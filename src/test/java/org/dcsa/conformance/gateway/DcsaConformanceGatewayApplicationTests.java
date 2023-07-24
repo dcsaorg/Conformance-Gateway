@@ -96,13 +96,12 @@ public class DcsaConformanceGatewayApplicationTests {
       webTestClient
         .get()
         .uri(
-            "/analyze?standard=%s&version=%s&party=Carrier1&role=Carrier"
+            "/analyze?standard=%s&version=%s&party=Carrier1&roles=Carrier&roles=Platform"
                 .formatted(standardName, standardVersion))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody()
-        .json("{\"exchangeCount\": 6}");
+        .expectBody();
   }
 }

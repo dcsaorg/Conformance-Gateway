@@ -9,23 +9,17 @@ enum EblSurrenderRole {
   CARRIER("Carrier"),
   PLATFORM("Platform");
 
-  private static final Map<String, EblSurrenderRole> rolesByConfigName = new TreeMap<>();
-
   @Getter private final String configName;
 
   private EblSurrenderRole(String configName) {
     this.configName = configName;
   }
 
-  static EblSurrenderRole forConfigName(String configName) {
-    return rolesByConfigName.get(configName);
-  }
-
   static boolean isCarrier(String configName) {
-    return EblSurrenderRole.CARRIER.equals(EblSurrenderRole.forConfigName(configName));
+    return EblSurrenderRole.CARRIER.configName.equals(configName);
   }
 
   static boolean isPlatform(String configName) {
-    return EblSurrenderRole.PLATFORM.equals(EblSurrenderRole.forConfigName(configName));
+    return EblSurrenderRole.PLATFORM.configName.equals(configName);
   }
 }

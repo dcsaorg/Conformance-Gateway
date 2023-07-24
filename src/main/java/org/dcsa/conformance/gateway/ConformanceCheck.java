@@ -25,4 +25,8 @@ public class ConformanceCheck {
   protected Stream<ConformanceCheck> getSubChecks() {
     return Stream.empty();
   }
+
+  public boolean isRelevantForRole(String roleName) {
+    return true;
+  }
 }

@@ -1,11 +1,9 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.stream.Stream;
-
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import lombok.Getter;
+import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.*;
 import org.springframework.util.MultiValueMap;
 
@@ -32,6 +30,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                               exchange.getRequestPath().endsWith("/v1/surrender-requests")));
                     }
                   }
+
+                  @Override
+                  public boolean isRelevantForRole(String roleName) {
+                    return EblSurrenderRole.isPlatform(roleName);
+                  }
                 });
           }
         },
@@ -52,6 +55,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                                   .endsWith("/v1/surrender-request-responses")));
                     }
                   }
+
+                  @Override
+                  public boolean isRelevantForRole(String roleName) {
+                    return EblSurrenderRole.isCarrier(roleName);
+                  }
                 });
           }
         },
@@ -63,11 +71,14 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                     "The surrenderRequestReference of every async response must match that of an async request") {
                   private Set<String> knownSurrenderRequestReferences = new TreeSet<>();
 
+                  @SneakyThrows
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
                     String surrenderRequestReference =
-                        JsonPath.given(exchange.getRequestBody())
-                            .get("$.surrenderRequestReference");
+                        new ObjectMapper()
+                            .readTree(exchange.getRequestBody())
+                            .get("surrenderRequestReference")
+                            .asText();
                     if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
                       knownSurrenderRequestReferences.add(surrenderRequestReference);
                     } else if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
@@ -76,6 +87,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                               exchange,
                               knownSurrenderRequestReferences.contains(surrenderRequestReference)));
                     }
+                  }
+
+                  @Override
+                  public boolean isRelevantForRole(String roleName) {
+                    return EblSurrenderRole.isCarrier(roleName);
                   }
                 });
           }

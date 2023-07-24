@@ -2,6 +2,7 @@ package org.dcsa.conformance.gateway;
 
 import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ConformanceTrafficAnalyzer {
@@ -21,12 +22,11 @@ public class ConformanceTrafficAnalyzer {
     this.partyName = partyName;
   }
 
-  public ConformanceReport analyze(
-      String checkedPartyName, String checkedRoleName, Stream<ConformanceExchange> trafficStream) {
+  public Map<String, ConformanceReport> analyze(
+          Stream<ConformanceExchange> trafficStream, String... roleNames) {
     ConformanceCheck conformanceCheck =
-        ConformanceCheckFactory.create(
-            gatewayConfiguration, checkedPartyName, checkedRoleName, standardName, standardVersion);
+            ConformanceCheckFactory.create(standardName, standardVersion);
     trafficStream.forEach(exchange -> conformanceCheck.check(exchange));
-    return new ConformanceReport(conformanceCheck);
+    return ConformanceReport.createForRoles(conformanceCheck, roleNames);
   }
 }

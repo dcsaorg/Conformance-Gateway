@@ -1,7 +1,9 @@
 package org.dcsa.conformance.gateway;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
+import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,16 +73,26 @@ public class DcsaConformanceGatewayApplication {
     return routeLocatorBuilderBuilder.build();
   }
 
+  @SneakyThrows
   @GetMapping("/analyze")
   public String analyze(
-          @RequestParam("standard") String standardName,
-          @RequestParam("version") String standardVersion,
-          @RequestParam("party") String partyName,
-          @RequestParam("role") String roleName
-  ) {
-    return new ConformanceTrafficAnalyzer(gatewayConfiguration, standardName, standardVersion, partyName)
-        .analyze(partyName, roleName, trafficRecorder.getTrafficStream())
-        .toString();
+      @RequestParam("standard") String standardName,
+      @RequestParam("version") String standardVersion,
+      @RequestParam("party") String partyName,
+      @RequestParam("roles") String[] roleNames) {
+    Map<String, ConformanceReport> reportsByRoleName =
+        new ConformanceTrafficAnalyzer(
+                gatewayConfiguration, standardName, standardVersion, partyName)
+            .analyze(trafficRecorder.getTrafficStream(), roleNames);
+    String response =
+        Jackson2ObjectMapperBuilder.json()
+            .indentOutput(true)
+            .build()
+            .writeValueAsString(reportsByRoleName);
+    System.out.println("################################################################");
+    System.out.println("reports by role name = " + response);
+    System.out.println("################################################################");
+    return response;
   }
 
   public static void main(String[] args) {

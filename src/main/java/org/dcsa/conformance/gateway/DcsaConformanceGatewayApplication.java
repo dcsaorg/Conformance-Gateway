@@ -4,7 +4,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
+import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
 import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
+import org.dcsa.conformance.gateway.analysis.ConformanceReport;
+import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -81,8 +84,7 @@ public class DcsaConformanceGatewayApplication {
       @RequestParam("party") String partyName,
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
-        new ConformanceTrafficAnalyzer(
-                gatewayConfiguration, standardName, standardVersion, partyName)
+        new ConformanceTrafficAnalyzer(standardName, standardVersion)
             .analyze(trafficRecorder.getTrafficStream(), roleNames);
     String response =
         Jackson2ObjectMapperBuilder.json()

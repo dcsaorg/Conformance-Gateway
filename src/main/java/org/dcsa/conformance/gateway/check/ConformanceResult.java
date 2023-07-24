@@ -1,6 +1,7 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.gateway.check;
 
 import lombok.Getter;
+import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 public class ConformanceResult {
   @Getter private String checkedPartyName;

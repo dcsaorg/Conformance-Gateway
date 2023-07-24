@@ -1,9 +1,10 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.gateway.check;
 
+import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
 
 public class ConformanceCheckFactory {
-  static ConformanceCheck create(
+  public static ConformanceCheck create(
       String standardName,
       String standardVersion) {
     if ("EblSurrender".equals(standardName) && "1.0".equals(standardVersion)) {

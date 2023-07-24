@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.gateway.traffic;
 
 import org.springframework.web.server.ServerWebExchange;
 

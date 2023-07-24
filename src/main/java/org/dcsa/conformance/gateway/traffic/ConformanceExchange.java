@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.gateway.traffic;
 
 import lombok.Getter;
 import org.springframework.util.MultiValueMap;

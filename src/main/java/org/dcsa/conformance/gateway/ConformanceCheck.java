@@ -1,35 +1,28 @@
 package org.dcsa.conformance.gateway;
 
 import lombok.Getter;
-import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public abstract class ConformanceCheck {
-  @Getter private int exchangeCount = 0;
-  @Getter protected ConformanceCode conformanceCode = ConformanceCode.UNKNOWN;
-  protected final GatewayConfiguration gatewayConfiguration;
+public class ConformanceCheck {
+  @Getter protected final String title;
 
-  public ConformanceCheck(GatewayConfiguration gatewayConfiguration) {
-    this.gatewayConfiguration = gatewayConfiguration;
+  protected final List<ConformanceResult> results = new ArrayList<>();
+
+  public ConformanceCheck(String title) {
+    this.title = title;
   }
 
-  public boolean check(ConformanceExchange exchange) {
-    ++exchangeCount;
-    List<ConformanceCheck> subChecks = this.getSubChecks();
-    if (subChecks.isEmpty()) {
-      return this.doCheck(exchange);
-    } else {
-      return subChecks.stream()
-              .map(subCheck -> subCheck.doCheck(exchange))
-              .collect(Collectors.toList())
-              .stream()
-              .anyMatch(result -> result);
-    }
+  public final void check(ConformanceExchange exchange) {
+    this.doCheck(exchange);
+    this.getSubChecks().forEach(subCheck -> subCheck.check(exchange));
   }
 
-  protected abstract List<ConformanceCheck> getSubChecks();
+  protected void doCheck(ConformanceExchange exchange) {}
 
-  protected abstract boolean doCheck(ConformanceExchange exchange);
+  protected Stream<ConformanceCheck> getSubChecks() {
+    return Stream.empty();
+  }
 }

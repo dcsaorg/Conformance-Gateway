@@ -72,10 +72,11 @@ public class DcsaConformanceGatewayApplication {
   public String analyze(
           @RequestParam("standard") String standardName,
           @RequestParam("version") String standardVersion,
-          @RequestParam("party") String partyName
+          @RequestParam("party") String partyName,
+          @RequestParam("role") String roleName
   ) {
     return new ConformanceTrafficAnalyzer(gatewayConfiguration, standardName, standardVersion, partyName)
-        .analyze(trafficRecorder.getTrafficStream())
+        .analyze(partyName, roleName, trafficRecorder.getTrafficStream())
         .toString();
   }
 

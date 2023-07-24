@@ -18,21 +18,20 @@ import reactor.core.publisher.Mono;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
             "gateway.targetUrl=http://localhost:${wiremock.server.port}",
-            "gateway.links[0].sourceParty.name=Carrier C",
-            "gateway.links[0].targetParty.name=Carrier K",
-            "gateway.links[0].gatewayBasePath=/link0/gateway",
-            "gateway.links[0].targetBasePath=/link0/target",
+            "gateway.links[0].sourceParty.name=Platform1",
+            "gateway.links[0].sourceParty.role=Platform",
+            "gateway.links[0].targetParty.name=Carrier1",
+            "gateway.links[0].targetParty.role=Carrier",
+            "gateway.links[0].gatewayBasePath=/RequestLink/gateway",
+            "gateway.links[0].targetBasePath=/RequestLink/target",
             "gateway.links[0].targetRootUrl=http://localhost:${wiremock.server.port}",
-            "gateway.links[1].sourceParty.name=Carrier K",
-            "gateway.links[1].targetParty.name=Carrier C",
-            "gateway.links[1].gatewayBasePath=/link1/gateway",
-            "gateway.links[1].targetBasePath=/link1/target",
+            "gateway.links[1].sourceParty.name=Carrier1",
+            "gateway.links[1].sourceParty.role=Carrier",
+            "gateway.links[1].targetParty.name=Platform1",
+            "gateway.links[1].targetParty.role=Platform",
+            "gateway.links[1].gatewayBasePath=/ResponseLink/gateway",
+            "gateway.links[1].targetBasePath=/ResponseLink/target",
             "gateway.links[1].targetRootUrl=http://localhost:${wiremock.server.port}",
-            "gateway.links[2].sourceParty.name=Feeder F",
-            "gateway.links[2].targetParty.name=Carrier C",
-            "gateway.links[2].gatewayBasePath=/link2/gateway",
-            "gateway.links[2].targetBasePath=/link2/target",
-            "gateway.links[2].targetRootUrl=http://localhost:${wiremock.server.port}",
     })
 @AutoConfigureWireMock(port = 0)
 public class DcsaConformanceGatewayApplicationTests {
@@ -61,47 +60,43 @@ public class DcsaConformanceGatewayApplicationTests {
           System.out.println("---------------------------------------------------");
         });
 
-    String standardName = "Example";
-    String standardVersion = "1.2";
+    String standardName = "EblSurrender";
+    String standardVersion = "1.0";
 
-    Stream.of(0, 1, 2)
-        .limit(111)
-        .forEach(
-            linkIndex -> {
-                TrafficGeneratorFactory.create(standardName, standardVersion)
-                  .get()
-                  .forEach(
+      TrafficGeneratorFactory.create(standardName, standardVersion)
+              .get()
+              .forEach(
                       exchange -> {
-                        stubFor(
-                            post(anyUrl())
-                                .willReturn(
-                                    aResponse()
-                                        .withHeader("Content-Type", "application/json")
-                                        .withHeader("RequestUrl", "{{request.url}}")
-                                        .withHeader(
-                                            "ResponseKey",
-                                            "Response on link %d for request path %s"
-                                                .formatted(linkIndex, exchange.getRequestPath()))
-                                        .withBody(exchange.getResponseBody())
-                                        .withTransformers("response-template")));
-                        webTestClient
-                            .post()
-                            .uri("/link" + linkIndex + "/gateway" + exchange.getRequestPath())
-                            .header("RequestKey", "Request on link " + linkIndex)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .accept(MediaType.APPLICATION_JSON)
-                            .body(Mono.just(exchange.getRequestBody()), String.class)
-                            .exchange()
-                            .expectStatus()
-                            .isOk()
-                            .expectBody()
-                            .json(exchange.getResponseBody());
+                          stubFor(
+                                  post(anyUrl())
+                                          .willReturn(
+                                                  aResponse()
+                                                          .withHeader("Content-Type", "application/json")
+                                                          .withHeader("RequestUrl", "{{request.url}}")
+                                                          .withHeader(
+                                                                  "ResponseKey",
+                                                                  "Response on link %s for request path %s"
+                                                                          .formatted(exchange.getLink(), exchange.getRequestPath()))
+                                                          .withBody(exchange.getResponseBody())
+                                                          .withTransformers("response-template")));
+                          webTestClient
+                                  .post()
+                                  .uri("/%s/gateway%s".formatted(
+                                          exchange.getLink(), exchange.getRequestPath()))
+                                  .header("RequestKey", "Request on link " + exchange.getLink())
+                                  .contentType(MediaType.APPLICATION_JSON)
+                                  .accept(MediaType.APPLICATION_JSON)
+                                  .body(Mono.just(exchange.getRequestBody()), String.class)
+                                  .exchange()
+                                  .expectStatus()
+                                  .isOk()
+                                  .expectBody()
+                                  .json(exchange.getResponseBody());
                       });
-            });
-    webTestClient
+      webTestClient
         .get()
         .uri(
-            "/analyze?standard=%s&version=%s&party=Carrier C"
+            "/analyze?standard=%s&version=%s&party=Carrier1&role=Carrier"
                 .formatted(standardName, standardVersion))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()

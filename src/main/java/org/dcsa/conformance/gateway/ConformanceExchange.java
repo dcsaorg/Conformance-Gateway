@@ -9,15 +9,15 @@ public class ConformanceExchange {
   @Getter private final String sourcePartyName;
   @Getter private final String targetPartyName;
   @Getter private final UUID uuid;
-  private final String httpMethod;
-  private final String requestPath;
-  private final MultiValueMap<String, String> requestQueryParams;
-  private final MultiValueMap<String, String> requestHeaders;
-  private final String requestBody;
-  private final long requestTimestamp;
-  private final MultiValueMap<String, String> responseHeaders;
-  private final String responseBody;
-  private final long responseTimestamp;
+  @Getter private final String httpMethod;
+  @Getter private final String requestPath;
+  @Getter private final MultiValueMap<String, String> requestQueryParams;
+  @Getter private final MultiValueMap<String, String> requestHeaders;
+  @Getter private final String requestBody;
+  @Getter private final long requestTimestamp;
+  @Getter private final MultiValueMap<String, String> responseHeaders;
+  @Getter private final String responseBody;
+  @Getter private final long responseTimestamp;
 
   private ConformanceExchange(
       String sourcePartyName,

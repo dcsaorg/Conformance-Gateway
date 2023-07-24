@@ -51,7 +51,9 @@ public class DcsaConformanceGatewayApplication {
                                             (exchange, requestBody) -> {
                                               trafficRecorder.recordRequest(
                                                   link.getSourceParty().getName(),
+                                                  link.getSourceParty().getRole(),
                                                   link.getTargetParty().getName(),
+                                                  link.getTargetParty().getRole(),
                                                   exchange,
                                                   requestBody);
                                               return Mono.just(requestBody);

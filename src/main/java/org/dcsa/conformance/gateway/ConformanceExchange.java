@@ -7,7 +7,9 @@ import java.util.UUID;
 
 public class ConformanceExchange {
   @Getter private final String sourcePartyName;
+  @Getter private final String sourcePartyRole;
   @Getter private final String targetPartyName;
+  @Getter private final String targetPartyRole;
   @Getter private final UUID uuid;
   @Getter private final String httpMethod;
   @Getter private final String requestPath;
@@ -21,7 +23,9 @@ public class ConformanceExchange {
 
   private ConformanceExchange(
       String sourcePartyName,
+      String sourcePartyRole,
       String targetPartyName,
+      String targetPartyRole,
       UUID uuid,
       String httpMethod,
       String requestPath,
@@ -29,7 +33,9 @@ public class ConformanceExchange {
       MultiValueMap<String, String> requestHeaders,
       String requestBody) {
     this.sourcePartyName = sourcePartyName;
+    this.sourcePartyRole = sourcePartyRole;
     this.targetPartyName = targetPartyName;
+    this.targetPartyRole = targetPartyRole;
     this.uuid = uuid;
     this.httpMethod = httpMethod;
     this.requestPath = requestPath;
@@ -47,7 +53,9 @@ public class ConformanceExchange {
       MultiValueMap<String, String> responseHeaders,
       String responseBody) {
     this.sourcePartyName = conformanceExchange.sourcePartyName;
+    this.sourcePartyRole = conformanceExchange.sourcePartyRole;
     this.targetPartyName = conformanceExchange.targetPartyName;
+    this.targetPartyRole = conformanceExchange.targetPartyRole;
     this.uuid = conformanceExchange.uuid;
     this.httpMethod = conformanceExchange.httpMethod;
     this.requestPath = conformanceExchange.requestPath;
@@ -62,7 +70,9 @@ public class ConformanceExchange {
 
   public static ConformanceExchange createFromRequest(
       String sourcePartyName,
+      String sourcePartyRole,
       String targetPartyName,
+      String targetPartyRole,
       UUID uuid,
       String httpMethod,
       String requestPath,
@@ -71,7 +81,9 @@ public class ConformanceExchange {
       String requestBody) {
     return new ConformanceExchange(
         sourcePartyName,
+        sourcePartyRole,
         targetPartyName,
+        targetPartyRole,
         uuid,
         httpMethod,
         requestPath,

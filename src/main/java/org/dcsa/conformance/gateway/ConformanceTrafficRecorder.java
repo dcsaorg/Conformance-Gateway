@@ -17,7 +17,9 @@ public class ConformanceTrafficRecorder {
 
   public void recordRequest(
       String sourcePartyName,
+      String sourcePartyRole,
       String targetPartyName,
+      String targetPartyRole,
       ServerWebExchange webExchange,
       String requestBody) {
     UUID uuid = UUID.randomUUID();
@@ -38,7 +40,9 @@ public class ConformanceTrafficRecorder {
         uuid,
         ConformanceExchange.createFromRequest(
             sourcePartyName,
+            sourcePartyRole,
             targetPartyName,
+            targetPartyRole,
             uuid,
             webExchange.getRequest().getMethod().name(),
             webExchange.getRequest().getPath().value(),

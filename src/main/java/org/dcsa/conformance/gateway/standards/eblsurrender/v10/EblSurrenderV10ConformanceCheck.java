@@ -1,7 +1,11 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
+
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import lombok.Getter;
 import org.dcsa.conformance.gateway.*;
 import org.springframework.util.MultiValueMap;
 
@@ -21,10 +25,12 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async platform requests URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    results.add(
-                        ConformanceResult.forSourceParty(
-                            exchange,
-                            exchange.getRequestPath().endsWith("/v1/surrender-requests")));
+                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                      results.add(
+                          ConformanceResult.forSourceParty(
+                              exchange,
+                              exchange.getRequestPath().endsWith("/v1/surrender-requests")));
+                    }
                   }
                 });
           }
@@ -37,24 +43,55 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async carrier response URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    results.add(
-                        ConformanceResult.forSourceParty(
-                            exchange,
-                            exchange.getRequestPath().endsWith("/v1/surrender-request-responses")));
+                    if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
+                      results.add(
+                          ConformanceResult.forSourceParty(
+                              exchange,
+                              exchange
+                                  .getRequestPath()
+                                  .endsWith("/v1/surrender-request-responses")));
+                    }
                   }
                 });
           }
         },
-        new ConformanceCheck("Async exchanges (platform request, carrier response)"),
-        new ConformanceCheck("Async exchange workflows (amendment exchanges + surrender exchanges)"));
+        new ConformanceCheck("Async exchanges (platform request, carrier response)") {
+          @Override
+          protected Stream<ConformanceCheck> getSubChecks() {
+            return Stream.of(
+                new ConformanceCheck(
+                    "The surrenderRequestReference of every async response must match that of an async request") {
+                  private Set<String> knownSurrenderRequestReferences = new TreeSet<>();
+
+                  @Override
+                  protected void doCheck(ConformanceExchange exchange) {
+                    String surrenderRequestReference =
+                        JsonPath.given(exchange.getRequestBody())
+                            .get("$.surrenderRequestReference");
+                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                      knownSurrenderRequestReferences.add(surrenderRequestReference);
+                    } else if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
+                      results.add(
+                          ConformanceResult.forSourceParty(
+                              exchange,
+                              knownSurrenderRequestReferences.contains(surrenderRequestReference)));
+                    }
+                  }
+                });
+          }
+        },
+        new ConformanceCheck(
+            "Async exchange workflows (amendment exchanges + surrender exchanges)"));
   }
 
   private ConformanceCheck createApiVersionHeaderCheck() {
-    return new ConformanceCheck("All sync requests and responses must contain Api-Version headers with a compatible version") {
+    return new ConformanceCheck(
+        "All sync requests and responses must contain Api-Version headers with a compatible version") {
       @Override
       protected Stream<ConformanceCheck> getSubChecks() {
         return Stream.of(
-            new ConformanceCheck("All sync requests must contain an Api-Version header with a compatible version") {
+            new ConformanceCheck(
+                "All sync requests must contain an Api-Version header with a compatible version") {
               @Override
               protected void doCheck(ConformanceExchange exchange) {
                 this.results.add(
@@ -62,7 +99,8 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                         exchange, checkApiVersionHeader(exchange.getRequestHeaders())));
               }
             },
-            new ConformanceCheck("All sync responses must contain an Api-Version header with a compatible version") {
+            new ConformanceCheck(
+                "All sync responses must contain an Api-Version header with a compatible version") {
               @Override
               protected void doCheck(ConformanceExchange exchange) {
                 this.results.add(

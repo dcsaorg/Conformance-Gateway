@@ -14,6 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,11 +78,10 @@ public class DcsaConformanceGatewayApplication {
   }
 
   @SneakyThrows
-  @GetMapping("/analyze")
-  public String analyze(
+  @GetMapping("/report/json")
+  public String reportJson(
       @RequestParam("standard") String standardName,
       @RequestParam("version") String standardVersion,
-      @RequestParam("party") String partyName,
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardName, standardVersion)
@@ -95,6 +95,22 @@ public class DcsaConformanceGatewayApplication {
     System.out.println("reports by role name = " + response);
     System.out.println("################################################################");
     return response;
+  }
+
+  @SneakyThrows
+  @GetMapping(value = "/report/html", produces = MediaType.TEXT_HTML_VALUE)
+  public String reportHtml(
+          @RequestParam("standard") String standardName,
+          @RequestParam("version") String standardVersion,
+          @RequestParam("roles") String[] roleNames) {
+    Map<String, ConformanceReport> reportsByRoleName =
+            new ConformanceTrafficAnalyzer(standardName, standardVersion)
+                    .analyze(trafficRecorder.getTrafficStream(), roleNames);
+    String htmlResponse = ConformanceReport.toHtmlReport(reportsByRoleName);
+    System.out.println("################################################################");
+    System.out.println("reports by role name = \n\n\n" + htmlResponse + "\n\n");
+    System.out.println("################################################################");
+    return htmlResponse;
   }
 
   public static void main(String[] args) {

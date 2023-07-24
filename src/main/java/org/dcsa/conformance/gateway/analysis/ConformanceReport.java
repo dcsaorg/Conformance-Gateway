@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 
@@ -70,5 +71,67 @@ public class ConformanceReport {
                 roleName -> new ConformanceReport(conformanceCheck, roleName),
                 (k1, k2) -> k1,
                 TreeMap::new));
+  }
+
+  public static String toHtmlReport(Map<String, ConformanceReport> reportsByRole) {
+    // FIXME by using a templating engine instead
+    return "<html><body style=\"font-family: sans-serif;\">\n<h1>%s</h1>\n%s</body></html>"
+        .formatted(
+            reportsByRole.values().stream().findFirst().orElseThrow().title,
+            reportsByRole.entrySet().stream()
+                .map(
+                    roleAndReport ->
+                        "<h2>%s conformance</h2>\n%s\n"
+                            .formatted(
+                                roleAndReport.getKey(), asHtmlBlock(roleAndReport.getValue(), 0)))
+                .collect(Collectors.joining("\n")));
+  }
+
+  private static String asHtmlBlock(ConformanceReport report, int indent) {
+    return "<div style=\"margin-left: %dem\">\n<h4>%s</h4>\n<div>%s %s %s</div></div>\n%s\n"
+        .formatted(
+            indent,
+            report.title,
+            getConformanceIcon(report.conformanceStatus),
+            getConformanceLabel(report.conformanceStatus),
+            getExchangesDetails(report),
+            report.subReports.stream()
+                .map(subReport -> asHtmlBlock(subReport, indent + 2))
+                .collect(Collectors.joining("\n")));
+  }
+
+  private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
+    switch (conformanceStatus) {
+      case CONFORMANT:
+        return "✅";
+      case PARTIALLY_CONFORMANT:
+        return "⚠️";
+      case NON_CONFORMANT:
+        return "🚫";
+      case NO_TRAFFIC:
+      default:
+        return "❔";
+    }
+  }
+
+  private static String getConformanceLabel(ConformanceStatus conformanceStatus) {
+    switch (conformanceStatus) {
+      case CONFORMANT:
+        return "CONFORMANT";
+      case PARTIALLY_CONFORMANT:
+        return "PARTIALLY CONFORMANT";
+      case NON_CONFORMANT:
+        return "NON-CONFORMANT";
+      case NO_TRAFFIC:
+      default:
+        return "NO TRAFFIC";
+    }
+  }
+
+  private static String getExchangesDetails(ConformanceReport report) {
+      if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
+      if (!report.subReports.isEmpty()) return "";
+    return "<ul><li>%d conformant exchanges</li><li>%d non-conformant exchanges</li></ul>"
+            .formatted(report.conformantExchangeCount, report.nonConformantExchangeCount);
   }
 }

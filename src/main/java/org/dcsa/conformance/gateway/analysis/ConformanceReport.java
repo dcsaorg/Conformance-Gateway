@@ -1,9 +1,6 @@
 package org.dcsa.conformance.gateway.analysis;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -14,6 +11,7 @@ public class ConformanceReport {
   @Getter private final ConformanceStatus conformanceStatus;
   @Getter private int conformantExchangeCount;
   @Getter private int nonConformantExchangeCount;
+  @Getter private final Set<String> errorMessages = new TreeSet<>();
   @Getter private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
@@ -27,6 +25,7 @@ public class ConformanceReport {
               } else {
                 ++nonConformantExchangeCount;
               }
+              errorMessages.addAll(result.getErrors());
             });
     this.subReports =
         conformanceCheck
@@ -88,13 +87,14 @@ public class ConformanceReport {
   }
 
   private static String asHtmlBlock(ConformanceReport report, int indent) {
-    return "<div style=\"margin-left: %dem\">\n<h4>%s</h4>\n<div>%s %s %s</div></div>\n%s\n"
+    return "<div style=\"margin-left: %dem\">\n<h4>%s</h4>\n<div>%s %s %s</div>\n<div>%s</div>\n</div>\n%s\n"
         .formatted(
             indent,
             report.title,
             getConformanceIcon(report.conformanceStatus),
             getConformanceLabel(report.conformanceStatus),
             getExchangesDetails(report),
+            getErrors(report),
             report.subReports.stream()
                 .map(subReport -> asHtmlBlock(subReport, indent + 2))
                 .collect(Collectors.joining("\n")));
@@ -129,9 +129,15 @@ public class ConformanceReport {
   }
 
   private static String getExchangesDetails(ConformanceReport report) {
-      if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
-      if (!report.subReports.isEmpty()) return "";
-    return "<ul><li>%d conformant exchanges</li><li>%d non-conformant exchanges</li></ul>"
-            .formatted(report.conformantExchangeCount, report.nonConformantExchangeCount);
+    if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
+    if (!report.subReports.isEmpty()) return "";
+    return "\n<ul><li>%d conformant exchanges</li><li>%d non-conformant exchanges</li></ul>"
+        .formatted(report.conformantExchangeCount, report.nonConformantExchangeCount);
+  }
+
+  private static String getErrors(ConformanceReport report) {
+    return report.errorMessages.stream()
+        .map(message -> "\n<div>%s</div>".formatted(message))
+        .collect(Collectors.joining());
   }
 }

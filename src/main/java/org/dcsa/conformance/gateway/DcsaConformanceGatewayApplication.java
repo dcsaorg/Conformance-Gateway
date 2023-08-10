@@ -1,12 +1,20 @@
 package org.dcsa.conformance.gateway;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
+import org.dcsa.conformance.gateway.analysis.ConformanceReport;
 import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
 import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
-import org.dcsa.conformance.gateway.analysis.ConformanceReport;
+import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
+import org.dcsa.conformance.gateway.parties.ConformanceParty;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Carrier;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Orchestrator;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Platform;
 import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,9 +24,8 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -26,11 +33,54 @@ import reactor.core.publisher.Mono;
 @ConfigurationPropertiesScan("org.dcsa.conformance.gateway.configuration")
 public class DcsaConformanceGatewayApplication {
 
-  ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
+  private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
+  private final ConformanceOrchestrator conformanceOrchestrator =
+      new EblSurrenderV10Orchestrator("Platform1", "Carrier1", this::notifyParty);
+  private final Map<String, ConformanceParty> conformancePartiesByName =
+      Stream.of(
+              new EblSurrenderV10Carrier(
+                  "Carrier1",
+                  true,
+                  "http://localhost:9000",
+                  "/RequestLink/gateway",
+                  this::getPartyPrompt,
+                  this::postPartyInput),
+              new EblSurrenderV10Platform(
+                  "Platform1",
+                  true,
+                  "http://localhost:9000",
+                  "/ResponseLink/gateway",
+                  this::getPartyPrompt,
+                  this::postPartyInput))
+          .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
+
   GatewayConfiguration gatewayConfiguration;
 
+  private JsonNode getPartyPrompt(String partyName) {
+    return WebTestClient.bindToServer()
+        .baseUrl("http://localhost:9000") // FIXME use config / deployment variable URL
+        .build()
+        .get()
+        .uri("/party/%s/prompt/json".formatted(partyName))
+        .exchange()
+        .expectBody(JsonNode.class)
+        .returnResult()
+        .getResponseBody();
+  }
+
+  private void postPartyInput(JsonNode partyInput) {
+    WebTestClient.bindToServer()
+        .baseUrl("http://localhost:9000") // FIXME use config / deployment variable URL
+        .build()
+        .post()
+        .uri("/party/input")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(partyInput), String.class)
+        .exchange();
+  }
+
   @Bean
-  public RouteLocator myRoutes(
+  public RouteLocator createRouteLocator(
       RouteLocatorBuilder routeLocatorBuilder, GatewayConfiguration gatewayConfiguration) {
 
     System.out.println("Using gateway configuration: " + gatewayConfiguration);
@@ -77,9 +127,41 @@ public class DcsaConformanceGatewayApplication {
     return routeLocatorBuilderBuilder.build();
   }
 
+  private void notifyParty(String partyName, JsonNode jsonNode) {
+    WebTestClient.bindToServer()
+        .baseUrl("http://localhost:9000") // FIXME use config / deployment variable URL
+        .build()
+        .post()
+        .uri("/party/%s/notify".formatted(partyName))
+        .contentType(MediaType.APPLICATION_JSON)
+        // don't (notify only) .body(Mono.just(jsonNode), String.class)
+        .exchange();
+  }
+
+  @GetMapping(value = "/party/{partyName}/notify")
+  @ResponseBody
+  public JsonNode handlePartyNotification(@PathVariable String partyName) {
+    conformancePartiesByName.get(partyName).handleNotification();
+    return new ObjectMapper().createObjectNode();
+  }
+
+  @SneakyThrows
+  @GetMapping(value = "/party/{partyName}/prompt/json", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public JsonNode handleGetPartyPrompt(@PathVariable String partyName) {
+    return conformanceOrchestrator.getPartyPrompt(partyName);
+  }
+
+  @SneakyThrows
+  @PostMapping(value = "/party/input", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public JsonNode handlePostPartyInput(@RequestBody JsonNode partyInput) {
+    return conformanceOrchestrator.postPartyInput(partyInput);
+  }
+
   @SneakyThrows
   @GetMapping("/report/json")
-  public String reportJson(
+  public String generateReportJson(
       @RequestParam("standard") String standardName,
       @RequestParam("version") String standardVersion,
       @RequestParam("roles") String[] roleNames) {
@@ -99,13 +181,13 @@ public class DcsaConformanceGatewayApplication {
 
   @SneakyThrows
   @GetMapping(value = "/report/html", produces = MediaType.TEXT_HTML_VALUE)
-  public String reportHtml(
-          @RequestParam("standard") String standardName,
-          @RequestParam("version") String standardVersion,
-          @RequestParam("roles") String[] roleNames) {
+  public String generateReportHtml(
+      @RequestParam("standard") String standardName,
+      @RequestParam("version") String standardVersion,
+      @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
-            new ConformanceTrafficAnalyzer(standardName, standardVersion)
-                    .analyze(trafficRecorder.getTrafficStream(), roleNames);
+        new ConformanceTrafficAnalyzer(standardName, standardVersion)
+            .analyze(trafficRecorder.getTrafficStream(), roleNames);
     String htmlResponse = ConformanceReport.toHtmlReport(reportsByRoleName);
     System.out.println("################################################################");
     System.out.println("reports by role name = \n\n\n" + htmlResponse + "\n\n");
@@ -113,29 +195,16 @@ public class DcsaConformanceGatewayApplication {
     return htmlResponse;
   }
 
+  @SneakyThrows
+  @GetMapping(value = "/reset", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public JsonNode handleReset() {
+    trafficRecorder.reset();
+    conformanceOrchestrator.reset();
+    return new ObjectMapper().readTree("{}");
+  }
+
   public static void main(String[] args) {
     SpringApplication.run(DcsaConformanceGatewayApplication.class, args);
   }
 }
-/*
-checkDefinition
-    protocol
-    summary
-    description
-    messageMatchPredicate
-    messageCheckPredicate
-    subCheckDefinitions
-checkResult
-    checkDefinition
-    passedMessages
-    failedMessages
-    subCheckResults
-analysis
-    protocol
-    links
-    startDateTime
-    endDateTime
-    checkDefinition
-    checkResult
-    ignoredMessages
- */

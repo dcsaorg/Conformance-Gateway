@@ -10,7 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 public class PartyConfiguration {
   @Getter @Setter private String name;
 
-  @Getter @Setter private StandardConfiguration standard;
-
   @Getter @Setter private String role;
 }

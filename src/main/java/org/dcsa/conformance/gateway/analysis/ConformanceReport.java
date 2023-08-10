@@ -1,9 +1,11 @@
 package org.dcsa.conformance.gateway.analysis;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
+import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 
 public class ConformanceReport {
@@ -73,17 +75,21 @@ public class ConformanceReport {
   }
 
   public static String toHtmlReport(Map<String, ConformanceReport> reportsByRole) {
-    // FIXME by using a templating engine instead
-    return "<html><body style=\"font-family: sans-serif;\">\n<h1>%s</h1>\n%s</body></html>"
-        .formatted(
-            reportsByRole.values().stream().findFirst().orElseThrow().title,
+    return Stream.of(
+            "<html>",
+            "<body style=\"font-family: sans-serif;\">",
+            "<div>%s</div>".formatted(getDcsaLogoImage()),
+            "<h1>Conformance Report</h1>",
             reportsByRole.entrySet().stream()
                 .map(
                     roleAndReport ->
                         "<h2>%s conformance</h2>\n%s\n"
                             .formatted(
                                 roleAndReport.getKey(), asHtmlBlock(roleAndReport.getValue(), 0)))
-                .collect(Collectors.joining("\n")));
+                .collect(Collectors.joining("\n")),
+            "</body>",
+            "</html>")
+        .collect(Collectors.joining("\n"));
   }
 
   private static String asHtmlBlock(ConformanceReport report, int indent) {
@@ -139,5 +145,14 @@ public class ConformanceReport {
     return report.errorMessages.stream()
         .map(message -> "\n<div>%s</div>".formatted(message))
         .collect(Collectors.joining());
+  }
+
+  @SneakyThrows
+  private static String getDcsaLogoImage() {
+    return "<img src=\"data:image/png;base64,\n%s\n\" alt=\"DCSA logo\"/>"
+        .formatted(
+            new String(
+                ConformanceReport.class.getResourceAsStream("/dcsa-logo-base64.txt").readAllBytes(),
+                StandardCharsets.UTF_8));
   }
 }

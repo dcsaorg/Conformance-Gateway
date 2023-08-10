@@ -11,6 +11,10 @@ public class ConformanceTrafficRecorder {
 
   private final LinkedHashMap<UUID, ConformanceExchange> traffic = new LinkedHashMap<>();
 
+  public void reset() {
+    traffic.clear();
+  }
+
   public Stream<ConformanceExchange> getTrafficStream() {
     return this.traffic.values().stream();
   }

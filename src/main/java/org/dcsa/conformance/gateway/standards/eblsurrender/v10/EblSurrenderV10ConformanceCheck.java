@@ -34,7 +34,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async platform request URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange,
@@ -44,7 +44,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isPlatform(roleName);
+                    return EblSurrenderV10Role.isPlatform(roleName);
                   }
                 },
                 new ConformanceCheck("Async request sync request body matches JSON schema") {
@@ -55,7 +55,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange, jsonSchemaValidator.validate(exchange.getRequestBody())));
@@ -64,7 +64,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isPlatform(roleName);
+                    return EblSurrenderV10Role.isPlatform(roleName);
                   }
                 },
                 new ConformanceCheck("Async request sync response body matches JSON schema") {
@@ -75,7 +75,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forTargetParty(
                               exchange, jsonSchemaValidator.validate(exchange.getResponseBody())));
@@ -84,7 +84,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isCarrier(roleName);
+                    return EblSurrenderV10Role.isCarrier(roleName);
                   }
                 },
                 new ConformanceCheck("Async response sync request body matches JSON schema") {
@@ -95,7 +95,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange, jsonSchemaValidator.validate(exchange.getRequestBody())));
@@ -104,7 +104,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isCarrier(roleName);
+                    return EblSurrenderV10Role.isCarrier(roleName);
                   }
                 });
           }
@@ -117,7 +117,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async carrier response URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange,
@@ -129,7 +129,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isCarrier(roleName);
+                    return EblSurrenderV10Role.isCarrier(roleName);
                   }
                 });
           }
@@ -150,9 +150,9 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                             .readTree(exchange.getRequestBody())
                             .get("surrenderRequestReference")
                             .asText();
-                    if (EblSurrenderRole.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
                       knownSurrenderRequestReferences.add(surrenderRequestReference);
-                    } else if (EblSurrenderRole.isCarrier(exchange.getSourcePartyRole())) {
+                    } else if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange,
@@ -162,7 +162,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderRole.isCarrier(roleName);
+                    return EblSurrenderV10Role.isCarrier(roleName);
                   }
                 });
           }

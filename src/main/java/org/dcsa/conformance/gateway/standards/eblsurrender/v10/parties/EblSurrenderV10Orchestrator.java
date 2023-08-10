@@ -21,11 +21,11 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
     { // scoped
       SupplyAvailableTdrAction supplyAvailableEblAction =
           new SupplyAvailableTdrAction(carrierPartyName);
-      RequestSurrenderForDeliveryAction requestSurrenderForDeliveryAction =
-          new RequestSurrenderForDeliveryAction(
+      RequestSurrenderAction requestSurrenderForDeliveryAction =
+          new RequestSurrenderAction(false,
               supplyAvailableEblAction.getTdrSupplier(), platformPartyName, carrierPartyName);
-      AcceptSurrenderForDeliveryAction acceptSurrenderForDeliveryAction =
-          new AcceptSurrenderForDeliveryAction(
+      AcceptSurrenderRequestAction acceptSurrenderRequestAction =
+          new AcceptSurrenderRequestAction(
               requestSurrenderForDeliveryAction.getSrrSupplier(),
               supplyAvailableEblAction.getTdrSupplier(),
                   carrierPartyName,
@@ -34,28 +34,28 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
           new EblSurrenderV10Scenario(
               supplyAvailableEblAction,
               requestSurrenderForDeliveryAction,
-              acceptSurrenderForDeliveryAction));
+              acceptSurrenderRequestAction));
     }
 
     { // scoped
       SupplyAvailableTdrAction supplyAvailableEblAction =
           new SupplyAvailableTdrAction(carrierPartyName);
 
-      RequestSurrenderForDeliveryAction firstRequestSurrenderForDeliveryAction =
-          new RequestSurrenderForDeliveryAction(
+      RequestSurrenderAction firstRequestSurrenderForDeliveryAction =
+          new RequestSurrenderAction(false,
               supplyAvailableEblAction.getTdrSupplier(), platformPartyName, carrierPartyName);
-      RejectSurrenderForDeliveryAction rejectSurrenderForDeliveryAction =
-          new RejectSurrenderForDeliveryAction(
+      RejectSurrenderRequestAction rejectSurrenderRequestAction =
+          new RejectSurrenderRequestAction(
               firstRequestSurrenderForDeliveryAction.getSrrSupplier(),
               supplyAvailableEblAction.getTdrSupplier(),
                   carrierPartyName,
                   platformPartyName);
 
-      RequestSurrenderForDeliveryAction secondRequestSurrenderForDeliveryAction =
-          new RequestSurrenderForDeliveryAction(
+      RequestSurrenderAction secondRequestSurrenderForDeliveryAction =
+          new RequestSurrenderAction(false,
               supplyAvailableEblAction.getTdrSupplier(), platformPartyName, carrierPartyName);
-      AcceptSurrenderForDeliveryAction acceptSurrenderForDeliveryAction =
-          new AcceptSurrenderForDeliveryAction(
+      AcceptSurrenderRequestAction acceptSurrenderRequestAction =
+          new AcceptSurrenderRequestAction(
               secondRequestSurrenderForDeliveryAction.getSrrSupplier(),
               supplyAvailableEblAction.getTdrSupplier(),
                   carrierPartyName,
@@ -65,9 +65,9 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
           new EblSurrenderV10Scenario(
               supplyAvailableEblAction,
               firstRequestSurrenderForDeliveryAction,
-              rejectSurrenderForDeliveryAction,
+              rejectSurrenderRequestAction,
               secondRequestSurrenderForDeliveryAction,
-              acceptSurrenderForDeliveryAction));
+              acceptSurrenderRequestAction));
     }
   }
 }

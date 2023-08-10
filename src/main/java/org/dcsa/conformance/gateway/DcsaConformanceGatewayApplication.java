@@ -23,6 +23,7 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.*;
@@ -39,45 +40,12 @@ public class DcsaConformanceGatewayApplication {
   private final Map<String, ConformanceParty> conformancePartiesByName =
       Stream.of(
               new EblSurrenderV10Carrier(
-                  "Carrier1",
-                  true,
-                  "http://localhost:9000",
-                  "/RequestLink/gateway",
-                  this::getPartyPrompt,
-                  this::postPartyInput),
+                  "Carrier1", true, "http://localhost:9000", "/RequestLink/gateway"),
               new EblSurrenderV10Platform(
-                  "Platform1",
-                  true,
-                  "http://localhost:9000",
-                  "/ResponseLink/gateway",
-                  this::getPartyPrompt,
-                  this::postPartyInput))
+                  "Platform1", true, "http://localhost:9000", "/ResponseLink/gateway"))
           .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
 
   GatewayConfiguration gatewayConfiguration;
-
-  private JsonNode getPartyPrompt(String partyName) {
-    return WebTestClient.bindToServer()
-        .baseUrl("http://localhost:9000") // FIXME use config / deployment variable URL
-        .build()
-        .get()
-        .uri("/party/%s/prompt/json".formatted(partyName))
-        .exchange()
-        .expectBody(JsonNode.class)
-        .returnResult()
-        .getResponseBody();
-  }
-
-  private void postPartyInput(JsonNode partyInput) {
-    WebTestClient.bindToServer()
-        .baseUrl("http://localhost:9000") // FIXME use config / deployment variable URL
-        .build()
-        .post()
-        .uri("/party/input")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(partyInput), String.class)
-        .exchange();
-  }
 
   @Bean
   public RouteLocator createRouteLocator(
@@ -125,6 +93,13 @@ public class DcsaConformanceGatewayApplication {
                                             }))
                             .uri(link.getTargetRootUrl())));
     return routeLocatorBuilderBuilder.build();
+  }
+
+  @PostMapping(value = "/traffic/party/{partyName}/**", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public ResponseEntity<JsonNode> handlePartyPostRequest(
+      @PathVariable String partyName, @RequestBody JsonNode requestBody) {
+    return conformancePartiesByName.get(partyName).handlePostRequest(requestBody);
   }
 
   private void notifyParty(String partyName, JsonNode jsonNode) {

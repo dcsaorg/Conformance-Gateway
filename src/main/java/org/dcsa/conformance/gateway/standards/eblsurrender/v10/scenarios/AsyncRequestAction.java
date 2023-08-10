@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 
-public class EblSurrenderV10AsyncRequestAction extends EblSurrenderV10Action {
+public class AsyncRequestAction extends EblSurrenderV10Action {
   private String surrenderRequestReference = null;
 
   @Getter
@@ -27,7 +27,7 @@ public class EblSurrenderV10AsyncRequestAction extends EblSurrenderV10Action {
         return surrenderRequestReference;
       };
 
-  public EblSurrenderV10AsyncRequestAction(
+  public AsyncRequestAction(
       Supplier<String> tdrSupplier, String sourcePartyName, String targetPartyName) {
     super(tdrSupplier, sourcePartyName, targetPartyName);
   }

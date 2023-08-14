@@ -1,7 +1,5 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.function.BiConsumer;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.*;
 
@@ -9,8 +7,7 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
   private final String platformPartyName;
   private final String carrierPartyName;
 
-  public EblSurrenderV10Orchestrator(String platformPartyName, String carrierPartyName, BiConsumer<String, JsonNode> partyNotifier) {
-    super(partyNotifier);
+  public EblSurrenderV10Orchestrator(String platformPartyName, String carrierPartyName) {
     this.platformPartyName = platformPartyName;
     this.carrierPartyName = carrierPartyName;
   }

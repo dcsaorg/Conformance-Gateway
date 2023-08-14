@@ -35,7 +35,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
         forAmendment
             ? EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED);
-    post(
+    postAsync(
         gatewayRootPath + "/v1/surrender-requests",
         new ObjectMapper()
             .createObjectNode()

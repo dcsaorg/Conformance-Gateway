@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 
 import java.util.stream.Stream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
@@ -42,22 +44,22 @@ public class DcsaConformanceGatewayApplicationTests {
 
   @Test
   void generatedTrafficHandled() {
-    System.out.println("Using wireMockServer: " + wireMockServer);
+    log.info("Using wireMockServer: " + wireMockServer);
     wireMockServer.addMockServiceRequestListener(
         (request, response) -> {
-          System.out.println("================ WireMock request ================");
-          System.out.println(request.getMethod());
-          System.out.println(request.getUrl());
-          System.out.println("--------------------------------------------------");
-          System.out.println(request.getHeaders());
-          System.out.println("--------------------------------------------------");
-          System.out.println(request.getBodyAsString());
-          System.out.println("--------------------------------------------------");
-          System.out.println("================ WireMock response ================");
-          System.out.println(response.getHeaders());
-          System.out.println("---------------------------------------------------");
-          System.out.println(response.getBodyAsString());
-          System.out.println("---------------------------------------------------");
+          log.info("================ WireMock request ================");
+          log.info("" + request.getMethod());
+          log.info(request.getUrl());
+          log.info("--------------------------------------------------");
+          log.info("" + request.getHeaders());
+          log.info("--------------------------------------------------");
+          log.info(request.getBodyAsString());
+          log.info("--------------------------------------------------");
+          log.info("================ WireMock response ================");
+          log.info("" + response.getHeaders());
+          log.info("---------------------------------------------------");
+          log.info(response.getBodyAsString());
+          log.info("---------------------------------------------------");
         });
 
     String standardName = "EblSurrender";

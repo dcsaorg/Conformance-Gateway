@@ -38,8 +38,8 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   private void supplyAvailableTdr(JsonNode actionPrompt) {
     String tdr = UUID.randomUUID().toString();
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-    post(
-        gatewayRootPath + "/party/input",
+    postAsync(
+        "/party/input",
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
@@ -55,7 +55,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
           tdr, EblSurrenderV10State.SURRENDERED_FOR_DELIVERY);
       default -> {} // ignore -- sending from wrong state for testing purposes
     }
-    post(
+    postAsync(
         gatewayRootPath + "/v1/surrender-request-responses",
         new ObjectMapper()
             .createObjectNode()
@@ -70,7 +70,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
           tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
       default -> {} // ignore -- sending from wrong state for testing purposes
     }
-    post(
+    postAsync(
         gatewayRootPath + "/v1/surrender-request-responses",
         new ObjectMapper()
             .createObjectNode()

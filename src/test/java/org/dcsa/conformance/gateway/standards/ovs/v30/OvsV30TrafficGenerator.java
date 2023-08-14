@@ -2,6 +2,7 @@ package org.dcsa.conformance.gateway.standards.ovs.v30;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.GeneratedTrafficExchange;
 import org.dcsa.conformance.gateway.TrafficGenerator;
 
@@ -11,18 +12,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class OvsV30TrafficGenerator implements TrafficGenerator {
   @Override
   public Stream<GeneratedTrafficExchange> get() {
-    System.out.println("#############################################");
-    System.out.println("################ ALL FILTERS ################");
-    System.out.println("#############################################");
+    log.info("#############################################");
+    log.info("################ ALL FILTERS ################");
+    log.info("#############################################");
     OvsRequestFilter.allFilterTypes()
         .map(filter -> filter.asEntryStream()
                 .map(entry -> "%s=%s".formatted(entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining("&")))
         .forEach(System.out::println);
-    System.out.println("#############################################");
+    log.info("#############################################");
     Stream.of(
             GeneratedTrafficExchange.builder()
                     .requestPath("/v3/service-schedules?carrierServiceCode=AAA")

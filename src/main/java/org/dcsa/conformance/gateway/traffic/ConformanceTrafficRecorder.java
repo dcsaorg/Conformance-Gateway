@@ -1,11 +1,13 @@
 package org.dcsa.conformance.gateway.traffic;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.LinkedHashMap;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+@Slf4j
 public class ConformanceTrafficRecorder {
   private static final String UUID_KEY = ConformanceTrafficRecorder.class.getCanonicalName();
 
@@ -28,17 +30,17 @@ public class ConformanceTrafficRecorder {
       String requestBody) {
     UUID uuid = UUID.randomUUID();
     webExchange.getAttributes().put(UUID_KEY, uuid);
-    System.out.println(">>>>>>>>>>>>>>>");
-    System.out.println("Gateway request " + uuid);
-    System.out.println(">>>>>>>>>>>>>>>");
-    System.out.println(webExchange.getRequest().getMethod());
-    System.out.println(webExchange.getRequest().getPath());
-    System.out.println(webExchange.getRequest().getQueryParams());
-    System.out.println(">>>>>>>>>>>>>>>");
-    System.out.println(webExchange.getRequest().getHeaders());
-    System.out.println(">>>>>>>>>>>>>>>");
-    System.out.println(requestBody);
-    System.out.println(">>>>>>>>>>>>>>>");
+    log.info(">>>>>>>>>>>>>>>");
+    log.info("Gateway request " + uuid);
+    log.info(">>>>>>>>>>>>>>>");
+    log.info("" + webExchange.getRequest().getMethod());
+    log.info("" + webExchange.getRequest().getPath());
+    log.info("" + webExchange.getRequest().getQueryParams());
+    log.info(">>>>>>>>>>>>>>>");
+    log.info("" + webExchange.getRequest().getHeaders());
+    log.info(">>>>>>>>>>>>>>>");
+    log.info(requestBody);
+    log.info(">>>>>>>>>>>>>>>");
 
     this.traffic.put(
         uuid,
@@ -56,19 +58,19 @@ public class ConformanceTrafficRecorder {
   }
 
   public void recordResponse(ServerWebExchange webExchange, String responseBody) {
-    System.out.println("<<<<<<<<<<<<<<<<");
+    log.info("<<<<<<<<<<<<<<<<");
     UUID uuid = webExchange.getAttribute(UUID_KEY);
-    System.out.println("Gateway response " + uuid);
-    System.out.println("<<<<<<<<<<<<<<<<");
-    System.out.println(webExchange.getResponse().getHeaders());
-    System.out.println("<<<<<<<<<<<<<<<<");
-    System.out.println(responseBody);
-    System.out.println("<<<<<<<<<<<<<<<<");
+    log.info("Gateway response " + uuid);
+    log.info("<<<<<<<<<<<<<<<<");
+    log.info("" + webExchange.getResponse().getHeaders());
+    log.info("<<<<<<<<<<<<<<<<");
+    log.info(responseBody);
+    log.info("<<<<<<<<<<<<<<<<");
     this.traffic.put(
         uuid,
         this.traffic
             .get(uuid)
             .mutateWithResponse(webExchange.getResponse().getHeaders(), responseBody));
-    System.out.println("Recorded %d exchanges".formatted(this.traffic.size()));
+    log.info("Recorded %d exchanges".formatted(this.traffic.size()));
   }
 }

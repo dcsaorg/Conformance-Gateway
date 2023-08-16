@@ -14,6 +14,7 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
   @Override
   protected void initializeScenarios() {
     scenarios.clear();
+
     { // scoped
       SupplyAvailableTdrAction supplyAvailableEblAction =
           new SupplyAvailableTdrAction(carrierPartyName);
@@ -40,8 +41,6 @@ public class EblSurrenderV10Orchestrator extends ConformanceOrchestrator {
               acceptSurrenderRequestAction));
     }
 
-    // TODO bring this back
-    if (System.currentTimeMillis() < 0)
     { // scoped
       SupplyAvailableTdrAction supplyAvailableEblAction =
           new SupplyAvailableTdrAction(carrierPartyName);

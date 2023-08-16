@@ -21,7 +21,7 @@ public class ConformanceTrafficRecorder {
     return this.traffic.values().stream();
   }
 
-  public void recordRequest(
+  synchronized public void recordRequest(
       String sourcePartyName,
       String sourcePartyRole,
       String targetPartyName,
@@ -57,7 +57,7 @@ public class ConformanceTrafficRecorder {
             requestBody));
   }
 
-  public ConformanceExchange recordResponse(ServerWebExchange webExchange, String responseBody) {
+  synchronized public ConformanceExchange recordResponse(ServerWebExchange webExchange, String responseBody) {
     log.info("<<<<<<<<<<<<<<<<");
     UUID uuid = webExchange.getAttribute(UUID_KEY);
     log.info("Gateway response " + uuid);

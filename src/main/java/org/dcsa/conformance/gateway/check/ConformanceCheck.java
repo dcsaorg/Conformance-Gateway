@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Getter
 public class ConformanceCheck {
-  @Getter protected final String title;
+  protected final String title;
 
   private final List<ConformanceCheck> subChecks;
 

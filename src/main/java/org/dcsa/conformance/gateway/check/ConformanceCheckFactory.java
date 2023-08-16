@@ -1,6 +1,5 @@
 package org.dcsa.conformance.gateway.check;
 
-import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
 
 public class ConformanceCheckFactory {

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
@@ -14,8 +16,10 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.Request
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@Slf4j
 public class EblSurrenderV10Platform extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
+  private final Map<String, String> tdrsBySrr = new HashMap<>();
 
   public EblSurrenderV10Platform(
       String name, boolean internal, String gatewayBaseUrl, String gatewayRootPath) {
@@ -28,44 +32,49 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderV10Platform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
+    String srr = actionPrompt.get("srr").asText();
     String tdr = actionPrompt.get("tdr").asText();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
+    tdrsBySrr.put(srr, tdr);
     eblStatesById.put(
         tdr,
         forAmendment
             ? EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED);
-    postAsync(
+    asyncPost(
         gatewayRootPath + "/v1/surrender-requests",
         new ObjectMapper()
             .createObjectNode()
-            .put("surrenderRequestReference", UUID.randomUUID().toString())
+            .put("surrenderRequestReference", srr)
             .put("transportDocumentReference", tdr)
             .put("surrenderRequestCode", forAmendment ? "AREQ" : "SREQ"));
   }
 
   @Override
-  public ResponseEntity<JsonNode> handlePostRequest(JsonNode requestBody) {
+  public ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
+    log.info(
+        "EblSurrenderV10Platform.handleRegularTraffic(%s)".formatted(requestBody.toPrettyString()));
     String action = requestBody.get("action").asText();
-    String tdr = requestBody.get("transportDocumentReference").asText();
-    if (Objects.equals(EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
+    String srr = requestBody.get("surrenderRequestReference").asText();
+    String tdr = tdrsBySrr.get(srr);
+    if (Objects.equals(
+        EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
           tdr,
           Objects.equals("SURR", action)
               ? EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT
               : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(
-          new ObjectMapper().createObjectNode(),
-          HttpStatus.NO_CONTENT);
-    } else if (Objects.equals(EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
+      return new ResponseEntity<>(new ObjectMapper().createObjectNode(), HttpStatus.NO_CONTENT);
+    } else if (Objects.equals(
+        EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
-              tdr,
-              Objects.equals("SURR", action)
-                      ? EblSurrenderV10State.SURRENDERED_FOR_DELIVERY
-                      : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(
-              new ObjectMapper().createObjectNode(),
-              HttpStatus.NO_CONTENT);
+          tdr,
+          Objects.equals("SURR", action)
+              ? EblSurrenderV10State.SURRENDERED_FOR_DELIVERY
+              : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
+      return new ResponseEntity<>(new ObjectMapper().createObjectNode(), HttpStatus.NO_CONTENT);
     } else {
       return new ResponseEntity<>(
           new ObjectMapper()

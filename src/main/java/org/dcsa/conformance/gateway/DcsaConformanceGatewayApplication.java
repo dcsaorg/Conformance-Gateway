@@ -3,6 +3,7 @@ package org.dcsa.conformance.gateway;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,9 +42,9 @@ public class DcsaConformanceGatewayApplication {
   private final Map<String, ConformanceParty> conformancePartiesByName =
       Stream.of(
               new EblSurrenderV10Carrier(
-                  "Carrier1", true, "http://localhost:8080", "/RequestLink/gateway"),
+                  "Carrier1", true, "http://localhost:8080", "/ResponseLink/gateway"),
               new EblSurrenderV10Platform(
-                  "Platform1", true, "http://localhost:8080", "/ResponseLink/gateway"))
+                  "Platform1", true, "http://localhost:8080", "/RequestLink/gateway"))
           .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
 
   GatewayConfiguration gatewayConfiguration;
@@ -82,15 +83,18 @@ public class DcsaConformanceGatewayApplication {
                                                   link.getTargetParty().getRole(),
                                                   exchange,
                                                   requestBody);
-                                              return Mono.just(requestBody);
+                                              return Mono.just(
+                                                  Optional.ofNullable(requestBody).orElse(""));
                                             })
                                         .modifyResponseBody(
                                             String.class,
                                             String.class,
                                             (exchange, responseBody) -> {
-                                              trafficRecorder.recordResponse(
-                                                  exchange, responseBody);
-                                              return Mono.just(responseBody);
+                                              conformanceOrchestrator.handlePartyTrafficExchange(
+                                                  trafficRecorder.recordResponse(
+                                                      exchange, responseBody));
+                                              return Mono.just(
+                                                  Optional.ofNullable(responseBody).orElse(""));
                                             }))
                             .uri(link.getTargetRootUrl())));
     return routeLocatorBuilderBuilder.build();
@@ -100,7 +104,7 @@ public class DcsaConformanceGatewayApplication {
   @ResponseBody
   public ResponseEntity<JsonNode> handlePartyPostRequest(
       @PathVariable String partyName, @RequestBody JsonNode requestBody) {
-    return conformancePartiesByName.get(partyName).handlePostRequest(requestBody);
+    return conformancePartiesByName.get(partyName).handleRegularTraffic(requestBody);
   }
 
   @GetMapping(value = "/party/{partyName}/notify")
@@ -110,18 +114,16 @@ public class DcsaConformanceGatewayApplication {
     return new ObjectMapper().createObjectNode();
   }
 
-  @SneakyThrows
   @GetMapping(value = "/party/{partyName}/prompt/json", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public JsonNode handleGetPartyPrompt(@PathVariable String partyName) {
-    return conformanceOrchestrator.getPartyPrompt(partyName);
+    return conformanceOrchestrator.handleGetPartyPrompt(partyName);
   }
 
-  @SneakyThrows
   @PostMapping(value = "/party/input", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public JsonNode handlePostPartyInput(@RequestBody JsonNode partyInput) {
-    return conformanceOrchestrator.postPartyInput(partyInput);
+    return conformanceOrchestrator.handlePartyInput(partyInput);
   }
 
   @SneakyThrows
@@ -144,7 +146,6 @@ public class DcsaConformanceGatewayApplication {
     return response;
   }
 
-  @SneakyThrows
   @GetMapping(value = "/report/html", produces = MediaType.TEXT_HTML_VALUE)
   public String generateReportHtml(
       @RequestParam("standard") String standardName,

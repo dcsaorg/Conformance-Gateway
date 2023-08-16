@@ -2,13 +2,14 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 
 import lombok.Getter;
 
+@Getter
 enum EblSurrenderV10Role {
   CARRIER("Carrier"),
   PLATFORM("Platform");
 
-  @Getter private final String configName;
+  private final String configName;
 
-  private EblSurrenderV10Role(String configName) {
+  EblSurrenderV10Role(String configName) {
     this.configName = configName;
   }
 

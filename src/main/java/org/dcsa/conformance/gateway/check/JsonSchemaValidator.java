@@ -29,11 +29,9 @@ public class JsonSchemaValidator {
             JsonMetaSchema.getV7(),
             jsonSchemaFactory,
             schemaValidatorsConfig);
-    jsonSchema =
-        new JsonSchema(
+    jsonSchema = jsonSchemaFactory.create(
             validationContext,
             "#/components/schemas/" + schemaName,
-            null,
             rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
             rootJsonSchema);
     jsonSchema.initializeValidators();

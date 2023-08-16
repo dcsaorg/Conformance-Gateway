@@ -1,20 +1,21 @@
 package org.dcsa.conformance.gateway.analysis;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 
+@Getter
 public class ConformanceReport {
-  @Getter private final String title;
-  @Getter private final ConformanceStatus conformanceStatus;
-  @Getter private int conformantExchangeCount;
-  @Getter private int nonConformantExchangeCount;
-  @Getter private final Set<String> errorMessages = new TreeSet<>();
-  @Getter private final List<ConformanceReport> subReports;
+  private final String title;
+  private final ConformanceStatus conformanceStatus;
+  private int conformantExchangeCount;
+  private int nonConformantExchangeCount;
+  private final Set<String> errorMessages = new TreeSet<>();
+  private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
     this.title = conformanceCheck.getTitle();
@@ -75,21 +76,21 @@ public class ConformanceReport {
   }
 
   public static String toHtmlReport(Map<String, ConformanceReport> reportsByRole) {
-    return Stream.of(
-            "<html>",
-            "<body style=\"font-family: sans-serif;\">",
-            "<div>%s</div>".formatted(getDcsaLogoImage()),
-            "<h1>Conformance Report</h1>",
-            reportsByRole.entrySet().stream()
-                .map(
-                    roleAndReport ->
-                        "<h2>%s conformance</h2>\n%s\n"
-                            .formatted(
-                                roleAndReport.getKey(), asHtmlBlock(roleAndReport.getValue(), 0)))
-                .collect(Collectors.joining("\n")),
-            "</body>",
-            "</html>")
-        .collect(Collectors.joining("\n"));
+    return String.join(
+        "\n",
+        "<html>",
+        "<body style=\"font-family: sans-serif;\">",
+        "<div>%s</div>".formatted(getDcsaLogoImage()),
+        "<h1>Conformance Report</h1>",
+        reportsByRole.entrySet().stream()
+            .map(
+                roleAndReport ->
+                    "<h2>%s conformance</h2>\n%s\n"
+                        .formatted(
+                            roleAndReport.getKey(), asHtmlBlock(roleAndReport.getValue(), 0)))
+            .collect(Collectors.joining("\n")),
+        "</body>",
+        "</html>");
   }
 
   private static String asHtmlBlock(ConformanceReport report, int indent) {
@@ -107,31 +108,21 @@ public class ConformanceReport {
   }
 
   private static String getConformanceIcon(ConformanceStatus conformanceStatus) {
-    switch (conformanceStatus) {
-      case CONFORMANT:
-        return "✅";
-      case PARTIALLY_CONFORMANT:
-        return "⚠️";
-      case NON_CONFORMANT:
-        return "🚫";
-      case NO_TRAFFIC:
-      default:
-        return "❔";
-    }
+    return switch (conformanceStatus) {
+      case CONFORMANT -> "✅";
+      case PARTIALLY_CONFORMANT -> "⚠️";
+      case NON_CONFORMANT -> "🚫";
+      default -> "❔";
+    };
   }
 
   private static String getConformanceLabel(ConformanceStatus conformanceStatus) {
-    switch (conformanceStatus) {
-      case CONFORMANT:
-        return "CONFORMANT";
-      case PARTIALLY_CONFORMANT:
-        return "PARTIALLY CONFORMANT";
-      case NON_CONFORMANT:
-        return "NON-CONFORMANT";
-      case NO_TRAFFIC:
-      default:
-        return "NO TRAFFIC";
-    }
+    return switch (conformanceStatus) {
+      case CONFORMANT -> "CONFORMANT";
+      case PARTIALLY_CONFORMANT -> "PARTIALLY CONFORMANT";
+      case NON_CONFORMANT -> "NON-CONFORMANT";
+      default -> "NO TRAFFIC";
+    };
   }
 
   private static String getExchangesDetails(ConformanceReport report) {
@@ -143,16 +134,18 @@ public class ConformanceReport {
 
   private static String getErrors(ConformanceReport report) {
     return report.errorMessages.stream()
-        .map(message -> "\n<div>%s</div>".formatted(message))
+        .map("\n<div>%s</div>"::formatted)
         .collect(Collectors.joining());
   }
 
   @SneakyThrows
   private static String getDcsaLogoImage() {
-    return "<img src=\"data:image/png;base64,\n%s\n\" alt=\"DCSA logo\"/>"
-        .formatted(
-            new String(
-                ConformanceReport.class.getResourceAsStream("/dcsa-logo-base64.txt").readAllBytes(),
-                StandardCharsets.UTF_8));
+    try (InputStream logoStream =
+        ConformanceReport.class.getResourceAsStream("/dcsa-logo-base64.txt")) {
+      return "<img src=\"data:image/png;base64,\n%s\n\" alt=\"DCSA logo\"/>"
+          .formatted(
+              new String(
+                  Objects.requireNonNull(logoStream).readAllBytes(), StandardCharsets.UTF_8));
+    }
   }
 }

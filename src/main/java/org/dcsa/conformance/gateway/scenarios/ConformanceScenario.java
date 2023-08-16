@@ -1,9 +1,11 @@
 package org.dcsa.conformance.gateway.scenarios;
 
-import java.util.Arrays;
+import lombok.ToString;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
+@ToString
 public class ConformanceScenario {
     protected final LinkedList<ConformanceAction> nextActions = new LinkedList<>();
 
@@ -11,7 +13,15 @@ public class ConformanceScenario {
         this.nextActions.addAll(actions);
     }
 
-    public ConformanceAction nextAction() {
+    public boolean hasNextAction() {
+        return !nextActions.isEmpty();
+    }
+
+    public ConformanceAction peekNextAction() {
         return nextActions.peek();
+    }
+
+    public ConformanceAction popNextAction() {
+        return nextActions.pop();
     }
 }

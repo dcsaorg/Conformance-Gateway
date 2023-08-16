@@ -7,8 +7,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @ConfigurationPropertiesScan
 @ToString
+@Getter
+@Setter
 public class PartyConfiguration {
-  @Getter @Setter private String name;
+  private String name;
 
-  @Getter @Setter private String role;
+  private String role;
 }

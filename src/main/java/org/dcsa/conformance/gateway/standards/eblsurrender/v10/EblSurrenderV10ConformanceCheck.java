@@ -140,7 +140,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
             return Stream.of(
                 new ConformanceCheck(
                     "The surrenderRequestReference of every async response must match that of an async request") {
-                  private Set<String> knownSurrenderRequestReferences = new TreeSet<>();
+                  private final Set<String> knownSurrenderRequestReferences = new TreeSet<>();
 
                   @SneakyThrows
                   @Override
@@ -202,8 +202,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         if (headerValues == null) return false;
         if (headerValues.size() != 1) return false;
         String apiVersion = headerValues.get(0);
-        if (!"1.0".equals(apiVersion)) return false;
-        return true;
+        return "1.0".equals(apiVersion);
       }
     };
   }

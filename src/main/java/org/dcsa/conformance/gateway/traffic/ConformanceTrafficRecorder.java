@@ -57,7 +57,7 @@ public class ConformanceTrafficRecorder {
             requestBody));
   }
 
-  public void recordResponse(ServerWebExchange webExchange, String responseBody) {
+  public ConformanceExchange recordResponse(ServerWebExchange webExchange, String responseBody) {
     log.info("<<<<<<<<<<<<<<<<");
     UUID uuid = webExchange.getAttribute(UUID_KEY);
     log.info("Gateway response " + uuid);
@@ -66,11 +66,12 @@ public class ConformanceTrafficRecorder {
     log.info("<<<<<<<<<<<<<<<<");
     log.info(responseBody);
     log.info("<<<<<<<<<<<<<<<<");
-    this.traffic.put(
-        uuid,
+    ConformanceExchange mutatedExchange =
         this.traffic
             .get(uuid)
-            .mutateWithResponse(webExchange.getResponse().getHeaders(), responseBody));
+            .mutateWithResponse(webExchange.getResponse().getHeaders(), responseBody);
+    this.traffic.put(uuid, mutatedExchange);
     log.info("Recorded %d exchanges".formatted(this.traffic.size()));
+    return mutatedExchange;
   }
 }

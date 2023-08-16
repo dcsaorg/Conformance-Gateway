@@ -20,7 +20,7 @@ public class ConformanceTrafficAnalyzer {
           Stream<ConformanceExchange> trafficStream, String... roleNames) {
     ConformanceCheck conformanceCheck =
         ConformanceCheckFactory.create(standardName, standardVersion);
-    trafficStream.forEach(exchange -> conformanceCheck.check(exchange));
+    trafficStream.forEach(conformanceCheck::check);
     return ConformanceReport.createForRoles(conformanceCheck, roleNames);
   }
 }

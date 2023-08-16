@@ -1,25 +1,28 @@
 package org.dcsa.conformance.gateway.traffic;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.util.MultiValueMap;
 
 import java.util.UUID;
 
+@ToString
+@Getter
 public class ConformanceExchange {
-  @Getter private final String sourcePartyName;
-  @Getter private final String sourcePartyRole;
-  @Getter private final String targetPartyName;
-  @Getter private final String targetPartyRole;
-  @Getter private final UUID uuid;
-  @Getter private final String httpMethod;
-  @Getter private final String requestPath;
-  @Getter private final MultiValueMap<String, String> requestQueryParams;
-  @Getter private final MultiValueMap<String, String> requestHeaders;
-  @Getter private final String requestBody;
-  @Getter private final long requestTimestamp;
-  @Getter private final MultiValueMap<String, String> responseHeaders;
-  @Getter private final String responseBody;
-  @Getter private final long responseTimestamp;
+  private final String sourcePartyName;
+  private final String sourcePartyRole;
+  private final String targetPartyName;
+  private final String targetPartyRole;
+  private final UUID uuid;
+  private final String httpMethod;
+  private final String requestPath;
+  private final MultiValueMap<String, String> requestQueryParams;
+  private final MultiValueMap<String, String> requestHeaders;
+  private final String requestBody;
+  private final long requestTimestamp;
+  private final MultiValueMap<String, String> responseHeaders;
+  private final String responseBody;
+  private final long responseTimestamp;
 
   private ConformanceExchange(
       String sourcePartyName,

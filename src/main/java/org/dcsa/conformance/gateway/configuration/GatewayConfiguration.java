@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationProperties(prefix = "gateway")
 @ConfigurationPropertiesScan
 @ToString
+@Getter
+@Setter
 public class GatewayConfiguration {
-  @Getter @Setter private LinkConfiguration[] links = {};
+  private LinkConfiguration[] links = {};
 }

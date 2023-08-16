@@ -9,19 +9,21 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationProperties
 @ConfigurationPropertiesScan
 @ToString
+@Getter
+@Setter
 public class LinkConfiguration {
 
-  @Getter @Setter private PartyConfiguration sourceParty;
+  private PartyConfiguration sourceParty;
 
-  @Getter @Setter private PartyConfiguration targetParty;
+  private PartyConfiguration targetParty;
 
-  @Getter @Setter private String gatewayBasePath;
+  private String gatewayBasePath;
 
-  @Getter @Setter private String targetBasePath;
+  private String targetBasePath;
 
-  @Getter @Setter private String targetRootUrl;
+  private String targetRootUrl;
 
-  @Getter @Setter private String gatewayApiKey;
+  private String gatewayApiKey;
 
-  @Getter @Setter private String targetApiKey;
+  private String targetApiKey;
 }

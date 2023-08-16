@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
+
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
@@ -18,6 +19,7 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyA
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@Slf4j
 public class EblSurrenderV10Carrier extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
 
@@ -36,9 +38,11 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   }
 
   private void supplyAvailableTdr(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderV10Carrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = UUID.randomUUID().toString();
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-    postAsync(
+    asyncPost(
         "/party/input",
         new ObjectMapper()
             .createObjectNode()
@@ -47,6 +51,9 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   }
 
   private void acceptSurrenderRequest(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderV10Carrier.acceptSurrenderRequest(%s)"
+            .formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.get("tdr").asText();
     switch (eblStatesById.get(tdr)) {
       case AMENDMENT_SURRENDER_REQUESTED -> eblStatesById.put(
@@ -55,7 +62,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
           tdr, EblSurrenderV10State.SURRENDERED_FOR_DELIVERY);
       default -> {} // ignore -- sending from wrong state for testing purposes
     }
-    postAsync(
+    asyncPost(
         gatewayRootPath + "/v1/surrender-request-responses",
         new ObjectMapper()
             .createObjectNode()
@@ -64,13 +71,16 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   }
 
   private void rejectSurrenderRequest(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderV10Carrier.rejectSurrenderRequest(%s)"
+            .formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.get("tdr").asText();
     switch (eblStatesById.get(tdr)) {
       case AMENDMENT_SURRENDER_REQUESTED, DELIVERY_SURRENDER_REQUESTED -> eblStatesById.put(
           tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
       default -> {} // ignore -- sending from wrong state for testing purposes
     }
-    postAsync(
+    asyncPost(
         gatewayRootPath + "/v1/surrender-request-responses",
         new ObjectMapper()
             .createObjectNode()
@@ -79,16 +89,19 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   }
 
   private void amendDocumentOffline(JsonNode actionPrompt) {
+    log.info(
+        "EblSurrenderV10Carrier.amendDocumentOffline(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.get("tdr").asText();
-    switch (eblStatesById.get(tdr)) {
-      case SURRENDERED_FOR_AMENDMENT -> eblStatesById.put(
-          tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      default -> {} // ignore -- sending from wrong state for testing purposes
+    if (Objects.requireNonNull(eblStatesById.get(tdr))
+        == EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT) {
+      eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
     }
   }
 
   @Override
-  public ResponseEntity<JsonNode> handlePostRequest(JsonNode requestBody) {
+  public ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
+    log.info(
+        "EblSurrenderV10Carrier.handlePostRequest(%s)".formatted(requestBody.toPrettyString()));
     String srr = requestBody.get("surrenderRequestReference").asText();
     String tdr = requestBody.get("transportDocumentReference").asText();
     String src = requestBody.get("surrenderRequestCode").asText();

@@ -15,8 +15,8 @@ import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Carrier;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Orchestrator;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Platform;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
 import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,7 +38,7 @@ public class DcsaConformanceGatewayApplication {
 
   private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
   private final ConformanceOrchestrator conformanceOrchestrator =
-      new EblSurrenderV10Orchestrator("Platform1", "Carrier1");
+      new ConformanceOrchestrator(new EblSurrenderV10ScenarioListBuilder("Platform1", "Carrier1"));
   private final Map<String, ConformanceParty> conformancePartiesByName =
       Stream.of(
               new EblSurrenderV10Carrier(

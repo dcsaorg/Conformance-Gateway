@@ -9,13 +9,19 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.scenarios.ConformanceScenario;
+import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @Slf4j
-public abstract class ConformanceOrchestrator {
+public class ConformanceOrchestrator {
+  protected final ScenarioListBuilder scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
+
+  public ConformanceOrchestrator(ScenarioListBuilder scenarioListBuilder) {
+    this.scenarioListBuilder = scenarioListBuilder;
+  }
 
   public void reset() {
     initializeScenarios();
@@ -31,7 +37,10 @@ public abstract class ConformanceOrchestrator {
         .forEach(this::asyncNotifyParty);
   }
 
-  protected abstract void initializeScenarios();
+  protected void initializeScenarios() {
+    scenarios.clear();
+    scenarios.addAll(scenarioListBuilder.buildList());
+  }
 
   private void asyncNotifyParty(String partyName) {
     CompletableFuture.runAsync(
@@ -101,7 +110,7 @@ public abstract class ConformanceOrchestrator {
             .filter(
                 scenario ->
                     scenario.hasNextAction()
-                        && scenario.peekNextAction().trafficExchangeMatches(conformanceExchange))
+                        && scenario.peekNextAction().updateFromExchangeIfItMatches(conformanceExchange))
             .map(ConformanceScenario::popNextAction)
             .findFirst()
             .orElse(null);

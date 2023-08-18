@@ -7,19 +7,21 @@ import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 
 @Getter
-public class EblSurrenderV10Action extends ConformanceAction {
-  protected final String srr;
-
+public class TdrAction extends ConformanceAction {
   protected final Supplier<String> tdrSupplier;
+  private final int expectedStatus;
 
-  public EblSurrenderV10Action(
-      String srr, Supplier<String> tdrSupplier, String sourcePartyName, String targetPartyName) {
+  public TdrAction(
+      Supplier<String> tdrSupplier,
+      String sourcePartyName,
+      String targetPartyName,
+      int expectedStatus) {
     super(sourcePartyName, targetPartyName);
-    this.srr = srr;
     this.tdrSupplier = tdrSupplier;
+    this.expectedStatus = expectedStatus;
   }
 
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("srr", srr).put("tdr", tdrSupplier.get());
+    return super.asJsonNode().put("tdr", tdrSupplier.get());
   }
 }

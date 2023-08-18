@@ -17,7 +17,7 @@ public class ConformanceAction {
   private final String sourcePartyName;
   private final String targetPartyName;
 
-  public boolean trafficExchangeMatches(ConformanceExchange exchange) {
+  public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
     return false;
   }
 

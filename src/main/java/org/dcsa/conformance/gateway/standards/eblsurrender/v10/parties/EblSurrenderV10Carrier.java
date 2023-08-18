@@ -12,9 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.AcceptSurrenderRequestAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.AmendDocumentOfflineAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.RejectSurrenderRequestAction;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +31,8 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(SupplyAvailableTdrAction.class, this::supplyAvailableTdr),
-        Map.entry(AcceptSurrenderRequestAction.class, this::acceptSurrenderRequest),
-        Map.entry(RejectSurrenderRequestAction.class, this::rejectSurrenderRequest),
-        Map.entry(AmendDocumentOfflineAction.class, this::amendDocumentOffline));
+        Map.entry(SurrenderResponseAction.class, this::sendSurrenderResponse),
+        Map.entry(VoidAndReissueAction.class, this::amendDocumentOffline));
   }
 
   private void supplyAvailableTdr(JsonNode actionPrompt) {
@@ -50,11 +48,12 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
             .put("tdr", tdr));
   }
 
-  private void acceptSurrenderRequest(JsonNode actionPrompt) {
+  private void sendSurrenderResponse(JsonNode actionPrompt) {
     log.info(
-        "EblSurrenderV10Carrier.acceptSurrenderRequest(%s)"
+        "EblSurrenderV10Carrier.sendSurrenderResponse(%s)"
             .formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.get("tdr").asText();
+    boolean accept = actionPrompt.get("accept").asBoolean();
     switch (eblStatesById.get(tdr)) {
       case AMENDMENT_SURRENDER_REQUESTED -> eblStatesById.put(
           tdr, EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT);
@@ -67,25 +66,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", actionPrompt.get("srr").asText())
-            .put("action", "SURR"));
-  }
-
-  private void rejectSurrenderRequest(JsonNode actionPrompt) {
-    log.info(
-        "EblSurrenderV10Carrier.rejectSurrenderRequest(%s)"
-            .formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
-    switch (eblStatesById.get(tdr)) {
-      case AMENDMENT_SURRENDER_REQUESTED, DELIVERY_SURRENDER_REQUESTED -> eblStatesById.put(
-          tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      default -> {} // ignore -- sending from wrong state for testing purposes
-    }
-    asyncPost(
-        gatewayRootPath + "/v1/surrender-request-responses",
-        new ObjectMapper()
-            .createObjectNode()
-            .put("surrenderRequestReference", actionPrompt.get("srr").asText())
-            .put("action", "SREJ"));
+            .put("action", accept ? "SURR" : "SREJ"));
   }
 
   private void amendDocumentOffline(JsonNode actionPrompt) {

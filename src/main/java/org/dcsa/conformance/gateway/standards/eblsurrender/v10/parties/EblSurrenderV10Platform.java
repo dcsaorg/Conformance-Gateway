@@ -7,12 +7,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.RequestSurrenderAction;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -28,13 +27,13 @@ public class EblSurrenderV10Platform extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(RequestSurrenderAction.class, this::requestSurrender));
+    return Map.ofEntries(Map.entry(SurrenderRequestAction.class, this::requestSurrender));
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Platform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
-    String srr = actionPrompt.get("srr").asText();
+    String srr = UUID.randomUUID().toString();
     String tdr = actionPrompt.get("tdr").asText();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
     tdrsBySrr.put(srr, tdr);
@@ -58,7 +57,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
         "EblSurrenderV10Platform.handleRegularTraffic(%s)".formatted(requestBody.toPrettyString()));
     String action = requestBody.get("action").asText();
     String srr = requestBody.get("surrenderRequestReference").asText();
-    String tdr = tdrsBySrr.get(srr);
+    String tdr = tdrsBySrr.remove(srr);
     if (Objects.equals(
         EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(

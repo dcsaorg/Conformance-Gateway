@@ -12,13 +12,19 @@ public class TdrAction extends ConformanceAction {
   private final int expectedStatus;
 
   public TdrAction(
-      Supplier<String> tdrSupplier,
       String sourcePartyName,
       String targetPartyName,
-      int expectedStatus) {
-    super(sourcePartyName, targetPartyName);
-    this.tdrSupplier = tdrSupplier;
+      int expectedStatus,
+      ConformanceAction previousAction) {
+    super(sourcePartyName, targetPartyName, previousAction);
+    this.tdrSupplier = _getTdrSupplier(previousAction);
     this.expectedStatus = expectedStatus;
+  }
+
+  private Supplier<String> _getTdrSupplier(ConformanceAction previousAction) {
+    return previousAction instanceof SupplyAvailableTdrAction supplyAvailableTdrAction
+        ? supplyAvailableTdrAction.getTdrSupplier()
+        : _getTdrSupplier(previousAction.getPreviousAction());
   }
 
   public ObjectNode asJsonNode() {

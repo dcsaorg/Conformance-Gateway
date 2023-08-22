@@ -6,16 +6,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
-@AllArgsConstructor
 @Getter
 public class ConformanceAction {
   protected final UUID id = UUID.randomUUID();
   private final String sourcePartyName;
   private final String targetPartyName;
+  private final ConformanceAction previousAction;
+
+  public ConformanceAction(
+      String sourcePartyName, String targetPartyName, ConformanceAction previousAction) {
+    this.sourcePartyName = sourcePartyName;
+    this.targetPartyName = targetPartyName;
+    this.previousAction = previousAction;
+  }
 
   public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
     return false;

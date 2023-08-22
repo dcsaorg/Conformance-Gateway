@@ -1,10 +1,14 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
 
+import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+
 import java.util.function.Supplier;
 
 public class VoidAndReissueAction extends TdrAction {
   public VoidAndReissueAction(
-      Supplier<String> tdrSupplier, String carrierPartyName, String platformPartyName) {
-    super(tdrSupplier, carrierPartyName, platformPartyName, -1);
+      String carrierPartyName,
+      String platformPartyName,
+      ConformanceAction previousAction) {
+    super(carrierPartyName, platformPartyName, -1, previousAction);
   }
 }

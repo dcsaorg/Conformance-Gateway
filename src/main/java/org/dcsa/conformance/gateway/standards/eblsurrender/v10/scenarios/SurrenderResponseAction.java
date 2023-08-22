@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.Getter;
+import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 @Getter
@@ -14,14 +15,19 @@ public class SurrenderResponseAction extends TdrAction {
 
   public SurrenderResponseAction(
       boolean accept,
-      Supplier<String> srrSupplier,
-      Supplier<String> tdrSupplier,
       String carrierPartyName,
       String platformPartyName,
-      int expectedStatus) {
-    super(tdrSupplier, carrierPartyName, platformPartyName, expectedStatus);
+      int expectedStatus,
+      ConformanceAction previousAction) {
+    super(carrierPartyName, platformPartyName, expectedStatus, previousAction);
     this.accept = accept;
-    this.srrSupplier = srrSupplier;
+    this.srrSupplier = _getSrrSupplier(previousAction);
+  }
+
+  private Supplier<String> _getSrrSupplier(ConformanceAction previousAction) {
+    return previousAction instanceof SurrenderRequestAction surrenderRequestAction
+            ? surrenderRequestAction.getSrrSupplier()
+            : _getSrrSupplier(previousAction.getPreviousAction());
   }
 
   @Override

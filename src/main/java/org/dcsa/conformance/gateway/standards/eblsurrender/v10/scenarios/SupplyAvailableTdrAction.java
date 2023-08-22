@@ -26,7 +26,7 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
         return transportDocumentReference;
       };
 
-  public SupplyAvailableTdrAction(String carrierPartyName) {
-    super(carrierPartyName, null);
+  public SupplyAvailableTdrAction(String carrierPartyName, ConformanceAction previousAction) {
+    super(carrierPartyName, null, previousAction);
   }
 }

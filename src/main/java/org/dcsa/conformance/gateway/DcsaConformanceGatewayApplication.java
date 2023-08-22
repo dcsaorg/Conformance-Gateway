@@ -14,6 +14,7 @@ import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
 import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
+import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Carrier;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Platform;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
@@ -37,8 +38,10 @@ import reactor.core.publisher.Mono;
 public class DcsaConformanceGatewayApplication {
 
   private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
+  private final ScenarioListBuilder scenarioListBuilder =
+      EblSurrenderV10ScenarioListBuilder.buildTree("Platform1", "Carrier1");
   private final ConformanceOrchestrator conformanceOrchestrator =
-      new ConformanceOrchestrator(new EblSurrenderV10ScenarioListBuilder("Platform1", "Carrier1"));
+      new ConformanceOrchestrator(scenarioListBuilder);
   private final Map<String, ConformanceParty> conformancePartiesByName =
       Stream.of(
               new EblSurrenderV10Carrier(
@@ -134,7 +137,7 @@ public class DcsaConformanceGatewayApplication {
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardName, standardVersion)
-            .analyze(trafficRecorder.getTrafficStream(), roleNames);
+            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
     String response =
         Jackson2ObjectMapperBuilder.json()
             .indentOutput(true)
@@ -146,6 +149,7 @@ public class DcsaConformanceGatewayApplication {
     return response;
   }
 
+  // test: http://localhost:8080/report/html?standard=EblSurrender&version=1.0&roles=Carrier&roles=Platform
   @GetMapping(value = "/report/html", produces = MediaType.TEXT_HTML_VALUE)
   public String generateReportHtml(
       @RequestParam("standard") String standardName,
@@ -153,7 +157,7 @@ public class DcsaConformanceGatewayApplication {
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardName, standardVersion)
-            .analyze(trafficRecorder.getTrafficStream(), roleNames);
+            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
     String htmlResponse = ConformanceReport.toHtmlReport(reportsByRoleName);
     log.info("################################################################");
     log.info("reports by role name = \n\n\n" + htmlResponse + "\n\n");

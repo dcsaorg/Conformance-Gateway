@@ -1,27 +1,39 @@
 package org.dcsa.conformance.gateway.scenarios;
 
+import org.dcsa.conformance.gateway.check.ActionCheck;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public abstract class ScenarioListBuilder {
-  private final ScenarioListBuilder parent;
+  protected ScenarioListBuilder parent;
   private final LinkedList<ScenarioListBuilder> children = new LinkedList<>();
-  protected final Function<LinkedList<ConformanceAction>, ConformanceAction> actionBuilder;
+  protected final Function<ConformanceAction, ConformanceAction> actionBuilder;
+  protected final Function<ActionCheck, ActionCheck> checkBuilder;
 
   protected ScenarioListBuilder(
-      ScenarioListBuilder parent,
-      Function<LinkedList<ConformanceAction>, ConformanceAction> actionBuilder) {
-    this.parent = parent;
+      Function<ConformanceAction, ConformanceAction> actionBuilder,
+      Function<ActionCheck, ActionCheck> checkBuilder) {
     this.actionBuilder = actionBuilder;
+    this.checkBuilder = checkBuilder;
   }
 
   public List<ConformanceScenario> buildList() {
-    return buildTree().buildScenarioList();
+    return buildScenarioList();
   }
 
-  abstract protected ScenarioListBuilder buildTree();
+  public ActionCheck buildCheckTree() {
+    return parent != null ? parent.buildCheckTree() : _buildCheckTree(null);
+  }
+
+  private ActionCheck _buildCheckTree(ActionCheck parentActionCheck) {
+    ActionCheck actionCheck = checkBuilder.apply(parentActionCheck);
+    children.forEach(child -> child._buildCheckTree(actionCheck));
+    return actionCheck;
+  }
 
   protected List<ConformanceScenario> buildScenarioList() {
     return parent != null
@@ -31,7 +43,8 @@ public abstract class ScenarioListBuilder {
                 builderList -> {
                   LinkedList<ConformanceAction> actionList = new LinkedList<>();
                   builderList.forEach(
-                      builder -> actionList.addLast(builder.actionBuilder.apply(actionList)));
+                      builder ->
+                          actionList.addLast(builder.actionBuilder.apply(actionList.getLast())));
                   return new ConformanceScenario(actionList);
                 })
             .toList();
@@ -47,15 +60,25 @@ public abstract class ScenarioListBuilder {
                 .toList());
   }
 
-  protected ScenarioListBuilder thenEither(
-      ScenarioListBuilder... scenarioListBuilders) {
+  protected ScenarioListBuilder then(ScenarioListBuilder child) {
+    return thenEither(child);
+  }
+
+  protected ScenarioListBuilder thenEither(ScenarioListBuilder... children) {
     if (!this.children.isEmpty()) throw new IllegalStateException();
-    this.children.addAll(Arrays.asList(scenarioListBuilders));
+    Stream.of(children).forEach(
+        child -> {
+          if (child.parent != null) throw new IllegalStateException();
+        });
+    this.children.addAll(Arrays.asList(children));
+    this.children.forEach(child -> child.parent = this);
     return this;
   }
 
   protected <T extends ScenarioListBuilder> T addChildIfFirst(T child) {
-    if (!this.children.isEmpty()) throw new IllegalStateException();
+    if (!this.children.isEmpty()) {
+      throw new IllegalStateException();
+    }
     this.children.add(child);
     return child;
   }

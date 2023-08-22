@@ -1,42 +1,48 @@
 package org.dcsa.conformance.gateway.check;
 
-import lombok.Getter;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Getter;
+import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 @Getter
 public class ConformanceCheck {
   protected final String title;
 
-  private final List<ConformanceCheck> subChecks;
+  private List<ConformanceCheck> _subChecks;
 
   private final List<ConformanceResult> results = new ArrayList<>();
 
   public ConformanceCheck(String title) {
     this.title = title;
-    this.subChecks = this.createSubChecks().collect(Collectors.toList());
+  }
+
+  synchronized private List<ConformanceCheck> getSubChecks() {
+    if (_subChecks == null) {
+      this._subChecks = this.createSubChecks().collect(Collectors.toList());
+    }
+    return _subChecks;
   }
 
   public final void check(ConformanceExchange exchange) {
-    if (this.subChecks.isEmpty()) {
+    List<ConformanceCheck> subChecks = getSubChecks();
+    if (subChecks.isEmpty()) {
       this.doCheck(exchange);
     } else {
-      this.subChecks.forEach(subCheck -> subCheck.check(exchange));
+      subChecks.forEach(subCheck -> subCheck.check(exchange));
     }
   }
 
   protected void doCheck(ConformanceExchange exchange) {}
 
-  protected Stream<ConformanceCheck> createSubChecks() {
+  protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.empty();
   }
 
   public Stream<ConformanceCheck> subChecksStream() {
-    return subChecks.stream();
+    return getSubChecks().stream();
   }
 
   protected void addResult(ConformanceResult result) {

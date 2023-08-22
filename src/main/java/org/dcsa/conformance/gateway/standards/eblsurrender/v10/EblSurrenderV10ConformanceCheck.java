@@ -3,11 +3,11 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
+import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 import org.springframework.util.MultiValueMap;
 
@@ -19,16 +19,18 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
   public static final String SCHEMAS_FILE_ASYNC_RESPONSE =
       SCHEMAS_FOLDER + "eblsurrender-v10-async-response.json";
 
-  public EblSurrenderV10ConformanceCheck() {
+  private final ScenarioListBuilder scenarioListBuilder;
+  public EblSurrenderV10ConformanceCheck(ScenarioListBuilder scenarioListBuilder) {
     super("EBL Surrender V1.0");
+    this.scenarioListBuilder = scenarioListBuilder;
   }
 
   @Override
-  protected Stream<ConformanceCheck> createSubChecks() {
+  protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
         new ConformanceCheck("Async platform requests (platform-initiated sync exchanges)") {
           @Override
-          protected Stream<ConformanceCheck> createSubChecks() {
+          protected Stream<? extends ConformanceCheck> createSubChecks() {
             return Stream.of(
                 createApiVersionHeaderCheck(),
                 new ConformanceCheck("Async platform request URL path is correct") {
@@ -111,7 +113,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         },
         new ConformanceCheck("Async carrier responses (carrier-initiated sync exchanges)") {
           @Override
-          protected Stream<ConformanceCheck> createSubChecks() {
+          protected Stream<? extends ConformanceCheck> createSubChecks() {
             return Stream.of(
                 createApiVersionHeaderCheck(),
                 new ConformanceCheck("Async carrier response URL path is correct") {
@@ -136,7 +138,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         },
         new ConformanceCheck("Async exchanges (platform request, carrier response)") {
           @Override
-          protected Stream<ConformanceCheck> createSubChecks() {
+          protected Stream<? extends ConformanceCheck> createSubChecks() {
             return Stream.of(
                 new ConformanceCheck(
                     "The surrenderRequestReference of every async response must match that of an async request") {
@@ -167,15 +169,14 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 });
           }
         },
-        new ConformanceCheck(
-            "Async exchange workflows (amendment exchanges + surrender exchanges)"));
+        scenarioListBuilder.buildCheckTree());
   }
 
   private ConformanceCheck createApiVersionHeaderCheck() {
     return new ConformanceCheck(
         "All sync requests and responses must contain Api-Version headers with a compatible version") {
       @Override
-      protected Stream<ConformanceCheck> createSubChecks() {
+      protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new ConformanceCheck(
                 "All sync requests must contain an Api-Version header with a compatible version") {

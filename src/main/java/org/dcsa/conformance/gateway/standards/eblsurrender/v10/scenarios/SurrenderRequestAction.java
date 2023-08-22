@@ -6,13 +6,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lombok.Getter;
+import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 @Getter
 public class SurrenderRequestAction extends TdrAction {
   private final boolean forAmendment;
 
-  private AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
+  private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
 
   private final Supplier<String> srrSupplier =
       () -> {
@@ -25,11 +26,11 @@ public class SurrenderRequestAction extends TdrAction {
 
   public SurrenderRequestAction(
       boolean forAmendment,
-      Supplier<String> tdrSupplier,
       String platformPartyName,
       String carrierPartyName,
-      int expectedStatus) {
-    super(tdrSupplier, platformPartyName, carrierPartyName, expectedStatus);
+      int expectedStatus,
+      ConformanceAction previousAction) {
+    super(platformPartyName, carrierPartyName, expectedStatus, previousAction);
     this.forAmendment = forAmendment;
   }
 

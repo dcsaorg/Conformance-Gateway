@@ -1,12 +1,11 @@
 package org.dcsa.conformance.gateway.scenarios;
 
-import org.dcsa.conformance.gateway.check.ActionCheck;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.dcsa.conformance.gateway.check.ActionCheck;
 
 public abstract class ScenarioListBuilder {
   protected ScenarioListBuilder parent;
@@ -73,13 +72,5 @@ public abstract class ScenarioListBuilder {
     this.children.addAll(Arrays.asList(children));
     this.children.forEach(child -> child.parent = this);
     return this;
-  }
-
-  protected <T extends ScenarioListBuilder> T addChildIfFirst(T child) {
-    if (!this.children.isEmpty()) {
-      throw new IllegalStateException();
-    }
-    this.children.add(child);
-    return child;
   }
 }

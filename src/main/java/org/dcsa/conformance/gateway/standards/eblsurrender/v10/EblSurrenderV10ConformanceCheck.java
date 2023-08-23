@@ -20,6 +20,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
       SCHEMAS_FOLDER + "eblsurrender-v10-async-response.json";
 
   private final ScenarioListBuilder scenarioListBuilder;
+
   public EblSurrenderV10ConformanceCheck(ScenarioListBuilder scenarioListBuilder) {
     super("EBL Surrender V1.0");
     this.scenarioListBuilder = scenarioListBuilder;
@@ -28,6 +29,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
+        scenarioListBuilder.buildCheckTree(),
         new ConformanceCheck("Async platform requests (platform-initiated sync exchanges)") {
           @Override
           protected Stream<? extends ConformanceCheck> createSubChecks() {
@@ -168,8 +170,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                   }
                 });
           }
-        },
-        scenarioListBuilder.buildCheckTree());
+        });
   }
 
   private ConformanceCheck createApiVersionHeaderCheck() {

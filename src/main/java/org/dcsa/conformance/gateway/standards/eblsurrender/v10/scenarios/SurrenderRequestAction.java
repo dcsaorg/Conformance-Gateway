@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 @Getter
@@ -47,8 +48,9 @@ public class SurrenderRequestAction extends TdrAction {
     }
     JsonNode requestJsonNode = getRequestBody(exchange);
     boolean matches =
-        stringAttributeEquals(requestJsonNode, "transportDocumentReference", tdrSupplier.get())
-            && stringAttributeEquals(
+        JsonToolkit.stringAttributeEquals(
+                requestJsonNode, "transportDocumentReference", tdrSupplier.get())
+            && JsonToolkit.stringAttributeEquals(
                 requestJsonNode, "surrenderRequestCode", forAmendment ? "AREQ" : "SREQ");
     if (matches) {
       this.surrenderRequestReference.set(requestJsonNode.get("surrenderRequestReference").asText());

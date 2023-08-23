@@ -35,10 +35,6 @@ public class ConformanceAction {
     }
   }
 
-  protected boolean stringAttributeEquals(JsonNode jsonNode, String name, String value) {
-    return jsonNode.has(name) && Objects.equals(value, jsonNode.get(name).asText());
-  }
-
   public ObjectNode asJsonNode() {
     return new ObjectMapper()
         .createObjectNode()

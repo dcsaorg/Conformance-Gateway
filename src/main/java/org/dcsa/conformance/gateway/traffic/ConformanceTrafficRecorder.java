@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -21,7 +22,7 @@ public class ConformanceTrafficRecorder {
     return this.traffic.values().stream();
   }
 
-  synchronized public void recordRequest(
+  public synchronized void recordRequest(
       String sourcePartyName,
       String sourcePartyRole,
       String targetPartyName,
@@ -57,7 +58,8 @@ public class ConformanceTrafficRecorder {
             requestBody));
   }
 
-  synchronized public ConformanceExchange recordResponse(ServerWebExchange webExchange, String responseBody) {
+  public synchronized ConformanceExchange recordResponse(
+      ServerWebExchange webExchange, String responseBody) {
     log.info("<<<<<<<<<<<<<<<<");
     UUID uuid = webExchange.getAttribute(UUID_KEY);
     log.info("Gateway response " + uuid);
@@ -69,7 +71,10 @@ public class ConformanceTrafficRecorder {
     ConformanceExchange mutatedExchange =
         this.traffic
             .get(uuid)
-            .mutateWithResponse(webExchange.getResponse().getHeaders(), responseBody);
+            .mutateWithResponse(
+                Objects.requireNonNull(webExchange.getResponse().getStatusCode()).value(),
+                webExchange.getResponse().getHeaders(),
+                responseBody);
     this.traffic.put(uuid, mutatedExchange);
     log.info("Recorded %d exchanges".formatted(this.traffic.size()));
     return mutatedExchange;

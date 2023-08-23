@@ -20,6 +20,7 @@ public class ConformanceExchange {
   private final MultiValueMap<String, String> requestHeaders;
   private final String requestBody;
   private final long requestTimestamp;
+  private final int responseStatusCode;
   private final MultiValueMap<String, String> responseHeaders;
   private final String responseBody;
   private final long responseTimestamp;
@@ -46,6 +47,7 @@ public class ConformanceExchange {
     this.requestHeaders = requestHeaders;
     this.requestBody = requestBody;
     this.requestTimestamp = System.currentTimeMillis();
+    this.responseStatusCode = 0;
     this.responseHeaders = null;
     this.responseBody = null;
     this.responseTimestamp = 0L;
@@ -53,6 +55,7 @@ public class ConformanceExchange {
 
   private ConformanceExchange(
       ConformanceExchange conformanceExchange,
+      int responseStatusCode,
       MultiValueMap<String, String> responseHeaders,
       String responseBody) {
     this.sourcePartyName = conformanceExchange.sourcePartyName;
@@ -66,6 +69,7 @@ public class ConformanceExchange {
     this.requestHeaders = conformanceExchange.requestHeaders;
     this.requestBody = conformanceExchange.requestBody;
     this.requestTimestamp = conformanceExchange.requestTimestamp;
+    this.responseStatusCode = responseStatusCode;
     this.responseHeaders = responseHeaders;
     this.responseBody = responseBody;
     this.responseTimestamp = System.currentTimeMillis();
@@ -96,7 +100,7 @@ public class ConformanceExchange {
   }
 
   public ConformanceExchange mutateWithResponse(
-      MultiValueMap<String, String> responseHeaders, String responseBody) {
-    return new ConformanceExchange(this, responseHeaders, responseBody);
+      int responseStatusCode, MultiValueMap<String, String> responseHeaders, String responseBody) {
+    return new ConformanceExchange(this, responseStatusCode, responseHeaders, responseBody);
   }
 }

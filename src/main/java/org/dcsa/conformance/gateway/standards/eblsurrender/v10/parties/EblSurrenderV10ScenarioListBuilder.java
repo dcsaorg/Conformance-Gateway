@@ -1,6 +1,8 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
+import java.util.LinkedList;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.dcsa.conformance.gateway.check.ActionCheck;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -12,6 +14,7 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyA
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
+import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -71,7 +74,12 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
   private static EblSurrenderV10ScenarioListBuilder supplyAvailableTdrAction() {
     return new EblSurrenderV10ScenarioListBuilder(
         noPreviousAction -> new SupplyAvailableTdrAction(threadLocalCarrierPartyName.get(), null),
-        noPreviousCheck -> new ActionCheck("Scenarios", null));
+        noPreviousCheck -> new ActionCheck("Scenario handling", null) {
+          @Override
+          public Stream<LinkedList<ConformanceExchange>> relevantExchangeListsStream() {
+            return null;
+          }
+        });
   }
 
   private EblSurrenderV10ScenarioListBuilder(
@@ -98,7 +106,14 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
                 threadLocalCarrierPartyName.get(),
                 expectedStatus,
                 previousAction),
-        previousCheck -> new SurrenderRequestCheck("TODO", previousCheck));
+        previousCheck ->
+            new SurrenderRequestCheck(
+                "%s - %s %d"
+                    .formatted(
+                        previousCheck.getTitle(), forAmendment ? "AREQ" : "SREQ", expectedStatus),
+                previousCheck,
+                forAmendment,
+                expectedStatus));
   }
 
   private static EblSurrenderV10ScenarioListBuilder acceptSurrenderRequest(int status) {
@@ -119,7 +134,13 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
                 threadLocalPlatformPartyName.get(),
                 expectedStatus,
                 previousAction),
-        previousCheck -> new SurrenderResponseCheck("TODO", previousCheck));
+        previousCheck ->
+            new SurrenderResponseCheck(
+                "%s - %s %d"
+                    .formatted(previousCheck.getTitle(), accept ? "SURR" : "SREJ", expectedStatus),
+                previousCheck,
+                accept,
+                expectedStatus));
   }
 
   private static EblSurrenderV10ScenarioListBuilder voidAndReissue() {
@@ -129,6 +150,8 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
                 threadLocalCarrierPartyName.get(),
                 threadLocalPlatformPartyName.get(),
                 previousAction),
-        previousCheck -> new VoidAndReissueCheck("TODO", previousCheck));
+        previousCheck ->
+            new VoidAndReissueCheck(
+                "%s - Void & Reissue".formatted(previousCheck.getTitle()), previousCheck));
   }
 }

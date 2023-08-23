@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 @Getter
@@ -41,7 +42,7 @@ public class SurrenderResponseAction extends TdrAction {
       return false;
     }
     JsonNode requestJsonNode = getRequestBody(exchange);
-    return stringAttributeEquals(requestJsonNode, "surrenderRequestReference", srrSupplier.get())
-        && stringAttributeEquals(requestJsonNode, "action", accept ? "SURR" : "SREJ");
+    return JsonToolkit.stringAttributeEquals(requestJsonNode, "surrenderRequestReference", srrSupplier.get())
+        && JsonToolkit.stringAttributeEquals(requestJsonNode, "action", accept ? "SURR" : "SREJ");
   }
 }

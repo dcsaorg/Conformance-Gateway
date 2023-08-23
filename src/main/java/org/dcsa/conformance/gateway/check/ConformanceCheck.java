@@ -27,6 +27,7 @@ public class ConformanceCheck {
   }
 
   public final void check(ConformanceExchange exchange) {
+    exchangeOccurred(exchange);
     List<ConformanceCheck> subChecks = getSubChecks();
     if (subChecks.isEmpty()) {
       this.doCheck(exchange);
@@ -34,6 +35,8 @@ public class ConformanceCheck {
       subChecks.forEach(subCheck -> subCheck.check(exchange));
     }
   }
+
+  protected void exchangeOccurred(ConformanceExchange exchange) {}
 
   protected void doCheck(ConformanceExchange exchange) {}
 

@@ -3,7 +3,7 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 import lombok.Getter;
 
 @Getter
-enum EblSurrenderV10Role {
+public enum EblSurrenderV10Role {
   CARRIER("Carrier"),
   PLATFORM("Platform");
 
@@ -13,11 +13,11 @@ enum EblSurrenderV10Role {
     this.configName = configName;
   }
 
-  static boolean isCarrier(String configName) {
+  public static boolean isCarrier(String configName) {
     return EblSurrenderV10Role.CARRIER.configName.equals(configName);
   }
 
-  static boolean isPlatform(String configName) {
+  public static boolean isPlatform(String configName) {
     return EblSurrenderV10Role.PLATFORM.configName.equals(configName);
   }
 }

@@ -43,7 +43,7 @@ public abstract class ScenarioListBuilder {
                   LinkedList<ConformanceAction> actionList = new LinkedList<>();
                   builderList.forEach(
                       builder ->
-                          actionList.addLast(builder.actionBuilder.apply(actionList.getLast())));
+                          actionList.addLast(builder.actionBuilder.apply(actionList.peekLast())));
                   return new ConformanceScenario(actionList);
                 })
             .toList();

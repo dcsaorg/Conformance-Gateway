@@ -3,6 +3,7 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -27,8 +28,10 @@ public class SurrenderResponseAction extends TdrAction {
 
   private Supplier<String> _getSrrSupplier(ConformanceAction previousAction) {
     return previousAction instanceof SurrenderRequestAction surrenderRequestAction
-            ? surrenderRequestAction.getSrrSupplier()
-            : _getSrrSupplier(previousAction.getPreviousAction());
+        ? surrenderRequestAction.getSrrSupplier()
+        : previousAction.getPreviousAction() != null
+            ? _getSrrSupplier(previousAction.getPreviousAction())
+            : () -> UUID.randomUUID().toString();
   }
 
   @Override
@@ -42,7 +45,8 @@ public class SurrenderResponseAction extends TdrAction {
       return false;
     }
     JsonNode requestJsonNode = getRequestBody(exchange);
-    return JsonToolkit.stringAttributeEquals(requestJsonNode, "surrenderRequestReference", srrSupplier.get())
+    return JsonToolkit.stringAttributeEquals(
+            requestJsonNode, "surrenderRequestReference", srrSupplier.get())
         && JsonToolkit.stringAttributeEquals(requestJsonNode, "action", accept ? "SURR" : "SREJ");
   }
 }

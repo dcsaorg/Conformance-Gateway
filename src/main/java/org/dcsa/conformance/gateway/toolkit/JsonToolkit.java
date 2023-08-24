@@ -10,4 +10,9 @@ public enum JsonToolkit {
   public static boolean stringAttributeEquals(JsonNode jsonNode, String name, String value) {
     return jsonNode.has(name) && Objects.equals(value, jsonNode.get(name).asText());
   }
+
+  public static String getTextAttributeOrNull(JsonNode jsonNode, String attributeName) {
+    JsonNode attributeNode = jsonNode.get(attributeName);
+    return attributeNode == null ? null : attributeNode.asText();
+  }
 }

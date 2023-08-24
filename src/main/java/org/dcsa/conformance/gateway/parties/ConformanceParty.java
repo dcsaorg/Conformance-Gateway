@@ -60,7 +60,14 @@ public abstract class ConformanceParty {
                               entry.getKey().getCanonicalName(),
                               actionPrompt.get("actionType").asText()))
                   .findFirst()
-                  .orElseThrow()
+                  .orElseThrow(
+                      () ->
+                          new RuntimeException(
+                              "Handler not found by %s for action prompt %s\nAvailable action prompts are %s"
+                                  .formatted(
+                                          ConformanceParty.this.getClass().getCanonicalName(),
+                                      actionPrompt.toPrettyString(),
+                                      getActionPromptHandlers().keySet())))
                   .getValue()
                   .accept(actionPrompt);
               asyncHandleNextActionPrompt();

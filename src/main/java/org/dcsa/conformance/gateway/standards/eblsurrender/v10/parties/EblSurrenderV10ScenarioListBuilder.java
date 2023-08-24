@@ -72,8 +72,9 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
   }
 
   private static EblSurrenderV10ScenarioListBuilder supplyAvailableTdrAction() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
-        noPreviousAction -> new SupplyAvailableTdrAction(threadLocalCarrierPartyName.get(), null),
+        noPreviousAction -> new SupplyAvailableTdrAction(carrierPartyName, null),
         noPreviousCheck -> new ActionCheck("Scenario handling", null) {
           @Override
           public Stream<LinkedList<ConformanceExchange>> relevantExchangeListsStream() {
@@ -98,12 +99,14 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
 
   private static EblSurrenderV10ScenarioListBuilder _surrenderRequestBuilder(
       boolean forAmendment, int expectedStatus) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
             new SurrenderRequestAction(
                 forAmendment,
-                threadLocalPlatformPartyName.get(),
-                threadLocalCarrierPartyName.get(),
+                platformPartyName,
+                carrierPartyName,
                 expectedStatus,
                 previousAction),
         previousCheck ->
@@ -126,12 +129,14 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
 
   private static EblSurrenderV10ScenarioListBuilder _surrenderResponseBuilder(
       boolean accept, int expectedStatus) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
             new SurrenderResponseAction(
                 accept,
-                threadLocalCarrierPartyName.get(),
-                threadLocalPlatformPartyName.get(),
+                carrierPartyName,
+                platformPartyName,
                 expectedStatus,
                 previousAction),
         previousCheck ->
@@ -144,11 +149,13 @@ public class EblSurrenderV10ScenarioListBuilder extends ScenarioListBuilder {
   }
 
   private static EblSurrenderV10ScenarioListBuilder voidAndReissue() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
             new VoidAndReissueAction(
-                threadLocalCarrierPartyName.get(),
-                threadLocalPlatformPartyName.get(),
+                carrierPartyName,
+                platformPartyName,
                 previousAction),
         previousCheck ->
             new VoidAndReissueCheck(

@@ -39,7 +39,7 @@ public class DcsaConformanceGatewayApplication {
 
   private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
   private final ScenarioListBuilder scenarioListBuilder =
-      EblSurrenderV10ScenarioListBuilder.buildTree("Platform1", "Carrier1");
+      EblSurrenderV10ScenarioListBuilder.buildTree("Carrier1", "Platform1");
   private final ConformanceOrchestrator conformanceOrchestrator =
       new ConformanceOrchestrator(scenarioListBuilder);
   private final Map<String, ConformanceParty> conformancePartiesByName =

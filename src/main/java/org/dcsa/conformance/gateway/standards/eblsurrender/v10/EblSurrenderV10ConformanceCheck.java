@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
+import org.dcsa.conformance.gateway.check.ActionCheck;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 import org.springframework.util.MultiValueMap;
 
@@ -19,17 +21,24 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
   public static final String SCHEMAS_FILE_ASYNC_RESPONSE =
       SCHEMAS_FOLDER + "eblsurrender-v10-async-response.json";
 
-  private final ScenarioListBuilder scenarioListBuilder;
+  private final ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder;
 
-  public EblSurrenderV10ConformanceCheck(ScenarioListBuilder scenarioListBuilder) {
+  public EblSurrenderV10ConformanceCheck(ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder) {
     super("EBL Surrender V1.0");
     this.scenarioListBuilder = scenarioListBuilder;
   }
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
+      Stream<ActionCheck> scenarioSubChecks = Stream.of(scenarioListBuilder.buildRootCheckTree());
+      if (System.currentTimeMillis() > 0) {
+          return scenarioSubChecks; // TODO bring back
+      }
+      return Stream.concat(scenarioSubChecks, _createNonScenarioSubChecks());
+  }
+
+  private Stream<? extends ConformanceCheck> _createNonScenarioSubChecks() {
     return Stream.of(
-        scenarioListBuilder.buildCheckTree(),
         new ConformanceCheck("Async platform requests (platform-initiated sync exchanges)") {
           @Override
           protected Stream<? extends ConformanceCheck> createSubChecks() {

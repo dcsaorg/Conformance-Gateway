@@ -31,8 +31,18 @@ public class SurrenderRequestAction extends TdrAction {
       String carrierPartyName,
       int expectedStatus,
       ConformanceAction previousAction) {
-    super(platformPartyName, carrierPartyName, expectedStatus, previousAction);
+    super(
+        platformPartyName,
+        carrierPartyName,
+        expectedStatus,
+        previousAction,
+        "%s %d".formatted(forAmendment ? "AREQ" : "SREQ", expectedStatus));
     this.forAmendment = forAmendment;
+  }
+
+  @Override
+  synchronized public Supplier<String> getSrrSupplier() {
+    return srrSupplier;
   }
 
   @Override

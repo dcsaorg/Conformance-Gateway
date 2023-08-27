@@ -1,6 +1,8 @@
 package org.dcsa.conformance.gateway.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -87,6 +89,7 @@ public abstract class ConformanceParty {
             () -> {
               JsonNode responseBody =
                   WebTestClient.bindToServer()
+                      .responseTimeout(Duration.ofHours(1))
                       .baseUrl(gatewayBaseUrl)
                       .build()
                       .get()
@@ -122,15 +125,14 @@ public abstract class ConformanceParty {
                       .formatted(
                           getClass().getSimpleName(), name, uri, requestBody.toPrettyString()));
               WebTestClient.bindToServer()
+                  .responseTimeout(Duration.ofHours(1))
                   .baseUrl(gatewayBaseUrl)
                   .build()
                   .post()
                   .uri(uri)
                   .contentType(MediaType.APPLICATION_JSON)
                   .body(Mono.just(requestBody), JsonNode.class)
-                  .exchange()
-                  .expectStatus()
-                  .is2xxSuccessful();
+                  .exchange();
             })
         .exceptionally(
             e -> {

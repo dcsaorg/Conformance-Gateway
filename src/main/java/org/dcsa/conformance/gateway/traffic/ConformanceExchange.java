@@ -1,9 +1,15 @@
 package org.dcsa.conformance.gateway.traffic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.util.MultiValueMap;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 @ToString
@@ -19,10 +25,12 @@ public class ConformanceExchange {
   private final MultiValueMap<String, String> requestQueryParams;
   private final MultiValueMap<String, String> requestHeaders;
   private final String requestBody;
+  private final JsonNode jsonRequestBody;
   private final long requestTimestamp;
   private final int responseStatusCode;
   private final MultiValueMap<String, String> responseHeaders;
   private final String responseBody;
+  private final JsonNode jsonResponseBody;
   private final long responseTimestamp;
 
   private ConformanceExchange(
@@ -46,11 +54,28 @@ public class ConformanceExchange {
     this.requestQueryParams = requestQueryParams;
     this.requestHeaders = requestHeaders;
     this.requestBody = requestBody;
+    this.jsonRequestBody = _parsedStringOrJsonError(requestBody);
     this.requestTimestamp = System.currentTimeMillis();
     this.responseStatusCode = 0;
     this.responseHeaders = null;
     this.responseBody = null;
+    this.jsonResponseBody = null;
     this.responseTimestamp = 0L;
+  }
+
+  private static JsonNode _parsedStringOrJsonError(String string) {
+    if (string == null) return new ObjectMapper().createObjectNode();
+    try {
+      return new ObjectMapper().readTree(string);
+    } catch (JsonProcessingException e) {
+      ObjectNode jsonException = new ObjectMapper().createObjectNode();
+      jsonException.put("RequestBodyJsonDecodingException", e.toString());
+      ArrayNode jsonStackTrace = new ObjectMapper().createArrayNode();
+      jsonException.set("StackTrace", jsonStackTrace);
+      Arrays.stream(e.getStackTrace())
+          .forEach(stackTraceElement -> jsonStackTrace.add(stackTraceElement.toString()));
+      return jsonException;
+    }
   }
 
   private ConformanceExchange(
@@ -68,10 +93,12 @@ public class ConformanceExchange {
     this.requestQueryParams = conformanceExchange.requestQueryParams;
     this.requestHeaders = conformanceExchange.requestHeaders;
     this.requestBody = conformanceExchange.requestBody;
+    this.jsonRequestBody = _parsedStringOrJsonError(requestBody);
     this.requestTimestamp = conformanceExchange.requestTimestamp;
     this.responseStatusCode = responseStatusCode;
     this.responseHeaders = responseHeaders;
     this.responseBody = responseBody;
+    this.jsonResponseBody = _parsedStringOrJsonError(responseBody);
     this.responseTimestamp = System.currentTimeMillis();
   }
 

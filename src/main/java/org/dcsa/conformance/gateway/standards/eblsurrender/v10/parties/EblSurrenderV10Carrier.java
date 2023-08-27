@@ -32,10 +32,10 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(SupplyAvailableTdrAction.class, this::supplyAvailableTdr),
         Map.entry(SurrenderResponseAction.class, this::sendSurrenderResponse),
-        Map.entry(VoidAndReissueAction.class, this::amendDocumentOffline));
+        Map.entry(VoidAndReissueAction.class, this::voidAndReissue));
   }
 
-  private void supplyAvailableTdr(JsonNode actionPrompt) {
+  private synchronized void supplyAvailableTdr(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Carrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = UUID.randomUUID().toString();
@@ -48,7 +48,23 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
             .put("tdr", tdr));
   }
 
-  private void sendSurrenderResponse(JsonNode actionPrompt) {
+  private synchronized void voidAndReissue(JsonNode actionPrompt) {
+    log.info("EblSurrenderV10Carrier.voidAndReissue(%s)".formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.get("tdr").asText();
+    if (!Objects.equals(eblStatesById.get(tdr), EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT)) {
+      throw new IllegalStateException(
+          "Cannot void and reissue in state: " + eblStatesById.get(tdr));
+    }
+    eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
+    asyncPost(
+        "/party/input",
+        new ObjectMapper()
+            .createObjectNode()
+            .put("actionId", actionPrompt.get("actionId").asText())
+            .put("tdr", tdr));
+  }
+
+  private synchronized void sendSurrenderResponse(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Carrier.sendSurrenderResponse(%s)"
             .formatted(actionPrompt.toPrettyString()));
@@ -56,31 +72,31 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     boolean accept = actionPrompt.get("accept").asBoolean();
     switch (eblStatesById.get(tdr)) {
       case AMENDMENT_SURRENDER_REQUESTED -> eblStatesById.put(
-          tdr, EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT);
+          tdr,
+          accept
+              ? EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT
+              : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
       case DELIVERY_SURRENDER_REQUESTED -> eblStatesById.put(
-          tdr, EblSurrenderV10State.SURRENDERED_FOR_DELIVERY);
+          tdr,
+          accept
+              ? EblSurrenderV10State.SURRENDERED_FOR_DELIVERY
+              : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
       default -> {} // ignore -- sending from wrong state for testing purposes
+    }
+    String srr = actionPrompt.get("srr").asText();
+    if ("*".equals(srr)) {
+      srr = UUID.randomUUID().toString();
     }
     asyncPost(
         gatewayRootPath + "/v1/surrender-request-responses",
         new ObjectMapper()
             .createObjectNode()
-            .put("surrenderRequestReference", actionPrompt.get("srr").asText())
+            .put("surrenderRequestReference", srr)
             .put("action", accept ? "SURR" : "SREJ"));
   }
 
-  private void amendDocumentOffline(JsonNode actionPrompt) {
-    log.info(
-        "EblSurrenderV10Carrier.amendDocumentOffline(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
-    if (Objects.requireNonNull(eblStatesById.get(tdr))
-        == EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT) {
-      eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-    }
-  }
-
   @Override
-  public ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
+  public synchronized ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
     log.info(
         "EblSurrenderV10Carrier.handlePostRequest(%s)".formatted(requestBody.toPrettyString()));
     String srr = requestBody.get("surrenderRequestReference").asText();

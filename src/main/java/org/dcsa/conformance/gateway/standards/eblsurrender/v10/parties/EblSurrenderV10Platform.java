@@ -30,7 +30,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
     return Map.ofEntries(Map.entry(SurrenderRequestAction.class, this::requestSurrender));
   }
 
-  private void requestSurrender(JsonNode actionPrompt) {
+  private synchronized void requestSurrender(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Platform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
     String srr = UUID.randomUUID().toString();
@@ -52,7 +52,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   }
 
   @Override
-  public ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
+  public synchronized ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
     log.info(
         "EblSurrenderV10Platform.handleRegularTraffic(%s)".formatted(requestBody.toPrettyString()));
     String action = requestBody.get("action").asText();

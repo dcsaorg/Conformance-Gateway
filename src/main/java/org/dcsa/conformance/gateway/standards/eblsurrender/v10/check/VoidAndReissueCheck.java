@@ -18,6 +18,6 @@ public class VoidAndReissueCheck extends ActionCheck {
 
   @Override
   public boolean isRelevantForRole(String roleName) {
-    return hasChildren();
+    return childrenStream().anyMatch(child -> child.isRelevantForRole(roleName));
   }
 }

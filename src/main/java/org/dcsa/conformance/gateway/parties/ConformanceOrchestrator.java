@@ -2,7 +2,8 @@ package org.dcsa.conformance.gateway.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.scenarios.ConformanceScenario;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -28,7 +30,7 @@ public class ConformanceOrchestrator {
     notifyAllPartiesOfNextActions();
   }
 
-  private void notifyAllPartiesOfNextActions() {
+  private synchronized void notifyAllPartiesOfNextActions() {
     scenarios.stream()
         .map(ConformanceScenario::peekNextAction)
         .filter(Objects::nonNull)
@@ -37,9 +39,9 @@ public class ConformanceOrchestrator {
         .forEach(this::asyncNotifyParty);
   }
 
-  protected void initializeScenarios() {
+  protected synchronized void initializeScenarios() {
     scenarios.clear();
-    scenarios.addAll(scenarioListBuilder.buildList());
+    scenarios.addAll(scenarioListBuilder.buildScenarioList());
   }
 
   private void asyncNotifyParty(String partyName) {
@@ -47,6 +49,7 @@ public class ConformanceOrchestrator {
             () -> {
               log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
               WebTestClient.bindToServer()
+                  .responseTimeout(Duration.ofHours(1))
                   .baseUrl("http://localhost:8080") // FIXME use config / deployment variable URL
                   .build()
                   .get()
@@ -62,9 +65,9 @@ public class ConformanceOrchestrator {
             });
   }
 
-  public JsonNode handleGetPartyPrompt(String partyName) {
-    ArrayNode jsonNodes =
-        new ObjectMapper()
+  public synchronized JsonNode handleGetPartyPrompt(String partyName) {
+    log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
+    return new ObjectMapper()
             .createArrayNode()
             .addAll(
                 scenarios.stream()
@@ -73,13 +76,9 @@ public class ConformanceOrchestrator {
                     .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
                     .map(ConformanceAction::asJsonNode)
                     .collect(Collectors.toList()));
-    log.info(
-        "ConformanceOrchestrator.getPartyPrompt(%s) fetched: %s"
-            .formatted(partyName, jsonNodes.toPrettyString()));
-    return jsonNodes;
   }
 
-  public JsonNode handlePartyInput(JsonNode partyInput) {
+  public synchronized JsonNode handlePartyInput(JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
     ConformanceAction action =
@@ -97,6 +96,8 @@ public class ConformanceOrchestrator {
                             .formatted(actionId, partyInput.toPrettyString())));
     if (action instanceof SupplyAvailableTdrAction supplyAvailableTdrAction) {
       supplyAvailableTdrAction.getTdrConsumer().accept(partyInput.get("tdr").asText());
+    } else if (action instanceof VoidAndReissueAction voidAndReissueAction) {
+      voidAndReissueAction.getTdrConsumer().accept(partyInput.get("tdr").asText());
     } else {
       throw new UnsupportedOperationException(partyInput.toString());
     }
@@ -104,7 +105,7 @@ public class ConformanceOrchestrator {
     return new ObjectMapper().createObjectNode();
   }
 
-  public void handlePartyTrafficExchange(ConformanceExchange conformanceExchange) {
+  public synchronized void handlePartyTrafficExchange(ConformanceExchange conformanceExchange) {
     ConformanceAction action =
         scenarios.stream()
             .filter(

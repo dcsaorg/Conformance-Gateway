@@ -128,8 +128,20 @@ public class ConformanceReport {
   private static String getExchangesDetails(ConformanceReport report) {
     if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
     if (!report.subReports.isEmpty()) return "";
-    return "\n<ul><li>%d conformant exchanges</li><li>%d non-conformant exchanges</li></ul>"
-        .formatted(report.conformantExchangeCount, report.nonConformantExchangeCount);
+    return "\n<ul>%s%s</ul>"
+        .formatted(
+            report.conformantExchangeCount == 0
+                ? ""
+                : "<li>%d conformant exchange%s</li>"
+                    .formatted(
+                        report.conformantExchangeCount,
+                        report.conformantExchangeCount == 1 ? "" : "s"),
+            report.nonConformantExchangeCount == 0
+                ? ""
+                : "<li>%d non-conformant exchange%s</li>"
+                    .formatted(
+                        report.nonConformantExchangeCount,
+                        report.nonConformantExchangeCount == 1 ? "" : "s"));
   }
 
   private static String getErrors(ConformanceReport report) {

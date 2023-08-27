@@ -3,7 +3,6 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -13,7 +12,7 @@ import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 @Getter
 public class SurrenderResponseAction extends TdrAction {
   private final boolean accept;
-  private final Supplier<String> srrSupplier;
+  private Supplier<String> srrSupplier;
 
   public SurrenderResponseAction(
       boolean accept,
@@ -21,22 +20,31 @@ public class SurrenderResponseAction extends TdrAction {
       String platformPartyName,
       int expectedStatus,
       ConformanceAction previousAction) {
-    super(carrierPartyName, platformPartyName, expectedStatus, previousAction);
+    super(
+        carrierPartyName,
+        platformPartyName,
+        expectedStatus,
+        previousAction,
+        "%s %d".formatted(accept ? "SURR" : "SREJ", expectedStatus));
     this.accept = accept;
-    this.srrSupplier = _getSrrSupplier(previousAction);
   }
 
-  private Supplier<String> _getSrrSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SurrenderRequestAction surrenderRequestAction
-        ? surrenderRequestAction.getSrrSupplier()
-        : previousAction.getPreviousAction() != null
-            ? _getSrrSupplier(previousAction.getPreviousAction())
-            : () -> UUID.randomUUID().toString();
+  @Override
+  synchronized public Supplier<String> getSrrSupplier() {
+    if (srrSupplier != null) return srrSupplier;
+    for (ConformanceAction action = this.previousAction; action != null; action = action.getPreviousAction()) {
+      if (action instanceof TdrAction tdrAction) {
+        if ((srrSupplier = tdrAction.getSrrSupplier()) != null) {
+          return srrSupplier;
+        }
+      }
+    }
+    return () -> "*";
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().put("srr", srrSupplier.get()).put("accept", accept);
+    return super.asJsonNode().put("srr", getSrrSupplier().get()).put("accept", accept);
   }
 
   @Override
@@ -45,8 +53,9 @@ public class SurrenderResponseAction extends TdrAction {
       return false;
     }
     JsonNode requestJsonNode = getRequestBody(exchange);
-    return JsonToolkit.stringAttributeEquals(
-            requestJsonNode, "surrenderRequestReference", srrSupplier.get())
+    String srr = getSrrSupplier().get();
+    return ("*".equals(srr)
+            || JsonToolkit.stringAttributeEquals(requestJsonNode, "surrenderRequestReference", srr))
         && JsonToolkit.stringAttributeEquals(requestJsonNode, "action", accept ? "SURR" : "SREJ");
   }
 }

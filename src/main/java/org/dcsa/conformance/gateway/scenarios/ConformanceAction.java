@@ -14,13 +14,15 @@ public class ConformanceAction {
   protected final UUID id = UUID.randomUUID();
   private final String sourcePartyName;
   private final String targetPartyName;
-  private final ConformanceAction previousAction;
+  protected final ConformanceAction previousAction;
+  private final String actionPath;
 
   public ConformanceAction(
-      String sourcePartyName, String targetPartyName, ConformanceAction previousAction) {
+      String sourcePartyName, String targetPartyName, ConformanceAction previousAction, String actionTitle) {
     this.sourcePartyName = sourcePartyName;
     this.targetPartyName = targetPartyName;
     this.previousAction = previousAction;
+    this.actionPath = (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
   }
 
   public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
@@ -39,7 +41,8 @@ public class ConformanceAction {
     return new ObjectMapper()
         .createObjectNode()
         .put("actionId", id.toString())
-        .put("actionType", getClass().getCanonicalName());
+        .put("actionType", getClass().getCanonicalName())
+        .put("actionPath", actionPath);
   }
 
   @Override

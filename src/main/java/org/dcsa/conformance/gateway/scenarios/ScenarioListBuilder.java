@@ -3,15 +3,21 @@ package org.dcsa.conformance.gateway.scenarios;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.check.ActionCheck;
 
-public abstract class ScenarioListBuilder {
-  protected ScenarioListBuilder parent;
-  private final LinkedList<ScenarioListBuilder> children = new LinkedList<>();
+@Slf4j
+public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
+  protected T parent;
+  private final LinkedList<T> children = new LinkedList<>();
   protected final Function<ConformanceAction, ConformanceAction> actionBuilder;
   protected final Function<ActionCheck, ActionCheck> checkBuilder;
+
+  protected boolean checkExclusively = false;
+  protected boolean runExclusively = false;
 
   protected ScenarioListBuilder(
       Function<ConformanceAction, ConformanceAction> actionBuilder,
@@ -20,23 +26,39 @@ public abstract class ScenarioListBuilder {
     this.checkBuilder = checkBuilder;
   }
 
-  public List<ConformanceScenario> buildList() {
-    return buildScenarioList();
+  @SuppressWarnings("unchecked")
+  protected T thisAsT() {
+    return (T)this;
   }
 
-  public ActionCheck buildCheckTree() {
-    return parent != null ? parent.buildCheckTree() : _buildCheckTree(null);
+  public ActionCheck buildRootCheckTree() {
+    if (parent != null) return parent.buildRootCheckTree();
+    _updateExclusiveCheckFlag();
+    return _buildCheckTree(null, !checkExclusively);
   }
 
-  private ActionCheck _buildCheckTree(ActionCheck parentActionCheck) {
+  protected void _updateExclusiveCheckFlag() {
+    children.forEach(child -> {
+      child._updateExclusiveCheckFlag();
+      if (child.checkExclusively) this.checkExclusively = true;
+    });
+  }
+
+  protected ActionCheck _buildCheckTree(ActionCheck parentActionCheck, boolean includeNonExclusive) {
     ActionCheck actionCheck = checkBuilder.apply(parentActionCheck);
-    children.forEach(child -> child._buildCheckTree(actionCheck));
+    children.stream()
+        .filter(child -> includeNonExclusive || child.checkExclusively)
+        .forEach(child -> child._buildCheckTree(actionCheck, includeNonExclusive));
     return actionCheck;
   }
 
-  protected List<ConformanceScenario> buildScenarioList() {
+  public List<ConformanceScenario> buildScenarioList() {
+    return _buildScenarioList();
+  }
+
+  protected List<ConformanceScenario> _buildScenarioList() {
     return parent != null
-        ? parent.buildScenarioList()
+        ? parent._buildScenarioList()
         : asBuilderListList().stream()
             .map(
                 builderList -> {
@@ -49,28 +71,46 @@ public abstract class ScenarioListBuilder {
             .toList();
   }
 
-  private LinkedList<LinkedList<ScenarioListBuilder>> asBuilderListList() {
-    return new LinkedList<>(
+  protected LinkedList<LinkedList<T>> asBuilderListList() {
+    List<LinkedList<T>> builderListList =
         children.isEmpty()
-            ? List.of(new LinkedList<>(List.of(this)))
+            ? List.of(new LinkedList<>(List.of(thisAsT())))
             : children.stream()
                 .flatMap(scenarioListBuilder -> scenarioListBuilder.asBuilderListList().stream())
-                .peek(scenarioBuilderList -> scenarioBuilderList.addFirst(this))
-                .toList());
+                .peek(scenarioBuilderList -> scenarioBuilderList.addFirst(thisAsT()))
+                .toList();
+    List<LinkedList<T>> exclusiveListList =
+        builderListList.stream()
+            .filter(builderList -> Objects.requireNonNull(builderList.peekLast()).runExclusively)
+            .toList();
+    return new LinkedList<>(exclusiveListList.isEmpty() ? builderListList : exclusiveListList);
   }
 
-  protected ScenarioListBuilder then(ScenarioListBuilder child) {
+  protected T then(T child) {
+    log.info("ScenarioListBuilder.then()");
     return thenEither(child);
   }
 
-  protected ScenarioListBuilder thenEither(ScenarioListBuilder... children) {
+  @SafeVarargs
+  protected final T thenEither(T... children) {
+    log.info("ScenarioListBuilder.thenEither(%d)".formatted(children.length));
     if (!this.children.isEmpty()) throw new IllegalStateException();
-    Stream.of(children).forEach(
-        child -> {
-          if (child.parent != null) throw new IllegalStateException();
-        });
+    Stream.of(children)
+        .forEach(
+            child -> {
+              if (child.parent != null) {
+                throw new IllegalStateException();
+              }
+            });
     this.children.addAll(Arrays.asList(children));
-    this.children.forEach(child -> child.parent = this);
-    return this;
+    this.children.forEach(child -> child.parent = thisAsT());
+    return thisAsT();
+  }
+
+  protected T runAndCheckExclusively() {
+    if (!children.isEmpty()) throw new IllegalStateException();
+    this.runExclusively = true;
+    this.checkExclusively = true;
+    return thisAsT();
   }
 }

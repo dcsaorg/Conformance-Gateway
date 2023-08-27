@@ -30,6 +30,10 @@ public class ActionCheck extends ConformanceCheck {
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
+    return this.childrenStream();
+  }
+
+  protected Stream<? extends ConformanceCheck> childrenStream() {
     return children.stream();
   }
 

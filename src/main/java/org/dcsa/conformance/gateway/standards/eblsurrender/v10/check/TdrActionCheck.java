@@ -1,58 +1,30 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.stream.Stream;
-import lombok.SneakyThrows;
 import org.dcsa.conformance.gateway.check.ActionCheck;
-import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 
 public abstract class TdrActionCheck extends ActionCheck {
   protected final int expectedStatus;
-  protected final Predicate<String> responseHttpStatusCheckRolePredicate;
 
-  public TdrActionCheck(
-      String title,
-      ActionCheck parent,
-      int expectedStatus,
-      Predicate<String> responseHttpStatusCheckRolePredicate) {
+  public TdrActionCheck(String title, ActionCheck parent, int expectedStatus) {
     super(title, parent);
     this.expectedStatus = expectedStatus;
-    this.responseHttpStatusCheckRolePredicate = responseHttpStatusCheckRolePredicate;
-  }
-
-  protected static String getSrr(JsonNode jsonRequest) {
-    return JsonToolkit.getTextAttributeOrNull(jsonRequest, "surrenderRequestReference");
-  }
-
-  protected static String getTdr(JsonNode jsonRequest) {
-    return JsonToolkit.getTextAttributeOrNull(jsonRequest, "transportDocumentReference");
-  }
-
-  @SneakyThrows
-  protected static JsonNode getJsonRequest(ConformanceExchange exchange) {
-    return new ObjectMapper().readTree(exchange.getRequestBody());
   }
 
   @Override
   protected void exchangeOccurred(ConformanceExchange exchange) {
-    if (isRelevantRequestType(getJsonRequest(exchange))) {
+    if (isRelevantExchange(exchange)) {
       Stream<LinkedList<ConformanceExchange>> parentRelevantExchangeListsStream =
           parent.relevantExchangeListsStream();
       if (parentRelevantExchangeListsStream == null) {
         addRelevantExchangeList(new LinkedList<>(List.of(exchange)));
       } else {
         parentRelevantExchangeListsStream
-            .filter(
-                parentExchangeList ->
-                    exchangeMatchesPreviousExchange(exchange, parentExchangeList.peekLast()))
+            .filter(parentExchangeList -> exchangeMatchesPreviousOnes(exchange, parentExchangeList))
             .forEach(
                 parentExchangeList ->
                     addRelevantExchangeList(
@@ -63,39 +35,41 @@ public abstract class TdrActionCheck extends ActionCheck {
     }
   }
 
-  protected abstract boolean isRelevantRequestType(JsonNode jsonRequest);
+  protected abstract boolean isRelevantExchange(ConformanceExchange exchange);
 
-  protected abstract boolean exchangeMatchesPreviousExchange(
-      ConformanceExchange exchange, ConformanceExchange previousExchange);
-
-  protected ConformanceExchange latestRelevantExchange() {
-    return Optional.ofNullable(
-            new LinkedList<>(TdrActionCheck.this.relevantExchangeListsStream().toList()).peekLast())
-        .orElse(new LinkedList<>())
-        .peekLast();
+  protected boolean exchangeMatchesPreviousOnes(
+      ConformanceExchange exchange, LinkedList<ConformanceExchange> previousExchanges) {
+    LinkedList<ConformanceExchange> reversedPreviousExchanges = new LinkedList<>(previousExchanges);
+    Collections.reverse(reversedPreviousExchanges);
+    return reversedPreviousExchanges.stream()
+            .anyMatch(
+                previousExchange -> exchangeMatchesPreviousRequest(exchange, previousExchange))
+        || ( // support scenarios starting with a response rejected with 409
+        this instanceof SurrenderRequestCheck
+            && Stream.of("SURR", "SREJ")
+                .anyMatch(
+                    action ->
+                        JsonToolkit.stringAttributeEquals(
+                            Objects.requireNonNull(previousExchanges.peekLast())
+                                .getJsonRequestBody(),
+                            "action",
+                            action)));
   }
 
-  @Override
-  protected Stream<? extends ConformanceCheck> createSubChecks() {
-    return Stream.concat(
-        Stream.of(
-            new ConformanceCheck("HTTP response status is %d".formatted(expectedStatus)) {
-              @Override
-              public boolean isRelevantForRole(String roleName) {
-                return responseHttpStatusCheckRolePredicate.test(roleName);
-              }
+  protected abstract boolean exchangeMatchesPreviousRequest(
+      ConformanceExchange exchange, ConformanceExchange previousExchange);
 
-              @Override
-              protected void doCheck(ConformanceExchange exchange) {
-                if (responseHttpStatusCheckRolePredicate.test(exchange.getTargetPartyRole())) {
-                  if (exchange == latestRelevantExchange()) {
-                    this.addResult(
-                        ConformanceResult.forTargetParty(
-                            exchange, exchange.getResponseStatusCode() == expectedStatus));
-                  }
-                }
-              }
-            }),
-        super.createSubChecks());
+  @Override
+  protected void doCheck(ConformanceExchange exchange) {
+    if (exchange
+        == Optional.ofNullable(
+                new LinkedList<>(TdrActionCheck.this.relevantExchangeListsStream().toList())
+                    .peekLast())
+            .orElse(new LinkedList<>())
+            .peekLast()) {
+      this.addResult(
+          ConformanceResult.forTargetParty(
+              exchange, exchange.getResponseStatusCode() == expectedStatus));
+    }
   }
 }

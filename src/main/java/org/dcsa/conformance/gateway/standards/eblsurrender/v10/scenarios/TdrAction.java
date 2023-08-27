@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 
 @Getter
-public class TdrAction extends ConformanceAction {
+public abstract class TdrAction extends ConformanceAction {
   protected final Supplier<String> tdrSupplier;
   private final int expectedStatus;
 
@@ -15,11 +15,14 @@ public class TdrAction extends ConformanceAction {
       String sourcePartyName,
       String targetPartyName,
       int expectedStatus,
-      ConformanceAction previousAction) {
-    super(sourcePartyName, targetPartyName, previousAction);
+      ConformanceAction previousAction,
+      String actionTitle) {
+    super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.tdrSupplier = _getTdrSupplier(previousAction);
     this.expectedStatus = expectedStatus;
   }
+
+  public abstract Supplier<String> getSrrSupplier();
 
   private Supplier<String> _getTdrSupplier(ConformanceAction previousAction) {
     return previousAction instanceof SupplyAvailableTdrAction supplyAvailableTdrAction

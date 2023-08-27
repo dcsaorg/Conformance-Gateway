@@ -31,18 +31,6 @@ public class ConformanceTrafficRecorder {
       String requestBody) {
     UUID uuid = UUID.randomUUID();
     webExchange.getAttributes().put(UUID_KEY, uuid);
-    log.info(">>>>>>>>>>>>>>>");
-    log.info("Gateway request " + uuid);
-    log.info(">>>>>>>>>>>>>>>");
-    log.info("" + webExchange.getRequest().getMethod());
-    log.info("" + webExchange.getRequest().getPath());
-    log.info("" + webExchange.getRequest().getQueryParams());
-    log.info(">>>>>>>>>>>>>>>");
-    log.info("" + webExchange.getRequest().getHeaders());
-    log.info(">>>>>>>>>>>>>>>");
-    log.info(requestBody);
-    log.info(">>>>>>>>>>>>>>>");
-
     this.traffic.put(
         uuid,
         ConformanceExchange.createFromRequest(
@@ -56,18 +44,12 @@ public class ConformanceTrafficRecorder {
             webExchange.getRequest().getQueryParams(),
             webExchange.getRequest().getHeaders(),
             requestBody));
+    log.info("Recorded request: " + this.traffic.get(uuid));
   }
 
   public synchronized ConformanceExchange recordResponse(
       ServerWebExchange webExchange, String responseBody) {
-    log.info("<<<<<<<<<<<<<<<<");
     UUID uuid = webExchange.getAttribute(UUID_KEY);
-    log.info("Gateway response " + uuid);
-    log.info("<<<<<<<<<<<<<<<<");
-    log.info("" + webExchange.getResponse().getHeaders());
-    log.info("<<<<<<<<<<<<<<<<");
-    log.info(responseBody);
-    log.info("<<<<<<<<<<<<<<<<");
     ConformanceExchange mutatedExchange =
         this.traffic
             .get(uuid)
@@ -76,7 +58,8 @@ public class ConformanceTrafficRecorder {
                 webExchange.getResponse().getHeaders(),
                 responseBody);
     this.traffic.put(uuid, mutatedExchange);
-    log.info("Recorded %d exchanges".formatted(this.traffic.size()));
+    log.info("Recorded response: " + mutatedExchange);
+    log.info("So far recorded %d exchanges".formatted(this.traffic.size()));
     return mutatedExchange;
   }
 }

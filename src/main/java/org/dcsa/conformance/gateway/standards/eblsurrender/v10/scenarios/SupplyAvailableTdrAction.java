@@ -27,6 +27,6 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
       };
 
   public SupplyAvailableTdrAction(String carrierPartyName, ConformanceAction previousAction) {
-    super(carrierPartyName, null, previousAction);
+    super(carrierPartyName, null, previousAction, "SupplyTDR");
   }
 }

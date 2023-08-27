@@ -69,7 +69,7 @@ public abstract class TdrActionCheck extends ActionCheck {
             .peekLast()) {
       this.addResult(
           ConformanceResult.forTargetParty(
-              exchange, exchange.getResponseStatusCode() == expectedStatus));
+              exchange, Objects.requireNonNull(exchange).getResponseStatusCode() == expectedStatus));
     }
   }
 }

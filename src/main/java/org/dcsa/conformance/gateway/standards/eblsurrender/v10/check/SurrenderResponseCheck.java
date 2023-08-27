@@ -26,7 +26,7 @@ public class SurrenderResponseCheck extends TdrActionCheck {
   @Override
   public boolean isRelevantForRole(String roleName) {
     return childrenStream().anyMatch(child -> child.isRelevantForRole(roleName))
-        || (EblSurrenderV10Role.isPlatform(roleName) && !hasChildren());
+        || (EblSurrenderV10Role.isPlatform(roleName) && hasNoChildren());
   }
 
   @Override

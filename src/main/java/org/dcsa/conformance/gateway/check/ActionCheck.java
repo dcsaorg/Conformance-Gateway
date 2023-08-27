@@ -37,7 +37,7 @@ public class ActionCheck extends ConformanceCheck {
     return children.stream();
   }
 
-  protected boolean hasChildren() {
-    return !children.isEmpty();
+  protected boolean hasNoChildren() {
+    return children.isEmpty();
   }
 }

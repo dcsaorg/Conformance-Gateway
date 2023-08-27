@@ -18,10 +18,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 @Slf4j
 public class ConformanceOrchestrator {
-  protected final ScenarioListBuilder scenarioListBuilder;
+  protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
 
-  public ConformanceOrchestrator(ScenarioListBuilder scenarioListBuilder) {
+  public ConformanceOrchestrator(ScenarioListBuilder<?> scenarioListBuilder) {
     this.scenarioListBuilder = scenarioListBuilder;
   }
 

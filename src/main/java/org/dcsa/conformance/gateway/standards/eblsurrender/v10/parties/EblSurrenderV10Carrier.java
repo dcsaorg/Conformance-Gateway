@@ -2,10 +2,8 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,7 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAnd
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 
 @Slf4j
 public class EblSurrenderV10Carrier extends ConformanceParty {
@@ -38,10 +37,11 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   private synchronized void supplyAvailableTdr(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Carrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = UUID.randomUUID().toString();
+    String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
     asyncPost(
         "/party/input",
+        "1.0.0",
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
@@ -58,6 +58,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
     asyncPost(
         "/party/input",
+        "1.0.0",
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
@@ -89,6 +90,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     }
     asyncPost(
         gatewayRootPath + "/v1/surrender-request-responses",
+        "1.0.0",
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", srr)
@@ -113,6 +115,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
               .createObjectNode()
               .put("surrenderRequestReference", srr)
               .put("transportDocumentReference", tdr),
+          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
           HttpStatus.ACCEPTED);
     } else {
       return new ResponseEntity<>(
@@ -122,6 +125,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
                   "comments",
                   "Rejecting '%s' for document '%s' because it is in state '%s'"
                       .formatted(src, tdr, eblStatesById.get(tdr))),
+          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
           HttpStatus.CONFLICT);
     }
   }

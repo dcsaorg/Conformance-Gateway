@@ -1,10 +1,7 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.stream.Stream;
-import lombok.SneakyThrows;
-import org.dcsa.conformance.gateway.check.ActionCheck;
 import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
@@ -23,18 +20,16 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
   private final ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder;
 
-  public EblSurrenderV10ConformanceCheck(ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder) {
+  public EblSurrenderV10ConformanceCheck(
+      ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder) {
     super("EBL Surrender V1.0");
     this.scenarioListBuilder = scenarioListBuilder;
   }
 
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
-      Stream<ActionCheck> scenarioSubChecks = Stream.of(scenarioListBuilder.buildRootCheckTree());
-      if (System.currentTimeMillis() > 0) {
-          return scenarioSubChecks; // TODO bring back
-      }
-      return Stream.concat(scenarioSubChecks, _createNonScenarioSubChecks());
+    return Stream.concat(
+        Stream.of(scenarioListBuilder.buildRootCheckTree()), _createNonScenarioSubChecks());
   }
 
   private Stream<? extends ConformanceCheck> _createNonScenarioSubChecks() {
@@ -146,39 +141,6 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                   }
                 });
           }
-        },
-        new ConformanceCheck("Async exchanges (platform request, carrier response)") {
-          @Override
-          protected Stream<? extends ConformanceCheck> createSubChecks() {
-            return Stream.of(
-                new ConformanceCheck(
-                    "The surrenderRequestReference of every async response must match that of an async request") {
-                  private final Set<String> knownSurrenderRequestReferences = new TreeSet<>();
-
-                  @SneakyThrows
-                  @Override
-                  protected void doCheck(ConformanceExchange exchange) {
-                    String surrenderRequestReference =
-                        new ObjectMapper()
-                            .readTree(exchange.getRequestBody())
-                            .get("surrenderRequestReference")
-                            .asText();
-                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
-                      knownSurrenderRequestReferences.add(surrenderRequestReference);
-                    } else if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
-                      this.addResult(
-                          ConformanceResult.forSourceParty(
-                              exchange,
-                              knownSurrenderRequestReferences.contains(surrenderRequestReference)));
-                    }
-                  }
-
-                  @Override
-                  public boolean isRelevantForRole(String roleName) {
-                    return EblSurrenderV10Role.isCarrier(roleName);
-                  }
-                });
-          }
         });
   }
 
@@ -213,7 +175,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         if (headerValues == null) return false;
         if (headerValues.size() != 1) return false;
         String apiVersion = headerValues.get(0);
-        return "1.0".equals(apiVersion);
+        return "1.0.0".equals(apiVersion);
       }
     };
   }

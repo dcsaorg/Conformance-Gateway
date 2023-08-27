@@ -117,7 +117,7 @@ public abstract class ConformanceParty {
             });
   }
 
-  protected void asyncPost(String uri, JsonNode requestBody) {
+  protected void asyncPost(String uri, String apiVersion, JsonNode requestBody) {
     CompletableFuture.runAsync(
             () -> {
               log.info(
@@ -130,6 +130,7 @@ public abstract class ConformanceParty {
                   .build()
                   .post()
                   .uri(uri)
+                  .header("Api-Version", apiVersion)
                   .contentType(MediaType.APPLICATION_JSON)
                   .body(Mono.just(requestBody), JsonNode.class)
                   .exchange();

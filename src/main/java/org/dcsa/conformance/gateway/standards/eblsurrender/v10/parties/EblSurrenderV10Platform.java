@@ -2,11 +2,11 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.Consumer;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -14,6 +14,7 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10St
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 
 @Slf4j
 public class EblSurrenderV10Platform extends ConformanceParty {
@@ -42,13 +43,34 @@ public class EblSurrenderV10Platform extends ConformanceParty {
         forAmendment
             ? EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED);
-    asyncPost(
-        gatewayRootPath + "/v1/surrender-requests",
+    ObjectNode jsonRequestBody =
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", srr)
             .put("transportDocumentReference", tdr)
-            .put("surrenderRequestCode", forAmendment ? "AREQ" : "SREQ"));
+            .put("surrenderRequestCode", forAmendment ? "AREQ" : "SREQ");
+    jsonRequestBody.set(
+        "surrenderRequestedBy",
+        new ObjectMapper()
+            .createObjectNode()
+            .put("eblPlatformIdentifier", "one@example.com")
+            .put("legalName", "Legal Name One"));
+    jsonRequestBody.set(
+        "endorsementChain",
+        new ObjectMapper()
+            .createArrayNode()
+            .add(
+                new ObjectMapper()
+                    .createObjectNode()
+                    .put("action", "ETOF")
+                    .put("actionDateTime", "2023-08-27T19:38:24.342Z")
+                    .set(
+                        "actor",
+                        new ObjectMapper()
+                            .createObjectNode()
+                            .put("eblPlatformIdentifier", "two@example.com")
+                            .put("legalName", "Legal Name Two"))));
+    asyncPost(gatewayRootPath + "/v1/surrender-requests", "1.0.0", jsonRequestBody);
   }
 
   @Override
@@ -65,7 +87,10 @@ public class EblSurrenderV10Platform extends ConformanceParty {
           Objects.equals("SURR", action)
               ? EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT
               : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(new ObjectMapper().createObjectNode(), HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(
+          new ObjectMapper().createObjectNode(),
+          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
+          HttpStatus.NO_CONTENT);
     } else if (Objects.equals(
         EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
@@ -73,7 +98,10 @@ public class EblSurrenderV10Platform extends ConformanceParty {
           Objects.equals("SURR", action)
               ? EblSurrenderV10State.SURRENDERED_FOR_DELIVERY
               : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(new ObjectMapper().createObjectNode(), HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(
+          new ObjectMapper().createObjectNode(),
+          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
+          HttpStatus.NO_CONTENT);
     } else {
       return new ResponseEntity<>(
           new ObjectMapper()
@@ -82,6 +110,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
                   "comments",
                   "Rejecting '%s' for document '%s' because it is in state '%s'"
                       .formatted(action, tdr, eblStatesById.get(tdr))),
+          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
           HttpStatus.CONFLICT);
     }
   }

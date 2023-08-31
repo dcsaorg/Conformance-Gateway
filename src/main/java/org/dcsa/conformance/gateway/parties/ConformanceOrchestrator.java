@@ -7,10 +7,15 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.OrchestratorConfiguration;
+import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.scenarios.ConformanceScenario;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
+import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilderFactory;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
@@ -18,11 +23,14 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 @Slf4j
 public class ConformanceOrchestrator {
+  @Getter
   protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
 
-  public ConformanceOrchestrator(ScenarioListBuilder<?> scenarioListBuilder) {
-    this.scenarioListBuilder = scenarioListBuilder;
+  public ConformanceOrchestrator(StandardConfiguration standardConfiguration,
+                                 OrchestratorConfiguration orchestratorConfiguration) {
+    this.scenarioListBuilder = ScenarioListBuilderFactory.create(
+            standardConfiguration, orchestratorConfiguration);
   }
 
   public void reset() {

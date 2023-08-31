@@ -2,17 +2,16 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.*;
 import java.util.function.Consumer;
-
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,9 +20,8 @@ import org.springframework.util.LinkedMultiValueMap;
 public class EblSurrenderV10Carrier extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
 
-  public EblSurrenderV10Carrier(
-      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
-    super(name, internal, counterpartBaseUrl, counterpartRootPath);
+  public EblSurrenderV10Carrier(PartyConfiguration partyConfiguration) {
+    super(partyConfiguration);
   }
 
   @Override

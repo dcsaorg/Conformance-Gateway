@@ -2,9 +2,12 @@ package org.dcsa.conformance.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +15,12 @@ import org.dcsa.conformance.gateway.analysis.ConformanceReport;
 import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
 import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
-import org.dcsa.conformance.gateway.parties.ConformancePartiesFactory;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
-import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilderFactory;
+import org.dcsa.conformance.gateway.parties.ConformancePartyFactory;
 import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -36,48 +36,55 @@ import reactor.core.publisher.Mono;
 @SpringBootApplication
 @ConfigurationPropertiesScan("org.dcsa.conformance.gateway.configuration")
 public class DcsaConformanceGatewayApplication {
-  @Autowired ServerProperties serverProperties;
-  @Autowired
-  ConformanceConfiguration conformanceConfiguration;
+  @Autowired ConformanceConfiguration conformanceConfiguration;
   private ConformanceTrafficRecorder trafficRecorder;
-  private ScenarioListBuilder<?> scenarioListBuilder;
   private ConformanceOrchestrator conformanceOrchestrator;
   private Map<String, ConformanceParty> conformancePartiesByName;
 
   @Bean
   public RouteLocator createRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
     log.info("DcsaConformanceGatewayApplication.createRouteLocator()");
-    log.info("gatewayConfiguration = " + Objects.requireNonNull(conformanceConfiguration));
+    log.info("conformanceConfiguration = " + Objects.requireNonNull(conformanceConfiguration));
     trafficRecorder = new ConformanceTrafficRecorder();
-    scenarioListBuilder = ScenarioListBuilderFactory.create(conformanceConfiguration);
-    conformanceOrchestrator = new ConformanceOrchestrator(scenarioListBuilder);
-    conformancePartiesByName = ConformancePartiesFactory.create(serverProperties, conformanceConfiguration);
+
+    conformanceOrchestrator =
+        new ConformanceOrchestrator(
+            conformanceConfiguration.getStandard(), conformanceConfiguration.getOrchestrator());
+
+    conformancePartiesByName =
+        Arrays.stream(conformanceConfiguration.getParties())
+            .map(
+                partyConfiguration ->
+                    ConformancePartyFactory.create(
+                        conformanceConfiguration.getStandard(), partyConfiguration))
+            .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
 
     RouteLocatorBuilder.Builder routeLocatorBuilderBuilder = routeLocatorBuilder.routes();
-    Stream.of(conformanceConfiguration.getLinks())
+    Stream.of(conformanceConfiguration.getGateway().getRoutes())
         .forEach(
-            link ->
+            routeConfiguration ->
                 routeLocatorBuilderBuilder.route(
                     "Route from %s to %s"
                         .formatted(
-                            link.getSourceParty().getName(), link.getTargetParty().getName()),
+                            routeConfiguration.getSourcePartyName(),
+                            routeConfiguration.getTargetPartyName()),
                     route ->
                         route
-                            .path(link.getGatewayBasePath() + "/**")
+                            .path(routeConfiguration.getGatewayRootPath() + "/**")
                             .filters(
                                 f ->
                                     f.rewritePath(
-                                            link.getGatewayBasePath() + "/(?<XP>.*)",
-                                            link.getTargetBasePath() + "/${XP}")
+                                            routeConfiguration.getGatewayRootPath() + "/(?<XP>.*)",
+                                            routeConfiguration.getTargetRootPath() + "/${XP}")
                                         .modifyRequestBody(
                                             String.class,
                                             String.class,
                                             (exchange, requestBody) -> {
                                               trafficRecorder.recordRequest(
-                                                  link.getSourceParty().getName(),
-                                                  link.getSourceParty().getRole(),
-                                                  link.getTargetParty().getName(),
-                                                  link.getTargetParty().getRole(),
+                                                  routeConfiguration.getSourcePartyName(),
+                                                  routeConfiguration.getSourcePartyRole(),
+                                                  routeConfiguration.getTargetPartyName(),
+                                                  routeConfiguration.getTargetPartyRole(),
                                                   exchange,
                                                   requestBody);
                                               return Mono.just(
@@ -93,7 +100,7 @@ public class DcsaConformanceGatewayApplication {
                                               return Mono.just(
                                                   Optional.ofNullable(responseBody).orElse(""));
                                             }))
-                            .uri(link.getTargetRootUrl())));
+                            .uri(routeConfiguration.getTargetBaseUrl())));
     return routeLocatorBuilderBuilder.build();
   }
 
@@ -101,6 +108,9 @@ public class DcsaConformanceGatewayApplication {
   @ResponseBody
   public ResponseEntity<JsonNode> handlePartyPostRequest(
       @PathVariable String partyName, @RequestBody JsonNode requestBody) {
+    log.info(
+        "DcsaConformanceGatewayApplication.handlePartyPostRequest(%s, %s)"
+            .formatted(partyName, requestBody.toPrettyString()));
     return conformancePartiesByName.get(partyName).handleRegularTraffic(requestBody);
   }
 
@@ -131,7 +141,10 @@ public class DcsaConformanceGatewayApplication {
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardName, standardVersion)
-            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
+            .analyze(
+                conformanceOrchestrator.getScenarioListBuilder(),
+                trafficRecorder.getTrafficStream(),
+                roleNames);
     String response =
         Jackson2ObjectMapperBuilder.json()
             .indentOutput(true)
@@ -152,7 +165,10 @@ public class DcsaConformanceGatewayApplication {
       @RequestParam("roles") String[] roleNames) {
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardName, standardVersion)
-            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
+            .analyze(
+                conformanceOrchestrator.getScenarioListBuilder(),
+                trafficRecorder.getTrafficStream(),
+                roleNames);
     String htmlResponse = ConformanceReport.toHtmlReport(reportsByRoleName);
     log.info("################################################################");
     log.info("reports by role name = \n\n\n" + htmlResponse + "\n\n");

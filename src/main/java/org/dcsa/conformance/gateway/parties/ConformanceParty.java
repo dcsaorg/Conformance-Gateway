@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,11 @@ public abstract class ConformanceParty {
   protected final String counterpartRootPath;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
-  public ConformanceParty(
-      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
-    this.name = name;
-    this.internal = internal;
-    this.counterpartBaseUrl = counterpartBaseUrl;
-    this.counterpartRootPath = counterpartRootPath;
+  public ConformanceParty(PartyConfiguration partyConfiguration) {
+    this.name = partyConfiguration.getName();
+    this.internal = true;
+    this.counterpartBaseUrl = partyConfiguration.getCounterpartBaseUrl();
+    this.counterpartRootPath = partyConfiguration.getCounterpartRootPath();
   }
 
   public void handleNotification() {

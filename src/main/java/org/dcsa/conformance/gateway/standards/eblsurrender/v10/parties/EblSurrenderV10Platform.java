@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
@@ -21,9 +22,8 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
-  public EblSurrenderV10Platform(
-      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
-    super(name, internal, counterpartBaseUrl, counterpartRootPath);
+  public EblSurrenderV10Platform(PartyConfiguration partyConfiguration) {
+    super(partyConfiguration);
   }
 
   @Override

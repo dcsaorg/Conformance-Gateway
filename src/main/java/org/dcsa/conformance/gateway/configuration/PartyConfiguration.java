@@ -6,11 +6,12 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @ConfigurationPropertiesScan
-@ToString
 @Getter
 @Setter
+@ToString
 public class PartyConfiguration {
   private String name;
-
   private String role;
+  private String counterpartBaseUrl;
+  private String counterpartRootPath;
 }

@@ -8,11 +8,12 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @ConfigurationProperties(prefix = "conformance")
 @ConfigurationPropertiesScan
-@ToString
 @Getter
 @Setter
+@ToString
 public class ConformanceConfiguration {
-  private String standardName;
-  private String standardVersion;
-  private LinkConfiguration[] links = {};
+  private StandardConfiguration standard;
+  private GatewayConfiguration gateway;
+  private OrchestratorConfiguration orchestrator;
+  private PartyConfiguration[] parties;
 }

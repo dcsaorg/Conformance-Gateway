@@ -6,22 +6,21 @@ import org.dcsa.conformance.gateway.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
 import org.springframework.util.MultiValueMap;
 
 public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
-  public static final String SCHEMAS_FOLDER = "/schemas/eblsurrender/v10/";
+  public static final String SCHEMAS_FOLDER = "/standards/eblsurrender/v10/";
   public static final String SCHEMAS_FILE_ASYNC_REQUEST =
       SCHEMAS_FOLDER + "eblsurrender-v10-async-request.json";
   public static final String SCHEMAS_FILE_ASYNC_RESPONSE =
       SCHEMAS_FOLDER + "eblsurrender-v10-async-response.json";
 
-  private final ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder;
+  private final ScenarioListBuilder<?> scenarioListBuilder;
 
   public EblSurrenderV10ConformanceCheck(
-      ScenarioListBuilder<EblSurrenderV10ScenarioListBuilder> scenarioListBuilder) {
+      ScenarioListBuilder<?> scenarioListBuilder) {
     super("EBL Surrender V1.0");
     this.scenarioListBuilder = scenarioListBuilder;
   }

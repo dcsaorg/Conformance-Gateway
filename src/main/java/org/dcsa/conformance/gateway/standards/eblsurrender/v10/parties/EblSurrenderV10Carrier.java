@@ -22,8 +22,8 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
 
   public EblSurrenderV10Carrier(
-      String name, boolean internal, String gatewayBaseUrl, String gatewayRootPath) {
-    super(name, internal, gatewayBaseUrl, gatewayRootPath);
+      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
+    super(name, internal, counterpartBaseUrl, counterpartRootPath);
   }
 
   @Override
@@ -89,7 +89,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
       srr = UUID.randomUUID().toString();
     }
     asyncPost(
-        gatewayRootPath + "/v1/surrender-request-responses",
+        counterpartRootPath + "/v1/surrender-request-responses",
         "1.0.0",
         new ObjectMapper()
             .createObjectNode()

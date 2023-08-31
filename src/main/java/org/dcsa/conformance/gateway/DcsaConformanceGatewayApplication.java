@@ -3,24 +3,24 @@ package org.dcsa.conformance.gateway;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.analysis.ConformanceReport;
 import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
-import org.dcsa.conformance.gateway.configuration.GatewayConfiguration;
+import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
+import org.dcsa.conformance.gateway.parties.ConformancePartiesFactory;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Carrier;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Platform;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
+import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilderFactory;
 import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -36,31 +36,25 @@ import reactor.core.publisher.Mono;
 @SpringBootApplication
 @ConfigurationPropertiesScan("org.dcsa.conformance.gateway.configuration")
 public class DcsaConformanceGatewayApplication {
-
-  private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
-  private final ScenarioListBuilder scenarioListBuilder =
-      EblSurrenderV10ScenarioListBuilder.buildTree("Carrier1", "Platform1");
-  private final ConformanceOrchestrator conformanceOrchestrator =
-      new ConformanceOrchestrator(scenarioListBuilder);
-  private final Map<String, ConformanceParty> conformancePartiesByName =
-      Stream.of(
-              new EblSurrenderV10Carrier(
-                  "Carrier1", true, "http://localhost:8080", "/ResponseLink/gateway"),
-              new EblSurrenderV10Platform(
-                  "Platform1", true, "http://localhost:8080", "/RequestLink/gateway"))
-          .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
-
-  GatewayConfiguration gatewayConfiguration;
+  @Autowired ServerProperties serverProperties;
+  @Autowired
+  ConformanceConfiguration conformanceConfiguration;
+  private ConformanceTrafficRecorder trafficRecorder;
+  private ScenarioListBuilder<?> scenarioListBuilder;
+  private ConformanceOrchestrator conformanceOrchestrator;
+  private Map<String, ConformanceParty> conformancePartiesByName;
 
   @Bean
-  public RouteLocator createRouteLocator(
-      RouteLocatorBuilder routeLocatorBuilder, GatewayConfiguration gatewayConfiguration) {
-
-    log.info("Using gateway configuration: " + gatewayConfiguration);
-    this.gatewayConfiguration = gatewayConfiguration;
+  public RouteLocator createRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
+    log.info("DcsaConformanceGatewayApplication.createRouteLocator()");
+    log.info("gatewayConfiguration = " + Objects.requireNonNull(conformanceConfiguration));
+    trafficRecorder = new ConformanceTrafficRecorder();
+    scenarioListBuilder = ScenarioListBuilderFactory.create(conformanceConfiguration);
+    conformanceOrchestrator = new ConformanceOrchestrator(scenarioListBuilder);
+    conformancePartiesByName = ConformancePartiesFactory.create(serverProperties, conformanceConfiguration);
 
     RouteLocatorBuilder.Builder routeLocatorBuilderBuilder = routeLocatorBuilder.routes();
-    Stream.of(gatewayConfiguration.getLinks())
+    Stream.of(conformanceConfiguration.getLinks())
         .forEach(
             link ->
                 routeLocatorBuilderBuilder.route(
@@ -149,7 +143,8 @@ public class DcsaConformanceGatewayApplication {
     return response;
   }
 
-  // test: http://localhost:8080/report/html?standard=EblSurrender&version=1.0&roles=Carrier&roles=Platform
+  // test:
+  // http://localhost:8080/report/html?standard=EblSurrender&version=1.0&roles=Carrier&roles=Platform
   @GetMapping(value = "/report/html", produces = MediaType.TEXT_HTML_VALUE)
   public String generateReportHtml(
       @RequestParam("standard") String standardName,

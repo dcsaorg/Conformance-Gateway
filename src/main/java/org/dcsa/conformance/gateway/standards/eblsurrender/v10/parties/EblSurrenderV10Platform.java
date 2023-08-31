@@ -22,8 +22,8 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
   public EblSurrenderV10Platform(
-      String name, boolean internal, String gatewayBaseUrl, String gatewayRootPath) {
-    super(name, internal, gatewayBaseUrl, gatewayRootPath);
+      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
+    super(name, internal, counterpartBaseUrl, counterpartRootPath);
   }
 
   @Override
@@ -70,7 +70,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
                             .createObjectNode()
                             .put("eblPlatformIdentifier", "two@example.com")
                             .put("legalName", "Legal Name Two"))));
-    asyncPost(gatewayRootPath + "/v1/surrender-requests", "1.0.0", jsonRequestBody);
+    asyncPost(counterpartRootPath + "/v1/surrender-requests", "1.0.0", jsonRequestBody);
   }
 
   @Override

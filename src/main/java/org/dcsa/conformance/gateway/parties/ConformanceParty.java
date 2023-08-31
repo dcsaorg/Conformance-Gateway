@@ -20,16 +20,16 @@ import reactor.core.publisher.Mono;
 public abstract class ConformanceParty {
   protected final String name;
   private final boolean internal;
-  protected final String gatewayBaseUrl;
-  protected final String gatewayRootPath;
+  protected final String counterpartBaseUrl;
+  protected final String counterpartRootPath;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
   public ConformanceParty(
-      String name, boolean internal, String gatewayBaseUrl, String gatewayRootPath) {
+      String name, boolean internal, String counterpartBaseUrl, String counterpartRootPath) {
     this.name = name;
     this.internal = internal;
-    this.gatewayBaseUrl = gatewayBaseUrl;
-    this.gatewayRootPath = gatewayRootPath;
+    this.counterpartBaseUrl = counterpartBaseUrl;
+    this.counterpartRootPath = counterpartRootPath;
   }
 
   public void handleNotification() {
@@ -90,7 +90,7 @@ public abstract class ConformanceParty {
               JsonNode responseBody =
                   WebTestClient.bindToServer()
                       .responseTimeout(Duration.ofHours(1))
-                      .baseUrl(gatewayBaseUrl)
+                      .baseUrl(counterpartBaseUrl)
                       .build()
                       .get()
                       .uri(uri)
@@ -111,7 +111,7 @@ public abstract class ConformanceParty {
             e -> {
               log.error(
                   "%s[%s].asyncGet(gatewayBaseUrl='%s', uri='%s') failed: %s"
-                      .formatted(getClass().getSimpleName(), name, gatewayBaseUrl, uri, e),
+                      .formatted(getClass().getSimpleName(), name, counterpartBaseUrl, uri, e),
                   e);
               return null;
             });
@@ -126,7 +126,7 @@ public abstract class ConformanceParty {
                           getClass().getSimpleName(), name, uri, requestBody.toPrettyString()));
               WebTestClient.bindToServer()
                   .responseTimeout(Duration.ofHours(1))
-                  .baseUrl(gatewayBaseUrl)
+                  .baseUrl(counterpartBaseUrl)
                   .build()
                   .post()
                   .uri(uri)
@@ -139,7 +139,7 @@ public abstract class ConformanceParty {
             e -> {
               log.error(
                   "%s[%s].asyncPost(gatewayBaseUrl='%s', uri='%s') failed: %s"
-                      .formatted(getClass().getSimpleName(), name, gatewayBaseUrl, uri, e),
+                      .formatted(getClass().getSimpleName(), name, counterpartBaseUrl, uri, e),
                   e);
               return null;
             });

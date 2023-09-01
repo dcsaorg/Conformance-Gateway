@@ -59,6 +59,8 @@ public class DcsaConformanceGatewayApplication {
                         conformanceConfiguration.getStandard(), partyConfiguration))
             .collect(Collectors.toMap(ConformanceParty::getName, Function.identity()));
 
+//    handlersByPrefix.
+
     RouteLocatorBuilder.Builder routeLocatorBuilderBuilder = routeLocatorBuilder.routes();
     Stream.of(conformanceConfiguration.getGateway().getRoutes())
         .forEach(

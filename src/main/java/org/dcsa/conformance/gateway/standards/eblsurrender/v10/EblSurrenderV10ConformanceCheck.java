@@ -19,8 +19,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
   private final ScenarioListBuilder<?> scenarioListBuilder;
 
-  public EblSurrenderV10ConformanceCheck(
-      ScenarioListBuilder<?> scenarioListBuilder) {
+  public EblSurrenderV10ConformanceCheck(ScenarioListBuilder<?> scenarioListBuilder) {
     super("EBL Surrender V1.0");
     this.scenarioListBuilder = scenarioListBuilder;
   }
@@ -41,11 +40,12 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async platform request URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(
+                        exchange.getRequest().message().sourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange,
-                              exchange.getRequestPath().endsWith("/v1/surrender-requests")));
+                              exchange.getRequest().path().endsWith("/v1/surrender-requests")));
                     }
                   }
 
@@ -62,10 +62,13 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(
+                        exchange.getRequest().message().sourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
-                              exchange, jsonSchemaValidator.validate(exchange.getRequestBody())));
+                              exchange,
+                              jsonSchemaValidator.validate(
+                                  exchange.getRequest().message().stringBody())));
                     }
                   }
 
@@ -82,10 +85,13 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderV10Role.isPlatform(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isPlatform(
+                        exchange.getRequest().message().sourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forTargetParty(
-                              exchange, jsonSchemaValidator.validate(exchange.getResponseBody())));
+                              exchange,
+                              jsonSchemaValidator.validate(
+                                  exchange.getResponse().message().stringBody())));
                     }
                   }
 
@@ -102,10 +108,13 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isCarrier(
+                        exchange.getRequest().message().sourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
-                              exchange, jsonSchemaValidator.validate(exchange.getRequestBody())));
+                              exchange,
+                              jsonSchemaValidator.validate(
+                                  exchange.getRequest().message().stringBody())));
                     }
                   }
 
@@ -124,12 +133,14 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 new ConformanceCheck("Async carrier response URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
-                    if (EblSurrenderV10Role.isCarrier(exchange.getSourcePartyRole())) {
+                    if (EblSurrenderV10Role.isCarrier(
+                        exchange.getRequest().message().sourcePartyRole())) {
                       this.addResult(
                           ConformanceResult.forSourceParty(
                               exchange,
                               exchange
-                                  .getRequestPath()
+                                  .getRequest()
+                                  .path()
                                   .endsWith("/v1/surrender-request-responses")));
                     }
                   }
@@ -155,7 +166,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
                     ConformanceResult.forSourceParty(
-                        exchange, checkApiVersionHeader(exchange.getRequestHeaders())));
+                        exchange, checkApiVersionHeader(exchange.getRequest().message().headers())));
               }
             },
             new ConformanceCheck(
@@ -164,7 +175,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
                     ConformanceResult.forTargetParty(
-                        exchange, checkApiVersionHeader(exchange.getResponseHeaders())));
+                        exchange, checkApiVersionHeader(exchange.getResponse().message().headers())));
               }
             });
       }

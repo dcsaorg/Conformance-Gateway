@@ -5,33 +5,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.util.MultiValueMap;
 
-import java.util.Arrays;
-import java.util.UUID;
-
 @ToString
 @Getter
 public class ConformanceExchange {
-  private final String sourcePartyName;
-  private final String sourcePartyRole;
-  private final String targetPartyName;
-  private final String targetPartyRole;
   private final UUID uuid;
-  private final String httpMethod;
-  private final String requestPath;
-  private final MultiValueMap<String, String> requestQueryParams;
-  private final MultiValueMap<String, String> requestHeaders;
-  private final String requestBody;
-  private final JsonNode jsonRequestBody;
-  private final long requestTimestamp;
-  private final int responseStatusCode;
-  private final MultiValueMap<String, String> responseHeaders;
-  private final String responseBody;
-  private final JsonNode jsonResponseBody;
-  private final long responseTimestamp;
+  private final ConformanceRequest request;
+  private final ConformanceResponse response;
 
   private ConformanceExchange(
       String sourcePartyName,
@@ -39,28 +24,27 @@ public class ConformanceExchange {
       String targetPartyName,
       String targetPartyRole,
       UUID uuid,
-      String httpMethod,
-      String requestPath,
-      MultiValueMap<String, String> requestQueryParams,
+      String method,
+      String path,
+      MultiValueMap<String, String> queryParams,
       MultiValueMap<String, String> requestHeaders,
       String requestBody) {
-    this.sourcePartyName = sourcePartyName;
-    this.sourcePartyRole = sourcePartyRole;
-    this.targetPartyName = targetPartyName;
-    this.targetPartyRole = targetPartyRole;
     this.uuid = uuid;
-    this.httpMethod = httpMethod;
-    this.requestPath = requestPath;
-    this.requestQueryParams = requestQueryParams;
-    this.requestHeaders = requestHeaders;
-    this.requestBody = requestBody;
-    this.jsonRequestBody = _parsedStringOrJsonError(requestBody);
-    this.requestTimestamp = System.currentTimeMillis();
-    this.responseStatusCode = 0;
-    this.responseHeaders = null;
-    this.responseBody = null;
-    this.jsonResponseBody = null;
-    this.responseTimestamp = 0L;
+    this.request =
+        new ConformanceRequest(
+            method,
+            path,
+            queryParams,
+            new ConformanceMessage(
+                sourcePartyName,
+                sourcePartyRole,
+                targetPartyName,
+                targetPartyRole,
+                requestHeaders,
+                requestBody,
+                _parsedStringOrJsonError(requestBody),
+                System.currentTimeMillis()));
+    this.response = null;
   }
 
   private static JsonNode _parsedStringOrJsonError(String string) {
@@ -80,26 +64,28 @@ public class ConformanceExchange {
 
   private ConformanceExchange(
       ConformanceExchange conformanceExchange,
-      int responseStatusCode,
+      int statusCode,
       MultiValueMap<String, String> responseHeaders,
       String responseBody) {
-    this.sourcePartyName = conformanceExchange.sourcePartyName;
-    this.sourcePartyRole = conformanceExchange.sourcePartyRole;
-    this.targetPartyName = conformanceExchange.targetPartyName;
-    this.targetPartyRole = conformanceExchange.targetPartyRole;
     this.uuid = conformanceExchange.uuid;
-    this.httpMethod = conformanceExchange.httpMethod;
-    this.requestPath = conformanceExchange.requestPath;
-    this.requestQueryParams = conformanceExchange.requestQueryParams;
-    this.requestHeaders = conformanceExchange.requestHeaders;
-    this.requestBody = conformanceExchange.requestBody;
-    this.jsonRequestBody = _parsedStringOrJsonError(requestBody);
-    this.requestTimestamp = conformanceExchange.requestTimestamp;
-    this.responseStatusCode = responseStatusCode;
-    this.responseHeaders = responseHeaders;
-    this.responseBody = responseBody;
-    this.jsonResponseBody = _parsedStringOrJsonError(responseBody);
-    this.responseTimestamp = System.currentTimeMillis();
+    this.request =
+        new ConformanceRequest(
+            conformanceExchange.request.method(),
+            conformanceExchange.request.path(),
+            conformanceExchange.request.queryParams(),
+            conformanceExchange.request.message());
+    this.response =
+        new ConformanceResponse(
+            statusCode,
+            new ConformanceMessage(
+                conformanceExchange.request.message().targetPartyName(),
+                conformanceExchange.request.message().targetPartyRole(),
+                conformanceExchange.request.message().sourcePartyName(),
+                conformanceExchange.request.message().sourcePartyRole(),
+                responseHeaders,
+                responseBody,
+                _parsedStringOrJsonError(responseBody),
+                System.currentTimeMillis()));
   }
 
   public static ConformanceExchange createFromRequest(

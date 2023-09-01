@@ -53,10 +53,10 @@ public class SurrenderRequestAction extends TdrAction {
 
   @Override
   public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
-    if (!Objects.equals(getSourcePartyName(), exchange.getSourcePartyName())) {
+    if (!Objects.equals(getSourcePartyName(), exchange.getRequest().message().sourcePartyName())) {
       return false;
     }
-    JsonNode requestJsonNode = getRequestBody(exchange);
+    JsonNode requestJsonNode = exchange.getRequest().message().jsonBody();
     boolean matches =
         JsonToolkit.stringAttributeEquals(
                 requestJsonNode, "transportDocumentReference", tdrSupplier.get())

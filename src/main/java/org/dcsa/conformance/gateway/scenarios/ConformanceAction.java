@@ -29,14 +29,6 @@ public class ConformanceAction {
     return false;
   }
 
-  protected JsonNode getRequestBody(ConformanceExchange exchange) {
-    try {
-      return new ObjectMapper().readTree(exchange.getRequestBody());
-    } catch (JsonProcessingException e) {
-      return new ObjectMapper().createObjectNode();
-    }
-  }
-
   public ObjectNode asJsonNode() {
     return new ObjectMapper()
         .createObjectNode()

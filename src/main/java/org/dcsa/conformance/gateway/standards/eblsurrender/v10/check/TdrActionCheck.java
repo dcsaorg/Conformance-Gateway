@@ -51,7 +51,9 @@ public abstract class TdrActionCheck extends ActionCheck {
                     action ->
                         JsonToolkit.stringAttributeEquals(
                             Objects.requireNonNull(previousExchanges.peekLast())
-                                .getJsonRequestBody(),
+                                .getRequest()
+                                .message()
+                                .jsonBody(),
                             "action",
                             action)));
   }
@@ -69,7 +71,8 @@ public abstract class TdrActionCheck extends ActionCheck {
             .peekLast()) {
       this.addResult(
           ConformanceResult.forTargetParty(
-              exchange, Objects.requireNonNull(exchange).getResponseStatusCode() == expectedStatus));
+              exchange,
+              Objects.requireNonNull(exchange).getResponse().statusCode() == expectedStatus));
     }
   }
 }

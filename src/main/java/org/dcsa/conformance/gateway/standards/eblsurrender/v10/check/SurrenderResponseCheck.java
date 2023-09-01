@@ -18,9 +18,9 @@ public class SurrenderResponseCheck extends TdrActionCheck {
 
   @Override
   protected boolean isRelevantExchange(ConformanceExchange exchange) {
-    return exchange.getResponseStatusCode() == expectedStatus
+    return exchange.getResponse().statusCode() == expectedStatus
         && JsonToolkit.stringAttributeEquals(
-            exchange.getJsonRequestBody(), "action", accept ? "SURR" : "SREJ");
+            exchange.getRequest().message().jsonBody(), "action", accept ? "SURR" : "SREJ");
   }
 
   @Override
@@ -33,7 +33,8 @@ public class SurrenderResponseCheck extends TdrActionCheck {
   protected boolean exchangeMatchesPreviousRequest(
       ConformanceExchange exchange, ConformanceExchange previousExchange) {
     return Objects.equals(
-        getSrr(exchange.getJsonRequestBody()), getSrr(previousExchange.getJsonRequestBody()));
+        getSrr(exchange.getRequest().message().jsonBody()),
+        getSrr(previousExchange.getRequest().message().jsonBody()));
   }
 
   protected static String getSrr(JsonNode jsonRequest) {

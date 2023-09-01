@@ -36,37 +36,57 @@ public class ConformanceResult {
 
   public static ConformanceResult forSourceParty(ConformanceExchange exchange, boolean conformant) {
     return new ConformanceResult(
-        exchange.getSourcePartyName(), exchange, conformant, Collections.emptySet());
+        exchange.getRequest().message().sourcePartyName(), exchange, conformant, Collections.emptySet());
   }
 
   public static ConformanceResult forTargetParty(ConformanceExchange exchange, boolean conformant) {
     return new ConformanceResult(
-        exchange.getTargetPartyName(), exchange, conformant, Collections.emptySet());
+        exchange.getRequest().message().targetPartyName(), exchange, conformant, Collections.emptySet());
   }
 
   public static ConformanceResult forSourceParty(ConformanceExchange exchange, Set<String> errors) {
-    return new ConformanceResult(exchange.getSourcePartyName(), exchange, errors.isEmpty(), errors);
+    return new ConformanceResult(
+        exchange.getRequest().message().sourcePartyName(), exchange, errors.isEmpty(), errors);
   }
 
   public static ConformanceResult forTargetParty(ConformanceExchange exchange, Set<String> errors) {
-    return new ConformanceResult(exchange.getTargetPartyName(), exchange, errors.isEmpty(), errors);
-  }
-
-  public static ConformanceResult forSourceParty(LinkedList<ConformanceExchange> exchanges, boolean conformant) {
     return new ConformanceResult(
-            Objects.requireNonNull(exchanges.peekLast()).getSourcePartyName(), exchanges, conformant, Collections.emptySet());
+        exchange.getRequest().message().targetPartyName(), exchange, errors.isEmpty(), errors);
   }
 
-  public static ConformanceResult forTargetParty(LinkedList<ConformanceExchange> exchanges, boolean conformant) {
+  public static ConformanceResult forSourceParty(
+      LinkedList<ConformanceExchange> exchanges, boolean conformant) {
     return new ConformanceResult(
-            Objects.requireNonNull(exchanges.peekLast()).getTargetPartyName(), exchanges, conformant, Collections.emptySet());
+        Objects.requireNonNull(exchanges.peekLast()).getRequest().message().sourcePartyName(),
+        exchanges,
+        conformant,
+        Collections.emptySet());
   }
 
-  public static ConformanceResult forSourceParty(LinkedList<ConformanceExchange> exchanges, Set<String> errors) {
-    return new ConformanceResult(Objects.requireNonNull(exchanges.peekLast()).getSourcePartyName(), exchanges, errors.isEmpty(), errors);
+  public static ConformanceResult forTargetParty(
+      LinkedList<ConformanceExchange> exchanges, boolean conformant) {
+    return new ConformanceResult(
+        Objects.requireNonNull(exchanges.peekLast()).getRequest().message().targetPartyName(),
+        exchanges,
+        conformant,
+        Collections.emptySet());
   }
 
-  public static ConformanceResult forTargetParty(LinkedList<ConformanceExchange> exchanges, Set<String> errors) {
-    return new ConformanceResult(Objects.requireNonNull(exchanges.peekLast()).getTargetPartyName(), exchanges, errors.isEmpty(), errors);
+  public static ConformanceResult forSourceParty(
+      LinkedList<ConformanceExchange> exchanges, Set<String> errors) {
+    return new ConformanceResult(
+        Objects.requireNonNull(exchanges.peekLast()).getRequest().message().sourcePartyName(),
+        exchanges,
+        errors.isEmpty(),
+        errors);
+  }
+
+  public static ConformanceResult forTargetParty(
+      LinkedList<ConformanceExchange> exchanges, Set<String> errors) {
+    return new ConformanceResult(
+        Objects.requireNonNull(exchanges.peekLast()).getRequest().message().targetPartyName(),
+        exchanges,
+        errors.isEmpty(),
+        errors);
   }
 }

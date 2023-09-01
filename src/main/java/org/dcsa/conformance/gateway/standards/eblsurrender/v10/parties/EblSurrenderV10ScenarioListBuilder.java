@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.check.ActionCheck;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderRequestCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderResponseCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.VoidAndReissueCheck;
@@ -91,7 +92,8 @@ public class EblSurrenderV10ScenarioListBuilder
 
               @Override
               public boolean isRelevantForRole(String roleName) {
-                return childrenStream().anyMatch(child -> child.isRelevantForRole(roleName));
+                return childrenStream().anyMatch(child -> child.isRelevantForRole(roleName))
+                    || (EblSurrenderV10Role.isCarrier(roleName) && hasNoChildren());
               }
             });
   }

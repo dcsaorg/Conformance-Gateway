@@ -30,9 +30,11 @@ public class SurrenderResponseAction extends TdrAction {
   }
 
   @Override
-  synchronized public Supplier<String> getSrrSupplier() {
+  public synchronized Supplier<String> getSrrSupplier() {
     if (srrSupplier != null) return srrSupplier;
-    for (ConformanceAction action = this.previousAction; action != null; action = action.getPreviousAction()) {
+    for (ConformanceAction action = this.previousAction;
+        action != null;
+        action = action.getPreviousAction()) {
       if (action instanceof TdrAction tdrAction) {
         if ((srrSupplier = tdrAction.getSrrSupplier()) != null) {
           return srrSupplier;
@@ -52,7 +54,7 @@ public class SurrenderResponseAction extends TdrAction {
     if (!Objects.equals(getSourcePartyName(), exchange.getRequest().message().sourcePartyName())) {
       return false;
     }
-    JsonNode requestJsonNode = exchange.getRequest().message().jsonBody();
+    JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     String srr = getSrrSupplier().get();
     return ("*".equals(srr)
             || JsonToolkit.stringAttributeEquals(requestJsonNode, "surrenderRequestReference", srr))

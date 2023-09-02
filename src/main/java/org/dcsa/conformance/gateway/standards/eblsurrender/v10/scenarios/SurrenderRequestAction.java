@@ -56,7 +56,7 @@ public class SurrenderRequestAction extends TdrAction {
     if (!Objects.equals(getSourcePartyName(), exchange.getRequest().message().sourcePartyName())) {
       return false;
     }
-    JsonNode requestJsonNode = exchange.getRequest().message().jsonBody();
+    JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     boolean matches =
         JsonToolkit.stringAttributeEquals(
                 requestJsonNode, "transportDocumentReference", tdrSupplier.get())

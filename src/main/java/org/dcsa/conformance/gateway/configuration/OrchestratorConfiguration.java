@@ -9,6 +9,4 @@ import lombok.ToString;
 @ToString
 public class OrchestratorConfiguration {
   private int maxParallelScenarios = Integer.MAX_VALUE;
-  private String carrierName;
-  private String platformName;
 }

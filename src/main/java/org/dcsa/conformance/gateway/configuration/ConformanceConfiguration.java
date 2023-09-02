@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ToString
 public class ConformanceConfiguration {
   private StandardConfiguration standard;
-  private GatewayConfiguration gateway;
   private OrchestratorConfiguration orchestrator;
   private PartyConfiguration[] parties;
+  private CounterpartConfiguration[] counterparts;
 }

@@ -2,15 +2,20 @@ package org.dcsa.conformance.gateway.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.gateway.configuration.OrchestratorConfiguration;
+import org.dcsa.conformance.gateway.analysis.ConformanceReport;
+import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
+import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.scenarios.ConformanceScenario;
@@ -19,21 +24,30 @@ import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilderFactory;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 
 @Slf4j
 public class ConformanceOrchestrator {
-  @Getter
+  private final StandardConfiguration standardConfiguration;
   protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
+  private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
+  private final Map<String, CounterpartConfiguration> counterpartConfigurationsByPartyName;
 
-  public ConformanceOrchestrator(StandardConfiguration standardConfiguration,
-                                 OrchestratorConfiguration orchestratorConfiguration) {
-    this.scenarioListBuilder = ScenarioListBuilderFactory.create(
-            standardConfiguration, orchestratorConfiguration);
+  public ConformanceOrchestrator(
+      StandardConfiguration standardConfiguration,
+      CounterpartConfiguration[] counterpartConfigurations) {
+
+    this.standardConfiguration = standardConfiguration;
+    this.scenarioListBuilder =
+        ScenarioListBuilderFactory.create(standardConfiguration, counterpartConfigurations);
+    counterpartConfigurationsByPartyName =
+        Arrays.stream(counterpartConfigurations)
+            .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
   }
 
   public void reset() {
+    trafficRecorder.reset();
     initializeScenarios();
     notifyAllPartiesOfNextActions();
   }
@@ -56,15 +70,7 @@ public class ConformanceOrchestrator {
     CompletableFuture.runAsync(
             () -> {
               log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
-              WebTestClient.bindToServer()
-                  .responseTimeout(Duration.ofHours(1))
-                  .baseUrl("http://localhost:8080") // FIXME use config / deployment variable URL
-                  .build()
-                  .get()
-                  .uri("/party/%s/notify".formatted(partyName))
-                  .exchange()
-                  .expectStatus()
-                  .is2xxSuccessful();
+              syncNotifyParty(partyName);
             })
         .exceptionally(
             e -> {
@@ -73,20 +79,38 @@ public class ConformanceOrchestrator {
             });
   }
 
+  @SneakyThrows
+  private void syncNotifyParty(String partyName) {
+    CounterpartConfiguration counterpartConfiguration =
+        counterpartConfigurationsByPartyName.get(partyName);
+    HttpClient.newHttpClient()
+        .send(
+            HttpRequest.newBuilder()
+                .uri(
+                    URI.create(
+                        counterpartConfiguration.getBaseUrl()
+                            + counterpartConfiguration.getRootPath()
+                            + "/party/%s/notification".formatted(partyName)))
+                .timeout(Duration.ofHours(1))
+                .GET()
+                .build(),
+            HttpResponse.BodyHandlers.ofString());
+  }
+
   public synchronized JsonNode handleGetPartyPrompt(String partyName) {
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
     return new ObjectMapper()
-            .createArrayNode()
-            .addAll(
-                scenarios.stream()
-                    .map(ConformanceScenario::peekNextAction)
-                    .filter(Objects::nonNull)
-                    .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
-                    .map(ConformanceAction::asJsonNode)
-                    .collect(Collectors.toList()));
+        .createArrayNode()
+        .addAll(
+            scenarios.stream()
+                .map(ConformanceScenario::peekNextAction)
+                .filter(Objects::nonNull)
+                .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
+                .map(ConformanceAction::asJsonNode)
+                .collect(Collectors.toList()));
   }
 
-  public synchronized JsonNode handlePartyInput(JsonNode partyInput) {
+  public synchronized void handlePartyInput(String partyName, JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
     ConformanceAction action =
@@ -110,25 +134,33 @@ public class ConformanceOrchestrator {
       throw new UnsupportedOperationException(partyInput.toString());
     }
     notifyAllPartiesOfNextActions();
-    return new ObjectMapper().createObjectNode();
+    new ObjectMapper().createObjectNode();
   }
 
-  public synchronized void handlePartyTrafficExchange(ConformanceExchange conformanceExchange) {
+  public synchronized void handlePartyTrafficExchange(ConformanceExchange exchange) {
+    trafficRecorder.recordExchange(exchange);
     ConformanceAction action =
         scenarios.stream()
             .filter(
                 scenario ->
                     scenario.hasNextAction()
-                        && scenario.peekNextAction().updateFromExchangeIfItMatches(conformanceExchange))
+                        && scenario.peekNextAction().updateFromExchangeIfItMatches(exchange))
             .map(ConformanceScenario::popNextAction)
             .findFirst()
             .orElse(null);
     if (action == null) {
       log.info(
           "Ignoring conformance exchange not matched by any pending actions: %s"
-              .formatted(conformanceExchange));
+              .formatted(exchange));
       return;
     }
     notifyAllPartiesOfNextActions();
+  }
+
+  public String generateReport(Set<String> roleNames) {
+    Map<String, ConformanceReport> reportsByRoleName =
+        new ConformanceTrafficAnalyzer(standardConfiguration)
+            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
+    return ConformanceReport.toHtmlReport(reportsByRoleName);
   }
 }

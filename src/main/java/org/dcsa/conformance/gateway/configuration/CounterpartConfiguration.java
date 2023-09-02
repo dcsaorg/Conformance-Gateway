@@ -7,6 +7,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class GatewayConfiguration {
-    private RouteConfiguration[] routes;
+public class CounterpartConfiguration {
+  private String name;
+  private String role;
+  private String baseUrl;
+  private String rootPath;
 }

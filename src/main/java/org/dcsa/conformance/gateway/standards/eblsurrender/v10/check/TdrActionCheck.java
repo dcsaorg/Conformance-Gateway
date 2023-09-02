@@ -53,7 +53,8 @@ public abstract class TdrActionCheck extends ActionCheck {
                             Objects.requireNonNull(previousExchanges.peekLast())
                                 .getRequest()
                                 .message()
-                                .jsonBody(),
+                                .body()
+                                .getJsonBody(),
                             "action",
                             action)));
   }

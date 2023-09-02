@@ -1,48 +1,144 @@
 package org.dcsa.conformance.gateway.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
-import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
+import org.dcsa.conformance.gateway.traffic.ConformanceMessage;
+import org.dcsa.conformance.gateway.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.gateway.traffic.ConformanceRequest;
+import org.dcsa.conformance.gateway.traffic.ConformanceResponse;
 
-@Getter
 @Slf4j
 public abstract class ConformanceParty {
-  protected final String name;
-  private final boolean internal;
-  protected final String counterpartBaseUrl;
-  protected final String counterpartRootPath;
+  protected final PartyConfiguration partyConfiguration;
+  protected final CounterpartConfiguration counterpartConfiguration;
+  protected final BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
-  public ConformanceParty(PartyConfiguration partyConfiguration) {
-    this.name = partyConfiguration.getName();
-    this.internal = true;
-    this.counterpartBaseUrl = partyConfiguration.getCounterpartBaseUrl();
-    this.counterpartRootPath = partyConfiguration.getCounterpartRootPath();
+  public ConformanceParty(
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
+    this.partyConfiguration = partyConfiguration;
+    this.counterpartConfiguration = counterpartConfiguration;
+    this.asyncWebClient = asyncWebClient;
   }
+
+  public String getName() {
+    return partyConfiguration.getName();
+  }
+
+  public String getRole() {
+    return partyConfiguration.getRole();
+  }
+
+  public String getCounterpartName() {
+    return counterpartConfiguration.getName();
+  }
+
+  public String getCounterpartRole() {
+    return counterpartConfiguration.getRole();
+  }
+
+  protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
+    asyncWebClient.accept(
+        new ConformanceRequest(
+            "POST",
+            partyConfiguration.getOrchestratorBaseUrl(),
+            partyConfiguration.getOrchestratorRootPath()
+                + "/orchestrator/party/%s/input".formatted(partyConfiguration.getName()),
+            Collections.emptyMap(),
+            new ConformanceMessage(
+                partyConfiguration.getName(),
+                partyConfiguration.getRole(),
+                "orchestrator",
+                "orchestrator",
+                Collections.emptyMap(),
+                new ConformanceMessageBody(jsonPartyInput),
+                System.currentTimeMillis())),
+        conformanceResponse -> {});
+  }
+
+  protected void asyncCounterpartPost(
+      String path,
+      String apiVersion,
+      JsonNode jsonBody,
+      Consumer<ConformanceResponse> responseConsumer) {
+    asyncWebClient.accept(
+        new ConformanceRequest(
+            "POST",
+            counterpartConfiguration.getBaseUrl(),
+            counterpartConfiguration.getRootPath()
+                + "/party/%s/from/%s"
+                    .formatted(counterpartConfiguration.getName(), partyConfiguration.getName())
+                + path,
+            Collections.emptyMap(),
+            new ConformanceMessage(
+                partyConfiguration.getName(),
+                partyConfiguration.getRole(),
+                counterpartConfiguration.getName(),
+                counterpartConfiguration.getRole(),
+                Map.of("Api-Version", List.of(apiVersion)),
+                new ConformanceMessageBody(jsonBody),
+                System.currentTimeMillis())),
+        responseConsumer);
+  }
+
+  public abstract ConformanceResponse handleRequest(ConformanceRequest request);
 
   public void handleNotification() {
-    log.info("%s[%s].handleNotification()".formatted(getClass().getSimpleName(), name));
-    asyncGet(
-        "/party/%s/prompt/json".formatted(name),
-        prompt -> {
-          StreamSupport.stream(prompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
-          asyncHandleNextActionPrompt();
-        });
+    CompletableFuture.runAsync(
+            () -> {
+              log.info(
+                  "%s[%s].handleNotification()"
+                      .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+              JsonNode jsonResponseBody = syncGetPartyPrompt();
+              StreamSupport.stream(jsonResponseBody.spliterator(), false)
+                  .forEach(actionPromptsQueue::addLast);
+              asyncHandleNextActionPrompt();
+            })
+        .exceptionally(
+            e -> {
+              log.error(
+                  "Failed to get prompt for party '%s': %s"
+                      .formatted(partyConfiguration.getName(), e),
+                  e);
+              return null;
+            });
   }
 
-  public abstract ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody);
+  @SneakyThrows
+  private JsonNode syncGetPartyPrompt() {
+    String stringResponseBody =
+        HttpClient.newHttpClient()
+            .send(
+                HttpRequest.newBuilder()
+                    .uri(
+                        URI.create(
+                            partyConfiguration.getOrchestratorBaseUrl()
+                                + partyConfiguration.getOrchestratorRootPath()
+                                + "/orchestrator/party/%s/prompt/json"
+                                    .formatted(partyConfiguration.getName())))
+                    .timeout(Duration.ofHours(1))
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString())
+            .body();
+    return new ConformanceMessageBody(stringResponseBody).getJsonBody();
+  }
 
   protected abstract Map<Class<? extends ConformanceAction>, Consumer<JsonNode>>
       getActionPromptHandlers();
@@ -54,7 +150,10 @@ public abstract class ConformanceParty {
               if (actionPrompt == null) return;
               log.info(
                   "%s[%s].asyncHandleNextActionPrompt() handling %s"
-                      .formatted(getClass().getSimpleName(), name, actionPrompt.toPrettyString()));
+                      .formatted(
+                          getClass().getSimpleName(),
+                          partyConfiguration.getName(),
+                          actionPrompt.toPrettyString()));
               getActionPromptHandlers().entrySet().stream()
                   .filter(
                       entry ->
@@ -67,7 +166,7 @@ public abstract class ConformanceParty {
                           new RuntimeException(
                               "Handler not found by %s for action prompt %s\nAvailable action prompts are %s"
                                   .formatted(
-                                          ConformanceParty.this.getClass().getCanonicalName(),
+                                      ConformanceParty.this.getClass().getCanonicalName(),
                                       actionPrompt.toPrettyString(),
                                       getActionPromptHandlers().keySet())))
                   .getValue()
@@ -78,68 +177,7 @@ public abstract class ConformanceParty {
             e -> {
               log.error(
                   "%s[%s].asyncHandleNextActionPrompt() failed: %s"
-                      .formatted(getClass().getSimpleName(), name, e),
-                  e);
-              return null;
-            });
-  }
-
-  private void asyncGet(String uri, Consumer<JsonNode> responseBodyConsumer) {
-    CompletableFuture.runAsync(
-            () -> {
-              JsonNode responseBody =
-                  WebTestClient.bindToServer()
-                      .responseTimeout(Duration.ofHours(1))
-                      .baseUrl(counterpartBaseUrl)
-                      .build()
-                      .get()
-                      .uri(uri)
-                      .exchange()
-                      .expectBody(JsonNode.class)
-                      .returnResult()
-                      .getResponseBody();
-              log.info(
-                  "%s[%s].asyncGet(%s): %s"
-                      .formatted(
-                          getClass().getSimpleName(),
-                          name,
-                          uri,
-                          Objects.requireNonNull(responseBody).toPrettyString()));
-              responseBodyConsumer.accept(responseBody);
-            })
-        .exceptionally(
-            e -> {
-              log.error(
-                  "%s[%s].asyncGet(gatewayBaseUrl='%s', uri='%s') failed: %s"
-                      .formatted(getClass().getSimpleName(), name, counterpartBaseUrl, uri, e),
-                  e);
-              return null;
-            });
-  }
-
-  protected void asyncPost(String uri, String apiVersion, JsonNode requestBody) {
-    CompletableFuture.runAsync(
-            () -> {
-              log.info(
-                  "%s[%s].asyncPost(%s, %s)"
-                      .formatted(
-                          getClass().getSimpleName(), name, uri, requestBody.toPrettyString()));
-              WebTestClient.bindToServer()
-                  .responseTimeout(Duration.ofHours(1))
-                  .baseUrl(counterpartBaseUrl)
-                  .build()
-                  .post()
-                  .uri(uri)
-                  .header("Api-Version", apiVersion)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .body(Mono.just(requestBody), JsonNode.class)
-                  .exchange();
-            })
-        .exceptionally(
-            e -> {
-              log.error(
-                  "%s[%s].asyncPost(gatewayBaseUrl='%s', uri='%s') failed: %s"
-                      .formatted(getClass().getSimpleName(), name, counterpartBaseUrl, uri, e),
+                      .formatted(getClass().getSimpleName(), partyConfiguration.getName(), e),
                   e);
               return null;
             });

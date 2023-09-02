@@ -2,28 +2,31 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.*;
-import java.util.function.Consumer;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
+import org.dcsa.conformance.gateway.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.gateway.traffic.ConformanceRequest;
+import org.dcsa.conformance.gateway.traffic.ConformanceResponse;
 
 @Slf4j
 public class EblSurrenderV10Platform extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
 
-  public EblSurrenderV10Platform(PartyConfiguration partyConfiguration) {
-    super(partyConfiguration);
+  public EblSurrenderV10Platform(
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient);
   }
 
   @Override
@@ -70,15 +73,16 @@ public class EblSurrenderV10Platform extends ConformanceParty {
                             .createObjectNode()
                             .put("eblPlatformIdentifier", "two@example.com")
                             .put("legalName", "Legal Name Two"))));
-    asyncPost(counterpartRootPath + "/v1/surrender-requests", "1.0.0", jsonRequestBody);
+    asyncCounterpartPost(
+        "/v1/surrender-requests", "1.0.0", jsonRequestBody, conformanceResponse -> {});
   }
 
   @Override
-  public synchronized ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
-    log.info(
-        "EblSurrenderV10Platform.handleRegularTraffic(%s)".formatted(requestBody.toPrettyString()));
-    String action = requestBody.get("action").asText();
-    String srr = requestBody.get("surrenderRequestReference").asText();
+  public synchronized ConformanceResponse handleRequest(ConformanceRequest request) {
+    log.info("EblSurrenderV10Platform.handleRequest(%s)".formatted(request));
+    JsonNode jsonRequest = request.message().body().getJsonBody();
+    String action = jsonRequest.get("action").asText();
+    String srr = jsonRequest.get("surrenderRequestReference").asText();
     String tdr = tdrsBySrr.remove(srr);
     if (Objects.equals(
         EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
@@ -87,10 +91,10 @@ public class EblSurrenderV10Platform extends ConformanceParty {
           Objects.equals("SURR", action)
               ? EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT
               : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(
-          new ObjectMapper().createObjectNode(),
-          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
-          HttpStatus.NO_CONTENT);
+      return request.createResponse(
+          204,
+          Map.of("Api-Version", List.of("1.0.0")),
+          new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
     } else if (Objects.equals(
         EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
@@ -98,20 +102,21 @@ public class EblSurrenderV10Platform extends ConformanceParty {
           Objects.equals("SURR", action)
               ? EblSurrenderV10State.SURRENDERED_FOR_DELIVERY
               : EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-      return new ResponseEntity<>(
-          new ObjectMapper().createObjectNode(),
-          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
-          HttpStatus.NO_CONTENT);
+      return request.createResponse(
+          204,
+          Map.of("Api-Version", List.of("1.0.0")),
+          new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
     } else {
-      return new ResponseEntity<>(
-          new ObjectMapper()
-              .createObjectNode()
-              .put(
-                  "comments",
-                  "Rejecting '%s' for document '%s' because it is in state '%s'"
-                      .formatted(action, tdr, eblStatesById.get(tdr))),
-          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
-          HttpStatus.CONFLICT);
+      return request.createResponse(
+          409,
+          Map.of("Api-Version", List.of("1.0.0")),
+          new ConformanceMessageBody(
+              new ObjectMapper()
+                  .createObjectNode()
+                  .put(
+                      "comments",
+                      "Rejecting '%s' for document '%s' because it is in state '%s'"
+                          .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
   }
 }

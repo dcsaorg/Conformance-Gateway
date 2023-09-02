@@ -7,7 +7,6 @@ import org.dcsa.conformance.gateway.check.ConformanceResult;
 import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
 import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
-import org.springframework.util.MultiValueMap;
 
 public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
@@ -68,7 +67,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                           ConformanceResult.forSourceParty(
                               exchange,
                               jsonSchemaValidator.validate(
-                                  exchange.getRequest().message().stringBody())));
+                                  exchange.getRequest().message().body().getStringBody())));
                     }
                   }
 
@@ -91,7 +90,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                           ConformanceResult.forTargetParty(
                               exchange,
                               jsonSchemaValidator.validate(
-                                  exchange.getResponse().message().stringBody())));
+                                  exchange.getResponse().message().body().getStringBody())));
                     }
                   }
 
@@ -114,7 +113,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                           ConformanceResult.forSourceParty(
                               exchange,
                               jsonSchemaValidator.validate(
-                                  exchange.getRequest().message().stringBody())));
+                                  exchange.getRequest().message().body().getStringBody())));
                     }
                   }
 
@@ -166,7 +165,8 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
                     ConformanceResult.forSourceParty(
-                        exchange, checkApiVersionHeader(exchange.getRequest().message().headers())));
+                        exchange,
+                        checkApiVersionHeader(exchange.getRequest().message().headers())));
               }
             },
             new ConformanceCheck(
@@ -175,16 +175,22 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
                     ConformanceResult.forTargetParty(
-                        exchange, checkApiVersionHeader(exchange.getResponse().message().headers())));
+                        exchange,
+                        checkApiVersionHeader(exchange.getResponse().message().headers())));
               }
             });
       }
 
-      private boolean checkApiVersionHeader(MultiValueMap<String, String> headers) {
-        List<String> headerValues = headers.get("Api-Version");
+      private boolean checkApiVersionHeader(Map<String, ? extends Collection<String>> headers) {
+        String headerName =
+            headers.keySet().stream()
+                .filter(key -> key.equalsIgnoreCase("api-version"))
+                .findFirst()
+                .orElse("api-version");
+        Collection<String> headerValues = headers.get(headerName);
         if (headerValues == null) return false;
         if (headerValues.size() != 1) return false;
-        String apiVersion = headerValues.get(0);
+        String apiVersion = headerValues.stream().findFirst().orElseThrow();
         return "1.0.0".equals(apiVersion);
       }
     };

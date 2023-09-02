@@ -65,8 +65,8 @@ public class ConformanceReport {
   }
 
   public static Map<String, ConformanceReport> createForRoles(
-      ConformanceCheck conformanceCheck, String... roleNames) {
-    return Arrays.stream(roleNames)
+      ConformanceCheck conformanceCheck, Set<String> roleNames) {
+    return roleNames.stream()
         .collect(
             Collectors.toMap(
                 roleName -> roleName,

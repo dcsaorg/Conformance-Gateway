@@ -3,8 +3,10 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -12,16 +14,19 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10St
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
+import org.dcsa.conformance.gateway.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.gateway.traffic.ConformanceRequest;
+import org.dcsa.conformance.gateway.traffic.ConformanceResponse;
 
 @Slf4j
 public class EblSurrenderV10Carrier extends ConformanceParty {
   private final Map<String, EblSurrenderV10State> eblStatesById = new HashMap<>();
 
-  public EblSurrenderV10Carrier(PartyConfiguration partyConfiguration) {
-    super(partyConfiguration);
+  public EblSurrenderV10Carrier(
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient);
   }
 
   @Override
@@ -37,9 +42,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
         "EblSurrenderV10Carrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-    asyncPost(
-        "/party/input",
-        "1.0.0",
+    asyncOrchestratorPostPartyInput(
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
@@ -54,9 +57,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
           "Cannot void and reissue in state: " + eblStatesById.get(tdr));
     }
     eblStatesById.put(tdr, EblSurrenderV10State.AVAILABLE_FOR_SURRENDER);
-    asyncPost(
-        "/party/input",
-        "1.0.0",
+    asyncOrchestratorPostPartyInput(
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
@@ -86,45 +87,48 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     if ("*".equals(srr)) {
       srr = UUID.randomUUID().toString();
     }
-    asyncPost(
-        counterpartRootPath + "/v1/surrender-request-responses",
+    asyncCounterpartPost(
+        "/v1/surrender-request-responses",
         "1.0.0",
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", srr)
-            .put("action", accept ? "SURR" : "SREJ"));
+            .put("action", accept ? "SURR" : "SREJ"),
+        conformanceResponse -> {});
   }
 
   @Override
-  public synchronized ResponseEntity<JsonNode> handleRegularTraffic(JsonNode requestBody) {
-    log.info(
-        "EblSurrenderV10Carrier.handlePostRequest(%s)".formatted(requestBody.toPrettyString()));
-    String srr = requestBody.get("surrenderRequestReference").asText();
-    String tdr = requestBody.get("transportDocumentReference").asText();
-    String src = requestBody.get("surrenderRequestCode").asText();
+  public synchronized ConformanceResponse handleRequest(ConformanceRequest request) {
+    log.info("EblSurrenderV10Carrier.handleRequest(%s)".formatted(request));
+    JsonNode jsonRequest = request.message().body().getJsonBody();
+    String srr = jsonRequest.get("surrenderRequestReference").asText();
+    String tdr = jsonRequest.get("transportDocumentReference").asText();
+    String src = jsonRequest.get("surrenderRequestCode").asText();
     if (Objects.equals(EblSurrenderV10State.AVAILABLE_FOR_SURRENDER, eblStatesById.get(tdr))) {
       eblStatesById.put(
           tdr,
           Objects.equals("AREQ", src)
               ? EblSurrenderV10State.AMENDMENT_SURRENDER_REQUESTED
               : EblSurrenderV10State.DELIVERY_SURRENDER_REQUESTED);
-      return new ResponseEntity<>(
-          new ObjectMapper()
-              .createObjectNode()
-              .put("surrenderRequestReference", srr)
-              .put("transportDocumentReference", tdr),
-          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
-          HttpStatus.ACCEPTED);
+      return request.createResponse(
+          202,
+          Map.of("Api-Version", List.of("1.0.0")),
+          new ConformanceMessageBody(
+              new ObjectMapper()
+                  .createObjectNode()
+                  .put("surrenderRequestReference", srr)
+                  .put("transportDocumentReference", tdr)));
     } else {
-      return new ResponseEntity<>(
-          new ObjectMapper()
-              .createObjectNode()
-              .put(
-                  "comments",
-                  "Rejecting '%s' for document '%s' because it is in state '%s'"
-                      .formatted(src, tdr, eblStatesById.get(tdr))),
-          new LinkedMultiValueMap<>(Map.of("Api-Version", List.of("1.0.0"))),
-          HttpStatus.CONFLICT);
+      return request.createResponse(
+          409,
+          Map.of("Api-Version", List.of("1.0.0")),
+          new ConformanceMessageBody(
+              new ObjectMapper()
+                  .createObjectNode()
+                  .put(
+                      "comments",
+                      "Rejecting '%s' for document '%s' because it is in state '%s'"
+                          .formatted(src, tdr, eblStatesById.get(tdr)))));
     }
   }
 }

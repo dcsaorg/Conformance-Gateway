@@ -1,14 +1,13 @@
 package org.dcsa.conformance.gateway.traffic;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.util.MultiValueMap;
+import java.util.Collection;
+import java.util.Map;
 
 public record ConformanceMessage(
     String sourcePartyName,
     String sourcePartyRole,
     String targetPartyName,
     String targetPartyRole,
-    MultiValueMap<String, String> headers,
-    String stringBody,
-    JsonNode jsonBody,
+    Map<String, ? extends Collection<String>> headers,
+    ConformanceMessageBody body,
     long timestamp) {}

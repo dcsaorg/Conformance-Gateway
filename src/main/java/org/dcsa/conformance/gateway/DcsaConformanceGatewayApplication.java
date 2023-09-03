@@ -15,9 +15,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
+import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
@@ -64,33 +67,38 @@ public class DcsaConformanceGatewayApplication {
                   this._handlePartyRequest(party, servletRequest, servletResponse));
         });
 
-    conformanceOrchestrator =
-        new ConformanceOrchestrator(
-            conformanceConfiguration.getStandard(), conformanceConfiguration.getCounterparts());
+    conformanceOrchestrator = new ConformanceOrchestrator(conformanceConfiguration);
 
     webHandlersByPathPrefix.put(
         "/conformance/orchestrator/reset",
         (servletRequest, servletResponse) -> conformanceOrchestrator.reset());
 
-    conformanceParties.forEach(
-        party -> {
-          webHandlersByPathPrefix.put(
-              "/conformance/orchestrator/party/%s/prompt/json".formatted(party.getName()),
-              (servletRequest, servletResponse) ->
-                  _writeResponse(
-                      servletResponse,
-                      HttpServletResponse.SC_OK,
-                      "application/json;charset=utf-8",
-                      conformanceOrchestrator
-                          .handleGetPartyPrompt(party.getName())
-                          .toPrettyString()));
-          webHandlersByPathPrefix.put(
-              "/conformance/orchestrator/party/%s/input".formatted(party.getName()),
-              (servletRequest, servletResponse) ->
-                  conformanceOrchestrator.handlePartyInput(
-                      party.getName(),
-                      new ConformanceMessageBody(_getRequestBody(servletRequest)).getJsonBody()));
-        });
+    Stream.concat(
+            Arrays.stream(conformanceConfiguration.getParties()).map(PartyConfiguration::getName),
+            Arrays.stream(conformanceConfiguration.getCounterparts())
+                .map(CounterpartConfiguration::getName))
+        .collect(Collectors.toSet())
+        .forEach(
+            partyOrCounterpartName -> {
+              webHandlersByPathPrefix.put(
+                  "/conformance/orchestrator/party/%s/prompt/json"
+                      .formatted(partyOrCounterpartName),
+                  (servletRequest, servletResponse) ->
+                      _writeResponse(
+                          servletResponse,
+                          HttpServletResponse.SC_OK,
+                          "application/json;charset=utf-8",
+                          Collections.emptyMap(),
+                          conformanceOrchestrator
+                              .handleGetPartyPrompt(partyOrCounterpartName)
+                              .toPrettyString()));
+              webHandlersByPathPrefix.put(
+                  "/conformance/orchestrator/party/%s/input".formatted(partyOrCounterpartName),
+                  (servletRequest, servletResponse) ->
+                      conformanceOrchestrator.handlePartyInput(
+                          new ConformanceMessageBody(_getRequestBody(servletRequest))
+                              .getJsonBody()));
+            });
 
     webHandlersByPathPrefix.put(
         "/conformance/orchestrator/report",
@@ -99,9 +107,16 @@ public class DcsaConformanceGatewayApplication {
                 servletResponse,
                 HttpServletResponse.SC_OK,
                 "text/html;charset=utf-8",
+                Collections.emptyMap(),
                 conformanceOrchestrator.generateReport(
-                    Arrays.stream(conformanceConfiguration.getParties())
-                        .map(PartyConfiguration::getRole)
+                    Arrays.stream(conformanceConfiguration.getCounterparts())
+                        .map(CounterpartConfiguration::getRole)
+                        .filter(
+                            counterpartRole ->
+                                Arrays.stream(conformanceConfiguration.getParties())
+                                    .map(PartyConfiguration::getRole)
+                                    .noneMatch(
+                                        partyRole -> Objects.equals(partyRole, counterpartRole)))
                         .collect(Collectors.toSet()))));
   }
 
@@ -131,9 +146,17 @@ public class DcsaConformanceGatewayApplication {
 
   @SneakyThrows
   private static void _writeResponse(
-      HttpServletResponse servletResponse, int statusCode, String contentType, String stringBody) {
+      HttpServletResponse servletResponse,
+      int statusCode,
+      String contentType,
+      Map<String, ? extends Collection<String>> headers,
+      String stringBody) {
     servletResponse.setStatus(statusCode);
     servletResponse.setContentType(contentType);
+    headers.forEach(
+        (headerName, headerValues) ->
+            headerValues.forEach(
+                headerValue -> servletResponse.setHeader(headerName, headerValue)));
     PrintWriter writer = servletResponse.getWriter();
     writer.write(stringBody);
     writer.flush();
@@ -145,6 +168,7 @@ public class DcsaConformanceGatewayApplication {
         servletResponse,
         conformanceResponse.statusCode(),
         "application/json;charset=utf-8",
+        conformanceResponse.message().headers(),
         conformanceResponse.message().body().getStringBody());
   }
 

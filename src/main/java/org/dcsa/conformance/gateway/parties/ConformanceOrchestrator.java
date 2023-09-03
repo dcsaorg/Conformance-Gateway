@@ -15,6 +15,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.gateway.analysis.ConformanceReport;
 import org.dcsa.conformance.gateway.analysis.ConformanceTrafficAnalyzer;
+import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
 import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
@@ -28,31 +29,44 @@ import org.dcsa.conformance.gateway.traffic.ConformanceTrafficRecorder;
 
 @Slf4j
 public class ConformanceOrchestrator {
+  private final boolean inactive;
   private final StandardConfiguration standardConfiguration;
   protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
-  private final ConformanceTrafficRecorder trafficRecorder = new ConformanceTrafficRecorder();
+  private final ConformanceTrafficRecorder trafficRecorder;
   private final Map<String, CounterpartConfiguration> counterpartConfigurationsByPartyName;
 
-  public ConformanceOrchestrator(
-      StandardConfiguration standardConfiguration,
-      CounterpartConfiguration[] counterpartConfigurations) {
+  public ConformanceOrchestrator(ConformanceConfiguration conformanceConfiguration) {
+    this.inactive = conformanceConfiguration.getOrchestrator() == null;
+    this.standardConfiguration = conformanceConfiguration.getStandard();
 
-    this.standardConfiguration = standardConfiguration;
     this.scenarioListBuilder =
-        ScenarioListBuilderFactory.create(standardConfiguration, counterpartConfigurations);
+        inactive
+            ? null
+            : ScenarioListBuilderFactory.create(
+                standardConfiguration,
+                conformanceConfiguration.getParties(),
+                conformanceConfiguration.getCounterparts());
+
+    trafficRecorder = inactive ? null : new ConformanceTrafficRecorder();
+
     counterpartConfigurationsByPartyName =
-        Arrays.stream(counterpartConfigurations)
+        Arrays.stream(conformanceConfiguration.getCounterparts())
             .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
   }
 
   public void reset() {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     trafficRecorder.reset();
-    initializeScenarios();
+
+    scenarios.clear();
+    scenarios.addAll(scenarioListBuilder.buildScenarioList());
+
     notifyAllPartiesOfNextActions();
   }
 
   private synchronized void notifyAllPartiesOfNextActions() {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     scenarios.stream()
         .map(ConformanceScenario::peekNextAction)
         .filter(Objects::nonNull)
@@ -61,12 +75,8 @@ public class ConformanceOrchestrator {
         .forEach(this::asyncNotifyParty);
   }
 
-  protected synchronized void initializeScenarios() {
-    scenarios.clear();
-    scenarios.addAll(scenarioListBuilder.buildScenarioList());
-  }
-
   private void asyncNotifyParty(String partyName) {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     CompletableFuture.runAsync(
             () -> {
               log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
@@ -81,6 +91,7 @@ public class ConformanceOrchestrator {
 
   @SneakyThrows
   private void syncNotifyParty(String partyName) {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     CounterpartConfiguration counterpartConfiguration =
         counterpartConfigurationsByPartyName.get(partyName);
     HttpClient.newHttpClient()
@@ -98,6 +109,7 @@ public class ConformanceOrchestrator {
   }
 
   public synchronized JsonNode handleGetPartyPrompt(String partyName) {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
     return new ObjectMapper()
         .createArrayNode()
@@ -110,7 +122,8 @@ public class ConformanceOrchestrator {
                 .collect(Collectors.toList()));
   }
 
-  public synchronized void handlePartyInput(String partyName, JsonNode partyInput) {
+  public synchronized void handlePartyInput(JsonNode partyInput) {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
     ConformanceAction action =
@@ -138,6 +151,7 @@ public class ConformanceOrchestrator {
   }
 
   public synchronized void handlePartyTrafficExchange(ConformanceExchange exchange) {
+    if (inactive) return;
     trafficRecorder.recordExchange(exchange);
     ConformanceAction action =
         scenarios.stream()
@@ -158,6 +172,7 @@ public class ConformanceOrchestrator {
   }
 
   public String generateReport(Set<String> roleNames) {
+    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     Map<String, ConformanceReport> reportsByRoleName =
         new ConformanceTrafficAnalyzer(standardConfiguration)
             .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);

@@ -31,11 +31,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
   private Stream<? extends ConformanceCheck> _createNonScenarioSubChecks() {
     return Stream.of(
-        new ConformanceCheck("Async platform requests (platform-initiated sync exchanges)") {
+        new ConformanceCheck("Platform-initiated sync exchanges") {
           @Override
           protected Stream<? extends ConformanceCheck> createSubChecks() {
             return Stream.of(
-                createApiVersionHeaderCheck(),
+                createApiVersionHeaderCheck(EblSurrenderV10Role.PLATFORM),
                 new ConformanceCheck("Async platform request URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
@@ -124,11 +124,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
                 });
           }
         },
-        new ConformanceCheck("Async carrier responses (carrier-initiated sync exchanges)") {
+        new ConformanceCheck("Carrier-initiated sync exchanges") {
           @Override
           protected Stream<? extends ConformanceCheck> createSubChecks() {
             return Stream.of(
-                createApiVersionHeaderCheck(),
+                createApiVersionHeaderCheck(EblSurrenderV10Role.CARRIER),
                 new ConformanceCheck("Async carrier response URL path is correct") {
                   @Override
                   protected void doCheck(ConformanceExchange exchange) {
@@ -153,7 +153,7 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         });
   }
 
-  private ConformanceCheck createApiVersionHeaderCheck() {
+  private ConformanceCheck createApiVersionHeaderCheck(EblSurrenderV10Role initiatingSyncExchangeRole) {
     return new ConformanceCheck(
         "All sync requests and responses must contain Api-Version headers with a compatible version") {
       @Override
@@ -161,6 +161,11 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
         return Stream.of(
             new ConformanceCheck(
                 "All sync requests must contain an Api-Version header with a compatible version") {
+              @Override
+              public boolean isRelevantForRole(String roleName) {
+                return Objects.equals(roleName, initiatingSyncExchangeRole.getConfigName());
+              }
+
               @Override
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
@@ -171,7 +176,12 @@ public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
             },
             new ConformanceCheck(
                 "All sync responses must contain an Api-Version header with a compatible version") {
-              @Override
+                @Override
+                public boolean isRelevantForRole(String roleName) {
+                    return !Objects.equals(roleName, initiatingSyncExchangeRole.getConfigName());
+                }
+
+                @Override
               protected void doCheck(ConformanceExchange exchange) {
                 this.addResult(
                     ConformanceResult.forTargetParty(

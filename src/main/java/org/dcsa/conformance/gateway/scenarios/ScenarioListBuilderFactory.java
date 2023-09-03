@@ -1,7 +1,10 @@
 package org.dcsa.conformance.gateway.scenarios;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
+import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10ScenarioListBuilder;
@@ -11,28 +14,35 @@ public enum ScenarioListBuilderFactory {
 
   public static ScenarioListBuilder<?> create(
       StandardConfiguration standardConfiguration,
+      PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     if ("EblSurrender".equals(standardConfiguration.getName())
         && "1.0.0".equals(standardConfiguration.getVersion())) {
-
       return EblSurrenderV10ScenarioListBuilder.buildTree(
-          Arrays.stream(counterpartConfigurations)
-              .filter(
-                  counterpartConfiguration ->
-                      EblSurrenderV10Role.isCarrier(counterpartConfiguration.getRole()))
-              .findFirst()
-              .orElseThrow()
-              .getName(),
-          Arrays.stream(counterpartConfigurations)
-              .filter(
-                  counterpartConfiguration ->
-                      EblSurrenderV10Role.isPlatform(counterpartConfiguration.getRole()))
-              .findFirst()
-              .orElseThrow()
-              .getName());
+          findPartyOrCounterpartName(
+              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isCarrier),
+          findPartyOrCounterpartName(
+              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isPlatform));
     }
     throw new UnsupportedOperationException(
         "Unsupported standard '%s' version '%s'"
             .formatted(standardConfiguration.getName(), standardConfiguration.getVersion()));
+  }
+
+  private static String findPartyOrCounterpartName(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations,
+      Predicate<String> rolePredicate) {
+    return Stream.concat(
+            Arrays.stream(partyConfigurations)
+                .filter(partyConfiguration -> rolePredicate.test(partyConfiguration.getRole()))
+                .map(PartyConfiguration::getName),
+            Arrays.stream(counterpartConfigurations)
+                .filter(
+                    counterpartConfigurationConfiguration ->
+                        rolePredicate.test(counterpartConfigurationConfiguration.getRole()))
+                .map(CounterpartConfiguration::getName))
+        .findFirst()
+        .orElseThrow();
   }
 }

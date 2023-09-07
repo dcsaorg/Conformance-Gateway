@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.dcsa.conformance</groupId>
-    <artifactId>gateway</artifactId>
+    <artifactId>lambda</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>dcsa-conformance-gateway</name>
     <description>DCSA Conformance Gateway</description>

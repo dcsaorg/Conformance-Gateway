@@ -25,6 +25,7 @@ import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
 import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
 import org.dcsa.conformance.gateway.parties.ConformanceParty;
 import org.dcsa.conformance.gateway.parties.ConformancePartyFactory;
+import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.gateway.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -109,14 +110,19 @@ public class DcsaConformanceGatewayApplication {
                 "text/html;charset=utf-8",
                 Collections.emptyMap(),
                 conformanceOrchestrator.generateReport(
-                    Arrays.stream(conformanceConfiguration.getCounterparts())
-                        .map(CounterpartConfiguration::getRole)
-                        .filter(
-                            counterpartRole ->
-                                Arrays.stream(conformanceConfiguration.getParties())
-                                    .map(PartyConfiguration::getRole)
-                                    .noneMatch(
-                                        partyRole -> Objects.equals(partyRole, counterpartRole)))
+                    (conformanceConfiguration.getParties().length
+                                == EblSurrenderV10Role.values().length
+                            ? Arrays.stream(EblSurrenderV10Role.values())
+                                .map(EblSurrenderV10Role::getConfigName)
+                            : Arrays.stream(conformanceConfiguration.getCounterparts())
+                                .map(CounterpartConfiguration::getRole)
+                                .filter(
+                                    counterpartRole ->
+                                        Arrays.stream(conformanceConfiguration.getParties())
+                                            .map(PartyConfiguration::getRole)
+                                            .noneMatch(
+                                                partyRole ->
+                                                    Objects.equals(partyRole, counterpartRole))))
                         .collect(Collectors.toSet()))));
   }
 

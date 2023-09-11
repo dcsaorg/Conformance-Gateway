@@ -73,6 +73,11 @@
   },
   "components": {
     "schemas": {
+      "eblPlatformIdentifier": {
+        "pattern": "\\S+@\\S+",
+        "type": "string",
+        "example": "43549850248@exampleplatform.com"
+      },
       "legalName": {
         "maxLength": 100,
         "pattern": "^\\S+(\\s+\\S+)*$",
@@ -93,6 +98,12 @@
         "type": "string",
         "description": "country code of the location of registration according to ISO 3166-1 alpha-2",
         "example": "NL"
+      },
+      "taxReference": {
+        "pattern": "^\\S+$",
+        "type": "string",
+        "description": "tax reference used in the location of registration",
+        "example": "NL859951480B01"
       },
       "surrenderRequestReference": {
         "maxLength": 100,
@@ -125,37 +136,12 @@
         ]
       },
       "transactionParty": {
-        "required": [
-          "eblPlatformIdentifier",
-          "legalName"
-        ],
-        "type": "object",
         "description": "refers to a company or a legal entity.",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "eblPlatformIdentifier": {
-                "pattern": "\\S+@\\S+",
-                "type": "string",
-                "example": "43549850248@exampleplatform.com"
-              }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/commonPartyDetails"
-          }
-        ]
-      },
-      "identifyingPartyCodes": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/identifyingPartyCodes_inner"
-        }
-      },
-      "commonPartyDetails": {
         "type": "object",
         "properties": {
+          "eblPlatformIdentifier": {
+            "$ref": "#/components/schemas/eblPlatformIdentifier"
+          },
           "legalName": {
             "$ref": "#/components/schemas/legalName"
           },
@@ -166,14 +152,21 @@
             "$ref": "#/components/schemas/locationOfRegistration"
           },
           "taxReference": {
-            "pattern": "^\\S+$",
-            "type": "string",
-            "description": "tax reference used in the location of registration",
-            "example": "NL859951480B01"
+            "$ref": "#/components/schemas/taxReference"
           },
           "identifyingCodes": {
             "$ref": "#/components/schemas/identifyingPartyCodes"
           }
+        },
+        "required": [
+          "eblPlatformIdentifier",
+          "legalName"
+        ]
+      },
+      "identifyingPartyCodes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/identifyingPartyCodes_inner"
         }
       },
       "endorsementChainLink": {
@@ -235,16 +228,7 @@
             "$ref": "#/components/schemas/comments"
           },
           "surrenderRequestedBy": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/transactionParty"
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "The party that requested the surrender of the EBL.\n\nThe EBL platform has verified that the party submitting the surrender request was in possion of the EBL and was entitled to perform the surrender ([see description of surrenderRequestDetails](#/components/schemas/surrenderRequestDetails)).\n"
-              }
-            ]
+            "$ref": "#/components/schemas/transactionParty"
           },
           "endorsementChain": {
             "minItems": 1,

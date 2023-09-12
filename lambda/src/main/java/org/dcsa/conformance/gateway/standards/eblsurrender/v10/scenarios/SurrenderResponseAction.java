@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.Getter;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
-import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
 public class SurrenderResponseAction extends TdrAction {

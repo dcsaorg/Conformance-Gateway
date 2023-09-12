@@ -2,11 +2,11 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
 
 import java.util.*;
 import java.util.stream.Stream;
-import org.dcsa.conformance.gateway.check.ConformanceCheck;
-import org.dcsa.conformance.gateway.check.ConformanceResult;
-import org.dcsa.conformance.gateway.check.JsonSchemaValidator;
-import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.check.ConformanceResult;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 

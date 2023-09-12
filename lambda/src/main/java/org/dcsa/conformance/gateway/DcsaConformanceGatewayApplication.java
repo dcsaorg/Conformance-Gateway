@@ -19,14 +19,12 @@ import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
-import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
-import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
-import org.dcsa.conformance.gateway.parties.ConformanceOrchestrator;
-import org.dcsa.conformance.gateway.parties.ConformanceParty;
-import org.dcsa.conformance.gateway.parties.ConformancePartyFactory;
+import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
-import org.dcsa.conformance.gateway.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

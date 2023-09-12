@@ -7,15 +7,15 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.gateway.configuration.CounterpartConfiguration;
-import org.dcsa.conformance.gateway.configuration.PartyConfiguration;
-import org.dcsa.conformance.gateway.parties.ConformanceParty;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.ConformanceParty;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
-import org.dcsa.conformance.gateway.traffic.ConformanceMessageBody;
-import org.dcsa.conformance.gateway.traffic.ConformanceRequest;
-import org.dcsa.conformance.gateway.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
 @Slf4j
 public class EblSurrenderV10Platform extends ConformanceParty {

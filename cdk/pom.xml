@@ -3,7 +3,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dcsa.conformance</groupId>
-    <artifactId>conformance-cdk</artifactId>
+    <artifactId>cdk</artifactId>
     <version>0.1</version>
     <name>DCSA Conformance CDK</name>
     <properties>

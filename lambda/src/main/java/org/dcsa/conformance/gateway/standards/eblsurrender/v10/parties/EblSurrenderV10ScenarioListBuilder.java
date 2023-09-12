@@ -5,9 +5,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.gateway.check.ActionCheck;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
-import org.dcsa.conformance.gateway.scenarios.ScenarioListBuilder;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderRequestCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderResponseCheck;
@@ -16,7 +16,7 @@ import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyA
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Slf4j
 public class EblSurrenderV10ScenarioListBuilder

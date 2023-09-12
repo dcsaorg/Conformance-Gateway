@@ -2,10 +2,10 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
 
 import java.util.*;
 import java.util.stream.Stream;
-import org.dcsa.conformance.gateway.check.ActionCheck;
-import org.dcsa.conformance.gateway.check.ConformanceResult;
-import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ConformanceResult;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 public abstract class TdrActionCheck extends ActionCheck {
   protected final int expectedStatus;

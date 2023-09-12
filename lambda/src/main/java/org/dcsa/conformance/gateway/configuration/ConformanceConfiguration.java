@@ -3,6 +3,8 @@ package org.dcsa.conformance.gateway.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 

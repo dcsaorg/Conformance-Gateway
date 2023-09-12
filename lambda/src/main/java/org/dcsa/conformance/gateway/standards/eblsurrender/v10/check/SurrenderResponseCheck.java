@@ -2,10 +2,10 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
-import org.dcsa.conformance.gateway.check.ActionCheck;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
-import org.dcsa.conformance.gateway.toolkit.JsonToolkit;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 public class SurrenderResponseCheck extends TdrActionCheck {
   private final boolean accept;

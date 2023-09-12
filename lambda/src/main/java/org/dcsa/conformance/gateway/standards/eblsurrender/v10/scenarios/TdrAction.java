@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Supplier;
 
 import lombok.Getter;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 @Getter
 public abstract class TdrAction extends ConformanceAction {

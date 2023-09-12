@@ -1,7 +1,7 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
 
 import lombok.Getter;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 import java.util.Objects;
 import java.util.function.Consumer;

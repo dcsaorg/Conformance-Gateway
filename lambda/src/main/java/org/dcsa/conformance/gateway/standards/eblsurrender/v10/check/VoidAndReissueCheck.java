@@ -1,7 +1,7 @@
 package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
 
-import org.dcsa.conformance.gateway.check.ActionCheck;
-import org.dcsa.conformance.gateway.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 import java.util.LinkedList;
 import java.util.stream.Stream;

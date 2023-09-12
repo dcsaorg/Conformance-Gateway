@@ -3,7 +3,7 @@ package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.Getter;
-import org.dcsa.conformance.gateway.scenarios.ConformanceAction;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 public class SupplyAvailableTdrAction extends ConformanceAction {
   private String transportDocumentReference = null;

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.sandbox;
 
 import java.util.Collection;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.configuration;
+package org.dcsa.conformance.sandbox.configuration;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package org.dcsa.conformance.gateway;
 
-import org.dcsa.conformance.gateway.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 

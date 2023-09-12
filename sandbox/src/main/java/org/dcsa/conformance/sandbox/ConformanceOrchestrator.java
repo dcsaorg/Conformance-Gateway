@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,8 +23,8 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.traffic.*;
-import org.dcsa.conformance.gateway.configuration.SandboxConfiguration;
-import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
+import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10ScenarioListBuilder;

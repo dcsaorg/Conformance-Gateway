@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.sandbox;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,8 +18,8 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.traffic.*;
-import org.dcsa.conformance.gateway.configuration.SandboxConfiguration;
-import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
+import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Carrier;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Platform;

@@ -20,8 +20,8 @@ import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.ConformanceTrafficRecorder;
 

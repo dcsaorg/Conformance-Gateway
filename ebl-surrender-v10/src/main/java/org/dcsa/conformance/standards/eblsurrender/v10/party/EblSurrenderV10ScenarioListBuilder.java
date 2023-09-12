@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
+package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
 import java.util.LinkedList;
 import java.util.function.Function;
@@ -8,14 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderRequestCheck;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.SurrenderResponseCheck;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.check.VoidAndReissueCheck;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderRequestAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.check.SurrenderRequestCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.check.SurrenderResponseCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.check.VoidAndReissueCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SurrenderRequestAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SurrenderResponseAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Slf4j

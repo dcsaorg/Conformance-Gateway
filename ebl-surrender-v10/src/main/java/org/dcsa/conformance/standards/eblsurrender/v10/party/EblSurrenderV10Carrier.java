@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties;
+package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,10 +10,10 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10State;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SupplyAvailableTdrAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.SurrenderResponseAction;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios.VoidAndReissueAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10State;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SurrenderResponseAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAction;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;

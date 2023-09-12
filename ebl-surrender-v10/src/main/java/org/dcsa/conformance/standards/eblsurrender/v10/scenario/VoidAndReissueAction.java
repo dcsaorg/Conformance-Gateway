@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10.scenarios;
+package org.dcsa.conformance.standards.eblsurrender.v10.scenario;
 
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;

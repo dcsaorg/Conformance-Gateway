@@ -12,9 +12,9 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.core.party.ConformanceParty;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10Role;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Carrier;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.parties.EblSurrenderV10Platform;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Carrier;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Platform;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 

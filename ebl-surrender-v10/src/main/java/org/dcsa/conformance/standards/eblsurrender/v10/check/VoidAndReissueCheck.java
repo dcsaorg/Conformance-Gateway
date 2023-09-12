@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
+package org.dcsa.conformance.standards.eblsurrender.v10.check;
 
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;

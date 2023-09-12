@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10.check;
+package org.dcsa.conformance.standards.eblsurrender.v10.check;
 
 import java.util.*;
 import java.util.stream.Stream;

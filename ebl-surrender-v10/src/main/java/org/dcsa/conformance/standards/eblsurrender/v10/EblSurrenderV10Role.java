@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway.standards.eblsurrender.v10;
+package org.dcsa.conformance.standards.eblsurrender.v10;
 
 import lombok.Getter;
 

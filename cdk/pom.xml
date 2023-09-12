@@ -5,7 +5,8 @@
     <groupId>org.dcsa.conformance</groupId>
     <artifactId>cdk</artifactId>
     <version>0.1</version>
-    <name>DCSA Conformance CDK</name>
+    <name>dcsa-conformance-cdk</name>
+    <description>DCSA Conformance CDK</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cdk.version>2.94.0</cdk.version>

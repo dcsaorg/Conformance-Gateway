@@ -3,7 +3,7 @@ package org.dcsa.conformance.gateway;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.gateway.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
 
 public enum ConformanceCheckFactory {
   ; // no instances

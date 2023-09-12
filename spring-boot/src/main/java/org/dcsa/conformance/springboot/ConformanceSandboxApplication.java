@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.springboot;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @SpringBootApplication
-@ConfigurationPropertiesScan("org.dcsa.conformance.gateway")
-public class DcsaConformanceGatewayApplication {
+@ConfigurationPropertiesScan("org.dcsa.conformance.springboot")
+public class ConformanceSandboxApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
   private ConformanceSandbox conformanceSandbox;
 
@@ -93,6 +93,6 @@ public class DcsaConformanceGatewayApplication {
   }
 
   public static void main(String[] args) {
-    SpringApplication.run(DcsaConformanceGatewayApplication.class, args);
+    SpringApplication.run(ConformanceSandboxApplication.class, args);
   }
 }

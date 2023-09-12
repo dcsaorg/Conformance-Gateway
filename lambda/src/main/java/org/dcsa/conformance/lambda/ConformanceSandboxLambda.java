@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -7,7 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
-public class DcsaConformanceGatewayLambda
+public class ConformanceSandboxLambda
     implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
   public APIGatewayProxyResponseEvent handleRequest(

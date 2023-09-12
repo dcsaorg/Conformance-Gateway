@@ -1,4 +1,4 @@
-package org.dcsa.conformance.gateway;
+package org.dcsa.conformance.springboot;
 
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;

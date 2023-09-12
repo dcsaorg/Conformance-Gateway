@@ -12,13 +12,7 @@ import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.apigatewayv2.alpha.AddRoutesOptions;
-import software.amazon.awscdk.services.apigatewayv2.alpha.HttpApi;
-import software.amazon.awscdk.services.apigatewayv2.alpha.HttpApiProps;
-import software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod;
-import software.amazon.awscdk.services.apigatewayv2.alpha.PayloadFormatVersion;
-import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegration;
-import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegrationProps;
+import software.amazon.awscdk.services.apigateway.*;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.FunctionProps;
@@ -68,31 +62,19 @@ public class ConformanceGatewayStack extends Stack {
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());
 
-    HttpApi httpApi =
-        new HttpApi(
+    LambdaRestApi lambdaRestApi =
+        new LambdaRestApi(
             this,
-            "conformance-gateway-api",
-            HttpApiProps.builder().apiName("conformance-gateway-api").build());
-
-    httpApi.addRoutes(
-        AddRoutesOptions.builder()
-            .path("/conformance")
-            .methods(singletonList(HttpMethod.GET))
-            .integration(
-                new HttpLambdaIntegration(
-                    "ConformanceGatewayIntegration",
-                    conformanceLambda,
-                    HttpLambdaIntegrationProps.builder()
-                        .payloadFormatVersion(PayloadFormatVersion.VERSION_2_0)
-                        .build()))
-            .build());
+            "conformance-lambda-rest-api",
+            LambdaRestApiProps.builder()
+                .restApiName("conformance-lambda-rest-api")
+                .handler(conformanceLambda)
+                .proxy(true)
+                .build());
 
     new CfnOutput(
         this,
-        "HttApi",
-        CfnOutputProps.builder()
-            .description("Url for Http Api")
-            .value(httpApi.getApiEndpoint())
-            .build());
+        "lambda-rest-api-url",
+        CfnOutputProps.builder().description("RestAPI URL").value(lambdaRestApi.getUrl()).build());
   }
 }

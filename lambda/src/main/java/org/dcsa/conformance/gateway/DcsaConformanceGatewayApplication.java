@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @ConfigurationPropertiesScan("org.dcsa.conformance.gateway.configuration")
 public class DcsaConformanceGatewayApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
-  private ConformanceOrchestrator conformanceOrchestrator;
+  private ConformanceGateway conformanceGateway;
 
   @PostConstruct
   public void postConstruct() {
@@ -30,14 +30,14 @@ public class DcsaConformanceGatewayApplication {
         "DcsaConformanceGatewayApplication.postConstruct(%s)"
             .formatted(Objects.requireNonNull(conformanceConfiguration)));
 
-    conformanceOrchestrator = new ConformanceOrchestrator(conformanceConfiguration);
+    conformanceGateway = new ConformanceGateway(conformanceConfiguration);
   }
 
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     ConformanceWebResponse conformanceWebResponse =
-        conformanceOrchestrator.handleRequest(
+        conformanceGateway.handleRequest(
             new ConformanceWebRequest(
                 servletRequest.getMethod(),
                 servletRequest.getRequestURL().toString(),

@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -97,7 +99,7 @@ public abstract class ConformanceParty {
 
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);
 
-  public void handleNotification() {
+  public JsonNode handleNotification() {
     CompletableFuture.runAsync(
             () -> {
               log.info(
@@ -116,6 +118,7 @@ public abstract class ConformanceParty {
                   e);
               return null;
             });
+    return new ObjectMapper().createObjectNode();
   }
 
   @SneakyThrows

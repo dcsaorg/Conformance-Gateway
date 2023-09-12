@@ -9,21 +9,36 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.report.ConformanceReport;
-import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
+import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
-import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
+import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.core.traffic.ConformanceTrafficRecorder;
+import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
+import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Carrier;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Platform;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SupplyAvailableTdrAction;
 import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAction;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.ConformanceTrafficRecorder;
 
 @Slf4j
 public class ConformanceOrchestrator {
@@ -41,7 +56,7 @@ public class ConformanceOrchestrator {
     this.scenarioListBuilder =
         inactive
             ? null
-            : ScenarioListBuilderFactory.create(
+            : createScenarioListBuilder(
                 standardConfiguration,
                 conformanceConfiguration.getParties(),
                 conformanceConfiguration.getCounterparts());
@@ -51,6 +66,51 @@ public class ConformanceOrchestrator {
     counterpartConfigurationsByPartyName =
         Arrays.stream(conformanceConfiguration.getCounterparts())
             .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
+  }
+
+  public static List<ConformanceParty> createParties(
+      StandardConfiguration standardConfiguration,
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
+    if ("EblSurrender".equals(standardConfiguration.getName())
+        && "1.0.0".equals(standardConfiguration.getVersion())) {
+
+      Map<String, PartyConfiguration> partyConfigurationsByRoleName =
+          Arrays.stream(partyConfigurations)
+              .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
+      Map<String, CounterpartConfiguration> counterpartConfigurationsByRoleName =
+          Arrays.stream(counterpartConfigurations)
+              .collect(Collectors.toMap(CounterpartConfiguration::getRole, Function.identity()));
+
+      LinkedList<ConformanceParty> parties = new LinkedList<>();
+
+      PartyConfiguration carrierConfiguration =
+          partyConfigurationsByRoleName.get(EblSurrenderV10Role.CARRIER.getConfigName());
+      if (carrierConfiguration != null) {
+        parties.add(
+            new EblSurrenderV10Carrier(
+                carrierConfiguration,
+                counterpartConfigurationsByRoleName.get(
+                    EblSurrenderV10Role.PLATFORM.getConfigName()),
+                asyncWebClient));
+      }
+
+      PartyConfiguration platformConfiguration =
+          partyConfigurationsByRoleName.get(EblSurrenderV10Role.PLATFORM.getConfigName());
+      if (platformConfiguration != null) {
+        parties.add(
+            new EblSurrenderV10Platform(
+                platformConfiguration,
+                counterpartConfigurationsByRoleName.get(
+                    EblSurrenderV10Role.CARRIER.getConfigName()),
+                asyncWebClient));
+      }
+
+      return parties;
+    }
+    throw new UnsupportedOperationException(
+        "Unsupported standard: %s".formatted(standardConfiguration));
   }
 
   public void reset() {
@@ -171,9 +231,58 @@ public class ConformanceOrchestrator {
 
   public String generateReport(Set<String> roleNames) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
+
+    ConformanceCheck conformanceCheck =
+        _createConformanceCheck(standardConfiguration, scenarioListBuilder);
+    trafficRecorder.getTrafficStream().forEach(conformanceCheck::check);
     Map<String, ConformanceReport> reportsByRoleName =
-        new ConformanceTrafficAnalyzer(standardConfiguration)
-            .analyze(scenarioListBuilder, trafficRecorder.getTrafficStream(), roleNames);
+        ConformanceReport.createForRoles(conformanceCheck, roleNames);
+
     return ConformanceReport.toHtmlReport(reportsByRoleName);
+  }
+
+  private static ConformanceCheck _createConformanceCheck(
+      StandardConfiguration standardConfiguration, ScenarioListBuilder<?> scenarioListBuilder) {
+    if ("EblSurrender".equals(standardConfiguration.getName())
+        && "1.0.0".equals(standardConfiguration.getVersion())) {
+      return new EblSurrenderV10ConformanceCheck(scenarioListBuilder);
+    }
+    throw new UnsupportedOperationException(
+        "Unsupported standard '%s' version '%s'"
+            .formatted(standardConfiguration.getName(), standardConfiguration.getVersion()));
+  }
+
+  public static ScenarioListBuilder<?> createScenarioListBuilder(
+      StandardConfiguration standardConfiguration,
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations) {
+    if ("EblSurrender".equals(standardConfiguration.getName())
+        && "1.0.0".equals(standardConfiguration.getVersion())) {
+      return EblSurrenderV10ScenarioListBuilder.buildTree(
+          _findPartyOrCounterpartName(
+              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isCarrier),
+          _findPartyOrCounterpartName(
+              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isPlatform));
+    }
+    throw new UnsupportedOperationException(
+        "Unsupported standard '%s' version '%s'"
+            .formatted(standardConfiguration.getName(), standardConfiguration.getVersion()));
+  }
+
+  private static String _findPartyOrCounterpartName(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations,
+      Predicate<String> rolePredicate) {
+    return Stream.concat(
+            Arrays.stream(partyConfigurations)
+                .filter(partyConfiguration -> rolePredicate.test(partyConfiguration.getRole()))
+                .map(PartyConfiguration::getName),
+            Arrays.stream(counterpartConfigurations)
+                .filter(
+                    counterpartConfigurationConfiguration ->
+                        rolePredicate.test(counterpartConfigurationConfiguration.getRole()))
+                .map(CounterpartConfiguration::getName))
+        .findFirst()
+        .orElseThrow();
   }
 }

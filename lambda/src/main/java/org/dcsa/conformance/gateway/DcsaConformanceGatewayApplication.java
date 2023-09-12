@@ -48,7 +48,7 @@ public class DcsaConformanceGatewayApplication {
             .formatted(Objects.requireNonNull(conformanceConfiguration)));
 
     List<ConformanceParty> conformanceParties =
-        ConformancePartyFactory.createParties(
+        ConformanceOrchestrator.createParties(
             conformanceConfiguration.getStandard(),
             conformanceConfiguration.getParties(),
             conformanceConfiguration.getCounterparts(),

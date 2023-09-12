@@ -15,7 +15,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -26,10 +25,7 @@ import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.core.traffic.ConformanceTrafficRecorder;
+import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
@@ -43,21 +39,24 @@ import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAc
 @Slf4j
 public class ConformanceOrchestrator {
   private final boolean inactive;
-  private final StandardConfiguration standardConfiguration;
+  private final ConformanceConfiguration conformanceConfiguration;
   protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
   private final ConformanceTrafficRecorder trafficRecorder;
   private final Map<String, CounterpartConfiguration> counterpartConfigurationsByPartyName;
 
+  private final Map<String, Function<ConformanceWebRequest, ConformanceWebResponse>>
+      webHandlersByPathPrefix = new HashMap<>();
+
   public ConformanceOrchestrator(ConformanceConfiguration conformanceConfiguration) {
     this.inactive = conformanceConfiguration.getOrchestrator() == null;
-    this.standardConfiguration = conformanceConfiguration.getStandard();
+    this.conformanceConfiguration = conformanceConfiguration;
 
     this.scenarioListBuilder =
         inactive
             ? null
             : createScenarioListBuilder(
-                standardConfiguration,
+                conformanceConfiguration.getStandard(),
                 conformanceConfiguration.getParties(),
                 conformanceConfiguration.getCounterparts());
 
@@ -66,9 +65,172 @@ public class ConformanceOrchestrator {
     counterpartConfigurationsByPartyName =
         Arrays.stream(conformanceConfiguration.getCounterparts())
             .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
+
+    _createParties(
+            conformanceConfiguration.getStandard(),
+            conformanceConfiguration.getParties(),
+            conformanceConfiguration.getCounterparts(),
+            this::asyncOutboundRequest)
+        .forEach(
+            party -> {
+              webHandlersByPathPrefix.put(
+                  "/conformance/party/%s/notification".formatted(party.getName()),
+                  (webRequest -> _handlePartyNotification(party)));
+              webHandlersByPathPrefix.put(
+                  "/conformance/party/%s/from/%s"
+                      .formatted(party.getName(), party.getCounterpartName()),
+                  webRequest -> this._handlePartyRequest(party, webRequest));
+            });
+
+    webHandlersByPathPrefix.put("/conformance/orchestrator/reset", webRequest -> reset());
+
+    Stream.concat(
+            Arrays.stream(conformanceConfiguration.getParties()).map(PartyConfiguration::getName),
+            Arrays.stream(conformanceConfiguration.getCounterparts())
+                .map(CounterpartConfiguration::getName))
+        .collect(Collectors.toSet())
+        .forEach(
+            partyOrCounterpartName -> {
+              webHandlersByPathPrefix.put(
+                  "/conformance/orchestrator/party/%s/prompt/json"
+                      .formatted(partyOrCounterpartName),
+                  webRequest -> _handleGetPartyPrompt(partyOrCounterpartName));
+              webHandlersByPathPrefix.put(
+                  "/conformance/orchestrator/party/%s/input".formatted(partyOrCounterpartName),
+                  webRequest ->
+                      _handlePartyInput(
+                          new ConformanceMessageBody(webRequest.body()).getJsonBody()));
+            });
+
+    webHandlersByPathPrefix.put(
+        "/conformance/orchestrator/report",
+        webRequest ->
+            _generateReport(
+                (conformanceConfiguration.getParties().length == EblSurrenderV10Role.values().length
+                        ? Arrays.stream(EblSurrenderV10Role.values())
+                            .map(EblSurrenderV10Role::getConfigName)
+                        : Arrays.stream(conformanceConfiguration.getCounterparts())
+                            .map(CounterpartConfiguration::getRole)
+                            .filter(
+                                counterpartRole ->
+                                    Arrays.stream(conformanceConfiguration.getParties())
+                                        .map(PartyConfiguration::getRole)
+                                        .noneMatch(
+                                            partyRole ->
+                                                Objects.equals(partyRole, counterpartRole))))
+                    .collect(Collectors.toSet())));
   }
 
-  public static List<ConformanceParty> createParties(
+  private void asyncOutboundRequest(
+      ConformanceRequest conformanceRequest,
+      Consumer<ConformanceResponse> conformanceResponseConsumer) {
+    CompletableFuture.runAsync(
+            () -> {
+              log.info(
+                  "DcsaConformanceGatewayApplication.outboundAsyncRequest(%s)"
+                      .formatted(conformanceRequest));
+
+              ConformanceResponse conformanceResponse = syncHttpRequest(conformanceRequest);
+
+              conformanceResponseConsumer.accept(conformanceResponse);
+
+              if (!conformanceRequest.message().targetPartyRole().equals("orchestrator")
+                  && Arrays.stream(conformanceConfiguration.getParties())
+                      .noneMatch(
+                          partyConfiguration ->
+                              Objects.equals(
+                                  partyConfiguration.getName(),
+                                  conformanceRequest.message().targetPartyName()))) {
+                ConformanceOrchestrator.this.handlePartyTrafficExchange(
+                    new ConformanceExchange(conformanceRequest, conformanceResponse));
+              }
+            })
+        .exceptionally(
+            e -> {
+              log.error(
+                  "DcsaConformanceGatewayApplication.outboundAsyncRequest(baseUrl='%s', path='%s') failed: %s"
+                      .formatted(conformanceRequest.baseUrl(), conformanceRequest.path(), e),
+                  e);
+              return null;
+            });
+  }
+
+  @SneakyThrows
+  private ConformanceResponse syncHttpRequest(ConformanceRequest conformanceRequest) {
+    HttpRequest.Builder httpRequestBuilder =
+        HttpRequest.newBuilder()
+            .uri(URI.create(conformanceRequest.baseUrl() + conformanceRequest.path()))
+            .method(
+                conformanceRequest.method(),
+                HttpRequest.BodyPublishers.ofString(
+                    conformanceRequest.message().body().getStringBody()))
+            .timeout(Duration.ofHours(1));
+    conformanceRequest
+        .message()
+        .headers()
+        .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
+    HttpResponse<String> httpResponse =
+        HttpClient.newHttpClient()
+            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    return conformanceRequest.createResponse(
+        httpResponse.statusCode(),
+        httpResponse.headers().map(),
+        new ConformanceMessageBody(httpResponse.body()));
+  }
+
+  private ConformanceWebResponse _handlePartyNotification(ConformanceParty party) {
+    party.handleNotification();
+    return _emptyResponse();
+  }
+
+  private ConformanceWebResponse _emptyResponse() {
+    return new ConformanceWebResponse(
+        200,
+        "application/json;charset=utf-8",
+        Collections.emptyMap(),
+        new ObjectMapper().createObjectNode().toString());
+  }
+
+  private ConformanceWebResponse _handlePartyRequest(
+      ConformanceParty party, ConformanceWebRequest webRequest) {
+    ConformanceRequest conformanceRequest =
+        new ConformanceRequest(
+            webRequest.method(),
+            webRequest.baseUrl(),
+            webRequest.uri(),
+            webRequest.queryParameters(),
+            new ConformanceMessage(
+                party.getCounterpartName(),
+                party.getCounterpartRole(),
+                party.getName(),
+                party.getRole(),
+                webRequest.headers(),
+                new ConformanceMessageBody(webRequest.body()),
+                System.currentTimeMillis()));
+    ConformanceResponse conformanceResponse = party.handleRequest(conformanceRequest);
+    handlePartyTrafficExchange(new ConformanceExchange(conformanceRequest, conformanceResponse));
+    return new ConformanceWebResponse(
+        conformanceResponse.statusCode(),
+        "application/json;charset=utf-8",
+        conformanceResponse.message().headers(),
+        conformanceResponse.message().body().getStringBody());
+  }
+
+  public ConformanceWebResponse handleRequest(ConformanceWebRequest conformanceWebRequest) {
+    return webHandlersByPathPrefix
+        .get(
+            webHandlersByPathPrefix.keySet().stream()
+                .filter(conformanceWebRequest.uri()::startsWith)
+                .findFirst()
+                .orElseThrow(
+                    () ->
+                        new NullPointerException(
+                            "Web handler not found for URI '%s'"
+                                .formatted(conformanceWebRequest.uri()))))
+        .apply(conformanceWebRequest);
+  }
+
+  private static List<ConformanceParty> _createParties(
       StandardConfiguration standardConfiguration,
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -113,7 +275,7 @@ public class ConformanceOrchestrator {
         "Unsupported standard: %s".formatted(standardConfiguration));
   }
 
-  public void reset() {
+  public ConformanceWebResponse reset() {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     trafficRecorder.reset();
 
@@ -121,6 +283,8 @@ public class ConformanceOrchestrator {
     scenarios.addAll(scenarioListBuilder.buildScenarioList());
 
     notifyAllPartiesOfNextActions();
+
+    return _emptyResponse();
   }
 
   private synchronized void notifyAllPartiesOfNextActions() {
@@ -166,21 +330,26 @@ public class ConformanceOrchestrator {
             HttpResponse.BodyHandlers.ofString());
   }
 
-  public synchronized JsonNode handleGetPartyPrompt(String partyName) {
+  private synchronized ConformanceWebResponse _handleGetPartyPrompt(String partyName) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
-    return new ObjectMapper()
-        .createArrayNode()
-        .addAll(
-            scenarios.stream()
-                .map(ConformanceScenario::peekNextAction)
-                .filter(Objects::nonNull)
-                .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
-                .map(ConformanceAction::asJsonNode)
-                .collect(Collectors.toList()));
+    return new ConformanceWebResponse(
+        200,
+        "application/json;charset=utf-8",
+        Collections.emptyMap(),
+        new ObjectMapper()
+            .createArrayNode()
+            .addAll(
+                scenarios.stream()
+                    .map(ConformanceScenario::peekNextAction)
+                    .filter(Objects::nonNull)
+                    .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
+                    .map(ConformanceAction::asJsonNode)
+                    .collect(Collectors.toList()))
+            .toString());
   }
 
-  public synchronized void handlePartyInput(JsonNode partyInput) {
+  private synchronized ConformanceWebResponse _handlePartyInput(JsonNode partyInput) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
@@ -205,7 +374,7 @@ public class ConformanceOrchestrator {
       throw new UnsupportedOperationException(partyInput.toString());
     }
     notifyAllPartiesOfNextActions();
-    new ObjectMapper().createObjectNode();
+    return _emptyResponse();
   }
 
   public synchronized void handlePartyTrafficExchange(ConformanceExchange exchange) {
@@ -229,16 +398,20 @@ public class ConformanceOrchestrator {
     notifyAllPartiesOfNextActions();
   }
 
-  public String generateReport(Set<String> roleNames) {
+  private ConformanceWebResponse _generateReport(Set<String> roleNames) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
 
     ConformanceCheck conformanceCheck =
-        _createConformanceCheck(standardConfiguration, scenarioListBuilder);
+        _createConformanceCheck(conformanceConfiguration.getStandard(), scenarioListBuilder);
     trafficRecorder.getTrafficStream().forEach(conformanceCheck::check);
     Map<String, ConformanceReport> reportsByRoleName =
         ConformanceReport.createForRoles(conformanceCheck, roleNames);
 
-    return ConformanceReport.toHtmlReport(reportsByRoleName);
+    return new ConformanceWebResponse(
+        200,
+        "text/html;charset=utf-8",
+        Collections.emptyMap(),
+        ConformanceReport.toHtmlReport(reportsByRoleName));
   }
 
   private static ConformanceCheck _createConformanceCheck(

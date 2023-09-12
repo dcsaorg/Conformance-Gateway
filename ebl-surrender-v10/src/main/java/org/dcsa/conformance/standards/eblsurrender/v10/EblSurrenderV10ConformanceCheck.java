@@ -11,7 +11,7 @@ import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
 
 public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 
-  public static final String SCHEMAS_FOLDER = "/standards/eblsurrender/v10/";
+  public static final String SCHEMAS_FOLDER = "/eblsurrender/v10/";
   public static final String SCHEMAS_FILE_ASYNC_REQUEST =
       SCHEMAS_FOLDER + "eblsurrender-v10-async-request.json";
   public static final String SCHEMAS_FILE_ASYNC_RESPONSE =

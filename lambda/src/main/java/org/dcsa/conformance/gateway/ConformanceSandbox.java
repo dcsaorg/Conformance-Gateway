@@ -18,28 +18,28 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.traffic.*;
-import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
+import org.dcsa.conformance.gateway.configuration.SandboxConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Carrier;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Platform;
 
 @Slf4j
-public class ConformanceGateway {
+public class ConformanceSandbox {
   public static final String JSON_UTF_8 = "application/json;charset=utf-8";
-  private final ConformanceConfiguration conformanceConfiguration;
+  private final SandboxConfiguration sandboxConfiguration;
   private final ConformanceOrchestrator conformanceOrchestrator;
   private final Map<String, Function<ConformanceWebRequest, ConformanceWebResponse>>
       webHandlersByPathPrefix = new HashMap<>();
 
-  public ConformanceGateway(ConformanceConfiguration conformanceConfiguration) {
-    this.conformanceConfiguration = conformanceConfiguration;
-    this.conformanceOrchestrator = new ConformanceOrchestrator(conformanceConfiguration);
+  public ConformanceSandbox(SandboxConfiguration sandboxConfiguration) {
+    this.sandboxConfiguration = sandboxConfiguration;
+    this.conformanceOrchestrator = new ConformanceOrchestrator(sandboxConfiguration);
 
     _createParties(
-            conformanceConfiguration.getStandard(),
-            conformanceConfiguration.getParties(),
-            conformanceConfiguration.getCounterparts(),
+            sandboxConfiguration.getStandard(),
+            sandboxConfiguration.getParties(),
+            sandboxConfiguration.getCounterparts(),
             this::asyncOutboundRequest)
         .forEach(
             party -> {
@@ -62,8 +62,8 @@ public class ConformanceGateway {
                 conformanceOrchestrator.reset().toString()));
 
     Stream.concat(
-            Arrays.stream(conformanceConfiguration.getParties()).map(PartyConfiguration::getName),
-            Arrays.stream(conformanceConfiguration.getCounterparts())
+            Arrays.stream(sandboxConfiguration.getParties()).map(PartyConfiguration::getName),
+            Arrays.stream(sandboxConfiguration.getCounterparts())
                 .map(CounterpartConfiguration::getName))
         .collect(Collectors.toSet())
         .forEach(
@@ -100,15 +100,15 @@ public class ConformanceGateway {
                 "text/html;charset=utf-8",
                 Collections.emptyMap(),
                 conformanceOrchestrator.generateReport(
-                    (conformanceConfiguration.getParties().length
+                    (sandboxConfiguration.getParties().length
                                 == EblSurrenderV10Role.values().length
                             ? Arrays.stream(EblSurrenderV10Role.values())
                                 .map(EblSurrenderV10Role::getConfigName)
-                            : Arrays.stream(conformanceConfiguration.getCounterparts())
+                            : Arrays.stream(sandboxConfiguration.getCounterparts())
                                 .map(CounterpartConfiguration::getRole)
                                 .filter(
                                     counterpartRole ->
-                                        Arrays.stream(conformanceConfiguration.getParties())
+                                        Arrays.stream(sandboxConfiguration.getParties())
                                             .map(PartyConfiguration::getRole)
                                             .noneMatch(
                                                 partyRole ->
@@ -130,7 +130,7 @@ public class ConformanceGateway {
               conformanceResponseConsumer.accept(conformanceResponse);
 
               if (!conformanceRequest.message().targetPartyRole().equals("orchestrator")
-                  && Arrays.stream(conformanceConfiguration.getParties())
+                  && Arrays.stream(sandboxConfiguration.getParties())
                       .noneMatch(
                           partyConfiguration ->
                               Objects.equals(

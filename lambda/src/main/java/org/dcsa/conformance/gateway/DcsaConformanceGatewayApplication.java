@@ -9,7 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,10 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @SpringBootApplication
-@ConfigurationPropertiesScan("org.dcsa.conformance.gateway.configuration")
+@ConfigurationPropertiesScan("org.dcsa.conformance.gateway")
 public class DcsaConformanceGatewayApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
-  private ConformanceGateway conformanceGateway;
+  private ConformanceSandbox conformanceSandbox;
 
   @PostConstruct
   public void postConstruct() {
@@ -30,14 +29,14 @@ public class DcsaConformanceGatewayApplication {
         "DcsaConformanceGatewayApplication.postConstruct(%s)"
             .formatted(Objects.requireNonNull(conformanceConfiguration)));
 
-    conformanceGateway = new ConformanceGateway(conformanceConfiguration);
+    conformanceSandbox = new ConformanceSandbox(conformanceConfiguration);
   }
 
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     ConformanceWebResponse conformanceWebResponse =
-        conformanceGateway.handleRequest(
+        conformanceSandbox.handleRequest(
             new ConformanceWebRequest(
                 servletRequest.getMethod(),
                 servletRequest.getRequestURL().toString(),

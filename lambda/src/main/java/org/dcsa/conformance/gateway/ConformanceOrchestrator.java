@@ -23,7 +23,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.traffic.*;
-import org.dcsa.conformance.gateway.configuration.ConformanceConfiguration;
+import org.dcsa.conformance.gateway.configuration.SandboxConfiguration;
 import org.dcsa.conformance.gateway.configuration.StandardConfiguration;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
@@ -34,28 +34,28 @@ import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAc
 @Slf4j
 public class ConformanceOrchestrator {
   private final boolean inactive;
-  private final ConformanceConfiguration conformanceConfiguration;
+  private final SandboxConfiguration sandboxConfiguration;
   protected final ScenarioListBuilder<?> scenarioListBuilder;
   protected final List<ConformanceScenario> scenarios = new ArrayList<>();
   private final ConformanceTrafficRecorder trafficRecorder;
   private final Map<String, CounterpartConfiguration> counterpartConfigurationsByPartyName;
 
-  public ConformanceOrchestrator(ConformanceConfiguration conformanceConfiguration) {
-    this.inactive = conformanceConfiguration.getOrchestrator() == null;
-    this.conformanceConfiguration = conformanceConfiguration;
+  public ConformanceOrchestrator(SandboxConfiguration sandboxConfiguration) {
+    this.inactive = sandboxConfiguration.getOrchestrator() == null;
+    this.sandboxConfiguration = sandboxConfiguration;
 
     this.scenarioListBuilder =
         inactive
             ? null
             : createScenarioListBuilder(
-                conformanceConfiguration.getStandard(),
-                conformanceConfiguration.getParties(),
-                conformanceConfiguration.getCounterparts());
+                sandboxConfiguration.getStandard(),
+                sandboxConfiguration.getParties(),
+                sandboxConfiguration.getCounterparts());
 
     trafficRecorder = inactive ? null : new ConformanceTrafficRecorder();
 
     counterpartConfigurationsByPartyName =
-        Arrays.stream(conformanceConfiguration.getCounterparts())
+        Arrays.stream(sandboxConfiguration.getCounterparts())
             .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
   }
 
@@ -181,7 +181,7 @@ public class ConformanceOrchestrator {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
 
     ConformanceCheck conformanceCheck =
-        _createConformanceCheck(conformanceConfiguration.getStandard(), scenarioListBuilder);
+        _createConformanceCheck(sandboxConfiguration.getStandard(), scenarioListBuilder);
     trafficRecorder.getTrafficStream().forEach(conformanceCheck::check);
     Map<String, ConformanceReport> reportsByRoleName =
         ConformanceReport.createForRoles(conformanceCheck, roleNames);

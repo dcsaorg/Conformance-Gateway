@@ -5,15 +5,11 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@ConfigurationProperties(prefix = "conformance")
-@ConfigurationPropertiesScan
 @Getter
 @Setter
 @ToString
-public class ConformanceConfiguration {
+public class SandboxConfiguration {
   private StandardConfiguration standard;
   private OrchestratorConfiguration orchestrator;
   private PartyConfiguration[] parties;

@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.state.StatefulExecutor;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class ConformanceSandboxApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
   private ConformanceSandbox conformanceSandbox;
+  private StatefulExecutor statefulExecutor;
 
   @PostConstruct
   public void postConstruct() {
@@ -32,7 +34,10 @@ public class ConformanceSandboxApplication {
         "DcsaConformanceGatewayApplication.postConstruct(%s)"
             .formatted(Objects.requireNonNull(conformanceConfiguration)));
 
+    statefulExecutor = new MemoryMapStatefulExecutor();
+    // TODO create initial sandboxes instead of config
     conformanceSandbox = new ConformanceSandbox(conformanceConfiguration);
+    // TODO make sandbox methods static with executor arg
   }
 
   @RequestMapping(value = "/conformance/**")

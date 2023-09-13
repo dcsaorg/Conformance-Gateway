@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender.v10;
+package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
 public enum EblSurrenderV10State {
     AVAILABLE_FOR_SURRENDER,

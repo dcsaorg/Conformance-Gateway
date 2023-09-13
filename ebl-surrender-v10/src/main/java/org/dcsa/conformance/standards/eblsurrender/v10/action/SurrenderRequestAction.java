@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender.v10.scenario;
+package org.dcsa.conformance.standards.eblsurrender.v10.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

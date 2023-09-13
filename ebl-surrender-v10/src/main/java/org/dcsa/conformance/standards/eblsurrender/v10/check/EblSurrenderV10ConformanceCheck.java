@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender.v10;
+package org.dcsa.conformance.standards.eblsurrender.v10.check;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -7,7 +7,7 @@ import org.dcsa.conformance.core.check.ConformanceResult;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
 
 public class EblSurrenderV10ConformanceCheck extends ConformanceCheck {
 

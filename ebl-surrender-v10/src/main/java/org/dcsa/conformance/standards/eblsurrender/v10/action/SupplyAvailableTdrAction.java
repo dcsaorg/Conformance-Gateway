@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender.v10.scenario;
+package org.dcsa.conformance.standards.eblsurrender.v10.action;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

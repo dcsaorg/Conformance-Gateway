@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 public class SurrenderRequestCheck extends TdrActionCheck {

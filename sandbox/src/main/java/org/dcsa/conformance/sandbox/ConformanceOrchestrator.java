@@ -25,11 +25,11 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ConformanceCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
-import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10ScenarioListBuilder;
-import org.dcsa.conformance.standards.eblsurrender.v10.scenario.SupplyAvailableTdrAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.scenario.VoidAndReissueAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.check.EblSurrenderV10ConformanceCheck;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ScenarioListBuilder;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
 
 @Slf4j
 public class ConformanceOrchestrator {

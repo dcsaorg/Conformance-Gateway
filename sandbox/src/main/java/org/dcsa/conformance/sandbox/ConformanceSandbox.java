@@ -20,7 +20,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Carrier;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Platform;
 

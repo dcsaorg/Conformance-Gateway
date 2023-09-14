@@ -2,19 +2,21 @@ package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
-import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderRequestAction;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderRequestAction;
 
 @Slf4j
 public class EblSurrenderV10Platform extends ConformanceParty {
@@ -24,8 +26,49 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   public EblSurrenderV10Platform(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
-    super(partyConfiguration, counterpartConfiguration, asyncWebClient);
+      Consumer<ConformanceRequest> asyncWebClient,
+      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient, asyncPartyActionConsumer);
+  }
+
+  @Override
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
+    eblStatesById.forEach(
+        (key, value) -> {
+          ObjectNode entryNode = objectMapper.createObjectNode();
+          entryNode.put("key", key);
+          entryNode.put("value", value.name());
+          arrayNodeEblStatesById.add(entryNode);
+        });
+    targetObjectNode.set("eblStatesById", arrayNodeEblStatesById);
+
+    ArrayNode arrayNodeTdrsBySrr = objectMapper.createArrayNode();
+    tdrsBySrr.forEach(
+        (key, value) -> {
+          ObjectNode entryNode = objectMapper.createObjectNode();
+          entryNode.put("key", key);
+          entryNode.put("value", value);
+          arrayNodeTdrsBySrr.add(entryNode);
+        });
+    targetObjectNode.set("tdrsBySrr", arrayNodeTdrsBySrr);
+  }
+
+  @Override
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    StreamSupport.stream(sourceObjectNode.get("eblStatesById").spliterator(), false)
+        .forEach(
+            entryNode ->
+                eblStatesById.put(
+                    entryNode.get("key").asText(),
+                    EblSurrenderV10State.valueOf(entryNode.get("value").asText())));
+
+    StreamSupport.stream(sourceObjectNode.get("tdrsBySrr").spliterator(), false)
+        .forEach(
+            entryNode ->
+                tdrsBySrr.put(entryNode.get("key").asText(), entryNode.get("value").asText()));
   }
 
   @Override
@@ -73,7 +116,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
                             .put("eblPlatformIdentifier", "two@example.com")
                             .put("legalName", "Legal Name Two"))));
     asyncCounterpartPost(
-        "/v1/surrender-requests", "1.0.0", jsonRequestBody, conformanceResponse -> {});
+        "/v1/surrender-requests", "1.0.0", jsonRequestBody);
   }
 
   @Override

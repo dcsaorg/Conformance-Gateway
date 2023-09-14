@@ -1,0 +1,26 @@
+{
+  "standard" : {
+    "name" : "EblSurrender",
+    "version" : "1.0.0"
+  },
+  "orchestrator" : {
+    "maxParallelScenarios" : 1
+  },
+  "parties" : [ {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "orchestratorBaseUrl" : "http://localhost:8080",
+    "orchestratorRootPath" : "/conformance"
+  } ],
+  "counterparts" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "baseUrl" : "http://localhost:8081",
+    "rootPath" : "/conformance"
+  }, {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance"
+  } ]
+}

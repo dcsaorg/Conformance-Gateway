@@ -1,15 +1,17 @@
 package org.dcsa.conformance.core.scenario;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
+import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
-public class ConformanceAction {
-  protected final UUID id = UUID.randomUUID();
+public abstract class ConformanceAction implements StatefulEntity {
+  protected UUID id = UUID.randomUUID();
   private final String sourcePartyName;
   private final String targetPartyName;
   protected final ConformanceAction previousAction;
@@ -21,6 +23,18 @@ public class ConformanceAction {
     this.targetPartyName = targetPartyName;
     this.previousAction = previousAction;
     this.actionPath = (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = new ObjectMapper().createObjectNode();
+    jsonState.put("id", id.toString());
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    id = UUID.fromString(jsonState.get("id").asText());
   }
 
   public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {

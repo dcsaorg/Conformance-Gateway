@@ -1,11 +1,12 @@
 package org.dcsa.conformance.standards.eblsurrender.v10.action;
 
-import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import lombok.Getter;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 @Getter
 public class VoidAndReissueAction extends TdrAction {
@@ -21,6 +22,16 @@ public class VoidAndReissueAction extends TdrAction {
   public VoidAndReissueAction(
       String carrierPartyName, String platformPartyName, ConformanceAction previousAction) {
     super(carrierPartyName, platformPartyName, -1, previousAction, "Void&Reissue");
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    return super.exportJsonState();
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
   }
 
   @Override

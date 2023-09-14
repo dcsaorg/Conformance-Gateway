@@ -2,20 +2,23 @@ package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
-import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderResponseAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderResponseAction;
+import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
 
 @Slf4j
 public class EblSurrenderV10Carrier extends ConformanceParty {
@@ -24,8 +27,33 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   public EblSurrenderV10Carrier(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient) {
-    super(partyConfiguration, counterpartConfiguration, asyncWebClient);
+      Consumer<ConformanceRequest> asyncWebClient,
+      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient, asyncPartyActionConsumer);
+  }
+
+  @Override
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ArrayNode arrayNode = objectMapper.createArrayNode();
+    eblStatesById.forEach(
+        (key, value) -> {
+          ObjectNode entryNode = objectMapper.createObjectNode();
+          entryNode.put("key", key);
+          entryNode.put("value", value.name());
+          arrayNode.add(entryNode);
+        });
+    targetObjectNode.set("eblStatesById", arrayNode);
+  }
+
+  @Override
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    StreamSupport.stream(sourceObjectNode.get("eblStatesById").spliterator(), false)
+        .forEach(
+            entryNode ->
+                eblStatesById.put(
+                    entryNode.get("key").asText(),
+                    EblSurrenderV10State.valueOf(entryNode.get("value").asText())));
   }
 
   @Override
@@ -92,8 +120,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", srr)
-            .put("action", accept ? "SURR" : "SREJ"),
-        conformanceResponse -> {});
+            .put("action", accept ? "SURR" : "SREJ"));
   }
 
   @Override

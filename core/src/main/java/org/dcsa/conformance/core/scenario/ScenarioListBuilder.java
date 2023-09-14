@@ -87,13 +87,13 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   protected T then(T child) {
-    log.info("ScenarioListBuilder.then()");
+    log.debug("ScenarioListBuilder.then()");
     return thenEither(child);
   }
 
   @SafeVarargs
   protected final T thenEither(T... children) {
-    log.info("ScenarioListBuilder.thenEither(%d)".formatted(children.length));
+    log.debug("ScenarioListBuilder.thenEither(%d)".formatted(children.length));
     if (!this.children.isEmpty()) throw new IllegalStateException();
     Stream.of(children)
         .forEach(
@@ -107,6 +107,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
     return thisAsT();
   }
 
+  @SuppressWarnings("unused")
   protected T runAndCheckExclusively() {
     if (!children.isEmpty()) throw new IllegalStateException();
     this.runExclusively = true;

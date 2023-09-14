@@ -1,0 +1,19 @@
+{
+  "standard" : {
+    "name" : "EblSurrender",
+    "version" : "1.0.0"
+  },
+  "orchestrator" : null,
+  "parties" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "orchestratorBaseUrl" : "http://localhost:8080",
+    "orchestratorRootPath" : "/conformance"
+  } ],
+  "counterparts" : [ {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance"
+  } ]
+}

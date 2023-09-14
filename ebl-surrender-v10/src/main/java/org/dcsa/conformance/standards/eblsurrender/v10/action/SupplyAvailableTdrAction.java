@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.eblsurrender.v10.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.Getter;
@@ -28,5 +30,23 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
 
   public SupplyAvailableTdrAction(String carrierPartyName, ConformanceAction previousAction) {
     super(carrierPartyName, null, previousAction, "SupplyTDR");
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = super.exportJsonState();
+    if (transportDocumentReference != null) {
+      jsonState.put("transportDocumentReference", transportDocumentReference);
+    }
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
+    JsonNode tdrNode = jsonState.get("transportDocumentReference");
+    if (tdrNode != null) {
+      transportDocumentReference = tdrNode.asText();
+    }
   }
 }

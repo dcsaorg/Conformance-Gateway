@@ -79,7 +79,7 @@ public class EblSurrenderV10ScenarioListBuilder
   }
 
   private static EblSurrenderV10ScenarioListBuilder supplyAvailableTdrAction() {
-    log.info("EblSurrenderV10ScenarioListBuilder.supplyAvailableTdrAction()");
+    log.debug("EblSurrenderV10ScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
         noPreviousAction -> new SupplyAvailableTdrAction(carrierPartyName, null),
@@ -105,13 +105,13 @@ public class EblSurrenderV10ScenarioListBuilder
   }
 
   private static EblSurrenderV10ScenarioListBuilder requestSurrenderForAmendment(int status) {
-    log.info(
+    log.debug(
         "EblSurrenderV10ScenarioListBuilder.requestSurrenderForAmendment(%d)".formatted(status));
     return _surrenderRequestBuilder(true, status);
   }
 
   private static EblSurrenderV10ScenarioListBuilder requestSurrenderForDelivery(int status) {
-    log.info(
+    log.debug(
         "EblSurrenderV10ScenarioListBuilder.requestSurrenderForDelivery(%d)".formatted(status));
     return _surrenderRequestBuilder(false, status);
   }
@@ -135,12 +135,12 @@ public class EblSurrenderV10ScenarioListBuilder
   }
 
   private static EblSurrenderV10ScenarioListBuilder acceptSurrenderRequest(int status) {
-    log.info("EblSurrenderV10ScenarioListBuilder.acceptSurrenderRequest(%d)".formatted(status));
+    log.debug("EblSurrenderV10ScenarioListBuilder.acceptSurrenderRequest(%d)".formatted(status));
     return _surrenderResponseBuilder(true, status);
   }
 
   private static EblSurrenderV10ScenarioListBuilder rejectSurrenderRequest(int status) {
-    log.info("EblSurrenderV10ScenarioListBuilder.rejectSurrenderRequest(%d)".formatted(status));
+    log.debug("EblSurrenderV10ScenarioListBuilder.rejectSurrenderRequest(%d)".formatted(status));
     return _surrenderResponseBuilder(false, status);
   }
 
@@ -162,7 +162,7 @@ public class EblSurrenderV10ScenarioListBuilder
   }
 
   private static EblSurrenderV10ScenarioListBuilder voidAndReissue() {
-    log.info("EblSurrenderV10ScenarioListBuilder.voidAndReissue()");
+    log.debug("EblSurrenderV10ScenarioListBuilder.voidAndReissue()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(

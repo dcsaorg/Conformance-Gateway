@@ -2,6 +2,8 @@ package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,70 +11,81 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
-import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
-import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
-import org.dcsa.conformance.standards.eblsurrender.v10.check.EblSurrenderV10ConformanceCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
-import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
 
 @Slf4j
-public class ConformanceOrchestrator {
+public class ConformanceOrchestrator implements StatefulEntity {
   private final boolean inactive;
   private final SandboxConfiguration sandboxConfiguration;
-  protected final ScenarioListBuilder<?> scenarioListBuilder;
-  protected final List<ConformanceScenario> scenarios = new ArrayList<>();
+  private final ComponentFactory componentFactory;
+  private final Consumer<Consumer<ConformanceOrchestrator>> asyncOrchestratorActionConsumer;
   private final ConformanceTrafficRecorder trafficRecorder;
-  private final Map<String, CounterpartConfiguration> counterpartConfigurationsByPartyName;
+  private final List<ConformanceScenario> scenarios = new ArrayList<>();
 
-  public ConformanceOrchestrator(SandboxConfiguration sandboxConfiguration) {
+  public ConformanceOrchestrator(
+      SandboxConfiguration sandboxConfiguration,
+      ComponentFactory componentFactory,
+      Consumer<Consumer<ConformanceOrchestrator>> asyncOrchestratorActionConsumer) {
     this.inactive = sandboxConfiguration.getOrchestrator() == null;
     this.sandboxConfiguration = sandboxConfiguration;
-
-    this.scenarioListBuilder =
-        inactive
-            ? null
-            : createScenarioListBuilder(
-                sandboxConfiguration.getStandard(),
-                sandboxConfiguration.getParties(),
-                sandboxConfiguration.getCounterparts());
-
+    this.componentFactory = componentFactory;
+    this.asyncOrchestratorActionConsumer = asyncOrchestratorActionConsumer;
     trafficRecorder = inactive ? null : new ConformanceTrafficRecorder();
-
-    counterpartConfigurationsByPartyName =
-        Arrays.stream(sandboxConfiguration.getCounterparts())
-            .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()));
+    if (!inactive) {
+      scenarios.addAll(
+          componentFactory
+              .createScenarioListBuilder(
+                  sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts())
+              .buildScenarioList());
+    }
   }
 
-  public JsonNode reset() {
-    if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
-    trafficRecorder.reset();
+  @Override
+  public JsonNode exportJsonState() {
+    ObjectNode jsonState = new ObjectMapper().createObjectNode();
+    if (inactive) return jsonState;
+    jsonState.set("trafficRecorder", trafficRecorder.exportJsonState());
 
-    scenarios.clear();
-    scenarios.addAll(scenarioListBuilder.buildScenarioList());
+    ArrayNode scenariosArrayNode = new ObjectMapper().createArrayNode();
+    scenarios.forEach(scenario -> scenariosArrayNode.add(scenario.exportJsonState()));
+    jsonState.set("scenarios", scenariosArrayNode);
 
-    notifyAllPartiesOfNextActions();
-
-    return new ObjectMapper().createObjectNode();
+    return jsonState;
   }
 
-  private synchronized void notifyAllPartiesOfNextActions() {
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    if (inactive) return;
+    trafficRecorder.importJsonState(jsonState.get("trafficRecorder"));
+
+    ArrayNode scenariosNode = (ArrayNode) jsonState.get("scenarios");
+    for (int index = 0; index < scenarios.size(); ++index) {
+      scenarios.get(index).importJsonState(scenariosNode.get(index));
+    }
+  }
+
+  public void scheduleNotifyAllParties() {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
+    log.info("ConformanceOrchestrator.scheduleNotifyAllParties()");
+    asyncOrchestratorActionConsumer.accept(ConformanceOrchestrator::_notifyAllParties);
+  }
+
+  private void _notifyAllParties() {
     scenarios.stream()
         .map(ConformanceScenario::peekNextAction)
         .filter(Objects::nonNull)
@@ -83,23 +96,23 @@ public class ConformanceOrchestrator {
 
   private void asyncNotifyParty(String partyName) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
-    CompletableFuture.runAsync(
-            () -> {
-              log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
-              syncNotifyParty(partyName);
-            })
+    log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
+    CompletableFuture.runAsync(() -> _syncNotifyParty(partyName))
         .exceptionally(
             e -> {
-              log.error("Failed to notify party '%s': %s".formatted(partyName, e), e);
+              log.error("ConformanceSandbox.asyncNotifyParty() failed: %s".formatted(e), e);
               return null;
             });
   }
 
   @SneakyThrows
-  private void syncNotifyParty(String partyName) {
+  private void _syncNotifyParty(String partyName) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
+    log.info("ConformanceOrchestrator._syncNotifyParty(%s)".formatted(partyName));
     CounterpartConfiguration counterpartConfiguration =
-        counterpartConfigurationsByPartyName.get(partyName);
+        Arrays.stream(sandboxConfiguration.getCounterparts())
+            .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()))
+            .get(partyName);
     HttpClient.newHttpClient()
         .send(
             HttpRequest.newBuilder()
@@ -152,12 +165,14 @@ public class ConformanceOrchestrator {
     } else {
       throw new UnsupportedOperationException(partyInput.toString());
     }
-    notifyAllPartiesOfNextActions();
+    scheduleNotifyAllParties();
     return new ObjectMapper().createObjectNode();
   }
 
   public synchronized void handlePartyTrafficExchange(ConformanceExchange exchange) {
     if (inactive) return;
+    log.info(
+        "ConformanceOrchestrator.handlePartyTrafficExchange(%s)".formatted(exchange.getUuid()));
     trafficRecorder.recordExchange(exchange);
     ConformanceAction action =
         scenarios.stream()
@@ -174,63 +189,20 @@ public class ConformanceOrchestrator {
               .formatted(exchange));
       return;
     }
-    notifyAllPartiesOfNextActions();
+    scheduleNotifyAllParties();
   }
 
   public String generateReport(Set<String> roleNames) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
 
     ConformanceCheck conformanceCheck =
-        _createConformanceCheck(sandboxConfiguration.getStandard(), scenarioListBuilder);
+        componentFactory.createConformanceCheck(
+            componentFactory.createScenarioListBuilder(
+                sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts()));
     trafficRecorder.getTrafficStream().forEach(conformanceCheck::check);
     Map<String, ConformanceReport> reportsByRoleName =
         ConformanceReport.createForRoles(conformanceCheck, roleNames);
 
     return ConformanceReport.toHtmlReport(reportsByRoleName);
-  }
-
-  private static ConformanceCheck _createConformanceCheck(
-      StandardConfiguration standardConfiguration, ScenarioListBuilder<?> scenarioListBuilder) {
-    if ("EblSurrender".equals(standardConfiguration.getName())
-        && "1.0.0".equals(standardConfiguration.getVersion())) {
-      return new EblSurrenderV10ConformanceCheck(scenarioListBuilder);
-    }
-    throw new UnsupportedOperationException(
-        "Unsupported standard '%s' version '%s'"
-            .formatted(standardConfiguration.getName(), standardConfiguration.getVersion()));
-  }
-
-  public static ScenarioListBuilder<?> createScenarioListBuilder(
-      StandardConfiguration standardConfiguration,
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations) {
-    if ("EblSurrender".equals(standardConfiguration.getName())
-        && "1.0.0".equals(standardConfiguration.getVersion())) {
-      return EblSurrenderV10ScenarioListBuilder.buildTree(
-          _findPartyOrCounterpartName(
-              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isCarrier),
-          _findPartyOrCounterpartName(
-              partyConfigurations, counterpartConfigurations, EblSurrenderV10Role::isPlatform));
-    }
-    throw new UnsupportedOperationException(
-        "Unsupported standard '%s' version '%s'"
-            .formatted(standardConfiguration.getName(), standardConfiguration.getVersion()));
-  }
-
-  private static String _findPartyOrCounterpartName(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      Predicate<String> rolePredicate) {
-    return Stream.concat(
-            Arrays.stream(partyConfigurations)
-                .filter(partyConfiguration -> rolePredicate.test(partyConfiguration.getRole()))
-                .map(PartyConfiguration::getName),
-            Arrays.stream(counterpartConfigurations)
-                .filter(
-                    counterpartConfigurationConfiguration ->
-                        rolePredicate.test(counterpartConfigurationConfiguration.getRole()))
-                .map(CounterpartConfiguration::getName))
-        .findFirst()
-        .orElseThrow();
   }
 }

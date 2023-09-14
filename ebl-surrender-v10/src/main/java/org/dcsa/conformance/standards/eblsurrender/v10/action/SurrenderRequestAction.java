@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lombok.Getter;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
@@ -41,7 +41,26 @@ public class SurrenderRequestAction extends TdrAction {
   }
 
   @Override
-  synchronized public Supplier<String> getSrrSupplier() {
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = super.exportJsonState();
+    String srr = surrenderRequestReference.get();
+    if (srr != null) {
+      jsonState.put("surrenderRequestReference", srr);
+    }
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
+    JsonNode srrNode = jsonState.get("surrenderRequestReference");
+    if (srrNode != null) {
+      surrenderRequestReference.set(srrNode.asText());
+    }
+  }
+
+  @Override
+  public synchronized Supplier<String> getSrrSupplier() {
     return srrSupplier;
   }
 

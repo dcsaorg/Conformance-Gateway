@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.eblsurrender.v10.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Supplier;
-
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 

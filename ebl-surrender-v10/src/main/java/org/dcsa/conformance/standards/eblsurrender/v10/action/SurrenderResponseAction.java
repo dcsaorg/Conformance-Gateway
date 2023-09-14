@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Supplier;
 import lombok.Getter;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
@@ -27,6 +27,16 @@ public class SurrenderResponseAction extends TdrAction {
         previousAction,
         "%s %d".formatted(accept ? "SURR" : "SREJ", expectedStatus));
     this.accept = accept;
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    return super.exportJsonState();
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
   }
 
   @Override

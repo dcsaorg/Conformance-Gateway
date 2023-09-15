@@ -149,8 +149,10 @@ public abstract class ConformanceParty implements StatefulEntity {
                 HttpResponse.BodyHandlers.ofString())
             .body();
     JsonNode jsonResponseBody = new ConformanceMessageBody(stringResponseBody).getJsonBody();
-    asyncPartyActionConsumer.accept(
-        getName(), newParty -> newParty._handlePartyPrompt(jsonResponseBody));
+    if (!jsonResponseBody.isEmpty()) {
+      asyncPartyActionConsumer.accept(
+          getName(), newParty -> newParty._handlePartyPrompt(jsonResponseBody));
+    }
   }
 
   private void _handlePartyPrompt(JsonNode partyPrompt) {

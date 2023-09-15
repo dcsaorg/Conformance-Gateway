@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,7 +34,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
   private final ComponentFactory componentFactory;
   private final Consumer<Consumer<ConformanceOrchestrator>> asyncOrchestratorActionConsumer;
   private final ConformanceTrafficRecorder trafficRecorder;
-  private final List<ConformanceScenario> scenarios = new ArrayList<>();
+  private final LinkedList<LinkedList<ConformanceScenario>> allScenarioBatches = new LinkedList<>();
+  private final LinkedList<LinkedList<ConformanceScenario>> nextScenarioBatches =
+      new LinkedList<>();
 
   public ConformanceOrchestrator(
       SandboxConfiguration sandboxConfiguration,
@@ -45,11 +48,26 @@ public class ConformanceOrchestrator implements StatefulEntity {
     this.asyncOrchestratorActionConsumer = asyncOrchestratorActionConsumer;
     trafficRecorder = inactive ? null : new ConformanceTrafficRecorder();
     if (!inactive) {
-      scenarios.addAll(
-          componentFactory
-              .createScenarioListBuilder(
-                  sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts())
-              .buildScenarioList());
+      int batchSize = sandboxConfiguration.getOrchestrator().getMaxParallelScenarios();
+      allScenarioBatches.addLast(new LinkedList<>());
+      componentFactory
+          .createScenarioListBuilder(
+              sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts())
+          .buildScenarioList()
+          .forEach(
+              scenario -> {
+                LinkedList<ConformanceScenario> currentBatch = allScenarioBatches.peekLast();
+                if (Objects.requireNonNull(currentBatch).size() >= batchSize) {
+                  allScenarioBatches.addLast(currentBatch = new LinkedList<>());
+                }
+                currentBatch.addLast(scenario);
+              });
+      nextScenarioBatches.addAll(allScenarioBatches);
+      if (allScenarioBatches.size() > 1) {
+        log.info(
+            "Running the scenarios in %d batches of up to %d scenarios each"
+                .formatted(allScenarioBatches.size(), batchSize));
+      }
     }
   }
 
@@ -59,8 +77,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
     if (inactive) return jsonState;
     jsonState.set("trafficRecorder", trafficRecorder.exportJsonState());
 
+    jsonState.put("nextScenarioBatchesSize", nextScenarioBatches.size());
+
     ArrayNode scenariosArrayNode = new ObjectMapper().createArrayNode();
-    scenarios.forEach(scenario -> scenariosArrayNode.add(scenario.exportJsonState()));
+    allScenarioBatches.forEach(
+        batch -> batch.forEach(scenario -> scenariosArrayNode.add(scenario.exportJsonState())));
     jsonState.set("scenarios", scenariosArrayNode);
 
     return jsonState;
@@ -71,10 +92,17 @@ public class ConformanceOrchestrator implements StatefulEntity {
     if (inactive) return;
     trafficRecorder.importJsonState(jsonState.get("trafficRecorder"));
 
-    ArrayNode scenariosNode = (ArrayNode) jsonState.get("scenarios");
-    for (int index = 0; index < scenarios.size(); ++index) {
-      scenarios.get(index).importJsonState(scenariosNode.get(index));
+    int nextScenarioBatchesSize = jsonState.get("nextScenarioBatchesSize").asInt();
+    while (nextScenarioBatches.size() > nextScenarioBatchesSize) {
+      nextScenarioBatches.removeFirst();
     }
+
+    ArrayNode scenariosNode = (ArrayNode) jsonState.get("scenarios");
+    AtomicInteger index = new AtomicInteger(0);
+    allScenarioBatches.forEach(
+        batch ->
+            batch.forEach(
+                scenario -> scenario.importJsonState(scenariosNode.get(index.getAndIncrement()))));
   }
 
   public void scheduleNotifyAllParties() {
@@ -83,8 +111,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
     asyncOrchestratorActionConsumer.accept(ConformanceOrchestrator::_notifyAllParties);
   }
 
+  private LinkedList<ConformanceScenario> _nextScenarioBatch() {
+    if (!nextScenarioBatches.isEmpty()) {
+      if (nextScenarioBatches.peekFirst().stream().noneMatch(ConformanceScenario::hasNextAction)) {
+        nextScenarioBatches.removeFirst();
+        log.info("Scenario batch completed, %d batches left".formatted(nextScenarioBatches.size()));
+      }
+    }
+    return Objects.requireNonNullElse(nextScenarioBatches.peekFirst(), new LinkedList<>());
+  }
+
   private void _notifyAllParties() {
-    scenarios.stream()
+    _nextScenarioBatch().stream()
         .map(ConformanceScenario::peekNextAction)
         .filter(Objects::nonNull)
         .map(ConformanceAction::getSourcePartyName)
@@ -131,7 +169,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return new ObjectMapper()
         .createArrayNode()
         .addAll(
-            scenarios.stream()
+            _nextScenarioBatch().stream()
                 .map(ConformanceScenario::peekNextAction)
                 .filter(Objects::nonNull)
                 .filter(action -> Objects.equals(action.getSourcePartyName(), partyName))
@@ -144,7 +182,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
     ConformanceAction action =
-        scenarios.stream()
+        _nextScenarioBatch().stream()
             .filter(
                 scenario ->
                     scenario.hasNextAction()
@@ -167,13 +205,13 @@ public class ConformanceOrchestrator implements StatefulEntity {
         "ConformanceOrchestrator.handlePartyTrafficExchange(%s)".formatted(exchange.getUuid()));
     trafficRecorder.recordExchange(exchange);
     ConformanceAction action =
-        scenarios.stream()
+        _nextScenarioBatch().stream()
             .filter(
                 scenario ->
                     scenario.hasNextAction()
                         && scenario.peekNextAction().updateFromExchangeIfItMatches(exchange))
-            .map(ConformanceScenario::popNextAction)
             .findFirst()
+            .map(ConformanceScenario::popNextAction)
             .orElse(null);
     if (action == null) {
       log.info(

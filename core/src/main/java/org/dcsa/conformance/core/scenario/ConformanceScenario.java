@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.state.StatefulEntity;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
+@Slf4j
 public class ConformanceScenario implements StatefulEntity {
   protected final LinkedList<ConformanceAction> allActions = new LinkedList<>();
   protected final LinkedList<ConformanceAction> nextActions = new LinkedList<>();
@@ -52,7 +54,9 @@ public class ConformanceScenario implements StatefulEntity {
   }
 
   public ConformanceAction popNextAction() {
-    return nextActions.pop();
+    ConformanceAction poppedAction = nextActions.pop();
+    log.info("Popped from scenario '%s' action: %s".formatted(toString(), poppedAction.getActionPath()));
+    return poppedAction;
   }
 
   @Override

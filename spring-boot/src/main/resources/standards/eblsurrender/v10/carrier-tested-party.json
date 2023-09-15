@@ -8,12 +8,12 @@
     "name" : "Carrier1",
     "role" : "Carrier",
     "orchestratorBaseUrl" : "http://localhost:8080",
-    "orchestratorRootPath" : "/conformance"
+    "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-carrier-testing-counterparts"
   } ],
   "counterparts" : [ {
     "name" : "Platform1",
     "role" : "Platform",
     "baseUrl" : "http://localhost:8080",
-    "rootPath" : "/conformance"
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-carrier-testing-counterparts"
   } ]
 }

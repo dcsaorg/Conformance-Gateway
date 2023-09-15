@@ -32,7 +32,7 @@ public class ActionPromptsQueue implements StatefulEntity {
   }
 
   @Override
-  public JsonNode exportJsonState() {
+  synchronized public JsonNode exportJsonState() {
     ObjectMapper objectMapper = new ObjectMapper();
     ObjectNode stateNode = objectMapper.createObjectNode();
 
@@ -48,7 +48,7 @@ public class ActionPromptsQueue implements StatefulEntity {
   }
 
   @Override
-  public void importJsonState(JsonNode jsonState) {
+  synchronized public void importJsonState(JsonNode jsonState) {
     StreamSupport.stream(jsonState.get("allActionIds").spliterator(), false)
             .map(JsonNode::asText)
             .forEach(allActionIds::add);

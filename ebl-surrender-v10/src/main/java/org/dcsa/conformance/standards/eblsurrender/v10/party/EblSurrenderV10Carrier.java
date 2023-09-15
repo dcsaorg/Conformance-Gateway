@@ -64,7 +64,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
         Map.entry(VoidAndReissueAction.class, this::voidAndReissue));
   }
 
-  private synchronized void supplyAvailableTdr(JsonNode actionPrompt) {
+  private void supplyAvailableTdr(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Carrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
@@ -76,7 +76,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
             .put("tdr", tdr));
   }
 
-  private synchronized void voidAndReissue(JsonNode actionPrompt) {
+  private void voidAndReissue(JsonNode actionPrompt) {
     log.info("EblSurrenderV10Carrier.voidAndReissue(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.get("tdr").asText();
     if (!Objects.equals(eblStatesById.get(tdr), EblSurrenderV10State.SURRENDERED_FOR_AMENDMENT)) {
@@ -91,7 +91,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
             .put("tdr", tdr));
   }
 
-  private synchronized void sendSurrenderResponse(JsonNode actionPrompt) {
+  private void sendSurrenderResponse(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderV10Carrier.sendSurrenderResponse(%s)"
             .formatted(actionPrompt.toPrettyString()));
@@ -124,7 +124,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   }
 
   @Override
-  public synchronized ConformanceResponse handleRequest(ConformanceRequest request) {
+  public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblSurrenderV10Carrier.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
     String srr = jsonRequest.get("surrenderRequestReference").asText();

@@ -47,7 +47,7 @@ public class ConformanceTrafficRecorder implements StatefulEntity {
     return this.traffic.values().stream();
   }
 
-  public synchronized void recordExchange(ConformanceExchange conformanceExchange) {
+  public void recordExchange(ConformanceExchange conformanceExchange) {
     this.traffic.put(conformanceExchange.getUuid(), conformanceExchange);
   }
 }

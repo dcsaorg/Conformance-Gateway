@@ -174,7 +174,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             HttpResponse.BodyHandlers.ofString());
   }
 
-  public synchronized JsonNode handleGetPartyPrompt(String partyName) {
+  public JsonNode handleGetPartyPrompt(String partyName) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
     return new ObjectMapper()
@@ -188,7 +188,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
                 .collect(Collectors.toList()));
   }
 
-  public synchronized JsonNode handlePartyInput(JsonNode partyInput) {
+  public JsonNode handlePartyInput(JsonNode partyInput) {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
@@ -210,7 +210,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return new ObjectMapper().createObjectNode();
   }
 
-  public synchronized void handlePartyTrafficExchange(ConformanceExchange exchange) {
+  public void handlePartyTrafficExchange(ConformanceExchange exchange) {
     if (inactive) return;
     log.info(
         "ConformanceOrchestrator.handlePartyTrafficExchange(%s)".formatted(exchange.getUuid()));

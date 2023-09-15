@@ -4,9 +4,7 @@
     "version" : "1.0.0"
   },
   "orchestrator" : {
-    "maxParallelScenarios" : 1,
-    "baseUrl" : "http://localhost:8080",
-    "rootPath" : "/conformance/sandbox/eblsurrender-v10-all-in-one"
+    "maxParallelScenarios" : 1
   },
   "parties" : [ {
     "name" : "Carrier1",

@@ -13,7 +13,7 @@ public class MemoryMapStatefulExecutor extends StatefulExecutor {
   private final HashMap<String, TreeMap<String, MemoryMapItem>> memoryMap = new HashMap<>();
 
   public MemoryMapStatefulExecutor() {
-    super(500, 5 * 1000, 5 * 1000);
+    super(100, 5 * 1000, 5 * 1000);
   }
 
   @Override

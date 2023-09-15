@@ -10,17 +10,17 @@
     "name" : "Carrier1",
     "role" : "Carrier",
     "orchestratorBaseUrl" : "http://localhost:8080",
-    "orchestratorRootPath" : "/conformance"
+    "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-platform-testing-counterparts"
   } ],
   "counterparts" : [ {
     "name" : "Platform1",
     "role" : "Platform",
-    "baseUrl" : "http://localhost:8081",
-    "rootPath" : "/conformance"
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-platform-tested-party"
   }, {
     "name" : "Carrier1",
     "role" : "Carrier",
     "baseUrl" : "http://localhost:8080",
-    "rootPath" : "/conformance"
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-platform-testing-counterparts"
   } ]
 }

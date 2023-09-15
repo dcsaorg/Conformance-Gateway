@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.state.StatefulEntity;
 
 public class ActionPromptsQueue implements StatefulEntity {
@@ -31,13 +33,26 @@ public class ActionPromptsQueue implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ArrayNode arrayNode = new ObjectMapper().createArrayNode();
-    pendingActions.forEach(arrayNode::add);
-    return arrayNode;
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode stateNode = objectMapper.createObjectNode();
+
+    ArrayNode allActionIdsNode = objectMapper.createArrayNode();
+    allActionIds.forEach(allActionIdsNode::add);
+    stateNode.set("allActionIds", allActionIdsNode);
+
+    ArrayNode pendingActionsNode = objectMapper.createArrayNode();
+    pendingActions.forEach(pendingActionsNode::add);
+    stateNode.set("pendingActions", pendingActionsNode);
+
+    return stateNode;
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
-    StreamSupport.stream(jsonState.spliterator(), false).forEach(this::addLast);
+    StreamSupport.stream(jsonState.get("allActionIds").spliterator(), false)
+            .map(JsonNode::asText)
+            .forEach(allActionIds::add);
+    StreamSupport.stream(jsonState.get("pendingActions").spliterator(), false)
+        .forEach(pendingActions::add);
   }
 }

@@ -41,6 +41,8 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
+  public void updateFromPartyInput(JsonNode partyInput) {};
+
   public ObjectNode asJsonNode() {
     return new ObjectMapper()
         .createObjectNode()

@@ -49,4 +49,10 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
       transportDocumentReference = tdrNode.asText();
     }
   }
+
+  @Override
+  public void updateFromPartyInput(JsonNode partyInput) {
+    super.updateFromPartyInput(partyInput);
+    getTdrConsumer().accept(partyInput.get("tdr").asText());
+  }
 }

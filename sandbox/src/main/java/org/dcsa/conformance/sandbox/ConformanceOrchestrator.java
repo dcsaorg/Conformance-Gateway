@@ -25,8 +25,6 @@ import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
-import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
 
 @Slf4j
 public class ConformanceOrchestrator implements StatefulEntity {
@@ -158,13 +156,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
                     new IllegalStateException(
                         "Input for already handled(?) actionId %s: %s"
                             .formatted(actionId, partyInput.toPrettyString())));
-    if (action instanceof SupplyAvailableTdrAction supplyAvailableTdrAction) {
-      supplyAvailableTdrAction.getTdrConsumer().accept(partyInput.get("tdr").asText());
-    } else if (action instanceof VoidAndReissueAction voidAndReissueAction) {
-      voidAndReissueAction.getTdrConsumer().accept(partyInput.get("tdr").asText());
-    } else {
-      throw new UnsupportedOperationException(partyInput.toString());
-    }
+    action.updateFromPartyInput(partyInput);
     scheduleNotifyAllParties();
     return new ObjectMapper().createObjectNode();
   }

@@ -38,4 +38,10 @@ public class VoidAndReissueAction extends TdrAction {
   public Supplier<String> getSrrSupplier() {
     return null;
   }
+
+  @Override
+  public void updateFromPartyInput(JsonNode partyInput) {
+    super.updateFromPartyInput(partyInput);
+    getTdrConsumer().accept(partyInput.get("tdr").asText());
+  }
 }

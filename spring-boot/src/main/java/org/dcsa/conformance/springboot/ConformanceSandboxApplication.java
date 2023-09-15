@@ -86,6 +86,8 @@ public class ConformanceSandboxApplication {
         "<h3>%s</h3>".formatted(sandboxId),
         "<p><a href=\"/conformance/sandbox/%s/orchestrator/reset\">Reset</a></p>"
             .formatted(sandboxId),
+        "<p><a href=\"/conformance/sandbox/%s/orchestrator/status\">Status</a></p>"
+            .formatted(sandboxId),
         "<p><a href=\"/conformance/sandbox/%s/orchestrator/party/%s/prompt/json\">Carrier1 prompt</a></p>"
             .formatted(sandboxId, "Carrier1"),
         "<p><a href=\"/conformance/sandbox/%s/orchestrator/party/%s/prompt/json\">Platform1 prompt</a></p>"

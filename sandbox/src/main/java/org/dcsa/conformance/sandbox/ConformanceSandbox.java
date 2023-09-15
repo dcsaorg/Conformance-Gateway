@@ -315,6 +315,15 @@ public class ConformanceSandbox {
               new ObjectMapper().createObjectNode().toString());
         });
 
+    webHandlersByPathPrefix.put(
+        "/conformance/sandbox/%s/orchestrator/status".formatted(id),
+        webRequest ->
+            new ConformanceWebResponse(
+                200,
+                JSON_UTF_8,
+                Collections.emptyMap(),
+                conformanceOrchestrator.getStatus().toString()));
+
     Stream.concat(
             Arrays.stream(sandboxConfiguration.getParties()).map(PartyConfiguration::getName),
             Arrays.stream(sandboxConfiguration.getCounterparts())

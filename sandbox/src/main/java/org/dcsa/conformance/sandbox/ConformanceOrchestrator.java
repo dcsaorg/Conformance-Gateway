@@ -105,6 +105,17 @@ public class ConformanceOrchestrator implements StatefulEntity {
                 scenario -> scenario.importJsonState(scenariosNode.get(index.getAndIncrement()))));
   }
 
+  public JsonNode getStatus() {
+    ObjectNode statusNode = new ObjectMapper().createObjectNode();
+    statusNode.put(
+        "scenariosLeft",
+        nextScenarioBatches.stream()
+            .flatMap(Collection::stream)
+            .filter(ConformanceScenario::hasNextAction)
+            .count());
+    return statusNode;
+  }
+
   public void scheduleNotifyAllParties() {
     if (inactive) throw new UnsupportedOperationException("This orchestrator is inactive");
     log.info("ConformanceOrchestrator.scheduleNotifyAllParties()");

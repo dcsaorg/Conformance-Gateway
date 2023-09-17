@@ -32,15 +32,8 @@ public abstract class SortedPartitionsLockingMap {
             "SortedPartitionsLockingMap.loadItem(lockedBy='%s', partitionKey='%s', sortKey='%s') DONE"
                 .formatted(lockedBy, partitionKey, sortKey));
         return loadedItem;
-      } catch (SortedPartitionsLockingMapException e) {
-        if (SortedPartitionsLockingMapExceptionCode.ITEM_IS_LOCKED.equals(e.code)) {
-          _sleepUpTo(loadRetryMillis);
-        } else {
-          throw new RuntimeException(
-              "Failed to load item with lockedBy='%s', partitionKey='%s', sortKey='%s': %s"
-                  .formatted(lockedBy, partitionKey, sortKey, e),
-              e);
-        }
+      } catch (TemporaryLockingMapException e) {
+        _sleepUpTo(loadRetryMillis);
       }
     }
     throw new RuntimeException(
@@ -57,53 +50,30 @@ public abstract class SortedPartitionsLockingMap {
   }
 
   public void saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value) {
-    try {
-      log.debug(
-          "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
-              .formatted(lockedBy, partitionKey, sortKey));
-      _saveItem(lockedBy, partitionKey, sortKey, value);
-      log.debug(
-          "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
-              .formatted(lockedBy, partitionKey, sortKey));
-    } catch (SortedPartitionsLockingMapException e) {
-      if (SortedPartitionsLockingMapExceptionCode.LOCK_HAS_EXPIRED.equals(e.code)) {
-        throw new RuntimeException(
-            "Found lock expired after %d ms when attempting to save item with lockedBy='%s', partitionKey='%s', sortKey='%s'"
-                .formatted(lockDurationMillis, lockedBy, partitionKey, sortKey),
-            e);
-      } else {
-        throw new RuntimeException(
-            "Failed to save item with lockedBy='%s', partitionKey='%s', sortKey='%s': %s"
-                .formatted(lockedBy, partitionKey, sortKey, e),
-            e);
-      }
-    }
+    log.debug(
+        "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
+            .formatted(lockedBy, partitionKey, sortKey));
+    _saveItem(lockedBy, partitionKey, sortKey, value);
+    log.debug(
+        "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
+            .formatted(lockedBy, partitionKey, sortKey));
   }
 
   public void unlockItem(String lockedBy, String partitionKey, String sortKey) {
-    try {
-      log.debug(
-          "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
-              .formatted(lockedBy, partitionKey, sortKey));
-      _unlockItem(lockedBy, partitionKey, sortKey);
-      log.debug(
-          "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
-              .formatted(lockedBy, partitionKey, sortKey));
-    } catch (SortedPartitionsLockingMapException e) {
-      throw new RuntimeException(
-          "Failed to unlock item with lockedBy='%s', partitionKey='%s', sortKey='%s'"
-              .formatted(lockedBy, partitionKey, sortKey),
-          e);
-    }
+    log.debug(
+        "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
+            .formatted(lockedBy, partitionKey, sortKey));
+    _unlockItem(lockedBy, partitionKey, sortKey);
+    log.debug(
+        "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
+            .formatted(lockedBy, partitionKey, sortKey));
   }
 
   protected abstract void _saveItem(
-      String lockedBy, String partitionKey, String sortKey, JsonNode value)
-      throws SortedPartitionsLockingMapException;
+      String lockedBy, String partitionKey, String sortKey, JsonNode value);
 
   protected abstract JsonNode _loadItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException;
+      throws TemporaryLockingMapException;
 
-  protected abstract void _unlockItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException;
+  protected abstract void _unlockItem(String lockedBy, String partitionKey, String sortKey);
 }

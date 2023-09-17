@@ -29,8 +29,7 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
   }
 
   @Override
-  protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value)
-      throws SortedPartitionsLockingMapException {
+  protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value) {
     synchronized (memoryMap) {
       MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
       if (Objects.equals(lockedBy, item.lockedBy)) {
@@ -38,28 +37,23 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
           item.value = value;
           item.lockedBy = null;
         } else {
-          log.debug("%s cannot save: lock has expired".formatted(lockedBy));
-          throw new SortedPartitionsLockingMapException(
-              SortedPartitionsLockingMapExceptionCode.LOCK_HAS_EXPIRED, null);
+          throw new RuntimeException("%s cannot save: lock has expired".formatted(lockedBy));
         }
       } else {
-        log.debug("%s cannot save: item is locked by %s".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_NOT_LOCKED, null);
+        throw new RuntimeException("%s cannot save: item is locked by %s".formatted(lockedBy, item.lockedBy));
       }
     }
   }
 
   @Override
   protected JsonNode _loadItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException {
+      throws TemporaryLockingMapException {
     synchronized (memoryMap) {
       MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
       long currentTime = System.currentTimeMillis();
       if (item.lockedBy != null && item.lockedUntil > currentTime) {
         log.debug("%s cannot load: must wait for %s to save".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_IS_LOCKED, null);
+        throw new TemporaryLockingMapException(null);
       } else {
         item.lockedBy = lockedBy;
         item.lockedUntil = currentTime + lockDurationMillis;
@@ -69,8 +63,7 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
   }
 
   @Override
-  protected void _unlockItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException {
+  protected void _unlockItem(String lockedBy, String partitionKey, String sortKey) {
     synchronized (memoryMap) {
       MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
       if (Objects.equals(lockedBy, item.lockedBy)) {
@@ -80,9 +73,7 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
           log.debug("%s does not need to unlock: lock has expired".formatted(lockedBy));
         }
       } else {
-        log.debug("%s cannot unlock: item is locked by %s".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_IS_LOCKED, null);
+        throw new RuntimeException("%s cannot unlock: item is locked by %s".formatted(lockedBy, item.lockedBy));
       }
     }
   }

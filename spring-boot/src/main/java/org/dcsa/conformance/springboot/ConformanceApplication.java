@@ -20,6 +20,7 @@ import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -51,7 +52,7 @@ public class ConformanceApplication {
 
     if (conformanceConfiguration.useDynamoDb) {
       log.info("Using DynamoDB persistence provider");
-      // docker run -p 8000:8000 amazon/dynamodb-local
+      // docker run -p 127.0.0.1:8000:8000 amazon/dynamodb-local
       // aws dynamodb list-tables --endpoint-url http://localhost:8000
       DynamoDbClient dynamoDbClient =
           DynamoDbClient.builder()
@@ -89,7 +90,7 @@ public class ConformanceApplication {
       persistenceProvider =
           new ConformancePersistenceProvider(
               new DynamoDbSortedPartitionsNonLockingMap(dynamoDbClient, "conformance"),
-              new MemorySortedPartitionsLockingMap()); // TODO
+              new DynamoDbSortedPartitionsLockingMap(dynamoDbClient, "conformance"));
     } else {
       log.info("Using memory map persistence provider");
       persistenceProvider =

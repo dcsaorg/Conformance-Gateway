@@ -1,116 +1,301 @@
 package org.dcsa.conformance.sandbox.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.HashMap;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.state.SortedPartitionsLockingMap;
-import org.dcsa.conformance.core.state.SortedPartitionsLockingMapException;
-import org.dcsa.conformance.core.state.SortedPartitionsLockingMapExceptionCode;
+import org.dcsa.conformance.core.state.TemporaryLockingMapException;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.Put;
-import software.amazon.awssdk.services.dynamodb.model.TransactWriteItem;
-import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsRequest;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Slf4j
 public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingMap {
 
-  private static class MemoryMapItem {
-    String lockedBy;
-    long lockedUntil;
-    JsonNode value;
-  }
-
-  private final HashMap<String, TreeMap<String, MemoryMapItem>> memoryMap = new HashMap<>();
-
   private final DynamoDbClient dynamoDbClient;
   private final String tableName;
+
   public DynamoDbSortedPartitionsLockingMap(DynamoDbClient dynamoDbClient, String tableName) {
-    super(5 * 1000, 100, 10 * 1000);
+    super(5 * 1000, 500, 10 * 1000);
     this.dynamoDbClient = dynamoDbClient;
     this.tableName = tableName;
   }
 
-  private MemoryMapItem _getOrCreateItem(String partitionKey, String sortKey) {
-    return memoryMap
-        .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .computeIfAbsent(sortKey, (ignoredKey) -> new MemoryMapItem());
-  }
-
   @Override
-  protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value)
-      throws SortedPartitionsLockingMapException {
-    dynamoDbClient.transactWriteItems(
-            TransactWriteItemsRequest.builder()
-                    .transactItems(
-                            TransactWriteItem.builder()
-                                    .put(
-                                            Put.builder()
-                                                    .tableName(tableName)
-                                                    .item(Map.ofEntries(
-                                                            Map.entry("PK", AttributeValue.fromS(partitionKey)),
-                                                            Map.entry("SK", AttributeValue.fromS(sortKey)),
-                                                            Map.entry("value", AttributeValue.fromS(value.toString()))
-                                                    ))
-                                                    .build())
-                                    .build())
-                    .build());
-    synchronized (memoryMap) {
-      MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
-      if (Objects.equals(lockedBy, item.lockedBy)) {
-        if (item.lockedUntil > System.currentTimeMillis()) {
-          item.value = value;
-          item.lockedBy = null;
-        } else {
-          log.debug("%s cannot save: lock has expired".formatted(lockedBy));
-          throw new SortedPartitionsLockingMapException(
-              SortedPartitionsLockingMapExceptionCode.LOCK_HAS_EXPIRED, null);
-        }
-      } else {
-        log.debug("%s cannot save: item is locked by %s".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_NOT_LOCKED, null);
-      }
+  protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value) {
+    log.debug(
+        "START _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+    String oldLockedUntil = Instant.now().toString();
+    String newLockedUntil = Instant.ofEpochMilli(Instant.now().toEpochMilli() - 1).toString();
+    Map<String, AttributeValue> key =
+        Map.ofEntries(
+            Map.entry("PK", AttributeValue.fromS(partitionKey)),
+            Map.entry("SK", AttributeValue.fromS(sortKey)));
+    try {
+      dynamoDbClient.transactWriteItems(
+          TransactWriteItemsRequest.builder()
+              .transactItems(
+                  TransactWriteItem.builder()
+                      .update(
+                          Update.builder()
+                              .tableName(tableName)
+                              .key(key)
+                              .conditionExpression(
+                                  "attribute_not_exists(PK) "
+                                      + "OR (lockedUntil < :olu) "
+                                      + "OR ("
+                                      + "attribute_exists(lockedBy) "
+                                      + "AND lockedBy = :lb "
+                                      + "AND lockedUntil > :olu"
+                                      + ")")
+                              .updateExpression("SET #v = :v, #lb = :lb, #lu = :nlu")
+                              .expressionAttributeNames(
+                                  Map.ofEntries(
+                                      Map.entry("#v", "value"),
+                                      Map.entry("#lb", "lockedBy"),
+                                      Map.entry("#lu", "lockedUntil")))
+                              .expressionAttributeValues(
+                                  Map.ofEntries(
+                                      Map.entry(":v", AttributeValue.fromS(value.toString())),
+                                      Map.entry(":lb", AttributeValue.fromS(lockedBy)),
+                                      Map.entry(":olu", AttributeValue.fromS(oldLockedUntil)),
+                                      Map.entry(":nlu", AttributeValue.fromS(newLockedUntil))))
+                              .build())
+                      .build())
+              .build());
+    } catch (TransactionCanceledException transactionCanceledException) {
+      log.debug(
+          "CATCH _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+      log.info(
+          "%s: %s"
+              .formatted(
+                  transactionCanceledException,
+                  transactionCanceledException.cancellationReasons().stream()
+                      .map(reason -> "%s %s".formatted(reason.code(), reason.message()))
+                      .collect(Collectors.joining(", "))));
+      throw new RuntimeException(transactionCanceledException);
     }
+    log.debug("END _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
   }
 
   @Override
   protected JsonNode _loadItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException {
-    synchronized (memoryMap) {
-      MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
-      long currentTime = System.currentTimeMillis();
-      if (item.lockedBy != null && item.lockedUntil > currentTime) {
-        log.debug("%s cannot load: must wait for %s to save".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_IS_LOCKED, null);
+      throws TemporaryLockingMapException {
+    log.debug(
+        "START _loadItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+    Map<String, AttributeValue> key =
+        Map.ofEntries(
+            Map.entry("PK", AttributeValue.fromS(partitionKey)),
+            Map.entry("SK", AttributeValue.fromS(sortKey)));
+
+    _createOrLockItem(lockedBy, partitionKey, sortKey, key);
+
+    return _loadLockedItem(lockedBy, partitionKey, sortKey, key);
+  }
+
+  private void _createOrLockItem(
+      String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key)
+      throws TemporaryLockingMapException {
+    log.debug(
+        "START _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+            .formatted(lockedBy, partitionKey, sortKey));
+    try {
+      String lockedUntil =
+          Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
+      dynamoDbClient.transactWriteItems(
+          TransactWriteItemsRequest.builder()
+              .transactItems(
+                  TransactWriteItem.builder()
+                      .put(
+                          Put.builder()
+                              .tableName(tableName)
+                              .conditionExpression("attribute_not_exists(PK)")
+                              .item(
+                                  Map.ofEntries(
+                                      Map.entry("PK", AttributeValue.fromS(partitionKey)),
+                                      Map.entry("SK", AttributeValue.fromS(sortKey)),
+                                      Map.entry("lockedBy", AttributeValue.fromS(lockedBy)),
+                                      Map.entry("lockedUntil", AttributeValue.fromS(lockedUntil))))
+                              .build())
+                      .build())
+              .build());
+    } catch (TransactionCanceledException transactionCanceledException) {
+      if ("ConditionalCheckFailed"
+          .equals(transactionCanceledException.cancellationReasons().get(0).code())) {
+        log.debug(
+            "CCF _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+                .formatted(lockedBy, partitionKey, sortKey));
+        _lockExistingItem(lockedBy, partitionKey, sortKey, key);
       } else {
-        item.lockedBy = lockedBy;
-        item.lockedUntil = currentTime + lockDurationMillis;
+        log.debug(
+            "TCE _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+                .formatted(lockedBy, partitionKey, sortKey));
+        log.info(
+            "Failed to create non-existing item (exception='%s' reasons='%s')"
+                .formatted(
+                    transactionCanceledException,
+                    transactionCanceledException.cancellationReasons().stream()
+                        .map(reason -> "%s %s".formatted(reason.code(), reason.message()))
+                        .collect(Collectors.joining(", "))));
+        throw transactionCanceledException;
       }
-      return item.value;
+    }
+    log.debug(
+        "END _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+            .formatted(lockedBy, partitionKey, sortKey));
+  }
+
+  private void _lockExistingItem(
+      String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key)
+      throws TemporaryLockingMapException {
+    log.debug(
+        "START _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+            .formatted(lockedBy, partitionKey, sortKey));
+    String oldLockedUntil = Instant.now().toString();
+    String newLockedUntil =
+        Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
+    try {
+      dynamoDbClient.transactWriteItems(
+          TransactWriteItemsRequest.builder()
+              .transactItems(
+                  TransactWriteItem.builder()
+                      .update(
+                          Update.builder()
+                              .tableName(tableName)
+                              .key(key)
+                              .conditionExpression(
+                                  "attribute_not_exists(lockedUntil) OR #lu < :olu")
+                              .updateExpression("SET #lb = :lb, #lu = :nlu")
+                              .expressionAttributeNames(
+                                  Map.ofEntries(
+                                      Map.entry("#lb", "lockedBy"),
+                                      Map.entry("#lu", "lockedUntil")))
+                              .expressionAttributeValues(
+                                  Map.ofEntries(
+                                      Map.entry(":lb", AttributeValue.fromS(lockedBy)),
+                                      Map.entry(":olu", AttributeValue.fromS(oldLockedUntil)),
+                                      Map.entry(":nlu", AttributeValue.fromS(newLockedUntil))))
+                              .build())
+                      .build())
+              .build());
+    } catch (TransactionCanceledException transactionCanceledException) {
+      if ("ConditionalCheckFailed"
+          .equals(transactionCanceledException.cancellationReasons().get(0).code())) {
+        log.info(
+            "CCF _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+                .formatted(lockedBy, partitionKey, sortKey));
+        throw new TemporaryLockingMapException(transactionCanceledException);
+      } else {
+        log.debug(
+            "TCE _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+                .formatted(lockedBy, partitionKey, sortKey));
+        log.info(
+            "Failed to lock existing item (exception='%s' reasons='%s')"
+                .formatted(
+                    transactionCanceledException,
+                    transactionCanceledException.cancellationReasons().stream()
+                        .map(reason -> "%s %s".formatted(reason.code(), reason.message()))
+                        .collect(Collectors.joining(", "))));
+        throw transactionCanceledException;
+      }
+    }
+    log.debug(
+        "END _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+            .formatted(lockedBy, partitionKey, sortKey));
+  }
+
+  private JsonNode _loadLockedItem(
+      String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key) {
+    log.debug(
+        "START _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
+            .formatted(lockedBy, partitionKey, sortKey));
+    try {
+      JsonNode itemValue =
+          JsonToolkit.stringToJsonNode(
+              Objects.requireNonNullElse(
+                      dynamoDbClient
+                          .transactGetItems(
+                              TransactGetItemsRequest.builder()
+                                  .transactItems(
+                                      TransactGetItem.builder()
+                                          .get(Get.builder().tableName(tableName).key(key).build())
+                                          .build())
+                                  .build())
+                          .responses()
+                          .get(0)
+                          .item()
+                          .get("value"),
+                      AttributeValue.fromS("{}"))
+                  .s());
+      log.debug(
+          "RETURN _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
+              .formatted(lockedBy, partitionKey, sortKey));
+      return itemValue;
+    } catch (TransactionCanceledException transactionCanceledException) {
+      log.debug(
+          "TCE _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
+              .formatted(lockedBy, partitionKey, sortKey));
+      log.info(
+          "Failed to get locked item value (exception='%s' reasons='%s')"
+              .formatted(
+                  transactionCanceledException,
+                  transactionCanceledException.cancellationReasons().stream()
+                      .map(reason -> "%s %s".formatted(reason.code(), reason.message()))
+                      .collect(Collectors.joining(", "))));
+      throw transactionCanceledException;
     }
   }
 
   @Override
-  protected void _unlockItem(String lockedBy, String partitionKey, String sortKey)
-      throws SortedPartitionsLockingMapException {
-    synchronized (memoryMap) {
-      MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
-      if (Objects.equals(lockedBy, item.lockedBy)) {
-        if (item.lockedUntil > System.currentTimeMillis()) {
-          item.lockedBy = null;
-        } else {
-          log.debug("%s does not need to unlock: lock has expired".formatted(lockedBy));
-        }
-      } else {
-        log.debug("%s cannot unlock: item is locked by %s".formatted(lockedBy, item.lockedBy));
-        throw new SortedPartitionsLockingMapException(
-            SortedPartitionsLockingMapExceptionCode.ITEM_IS_LOCKED, null);
-      }
+  protected void _unlockItem(String lockedBy, String partitionKey, String sortKey) {
+    log.debug(
+        "START _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+    String oldLockedUntil = Instant.now().toString();
+    String newLockedUntil = Instant.ofEpochMilli(Instant.now().toEpochMilli() - 1).toString();
+    Map<String, AttributeValue> key =
+        Map.ofEntries(
+            Map.entry("PK", AttributeValue.fromS(partitionKey)),
+            Map.entry("SK", AttributeValue.fromS(sortKey)));
+    try {
+      dynamoDbClient.transactWriteItems(
+          TransactWriteItemsRequest.builder()
+              .transactItems(
+                  TransactWriteItem.builder()
+                      .update(
+                          Update.builder()
+                              .tableName(tableName)
+                              .key(key)
+                              .conditionExpression(
+                                  "attribute_exists(lockedBy) "
+                                      + "AND lockedBy = :lb "
+                                      + "AND lockedUntil > :olu")
+                              .updateExpression("SET #lu = :nlu")
+                              .expressionAttributeNames(
+                                  Map.ofEntries(Map.entry("#lu", "lockedUntil")))
+                              .expressionAttributeValues(
+                                  Map.ofEntries(
+                                      Map.entry(":lb", AttributeValue.fromS(lockedBy)),
+                                      Map.entry(":olu", AttributeValue.fromS(oldLockedUntil)),
+                                      Map.entry(":nlu", AttributeValue.fromS(newLockedUntil))))
+                              .build())
+                      .build())
+              .build());
+    } catch (TransactionCanceledException transactionCanceledException) {
+      log.debug(
+          "TCE _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+      log.info(
+          "Failed to unlock item (exception='%s' reasons='%s')"
+              .formatted(
+                  transactionCanceledException,
+                  transactionCanceledException.cancellationReasons().stream()
+                      .map(reason -> "%s %s".formatted(reason.code(), reason.message()))
+                      .collect(Collectors.joining(", "))));
+      throw transactionCanceledException;
     }
+    log.debug(
+        "END _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
   }
 }

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-public class SortedPartitionsNonLockingMemoryMap implements SortedPartitionsNonLockingMap {
+public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
 
   @Override

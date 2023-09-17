@@ -1,14 +1,22 @@
-package org.dcsa.conformance.core.state;
+package org.dcsa.conformance.sandbox.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.state.SortedPartitionsLockingMap;
+import org.dcsa.conformance.core.state.SortedPartitionsLockingMapException;
+import org.dcsa.conformance.core.state.SortedPartitionsLockingMapExceptionCode;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.Put;
+import software.amazon.awssdk.services.dynamodb.model.TransactWriteItem;
+import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsRequest;
 
 @Slf4j
-public class SortedPartitionsLockingMemoryMap extends SortedPartitionsLockingMap {
+public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingMap {
 
   private static class MemoryMapItem {
     String lockedBy;
@@ -18,8 +26,12 @@ public class SortedPartitionsLockingMemoryMap extends SortedPartitionsLockingMap
 
   private final HashMap<String, TreeMap<String, MemoryMapItem>> memoryMap = new HashMap<>();
 
-  public SortedPartitionsLockingMemoryMap() {
+  private final DynamoDbClient dynamoDbClient;
+  private final String tableName;
+  public DynamoDbSortedPartitionsLockingMap(DynamoDbClient dynamoDbClient, String tableName) {
     super(5 * 1000, 100, 10 * 1000);
+    this.dynamoDbClient = dynamoDbClient;
+    this.tableName = tableName;
   }
 
   private MemoryMapItem _getOrCreateItem(String partitionKey, String sortKey) {
@@ -31,6 +43,21 @@ public class SortedPartitionsLockingMemoryMap extends SortedPartitionsLockingMap
   @Override
   protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value)
       throws SortedPartitionsLockingMapException {
+    dynamoDbClient.transactWriteItems(
+            TransactWriteItemsRequest.builder()
+                    .transactItems(
+                            TransactWriteItem.builder()
+                                    .put(
+                                            Put.builder()
+                                                    .tableName(tableName)
+                                                    .item(Map.ofEntries(
+                                                            Map.entry("PK", AttributeValue.fromS(partitionKey)),
+                                                            Map.entry("SK", AttributeValue.fromS(sortKey)),
+                                                            Map.entry("value", AttributeValue.fromS(value.toString()))
+                                                    ))
+                                                    .build())
+                                    .build())
+                    .build());
     synchronized (memoryMap) {
       MemoryMapItem item = _getOrCreateItem(partitionKey, sortKey);
       if (Objects.equals(lockedBy, item.lockedBy)) {

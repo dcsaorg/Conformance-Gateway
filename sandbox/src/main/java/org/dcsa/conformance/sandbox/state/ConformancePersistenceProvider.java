@@ -1,5 +1,7 @@
-package org.dcsa.conformance.sandbox;
+package org.dcsa.conformance.sandbox.state;
 
+// TODO environments, sessions
+//
 // PK=environment#UUID      SK=sandbox#uuid      value={sandboxId: UUID}
 //
 // PK=sandbox#UUID          SK=config            value={...}
@@ -9,9 +11,7 @@ package org.dcsa.conformance.sandbox;
 // PK=session#UUID#traffic  SK=UTC#uuid          value={...}
 
 import lombok.Getter;
-import org.dcsa.conformance.core.state.SortedPartitionsLockingMap;
-import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
-import org.dcsa.conformance.core.state.StatefulExecutor;
+import org.dcsa.conformance.core.state.*;
 
 @Getter
 public class ConformancePersistenceProvider {

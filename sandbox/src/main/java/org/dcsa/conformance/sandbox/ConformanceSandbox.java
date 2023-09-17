@@ -25,6 +25,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
+import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10ComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
 
@@ -94,7 +95,6 @@ public class ConformanceSandbox {
 
   @Getter private final String id;
   private final SandboxConfiguration sandboxConfiguration;
-  private UUID currentSessionId;
   private ConformanceOrchestrator conformanceOrchestrator;
 
   private List<ConformanceParty> parties;
@@ -110,7 +110,6 @@ public class ConformanceSandbox {
   }
 
   private void _reset(boolean notifyParties) {
-    currentSessionId = UUID.randomUUID();
     ComponentFactory componentFactory = _createComponentFactory(sandboxConfiguration.getStandard());
     if (sandboxConfiguration.getOrchestrator() != null) {
       this.conformanceOrchestrator =
@@ -119,8 +118,7 @@ public class ConformanceSandbox {
               componentFactory,
               this::asyncOrchestratorAction,
               new TrafficRecorder(
-                  persistenceProvider.getNonLockingMap(),
-                  "session#%s#traffic".formatted("TODO_currentSessionId"))); // TODO
+                  persistenceProvider.getNonLockingMap(), "sandbox#%s#traffic".formatted(id)));
     }
     this.parties =
         componentFactory.createParties(
@@ -139,9 +137,6 @@ public class ConformanceSandbox {
         persistenceProvider,
         id,
         SandboxConfiguration.fromJsonNode(jsonState.get("sandboxConfiguration")));
-    JsonNode currentSessionIdNode = jsonState.get("currentSessionId");
-    currentSessionId =
-        currentSessionIdNode == null ? null : UUID.fromString(currentSessionIdNode.asText());
     if (conformanceOrchestrator != null) {
       conformanceOrchestrator.importJsonState(jsonState.get("conformanceOrchestrator"));
     }
@@ -161,8 +156,6 @@ public class ConformanceSandbox {
 
   private JsonNode _exportJsonState() {
     ObjectNode jsonState = new ObjectMapper().createObjectNode();
-
-    jsonState.put("currentSessionId", currentSessionId.toString());
 
     jsonState.set("sandboxConfiguration", sandboxConfiguration.toJsonNode());
     if (conformanceOrchestrator != null) {
@@ -246,10 +239,12 @@ public class ConformanceSandbox {
                 log.info(
                     "Posting asyncOrchestratorAction to handle party traffic exchange for %s"
                         .formatted(conformanceRequest.path()));
-                asyncOrchestratorAction(
-                    newOrchestrator ->
-                        newOrchestrator.handlePartyTrafficExchange(
-                            new ConformanceExchange(conformanceRequest, conformanceResponse)));
+                if (conformanceOrchestrator != null) {
+                  asyncOrchestratorAction(
+                      newOrchestrator ->
+                          newOrchestrator.handlePartyTrafficExchange(
+                              new ConformanceExchange(conformanceRequest, conformanceResponse)));
+                }
               }
             })
         .exceptionally(

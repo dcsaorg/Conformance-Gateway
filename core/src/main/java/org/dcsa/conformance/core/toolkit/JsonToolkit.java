@@ -15,6 +15,11 @@ public enum JsonToolkit {
   ; // no instances
 
   @SneakyThrows
+  public static JsonNode stringToJsonNode(String string) {
+    return new ObjectMapper().readTree(string);
+  }
+
+  @SneakyThrows
   public static JsonNode inputStreamToJsonNode(InputStream inputStream) {
     return new ObjectMapper().readTree(inputStream);
   }

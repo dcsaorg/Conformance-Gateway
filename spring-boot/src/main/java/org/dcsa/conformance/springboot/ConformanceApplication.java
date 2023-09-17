@@ -5,25 +5,32 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.state.SortedPartitionsLockingMemoryMap;
-import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMemoryMap;
+import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
+import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.sandbox.ConformancePersistenceProvider;
+import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Slf4j
 @RestController
@@ -42,9 +49,53 @@ public class ConformanceApplication {
                     .valueToTree(Objects.requireNonNull(conformanceConfiguration))
                     .toPrettyString()));
 
-    persistenceProvider =
-        new ConformancePersistenceProvider(
-            new SortedPartitionsNonLockingMemoryMap(), new SortedPartitionsLockingMemoryMap());
+    if (conformanceConfiguration.useDynamoDb) {
+      log.info("Using DynamoDB persistence provider");
+      // docker run -p 8000:8000 amazon/dynamodb-local
+      // aws dynamodb list-tables --endpoint-url http://localhost:8000
+      DynamoDbClient dynamoDbClient =
+          DynamoDbClient.builder()
+              .endpointOverride(URI.create("http://localhost:8000"))
+              .region(Region.EU_NORTH_1)
+              .credentialsProvider(
+                  StaticCredentialsProvider.create(
+                      AwsBasicCredentials.create("DummyKey", "DummySecret")))
+              .build();
+      if (dynamoDbClient.listTables().tableNames().contains("conformance")) {
+        dynamoDbClient.deleteTable(DeleteTableRequest.builder().tableName("conformance").build());
+      }
+      dynamoDbClient.createTable(
+          CreateTableRequest.builder()
+              .tableName("conformance")
+              .keySchema(
+                  KeySchemaElement.builder().attributeName("PK").keyType(KeyType.HASH).build(),
+                  KeySchemaElement.builder().attributeName("SK").keyType(KeyType.RANGE).build())
+              .attributeDefinitions(
+                  AttributeDefinition.builder()
+                      .attributeName("PK")
+                      .attributeType(ScalarAttributeType.S)
+                      .build(),
+                  AttributeDefinition.builder()
+                      .attributeName("SK")
+                      .attributeType(ScalarAttributeType.S)
+                      .build())
+              .billingMode(BillingMode.PAY_PER_REQUEST)
+              .provisionedThroughput(
+                  ProvisionedThroughput.builder()
+                      .readCapacityUnits(0L)
+                      .writeCapacityUnits(0L)
+                      .build())
+              .build());
+      persistenceProvider =
+          new ConformancePersistenceProvider(
+              new DynamoDbSortedPartitionsNonLockingMap(dynamoDbClient, "conformance"),
+              new MemorySortedPartitionsLockingMap()); // TODO
+    } else {
+      log.info("Using memory map persistence provider");
+      persistenceProvider =
+          new ConformancePersistenceProvider(
+              new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
+    }
 
     Stream.of(
             "all-in-one",

@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.state.StatefulExecutor;
+import org.dcsa.conformance.core.state.SortedPartitionsLockingMemoryMap;
+import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMemoryMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.sandbox.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
@@ -27,9 +29,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @SpringBootApplication
 @ConfigurationPropertiesScan("org.dcsa.conformance.springboot")
-public class ConformanceSandboxApplication {
+public class ConformanceApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
-  private StatefulExecutor statefulExecutor;
+  private ConformancePersistenceProvider persistenceProvider;
 
   @PostConstruct
   public void postConstruct() {
@@ -40,7 +42,10 @@ public class ConformanceSandboxApplication {
                     .valueToTree(Objects.requireNonNull(conformanceConfiguration))
                     .toPrettyString()));
 
-    statefulExecutor = new MemoryMapStatefulExecutor();
+    persistenceProvider =
+        new ConformancePersistenceProvider(
+            new SortedPartitionsNonLockingMemoryMap(), new SortedPartitionsLockingMemoryMap());
+
     Stream.of(
             "all-in-one",
             "carrier-tested-party",
@@ -50,11 +55,11 @@ public class ConformanceSandboxApplication {
         .map(
             baseFileName ->
                 ConformanceSandbox.create(
-                    statefulExecutor,
+                    persistenceProvider,
                     "eblsurrender-v10-%s".formatted(baseFileName),
                     SandboxConfiguration.fromJsonNode(
                         JsonToolkit.inputStreamToJsonNode(
-                            ConformanceSandboxApplication.class.getResourceAsStream(
+                            ConformanceApplication.class.getResourceAsStream(
                                 "/standards/eblsurrender/v10/%s.json".formatted(baseFileName))))))
         .forEach(sandbox -> log.info("Created sandbox: %s".formatted(sandbox.getId())));
   }
@@ -101,7 +106,7 @@ public class ConformanceSandboxApplication {
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     ConformanceWebResponse conformanceWebResponse =
         ConformanceSandbox.handleRequest(
-            statefulExecutor,
+            persistenceProvider,
             new ConformanceWebRequest(
                 servletRequest.getMethod(),
                 servletRequest.getRequestURL().toString(),
@@ -155,6 +160,6 @@ public class ConformanceSandboxApplication {
   }
 
   public static void main(String[] args) {
-    SpringApplication.run(ConformanceSandboxApplication.class, args);
+    SpringApplication.run(ConformanceApplication.class, args);
   }
 }

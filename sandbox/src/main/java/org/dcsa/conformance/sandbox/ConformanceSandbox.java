@@ -22,7 +22,6 @@ import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
-import org.dcsa.conformance.core.state.StatefulExecutor;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
@@ -34,39 +33,44 @@ public class ConformanceSandbox {
   public static final String JSON_UTF_8 = "application/json;charset=utf-8";
 
   public static ConformanceSandbox create(
-      StatefulExecutor statefulExecutor,
+      ConformancePersistenceProvider persistenceProvider,
       String sandboxId,
       SandboxConfiguration sandboxConfiguration) {
     AtomicReference<ConformanceSandbox> sandboxReference = new AtomicReference<>();
-    statefulExecutor.execute(
-        "ConformanceSandbox[%s]::create()".formatted(sandboxId),
-        "sandbox#%s".formatted(sandboxId),
-        "state",
-        ignoredOriginalState -> {
-          ConformanceSandbox sandbox =
-              new ConformanceSandbox(statefulExecutor, sandboxId, sandboxConfiguration);
-          sandboxReference.set(sandbox);
-          return sandbox._exportJsonState();
-        });
+    persistenceProvider
+        .getStatefulExecutor()
+        .execute(
+            "ConformanceSandbox[%s]::create()".formatted(sandboxId),
+            "sandbox#%s".formatted(sandboxId),
+            "state",
+            ignoredOriginalState -> {
+              ConformanceSandbox sandbox =
+                  new ConformanceSandbox(persistenceProvider, sandboxId, sandboxConfiguration);
+              sandboxReference.set(sandbox);
+              return sandbox._exportJsonState();
+            });
     return sandboxReference.get();
   }
 
   public static ConformanceWebResponse handleRequest(
-      StatefulExecutor statefulExecutor, ConformanceWebRequest conformanceWebRequest) {
+      ConformancePersistenceProvider persistenceProvider,
+      ConformanceWebRequest conformanceWebRequest) {
     String sandboxId = _getRequestSandboxId(conformanceWebRequest);
 
     AtomicReference<ConformanceWebResponse> responseReference = new AtomicReference<>();
-    statefulExecutor.execute(
-        "ConformanceSandbox[%s]::handleRequest(%s)"
-            .formatted(sandboxId, conformanceWebRequest.uri()),
-        "sandbox#%s".formatted(sandboxId),
-        "state",
-        originalState -> {
-          ConformanceSandbox sandbox =
-              new ConformanceSandbox(statefulExecutor, sandboxId, originalState);
-          responseReference.set(sandbox._handleRequest(conformanceWebRequest));
-          return sandbox._exportJsonState();
-        });
+    persistenceProvider
+        .getStatefulExecutor()
+        .execute(
+            "ConformanceSandbox[%s]::handleRequest(%s)"
+                .formatted(sandboxId, conformanceWebRequest.uri()),
+            "sandbox#%s".formatted(sandboxId),
+            "state",
+            originalState -> {
+              ConformanceSandbox sandbox =
+                  new ConformanceSandbox(persistenceProvider, sandboxId, originalState);
+              responseReference.set(sandbox._handleRequest(conformanceWebRequest));
+              return sandbox._exportJsonState();
+            });
     return responseReference.get();
   }
 
@@ -86,44 +90,61 @@ public class ConformanceSandbox {
     return prefixStrippedUri.substring(0, endOfSandboxId);
   }
 
-  private final StatefulExecutor statefulExecutor;
+  private final ConformancePersistenceProvider persistenceProvider;
 
   @Getter private final String id;
   private final SandboxConfiguration sandboxConfiguration;
+  private UUID currentSessionId;
   private ConformanceOrchestrator conformanceOrchestrator;
 
   private List<ConformanceParty> parties;
 
   private ConformanceSandbox(
-      StatefulExecutor statefulExecutor, String id, SandboxConfiguration sandboxConfiguration) {
-    this.statefulExecutor = statefulExecutor;
+      ConformancePersistenceProvider persistenceProvider,
+      String id,
+      SandboxConfiguration sandboxConfiguration) {
+    this.persistenceProvider = persistenceProvider;
     this.id = id;
     this.sandboxConfiguration = sandboxConfiguration;
     _reset(false);
   }
 
   private void _reset(boolean notifyParties) {
+    currentSessionId = UUID.randomUUID();
     ComponentFactory componentFactory = _createComponentFactory(sandboxConfiguration.getStandard());
-    this.conformanceOrchestrator =
-        new ConformanceOrchestrator(
-            sandboxConfiguration, componentFactory, this::asyncOrchestratorAction);
+    if (sandboxConfiguration.getOrchestrator() != null) {
+      this.conformanceOrchestrator =
+          new ConformanceOrchestrator(
+              sandboxConfiguration,
+              componentFactory,
+              this::asyncOrchestratorAction,
+              new TrafficRecorder(
+                  persistenceProvider.getNonLockingMap(),
+                  "session#%s#traffic".formatted("TODO_currentSessionId"))); // TODO
+    }
     this.parties =
         componentFactory.createParties(
             sandboxConfiguration.getParties(),
             sandboxConfiguration.getCounterparts(),
             this::asyncOutboundRequest,
             this::asyncPartyAction);
-    if (notifyParties) {
+    if (notifyParties && this.conformanceOrchestrator != null) {
       this.conformanceOrchestrator.scheduleNotifyAllParties();
     }
   }
 
-  private ConformanceSandbox(StatefulExecutor statefulExecutor, String id, JsonNode jsonState) {
+  private ConformanceSandbox(
+      ConformancePersistenceProvider persistenceProvider, String id, JsonNode jsonState) {
     this(
-        statefulExecutor,
+        persistenceProvider,
         id,
         SandboxConfiguration.fromJsonNode(jsonState.get("sandboxConfiguration")));
-    conformanceOrchestrator.importJsonState(jsonState.get("conformanceOrchestrator"));
+    JsonNode currentSessionIdNode = jsonState.get("currentSessionId");
+    currentSessionId =
+        currentSessionIdNode == null ? null : UUID.fromString(currentSessionIdNode.asText());
+    if (conformanceOrchestrator != null) {
+      conformanceOrchestrator.importJsonState(jsonState.get("conformanceOrchestrator"));
+    }
     parties.forEach(
         party -> party.importJsonState(jsonState.get("partiesByName").get(party.getName())));
   }
@@ -141,9 +162,12 @@ public class ConformanceSandbox {
   private JsonNode _exportJsonState() {
     ObjectNode jsonState = new ObjectMapper().createObjectNode();
 
-    jsonState.set("sandboxConfiguration", sandboxConfiguration.toJsonNode());
+    jsonState.put("currentSessionId", currentSessionId.toString());
 
-    jsonState.set("conformanceOrchestrator", conformanceOrchestrator.exportJsonState());
+    jsonState.set("sandboxConfiguration", sandboxConfiguration.toJsonNode());
+    if (conformanceOrchestrator != null) {
+      jsonState.set("conformanceOrchestrator", conformanceOrchestrator.exportJsonState());
+    }
 
     ObjectNode jsonPartiesByName = new ObjectMapper().createObjectNode();
     parties.forEach(party -> jsonPartiesByName.set(party.getName(), party.exportJsonState()));
@@ -156,16 +180,18 @@ public class ConformanceSandbox {
     CompletableFuture.runAsync(
             () -> {
               log.info("ConformanceSandbox.asyncOrchestratorAction()");
-              statefulExecutor.execute(
-                  "ConformanceSandbox[%s]::asyncOrchestratorAction()".formatted(id),
-                  "sandbox#%s".formatted(id),
-                  "state",
-                  originalState -> {
-                    ConformanceSandbox sandbox =
-                        new ConformanceSandbox(statefulExecutor, id, originalState);
-                    orchestratorAction.accept(sandbox.conformanceOrchestrator);
-                    return sandbox._exportJsonState();
-                  });
+              persistenceProvider
+                  .getStatefulExecutor()
+                  .execute(
+                      "ConformanceSandbox[%s]::asyncOrchestratorAction()".formatted(id),
+                      "sandbox#%s".formatted(id),
+                      "state",
+                      originalState -> {
+                        ConformanceSandbox sandbox =
+                            new ConformanceSandbox(persistenceProvider, id, originalState);
+                        orchestratorAction.accept(sandbox.conformanceOrchestrator);
+                        return sandbox._exportJsonState();
+                      });
             })
         .exceptionally(
             e -> {
@@ -178,20 +204,22 @@ public class ConformanceSandbox {
     CompletableFuture.runAsync(
             () -> {
               log.info("ConformanceSandbox.asyncPartyAction(%s)".formatted(partyName));
-              statefulExecutor.execute(
-                  "ConformanceSandbox[%s]::asyncPartyAction(%s)".formatted(id, partyName),
-                  "sandbox#%s".formatted(id),
-                  "state",
-                  originalState -> {
-                    ConformanceSandbox sandbox =
-                        new ConformanceSandbox(statefulExecutor, id, originalState);
-                    partyAction.accept(
-                        sandbox.parties.stream()
-                            .filter(party -> partyName.equals(party.getName()))
-                            .findFirst()
-                            .orElseThrow());
-                    return sandbox._exportJsonState();
-                  });
+              persistenceProvider
+                  .getStatefulExecutor()
+                  .execute(
+                      "ConformanceSandbox[%s]::asyncPartyAction(%s)".formatted(id, partyName),
+                      "sandbox#%s".formatted(id),
+                      "state",
+                      originalState -> {
+                        ConformanceSandbox sandbox =
+                            new ConformanceSandbox(persistenceProvider, id, originalState);
+                        partyAction.accept(
+                            sandbox.parties.stream()
+                                .filter(party -> partyName.equals(party.getName()))
+                                .findFirst()
+                                .orElseThrow());
+                        return sandbox._exportJsonState();
+                      });
             })
         .exceptionally(
             e -> {
@@ -275,8 +303,10 @@ public class ConformanceSandbox {
                 new ConformanceMessageBody(webRequest.body()),
                 System.currentTimeMillis()));
     ConformanceResponse conformanceResponse = party.handleRequest(conformanceRequest);
-    conformanceOrchestrator.handlePartyTrafficExchange(
-        new ConformanceExchange(conformanceRequest, conformanceResponse));
+    if (conformanceOrchestrator != null) {
+      conformanceOrchestrator.handlePartyTrafficExchange(
+          new ConformanceExchange(conformanceRequest, conformanceResponse));
+    }
     return new ConformanceWebResponse(
         conformanceResponse.statusCode(),
         JSON_UTF_8,
@@ -315,68 +345,71 @@ public class ConformanceSandbox {
               new ObjectMapper().createObjectNode().toString());
         });
 
-    webHandlersByPathPrefix.put(
-        "/conformance/sandbox/%s/orchestrator/status".formatted(id),
-        webRequest ->
-            new ConformanceWebResponse(
-                200,
-                JSON_UTF_8,
-                Collections.emptyMap(),
-                conformanceOrchestrator.getStatus().toString()));
+    if (conformanceOrchestrator != null) {
+      webHandlersByPathPrefix.put(
+          "/conformance/sandbox/%s/orchestrator/status".formatted(id),
+          webRequest ->
+              new ConformanceWebResponse(
+                  200,
+                  JSON_UTF_8,
+                  Collections.emptyMap(),
+                  conformanceOrchestrator.getStatus().toString()));
 
-    Stream.concat(
-            Arrays.stream(sandboxConfiguration.getParties()).map(PartyConfiguration::getName),
-            Arrays.stream(sandboxConfiguration.getCounterparts())
-                .map(CounterpartConfiguration::getName))
-        .collect(Collectors.toSet())
-        .forEach(
-            partyOrCounterpartName -> {
-              webHandlersByPathPrefix.put(
-                  "/conformance/sandbox/%s/orchestrator/party/%s/prompt/json"
-                      .formatted(id, partyOrCounterpartName),
-                  webRequest ->
-                      new ConformanceWebResponse(
-                          200,
-                          JSON_UTF_8,
-                          Collections.emptyMap(),
-                          conformanceOrchestrator
-                              .handleGetPartyPrompt(partyOrCounterpartName)
-                              .toString()));
-              webHandlersByPathPrefix.put(
-                  "/conformance/sandbox/%s/orchestrator/party/%s/input"
-                      .formatted(id, partyOrCounterpartName),
-                  webRequest ->
-                      new ConformanceWebResponse(
-                          200,
-                          JSON_UTF_8,
-                          Collections.emptyMap(),
-                          conformanceOrchestrator
-                              .handlePartyInput(
-                                  new ConformanceMessageBody(webRequest.body()).getJsonBody())
-                              .toString()));
-            });
+      Stream.concat(
+              Arrays.stream(sandboxConfiguration.getParties()).map(PartyConfiguration::getName),
+              Arrays.stream(sandboxConfiguration.getCounterparts())
+                  .map(CounterpartConfiguration::getName))
+          .collect(Collectors.toSet())
+          .forEach(
+              partyOrCounterpartName -> {
+                webHandlersByPathPrefix.put(
+                    "/conformance/sandbox/%s/orchestrator/party/%s/prompt/json"
+                        .formatted(id, partyOrCounterpartName),
+                    webRequest ->
+                        new ConformanceWebResponse(
+                            200,
+                            JSON_UTF_8,
+                            Collections.emptyMap(),
+                            conformanceOrchestrator
+                                .handleGetPartyPrompt(partyOrCounterpartName)
+                                .toString()));
+                webHandlersByPathPrefix.put(
+                    "/conformance/sandbox/%s/orchestrator/party/%s/input"
+                        .formatted(id, partyOrCounterpartName),
+                    webRequest ->
+                        new ConformanceWebResponse(
+                            200,
+                            JSON_UTF_8,
+                            Collections.emptyMap(),
+                            conformanceOrchestrator
+                                .handlePartyInput(
+                                    new ConformanceMessageBody(webRequest.body()).getJsonBody())
+                                .toString()));
+              });
 
-    webHandlersByPathPrefix.put(
-        "/conformance/sandbox/%s/orchestrator/report".formatted(id),
-        webRequest ->
-            new ConformanceWebResponse(
-                200,
-                "text/html;charset=utf-8",
-                Collections.emptyMap(),
-                conformanceOrchestrator.generateReport(
-                    (sandboxConfiguration.getParties().length == EblSurrenderV10Role.values().length
-                            ? Arrays.stream(EblSurrenderV10Role.values())
-                                .map(EblSurrenderV10Role::getConfigName)
-                            : Arrays.stream(sandboxConfiguration.getCounterparts())
-                                .map(CounterpartConfiguration::getRole)
-                                .filter(
-                                    counterpartRole ->
-                                        Arrays.stream(sandboxConfiguration.getParties())
-                                            .map(PartyConfiguration::getRole)
-                                            .noneMatch(
-                                                partyRole ->
-                                                    Objects.equals(partyRole, counterpartRole))))
-                        .collect(Collectors.toSet()))));
+      webHandlersByPathPrefix.put(
+          "/conformance/sandbox/%s/orchestrator/report".formatted(id),
+          webRequest ->
+              new ConformanceWebResponse(
+                  200,
+                  "text/html;charset=utf-8",
+                  Collections.emptyMap(),
+                  conformanceOrchestrator.generateReport(
+                      (sandboxConfiguration.getParties().length
+                                  == EblSurrenderV10Role.values().length
+                              ? Arrays.stream(EblSurrenderV10Role.values())
+                                  .map(EblSurrenderV10Role::getConfigName)
+                              : Arrays.stream(sandboxConfiguration.getCounterparts())
+                                  .map(CounterpartConfiguration::getRole)
+                                  .filter(
+                                      counterpartRole ->
+                                          Arrays.stream(sandboxConfiguration.getParties())
+                                              .map(PartyConfiguration::getRole)
+                                              .noneMatch(
+                                                  partyRole ->
+                                                      Objects.equals(partyRole, counterpartRole))))
+                          .collect(Collectors.toSet()))));
+    }
     return webHandlersByPathPrefix
         .get(
             webHandlersByPathPrefix.keySet().stream()

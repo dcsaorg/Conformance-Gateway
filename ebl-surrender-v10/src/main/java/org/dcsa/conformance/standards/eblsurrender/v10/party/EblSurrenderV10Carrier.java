@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +26,11 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   public EblSurrenderV10Carrier(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient,
-      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
-    super(partyConfiguration, counterpartConfiguration, asyncWebClient, asyncPartyActionConsumer);
+      Consumer<ConformanceRequest> asyncWebClient) {
+    super(
+        partyConfiguration,
+        counterpartConfiguration,
+        asyncWebClient);
   }
 
   @Override

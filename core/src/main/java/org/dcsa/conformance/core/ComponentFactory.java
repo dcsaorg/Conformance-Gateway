@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -16,8 +15,7 @@ public interface ComponentFactory {
   List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
-      Consumer<ConformanceRequest> asyncWebClient,
-      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer);
+      Consumer<ConformanceRequest> asyncWebClient);
 
   ScenarioListBuilder<?> createScenarioListBuilder(
       PartyConfiguration[] partyConfigurations,

@@ -3,12 +3,11 @@ package org.dcsa.conformance.core.toolkit;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 
 public enum JsonToolkit {

@@ -34,7 +34,19 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
 
   @Override
   public JsonNode getItemValue(String partitionKey, String sortKey) {
-    throw new UnsupportedOperationException();
+    return JsonToolkit.stringToJsonNode(
+        dynamoDbClient
+            .getItem(
+                GetItemRequest.builder()
+                    .tableName(tableName)
+                    .key(
+                        Map.ofEntries(
+                            Map.entry("PK", AttributeValue.fromS(partitionKey)),
+                            Map.entry("SK", AttributeValue.fromS(sortKey))))
+                    .build())
+            .item()
+            .getOrDefault("value", AttributeValue.fromS(""))
+            .s());
   }
 
   @Override

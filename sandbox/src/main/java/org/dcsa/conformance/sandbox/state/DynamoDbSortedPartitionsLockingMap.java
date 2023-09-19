@@ -69,7 +69,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     } catch (TransactionCanceledException transactionCanceledException) {
       log.debug(
           "CATCH _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
-      log.info(
+      log.warn(
           "%s: %s"
               .formatted(
                   transactionCanceledException,
@@ -133,7 +133,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
         log.debug(
             "TCE _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
-        log.info(
+        log.warn(
             "Failed to create non-existing item (exception='%s' reasons='%s')"
                 .formatted(
                     transactionCanceledException,
@@ -184,7 +184,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     } catch (TransactionCanceledException transactionCanceledException) {
       if ("ConditionalCheckFailed"
           .equals(transactionCanceledException.cancellationReasons().get(0).code())) {
-        log.info(
+        log.warn(
             "CCF _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
         throw new TemporaryLockingMapException(transactionCanceledException);
@@ -192,7 +192,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
         log.debug(
             "TCE _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
-        log.info(
+        log.warn(
             "Failed to lock existing item (exception='%s' reasons='%s')"
                 .formatted(
                     transactionCanceledException,
@@ -238,7 +238,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
       log.debug(
           "TCE _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
               .formatted(lockedBy, partitionKey, sortKey));
-      log.info(
+      log.warn(
           "Failed to get locked item value (exception='%s' reasons='%s')"
               .formatted(
                   transactionCanceledException,
@@ -286,7 +286,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     } catch (TransactionCanceledException transactionCanceledException) {
       log.debug(
           "TCE _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
-      log.info(
+      log.warn(
           "Failed to unlock item (exception='%s' reasons='%s')"
               .formatted(
                   transactionCanceledException,

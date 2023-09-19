@@ -9,8 +9,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
@@ -26,19 +24,17 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 public abstract class ConformanceParty implements StatefulEntity {
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
+
   protected final Consumer<ConformanceRequest> asyncWebClient;
-  protected final BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
   public ConformanceParty(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient,
-      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
+      Consumer<ConformanceRequest> asyncWebClient) {
     this.partyConfiguration = partyConfiguration;
     this.counterpartConfiguration = counterpartConfiguration;
     this.asyncWebClient = asyncWebClient;
-    this.asyncPartyActionConsumer = asyncPartyActionConsumer;
   }
 
   @Override
@@ -81,7 +77,7 @@ public abstract class ConformanceParty implements StatefulEntity {
             "POST",
             partyConfiguration.getOrchestratorBaseUrl(),
             partyConfiguration.getOrchestratorRootPath()
-                + "/orchestrator/party/%s/input".formatted(partyConfiguration.getName()),
+                + "/party/%s/input".formatted(partyConfiguration.getName()),
             Collections.emptyMap(),
             new ConformanceMessage(
                 partyConfiguration.getName(),
@@ -93,14 +89,18 @@ public abstract class ConformanceParty implements StatefulEntity {
                 System.currentTimeMillis())));
   }
 
+  @SuppressWarnings("unused")
+  private void useDifferentApiVersion() {
+    asyncCounterpartPost("", "", new ObjectMapper().createObjectNode());
+  }
+
   protected void asyncCounterpartPost(String path, String apiVersion, JsonNode jsonBody) {
     asyncWebClient.accept(
         new ConformanceRequest(
             "POST",
             counterpartConfiguration.getBaseUrl(),
             counterpartConfiguration.getRootPath()
-                + "/party/%s/from/%s"
-                    .formatted(counterpartConfiguration.getName(), partyConfiguration.getName())
+                + "/party/%s/api".formatted(counterpartConfiguration.getName())
                 + path,
             Collections.emptyMap(),
             new ConformanceMessage(
@@ -119,53 +119,40 @@ public abstract class ConformanceParty implements StatefulEntity {
     log.info(
         "%s[%s].handleNotification()"
             .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
-    CompletableFuture.runAsync(this::getPartyPrompt)
-        .exceptionally(
-            e -> {
-              log.error("ConformanceSandbox.asyncNotifyParty() failed: %s".formatted(e), e);
-              return null;
-            });
+    JsonNode partyPrompt = _syncGetPartyPrompt();
+    if (!partyPrompt.isEmpty()) {
+      StreamSupport.stream(partyPrompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
+      _handleNextActionPrompt();
+    }
     return new ObjectMapper().createObjectNode();
   }
 
   @SneakyThrows
-  private void getPartyPrompt() {
+  private JsonNode _syncGetPartyPrompt() {
     log.info(
         "%s[%s].getPartyPrompt()"
             .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    URI uri =
+        URI.create(
+            partyConfiguration.getOrchestratorBaseUrl()
+                + partyConfiguration.getOrchestratorRootPath()
+                + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
+    log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
     String stringResponseBody =
         HttpClient.newHttpClient()
             .send(
-                HttpRequest.newBuilder()
-                    .uri(
-                        URI.create(
-                            partyConfiguration.getOrchestratorBaseUrl()
-                                + partyConfiguration.getOrchestratorRootPath()
-                                + "/orchestrator/party/%s/prompt/json"
-                                    .formatted(partyConfiguration.getName())))
-                    .timeout(Duration.ofHours(1))
-                    .GET()
-                    .build(),
+                HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET().build(),
                 HttpResponse.BodyHandlers.ofString())
             .body();
-    JsonNode jsonResponseBody = new ConformanceMessageBody(stringResponseBody).getJsonBody();
-    if (!jsonResponseBody.isEmpty()) {
-      asyncPartyActionConsumer.accept(
-          getName(), newParty -> newParty._handlePartyPrompt(jsonResponseBody));
-    }
+    return new ConformanceMessageBody(stringResponseBody).getJsonBody();
   }
 
-  private void _handlePartyPrompt(JsonNode partyPrompt) {
-    StreamSupport.stream(partyPrompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
-    handleNextActionPrompt();
-  }
-
-  private void handleNextActionPrompt() {
+  private void _handleNextActionPrompt() {
     if (actionPromptsQueue.isEmpty()) return;
     JsonNode actionPrompt = actionPromptsQueue.removeFirst();
     if (actionPrompt == null) return;
     log.info(
-        "%s[%s].handleNextActionPrompt() handling %s"
+        "%s[%s]._handleNextActionPrompt() handling %s"
             .formatted(
                 getClass().getSimpleName(),
                 partyConfiguration.getName(),
@@ -186,9 +173,9 @@ public abstract class ConformanceParty implements StatefulEntity {
                             getActionPromptHandlers().keySet())))
         .getValue()
         .accept(actionPrompt);
-    handleNextActionPrompt();
+    _handleNextActionPrompt();
   }
 
   protected abstract Map<Class<? extends ConformanceAction>, Consumer<JsonNode>>
-  getActionPromptHandlers();
+      getActionPromptHandlers();
 }

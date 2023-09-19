@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +25,11 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   public EblSurrenderV10Platform(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient,
-      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
-    super(partyConfiguration, counterpartConfiguration, asyncWebClient, asyncPartyActionConsumer);
+      Consumer<ConformanceRequest> asyncWebClient) {
+    super(
+        partyConfiguration,
+        counterpartConfiguration,
+        asyncWebClient);
   }
 
   @Override
@@ -115,8 +116,7 @@ public class EblSurrenderV10Platform extends ConformanceParty {
                             .createObjectNode()
                             .put("eblPlatformIdentifier", "two@example.com")
                             .put("legalName", "Legal Name Two"))));
-    asyncCounterpartPost(
-        "/v1/surrender-requests", "1.0.0", jsonRequestBody);
+    asyncCounterpartPost("/v1/surrender-requests", "1.0.0", jsonRequestBody);
   }
 
   @Override

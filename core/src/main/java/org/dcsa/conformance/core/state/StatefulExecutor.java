@@ -25,6 +25,7 @@ public class StatefulExecutor {
     String lockedBy = UUID.randomUUID().toString();
     log.debug("Executing with lock %s: %s".formatted(lockedBy, description));
     JsonNode originalState = sortedPartitionsLockingMap.loadItem(lockedBy, partitionKey, sortKey);
+
     JsonNode modifiedState;
     try {
       modifiedState = function.apply(originalState);
@@ -36,11 +37,15 @@ public class StatefulExecutor {
       sortedPartitionsLockingMap.unlockItem(lockedBy, partitionKey, sortKey);
       throw new RuntimeException("Execution failed: " + t, t);
     }
-    sortedPartitionsLockingMap.saveItem(lockedBy, partitionKey, sortKey, modifiedState);
 
-    int stateLength = modifiedState.toString().getBytes(StandardCharsets.UTF_8).length;
-    log.info(
-        "Max saved state length is now: %d"
-            .formatted(maxStateLength.accumulateAndGet(stateLength, Math::max)));
+    if (modifiedState != null) {
+      sortedPartitionsLockingMap.saveItem(lockedBy, partitionKey, sortKey, modifiedState);
+      int stateLength = modifiedState.toString().getBytes(StandardCharsets.UTF_8).length;
+      log.info(
+          "Max saved state length is now: %d"
+              .formatted(maxStateLength.accumulateAndGet(stateLength, Math::max)));
+    } else {
+      sortedPartitionsLockingMap.unlockItem(lockedBy, partitionKey, sortKey);
+    }
   }
 }

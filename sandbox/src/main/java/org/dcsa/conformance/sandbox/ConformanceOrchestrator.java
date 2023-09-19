@@ -4,18 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -31,8 +24,8 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 public class ConformanceOrchestrator implements StatefulEntity {
   private final SandboxConfiguration sandboxConfiguration;
   private final ComponentFactory componentFactory;
-  private final Consumer<Consumer<ConformanceOrchestrator>> asyncOrchestratorActionConsumer;
   private final TrafficRecorder trafficRecorder;
+  private final Consumer<ConformanceWebRequest> asyncWebClient;
   private final LinkedList<LinkedList<ConformanceScenario>> allScenarioBatches = new LinkedList<>();
   private final LinkedList<LinkedList<ConformanceScenario>> nextScenarioBatches =
       new LinkedList<>();
@@ -40,12 +33,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public ConformanceOrchestrator(
       SandboxConfiguration sandboxConfiguration,
       ComponentFactory componentFactory,
-      Consumer<Consumer<ConformanceOrchestrator>> asyncOrchestratorActionConsumer,
-      TrafficRecorder trafficRecorder) {
+      TrafficRecorder trafficRecorder,
+      Consumer<ConformanceWebRequest> asyncWebClient) {
     this.sandboxConfiguration = sandboxConfiguration;
     this.componentFactory = componentFactory;
-    this.asyncOrchestratorActionConsumer = asyncOrchestratorActionConsumer;
     this.trafficRecorder = trafficRecorder;
+    this.asyncWebClient = asyncWebClient;
 
     int batchSize = sandboxConfiguration.getOrchestrator().getMaxParallelScenarios();
     allScenarioBatches.addLast(new LinkedList<>());
@@ -109,9 +102,14 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return statusNode;
   }
 
-  public void scheduleNotifyAllParties() {
-    log.info("ConformanceOrchestrator.scheduleNotifyAllParties()");
-    asyncOrchestratorActionConsumer.accept(ConformanceOrchestrator::_notifyAllParties);
+  public void notifyRelevantParties() {
+    log.info("ConformanceOrchestrator.notifyRelevantParties()");
+    _nextScenarioBatch().stream()
+        .map(ConformanceScenario::peekNextAction)
+        .filter(Objects::nonNull)
+        .map(ConformanceAction::getSourcePartyName)
+        .collect(Collectors.toSet())
+        .forEach(this::_asyncNotifyParty);
   }
 
   private LinkedList<ConformanceScenario> _nextScenarioBatch() {
@@ -124,44 +122,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return Objects.requireNonNullElse(nextScenarioBatches.peekFirst(), new LinkedList<>());
   }
 
-  private void _notifyAllParties() {
-    _nextScenarioBatch().stream()
-        .map(ConformanceScenario::peekNextAction)
-        .filter(Objects::nonNull)
-        .map(ConformanceAction::getSourcePartyName)
-        .collect(Collectors.toSet())
-        .forEach(this::asyncNotifyParty);
-  }
-
-  private void asyncNotifyParty(String partyName) {
+  private void _asyncNotifyParty(String partyName) {
     log.info("ConformanceOrchestrator.asyncNotifyParty(%s)".formatted(partyName));
-    CompletableFuture.runAsync(() -> _syncNotifyParty(partyName))
-        .exceptionally(
-            e -> {
-              log.error("ConformanceSandbox.asyncNotifyParty() failed: %s".formatted(e), e);
-              return null;
-            });
-  }
-
-  @SneakyThrows
-  private void _syncNotifyParty(String partyName) {
-    log.info("ConformanceOrchestrator._syncNotifyParty(%s)".formatted(partyName));
     CounterpartConfiguration counterpartConfiguration =
         Arrays.stream(sandboxConfiguration.getCounterparts())
             .collect(Collectors.toMap(CounterpartConfiguration::getName, Function.identity()))
             .get(partyName);
-    HttpClient.newHttpClient()
-        .send(
-            HttpRequest.newBuilder()
-                .uri(
-                    URI.create(
-                        counterpartConfiguration.getBaseUrl()
-                            + counterpartConfiguration.getRootPath()
-                            + "/party/%s/notification".formatted(partyName)))
-                .timeout(Duration.ofHours(1))
-                .GET()
-                .build(),
-            HttpResponse.BodyHandlers.ofString());
+    String uri =
+        counterpartConfiguration.getRootPath() + "/party/%s/notification".formatted(partyName);
+    String url = counterpartConfiguration.getBaseUrl() + uri;
+    asyncWebClient.accept(
+        new ConformanceWebRequest(
+            "GET", url, uri, Collections.emptyMap(), Collections.emptyMap(), ""));
   }
 
   public JsonNode handleGetPartyPrompt(String partyName) {
@@ -177,7 +149,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
                 .collect(Collectors.toList()));
   }
 
-  public JsonNode handlePartyInput(JsonNode partyInput) {
+  public void handlePartyInput(JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     String actionId = partyInput.get("actionId").asText();
     ConformanceAction action =
@@ -191,11 +163,17 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .orElseThrow(
                 () ->
                     new IllegalStateException(
-                        "Input for already handled(?) actionId %s: %s"
-                            .formatted(actionId, partyInput.toPrettyString())));
+                        "Ignoring party input %s with unrecognized action id, known next actions are: %s"
+                            .formatted(
+                                actionId,
+                                _nextScenarioBatch().stream()
+                                    .filter(ConformanceScenario::hasNextAction)
+                                    .map(
+                                        scenario ->
+                                            scenario.peekNextAction().asJsonNode().toPrettyString())
+                                    .toList())));
     action.updateFromPartyInput(partyInput);
-    scheduleNotifyAllParties();
-    return new ObjectMapper().createObjectNode();
+    notifyRelevantParties();
   }
 
   public void handlePartyTrafficExchange(ConformanceExchange exchange) {
@@ -217,7 +195,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(exchange));
       return;
     }
-    scheduleNotifyAllParties();
+    notifyRelevantParties();
   }
 
   public String generateReport(Set<String> roleNames) {

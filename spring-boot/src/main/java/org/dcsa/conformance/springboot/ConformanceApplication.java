@@ -4,9 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,11 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
+import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +48,31 @@ public class ConformanceApplication {
   @Autowired ConformanceConfiguration conformanceConfiguration;
   private ConformancePersistenceProvider persistenceProvider;
 
+  private final Consumer<ConformanceWebRequest> asyncWebClient =
+      conformanceWebRequest -> {
+        CompletableFuture.runAsync(
+                () -> {
+                  try {
+                    HttpClient.newHttpClient()
+                        .send(
+                            HttpRequest.newBuilder()
+                                .uri(URI.create(conformanceWebRequest.url()))
+                                .timeout(Duration.ofHours(1))
+                                .GET()
+                                .build(),
+                            HttpResponse.BodyHandlers.ofString());
+                  } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                  }
+                })
+            .exceptionally(
+                e -> {
+                  log.error(
+                      "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
+                  return null;
+                });
+      };
+
   @PostConstruct
   public void postConstruct() {
     log.info(
@@ -50,11 +82,12 @@ public class ConformanceApplication {
                     .valueToTree(Objects.requireNonNull(conformanceConfiguration))
                     .toPrettyString()));
 
+    DynamoDbClient dynamoDbClient;
     if (conformanceConfiguration.useDynamoDb) {
       log.info("Using DynamoDB persistence provider");
       // docker run -p 127.0.0.1:8000:8000 amazon/dynamodb-local
       // aws dynamodb list-tables --endpoint-url http://localhost:8000
-      DynamoDbClient dynamoDbClient =
+      dynamoDbClient =
           DynamoDbClient.builder()
               .endpointOverride(URI.create("http://localhost:8000"))
               .region(Region.EU_NORTH_1)
@@ -104,7 +137,7 @@ public class ConformanceApplication {
             "carrier-testing-counterparts",
             "platform-tested-party",
             "platform-testing-counterparts")
-        .map(
+        .forEach(
             baseFileName ->
                 ConformanceSandbox.create(
                     persistenceProvider,
@@ -112,50 +145,13 @@ public class ConformanceApplication {
                     SandboxConfiguration.fromJsonNode(
                         JsonToolkit.inputStreamToJsonNode(
                             ConformanceApplication.class.getResourceAsStream(
-                                "/standards/eblsurrender/v10/%s.json".formatted(baseFileName))))))
-        .forEach(sandbox -> log.info("Created sandbox: %s".formatted(sandbox.getId())));
-  }
-
-  @GetMapping(value = "/")
-  public void handleGetRoot(
-      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-    _writeResponse(
-        servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
-  }
-
-  private String _buildHomePage() {
-    return String.join(
-        System.lineSeparator(),
-        "<html>",
-        "<head><title>DCSA Conformance</title></head>",
-        "<body style=\"font-family: sans-serif;\">",
-        "<h2>DCSA Conformance</h2>",
-        _buildHomeSandboxSection("eblsurrender-v10-all-in-one"),
-        _buildHomeSandboxSection("eblsurrender-v10-carrier-testing-counterparts"),
-        _buildHomeSandboxSection("eblsurrender-v10-platform-testing-counterparts"),
-        "</body>",
-        "</html>");
-  }
-
-  private String _buildHomeSandboxSection(String sandboxId) {
-    return String.join(
-        System.lineSeparator(),
-        "<h3>%s</h3>".formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/orchestrator/reset\">Reset</a></p>"
-            .formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/orchestrator/status\">Status</a></p>"
-            .formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/orchestrator/party/%s/prompt/json\">Carrier1 prompt</a></p>"
-            .formatted(sandboxId, "Carrier1"),
-        "<p><a href=\"/conformance/sandbox/%s/orchestrator/party/%s/prompt/json\">Platform1 prompt</a></p>"
-            .formatted(sandboxId, "Platform1"),
-        "<p><a href=\"/conformance/sandbox/%s/orchestrator/report\">Report</a></p>"
-            .formatted(sandboxId));
+                                "/standards/eblsurrender/v10/%s.json".formatted(baseFileName))))));
   }
 
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+
     ConformanceWebResponse conformanceWebResponse =
         ConformanceSandbox.handleRequest(
             persistenceProvider,
@@ -165,7 +161,9 @@ public class ConformanceApplication {
                 servletRequest.getRequestURI(),
                 _getQueryParameters(servletRequest),
                 _getRequestHeaders(servletRequest),
-                _getRequestBody(servletRequest)));
+                _getRequestBody(servletRequest)),
+            asyncWebClient);
+
     _writeResponse(
         servletResponse,
         conformanceWebResponse.statusCode(),
@@ -209,6 +207,43 @@ public class ConformanceApplication {
   @SneakyThrows
   private static String _getRequestBody(HttpServletRequest request) {
     return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+  }
+
+  @GetMapping(value = "/")
+  public void handleGetRoot(
+          HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+    _writeResponse(
+            servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
+  }
+
+  private String _buildHomePage() {
+    return String.join(
+            System.lineSeparator(),
+            "<html>",
+            "<head><title>DCSA Conformance</title></head>",
+            "<body style=\"font-family: sans-serif;\">",
+            "<h2>DCSA Conformance</h2>",
+            _buildHomeSandboxSection("eblsurrender-v10-all-in-one"),
+            _buildHomeSandboxSection("eblsurrender-v10-carrier-testing-counterparts"),
+            _buildHomeSandboxSection("eblsurrender-v10-platform-testing-counterparts"),
+            "</body>",
+            "</html>");
+  }
+
+  private String _buildHomeSandboxSection(String sandboxId) {
+    return String.join(
+            System.lineSeparator(),
+            "<h3>%s</h3>".formatted(sandboxId),
+            "<p><a href=\"/conformance/sandbox/%s/reset\">Reset</a></p>"
+                    .formatted(sandboxId),
+            "<p><a href=\"/conformance/sandbox/%s/status\">Status</a></p>"
+                    .formatted(sandboxId),
+            "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
+                    .formatted(sandboxId, "Carrier1"),
+            "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
+                    .formatted(sandboxId, "Platform1"),
+            "<p><a href=\"/conformance/sandbox/%s/report\">Report</a></p>"
+                    .formatted(sandboxId));
   }
 
   public static void main(String[] args) {

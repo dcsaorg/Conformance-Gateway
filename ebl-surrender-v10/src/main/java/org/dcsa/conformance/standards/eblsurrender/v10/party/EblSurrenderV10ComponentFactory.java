@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,8 +28,7 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
-      Consumer<ConformanceRequest> asyncWebClient,
-      BiConsumer<String, Consumer<ConformanceParty>> asyncPartyActionConsumer) {
+      Consumer<ConformanceRequest> asyncWebClient) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
             .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
@@ -47,8 +45,7 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
           new EblSurrenderV10Carrier(
               carrierConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderV10Role.PLATFORM.getConfigName()),
-              asyncWebClient,
-              asyncPartyActionConsumer));
+              asyncWebClient));
     }
 
     PartyConfiguration platformConfiguration =
@@ -58,8 +55,7 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
           new EblSurrenderV10Platform(
               platformConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderV10Role.CARRIER.getConfigName()),
-              asyncWebClient,
-              asyncPartyActionConsumer));
+              asyncWebClient));
     }
 
     return parties;

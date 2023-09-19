@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 @Slf4j
 public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingMap {
 
+  private static final int MAX_TRANSACTION_RETRY_COUNT = 5;
+
   private final DynamoDbClient dynamoDbClient;
   private final String tableName;
 
@@ -35,7 +37,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
             Map.entry("PK", AttributeValue.fromS(partitionKey)),
             Map.entry("SK", AttributeValue.fromS(sortKey)));
     try {
-      dynamoDbClient.transactWriteItems(
+      retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -105,7 +107,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     try {
       String lockedUntil =
           Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
-      dynamoDbClient.transactWriteItems(
+      retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -158,7 +160,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     String newLockedUntil =
         Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
     try {
-      dynamoDbClient.transactWriteItems(
+      retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -216,8 +218,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
       JsonNode itemValue =
           JsonToolkit.stringToJsonNode(
               Objects.requireNonNullElse(
-                      dynamoDbClient
-                          .transactGetItems(
+                      retryTransactGetItems(
                               TransactGetItemsRequest.builder()
                                   .transactItems(
                                       TransactGetItem.builder()
@@ -260,7 +261,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
             Map.entry("PK", AttributeValue.fromS(partitionKey)),
             Map.entry("SK", AttributeValue.fromS(sortKey)));
     try {
-      dynamoDbClient.transactWriteItems(
+      retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -297,5 +298,47 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     }
     log.debug(
         "END _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+  }
+
+  private TransactGetItemsResponse retryTransactGetItems(
+      TransactGetItemsRequest transactGetItemsRequest) {
+    TransactionCanceledException latestTransactionCanceledException = null;
+    for (int retriesLeft = MAX_TRANSACTION_RETRY_COUNT - 1; retriesLeft >= 0; --retriesLeft) {
+      try {
+        return dynamoDbClient.transactGetItems(transactGetItemsRequest);
+      } catch (TransactionCanceledException transactionCanceledException) {
+        if (transactionCanceledException.cancellationReasons().stream()
+            .noneMatch(reason -> "TransactionConflict".equals(reason.code()))) {
+          throw transactionCanceledException;
+        } else {
+          latestTransactionCanceledException = transactionCanceledException;
+          log.info("TransactGetItemsRequest %d retries left".formatted(retriesLeft));
+        }
+      }
+    }
+    throw new RuntimeException(
+        "TransactGetItemsRequest failed after %d retries".formatted(MAX_TRANSACTION_RETRY_COUNT),
+        latestTransactionCanceledException);
+  }
+
+  private TransactWriteItemsResponse retryTransactWriteItems(
+      TransactWriteItemsRequest transactWriteItemsRequest) {
+    TransactionCanceledException latestTransactionCanceledException = null;
+    for (int retriesLeft = MAX_TRANSACTION_RETRY_COUNT - 1; retriesLeft >= 0; --retriesLeft) {
+      try {
+        return dynamoDbClient.transactWriteItems(transactWriteItemsRequest);
+      } catch (TransactionCanceledException transactionCanceledException) {
+        if (transactionCanceledException.cancellationReasons().stream()
+            .noneMatch(reason -> "TransactionConflict".equals(reason.code()))) {
+          throw transactionCanceledException;
+        } else {
+          latestTransactionCanceledException = transactionCanceledException;
+          log.info("TransactWriteItemsRequest %d retries left".formatted(retriesLeft));
+        }
+      }
+    }
+    throw new RuntimeException(
+        "TransactWriteItemsRequest failed after %d retries".formatted(MAX_TRANSACTION_RETRY_COUNT),
+        latestTransactionCanceledException);
   }
 }

@@ -144,6 +144,7 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       ConformanceWebRequest webRequest,
       Consumer<ConformanceWebRequest> asyncWebClient) {
+    log.info("ConformanceSandbox.handleRequest() " + new ObjectMapper().valueToTree(webRequest).toPrettyString());
     String expectedPrefix = "/conformance/sandbox/";
     if (!webRequest.uri().startsWith(expectedPrefix)) {
       throw new IllegalArgumentException("Incorrect URI prefix: " + webRequest.uri());

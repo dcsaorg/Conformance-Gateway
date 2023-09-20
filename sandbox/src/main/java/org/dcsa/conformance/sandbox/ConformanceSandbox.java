@@ -74,8 +74,9 @@ public class ConformanceSandbox {
       implements Runnable {
     @Override
     public void run() {
+      JsonNode sandboxState = _loadSandboxState(persistenceProvider, sandboxId);
       String currentSessionId =
-          _loadSandboxState(persistenceProvider, sandboxId).get("currentSessionId").asText();
+          sandboxState.isEmpty() ? "" : sandboxState.get("currentSessionId").asText();
       persistenceProvider
           .getStatefulExecutor()
           .execute(
@@ -118,7 +119,7 @@ public class ConformanceSandbox {
     persistenceProvider
         .getStatefulExecutor()
         .execute(
-            "load sandbox state",
+            "loading state of sandbox " + sandboxId,
             "sandbox#" + sandboxId,
             "state",
             originalSandboxState -> {
@@ -297,9 +298,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "get prompt for party " + partyName,
-            orchestrator -> {
-              partyPromptReference.set(orchestrator.handleGetPartyPrompt(partyName));
-            })
+            orchestrator -> partyPromptReference.set(orchestrator.handleGetPartyPrompt(partyName)))
         .run();
     log.info(
         "Returning prompt for party %s: %s"
@@ -318,9 +317,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "get status",
-            orchestrator -> {
-              statusReference.set(orchestrator.getStatus());
-            })
+            orchestrator -> statusReference.set(orchestrator.getStatus()))
         .run();
     return new ConformanceWebResponse(
         200, JSON_UTF_8, Collections.emptyMap(), statusReference.get().toString());
@@ -337,9 +334,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "handling input from party " + partyName,
-            orchestrator -> {
-              orchestrator.handlePartyInput(new ConformanceMessageBody(input).getJsonBody());
-            })
+            orchestrator -> orchestrator.handlePartyInput(new ConformanceMessageBody(input).getJsonBody()))
         .run();
     return new ConformanceWebResponse(200, JSON_UTF_8, Collections.emptyMap(), "{}");
   }
@@ -371,9 +366,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "generating report for roles: " + reportRoleNames,
-            orchestrator -> {
-              reportReference.set(orchestrator.generateReport(reportRoleNames));
-            })
+            orchestrator -> reportReference.set(orchestrator.generateReport(reportRoleNames)))
         .run();
     return new ConformanceWebResponse(
         200, "text/html;charset=utf-8", Collections.emptyMap(), reportReference.get());

@@ -1,0 +1,10 @@
+<div class="pageTitle">Sandboxes</div>
+
+<mat-spinner *ngIf="isLoading"></mat-spinner>
+
+<mat-card
+*ngFor="let sandbox of sandboxes"
+[ngClass]="'entityCard withContentPadding withPointerCursor'"
+(click)="onSandboxClick(sandbox)">
+    <div>{{sandbox.name}}</div>
+</mat-card>

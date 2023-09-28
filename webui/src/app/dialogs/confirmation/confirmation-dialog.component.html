@@ -1,0 +1,30 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+  <p>{{data.question}}</p>
+
+  <div
+  *ngIf="data.requiredConfirmationString"
+  >
+    <div>{{"Type '" + data.requiredConfirmationString + "' to confirm:"}}</div>
+    <div>
+      <mat-form-field
+        [ngClass]="'singleLineInput'"
+        >
+          <input
+          matInput
+          #focusableInput
+          type="text"
+          autocomplete="off"
+          name="requiredConfirmationTextField"
+          [(ngModel)]="confirmationText"
+          >
+        </mat-form-field>
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="data.result"
+  [disabled]="data.requiredConfirmationString && (data.requiredConfirmationString !== confirmationText.toLowerCase())"
+  >OK</button>
+  <button mat-button cdkFocusInitial (click)="onCancelClick()">Cancel</button>
+</div>

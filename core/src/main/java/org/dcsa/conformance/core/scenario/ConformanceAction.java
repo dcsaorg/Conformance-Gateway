@@ -16,13 +16,19 @@ public abstract class ConformanceAction implements StatefulEntity {
   private final String targetPartyName;
   protected final ConformanceAction previousAction;
   private final String actionPath;
+  private final String actionTitle;
 
   public ConformanceAction(
-      String sourcePartyName, String targetPartyName, ConformanceAction previousAction, String actionTitle) {
+      String sourcePartyName,
+      String targetPartyName,
+      ConformanceAction previousAction,
+      String actionTitle) {
     this.sourcePartyName = sourcePartyName;
     this.targetPartyName = targetPartyName;
     this.previousAction = previousAction;
-    this.actionPath = (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
+    this.actionTitle = actionTitle;
+    this.actionPath =
+        (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
   }
 
   @Override
@@ -37,11 +43,22 @@ public abstract class ConformanceAction implements StatefulEntity {
     id = UUID.fromString(jsonState.get("id").asText());
   }
 
+  public abstract String getHumanReadablePrompt();
+
+  public boolean isConfirmationRequired() {
+    return false;
+  }
+
+  public boolean isInputRequired() {
+    return false;
+  }
+
   public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
     return false;
   }
 
-  public void updateFromPartyInput(JsonNode partyInput) {};
+  public void updateFromPartyInput(JsonNode partyInput) {}
+  ;
 
   public ObjectNode asJsonNode() {
     return new ObjectMapper()

@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 
 @Getter
 public class ConformanceReport {
+  private final ConformanceCheck conformanceCheck;
   private final String title;
   private final ConformanceStatus conformanceStatus;
   private int conformantExchangeCount;
@@ -18,6 +19,7 @@ public class ConformanceReport {
   private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {
+    this.conformanceCheck = conformanceCheck;
     this.title = conformanceCheck.getTitle();
     conformanceCheck
         .resultsStream()

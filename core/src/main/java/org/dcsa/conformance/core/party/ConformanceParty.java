@@ -72,6 +72,12 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
+    if (partyConfiguration.isManualMode()) {
+      log.info(
+          "Party %s is in manual mode and will NOT post its input automatically: %s"
+              .formatted(partyConfiguration.getName(), jsonPartyInput.toPrettyString()));
+      return;
+    }
     asyncWebClient.accept(
         new ConformanceRequest(
             "POST",
@@ -115,7 +121,7 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);
 
-  public JsonNode handleNotification() {
+  public void handleNotification() {
     log.info(
         "%s[%s].handleNotification()"
             .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
@@ -124,7 +130,6 @@ public abstract class ConformanceParty implements StatefulEntity {
       StreamSupport.stream(partyPrompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
       _handleNextActionPrompt();
     }
-    return new ObjectMapper().createObjectNode();
   }
 
   @SneakyThrows

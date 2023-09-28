@@ -23,7 +23,7 @@ public class StatefulExecutor {
       String sortKey,
       Function<JsonNode, JsonNode> function) {
     String lockedBy = UUID.randomUUID().toString();
-    log.debug("Executing with lock %s: %s".formatted(lockedBy, description));
+    log.info("Executing with lock %s: %s".formatted(lockedBy, description));
     JsonNode originalState = sortedPartitionsLockingMap.loadItem(lockedBy, partitionKey, sortKey);
 
     JsonNode modifiedState;

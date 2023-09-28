@@ -6,11 +6,13 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
+@Slf4j
 public class SurrenderRequestAction extends TdrAction {
   private final boolean forAmendment;
 
@@ -60,6 +62,13 @@ public class SurrenderRequestAction extends TdrAction {
   }
 
   @Override
+  public String getHumanReadablePrompt() {
+    return ("Send a surrender request for %s "
+            + "for the eBL with the transport document reference '%s'")
+        .formatted(forAmendment ? "amendment" : "delivery", tdrSupplier.get());
+  }
+
+  @Override
   public synchronized Supplier<String> getSrrSupplier() {
     return srrSupplier;
   }
@@ -82,7 +91,10 @@ public class SurrenderRequestAction extends TdrAction {
             && JsonToolkit.stringAttributeEquals(
                 requestJsonNode, "surrenderRequestCode", forAmendment ? "AREQ" : "SREQ");
     if (matches) {
-      this.surrenderRequestReference.set(requestJsonNode.get("surrenderRequestReference").asText());
+      String srr = requestJsonNode.get("surrenderRequestReference").asText();
+      log.info(
+          "Updating SurrenderRequestAction '%s' with SRR '%s'".formatted(getActionTitle(), srr));
+      this.surrenderRequestReference.set(srr);
     }
     return matches;
   }

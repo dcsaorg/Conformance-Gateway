@@ -40,6 +40,12 @@ public class SurrenderResponseAction extends TdrAction {
   }
 
   @Override
+  public String getHumanReadablePrompt() {
+    return ("%s the surrender request with surrender request reference '%s'")
+            .formatted(accept ? "Accept" : "Reject", getSrrSupplier().get());
+  }
+
+  @Override
   public synchronized Supplier<String> getSrrSupplier() {
     if (srrSupplier != null) return srrSupplier;
     for (ConformanceAction action = this.previousAction;

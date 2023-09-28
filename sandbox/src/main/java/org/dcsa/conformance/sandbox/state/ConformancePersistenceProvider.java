@@ -1,6 +1,6 @@
 package org.dcsa.conformance.sandbox.state;
 
-// PK=environment#UUID  SK=sandbox#UUID
+// PK=environment#UUID  SK=sandbox#UUID        value={id: sandboxUUID, name: sandboxName}
 //
 // PK=sandbox#UUID      SK=config              value={...}
 // PK=sandbox#UUID      SK=state               value={currentSessionId: UUID, ...}  lock=...

@@ -35,13 +35,17 @@ public class VoidAndReissueAction extends TdrAction {
   }
 
   @Override
-  public Supplier<String> getSrrSupplier() {
-    return null;
+  public String getHumanReadablePrompt() {
+    return "Void and reissue the eBL with transport document reference '%s'".formatted(tdrSupplier.get());
   }
 
   @Override
-  public void updateFromPartyInput(JsonNode partyInput) {
-    super.updateFromPartyInput(partyInput);
-    getTdrConsumer().accept(partyInput.get("tdr").asText());
+  public boolean isConfirmationRequired() {
+    return true;
+  }
+
+  @Override
+  public Supplier<String> getSrrSupplier() {
+    return null;
   }
 }

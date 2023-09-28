@@ -1,0 +1,52 @@
+<mat-toolbar color="primary">
+  <a
+  id="homeButton"
+  mat-icon-button
+  routerLink="/"
+  >
+    <mat-icon>home</mat-icon>
+  </a>
+
+  <span class="spacer"></span>
+
+  <span>{{siteTitle}}</span>
+
+  <span class="spacer"></span>
+
+  <a
+  *ngIf="!isAuthenticated"
+  routerLink="/login"
+  mat-button
+  color="{{'white'}}"
+  >
+    Login
+  </a>
+
+  <button
+  *ngIf="isAuthenticated"
+  mat-icon-button
+  color="{{isAuthenticated ? 'white' : 'accent'}}"
+  [matMenuTriggerFor]="userMenu"
+  aria-label="More">
+    <mat-icon>account_box</mat-icon>
+  </button>
+  <mat-menu
+  #userMenu="matMenu">
+    <button
+    *ngIf="isAuthenticated"
+    mat-menu-item
+    color="primary"
+    (click)="onHelp()">
+      <mat-icon>help_outline</mat-icon>
+      <span>Help</span>
+    </button>
+    <button
+    *ngIf="isAuthenticated"
+    mat-menu-item
+    color="primary"
+    (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

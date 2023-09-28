@@ -49,29 +49,28 @@ public class ConformanceApplication {
   private ConformancePersistenceProvider persistenceProvider;
 
   private final Consumer<ConformanceWebRequest> asyncWebClient =
-      conformanceWebRequest -> {
-        CompletableFuture.runAsync(
-                () -> {
-                  try {
-                    HttpClient.newHttpClient()
-                        .send(
-                            HttpRequest.newBuilder()
-                                .uri(URI.create(conformanceWebRequest.url()))
-                                .timeout(Duration.ofHours(1))
-                                .GET()
-                                .build(),
-                            HttpResponse.BodyHandlers.ofString());
-                  } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                  }
-                })
-            .exceptionally(
-                e -> {
-                  log.error(
-                      "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
-                  return null;
-                });
-      };
+      conformanceWebRequest ->
+          CompletableFuture.runAsync(
+                  () -> {
+                    try {
+                      HttpClient.newHttpClient()
+                          .send(
+                              HttpRequest.newBuilder()
+                                  .uri(URI.create(conformanceWebRequest.url()))
+                                  .timeout(Duration.ofHours(1))
+                                  .GET()
+                                  .build(),
+                              HttpResponse.BodyHandlers.ofString());
+                    } catch (IOException | InterruptedException e) {
+                      throw new RuntimeException(e);
+                    }
+                  })
+              .exceptionally(
+                  e -> {
+                    log.error(
+                        "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
+                    return null;
+                  });
 
   @PostConstruct
   public void postConstruct() {
@@ -131,21 +130,50 @@ public class ConformanceApplication {
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
 
-    Stream.of(
-            "all-in-one",
-            "carrier-tested-party",
-            "carrier-testing-counterparts",
-            "platform-tested-party",
-            "platform-testing-counterparts")
+    Stream.concat(
+            conformanceConfiguration.createAutoTestingSandboxes
+                ? Stream.of(
+                    "all-in-one",
+                    "carrier-tested-party",
+                    "carrier-testing-counterparts",
+                    "platform-tested-party",
+                    "platform-testing-counterparts")
+                : Stream.of(),
+            conformanceConfiguration.createManualTestingSandboxes
+                ? Stream.of(
+                    "manual-carrier-tested-party",
+                    "manual-carrier-testing-counterparts",
+                    "manual-platform-tested-party",
+                    "manual-platform-testing-counterparts")
+                : Stream.of())
         .forEach(
             baseFileName ->
                 ConformanceSandbox.create(
                     persistenceProvider,
+                    asyncWebClient,
+                    "spring-boot-env",
                     "eblsurrender-v10-%s".formatted(baseFileName),
+                    "eBL Surrender v1.0 " + baseFileName,
                     SandboxConfiguration.fromJsonNode(
                         JsonToolkit.inputStreamToJsonNode(
                             ConformanceApplication.class.getResourceAsStream(
                                 "/standards/eblsurrender/v10/%s.json".formatted(baseFileName))))));
+  }
+
+  @CrossOrigin(origins = "http://localhost:4200")
+  @RequestMapping(value = "/conformance/webui/**")
+  public void handleWebuiRequest(
+      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+    _writeResponse(
+        servletResponse,
+        200,
+        "application/json;charset=utf-8",
+        Collections.emptyMap(),
+        ConformanceWebuiHandler.handleRequest(
+                persistenceProvider,
+                asyncWebClient,
+                JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
+            .toPrettyString());
   }
 
   @RequestMapping(value = "/conformance/**")
@@ -211,39 +239,36 @@ public class ConformanceApplication {
 
   @GetMapping(value = "/")
   public void handleGetRoot(
-          HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     _writeResponse(
-            servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
+        servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
   }
 
   private String _buildHomePage() {
     return String.join(
-            System.lineSeparator(),
-            "<html>",
-            "<head><title>DCSA Conformance</title></head>",
-            "<body style=\"font-family: sans-serif;\">",
-            "<h2>DCSA Conformance</h2>",
-            _buildHomeSandboxSection("eblsurrender-v10-all-in-one"),
-            _buildHomeSandboxSection("eblsurrender-v10-carrier-testing-counterparts"),
-            _buildHomeSandboxSection("eblsurrender-v10-platform-testing-counterparts"),
-            "</body>",
-            "</html>");
+        System.lineSeparator(),
+        "<html>",
+        "<head><title>DCSA Conformance</title></head>",
+        "<body style=\"font-family: sans-serif;\">",
+        "<h2>DCSA Conformance</h2>",
+        _buildHomeSandboxSection("eblsurrender-v10-all-in-one"),
+        _buildHomeSandboxSection("eblsurrender-v10-carrier-testing-counterparts"),
+        _buildHomeSandboxSection("eblsurrender-v10-platform-testing-counterparts"),
+        "</body>",
+        "</html>");
   }
 
   private String _buildHomeSandboxSection(String sandboxId) {
     return String.join(
-            System.lineSeparator(),
-            "<h3>%s</h3>".formatted(sandboxId),
-            "<p><a href=\"/conformance/sandbox/%s/reset\">Reset</a></p>"
-                    .formatted(sandboxId),
-            "<p><a href=\"/conformance/sandbox/%s/status\">Status</a></p>"
-                    .formatted(sandboxId),
-            "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
-                    .formatted(sandboxId, "Carrier1"),
-            "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
-                    .formatted(sandboxId, "Platform1"),
-            "<p><a href=\"/conformance/sandbox/%s/report\">Report</a></p>"
-                    .formatted(sandboxId));
+        System.lineSeparator(),
+        "<h3>%s</h3>".formatted(sandboxId),
+        "<p><a href=\"/conformance/sandbox/%s/reset\">Reset</a></p>".formatted(sandboxId),
+        "<p><a href=\"/conformance/sandbox/%s/status\">Status</a></p>".formatted(sandboxId),
+        "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
+            .formatted(sandboxId, "Carrier1"),
+        "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
+            .formatted(sandboxId, "Platform1"),
+        "<p><a href=\"/conformance/sandbox/%s/report\">Report</a></p>".formatted(sandboxId));
   }
 
   public static void main(String[] args) {

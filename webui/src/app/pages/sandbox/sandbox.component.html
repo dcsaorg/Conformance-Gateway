@@ -1,0 +1,25 @@
+<mat-spinner *ngIf="!sandbox"></mat-spinner>
+
+<div *ngIf="sandbox">
+    <div class="pageTitle">Sandbox: {{sandbox.name}}</div>
+</div>
+
+<div class="pageSubtitle">All scenarios:</div>
+
+<mat-card [ngClass]="'entityCard'" *ngFor="let scenario of scenarios">
+    <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
+        <button
+        mat-icon-button
+        color="primary"
+        [title]="getActionTitle(scenario)"
+        (click)="onScenarioAction(scenario)"
+        ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+
+        <span
+        class="conformanceStatus"
+        [title]="getConformanceStatusTitle(scenario)"
+        >{{getConformanceStatusEmoji(scenario)}}</span>
+    
+        <span>{{scenario.name}}</span>
+    </div>
+</mat-card>

@@ -1,0 +1,29 @@
+.fullWidth {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-spinner {
+  margin: auto;
+}
+
+.loginPage {
+  margin-top: 1em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.editCardContent {
+  padding: 1em;
+}

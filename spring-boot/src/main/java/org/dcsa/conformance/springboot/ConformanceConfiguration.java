@@ -11,4 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @Setter
 public class ConformanceConfiguration {
     boolean useDynamoDb;
+    boolean createAutoTestingSandboxes;
+    boolean createManualTestingSandboxes;
 }

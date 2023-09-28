@@ -21,14 +21,14 @@ public abstract class SortedPartitionsLockingMap {
   }
 
   public JsonNode loadItem(String lockedBy, String partitionKey, String sortKey) {
-    log.info(
+    log.debug(
         "SortedPartitionsLockingMap.loadItem(lockedBy='%s', partitionKey='%s', sortKey='%s') starting..."
             .formatted(lockedBy, partitionKey, sortKey));
     long timeoutTimestamp = System.currentTimeMillis() + loadTimeoutMillis;
     while (System.currentTimeMillis() < timeoutTimestamp) {
       try {
         JsonNode loadedItem = _loadItem(lockedBy, partitionKey, sortKey);
-        log.info(
+        log.debug(
             "SortedPartitionsLockingMap.loadItem(lockedBy='%s', partitionKey='%s', sortKey='%s') DONE"
                 .formatted(lockedBy, partitionKey, sortKey));
         return loadedItem;
@@ -50,21 +50,21 @@ public abstract class SortedPartitionsLockingMap {
   }
 
   public void saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value) {
-    log.info(
+    log.debug(
         "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
             .formatted(lockedBy, partitionKey, sortKey));
     _saveItem(lockedBy, partitionKey, sortKey, value);
-    log.info(
+    log.debug(
         "SortedPartitionsLockingMap.saveItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
             .formatted(lockedBy, partitionKey, sortKey));
   }
 
   public void unlockItem(String lockedBy, String partitionKey, String sortKey) {
-    log.info(
+    log.debug(
         "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) starting..."
             .formatted(lockedBy, partitionKey, sortKey));
     _unlockItem(lockedBy, partitionKey, sortKey);
-    log.info(
+    log.debug(
         "SortedPartitionsLockingMap.unlockItem(lockedBy='%s', partitionKey='%s', sortKey='%s', ...) DONE"
             .formatted(lockedBy, partitionKey, sortKey));
   }

@@ -1,0 +1,7 @@
+<span
+class="simpleText"
+*ngFor="let segment of getSegments()">
+  <br *ngIf="isLineBreak(segment)"/>
+  <a *ngIf="isUrl(segment)" target="_blank" [href]="segment">{{segment}}</a>
+  <span *ngIf="isPlainText(segment)">{{segment}}</span>
+</span>

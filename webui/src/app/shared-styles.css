@@ -1,0 +1,40 @@
+.cardContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.conformanceStatus {
+    width: 2em;
+}
+
+.entityCard {
+    margin-top: 1em;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.pageSubtitle {
+    font-size: 1.1rem;
+    margin-top: 1em;
+}
+
+.pageTitle {
+    font-size: 1.2rem;
+    margin-top: 1em;
+}
+
+.paragraph {
+    margin-top: 1em;
+}
+
+.withContentPadding {
+    padding: 1em;
+}
+
+.withPointerCursor {
+    cursor: pointer;
+}

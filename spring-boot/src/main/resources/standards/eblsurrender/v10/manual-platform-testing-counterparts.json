@@ -1,0 +1,26 @@
+{
+  "standard" : {
+    "name" : "EblSurrender",
+    "version" : "1.0.0"
+  },
+  "orchestrator" : {
+    "maxParallelScenarios" : 0
+  },
+  "parties" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "orchestratorBaseUrl" : "http://localhost:8080",
+    "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-manual-platform-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-manual-platform-tested-party"
+  }, {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-manual-platform-testing-counterparts"
+  } ]
+}

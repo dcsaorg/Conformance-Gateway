@@ -13,7 +13,9 @@ import lombok.SneakyThrows;
 public enum JsonToolkit {
   ; // no instances
 
-  @SneakyThrows
+    public static final String JSON_UTF_8 = "application/json;charset=utf-8";
+
+    @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {
     return new ObjectMapper().readTree(string);
   }

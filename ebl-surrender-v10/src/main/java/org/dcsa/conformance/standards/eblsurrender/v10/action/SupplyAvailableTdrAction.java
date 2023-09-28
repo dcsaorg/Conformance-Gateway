@@ -51,8 +51,19 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
   }
 
   @Override
+  public String getHumanReadablePrompt() {
+    return "Provide the transport document reference of an eBL "
+        + "for which your party can receive and handle a surrender request.";
+  }
+
+  @Override
+  public boolean isInputRequired() {
+    return true;
+  }
+
+  @Override
   public void updateFromPartyInput(JsonNode partyInput) {
     super.updateFromPartyInput(partyInput);
-    getTdrConsumer().accept(partyInput.get("tdr").asText());
+    getTdrConsumer().accept(partyInput.get("input").asText());
   }
 }

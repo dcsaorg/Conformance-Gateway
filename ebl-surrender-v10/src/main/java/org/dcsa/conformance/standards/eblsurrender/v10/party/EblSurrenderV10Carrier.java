@@ -74,7 +74,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
         new ObjectMapper()
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
-            .put("tdr", tdr));
+            .put("input", tdr));
   }
 
   private void voidAndReissue(JsonNode actionPrompt) {
@@ -88,8 +88,7 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
     asyncOrchestratorPostPartyInput(
         new ObjectMapper()
             .createObjectNode()
-            .put("actionId", actionPrompt.get("actionId").asText())
-            .put("tdr", tdr));
+            .put("actionId", actionPrompt.get("actionId").asText()));
   }
 
   private void sendSurrenderResponse(JsonNode actionPrompt) {

@@ -12,12 +12,16 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
@@ -50,12 +54,13 @@ public class ConformanceSandbox {
                 ComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
                 ConformanceOrchestrator orchestrator =
-                    new ConformanceOrchestrator(
+                    ConformanceOrchestrator.createOrchestrator(
                         sandboxConfiguration,
                         componentFactory,
-                        _createTrafficRecorder(persistenceProvider, "session#" + currentSessionId),
+                        new TrafficRecorder(
+                            persistenceProvider.getNonLockingMap(), "session#" + currentSessionId),
                         asyncWebClient);
-                if (!originalOrchestratorState.isEmpty()) {
+                if (originalOrchestratorState != null && !originalOrchestratorState.isEmpty()) {
                   orchestrator.importJsonState(originalOrchestratorState);
                 }
                 orchestratorConsumer.accept(orchestrator);
@@ -104,7 +109,7 @@ public class ConformanceSandbox {
                         .findFirst()
                         .orElseThrow(
                             () -> new IllegalArgumentException("Party not found: " + partyName));
-                if (!originalPartyState.isEmpty()) {
+                if (originalPartyState != null && !originalPartyState.isEmpty()) {
                   party.importJsonState(originalPartyState);
                 }
                 partyConsumer.accept(party);
@@ -129,22 +134,38 @@ public class ConformanceSandbox {
     return sandboxStateNodeReference.get();
   }
 
-  public static final String JSON_UTF_8 = "application/json;charset=utf-8";
-
   public static void create(
       ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String environmentId,
       String sandboxId,
+      String sandboxName,
       SandboxConfiguration sandboxConfiguration) {
     persistenceProvider
         .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "sandbox#" + sandboxId,
+            new ObjectMapper().createObjectNode().put("id", sandboxId).put("name", sandboxName));
+    persistenceProvider
+        .getNonLockingMap()
         .setItemValue("sandbox#" + sandboxId, "config", sandboxConfiguration.toJsonNode());
+    if (sandboxConfiguration.getOrchestrator() != null) {
+      if (sandboxConfiguration.getOrchestrator().getMaxParallelScenarios() < 1) {
+        _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+      }
+    } else {
+      _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+    }
   }
 
   public static ConformanceWebResponse handleRequest(
       ConformancePersistenceProvider persistenceProvider,
       ConformanceWebRequest webRequest,
       Consumer<ConformanceWebRequest> asyncWebClient) {
-    log.info("ConformanceSandbox.handleRequest() " + new ObjectMapper().valueToTree(webRequest).toPrettyString());
+    log.info(
+        "ConformanceSandbox.handleRequest() "
+            + new ObjectMapper().valueToTree(webRequest).toPrettyString());
     String expectedPrefix = "/conformance/sandbox/";
     if (!webRequest.uri().startsWith(expectedPrefix)) {
       throw new IllegalArgumentException("Incorrect URI prefix: " + webRequest.uri());
@@ -188,6 +209,86 @@ public class ConformanceSandbox {
     throw new IllegalArgumentException("Unhandled URI: " + webRequest.uri());
   }
 
+  public static ArrayNode getScenarioDigests(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId) {
+    AtomicReference<ArrayNode> arrayNodeReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "getting scenario digests for sandbox " + sandboxId,
+            orchestrator ->
+                arrayNodeReference.set(((ManualOrchestrator) orchestrator).getScenarioDigests()))
+        .run();
+    return arrayNodeReference.get();
+  }
+
+  public static ObjectNode getScenarioDigest(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
+    AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "getting from sandbox %s the digest of scenario %s".formatted(sandboxId, scenarioId),
+            orchestrator ->
+                resultReference.set(
+                    ((ManualOrchestrator) orchestrator).getScenarioDigest(scenarioId)))
+        .run();
+    return resultReference.get();
+  }
+
+  public static ObjectNode getScenarioStatus(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
+    AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "getting from sandbox %s the status of scenario %s".formatted(sandboxId, scenarioId),
+            orchestrator ->
+                resultReference.set(
+                    ((ManualOrchestrator) orchestrator).getScenarioStatus(scenarioId)))
+        .run();
+    return resultReference.get();
+  }
+
+  public static ObjectNode handleActionInput(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String sandboxId,
+      String actionId,
+      String actionInput) {
+    new OrchestratorTask(
+            persistenceProvider,
+            asyncWebClient,
+            sandboxId,
+            "handling in sandbox %s the input for action %s".formatted(sandboxId, actionId),
+            orchestrator ->
+                orchestrator.handlePartyInput(
+                    new ObjectMapper()
+                        .createObjectNode()
+                        .put("actionId", actionId)
+                        .put("input", actionInput)))
+        .run();
+    return new ObjectMapper().createObjectNode();
+  }
+
+  public static JsonNode startScenario(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String sandboxId,
+      String scenarioId) {
+    new OrchestratorTask(
+            persistenceProvider,
+            asyncWebClient,
+            sandboxId,
+            "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
+            orchestrator -> ((ManualOrchestrator) orchestrator).startScenario(scenarioId))
+        .run();
+    return new ObjectMapper().createObjectNode();
+  }
+
   private static ConformanceWebResponse _handlePartyNotification(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
@@ -201,7 +302,7 @@ public class ConformanceSandbox {
             "handling notification for party " + partyName,
             ConformanceParty::handleNotification)
         .run();
-    return new ConformanceWebResponse(200, JSON_UTF_8, Collections.emptyMap(), "{}");
+    return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
   }
 
   private static ConformanceWebResponse _handlePartyInboundConformanceRequest(
@@ -254,7 +355,7 @@ public class ConformanceSandbox {
     }
     return new ConformanceWebResponse(
         conformanceResponse.statusCode(),
-        JSON_UTF_8,
+        JsonToolkit.JSON_UTF_8,
         conformanceResponse.message().headers(),
         conformanceResponse.message().body().getStringBody());
   }
@@ -305,7 +406,10 @@ public class ConformanceSandbox {
         "Returning prompt for party %s: %s"
             .formatted(partyName, partyPromptReference.get().toPrettyString()));
     return new ConformanceWebResponse(
-        200, JSON_UTF_8, Collections.emptyMap(), partyPromptReference.get().toPrettyString());
+        200,
+        JsonToolkit.JSON_UTF_8,
+        Collections.emptyMap(),
+        partyPromptReference.get().toPrettyString());
   }
 
   private static ConformanceWebResponse _handleGetStatus(
@@ -321,7 +425,7 @@ public class ConformanceSandbox {
             orchestrator -> statusReference.set(orchestrator.getStatus()))
         .run();
     return new ConformanceWebResponse(
-        200, JSON_UTF_8, Collections.emptyMap(), statusReference.get().toString());
+        200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), statusReference.get().toString());
   }
 
   private static ConformanceWebResponse _handlePostPartyInput(
@@ -335,9 +439,10 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "handling input from party " + partyName,
-            orchestrator -> orchestrator.handlePartyInput(new ConformanceMessageBody(input).getJsonBody()))
+            orchestrator ->
+                orchestrator.handlePartyInput(new ConformanceMessageBody(input).getJsonBody()))
         .run();
-    return new ConformanceWebResponse(200, JSON_UTF_8, Collections.emptyMap(), "{}");
+    return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
   }
 
   private static ConformanceWebResponse _handleGenerateReport(
@@ -405,7 +510,7 @@ public class ConformanceSandbox {
           .run();
     }
 
-    return new ConformanceWebResponse(200, JSON_UTF_8, Collections.emptyMap(), "{}");
+    return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
   }
 
   private static SandboxConfiguration _loadSandboxConfiguration(
@@ -422,11 +527,6 @@ public class ConformanceSandbox {
     }
     throw new UnsupportedOperationException(
         "Unsupported standard: %s".formatted(standardConfiguration));
-  }
-
-  private static TrafficRecorder _createTrafficRecorder(
-      ConformancePersistenceProvider persistenceProvider, String sessionId) {
-    return new TrafficRecorder(persistenceProvider.getNonLockingMap(), "session#" + sessionId);
   }
 
   @SneakyThrows

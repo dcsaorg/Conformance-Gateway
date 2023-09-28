@@ -1,0 +1,20 @@
+{
+  "standard" : {
+    "name" : "EblSurrender",
+    "version" : "1.0.0"
+  },
+  "orchestrator" : null,
+  "parties" : [ {
+    "manualMode": true,
+    "name" : "Platform1",
+    "role" : "Platform",
+    "orchestratorBaseUrl" : "http://localhost:8080",
+    "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-manual-platform-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "baseUrl" : "http://localhost:8080",
+    "rootPath" : "/conformance/sandbox/eblsurrender-v10-manual-platform-testing-counterparts"
+  } ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "conformance-webui",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^16.2.6",
+    "@angular/cdk": "^16.2.5",
+    "@angular/common": "^16.2.6",
+    "@angular/compiler": "^16.2.6",
+    "@angular/core": "^16.2.6",
+    "@angular/forms": "^16.2.6",
+    "@angular/material": "^16.2.5",
+    "@angular/platform-browser": "^16.2.6",
+    "@angular/platform-browser-dynamic": "^16.2.6",
+    "@angular/router": "^16.2.6",
+    "@types/node": "^20.6.3",
+    "@types/uuid": "^9.0.4",
+    "amazon-cognito-identity-js": "^6.3.6",
+    "rxjs": "~7.8.1",
+    "tslib": "^2.6.2",
+    "uuid": "^9.0.1",
+    "zone.js": "~0.13.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.3",
+    "@angular/cli": "~16.2.3",
+    "@angular/compiler-cli": "^16.2.6",
+    "@types/jasmine": "~4.3.6",
+    "jasmine-core": "~5.1.1",
+    "karma": "~6.4.2",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.1",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.1.6"
+  }
+}

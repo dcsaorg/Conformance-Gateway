@@ -4,7 +4,7 @@
     "version" : "1.0.0"
   },
   "orchestrator" : {
-    "maxParallelScenarios" : 0
+    "active": true
   },
   "parties" : [ {
     "name" : "Platform1",
@@ -13,6 +13,7 @@
     "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-manual-carrier-testing-counterparts"
   } ],
   "counterparts" : [ {
+    "inManualMode": true,
     "name" : "Carrier1",
     "role" : "Carrier",
     "baseUrl" : "http://localhost:8080",

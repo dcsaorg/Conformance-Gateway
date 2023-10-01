@@ -8,6 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class CounterpartConfiguration {
+  private boolean inManualMode;
   private String name;
   private String role;
   private String baseUrl;

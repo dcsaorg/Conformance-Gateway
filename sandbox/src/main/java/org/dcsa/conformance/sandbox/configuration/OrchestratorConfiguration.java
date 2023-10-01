@@ -8,5 +8,5 @@ import lombok.ToString;
 @Setter
 @ToString
 public class OrchestratorConfiguration {
-  private int maxParallelScenarios = Integer.MAX_VALUE;
+    private boolean active;
 }

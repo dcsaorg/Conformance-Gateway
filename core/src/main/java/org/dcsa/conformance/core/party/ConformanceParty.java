@@ -72,7 +72,7 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
-    if (partyConfiguration.isManualMode()) {
+    if (partyConfiguration.isInManualMode()) {
       log.info(
           "Party %s is in manual mode and will NOT post its input automatically: %s"
               .formatted(partyConfiguration.getName(), jsonPartyInput.toPrettyString()));

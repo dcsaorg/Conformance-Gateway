@@ -2,6 +2,8 @@ package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,9 +14,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.ComponentFactory;
@@ -54,7 +53,7 @@ public class ConformanceSandbox {
                 ComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
                 ConformanceOrchestrator orchestrator =
-                    ConformanceOrchestrator.createOrchestrator(
+                    new ConformanceOrchestrator(
                         sandboxConfiguration,
                         componentFactory,
                         new TrafficRecorder(
@@ -150,12 +149,13 @@ public class ConformanceSandbox {
     persistenceProvider
         .getNonLockingMap()
         .setItemValue("sandbox#" + sandboxId, "config", sandboxConfiguration.toJsonNode());
-    if (sandboxConfiguration.getOrchestrator() != null) {
-      if (sandboxConfiguration.getOrchestrator().getMaxParallelScenarios() < 1) {
+    if (!sandboxConfiguration.getOrchestrator().isActive()) {
+      _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+    } else {
+      if (Arrays.stream(sandboxConfiguration.getCounterparts())
+          .anyMatch(CounterpartConfiguration::isInManualMode)) {
         _handleReset(persistenceProvider, asyncWebClient, sandboxId);
       }
-    } else {
-      _handleReset(persistenceProvider, asyncWebClient, sandboxId);
     }
   }
 
@@ -217,8 +217,7 @@ public class ConformanceSandbox {
             null,
             sandboxId,
             "getting scenario digests for sandbox " + sandboxId,
-            orchestrator ->
-                arrayNodeReference.set(((ManualOrchestrator) orchestrator).getScenarioDigests()))
+            orchestrator -> arrayNodeReference.set(orchestrator.getScenarioDigests()))
         .run();
     return arrayNodeReference.get();
   }
@@ -231,9 +230,7 @@ public class ConformanceSandbox {
             null,
             sandboxId,
             "getting from sandbox %s the digest of scenario %s".formatted(sandboxId, scenarioId),
-            orchestrator ->
-                resultReference.set(
-                    ((ManualOrchestrator) orchestrator).getScenarioDigest(scenarioId)))
+            orchestrator -> resultReference.set(orchestrator.getScenarioDigest(scenarioId)))
         .run();
     return resultReference.get();
   }
@@ -246,9 +243,7 @@ public class ConformanceSandbox {
             null,
             sandboxId,
             "getting from sandbox %s the status of scenario %s".formatted(sandboxId, scenarioId),
-            orchestrator ->
-                resultReference.set(
-                    ((ManualOrchestrator) orchestrator).getScenarioStatus(scenarioId)))
+            orchestrator -> resultReference.set(orchestrator.getScenarioStatus(scenarioId)))
         .run();
     return resultReference.get();
   }
@@ -284,7 +279,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
-            orchestrator -> ((ManualOrchestrator) orchestrator).startScenario(scenarioId))
+            orchestrator -> orchestrator.startScenario(scenarioId))
         .run();
     return new ObjectMapper().createObjectNode();
   }
@@ -341,7 +336,7 @@ public class ConformanceSandbox {
     ConformanceResponse conformanceResponse = conformanceResponseReference.get();
     SandboxConfiguration sandboxConfiguration =
         _loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (sandboxConfiguration.getOrchestrator() != null) {
+    if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
               asyncWebClient,
@@ -375,7 +370,7 @@ public class ConformanceSandbox {
                     Objects.equals(
                         partyConfiguration.getName(),
                         conformanceRequest.message().targetPartyName()))) {
-      if (sandboxConfiguration.getOrchestrator() != null) {
+      if (sandboxConfiguration.getOrchestrator().isActive()) {
         new OrchestratorTask(
                 persistenceProvider,
                 asyncWebClient,
@@ -500,13 +495,13 @@ public class ConformanceSandbox {
 
     SandboxConfiguration sandboxConfiguration =
         _loadSandboxConfiguration(persistenceProvider, sandboxId);
-    if (sandboxConfiguration.getOrchestrator() != null) {
+    if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
               asyncWebClient,
               sandboxId,
               "starting session",
-              ConformanceOrchestrator::notifyRelevantParties)
+              ConformanceOrchestrator::notifyNextActionParty)
           .run();
     }
 

@@ -3,9 +3,11 @@
     "name" : "EblSurrender",
     "version" : "1.0.0"
   },
-  "orchestrator" : null,
+  "orchestrator" : {
+    "active": false
+  },
   "parties" : [ {
-    "manualMode": true,
+    "inManualMode": true,
     "name" : "Carrier1",
     "role" : "Carrier",
     "orchestratorBaseUrl" : "http://localhost:8080",

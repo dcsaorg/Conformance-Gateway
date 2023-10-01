@@ -8,7 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class PartyConfiguration {
-  private boolean manualMode;
+  private boolean inManualMode;
   private String name;
   private String role;
   private String orchestratorBaseUrl;

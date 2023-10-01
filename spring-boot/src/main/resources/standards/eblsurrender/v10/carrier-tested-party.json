@@ -3,7 +3,9 @@
     "name" : "EblSurrender",
     "version" : "1.0.0"
   },
-  "orchestrator" : null,
+  "orchestrator" : {
+    "active": false
+  },
   "parties" : [ {
     "name" : "Carrier1",
     "role" : "Carrier",

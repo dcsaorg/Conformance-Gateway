@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.state.StatefulEntity;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
@@ -20,10 +23,19 @@ public class ConformanceScenario implements StatefulEntity {
   protected final LinkedList<ConformanceAction> allActions = new LinkedList<>();
   protected final LinkedList<ConformanceAction> nextActions = new LinkedList<>();
 
+  @Getter private ConformanceStatus latestComputedStatus = ConformanceStatus.NO_TRAFFIC;
+
   public ConformanceScenario(Collection<ConformanceAction> actions) {
     this.allActions.addAll(actions);
     this.nextActions.addAll(actions);
     this.title = allActions.isEmpty() ? "" : allActions.peekLast().getActionPath();
+  }
+
+  public void reset() {
+    this.nextActions.clear();
+    latestComputedStatus = ConformanceStatus.NO_TRAFFIC;
+    allActions.forEach(ConformanceAction::reset);
+    this.nextActions.addAll(allActions);
   }
 
   @Override
@@ -83,9 +95,17 @@ public class ConformanceScenario implements StatefulEntity {
             .collect(Collectors.joining(" - "));
   }
 
+  public Stream<ConformanceAction> allActionsStream() {
+    return allActions.stream();
+  }
+
   @Override
   public String toString() {
     return "%s[ allActions=[%s] nextActions=[%s] ]"
         .formatted(getClass().getSimpleName(), title, getNextActionsDescription());
+  }
+
+  public Consumer<ConformanceStatus> computedStatusConsumer() {
+    return status -> latestComputedStatus = status;
   }
 }

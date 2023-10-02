@@ -95,12 +95,10 @@ export class SandboxComponent {
   }
 
   async onScenarioAction(scenario: Scenario) {
-    if (scenario.conformanceStatus === ConformanceStatus.NO_TRAFFIC) {
-      await this.conformanceService.startScenario(this.sandbox!.id, scenario.id);
-      this.router.navigate([
-        '/scenario', this.sandbox!.id, scenario.id
-      ]);
-    }
+    await this.conformanceService.startScenario(this.sandbox!.id, scenario.id);
+    this.router.navigate([
+      '/scenario', this.sandbox!.id, scenario.id
+    ]);
   }
 
   async onScenarioClick(scenario: Scenario) {

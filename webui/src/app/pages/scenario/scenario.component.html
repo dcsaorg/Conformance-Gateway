@@ -5,58 +5,67 @@
 <div *ngIf="scenario" class="pageSubtitle">Scenario: {{scenario.name}}</div>
 
 <div *ngIf="scenarioStatus">
-    <div *ngIf="!scenarioStatus.nextActions">
-        <div class="paragraph">The execution of this scenario is complete.</div>
+    <div *ngIf="!scenarioStatus.runId">
+        <div class="paragraph">The scenario was not yet started.</div>
         <div class="paragraph">
             <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
         </div>
     </div>
 
-    <div *ngIf="scenarioStatus.nextActions">
-        <div class="paragraph">Next actions: {{scenarioStatus.nextActions}}</div>
-
-        <div *ngIf="scenarioStatus.promptText">
-            <div class="paragraph">{{scenarioStatus.promptText}}</div>
-
-            <div *ngIf="scenarioStatus.inputRequired">
-                <div class="paragraph">
-                    <mat-form-field
-                    class="fullWidth"
-                    >
-                        <textarea
-                        matInput
-                        rows="3"
-                        name="actionInput"
-                        [(ngModel)]="actionInput"
-                        ></textarea>
-                    </mat-form-field>
+    <div *ngIf="scenarioStatus.runId">
+        <div *ngIf="!scenarioStatus.nextActions">
+            <div class="paragraph">The execution of this scenario is complete.</div>
+            <div class="paragraph">
+                <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
+            </div>
+        </div>
+    
+        <div *ngIf="scenarioStatus.nextActions">
+            <div class="paragraph">Next actions: {{scenarioStatus.nextActions}}</div>
+    
+            <div *ngIf="scenarioStatus.promptText">
+                <div class="paragraph">{{scenarioStatus.promptText}}</div>
+    
+                <div *ngIf="scenarioStatus.inputRequired">
+                    <div class="paragraph">
+                        <mat-form-field
+                        class="fullWidth"
+                        >
+                            <textarea
+                            matInput
+                            rows="3"
+                            name="actionInput"
+                            [(ngModel)]="actionInput"
+                            ></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="paragraph">
+                        <button
+                        mat-raised-button
+                        color="primary"
+                        [disabled]="cannotSubmit()"
+                        (click)="onSubmit(true)"
+                        >Submit</button>
+                    </div>
                 </div>
+    
+                <div *ngIf="!scenarioStatus.inputRequired" class="paragraph">
+                    <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="onSubmit(false)"
+                    >Done</button>
+                </div>
+            </div>
+            
+            <div *ngIf="!scenarioStatus.promptText">
                 <div class="paragraph">
                     <button
                     mat-raised-button
                     color="primary"
-                    [disabled]="cannotSubmit()"
-                    (click)="onSubmit(true)"
-                    >Submit</button>
+                    (click)="loadScenarioStatus()"
+                    >Refresh</button>
                 </div>
-            </div>
-
-            <div *ngIf="!scenarioStatus.inputRequired" class="paragraph">
-                <button
-                mat-raised-button
-                color="primary"
-                (click)="onSubmit(false)"
-                >Done</button>
-            </div>
-        </div>
-        
-        <div *ngIf="!scenarioStatus.promptText">
-            <div class="paragraph">
-                <button
-                mat-raised-button
-                color="primary"
-                (click)="loadScenarioStatus()"
-                >Refresh</button>
             </div>
         </div>
     </div>

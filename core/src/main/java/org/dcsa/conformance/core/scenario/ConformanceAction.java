@@ -6,17 +6,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
+import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
 public abstract class ConformanceAction implements StatefulEntity {
-  protected UUID id = UUID.randomUUID();
   private final String sourcePartyName;
   private final String targetPartyName;
   protected final ConformanceAction previousAction;
   private final String actionPath;
   private final String actionTitle;
+
+  protected UUID id = UUID.randomUUID();
+  private UUID matchedExchangeUuid;
 
   public ConformanceAction(
       String sourcePartyName,
@@ -31,16 +34,27 @@ public abstract class ConformanceAction implements StatefulEntity {
         (previousAction == null ? "" : previousAction.actionPath + " - ") + actionTitle;
   }
 
+  public void reset() {
+    id = UUID.randomUUID();
+    matchedExchangeUuid = null;
+  }
+
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = new ObjectMapper().createObjectNode();
     jsonState.put("id", id.toString());
+    if (matchedExchangeUuid != null) {
+      jsonState.put("matchedExchangeUuid", matchedExchangeUuid.toString());
+    }
     return jsonState;
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
     id = UUID.fromString(jsonState.get("id").asText());
+    if (jsonState.has("matchedExchangeUuid")) {
+      this.matchedExchangeUuid = UUID.fromString(jsonState.get("matchedExchangeUuid").asText());
+    }
   }
 
   public abstract String getHumanReadablePrompt();
@@ -53,12 +67,18 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
-  public boolean updateFromExchangeIfItMatches(ConformanceExchange exchange) {
-    return false;
+  public final void handleExchange(ConformanceExchange exchange) {
+    matchedExchangeUuid = exchange.getUuid();
+    doHandleExchange(exchange);
   }
 
-  public void updateFromPartyInput(JsonNode partyInput) {}
-  ;
+  public void doHandleExchange(ConformanceExchange exchange) {}
+
+  public ConformanceCheck createCheck() {
+    return null;
+  }
+
+  public void handlePartyInput(JsonNode partyInput) {}
 
   public ObjectNode asJsonNode() {
     return new ObjectMapper()

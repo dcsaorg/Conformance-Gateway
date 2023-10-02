@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.report;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -64,6 +65,7 @@ public class ConformanceReport {
             .orElse(
                 ConformanceStatus.forExchangeCounts(
                     conformantExchangeCount, nonConformantExchangeCount));
+    conformanceCheck.computedStatusConsumer().accept(this.conformanceStatus);
   }
 
   public static Map<String, ConformanceReport> createForRoles(
@@ -128,6 +130,7 @@ public class ConformanceReport {
   }
 
   private static String getExchangesDetails(ConformanceReport report) {
+    if (Instant.now().toEpochMilli() > 0) return "";
     if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
     if (!report.subReports.isEmpty()) return "";
     return "\n<ul>%s%s</ul>"

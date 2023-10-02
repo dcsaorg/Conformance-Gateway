@@ -37,4 +37,11 @@ public class ConformanceExchange {
         ConformanceRequest.fromJson((ObjectNode) objectNode.get("request")),
         ConformanceResponse.fromJson((ObjectNode) objectNode.get("response")));
   }
+
+  public ConformanceMessage getMessage(HttpMessageType httpMessageType) {
+    return switch (httpMessageType) {
+      case REQUEST -> request.message();
+      case RESPONSE -> response.message();
+    };
+  }
 }

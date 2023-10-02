@@ -2,9 +2,11 @@ package org.dcsa.conformance.core.check;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
@@ -27,7 +29,6 @@ public class ConformanceCheck {
   }
 
   public final void check(ConformanceExchange exchange) {
-    exchangeOccurred(exchange);
     List<ConformanceCheck> subChecks = getSubChecks();
     if (subChecks.isEmpty()) {
       this.doCheck(exchange);
@@ -35,8 +36,6 @@ public class ConformanceCheck {
       subChecks.forEach(subCheck -> subCheck.check(exchange));
     }
   }
-
-  protected void exchangeOccurred(ConformanceExchange exchange) {}
 
   protected void doCheck(ConformanceExchange exchange) {}
 
@@ -58,5 +57,9 @@ public class ConformanceCheck {
 
   public boolean isRelevantForRole(String roleName) {
     return true;
+  }
+
+  public Consumer<ConformanceStatus> computedStatusConsumer() {
+    return ignoredStatus -> {};
   }
 }

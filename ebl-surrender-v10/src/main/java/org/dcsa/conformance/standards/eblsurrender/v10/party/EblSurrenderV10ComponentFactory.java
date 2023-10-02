@@ -1,29 +1,20 @@
 package org.dcsa.conformance.standards.eblsurrender.v10.party;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.ComponentFactory;
-import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.standards.eblsurrender.v10.EblSurrenderV10ScenarioListBuilder;
-import org.dcsa.conformance.standards.eblsurrender.v10.check.EblSurrenderV10ConformanceCheck;
 
 public class EblSurrenderV10ComponentFactory implements ComponentFactory {
-
-  public ConformanceCheck createConformanceCheck(ScenarioListBuilder<?> scenarioListBuilder) {
-    return new EblSurrenderV10ConformanceCheck(scenarioListBuilder);
-  }
 
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,

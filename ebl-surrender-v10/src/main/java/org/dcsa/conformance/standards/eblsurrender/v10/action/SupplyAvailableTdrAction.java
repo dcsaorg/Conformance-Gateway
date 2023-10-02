@@ -33,6 +33,12 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
   }
 
   @Override
+  public void reset() {
+    super.reset();
+    transportDocumentReference = null;
+  }
+
+  @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (transportDocumentReference != null) {
@@ -62,8 +68,8 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
   }
 
   @Override
-  public void updateFromPartyInput(JsonNode partyInput) {
-    super.updateFromPartyInput(partyInput);
+  public void handlePartyInput(JsonNode partyInput) {
+    super.handlePartyInput(partyInput);
     getTdrConsumer().accept(partyInput.get("input").asText());
   }
 }

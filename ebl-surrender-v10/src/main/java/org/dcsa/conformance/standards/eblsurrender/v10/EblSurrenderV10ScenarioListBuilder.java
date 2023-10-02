@@ -1,22 +1,13 @@
 package org.dcsa.conformance.standards.eblsurrender.v10;
 
-import java.util.LinkedList;
 import java.util.function.Function;
-import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.eblsurrender.v10.check.SurrenderRequestCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.check.SurrenderResponseCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.check.VoidAndReissueCheck;
-import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.SupplyAvailableTdrAction;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderRequestAction;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.SurrenderResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.v10.action.VoidAndReissueAction;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Slf4j
 public class EblSurrenderV10ScenarioListBuilder
@@ -82,26 +73,12 @@ public class EblSurrenderV10ScenarioListBuilder
     log.debug("EblSurrenderV10ScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
-        noPreviousAction -> new SupplyAvailableTdrAction(carrierPartyName, null),
-        noPreviousCheck ->
-            new ActionCheck("Scenario handling", null) {
-              @Override
-              public Stream<LinkedList<ConformanceExchange>> relevantExchangeListsStream() {
-                return null;
-              }
-
-              @Override
-              public boolean isRelevantForRole(String roleName) {
-                return childrenStream().anyMatch(child -> child.isRelevantForRole(roleName))
-                    || (EblSurrenderV10Role.isCarrier(roleName) && hasNoChildren());
-              }
-            });
+        noPreviousAction -> new SupplyAvailableTdrAction(carrierPartyName, null));
   }
 
   private EblSurrenderV10ScenarioListBuilder(
-      Function<ConformanceAction, ConformanceAction> actionBuilder,
-      Function<ActionCheck, ActionCheck> checkBuilder) {
-    super(actionBuilder, checkBuilder);
+      Function<ConformanceAction, ConformanceAction> actionBuilder) {
+    super(actionBuilder);
   }
 
   private static EblSurrenderV10ScenarioListBuilder requestSurrenderForAmendment(int status) {
@@ -123,15 +100,7 @@ public class EblSurrenderV10ScenarioListBuilder
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
             new SurrenderRequestAction(
-                forAmendment, platformPartyName, carrierPartyName, expectedStatus, previousAction),
-        previousCheck ->
-            new SurrenderRequestCheck(
-                "%s - %s %d"
-                    .formatted(
-                        previousCheck.getTitle(), forAmendment ? "AREQ" : "SREQ", expectedStatus),
-                previousCheck,
-                forAmendment,
-                expectedStatus));
+                forAmendment, platformPartyName, carrierPartyName, expectedStatus, previousAction));
   }
 
   private static EblSurrenderV10ScenarioListBuilder acceptSurrenderRequest(int status) {
@@ -151,14 +120,7 @@ public class EblSurrenderV10ScenarioListBuilder
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
             new SurrenderResponseAction(
-                accept, carrierPartyName, platformPartyName, expectedStatus, previousAction),
-        previousCheck ->
-            new SurrenderResponseCheck(
-                "%s - %s %d"
-                    .formatted(previousCheck.getTitle(), accept ? "SURR" : "SREJ", expectedStatus),
-                previousCheck,
-                accept,
-                expectedStatus));
+                accept, carrierPartyName, platformPartyName, expectedStatus, previousAction));
   }
 
   private static EblSurrenderV10ScenarioListBuilder voidAndReissue() {
@@ -167,9 +129,6 @@ public class EblSurrenderV10ScenarioListBuilder
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderV10ScenarioListBuilder(
         previousAction ->
-            new VoidAndReissueAction(carrierPartyName, platformPartyName, previousAction),
-        previousCheck ->
-            new VoidAndReissueCheck(
-                "%s - Void & Reissue".formatted(previousCheck.getTitle()), previousCheck));
+            new VoidAndReissueAction(carrierPartyName, platformPartyName, previousAction));
   }
 }

@@ -1,7 +1,8 @@
 import { ConformanceStatus } from "./conformance-status";
 
-export interface Scenario {
+export interface ScenarioDigest {
     id: string,
     name: string,
+    isRunning: string,
     conformanceStatus: ConformanceStatus,
 }

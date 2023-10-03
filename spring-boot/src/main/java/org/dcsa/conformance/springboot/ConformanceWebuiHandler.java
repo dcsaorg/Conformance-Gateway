@@ -21,11 +21,11 @@ public class ConformanceWebuiHandler {
     return switch (operation) {
       case "getAllSandboxes" -> _getAllSandboxes(persistenceProvider);
       case "getSandbox" -> _getSandbox(persistenceProvider, requestNode);
-      case "getSandboxScenarios" -> _getSandboxScenarios(persistenceProvider, requestNode);
+      case "getScenarioDigests" -> _getScenarioDigests(persistenceProvider, requestNode);
       case "getScenario" -> _getScenario(persistenceProvider, requestNode);
       case "getScenarioStatus" -> _getScenarioStatus(persistenceProvider, requestNode);
       case "handleActionInput" -> _handleActionInput(persistenceProvider, asyncWebClient, requestNode);
-      case "startScenario" -> _startScenario(persistenceProvider, asyncWebClient, requestNode);
+      case "startOrStopScenario" -> _startOrStopScenario(persistenceProvider, asyncWebClient, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
   }
@@ -48,7 +48,7 @@ public class ConformanceWebuiHandler {
             "environment#spring-boot-env", "sandbox#" + requestNode.get("sandboxId").asText());
   }
 
-  private static JsonNode _getSandboxScenarios(
+  private static JsonNode _getScenarioDigests(
       ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
     return ConformanceSandbox.getScenarioDigests(
         persistenceProvider, requestNode.get("sandboxId").asText());
@@ -87,11 +87,11 @@ public class ConformanceWebuiHandler {
     }
   }
 
-  private static JsonNode _startScenario(
+  private static JsonNode _startOrStopScenario(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       JsonNode requestNode) {
-    return ConformanceSandbox.startScenario(
+    return ConformanceSandbox.startOrStopScenario(
         persistenceProvider,
         asyncWebClient,
         requestNode.get("sandboxId").asText(),

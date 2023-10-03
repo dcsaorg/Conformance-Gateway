@@ -108,7 +108,7 @@ public class SurrenderResponseAction extends TdrAction {
                     HttpMessageType.REQUEST,
                     "action",
                     accept ? "SURR" : "SREJ"),
-                expectedSrr.equals("*")
+                expectedSrr == null || expectedSrr.equals("*")
                     ? null
                     : new JsonAttributeCheck(
                         EblSurrenderV10Role::isCarrier,

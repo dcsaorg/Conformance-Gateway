@@ -20,14 +20,7 @@ public class SurrenderRequestAction extends TdrAction {
 
   private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
 
-  private final Supplier<String> srrSupplier =
-      () -> {
-        String srr = surrenderRequestReference.get();
-        if (srr == null) {
-          throw new IllegalStateException();
-        }
-        return srr;
-      };
+  private final Supplier<String> srrSupplier = surrenderRequestReference::get;
 
   public SurrenderRequestAction(
       boolean forAmendment,

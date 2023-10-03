@@ -20,13 +20,7 @@ public class SupplyAvailableTdrAction extends ConformanceAction {
       };
 
   @Getter
-  private final Supplier<String> tdrSupplier =
-      () -> {
-        if (transportDocumentReference == null) {
-          throw new IllegalStateException();
-        }
-        return transportDocumentReference;
-      };
+  private final Supplier<String> tdrSupplier = () -> transportDocumentReference;
 
   public SupplyAvailableTdrAction(String carrierPartyName, ConformanceAction previousAction) {
     super(carrierPartyName, null, previousAction, "SupplyTDR");

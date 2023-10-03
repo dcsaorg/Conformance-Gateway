@@ -280,6 +280,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
                       .createObjectNode()
                       .put("id", scenario.getId().toString())
                       .put("name", scenario.getTitle())
+                      .put("isRunning", scenario.getId().equals(currentScenarioId))
                       .put("conformanceStatus", scenario.getLatestComputedStatus().name());
               arrayNode.add(scenarioNode);
             });
@@ -307,42 +308,67 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public ObjectNode getScenarioStatus(String scenarioId) {
     UUID scenarioUuid = UUID.fromString(scenarioId);
 
-    ObjectNode scenarioNode = new ObjectMapper().createObjectNode();
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode scenarioNode = objectMapper.createObjectNode();
     UUID runUuid = latestRunIdsByScenarioId.get(scenarioUuid);
     if (runUuid == null) return scenarioNode;
-    scenarioNode.put("runId", runUuid.toString());
 
     ConformanceScenario scenario = this.scenariosById.get(scenarioUuid);
+    scenarioNode.put("isRunning", scenario.getId().equals(currentScenarioId));
     scenarioNode.put("nextActions", scenario.getNextActionsDescription());
 
     ConformanceAction nextAction = scenario.peekNextAction();
-    if (nextAction == null) return scenarioNode;
-    if (!Objects.equals(nextAction.getSourcePartyName(), _getManualCounterpart().getName()))
-      return scenarioNode;
+    if (nextAction != null
+        && Objects.equals(nextAction.getSourcePartyName(), _getManualCounterpart().getName())) {
+      scenarioNode.put("promptActionId", nextAction.getId().toString());
+      scenarioNode.put("promptText", nextAction.getHumanReadablePrompt());
+      scenarioNode.put("confirmationRequired", nextAction.isConfirmationRequired());
+      scenarioNode.put("inputRequired", nextAction.isInputRequired());
+    }
 
-    scenarioNode.put("promptActionId", nextAction.getId().toString());
-    scenarioNode.put("promptText", nextAction.getHumanReadablePrompt());
-    scenarioNode.put("confirmationRequired", nextAction.isConfirmationRequired());
-    scenarioNode.put("inputRequired", nextAction.isInputRequired());
+    ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
+    Map<String, List<ConformanceExchange>> trafficByScenarioRun =
+        trafficRecorder.getTrafficByScenarioRun();
+    List<ConformanceExchange> scenarioRunExchanges =
+        Objects.requireNonNullElse(
+            trafficByScenarioRun.get(runUuid.toString()), Collections.emptyList());
+    scenarioRunExchanges.forEach(conformanceCheck::check);
+    ConformanceReport fullReport =
+        new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
+    ConformanceReport scenarioSubReport =
+        fullReport.getSubReports().stream()
+            .filter(subReport -> subReport.getTitle().equals(scenario.getTitle()))
+            .findFirst()
+            .orElseThrow();
+    scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());
 
     return scenarioNode;
   }
 
-  public void startScenario(String scenarioId) {
-    if (currentScenarioId != null)
-      throw new IllegalStateException("Another scenario is currently running");
-
-    ConformanceScenario scenario = scenariosById.get(UUID.fromString(scenarioId));
-    if (scenario == null)
-      throw new IllegalArgumentException("There is no scenario with id '%s'".formatted(scenarioId));
-
-    if (latestRunIdsByScenarioId.containsKey(scenario.getId())) {
-      scenario.reset();
+  public void startOrStopScenario(String scenarioId) {
+    UUID scenarioUuid = UUID.fromString(scenarioId);
+    if (currentScenarioId != null) {
+      if (currentScenarioId.equals(scenarioUuid)) {
+        // stop
+        scenariosById.get(currentScenarioId).reset();
+        latestRunIdsByScenarioId.remove(currentScenarioId);
+        currentScenarioId = null;
+      } else {
+        throw new IllegalStateException("Another scenario is currently running");
+      }
+    } else {
+      // start or restart
+      ConformanceScenario scenario = scenariosById.get(scenarioUuid);
+      if (scenario == null)
+        throw new IllegalArgumentException(
+            "There is no scenario with id '%s'".formatted(scenarioId));
+      if (latestRunIdsByScenarioId.containsKey(scenario.getId())) {
+        scenario.reset();
+      }
+      currentScenarioId = scenario.getId();
+      latestRunIdsByScenarioId.put(scenario.getId(), UUID.randomUUID());
+      notifyNextActionParty();
     }
-    currentScenarioId = scenario.getId();
-    latestRunIdsByScenarioId.put(scenario.getId(), UUID.randomUUID());
-
-    notifyNextActionParty();
   }
 
   private CounterpartConfiguration _getManualCounterpart() {

@@ -4,8 +4,11 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 import { Sandbox } from "../../model/sandbox";
 import { Subscription } from "rxjs";
-import { Scenario } from "src/app/model/scenario";
-import { ConformanceStatus } from "src/app/model/conformance-status";
+import { ScenarioDigest } from "src/app/model/scenario";
+import { ConformanceStatus,
+  getConformanceStatusEmoji,
+  getConformanceStatusTitle
+} from "src/app/model/conformance-status";
 import { ScenarioStatus } from "src/app/model/scenario-status";
 
 @Component({
@@ -16,10 +19,13 @@ import { ScenarioStatus } from "src/app/model/scenario-status";
 export class ScenarioComponent {
 
   sandbox: Sandbox | undefined;
-  scenario: Scenario | undefined;
+  scenario: ScenarioDigest | undefined;
   scenarioStatus: ScenarioStatus | undefined;
   actionInput: string = '';
   activatedRouteSubscription: Subscription | undefined;
+
+  getConformanceStatusEmoji = getConformanceStatusEmoji;
+  getConformanceStatusTitle = getConformanceStatusTitle;
 
   constructor(
     public activatedRoute: ActivatedRoute,
@@ -70,4 +76,6 @@ export class ScenarioComponent {
       withInput ? this.actionInput.trim() : undefined);
     await this.loadScenarioStatus();
   }
+
+  
 }

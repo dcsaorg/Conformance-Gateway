@@ -269,7 +269,7 @@ public class ConformanceSandbox {
     return new ObjectMapper().createObjectNode();
   }
 
-  public static JsonNode startScenario(
+  public static JsonNode startOrStopScenario(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId,
@@ -279,7 +279,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
-            orchestrator -> orchestrator.startScenario(scenarioId))
+            orchestrator -> orchestrator.startOrStopScenario(scenarioId))
         .run();
     return new ObjectMapper().createObjectNode();
   }

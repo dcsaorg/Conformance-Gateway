@@ -5,6 +5,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -77,6 +82,20 @@ public class ConformanceReport {
                 roleName -> new ConformanceReport(conformanceCheck, roleName),
                 (k1, k2) -> k1,
                 TreeMap::new));
+  }
+
+  public JsonNode toJsonReport() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode reportNode = objectMapper.createObjectNode();
+
+    reportNode.put("title", title);
+    reportNode.put("status", conformanceStatus.name());
+
+    ArrayNode subReportsNode = objectMapper.createArrayNode();
+    subReports.forEach(subReport -> subReportsNode.add(subReport.toJsonReport()));
+    reportNode.set("subReports", subReportsNode);
+
+    return reportNode;
   }
 
   public static String toHtmlReport(Map<String, ConformanceReport> reportsByRole) {

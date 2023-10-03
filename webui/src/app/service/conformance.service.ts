@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
 import { Sandbox } from "../model/sandbox";
-import { Scenario } from "../model/scenario";
+import { ScenarioDigest } from "../model/scenario";
 import { ScenarioStatus } from "../model/scenario-status";
 
 @Injectable({
@@ -28,16 +28,16 @@ export class ConformanceService {
     return sandbox;
   }
 
-  async getSandboxScenarios(sandboxId: string): Promise<Scenario[]> {
-    const scenarios: Scenario[] = await this.apiService.call({
-      operation: "getSandboxScenarios",
+  async getScenarioDigests(sandboxId: string): Promise<ScenarioDigest[]> {
+    const scenarios: ScenarioDigest[] = await this.apiService.call({
+      operation: "getScenarioDigests",
       sandboxId,
     });
     return scenarios;
   }
 
-  async getScenario(sandboxId: string, scenarioId: string): Promise<Scenario> {
-    const scenario: Scenario = await this.apiService.call({
+  async getScenario(sandboxId: string, scenarioId: string): Promise<ScenarioDigest> {
+    const scenario: ScenarioDigest = await this.apiService.call({
       operation: "getScenario",
       sandboxId,
       scenarioId,
@@ -65,9 +65,9 @@ export class ConformanceService {
     return scenarioStatus;
   }
 
-  async startScenario(sandboxId: string, scenarioId: string): Promise<void> {
+  async startOrStopScenario(sandboxId: string, scenarioId: string): Promise<void> {
     await this.apiService.call({
-      operation: "startScenario",
+      operation: "startOrStopScenario",
       sandboxId,
       scenarioId,
     });

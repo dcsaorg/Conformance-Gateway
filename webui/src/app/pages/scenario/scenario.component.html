@@ -1,23 +1,22 @@
 <mat-spinner *ngIf="!sandbox"></mat-spinner>
 
-<div *ngIf="sandbox" class="pageTitle">Sandbox: {{sandbox.name}}</div>
+<div *ngIf="sandbox">
+    <div class="pageTitle">Sandbox: {{sandbox.name}}</div>
+    <div class="paragraph">
+        <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
+    </div>
+</div>
 
 <div *ngIf="scenario" class="pageSubtitle">Scenario: {{scenario.name}}</div>
 
 <div *ngIf="scenarioStatus">
-    <div *ngIf="!scenarioStatus.runId">
-        <div class="paragraph">The scenario was not yet started.</div>
-        <div class="paragraph">
-            <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
-        </div>
+    <div *ngIf="!scenarioStatus.isRunning">
+        <div class="paragraph">The scenario was not started yet.</div>
     </div>
 
-    <div *ngIf="scenarioStatus.runId">
+    <div *ngIf="scenarioStatus.isRunning">
         <div *ngIf="!scenarioStatus.nextActions">
             <div class="paragraph">The execution of this scenario is complete.</div>
-            <div class="paragraph">
-                <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
-            </div>
         </div>
     
         <div *ngIf="scenarioStatus.nextActions">
@@ -65,6 +64,38 @@
                     color="primary"
                     (click)="loadScenarioStatus()"
                     >Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="scenario && scenarioStatus?.conformanceSubReport">
+        <div class="pageSubtitle">Conformance status</div>
+        <div style="margin-top: 1em">
+            <span
+            class="conformanceStatus"
+            [title]="getConformanceStatusTitle(scenarioStatus.conformanceSubReport.status)"
+            >{{getConformanceStatusEmoji(scenarioStatus.conformanceSubReport.status)}}</span>
+            
+            <span>{{scenarioStatus.conformanceSubReport.title}}</span>
+
+            <div *ngFor="let subReport of scenarioStatus.conformanceSubReport.subReports"
+            style="margin-top: 1em; margin-left: 1em">
+                <span
+                class="conformanceStatus"
+                [title]="getConformanceStatusTitle(subReport.status)"
+                >{{getConformanceStatusEmoji(subReport.status)}}</span>
+                
+                <span>{{subReport.title}}</span>
+
+                <div *ngFor="let subSubReport of subReport.subReports"
+                style="margin-top: 1em; margin-left: 2em">
+                    <span
+                    class="conformanceStatus"
+                    [title]="getConformanceStatusTitle(subSubReport.status)"
+                    >{{getConformanceStatusEmoji(subSubReport.status)}}</span>
+                    
+                    <span>{{subSubReport.title}}</span>
                 </div>
             </div>
         </div>

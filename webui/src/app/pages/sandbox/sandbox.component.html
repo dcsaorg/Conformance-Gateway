@@ -11,14 +11,15 @@
         <button
         mat-icon-button
         color="primary"
+        [disabled]="cannotPerformAction(scenario)"
         [title]="getActionTitle(scenario)"
-        (click)="onScenarioAction(scenario)"
+        (click)="onScenarioAction($event, scenario)"
         ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
 
         <span
         class="conformanceStatus"
-        [title]="getConformanceStatusTitle(scenario)"
-        >{{getConformanceStatusEmoji(scenario)}}</span>
+        [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
+        >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
     
         <span>{{scenario.name}}</span>
     </div>

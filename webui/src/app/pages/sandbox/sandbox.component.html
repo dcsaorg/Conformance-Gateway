@@ -1,10 +1,21 @@
 <mat-spinner *ngIf="!sandbox"></mat-spinner>
 
 <div *ngIf="sandbox">
-    <div class="pageTitle">Sandbox: {{sandbox.name}}</div>
+    <div class="pageTitle">
+        <span>Sandbox: {{sandbox.name}}</span>
+        
+        <span style="vertical-align: middle;">
+            <button
+            mat-icon-button
+            color="primary"
+            title="Settings"
+            (click)="onClickSettings()"
+            ><mat-icon>settings</mat-icon></button>
+        </span>
+    </div>
 </div>
 
-<div class="pageSubtitle">All scenarios:</div>
+<div class="pageSubtitle">{{scenarios.length == 0 ? "No scenarios" : "All scenarios:"}}</div>
 
 <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of scenarios">
     <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">

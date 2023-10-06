@@ -49,7 +49,7 @@ public class ConformanceSandbox {
               "state#orchestrator",
               originalOrchestratorState -> {
                 SandboxConfiguration sandboxConfiguration =
-                    _loadSandboxConfiguration(persistenceProvider, sandboxId);
+                    loadSandboxConfiguration(persistenceProvider, sandboxId);
                 ComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
                 ConformanceOrchestrator orchestrator =
@@ -89,9 +89,36 @@ public class ConformanceSandbox {
               "state#party#" + partyName,
               originalPartyState -> {
                 SandboxConfiguration sandboxConfiguration =
-                    _loadSandboxConfiguration(persistenceProvider, sandboxId);
+                    loadSandboxConfiguration(persistenceProvider, sandboxId);
                 ComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
+
+                Map<String, ? extends Collection<String>> orchestratorAuthHeader;
+                if (sandboxConfiguration.getOrchestrator().isActive()) {
+                  orchestratorAuthHeader =
+                      sandboxConfiguration.getAuthHeaderName().isBlank()
+                          ? Collections.emptyMap()
+                          : Map.of(
+                              sandboxConfiguration.getAuthHeaderName(),
+                              List.of(sandboxConfiguration.getAuthHeaderValue()));
+                } else {
+                  CounterpartConfiguration externalCounterpartConfiguration =
+                      Arrays.stream(sandboxConfiguration.getCounterparts())
+                          .filter(
+                              counterpart ->
+                                  Arrays.stream(sandboxConfiguration.getParties())
+                                      .noneMatch(
+                                          party -> counterpart.getName().equals(party.getName())))
+                          .findFirst()
+                          .orElseThrow();
+                  orchestratorAuthHeader =
+                      externalCounterpartConfiguration.getAuthHeaderName().isBlank()
+                          ? Collections.emptyMap()
+                          : Map.of(
+                              externalCounterpartConfiguration.getAuthHeaderName(),
+                              List.of(externalCounterpartConfiguration.getAuthHeaderValue()));
+                }
+
                 ConformanceParty party =
                     componentFactory
                         .createParties(
@@ -102,7 +129,8 @@ public class ConformanceSandbox {
                                     persistenceProvider,
                                     asyncWebClient,
                                     sandboxId,
-                                    conformanceRequest))
+                                    conformanceRequest),
+                            orchestratorAuthHeader)
                         .stream()
                         .filter(createdParty -> partyName.equals(createdParty.getName()))
                         .findFirst()
@@ -166,29 +194,54 @@ public class ConformanceSandbox {
     log.info(
         "ConformanceSandbox.handleRequest() "
             + new ObjectMapper().valueToTree(webRequest).toPrettyString());
+
     String expectedPrefix = "/conformance/sandbox/";
-    if (!webRequest.uri().startsWith(expectedPrefix)) {
-      throw new IllegalArgumentException("Incorrect URI prefix: " + webRequest.uri());
-    }
-    String remainingUri = webRequest.uri().substring(expectedPrefix.length());
+    int expectedPrefixStart = webRequest.url().indexOf(expectedPrefix);
+    if (expectedPrefixStart < 0)
+      throw new IllegalArgumentException(
+          "Missing '%s' in: %s".formatted(expectedPrefix, webRequest.url()));
+    String remainingUri = webRequest.url().substring(expectedPrefixStart + expectedPrefix.length());
 
     int endOfSandboxId = remainingUri.indexOf("/");
     if (endOfSandboxId < 0) {
-      throw new IllegalArgumentException("Missing sandbox id: " + webRequest.uri());
+      throw new IllegalArgumentException("Missing sandbox id: " + webRequest.url());
     }
     String sandboxId = remainingUri.substring(0, endOfSandboxId);
     remainingUri = remainingUri.substring(endOfSandboxId);
+
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
+      Collection<String> authHeaderValues =
+          webRequest.headers().get(sandboxConfiguration.getAuthHeaderName());
+      if (authHeaderValues == null || authHeaderValues.isEmpty()) {
+        log.info("Authorization failed: no auth header values");
+        return new ConformanceWebResponse(
+            403, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+      }
+      if (authHeaderValues.size() > 1) {
+        log.info("Authorization failed: duplicate auth header values");
+        return new ConformanceWebResponse(
+            403, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+      }
+      String authHeaderValue = authHeaderValues.stream().findFirst().orElseThrow();
+      if (!Objects.equals(authHeaderValue, sandboxConfiguration.getAuthHeaderValue())) {
+        log.info("Authorization failed: incorrect auth header value");
+        return new ConformanceWebResponse(
+            403, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+      }
+    }
 
     if (remainingUri.startsWith("/party/")) {
       remainingUri = remainingUri.substring("/party/".length());
       int endOfPartyName = remainingUri.indexOf("/");
       if (endOfPartyName < 0) {
-        throw new IllegalArgumentException("Missing party name: " + webRequest.uri());
+        throw new IllegalArgumentException("Missing party name: " + webRequest.url());
       }
       String partyName = remainingUri.substring(0, endOfPartyName);
       remainingUri = remainingUri.substring(endOfPartyName);
 
-      if (remainingUri.equals("/notification")) {
+      if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(persistenceProvider, asyncWebClient, sandboxId, partyName);
       } else if (remainingUri.equals("/prompt/json")) {
         return _handleGetPartyPrompt(persistenceProvider, asyncWebClient, sandboxId, partyName);
@@ -206,7 +259,7 @@ public class ConformanceSandbox {
     } else if (remainingUri.equals("/reset")) {
       return _handleReset(persistenceProvider, asyncWebClient, sandboxId);
     }
-    throw new IllegalArgumentException("Unhandled URI: " + webRequest.uri());
+    throw new IllegalArgumentException("Unhandled URI: " + webRequest.url());
   }
 
   public static ArrayNode getScenarioDigests(
@@ -318,8 +371,7 @@ public class ConformanceSandbox {
               ConformanceRequest conformanceRequest =
                   new ConformanceRequest(
                       webRequest.method(),
-                      webRequest.baseUrl(),
-                      webRequest.uri(),
+                      webRequest.url(),
                       webRequest.queryParameters(),
                       new ConformanceMessage(
                           party.getCounterpartName(),
@@ -335,7 +387,7 @@ public class ConformanceSandbox {
         .run();
     ConformanceResponse conformanceResponse = conformanceResponseReference.get();
     SandboxConfiguration sandboxConfiguration =
-        _loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
@@ -362,7 +414,7 @@ public class ConformanceSandbox {
       ConformanceRequest conformanceRequest) {
     ConformanceResponse conformanceResponse = _syncHttpRequest(conformanceRequest);
     SandboxConfiguration sandboxConfiguration =
-        _loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (!conformanceRequest.message().targetPartyRole().equals("orchestrator")
         && Arrays.stream(sandboxConfiguration.getParties())
             .noneMatch(
@@ -445,7 +497,7 @@ public class ConformanceSandbox {
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
-        _loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     Set<String> reportRoleNames =
         (sandboxConfiguration.getParties().length == EblSurrenderV10Role.values().length
@@ -494,7 +546,7 @@ public class ConformanceSandbox {
             new ObjectMapper().createObjectNode());
 
     SandboxConfiguration sandboxConfiguration =
-        _loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
@@ -508,10 +560,19 @@ public class ConformanceSandbox {
     return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
   }
 
-  private static SandboxConfiguration _loadSandboxConfiguration(
+  public static SandboxConfiguration loadSandboxConfiguration(
       ConformancePersistenceProvider persistenceProvider, String sandboxId) {
     return SandboxConfiguration.fromJsonNode(
         persistenceProvider.getNonLockingMap().getItemValue("sandbox#" + sandboxId, "config"));
+  }
+
+  public static void saveSandboxConfiguration(
+      ConformancePersistenceProvider persistenceProvider,
+      SandboxConfiguration sandboxConfiguration) {
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "sandbox#" + sandboxConfiguration.getId(), "config", sandboxConfiguration.toJsonNode());
   }
 
   private static ComponentFactory _createComponentFactory(
@@ -526,7 +587,7 @@ public class ConformanceSandbox {
 
   @SneakyThrows
   private static ConformanceResponse _syncHttpRequest(ConformanceRequest conformanceRequest) {
-    URI uri = URI.create(conformanceRequest.baseUrl() + conformanceRequest.path());
+    URI uri = URI.create(conformanceRequest.url());
     log.info(
         "ConformanceSandbox.syncHttpRequest(%s) calling: %s"
             .formatted(conformanceRequest.toJson().toPrettyString(), uri));

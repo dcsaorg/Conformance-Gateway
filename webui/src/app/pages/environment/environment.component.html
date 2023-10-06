@@ -1,5 +1,14 @@
 <div class="pageTitle">Sandboxes</div>
 
+<div class="pageSubtitle">
+    <button
+        mat-raised-button
+        color="primary"
+        title="Create sandbox"
+        (click)="onCreateSandbox()"
+        >Create sandbox</button>
+</div>
+
 <mat-spinner *ngIf="isLoading"></mat-spinner>
 
 <mat-card

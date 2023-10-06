@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
@@ -65,22 +66,29 @@ public class ConformanceSandboxLambda
                 new ConformanceWebRequest(
                     input.getHttpMethod(),
                     baseUrl + input.getPath(),
-                    input.getPath(),
                     Objects.requireNonNullElse(
                         input.getMultiValueQueryStringParameters(), Collections.emptyMap()),
                     input.getMultiValueHeaders(),
                     input.getBody()),
-                conformanceWebRequest ->
-                    AWSLambdaAsyncClientBuilder.defaultClient()
-                        .invoke(
-                            new InvokeRequest()
-                                .withInvocationType(InvocationType.Event)
-                                .withFunctionName(httpClientLambdaArn)
-                                .withPayload(
-                                    new ObjectMapper()
-                                        .createObjectNode()
-                                        .put("url", conformanceWebRequest.url())
-                                        .toPrettyString())));
+                conformanceWebRequest -> {
+                  ObjectNode httpClientLambdaEvent = new ObjectMapper().createObjectNode();
+                  httpClientLambdaEvent.put("url", conformanceWebRequest.url());
+                  conformanceWebRequest
+                      .headers()
+                      .forEach(
+                          (name, values) ->
+                              values.forEach(
+                                  value -> {
+                                    httpClientLambdaEvent.put("authHeaderName", name);
+                                    httpClientLambdaEvent.put("authHeaderValue", value);
+                                  }));
+                  AWSLambdaAsyncClientBuilder.defaultClient()
+                      .invoke(
+                          new InvokeRequest()
+                              .withInvocationType(InvocationType.Event)
+                              .withFunctionName(httpClientLambdaArn)
+                              .withPayload(httpClientLambdaEvent.toPrettyString()));
+                });
 
         Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();
         responseHeaders.put("Content-Type", List.of(conformanceWebResponse.contentType()));

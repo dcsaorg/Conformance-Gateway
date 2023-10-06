@@ -11,6 +11,5 @@ public class PartyConfiguration {
   private boolean inManualMode;
   private String name;
   private String role;
-  private String orchestratorBaseUrl;
-  private String orchestratorRootPath;
+  private String orchestratorUrl;
 }

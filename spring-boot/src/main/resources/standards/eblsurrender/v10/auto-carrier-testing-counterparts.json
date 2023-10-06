@@ -1,0 +1,27 @@
+{
+  "id": "auto-carrier-testing-counterparts",
+  "name": "Auto carrier testing counterparts",
+  "standard" : {
+    "name" : "EblSurrender",
+    "version" : "1.0.0"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-auto-carrier-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-auto-carrier-tested-party/party/Carrier1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "626e06b7-2ed1-427d-bb5c-3457d22be6fb"
+  }, {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "url" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-auto-carrier-testing-counterparts/party/Platform1/api"
+  } ]
+}

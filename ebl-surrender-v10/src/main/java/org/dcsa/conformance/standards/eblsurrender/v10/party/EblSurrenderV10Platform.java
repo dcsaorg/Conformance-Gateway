@@ -25,11 +25,9 @@ public class EblSurrenderV10Platform extends ConformanceParty {
   public EblSurrenderV10Platform(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient) {
-    super(
-        partyConfiguration,
-        counterpartConfiguration,
-        asyncWebClient);
+      Consumer<ConformanceRequest> asyncWebClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient, orchestratorAuthHeader);
   }
 
   @Override

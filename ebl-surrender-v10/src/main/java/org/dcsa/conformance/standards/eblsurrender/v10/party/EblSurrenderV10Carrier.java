@@ -26,11 +26,9 @@ public class EblSurrenderV10Carrier extends ConformanceParty {
   public EblSurrenderV10Carrier(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient) {
-    super(
-        partyConfiguration,
-        counterpartConfiguration,
-        asyncWebClient);
+      Consumer<ConformanceRequest> asyncWebClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    super(partyConfiguration, counterpartConfiguration, asyncWebClient, orchestratorAuthHeader);
   }
 
   @Override

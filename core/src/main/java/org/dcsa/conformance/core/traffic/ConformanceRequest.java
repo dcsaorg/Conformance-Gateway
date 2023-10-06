@@ -9,8 +9,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
 public record ConformanceRequest(
     String method,
-    String baseUrl,
-    String path,
+    String url,
     Map<String, ? extends Collection<String>> queryParams,
     ConformanceMessage message) {
 
@@ -34,8 +33,7 @@ public record ConformanceRequest(
     ObjectMapper objectMapper = new ObjectMapper();
     ObjectNode objectNode = objectMapper.createObjectNode();
     objectNode.put("method", method);
-    objectNode.put("baseUrl", baseUrl);
-    objectNode.put("path", path);
+    objectNode.put("url", url);
     objectNode.set("queryParams", JsonToolkit.mapOfStringToStringCollectionToJson(queryParams));
     objectNode.set("message", message.toJson());
     return objectNode;
@@ -44,8 +42,7 @@ public record ConformanceRequest(
   public static ConformanceRequest fromJson(ObjectNode objectNode) {
     return new ConformanceRequest(
         objectNode.get("method").asText(),
-        objectNode.get("baseUrl").asText(),
-        objectNode.get("path").asText(),
+        objectNode.get("url").asText(),
         JsonToolkit.mapOfStringToStringCollectionFromJson((ArrayNode) objectNode.get("queryParams")),
         ConformanceMessage.fromJson((ObjectNode) objectNode.get("message")));
   }

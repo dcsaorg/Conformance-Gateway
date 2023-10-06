@@ -55,7 +55,8 @@ export class ScenarioComponent {
     this.actionInput = '';
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
       this.sandbox!.id,
-      this.scenario!.id);
+      this.scenario!.id
+    );
   }
 
   async ngOnDestroy() {

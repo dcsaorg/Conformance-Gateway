@@ -1,4 +1,6 @@
 {
+  "id": "manual-carrier-tested-party",
+  "name": "Manual carrier tested party",
   "standard" : {
     "name" : "EblSurrender",
     "version" : "1.0.0"
@@ -10,13 +12,16 @@
     "inManualMode": true,
     "name" : "Carrier1",
     "role" : "Carrier",
-    "orchestratorBaseUrl" : "http://localhost:8080",
-    "orchestratorRootPath" : "/conformance/sandbox/eblsurrender-v10-manual-carrier-testing-counterparts"
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-manual-carrier-testing-counterparts"
   } ],
   "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-manual-carrier-tested-party/party/Carrier1/api"
+  }, {
     "name" : "Platform1",
     "role" : "Platform",
-    "baseUrl" : "http://localhost:8080",
-    "rootPath" : "/conformance/sandbox/eblsurrender-v10-manual-carrier-testing-counterparts"
+    "url" : "http://localhost:8080/conformance/sandbox/eblsurrender-v10-manual-carrier-testing-counterparts/party/Platform1/api"
   } ]
 }

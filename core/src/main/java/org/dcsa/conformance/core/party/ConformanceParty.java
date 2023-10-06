@@ -25,16 +25,26 @@ public abstract class ConformanceParty implements StatefulEntity {
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
 
-  protected final Consumer<ConformanceRequest> asyncWebClient;
+  private final Consumer<ConformanceRequest> asyncWebClient;
+  private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
   public ConformanceParty(
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
-      Consumer<ConformanceRequest> asyncWebClient) {
+      Consumer<ConformanceRequest> asyncWebClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     this.partyConfiguration = partyConfiguration;
     this.counterpartConfiguration = counterpartConfiguration;
     this.asyncWebClient = asyncWebClient;
+    this.orchestratorAuthHeader =
+        orchestratorAuthHeader.isEmpty()
+            ? counterpartConfiguration.getAuthHeaderName().isBlank()
+                ? Collections.emptyMap()
+                : Map.of(
+                    counterpartConfiguration.getAuthHeaderName(),
+                    List.of(counterpartConfiguration.getAuthHeaderValue()))
+            : orchestratorAuthHeader;
   }
 
   @Override
@@ -74,15 +84,14 @@ public abstract class ConformanceParty implements StatefulEntity {
   protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
     if (partyConfiguration.isInManualMode()) {
       log.info(
-          "Party %s is in manual mode and will NOT post its input automatically: %s"
+          "Party %s NOT posting its input automatically (it is in manual mode): %s"
               .formatted(partyConfiguration.getName(), jsonPartyInput.toPrettyString()));
       return;
     }
     asyncWebClient.accept(
         new ConformanceRequest(
             "POST",
-            partyConfiguration.getOrchestratorBaseUrl(),
-            partyConfiguration.getOrchestratorRootPath()
+            partyConfiguration.getOrchestratorUrl()
                 + "/party/%s/input".formatted(partyConfiguration.getName()),
             Collections.emptyMap(),
             new ConformanceMessage(
@@ -90,7 +99,7 @@ public abstract class ConformanceParty implements StatefulEntity {
                 partyConfiguration.getRole(),
                 "orchestrator",
                 "orchestrator",
-                Collections.emptyMap(),
+                orchestratorAuthHeader,
                 new ConformanceMessageBody(jsonPartyInput),
                 System.currentTimeMillis())));
   }
@@ -104,17 +113,20 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncWebClient.accept(
         new ConformanceRequest(
             "POST",
-            counterpartConfiguration.getBaseUrl(),
-            counterpartConfiguration.getRootPath()
-                + "/party/%s/api".formatted(counterpartConfiguration.getName())
-                + path,
+            counterpartConfiguration.getUrl() + path,
             Collections.emptyMap(),
             new ConformanceMessage(
                 partyConfiguration.getName(),
                 partyConfiguration.getRole(),
                 counterpartConfiguration.getName(),
                 counterpartConfiguration.getRole(),
-                Map.of("Api-Version", List.of(apiVersion)),
+                counterpartConfiguration.getAuthHeaderName().isBlank()
+                    ? Map.of("Api-Version", List.of(apiVersion))
+                    : Map.of(
+                        "Api-Version",
+                        List.of(apiVersion),
+                        counterpartConfiguration.getAuthHeaderName(),
+                        List.of(counterpartConfiguration.getAuthHeaderValue())),
                 new ConformanceMessageBody(jsonBody),
                 System.currentTimeMillis())));
   }
@@ -139,15 +151,16 @@ public abstract class ConformanceParty implements StatefulEntity {
             .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
     URI uri =
         URI.create(
-            partyConfiguration.getOrchestratorBaseUrl()
-                + partyConfiguration.getOrchestratorRootPath()
+            partyConfiguration.getOrchestratorUrl()
                 + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
     log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
+    HttpRequest.Builder httpRequestBuilder =
+        HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET();
+    orchestratorAuthHeader.forEach(
+        (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     String stringResponseBody =
         HttpClient.newHttpClient()
-            .send(
-                HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET().build(),
-                HttpResponse.BodyHandlers.ofString())
+            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString())
             .body();
     return new ConformanceMessageBody(stringResponseBody).getJsonBody();
   }

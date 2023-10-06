@@ -31,6 +31,13 @@
     margin-top: 1em;
 }
 
+.readOnlyInput {
+    width: 99%;
+    background-color: #eee;
+    color: #555;
+    border: 1px solid grey;
+}
+
 .withContentPadding {
     padding: 1em;
 }

@@ -36,5 +36,11 @@ export class EnvironmentComponent {
     this.router.navigate([
       '/sandbox', sandbox.id
     ]);
-}
+  }
+
+  onCreateSandbox() {
+    this.router.navigate([
+      '/create-sandbox'
+    ]);
+  }
 }

@@ -159,12 +159,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    String uri =
-        counterpartConfiguration.getRootPath() + "/party/%s/notification".formatted(partyName);
-    String url = counterpartConfiguration.getBaseUrl() + uri;
+    String url = counterpartConfiguration.getUrl() + "/conformance/notification";
     asyncWebClient.accept(
         new ConformanceWebRequest(
-            "GET", url, uri, Collections.emptyMap(), Collections.emptyMap(), ""));
+            "GET",
+            url,
+            Collections.emptyMap(),
+            counterpartConfiguration.getAuthHeaderName().isBlank()
+                ? Collections.emptyMap()
+                : Map.of(
+                    counterpartConfiguration.getAuthHeaderName(),
+                    List.of(counterpartConfiguration.getAuthHeaderValue())),
+            ""));
   }
 
   public JsonNode handleGetPartyPrompt(String partyName) {
@@ -256,6 +262,10 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public ArrayNode getScenarioDigests() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    ArrayNode arrayNode = objectMapper.createArrayNode();
+    if (!sandboxConfiguration.getOrchestrator().isActive()) return arrayNode;
+
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
 
     Map<String, List<ConformanceExchange>> trafficByScenarioRun =
@@ -267,8 +277,6 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode arrayNode = objectMapper.createArrayNode();
     this.scenariosById
         .values()
         .forEach(

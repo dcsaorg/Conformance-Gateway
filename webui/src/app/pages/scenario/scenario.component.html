@@ -10,7 +10,7 @@
 <div *ngIf="scenario" class="pageSubtitle">Scenario: {{scenario.name}}</div>
 
 <div *ngIf="scenarioStatus">
-    <div *ngIf="!scenarioStatus.isRunning">
+    <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
         <div class="paragraph">The scenario was not started yet.</div>
     </div>
 

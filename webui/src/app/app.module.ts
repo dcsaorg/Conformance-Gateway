@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { AppComponent } from './app.component';
@@ -24,11 +25,15 @@ import { EnvironmentComponent } from './pages/environment/environment.component'
 import { HttpClientModule } from '@angular/common/http';
 import { SandboxComponent } from './pages/sandbox/sandbox.component';
 import { ScenarioComponent } from './pages/scenario/scenario.component';
+import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.component';
+import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ConfirmationDialog,
+    CreateSandboxComponent,
+    EditSandboxComponent,
     EnvironmentComponent,
     FooterComponent,
     HeaderComponent,
@@ -51,6 +56,7 @@ import { ScenarioComponent } from './pages/scenario/scenario.component';
     MatInputModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatToolbarModule,
     ReactiveFormsModule,
     // import as last module!

@@ -1,0 +1,119 @@
+<div class="pageTitle">Sandbox settings</div>
+
+<mat-spinner *ngIf="!originalSandboxConfig || !updatedSandboxConfig"></mat-spinner>
+
+<div *ngIf="originalSandboxConfig && updatedSandboxConfig">
+    <div class="pageSubtitle">Connecting to the sandbox</div>
+
+    <div class="paragraph">Sandbox URL:</div>
+    <input
+    class="readOnlyInput"
+    type = "text"
+    readonly="true"
+    [value]="originalSandboxConfig.sandboxUrl"
+    />
+
+    <div class="paragraph">Request authentication header name:</div>
+    <input
+    class="readOnlyInput"
+    type = "text"
+    readonly="true"
+    [value]="originalSandboxConfig.sandboxAuthHeaderName"
+    />
+
+    <div class="paragraph">Request authentication header value:</div>
+    <input
+    class="readOnlyInput"
+    type = "text"
+    readonly="true"
+    [value]="originalSandboxConfig.sandboxAuthHeaderValue"
+    />
+
+    <br />
+    <br />
+
+    <div class="pageSubtitle">Update sandbox settings</div>
+
+    <form
+    #createSandboxForm="ngForm"
+    (submit)="onUpdate()"
+    >
+        <div>
+            <br />
+            <mat-form-field class="fullWidth">
+                <mat-label>Sandbox name</mat-label>
+                <input
+                matInput
+                #sandboxNameInput
+                type = "text"
+                autocomplete="off"
+                name="sandboxNameTextField"
+                [(ngModel)]="updatedSandboxConfig.sandboxName"
+                />
+            </mat-form-field>
+        </div>
+
+        <div>
+            <br />
+            <mat-form-field class="fullWidth">
+                <mat-label>Sandbox counterpart URL</mat-label>
+                <input
+                matInput
+                #externalPartyUrlInput
+                type = "text"
+                autocomplete="off"
+                name="externalPartyUrlTextField"
+                [(ngModel)]="updatedSandboxConfig.externalPartyUrl"
+                />
+            </mat-form-field>
+        </div>
+
+        <div>
+            <br />
+            <mat-form-field class="fullWidth">
+                <mat-label>Sandbox counterpart authentication header name</mat-label>
+                <input
+                matInput
+                #externalPartyAuthHeaderNameInput
+                type = "text"
+                autocomplete="off"
+                name="externalPartyAuthHeaderNameTextField"
+                [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderName"
+                />
+            </mat-form-field>
+        </div>
+
+        <div>
+            <br />
+            <mat-form-field class="fullWidth">
+                <mat-label>Sandbox counterpart authentication header value</mat-label>
+                <input
+                matInput
+                #externalPartyAuthHeaderValueInput
+                type = "text"
+                autocomplete="off"
+                name="externalPartyAuthHeaderValueTextField"
+                [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderValue"
+                />
+            </mat-form-field>
+        </div>
+    
+        <br />
+        <div>
+            <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="cannotUpdate()"
+            ><mat-icon>done</mat-icon>Update</button>
+            &nbsp;
+            <button
+            mat-raised-button
+            type="button"
+            (click)="onCancel()"
+            ><mat-icon>not_interested</mat-icon>Cancel</button>
+        </div>
+        <br />
+    </form>
+</div>
+

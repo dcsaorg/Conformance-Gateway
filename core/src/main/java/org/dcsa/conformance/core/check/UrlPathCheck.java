@@ -22,10 +22,10 @@ public class UrlPathCheck extends ActionCheck {
 
   @Override
   protected Set<String> checkConformance(ConformanceExchange exchange) {
-    String requestPath = exchange.getRequest().path();
-    return requestPath.endsWith(expectedUrlPath)
+    String requestUrl = exchange.getRequest().url();
+    return requestUrl.endsWith(expectedUrlPath)
         ? Collections.emptySet()
         : Set.of(
-            "Request path '%s' does not end with '%s'".formatted(requestPath, expectedUrlPath));
+            "Request URL '%s' does not end with '%s'".formatted(requestUrl, expectedUrlPath));
   }
 }

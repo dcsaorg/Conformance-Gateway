@@ -23,11 +23,15 @@ public class HttpClientLambda implements RequestStreamHandler {
       JsonNode jsonInput = JsonToolkit.inputStreamToJsonNode(inputStream);
       log.info("jsonInput = " + jsonInput.toPrettyString());
       String url = jsonInput.get("url").asText();
+      String authHeaderName = jsonInput.get("authHeaderName").asText();
+      String authHeaderValue = jsonInput.get("authHeaderValue").asText();
 
+      HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder().uri(URI.create(url)).GET();
+      httpRequestBuilder.header(authHeaderName, authHeaderValue);
       int statusCode =
           HttpClient.newHttpClient()
               .send(
-                  HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
+                  httpRequestBuilder.build(),
                   HttpResponse.BodyHandlers.ofString())
               .statusCode();
 

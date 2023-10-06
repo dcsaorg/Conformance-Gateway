@@ -25,6 +25,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
+import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
@@ -53,14 +54,18 @@ public class ConformanceApplication {
           CompletableFuture.runAsync(
                   () -> {
                     try {
+                      HttpRequest.Builder httpRequestBuilder =
+                          HttpRequest.newBuilder()
+                              .uri(URI.create(conformanceWebRequest.url()))
+                              .timeout(Duration.ofHours(1))
+                              .GET();
+                      conformanceWebRequest
+                          .headers()
+                          .forEach(
+                              (name, values) ->
+                                  values.forEach(value -> httpRequestBuilder.header(name, value)));
                       HttpClient.newHttpClient()
-                          .send(
-                              HttpRequest.newBuilder()
-                                  .uri(URI.create(conformanceWebRequest.url()))
-                                  .timeout(Duration.ofHours(1))
-                                  .GET()
-                                  .build(),
-                              HttpResponse.BodyHandlers.ofString());
+                          .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
                     } catch (IOException | InterruptedException e) {
                       throw new RuntimeException(e);
                     }
@@ -133,11 +138,11 @@ public class ConformanceApplication {
     Stream.concat(
             conformanceConfiguration.createAutoTestingSandboxes
                 ? Stream.of(
-                    "all-in-one",
-                    "carrier-tested-party",
-                    "carrier-testing-counterparts",
-                    "platform-tested-party",
-                    "platform-testing-counterparts")
+                    "auto-all-in-one",
+                    "auto-carrier-tested-party",
+                    "auto-carrier-testing-counterparts",
+                    "auto-platform-tested-party",
+                    "auto-platform-testing-counterparts")
                 : Stream.of(),
             conformanceConfiguration.createManualTestingSandboxes
                 ? Stream.of(
@@ -170,25 +175,47 @@ public class ConformanceApplication {
         "application/json;charset=utf-8",
         Collections.emptyMap(),
         ConformanceWebuiHandler.handleRequest(
+                "http://localhost:8080",
                 persistenceProvider,
                 asyncWebClient,
                 JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
   }
 
+  private final String localhostAuthUrlToken = UUID.randomUUID().toString();
+
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+
+    String requestUrl = servletRequest.getRequestURL().toString();
+    Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
+    String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";
+    if (requestUrl.contains(uriAuthPrefix)) {
+      int sandboxIdStart = requestUrl.indexOf(uriAuthPrefix) + uriAuthPrefix.length();
+      int sandboxIdEnd = requestUrl.indexOf("/", sandboxIdStart);
+      String sandboxId = requestUrl.substring(sandboxIdStart, sandboxIdEnd);
+
+      requestUrl = requestUrl.replaceAll(localhostAuthUrlToken + "/", "");
+
+      requestHeaders = new HashMap<>(requestHeaders);
+      SandboxConfiguration sandboxConfiguration =
+          ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+      if (!sandboxConfiguration.getAuthHeaderName().isBlank()) {
+        requestHeaders.put(
+            sandboxConfiguration.getAuthHeaderName(),
+            List.of(sandboxConfiguration.getAuthHeaderValue()));
+      }
+    }
 
     ConformanceWebResponse conformanceWebResponse =
         ConformanceSandbox.handleRequest(
             persistenceProvider,
             new ConformanceWebRequest(
                 servletRequest.getMethod(),
-                servletRequest.getRequestURL().toString(),
-                servletRequest.getRequestURI(),
+                requestUrl,
                 _getQueryParameters(servletRequest),
-                _getRequestHeaders(servletRequest),
+                requestHeaders,
                 _getRequestBody(servletRequest)),
             asyncWebClient);
 
@@ -251,9 +278,9 @@ public class ConformanceApplication {
         "<head><title>DCSA Conformance</title></head>",
         "<body style=\"font-family: sans-serif;\">",
         "<h2>DCSA Conformance</h2>",
-        _buildHomeSandboxSection("eblsurrender-v10-all-in-one"),
-        _buildHomeSandboxSection("eblsurrender-v10-carrier-testing-counterparts"),
-        _buildHomeSandboxSection("eblsurrender-v10-platform-testing-counterparts"),
+        _buildHomeSandboxSection("eblsurrender-v10-auto-all-in-one"),
+        _buildHomeSandboxSection("eblsurrender-v10-auto-carrier-testing-counterparts"),
+        _buildHomeSandboxSection("eblsurrender-v10-auto-platform-testing-counterparts"),
         "</body>",
         "</html>");
   }
@@ -262,13 +289,16 @@ public class ConformanceApplication {
     return String.join(
         System.lineSeparator(),
         "<h3>%s</h3>".formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/reset\">Reset</a></p>".formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/status\">Status</a></p>".formatted(sandboxId),
-        "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
-            .formatted(sandboxId, "Carrier1"),
-        "<p><a href=\"/conformance/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
-            .formatted(sandboxId, "Platform1"),
-        "<p><a href=\"/conformance/sandbox/%s/report\">Report</a></p>".formatted(sandboxId));
+        "<p><a href=\"/conformance/%s/sandbox/%s/reset\">Reset</a></p>"
+            .formatted(localhostAuthUrlToken, sandboxId),
+        "<p><a href=\"/conformance/%s/sandbox/%s/status\">Status</a></p>"
+            .formatted(localhostAuthUrlToken, sandboxId),
+        "<p><a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
+            .formatted(localhostAuthUrlToken, sandboxId, "Carrier1"),
+        "<p><a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
+            .formatted(localhostAuthUrlToken, sandboxId, "Platform1"),
+        "<p><a href=\"/conformance/%s/sandbox/%s/report\">Report</a></p>"
+            .formatted(localhostAuthUrlToken, sandboxId));
   }
 
   public static void main(String[] args) {

@@ -11,6 +11,7 @@ public class CounterpartConfiguration {
   private boolean inManualMode;
   private String name;
   private String role;
-  private String baseUrl;
-  private String rootPath;
+  private String url;
+  private String authHeaderName = "";
+  private String authHeaderValue = "";
 }

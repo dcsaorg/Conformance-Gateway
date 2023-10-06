@@ -114,4 +114,10 @@ export class SandboxComponent {
       '/scenario', this.sandbox!.id, scenario.id
     ]);
   }
+
+  onClickSettings() {
+    this.router.navigate([
+      '/edit-sandbox', this.sandbox!.id
+    ]);
+  }
 }

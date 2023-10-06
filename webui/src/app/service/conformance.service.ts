@@ -3,6 +3,8 @@ import { ApiService } from "./api.service";
 import { Sandbox } from "../model/sandbox";
 import { ScenarioDigest } from "../model/scenario";
 import { ScenarioStatus } from "../model/scenario-status";
+import { Standard } from "../model/standard";
+import { SandboxConfig } from "../model/sandbox-config";
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,13 @@ export class ConformanceService {
   constructor(
     private apiService: ApiService,
   ) {
+  }
+
+  async getAvailableStandards(): Promise<Standard[]> {
+    const standards: Standard[] = await this.apiService.call({
+      operation: "getAvailableStandards",
+    });
+    return standards;
   }
 
   async getAllSandboxes(): Promise<Sandbox[]> {
@@ -70,6 +79,49 @@ export class ConformanceService {
       operation: "startOrStopScenario",
       sandboxId,
       scenarioId,
+    });
+  }
+
+  async createSandbox(
+    standardName: string,
+    versionNumber: string,
+    testedPartyRole: string,
+    isDefaultType: boolean,
+    sandboxName: string
+  ): Promise<string> {
+    const reply: { sandboxId: string } = await this.apiService.call({
+      operation: "createSandbox",
+      standardName,
+      versionNumber,
+      testedPartyRole,
+      isDefaultType,
+      sandboxName,
+    });
+    return reply.sandboxId;
+  }
+
+  async getSandboxConfig(sandboxId: string): Promise<SandboxConfig> {
+    const sandboxConfig: SandboxConfig = await this.apiService.call({
+      operation: "getSandboxConfig",
+      sandboxId
+    });
+    return sandboxConfig;
+  }
+
+  async updateSandboxConfig(
+    sandboxId: string,
+    sandboxName: string,
+    externalPartyUrl: string,
+    externalPartyAuthHeaderName: string,
+    externalPartyAuthHeaderValue: string,
+  ): Promise<void> {
+    await this.apiService.call({
+      operation: "updateSandboxConfig",
+      sandboxId,
+      sandboxName,
+      externalPartyUrl,
+      externalPartyAuthHeaderName,
+      externalPartyAuthHeaderValue,
     });
   }
 }

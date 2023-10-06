@@ -13,6 +13,10 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 @Setter
 @ToString
 public class SandboxConfiguration {
+  private String id;
+  private String name;
+  private String authHeaderName = "";
+  private String authHeaderValue = "";
   private StandardConfiguration standard;
   private OrchestratorConfiguration orchestrator;
   private PartyConfiguration[] parties;

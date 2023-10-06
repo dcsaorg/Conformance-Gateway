@@ -19,7 +19,8 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
-      Consumer<ConformanceRequest> asyncWebClient) {
+      Consumer<ConformanceRequest> asyncWebClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
             .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
@@ -36,7 +37,8 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
           new EblSurrenderV10Carrier(
               carrierConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderV10Role.PLATFORM.getConfigName()),
-              asyncWebClient));
+              asyncWebClient,
+              orchestratorAuthHeader));
     }
 
     PartyConfiguration platformConfiguration =
@@ -46,7 +48,8 @@ public class EblSurrenderV10ComponentFactory implements ComponentFactory {
           new EblSurrenderV10Platform(
               platformConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderV10Role.CARRIER.getConfigName()),
-              asyncWebClient));
+              asyncWebClient,
+              orchestratorAuthHeader));
     }
 
     return parties;

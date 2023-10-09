@@ -80,7 +80,7 @@ public class ConformanceApplication {
   @PostConstruct
   public void postConstruct() {
     log.info(
-        "DcsaConformanceGatewayApplication.postConstruct(%s)"
+        "ConformanceApplication.postConstruct(%s)"
             .formatted(
                 new ObjectMapper()
                     .valueToTree(Objects.requireNonNull(conformanceConfiguration))
@@ -176,6 +176,7 @@ public class ConformanceApplication {
         Collections.emptyMap(),
         ConformanceWebuiHandler.handleRequest(
                 "http://localhost:8080",
+                "spring-boot-env",
                 persistenceProvider,
                 asyncWebClient,
                 JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))

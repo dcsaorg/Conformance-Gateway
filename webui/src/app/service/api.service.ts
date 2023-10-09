@@ -1,7 +1,5 @@
-import { v4 as uuid4 } from "uuid";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import { environment } from "src/environments/environment";
 import { AuthService } from "../auth/auth.service";
@@ -15,7 +13,6 @@ export class ApiService {
   constructor(
     private authService: AuthService,
     private httpClient: HttpClient,
-    private router: Router,
   ) {
   }
 

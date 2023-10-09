@@ -1,9 +1,9 @@
 export const environment = {
   name: "dev",
   production: true,
-  apiBaseUrl: 'https://example.com/todo',
+  apiBaseUrl: 'https://dev-webui.conformance-development-1.dcsa.org/',
   useCognito: true,
-  cognitoUserPoolId: 'TODO',
-  cognitoClientId: 'TODO',
-  siteTitle: 'Dev',
+  cognitoUserPoolId: 'eu-north-1_rGS9UPweZ',
+  cognitoClientId: '7i6h6m9q1f336lnoohl4c8dkee',
+  siteTitle: 'DCSA Conformance',
 };

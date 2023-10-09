@@ -7,4 +7,7 @@ call mvn clean install
 cd ..\sandbox
 call mvn clean install
 
+cd ..\webui
+call ng build --configuration=dev
+
 cd ..\cdk

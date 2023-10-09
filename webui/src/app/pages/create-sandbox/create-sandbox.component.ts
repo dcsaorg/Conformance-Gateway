@@ -59,10 +59,6 @@ export class CreateSandboxComponent {
   }
 
   async onCreate() {
-    console.log("this.selectedStandard: " + this.selectedStandard);
-    console.log("this.selectedVersion: " + this.selectedVersion);
-    console.log("this.selectedRole: " + this.selectedRole);
-    console.log("this.selectedSandboxType: " + this.selectedSandboxType);
     if (this.cannotCreate()) return;
     const sandboxId: string = await this.conformanceService.createSandbox(
       this.selectedStandard!.name,

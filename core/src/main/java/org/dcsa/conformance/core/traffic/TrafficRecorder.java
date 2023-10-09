@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Stream;
 import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
 
 public class TrafficRecorder {
@@ -16,15 +15,11 @@ public class TrafficRecorder {
     this.partitionKey = partitionKey;
   }
 
-  public Stream<ConformanceExchange> getTrafficStream() {
-    return nonLockingMap.getPartitionValues(partitionKey).stream()
-        .map(itemNode -> ConformanceExchange.fromJson((ObjectNode) itemNode.get("exchange")));
-  }
-
   public Map<String, List<ConformanceExchange>> getTrafficByScenarioRun() {
     HashMap<String, List<ConformanceExchange>> trafficMap = new HashMap<>();
     nonLockingMap
         .getPartitionValues(partitionKey)
+        .stream().filter(itemNode -> itemNode.has("scenarioRun"))
         .forEach(
             itemNode ->
                 trafficMap

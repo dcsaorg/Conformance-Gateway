@@ -20,6 +20,7 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 public class ConformanceWebuiHandler {
   public static JsonNode handleRequest(
       String environmentBaseUrl,
+      String userEnvironmentId,
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       JsonNode requestNode) {
@@ -27,12 +28,12 @@ public class ConformanceWebuiHandler {
     String operation = requestNode.get("operation").asText();
     return switch (operation) {
       case "createSandbox" -> _createSandbox(
-          environmentBaseUrl, persistenceProvider, asyncWebClient, requestNode);
+          environmentBaseUrl, userEnvironmentId, persistenceProvider, asyncWebClient, requestNode);
       case "getSandboxConfig" -> _getSandboxConfig(persistenceProvider, requestNode);
       case "updateSandboxConfig" -> _updateSandboxConfig(persistenceProvider, requestNode);
       case "getAvailableStandards" -> _getAvailableStandards();
-      case "getAllSandboxes" -> _getAllSandboxes(persistenceProvider);
-      case "getSandbox" -> _getSandbox(persistenceProvider, requestNode);
+      case "getAllSandboxes" -> _getAllSandboxes(persistenceProvider, userEnvironmentId);
+      case "getSandbox" -> _getSandbox(persistenceProvider, userEnvironmentId, requestNode);
       case "getScenarioDigests" -> _getScenarioDigests(persistenceProvider, requestNode);
       case "getScenario" -> _getScenario(persistenceProvider, requestNode);
       case "getScenarioStatus" -> _getScenarioStatus(persistenceProvider, requestNode);
@@ -46,13 +47,14 @@ public class ConformanceWebuiHandler {
 
   private static JsonNode _createSandbox(
       String environmentBaseUrl,
+      String userEnvironmentId,
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       JsonNode requestNode) {
     String sandboxId = UUID.randomUUID().toString();
     String sandboxName = requestNode.get("sandboxName").asText();
 
-    if (StreamSupport.stream(_getAllSandboxes(persistenceProvider).spliterator(), false)
+    if (StreamSupport.stream(_getAllSandboxes(persistenceProvider, userEnvironmentId).spliterator(), false)
         .anyMatch(existingSandbox -> sandboxName.equals(existingSandbox.get("name").asText())))
       throw new IllegalArgumentException(
           "A sandbox named '%s' already exists".formatted(sandboxName));
@@ -126,7 +128,7 @@ public class ConformanceWebuiHandler {
     ConformanceSandbox.create(
         persistenceProvider,
         asyncWebClient,
-        "spring-boot-env",
+        userEnvironmentId,
         sandboxId,
         sandboxName,
         sandboxConfiguration);
@@ -242,22 +244,25 @@ public class ConformanceWebuiHandler {
     return standardsNode;
   }
 
-  private static JsonNode _getAllSandboxes(ConformancePersistenceProvider persistenceProvider) {
+  private static JsonNode _getAllSandboxes(
+      ConformancePersistenceProvider persistenceProvider, String environmentId) {
     ObjectMapper objectMapper = new ObjectMapper();
     ArrayNode sandboxesNode = objectMapper.createArrayNode();
     persistenceProvider
         .getNonLockingMap()
-        .getPartitionValues("environment#spring-boot-env")
+        .getPartitionValues("environment#" + environmentId)
         .forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
   private static JsonNode _getSandbox(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
+      ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
+      JsonNode requestNode) {
     return persistenceProvider
         .getNonLockingMap()
         .getItemValue(
-            "environment#spring-boot-env", "sandbox#" + requestNode.get("sandboxId").asText());
+            "environment#" + environmentId, "sandbox#" + requestNode.get("sandboxId").asText());
   }
 
   private static JsonNode _getScenarioDigests(

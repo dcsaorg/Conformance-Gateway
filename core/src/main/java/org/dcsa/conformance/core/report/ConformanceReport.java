@@ -95,6 +95,11 @@ public class ConformanceReport {
     subReports.forEach(subReport -> subReportsNode.add(subReport.toJsonReport()));
     reportNode.set("subReports", subReportsNode);
 
+
+    ArrayNode errorsNode = objectMapper.createArrayNode();
+    errorMessages.forEach(errorsNode::add);
+    reportNode.set("errorMessages", errorsNode);
+
     return reportNode;
   }
 

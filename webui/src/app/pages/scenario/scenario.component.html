@@ -96,8 +96,17 @@
                     >{{getConformanceStatusEmoji(subSubReport.status)}}</span>
                     
                     <span>{{subSubReport.title}}</span>
+                    
+                    <div *ngFor="let errorMessage of subSubReport.errorMessages"
+                    style="margin-top: .5em; margin-left: 3em">
+                        <span
+                        class="conformanceStatus"
+                        >❌</span>
+                        
+                        <span>{{errorMessage}}</span>
+                    </div>
                 </div>
-            </div>
+        </div>
         </div>
     </div>
 </div>

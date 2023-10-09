@@ -13,5 +13,6 @@ export interface ScenarioStatus {
 export interface ScenarioConformanceReport {
     title: string,
     status: ConformanceStatus,
+    errorMessages: string[],
     subReports: ScenarioConformanceReport[],
 }

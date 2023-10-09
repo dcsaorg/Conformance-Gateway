@@ -1,2 +1,2 @@
 call cdk-pre.cmd
-cdk -v diff
+cdk -v diff %1%ConformanceStack

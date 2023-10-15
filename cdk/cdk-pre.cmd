@@ -8,6 +8,6 @@ cd ..\sandbox
 call mvn clean install
 
 cd ..\webui
-call ng build --configuration=dev
+call ng build --configuration=%1%
 
 cd ..\cdk

@@ -1,9 +1,10 @@
 package org.dcsa.conformance.core;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -20,4 +21,15 @@ public interface ComponentFactory {
   ScenarioListBuilder<?> createScenarioListBuilder(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations);
+
+  SortedSet<String> getRoleNames();
+
+  Set<String> getReportRoleNames(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations);
+
+  JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest);
+
+  JsonNode getJsonSandboxConfigurationTemplate(
+      String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig);
 }

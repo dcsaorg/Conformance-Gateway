@@ -1,0 +1,27 @@
+{
+  "id": "manual-carrier-tested-party",
+  "name": "Manual carrier tested party",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": false
+  },
+  "parties" : [ {
+    "inManualMode": true,
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/manual-carrier-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/manual-carrier-tested-party/party/Carrier1/api"
+  }, {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "url" : "http://localhost:8080/conformance/sandbox/manual-carrier-testing-counterparts/party/Platform1/api"
+  } ]
+}

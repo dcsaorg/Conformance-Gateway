@@ -1,4 +1,4 @@
-<mat-spinner *ngIf="!sandbox"></mat-spinner>
+<mat-spinner *ngIf="isLoading"></mat-spinner>
 
 <div *ngIf="sandbox">
     <div class="pageTitle">
@@ -35,3 +35,24 @@
         <span>{{scenario.name}}</span>
     </div>
 </mat-card>
+
+<div *ngIf="sandbox?.canNotifyParty">
+    <div class="paragraph">
+        <button
+        mat-raised-button
+        color="primary"
+        (click)="onClickNotifyParty()"
+        >Notify party</button>
+    </div>
+
+    <div class="pageSubtitle">Activity</div>
+    <div>(latest message at the top)</div>
+    <div class="paragraph">
+        <button
+        mat-raised-button
+        color="primary"
+        (click)="onClickRefresh()"
+        >Refresh</button>
+    </div>
+    <div class="paragraph" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
+</div>

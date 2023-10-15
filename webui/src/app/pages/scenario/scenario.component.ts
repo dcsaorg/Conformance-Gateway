@@ -45,7 +45,7 @@ export class ScenarioComponent {
       async params => {
         const sandboxId: string = params['sandboxId'];
         const scenarioId: string = params['scenarioId'];
-        this.sandbox = await this.conformanceService.getSandbox(sandboxId);
+        this.sandbox = await this.conformanceService.getSandbox(sandboxId, false);
         this.scenario = await this.conformanceService.getScenario(sandboxId, scenarioId);
         await this.loadScenarioStatus();
       });

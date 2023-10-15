@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.sandbox.ConformanceAccessException;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
@@ -39,14 +40,26 @@ public class WebuiLambda
       ConformancePersistenceProvider persistenceProvider =
           LambdaToolkit.createPersistenceProvider();
 
-      String responseBody =
-          ConformanceWebuiHandler.handleRequest(
-                  LambdaToolkit.getDbConfigValue(persistenceProvider, "environmentBaseUrl"),
-                  cognitoIdAsEnvironmentId,
-                  persistenceProvider,
-                  LambdaToolkit.createAsyncWebClient(persistenceProvider),
-                  JsonToolkit.stringToJsonNode(event.getBody()))
-              .toPrettyString();
+      ConformanceWebuiHandler webuiHandler =
+          new ConformanceWebuiHandler(
+              new WebuiAccessChecker(persistenceProvider),
+              LambdaToolkit.getDbConfigValue(persistenceProvider, "environmentBaseUrl"),
+              persistenceProvider,
+              LambdaToolkit.createAsyncWebClient(persistenceProvider));
+
+      String responseBody;
+      try {
+        responseBody =
+            webuiHandler
+                .handleRequest(
+                    cognitoIdAsEnvironmentId, JsonToolkit.stringToJsonNode(event.getBody()))
+                .toPrettyString();
+      } catch (ConformanceAccessException e) {
+        return new APIGatewayProxyResponseEvent()
+            .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
+            .withStatusCode(403)
+            .withBody("Access denied");
+      }
 
       return new APIGatewayProxyResponseEvent()
           .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))

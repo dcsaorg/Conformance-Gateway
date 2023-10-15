@@ -23,7 +23,8 @@ export class SandboxComponent {
   sandbox: Sandbox | undefined;
   scenarios: ScenarioDigest[] = [];
   isAnyScenarioRunning: boolean = false;
-
+  isLoading: boolean = false;
+  
   activatedRouteSubscription: Subscription | undefined;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
@@ -47,14 +48,16 @@ export class SandboxComponent {
     this.activatedRouteSubscription = this.activatedRoute.params.subscribe(
       async params => {
         this.sandboxId = params['sandboxId'];
-        await this._loadScenarios();
+        await this._loadData();
       });
   }
 
-  async _loadScenarios() {
-    this.sandbox = await this.conformanceService.getSandbox(this.sandboxId);
+  async _loadData() {
+    this.isLoading = true;
+    this.sandbox = await this.conformanceService.getSandbox(this.sandboxId, true);
     this.scenarios = await this.conformanceService.getScenarioDigests(this.sandboxId);
     this.isAnyScenarioRunning = this.scenarios.filter(scenario => scenario.isRunning).length > 0;
+    this.isLoading = false;
   }
 
   async ngOnDestroy() {
@@ -100,7 +103,7 @@ export class SandboxComponent {
     ) {
       await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);
       if (action === "Stop") {
-        await this._loadScenarios();
+        await this._loadData();
       } else {
         this.router.navigate([
           '/scenario', this.sandbox!.id, scenario.id
@@ -119,5 +122,14 @@ export class SandboxComponent {
     this.router.navigate([
       '/edit-sandbox', this.sandbox!.id
     ]);
+  }
+
+  onClickNotifyParty() {
+    this.conformanceService.notifyParty(this.sandbox!.id);
+  }
+
+  onClickRefresh() {
+    this.sandbox = undefined;
+    this._loadData();
   }
 }

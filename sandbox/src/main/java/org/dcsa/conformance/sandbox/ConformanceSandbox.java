@@ -13,20 +13,17 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
-import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10ComponentFactory;
-import org.dcsa.conformance.standards.eblsurrender.v10.party.EblSurrenderV10Role;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
 @Slf4j
 public class ConformanceSandbox {
@@ -275,6 +272,46 @@ public class ConformanceSandbox {
     return arrayNodeReference.get();
   }
 
+  public static ArrayNode getOperatorLog(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String sandboxId) {
+    SandboxConfiguration sandboxConfiguration =
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return null;
+
+    String partyName = sandboxConfiguration.getParties()[0].getName();
+    ArrayNode operatorLogNode = new ObjectMapper().createArrayNode();
+    new PartyTask(
+            persistenceProvider,
+            asyncWebClient,
+            sandboxId,
+            partyName,
+            "getting operator log for party " + partyName,
+            party -> party.getOperatorLog().forEach(operatorLogNode::add))
+        .run();
+    return operatorLogNode;
+  }
+
+  public static void notifyParty(
+          ConformancePersistenceProvider persistenceProvider,
+          Consumer<ConformanceWebRequest> asyncWebClient,
+          String sandboxId) {
+    SandboxConfiguration sandboxConfiguration =
+            loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return;
+
+    String partyName = sandboxConfiguration.getParties()[0].getName();
+    new PartyTask(
+            persistenceProvider,
+            asyncWebClient,
+            sandboxId,
+            partyName,
+            "handling notification for party " + partyName,
+            ConformanceParty::handleNotification)
+            .run();
+  }
+
   public static ObjectNode getScenarioDigest(
       ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
     AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
@@ -500,18 +537,9 @@ public class ConformanceSandbox {
         loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     Set<String> reportRoleNames =
-        (sandboxConfiguration.getParties().length == EblSurrenderV10Role.values().length
-                ? Arrays.stream(EblSurrenderV10Role.values())
-                    .map(EblSurrenderV10Role::getConfigName)
-                : Arrays.stream(sandboxConfiguration.getCounterparts())
-                    .map(CounterpartConfiguration::getRole)
-                    .filter(
-                        counterpartRole ->
-                            Arrays.stream(sandboxConfiguration.getParties())
-                                .map(PartyConfiguration::getRole)
-                                .noneMatch(
-                                    partyRole -> Objects.equals(partyRole, counterpartRole))))
-            .collect(Collectors.toSet());
+        _createComponentFactory(sandboxConfiguration.getStandard())
+            .getReportRoleNames(
+                sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts());
 
     AtomicReference<String> reportReference = new AtomicReference<>();
     new OrchestratorTask(
@@ -577,9 +605,8 @@ public class ConformanceSandbox {
 
   private static ComponentFactory _createComponentFactory(
       StandardConfiguration standardConfiguration) {
-    if ("EblSurrender".equals(standardConfiguration.getName())
-        && "1.0.0".equals(standardConfiguration.getVersion())) {
-      return new EblSurrenderV10ComponentFactory();
+    if (EblSurrenderComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new EblSurrenderComponentFactory(standardConfiguration.getVersion());
     }
     throw new UnsupportedOperationException(
         "Unsupported standard: %s".formatted(standardConfiguration));

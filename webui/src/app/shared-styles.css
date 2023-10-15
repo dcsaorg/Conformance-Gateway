@@ -1,3 +1,7 @@
+mat-spinner {
+    margin-top: 1em;
+}
+
 .cardContent {
     display: flex;
     flex-direction: row;

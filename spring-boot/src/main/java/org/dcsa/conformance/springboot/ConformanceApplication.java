@@ -22,14 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.sandbox.ConformanceSandbox;
-import org.dcsa.conformance.sandbox.ConformanceWebRequest;
-import org.dcsa.conformance.sandbox.ConformanceWebResponse;
-import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
+import org.dcsa.conformance.sandbox.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -76,6 +75,19 @@ public class ConformanceApplication {
                         "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
                     return null;
                   });
+
+  private final ConformanceAccessChecker accessChecker =
+      new ConformanceAccessChecker() {
+        @Override
+        public String getUserEnvironmentId(String userId) {
+          return "spring-boot-env";
+        }
+
+        @Override
+        public void checkUserSandboxAccess(String userId, String sandboxId) {
+          // full access
+        }
+      };
 
   @PostConstruct
   public void postConstruct() {
@@ -135,34 +147,42 @@ public class ConformanceApplication {
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
 
+    EblSurrenderComponentFactory componentFactory =
+        new EblSurrenderComponentFactory(
+            new LinkedList<>(EblSurrenderComponentFactory.STANDARD_VERSIONS).getLast());
     Stream.concat(
             conformanceConfiguration.createAutoTestingSandboxes
                 ? Stream.of(
-                    "auto-all-in-one",
-                    "auto-carrier-tested-party",
-                    "auto-carrier-testing-counterparts",
-                    "auto-platform-tested-party",
-                    "auto-platform-testing-counterparts")
+                    componentFactory.getJsonSandboxConfigurationTemplate(null, false, false),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.CARRIER.getConfigName(), false, false),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.CARRIER.getConfigName(), false, true),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.PLATFORM.getConfigName(), false, false),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.PLATFORM.getConfigName(), false, true))
                 : Stream.of(),
             conformanceConfiguration.createManualTestingSandboxes
                 ? Stream.of(
-                    "manual-carrier-tested-party",
-                    "manual-carrier-testing-counterparts",
-                    "manual-platform-tested-party",
-                    "manual-platform-testing-counterparts")
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.CARRIER.getConfigName(), true, false),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.CARRIER.getConfigName(), true, true),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.PLATFORM.getConfigName(), true, false),
+                    componentFactory.getJsonSandboxConfigurationTemplate(
+                        EblSurrenderRole.PLATFORM.getConfigName(), true, true))
                 : Stream.of())
         .forEach(
-            baseFileName ->
+            jsonSandboxConfigurationTemplate ->
                 ConformanceSandbox.create(
                     persistenceProvider,
                     asyncWebClient,
                     "spring-boot-env",
-                    "eblsurrender-v10-%s".formatted(baseFileName),
-                    "eBL Surrender v1.0 " + baseFileName,
-                    SandboxConfiguration.fromJsonNode(
-                        JsonToolkit.inputStreamToJsonNode(
-                            ConformanceApplication.class.getResourceAsStream(
-                                "/standards/eblsurrender/v10/%s.json".formatted(baseFileName))))));
+                    jsonSandboxConfigurationTemplate.get("id").asText(),
+                    jsonSandboxConfigurationTemplate.get("name").asText(),
+                    SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate)));
   }
 
   @CrossOrigin(origins = "http://localhost:4200")
@@ -174,12 +194,10 @@ public class ConformanceApplication {
         200,
         "application/json;charset=utf-8",
         Collections.emptyMap(),
-        ConformanceWebuiHandler.handleRequest(
-                "http://localhost:8080",
-                "spring-boot-env",
-                persistenceProvider,
-                asyncWebClient,
-                JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
+        new ConformanceWebuiHandler(
+                accessChecker, "http://localhost:8080", persistenceProvider, asyncWebClient)
+            .handleRequest(
+                "local-user", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
   }
 
@@ -279,9 +297,9 @@ public class ConformanceApplication {
         "<head><title>DCSA Conformance</title></head>",
         "<body style=\"font-family: sans-serif;\">",
         "<h2>DCSA Conformance</h2>",
-        _buildHomeSandboxSection("eblsurrender-v10-auto-all-in-one"),
-        _buildHomeSandboxSection("eblsurrender-v10-auto-carrier-testing-counterparts"),
-        _buildHomeSandboxSection("eblsurrender-v10-auto-platform-testing-counterparts"),
+        _buildHomeSandboxSection("auto-all-in-one"),
+        _buildHomeSandboxSection("auto-carrier-testing-counterparts"),
+        _buildHomeSandboxSection("auto-platform-testing-counterparts"),
         "</body>",
         "</html>");
   }

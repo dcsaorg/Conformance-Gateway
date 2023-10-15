@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,6 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
+  protected final String apiVersion;
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
 
@@ -29,11 +31,15 @@ public abstract class ConformanceParty implements StatefulEntity {
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
+  private final LinkedList<String> operatorLog = new LinkedList<>();
+
   public ConformanceParty(
+      String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    this.apiVersion = apiVersion;
     this.partyConfiguration = partyConfiguration;
     this.counterpartConfiguration = counterpartConfiguration;
     this.asyncWebClient = asyncWebClient;
@@ -51,6 +57,11 @@ public abstract class ConformanceParty implements StatefulEntity {
   public JsonNode exportJsonState() {
     ObjectNode jsonPartyState = new ObjectMapper().createObjectNode();
     jsonPartyState.set("actionPromptsQueue", actionPromptsQueue.exportJsonState());
+
+    ArrayNode operatorLogNode = new ObjectMapper().createArrayNode();
+    operatorLog.forEach(operatorLogNode::add);
+    jsonPartyState.set("operatorLog", operatorLogNode);
+
     exportPartyJsonState(jsonPartyState);
     return jsonPartyState;
   }
@@ -60,10 +71,20 @@ public abstract class ConformanceParty implements StatefulEntity {
   @Override
   public void importJsonState(JsonNode jsonState) {
     actionPromptsQueue.importJsonState(jsonState.get("actionPromptsQueue"));
+    StreamSupport.stream(jsonState.get("operatorLog").spliterator(), false)
+        .forEach(entryNode -> operatorLog.add(entryNode.asText()));
     importPartyJsonState((ObjectNode) jsonState);
   }
 
   protected abstract void importPartyJsonState(ObjectNode sourceObjectNode);
+
+  protected void addOperatorLogEntry(String logEntry) {
+    operatorLog.addFirst(logEntry);
+  }
+
+  public List<String> getOperatorLog() {
+    return List.copyOf(operatorLog);
+  }
 
   public String getName() {
     return partyConfiguration.getName();
@@ -104,12 +125,7 @@ public abstract class ConformanceParty implements StatefulEntity {
                 System.currentTimeMillis())));
   }
 
-  @SuppressWarnings("unused")
-  private void useDifferentApiVersion() {
-    asyncCounterpartPost("", "", new ObjectMapper().createObjectNode());
-  }
-
-  protected void asyncCounterpartPost(String path, String apiVersion, JsonNode jsonBody) {
+  protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
     asyncWebClient.accept(
         new ConformanceRequest(
             "POST",

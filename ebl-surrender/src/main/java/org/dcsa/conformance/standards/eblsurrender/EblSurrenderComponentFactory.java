@@ -1,0 +1,174 @@
+package org.dcsa.conformance.standards.eblsurrender;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.SneakyThrows;
+import org.dcsa.conformance.core.ComponentFactory;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.party.ConformanceParty;
+import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderPlatform;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
+
+public class EblSurrenderComponentFactory implements ComponentFactory {
+  public static final String STANDARD_NAME = "eBL Surrender";
+  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1", "3.0.0-Beta-1");
+
+  private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+  private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+
+  private final String standardVersion;
+
+  public EblSurrenderComponentFactory(String standardVersion) {
+    this.standardVersion = standardVersion;
+    if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
+      throw new IllegalArgumentException(
+          "Unsupported standard version '%s'".formatted(standardVersion));
+    }
+  }
+
+  public List<ConformanceParty> createParties(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations,
+      Consumer<ConformanceRequest> asyncWebClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    Map<String, PartyConfiguration> partyConfigurationsByRoleName =
+        Arrays.stream(partyConfigurations)
+            .collect(Collectors.toMap(PartyConfiguration::getRole, Function.identity()));
+    Map<String, CounterpartConfiguration> counterpartConfigurationsByRoleName =
+        Arrays.stream(counterpartConfigurations)
+            .collect(Collectors.toMap(CounterpartConfiguration::getRole, Function.identity()));
+
+    LinkedList<ConformanceParty> parties = new LinkedList<>();
+
+    PartyConfiguration carrierConfiguration =
+        partyConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName());
+    if (carrierConfiguration != null) {
+      parties.add(
+          new EblSurrenderCarrier(
+              standardVersion,
+              carrierConfiguration,
+              counterpartConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName()),
+              asyncWebClient,
+              orchestratorAuthHeader));
+    }
+
+    PartyConfiguration platformConfiguration =
+        partyConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName());
+    if (platformConfiguration != null) {
+      parties.add(
+          new EblSurrenderPlatform(
+              standardVersion,
+              platformConfiguration,
+              counterpartConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName()),
+              asyncWebClient,
+              orchestratorAuthHeader));
+    }
+
+    return parties;
+  }
+
+  public ScenarioListBuilder<?> createScenarioListBuilder(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations) {
+    return EblSurrenderScenarioListBuilder.buildTree(
+        this,
+        _findPartyOrCounterpartName(
+            partyConfigurations, counterpartConfigurations, EblSurrenderRole::isCarrier),
+        _findPartyOrCounterpartName(
+            partyConfigurations, counterpartConfigurations, EblSurrenderRole::isPlatform));
+  }
+
+  private static String _findPartyOrCounterpartName(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations,
+      Predicate<String> rolePredicate) {
+    return Stream.concat(
+            Arrays.stream(partyConfigurations)
+                .filter(partyConfiguration -> rolePredicate.test(partyConfiguration.getRole()))
+                .map(PartyConfiguration::getName),
+            Arrays.stream(counterpartConfigurations)
+                .filter(
+                    counterpartConfigurationConfiguration ->
+                        rolePredicate.test(counterpartConfigurationConfiguration.getRole()))
+                .map(CounterpartConfiguration::getName))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  @Override
+  public SortedSet<String> getRoleNames() {
+    return Arrays.stream(EblSurrenderRole.values())
+        .map(EblSurrenderRole::getConfigName)
+        .collect(Collectors.toCollection(TreeSet::new));
+  }
+
+  public Set<String> getReportRoleNames(
+      PartyConfiguration[] partyConfigurations,
+      CounterpartConfiguration[] counterpartConfigurations) {
+    return (partyConfigurations.length == EblSurrenderRole.values().length
+            ? Arrays.stream(EblSurrenderRole.values()).map(EblSurrenderRole::getConfigName)
+            : Arrays.stream(counterpartConfigurations)
+                .map(CounterpartConfiguration::getRole)
+                .filter(
+                    counterpartRole ->
+                        Arrays.stream(partyConfigurations)
+                            .map(PartyConfiguration::getRole)
+                            .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
+        .collect(Collectors.toSet());
+  }
+
+  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
+    String schemaFilePath =
+        "/standards/eblsurrender/schemas/eblsurrender-%s-%s.json"
+            .formatted(
+                standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
+    String schemaName =
+        EblSurrenderRole.isCarrier(apiProviderRole)
+            ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")
+            : (forRequest ? "surrenderRequestAnswer" : null);
+    return new JsonSchemaValidator(
+        EblSurrenderComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+  }
+
+  @SneakyThrows
+  public JsonNode getJsonSandboxConfigurationTemplate(
+      String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig) {
+    String template;
+    try (InputStream inputStream =
+        EblSurrenderComponentFactory.class.getResourceAsStream(
+            "/standards/eblsurrender/sandboxes/%s.json"
+                .formatted(
+                    testedPartyRole == null
+                        ? "auto-all-in-one"
+                        : "%s-%s-%s"
+                            .formatted(
+                                isManual ? "manual" : "auto",
+                                testedPartyRole.toLowerCase(),
+                                isTestingCounterpartsConfig
+                                    ? "testing-counterparts"
+                                    : "tested-party")))) {
+      template =
+          new String(Objects.requireNonNull(inputStream).readAllBytes(), StandardCharsets.UTF_8);
+    }
+    String config =
+        template
+            .replaceAll("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME)
+            .replaceAll("STANDARD_VERSION_PLACEHOLDER", standardVersion)
+            .replaceAll("CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER", CARRIER_AUTH_HEADER_VALUE)
+            .replaceAll("PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER", PLATFORM_AUTH_HEADER_VALUE);
+    return new ObjectMapper().readTree(config);
+  }
+}

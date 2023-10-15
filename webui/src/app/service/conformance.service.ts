@@ -29,9 +29,18 @@ export class ConformanceService {
     return sandboxes;
   }
 
-  async getSandbox(sandboxId: string): Promise<Sandbox> {
+  async getSandbox(sandboxId: string, includeOperatorLog: boolean): Promise<Sandbox> {
     const sandbox: Sandbox = await this.apiService.call({
       operation: "getSandbox",
+      sandboxId,
+      includeOperatorLog,
+    });
+    return sandbox;
+  }
+
+  async notifyParty(sandboxId: string): Promise<Sandbox> {
+    const sandbox: Sandbox = await this.apiService.call({
+      operation: "notifyParty",
       sandboxId,
     });
     return sandbox;

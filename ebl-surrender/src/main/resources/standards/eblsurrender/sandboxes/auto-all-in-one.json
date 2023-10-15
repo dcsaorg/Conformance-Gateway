@@ -1,0 +1,35 @@
+{
+  "id": "auto-all-in-one",
+  "name": "Auto all-in-one",
+  "authHeaderName": "dcsa-conformance-api-key",
+  "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/auto-all-in-one"
+  }, {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/auto-all-in-one"
+  } ],
+  "counterparts" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/auto-all-in-one/party/Carrier1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER"
+  }, {
+    "name" : "Platform1",
+    "role" : "Platform",
+    "url" : "http://localhost:8080/conformance/sandbox/auto-all-in-one/party/Platform1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER"
+  } ]
+}

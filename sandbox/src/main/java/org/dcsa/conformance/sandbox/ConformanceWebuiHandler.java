@@ -4,86 +4,100 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.ComponentFactory;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
 @Slf4j
 public class ConformanceWebuiHandler {
-  public static JsonNode handleRequest(
+  private final ConformanceAccessChecker accessChecker;
+  private final String environmentBaseUrl;
+  private final ConformancePersistenceProvider persistenceProvider;
+  private final Consumer<ConformanceWebRequest> asyncWebClient;
+
+  private final SortedMap<String, SortedMap<String, ComponentFactory>> componentFactories =
+      new TreeMap<>(
+          Map.of(
+              EblSurrenderComponentFactory.STANDARD_NAME,
+              new TreeMap<>(
+                  EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
+                      .collect(
+                          Collectors.toMap(
+                              Function.identity(), EblSurrenderComponentFactory::new)))));
+
+  public ConformanceWebuiHandler(
+      ConformanceAccessChecker accessChecker,
       String environmentBaseUrl,
-      String userEnvironmentId,
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      JsonNode requestNode) {
+      Consumer<ConformanceWebRequest> asyncWebClient) {
+    this.accessChecker = accessChecker;
+    this.environmentBaseUrl = environmentBaseUrl;
+    this.persistenceProvider = persistenceProvider;
+    this.asyncWebClient = asyncWebClient;
+  }
+
+  public JsonNode handleRequest(String userId, JsonNode requestNode) {
     log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
     String operation = requestNode.get("operation").asText();
     return switch (operation) {
-      case "createSandbox" -> _createSandbox(
-          environmentBaseUrl, userEnvironmentId, persistenceProvider, asyncWebClient, requestNode);
-      case "getSandboxConfig" -> _getSandboxConfig(persistenceProvider, requestNode);
-      case "updateSandboxConfig" -> _updateSandboxConfig(persistenceProvider, requestNode);
-      case "getAvailableStandards" -> _getAvailableStandards();
-      case "getAllSandboxes" -> _getAllSandboxes(persistenceProvider, userEnvironmentId);
-      case "getSandbox" -> _getSandbox(persistenceProvider, userEnvironmentId, requestNode);
-      case "getScenarioDigests" -> _getScenarioDigests(persistenceProvider, requestNode);
-      case "getScenario" -> _getScenario(persistenceProvider, requestNode);
-      case "getScenarioStatus" -> _getScenarioStatus(persistenceProvider, requestNode);
-      case "handleActionInput" -> _handleActionInput(
-          persistenceProvider, asyncWebClient, requestNode);
-      case "startOrStopScenario" -> _startOrStopScenario(
-          persistenceProvider, asyncWebClient, requestNode);
+      case "createSandbox" -> _createSandbox(userId, requestNode);
+      case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
+      case "updateSandboxConfig" -> _updateSandboxConfig(userId, requestNode);
+      case "getAvailableStandards" -> _getAvailableStandards(userId);
+      case "getAllSandboxes" -> _getAllSandboxes(userId);
+      case "getSandbox" -> _getSandbox(userId, requestNode);
+      case "notifyParty" -> _notifyParty(userId, requestNode);
+      case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
+      case "getScenario" -> _getScenario(userId, requestNode);
+      case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
+      case "handleActionInput" -> _handleActionInput(userId, requestNode);
+      case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
   }
 
-  private static JsonNode _createSandbox(
-      String environmentBaseUrl,
-      String userEnvironmentId,
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      JsonNode requestNode) {
+  private JsonNode _createSandbox(String userId, JsonNode requestNode) {
     String sandboxId = UUID.randomUUID().toString();
     String sandboxName = requestNode.get("sandboxName").asText();
 
-    if (StreamSupport.stream(_getAllSandboxes(persistenceProvider, userEnvironmentId).spliterator(), false)
+    if (StreamSupport.stream(_getAllSandboxes(userId).spliterator(), false)
         .anyMatch(existingSandbox -> sandboxName.equals(existingSandbox.get("name").asText())))
       throw new IllegalArgumentException(
           "A sandbox named '%s' already exists".formatted(sandboxName));
 
     String standardName = requestNode.get("standardName").asText();
-    if (!"eBL Surrender".equals(standardName))
+    if (!componentFactories.containsKey(standardName))
       throw new IllegalArgumentException("Unsupported standard: " + standardName);
 
     String versionNumber = requestNode.get("versionNumber").asText();
-    if (!Set.of("2.0-beta1", "3.0-beta1").contains(versionNumber))
+    if (!componentFactories.get(standardName).containsKey(versionNumber))
       throw new IllegalArgumentException("Unsupported version: " + versionNumber);
 
     String testedPartyRole = requestNode.get("testedPartyRole").asText();
-    if (!Set.of("Carrier", "Platform").contains(testedPartyRole))
+    if (!componentFactories
+        .get(standardName)
+        .get(versionNumber)
+        .getRoleNames()
+        .contains(testedPartyRole))
       throw new IllegalArgumentException("Unsupported role: " + testedPartyRole);
 
     boolean isDefaultType = requestNode.get("isDefaultType").asBoolean();
 
-    String baseConfigFileName =
-        "manual-%s-%s"
-            .formatted(
-                testedPartyRole.toLowerCase(),
-                isDefaultType ? "testing-counterparts" : "tested-party");
-
     SandboxConfiguration sandboxConfiguration =
         SandboxConfiguration.fromJsonNode(
-            JsonToolkit.inputStreamToJsonNode(
-                ConformanceWebuiHandler.class.getResourceAsStream(
-                    "/standards/eblsurrender/v10/%s.json".formatted(baseConfigFileName))));
+            componentFactories
+                .get(standardName)
+                .get(versionNumber)
+                .getJsonSandboxConfigurationTemplate(testedPartyRole, true, isDefaultType));
 
     sandboxConfiguration.setId(sandboxId);
     sandboxConfiguration.setName(sandboxName);
@@ -128,7 +142,7 @@ public class ConformanceWebuiHandler {
     ConformanceSandbox.create(
         persistenceProvider,
         asyncWebClient,
-        userEnvironmentId,
+        accessChecker.getUserEnvironmentId(userId),
         sandboxId,
         sandboxName,
         sandboxConfiguration);
@@ -138,11 +152,11 @@ public class ConformanceWebuiHandler {
     return new ObjectMapper().createObjectNode().put("sandboxId", sandboxId);
   }
 
-  private static JsonNode _getSandboxConfig(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
+  private JsonNode _getSandboxConfig(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     SandboxConfiguration sandboxConfiguration =
-        ConformanceSandbox.loadSandboxConfiguration(
-            persistenceProvider, requestNode.get("sandboxId").asText());
+        ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     CounterpartConfiguration sandboxPartyCounterpartConfig =
         Arrays.stream(sandboxConfiguration.getCounterparts())
@@ -174,11 +188,11 @@ public class ConformanceWebuiHandler {
         .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
   }
 
-  private static JsonNode _updateSandboxConfig(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
+  private JsonNode _updateSandboxConfig(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     SandboxConfiguration sandboxConfiguration =
-        ConformanceSandbox.loadSandboxConfiguration(
-            persistenceProvider, requestNode.get("sandboxId").asText());
+        ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     log.info("Updating sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
 
@@ -220,83 +234,112 @@ public class ConformanceWebuiHandler {
     return new ObjectMapper().createObjectNode();
   }
 
-  private static JsonNode _getAvailableStandards() {
+  private JsonNode _getAvailableStandards(String ignoredUserId) {
     ObjectMapper objectMapper = new ObjectMapper();
     ArrayNode standardsNode = objectMapper.createArrayNode();
-    for (String standardName : new String[] {"eBL Issuance", "eBL Surrender"}) {
-      ObjectNode eblSurrenderNode = objectMapper.createObjectNode().put("name", standardName);
-      standardsNode.add(eblSurrenderNode);
-      {
-        ArrayNode eblSurrenderVersionsNode = objectMapper.createArrayNode();
-        eblSurrenderNode.set("versions", eblSurrenderVersionsNode);
-        for (String versionNumber : new String[] {"2.0-beta1", "3.0-beta1"}) {
-          ObjectNode versionNode = objectMapper.createObjectNode().put("number", versionNumber);
-          eblSurrenderVersionsNode.add(versionNode);
-          {
-            ArrayNode rolesNode = objectMapper.createArrayNode();
-            versionNode.set("roles", rolesNode);
-            rolesNode.add("Carrier");
-            rolesNode.add("Platform");
-          }
-        }
-      }
-    }
+    componentFactories
+        .keySet()
+        .forEach(
+            standardName -> {
+              ObjectNode standardNode = objectMapper.createObjectNode().put("name", standardName);
+              {
+                ArrayNode versionsNode = objectMapper.createArrayNode();
+                standardNode.set("versions", versionsNode);
+                componentFactories
+                    .get(standardName)
+                    .keySet()
+                    .forEach(
+                        standardVersion -> {
+                          ObjectNode versionNode =
+                              objectMapper.createObjectNode().put("number", standardVersion);
+                          {
+                            ArrayNode rolesNode = objectMapper.createArrayNode();
+                            componentFactories
+                                .get(standardName)
+                                .get(standardVersion)
+                                .getRoleNames()
+                                .forEach(rolesNode::add);
+                            versionNode.set("roles", rolesNode);
+                          }
+                          versionsNode.add(versionNode);
+                        });
+              }
+              standardsNode.add(standardNode);
+            });
     return standardsNode;
   }
 
-  private static JsonNode _getAllSandboxes(
-      ConformancePersistenceProvider persistenceProvider, String environmentId) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode sandboxesNode = objectMapper.createArrayNode();
+  private JsonNode _getAllSandboxes(String userId) {
+    TreeMap<String, JsonNode> sortedSandboxesByLowercaseName = new TreeMap<>();
     persistenceProvider
         .getNonLockingMap()
-        .getPartitionValues("environment#" + environmentId)
-        .forEach(sandboxesNode::add);
+        .getPartitionValues("environment#" + accessChecker.getUserEnvironmentId(userId))
+        .forEach(
+            sandboxNode ->
+                sortedSandboxesByLowercaseName.put(
+                    sandboxNode.get("name").asText().toLowerCase(), sandboxNode));
+    ArrayNode sandboxesNode = new ObjectMapper().createArrayNode();
+    sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
-  private static JsonNode _getSandbox(
-      ConformancePersistenceProvider persistenceProvider,
-      String environmentId,
-      JsonNode requestNode) {
-    return persistenceProvider
-        .getNonLockingMap()
-        .getItemValue(
-            "environment#" + environmentId, "sandbox#" + requestNode.get("sandboxId").asText());
+  private JsonNode _getSandbox(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    ObjectNode sandboxNode =
+        (ObjectNode)
+            persistenceProvider
+                .getNonLockingMap()
+                .getItemValue(
+                    "environment#" + accessChecker.getUserEnvironmentId(userId),
+                    "sandbox#" + sandboxId);
+
+    boolean includeOperatorLog = requestNode.get("includeOperatorLog").asBoolean();
+    if (includeOperatorLog) {
+      ArrayNode operatorLog =
+          ConformanceSandbox.getOperatorLog(persistenceProvider, asyncWebClient, sandboxId);
+      sandboxNode.set("operatorLog", operatorLog);
+      sandboxNode.put("canNotifyParty", operatorLog != null);
+    }
+    return sandboxNode;
   }
 
-  private static JsonNode _getScenarioDigests(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
-    return ConformanceSandbox.getScenarioDigests(
-        persistenceProvider, requestNode.get("sandboxId").asText());
+  private JsonNode _notifyParty(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    ConformanceSandbox.notifyParty(persistenceProvider, asyncWebClient, sandboxId);
+    return new ObjectMapper().createObjectNode();
   }
 
-  private static JsonNode _getScenario(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
+  private JsonNode _getScenarioDigests(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getScenarioDigests(persistenceProvider, sandboxId);
+  }
+
+  private JsonNode _getScenario(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getScenarioDigest(
-        persistenceProvider,
-        requestNode.get("sandboxId").asText(),
-        requestNode.get("scenarioId").asText());
+        persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 
-  private static JsonNode _getScenarioStatus(
-      ConformancePersistenceProvider persistenceProvider, JsonNode requestNode) {
+  private JsonNode _getScenarioStatus(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getScenarioStatus(
-        persistenceProvider,
-        requestNode.get("sandboxId").asText(),
-        requestNode.get("scenarioId").asText());
+        persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 
-  private static JsonNode _handleActionInput(
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      JsonNode requestNode) {
+  private JsonNode _handleActionInput(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     JsonNode actionInputNode = requestNode.get("actionInput");
     if (actionInputNode != null) {
       return ConformanceSandbox.handleActionInput(
           persistenceProvider,
           asyncWebClient,
-          requestNode.get("sandboxId").asText(),
+          sandboxId,
           requestNode.get("actionId").asText(),
           actionInputNode.asText());
     } else {
@@ -304,14 +347,10 @@ public class ConformanceWebuiHandler {
     }
   }
 
-  private static JsonNode _startOrStopScenario(
-      ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      JsonNode requestNode) {
+  private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.startOrStopScenario(
-        persistenceProvider,
-        asyncWebClient,
-        requestNode.get("sandboxId").asText(),
-        requestNode.get("scenarioId").asText());
+        persistenceProvider, asyncWebClient, sandboxId, requestNode.get("scenarioId").asText());
   }
 }

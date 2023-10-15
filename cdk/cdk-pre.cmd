@@ -1,7 +1,7 @@
 cd ..\core
 call mvn clean install
 
-cd ..\ebl-surrender-v10
+cd ..\ebl-surrender
 call mvn clean install
 
 cd ..\sandbox

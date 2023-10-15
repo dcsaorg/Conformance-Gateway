@@ -299,7 +299,10 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return new ConformanceCheck("Scenario conformance") {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return scenariosById.values().stream().map(ScenarioCheck::new);
+        return scenariosById.values().stream()
+            .map(
+                scenario ->
+                    new ScenarioCheck(scenario, sandboxConfiguration.getStandard().getVersion()));
       }
     };
   }

@@ -77,6 +77,7 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
 
       QueryResponse queryResponse = dynamoDbClient.query(queryRequestBuilder.build());
       queryResponse.items().stream()
+          .filter(item -> item.containsKey("value"))
           .map(item -> JsonToolkit.stringToJsonNode(item.get("value").s()))
           .forEach(values::add);
 

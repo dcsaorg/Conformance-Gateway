@@ -74,7 +74,7 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   public void doHandleExchange(ConformanceExchange exchange) {}
 
-  public ConformanceCheck createCheck() {
+  public ConformanceCheck createCheck(String expectedApiVersion) {
     return null;
   }
 

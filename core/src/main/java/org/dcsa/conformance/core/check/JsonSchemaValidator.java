@@ -12,16 +12,15 @@ public class JsonSchemaValidator {
 
   private final JsonSchema jsonSchema;
 
-  public JsonSchemaValidator(String schemaFilePath, String schemaName) {
+  public JsonSchemaValidator(InputStream schemaFileInputStream, String schemaName) {
     // https://github.com/networknt/json-schema-validator/issues/579#issuecomment-1488269135
-    InputStream inputStream = JsonSchemaValidator.class.getResourceAsStream(schemaFilePath);
     JsonSchemaFactory jsonSchemaFactory =
         JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
             .objectMapper(new ObjectMapper(new JsonFactory()))
             .build();
     SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
     schemaValidatorsConfig.setTypeLoose(true);
-    JsonSchema rootJsonSchema = jsonSchemaFactory.getSchema(inputStream, schemaValidatorsConfig);
+    JsonSchema rootJsonSchema = jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
     ValidationContext validationContext =
         new ValidationContext(
             jsonSchemaFactory.getUriFactory(),

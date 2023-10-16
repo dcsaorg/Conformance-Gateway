@@ -294,11 +294,11 @@ public class ConformanceSandbox {
   }
 
   public static void notifyParty(
-          ConformancePersistenceProvider persistenceProvider,
-          Consumer<ConformanceWebRequest> asyncWebClient,
-          String sandboxId) {
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
-            loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) return;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
@@ -309,7 +309,7 @@ public class ConformanceSandbox {
             partyName,
             "handling notification for party " + partyName,
             ConformanceParty::handleNotification)
-            .run();
+        .run();
   }
 
   public static ObjectNode getScenarioDigest(
@@ -343,18 +343,17 @@ public class ConformanceSandbox {
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId,
       String actionId,
-      String actionInput) {
+      String actionInputOrNull) {
+    ObjectNode partyInput = new ObjectMapper().createObjectNode().put("actionId", actionId);
+    if (actionInputOrNull != null) {
+      partyInput.put("input", actionInputOrNull);
+    }
     new OrchestratorTask(
             persistenceProvider,
             asyncWebClient,
             sandboxId,
             "handling in sandbox %s the input for action %s".formatted(sandboxId, actionId),
-            orchestrator ->
-                orchestrator.handlePartyInput(
-                    new ObjectMapper()
-                        .createObjectNode()
-                        .put("actionId", actionId)
-                        .put("input", actionInput)))
+            orchestrator -> orchestrator.handlePartyInput(partyInput))
         .run();
     return new ObjectMapper().createObjectNode();
   }

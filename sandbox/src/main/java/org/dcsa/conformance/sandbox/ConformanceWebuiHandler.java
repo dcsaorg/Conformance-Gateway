@@ -335,16 +335,12 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     JsonNode actionInputNode = requestNode.get("actionInput");
-    if (actionInputNode != null) {
-      return ConformanceSandbox.handleActionInput(
-          persistenceProvider,
-          asyncWebClient,
-          sandboxId,
-          requestNode.get("actionId").asText(),
-          actionInputNode.asText());
-    } else {
-      return new ObjectMapper().createObjectNode();
-    }
+    return ConformanceSandbox.handleActionInput(
+        persistenceProvider,
+        asyncWebClient,
+        sandboxId,
+        requestNode.get("actionId").asText(),
+        actionInputNode == null ? null : actionInputNode.asText());
   }
 
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {

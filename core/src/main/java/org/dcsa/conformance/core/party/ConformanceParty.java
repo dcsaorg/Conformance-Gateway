@@ -31,6 +31,7 @@ public abstract class ConformanceParty implements StatefulEntity {
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
+  private static final int MAX_OPERATOR_LOG_RECORDS = 100;
   private final LinkedList<String> operatorLog = new LinkedList<>();
 
   public ConformanceParty(
@@ -80,6 +81,11 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected void addOperatorLogEntry(String logEntry) {
     operatorLog.addFirst(logEntry);
+    if (operatorLog.size() > MAX_OPERATOR_LOG_RECORDS - 1) {
+      operatorLog.removeLast();
+      operatorLog.removeLast();
+      operatorLog.addLast("...");
+    }
   }
 
   public List<String> getOperatorLog() {

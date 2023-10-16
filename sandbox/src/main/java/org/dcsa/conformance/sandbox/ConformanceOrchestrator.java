@@ -191,24 +191,34 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public void handlePartyInput(JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
-    if (currentScenarioId == null)
-      throw new IllegalStateException(
+    if (currentScenarioId == null) {
+      log.info(
           "Ignoring party input %s: no scenario is currently active"
               .formatted(partyInput.toPrettyString()));
+      return;
+    }
 
     ConformanceScenario currentScenario = scenariosById.get(currentScenarioId);
     ConformanceAction nextAction = currentScenario.peekNextAction();
-    if (nextAction == null)
-      throw new IllegalStateException(
+    if (nextAction == null) {
+      log.info(
           "Ignoring party input %s: the active scenario has no next action"
               .formatted(partyInput.toPrettyString()));
+      return;
+    }
 
     String actionId = partyInput.get("actionId").asText();
-    if (!Objects.equals(actionId, nextAction.getId().toString()))
-      throw new IllegalStateException(
-          "Ignoring party input %s: the expected next action id is %s in current scenario %s"
-              .formatted(
-                  partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
+    if (!Objects.equals(actionId, nextAction.getId().toString())) {
+      if (partyInput.has("input")) {
+        throw new IllegalStateException(
+            "Unexpected party input %s: the expected next action id is %s in current scenario %s"
+                .formatted(
+                    partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
+      } else {
+        log.info("Ignoring redundant party input %s".formatted(partyInput.toPrettyString()));
+        return;
+      }
+    }
 
     currentScenario.popNextAction();
 

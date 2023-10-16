@@ -77,6 +77,4 @@ export class ScenarioComponent {
       withInput ? this.actionInput.trim() : undefined);
     await this.loadScenarioStatus();
   }
-
-  
 }

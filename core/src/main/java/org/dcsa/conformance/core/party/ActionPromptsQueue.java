@@ -15,6 +15,11 @@ public class ActionPromptsQueue implements StatefulEntity {
   private final Set<String> allActionIds = new HashSet<>();
   private final LinkedList<JsonNode> pendingActions = new LinkedList<>();
 
+  synchronized void clear() {
+    allActionIds.clear();
+    pendingActions.clear();
+  }
+
   synchronized void addLast(JsonNode actionPrompt) {
     String actionId = actionPrompt.get("actionId").asText();
     if (!allActionIds.contains(actionId)) {

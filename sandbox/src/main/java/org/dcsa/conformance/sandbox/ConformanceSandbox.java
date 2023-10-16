@@ -312,6 +312,25 @@ public class ConformanceSandbox {
         .run();
   }
 
+  public static void resetParty(
+          ConformancePersistenceProvider persistenceProvider,
+          Consumer<ConformanceWebRequest> asyncWebClient,
+          String sandboxId) {
+    SandboxConfiguration sandboxConfiguration =
+            loadSandboxConfiguration(persistenceProvider, sandboxId);
+    if (sandboxConfiguration.getOrchestrator().isActive()) return;
+
+    String partyName = sandboxConfiguration.getParties()[0].getName();
+    new PartyTask(
+            persistenceProvider,
+            asyncWebClient,
+            sandboxId,
+            partyName,
+            "resetting party " + partyName,
+            ConformanceParty::reset)
+            .run();
+  }
+
   public static ObjectNode getScenarioDigest(
       ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
     AtomicReference<ObjectNode> resultReference = new AtomicReference<>();

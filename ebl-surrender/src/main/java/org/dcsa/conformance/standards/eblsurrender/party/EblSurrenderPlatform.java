@@ -77,6 +77,12 @@ public class EblSurrenderPlatform extends ConformanceParty {
   }
 
   @Override
+  protected void doReset() {
+    eblStatesById.clear();
+    tdrsBySrr.clear();
+  }
+
+  @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(Map.entry(SurrenderRequestAction.class, this::requestSurrender));
   }

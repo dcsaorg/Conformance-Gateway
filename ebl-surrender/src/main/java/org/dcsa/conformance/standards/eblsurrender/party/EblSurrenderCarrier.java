@@ -62,6 +62,11 @@ public class EblSurrenderCarrier extends ConformanceParty {
   }
 
   @Override
+  protected void doReset() {
+    eblStatesById.clear();
+  }
+
+  @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(SupplyAvailableTdrAction.class, this::supplyAvailableTdr),

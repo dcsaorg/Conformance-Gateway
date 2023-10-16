@@ -166,6 +166,17 @@ public abstract class ConformanceParty implements StatefulEntity {
     }
   }
 
+  public void reset() {
+    log.info(
+            "%s[%s].reset()"
+                    .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    this.actionPromptsQueue.clear();
+    this.operatorLog.clear();
+    doReset();
+  }
+
+  abstract protected void doReset();
+
   @SneakyThrows
   private JsonNode _syncGetPartyPrompt() {
     log.info(

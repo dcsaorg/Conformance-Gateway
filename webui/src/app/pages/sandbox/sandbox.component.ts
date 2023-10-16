@@ -128,6 +128,18 @@ export class SandboxComponent {
     this.conformanceService.notifyParty(this.sandbox!.id);
   }
 
+  async onClickResetParty() {
+    if (
+      await ConfirmationDialog.open(
+        this.dialog,
+        "Reset party",
+        "Are you sure you want to reset the party? "
+        + "All current party data will be lost.")
+    ) {
+      this.conformanceService.resetParty(this.sandbox!.id);
+    }
+  }
+
   onClickRefresh() {
     this.sandbox = undefined;
     this._loadData();

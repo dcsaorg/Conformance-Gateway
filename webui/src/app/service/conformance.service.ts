@@ -46,6 +46,14 @@ export class ConformanceService {
     return sandbox;
   }
 
+  async resetParty(sandboxId: string): Promise<Sandbox> {
+    const sandbox: Sandbox = await this.apiService.call({
+      operation: "resetParty",
+      sandboxId,
+    });
+    return sandbox;
+  }
+
   async getScenarioDigests(sandboxId: string): Promise<ScenarioDigest[]> {
     const scenarios: ScenarioDigest[] = await this.apiService.call({
       operation: "getScenarioDigests",

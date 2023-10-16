@@ -56,6 +56,7 @@ public class ConformanceWebuiHandler {
       case "getAllSandboxes" -> _getAllSandboxes(userId);
       case "getSandbox" -> _getSandbox(userId, requestNode);
       case "notifyParty" -> _notifyParty(userId, requestNode);
+      case "resetParty" -> _resetParty(userId, requestNode);
       case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
       case "getScenario" -> _getScenario(userId, requestNode);
       case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
@@ -308,6 +309,13 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.notifyParty(persistenceProvider, asyncWebClient, sandboxId);
+    return new ObjectMapper().createObjectNode();
+  }
+
+  private JsonNode _resetParty(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    ConformanceSandbox.resetParty(persistenceProvider, asyncWebClient, sandboxId);
     return new ObjectMapper().createObjectNode();
   }
 

@@ -1,0 +1,106 @@
+{
+  "document": {
+    "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+    "transportDocumentTypeCode": "BOL",
+    "documentStatus": "ISSUED",
+    "shippingInstructionReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
+    "carrierCode": "ASDF",
+    "carrierCodeListProvider": "SMDG",
+    "issuingParty": {
+      "partyName": "issuing party",
+      "partyContactDetails": [
+        {
+          "name": "issuing party",
+          "phone": "+1234567890"
+        }
+      ]
+    },
+    "termsAndConditions": "terms and conditions",
+    "isShippedOnBoardType": true,
+    "receiptTypeAtOrigin": "CY",
+    "deliveryTypeAtDestination": "CY",
+    "cargoMovementTypeAtOrigin": "FCL",
+    "cargoMovementTypeAtDestination": "FCL",
+    "invoicePayableAt": {
+      "locationType": "UNLO",
+      "UNLocationCode": "FRPAR"
+    },
+    "isElectronic": true,
+    "isToOrder": false,
+    "consignmentItems": [
+      {
+        "carrierBookingReference": "BOOKING_REFERENCE_PLACEHOLDER",
+        "weight": 123.45,
+        "weightUnit": "KGM",
+        "descriptionOfGoods": "description of goods",
+        "HSCodes": [
+          "123456"
+        ],
+        "cargoItems": [
+          {
+            "equipmentReference": "C1234567890",
+            "weight": 123.45,
+            "weightUnit": "KGM",
+            "outerPackaging": {
+              "numberOfPackages": 1
+            }
+          }
+        ]
+      }
+    ],
+    "utilizedTransportEquipments": [
+      {
+        "equipment": {
+          "equipmentReference": "C1234567890"
+        },
+        "cargoGrossWeight": 123.45,
+        "cargoGrossWeightUnit": "KGM",
+        "isShipperOwned": true,
+        "seals": [
+          {
+            "number": "seal number"
+          }
+        ]
+      }
+    ],
+    "documentParties": [
+      {
+        "party": {
+          "partyName": "party name",
+          "partyContactDetails": [
+            {
+              "name": "party name",
+              "phone": "+1234567890"
+            }
+          ]
+        },
+        "partyFunction": "OS",
+        "isToBeNotified": true
+      }
+    ],
+    "partyContactDetails": [
+      {
+        "name": "party name",
+        "phone": "+1234567890"
+      }
+    ],
+    "transports": {
+      "plannedArrivalDate": "2023-01-23",
+      "plannedDepartureDate": "2023-01-23",
+      "portOfLoading": {
+        "locationType": "UNLO",
+        "UNLocationCode": "DEHAM"
+      },
+      "portOfDischarge": {
+        "locationType": "UNLO",
+        "UNLocationCode": "FRPAR"
+      },
+      "vesselName": "vessel name",
+      "carrierExportVoyageNumber": "1234E"
+    }
+  },
+  "issueTo": {
+    "eblPlatformIdentifier": "epi@example.com",
+    "legalName": "legal name"
+  }
+}

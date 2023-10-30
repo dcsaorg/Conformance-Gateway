@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
 @Slf4j
@@ -623,6 +624,9 @@ public class ConformanceSandbox {
 
   private static ComponentFactory _createComponentFactory(
       StandardConfiguration standardConfiguration) {
+    if (EblIssuanceComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new EblIssuanceComponentFactory(standardConfiguration.getVersion());
+    }
     if (EblSurrenderComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblSurrenderComponentFactory(standardConfiguration.getVersion());
     }

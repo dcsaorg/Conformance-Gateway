@@ -19,7 +19,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
 
   @SuppressWarnings("unchecked")
   protected T thisAsT() {
-    return (T)this;
+    return (T) this;
   }
 
   public List<ConformanceScenario> buildScenarioList() {
@@ -33,9 +33,12 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
             .map(
                 builderList -> {
                   LinkedList<ConformanceAction> actionList = new LinkedList<>();
-                  builderList.forEach(
-                      builder ->
-                          actionList.addLast(builder.actionBuilder.apply(actionList.peekLast())));
+                  builderList.stream()
+                      .filter(builder -> builder.actionBuilder != null)
+                      .forEach(
+                          builder ->
+                              actionList.addLast(
+                                  builder.actionBuilder.apply(actionList.peekLast())));
                   return new ConformanceScenario(actionList);
                 })
             .toList();

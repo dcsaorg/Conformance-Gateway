@@ -1,0 +1,3084 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DCSA OpenAPI specification for Issuance an EBL to an EBL platform.\n",
+    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1).\n\nAPI specification issued by DCSA.org.\n",
+    "contact": {
+      "name": "Digital Container Shipping Association (DCSA)",
+      "url": "https://dcsa.org",
+      "email": "info@dcsa.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "3.0-beta1"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS/3.0-beta1",
+      "description": "SwaggerHub API Auto Mocking"
+    }
+  ],
+  "paths": {
+    "/v1/issue-ebls": {
+      "put": {
+        "tags": [
+          "Issuance EBL"
+        ],
+        "summary": "Request issuance of an EBL",
+        "description": "Submit a transport document (EBL) for issuance\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/issuanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Platform acknowledges the issuance request and will follow up later with a response via the DCSA_ISS_RSP API. Please see the API description for the concrete link and version.\n\nNote that the platform MUST NOT accept an issuance request twice. If the client misbehaves and attempts to complete the same transaction more than once, then the platform must ensure that at most one of these requests sees a successful response.  The rest should an error instead.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "409": {
+            "description": "The carrier already finished an issuance transaction for this document. The document is either already issued or waiting for the platform to finish the issuance process.  Either way, the platform will inform the carrier when the carrier needs to act on this document again.\n\nIf the issuance is pending, then the carrier will be notified via the DCSA_ISS_RSP API once the issuance process completes.  If the issuance has already succeeded, the platform will notify the carrier when there is a surrender request via the DCSA_SUR API.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request failed for some reason.",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "legalName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Legal name of the party/user as shown on the endorsement chain",
+        "example": "Digital Container Shipping Association"
+      },
+      "registrationNumber": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Company registration number of this party. E.g. registration number on the local chamber of commerse.",
+        "example": "74567837"
+      },
+      "locationOfRegistration": {
+        "maxLength": 2,
+        "minLength": 2,
+        "pattern": "^[A-Z]+$",
+        "type": "string",
+        "description": "country code of the location of registration according to ISO 3166-1 alpha-2",
+        "example": "NL"
+      },
+      "transactionReference": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "Opaque server provided identifier for a given transaction.\n",
+        "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+      },
+      "issuanceRequest": {
+        "required": [
+          "document",
+          "issueTo"
+        ],
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/transportDocument"
+          },
+          "issueTo": {
+            "$ref": "#/components/schemas/party"
+          },
+          "eBLVisualisationByCarrier": {
+            "$ref": "#/components/schemas/supportingDocument"
+          }
+        },
+        "description": "Details of the eBL that the carrier requests to have issued.\n\nThe `eBLVisualisationByCarrier` is an optional document, where the carrier can provide its own visualization of the eBL for the end user.  The carrier is the sole responsible party for ensuring there are no discrepencies between the eBL (the `document` attribute) and the provided visualization (the `eBLVisualisationByCarrier` attribute).\n"
+      },
+      "supportingDocument": {
+        "required": [
+          "content",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "type": "string",
+            "example": "Carrier rendered copy of the EBL.pdf"
+          },
+          "content": {
+            "type": "string",
+            "description": "The actual contents of the visual rendering.",
+            "format": "byte"
+          }
+        }
+      },
+      "party": {
+        "required": [
+          "eblPlatformIdentifier",
+          "legalName"
+        ],
+        "type": "object",
+        "properties": {
+          "eblPlatformIdentifier": {
+            "maxLength": 100,
+            "pattern": "\\S+@\\S+",
+            "type": "string",
+            "description": "The eBL Platform identifier to issue the document to. This defines the initial possesor of the EBL.\nThe titleholder of the document is listed inside the document itself as the consignee document party.",
+            "example": "43549850248@exampleplatform.com"
+          },
+          "legalName": {
+            "$ref": "#/components/schemas/legalName"
+          },
+          "registrationNumber": {
+            "$ref": "#/components/schemas/registrationNumber"
+          },
+          "locationOfRegistration": {
+            "$ref": "#/components/schemas/locationOfRegistration"
+          },
+          "taxReference": {
+            "pattern": "^\\S+$",
+            "type": "string",
+            "description": "tax reference used in the location of registration",
+            "example": "NL859951480B01"
+          },
+          "supportingPartyCodes": {
+            "$ref": "#/components/schemas/supportingPartyCodes"
+          }
+        }
+      },
+      "supportingPartyCodes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/supportingPartyCodes_inner"
+        }
+      },
+      "error": {
+        "required": [
+          "errorDateTime",
+          "errors",
+          "httpMethod",
+          "requestUri",
+          "statusCode",
+          "statusCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "httpMethod": {
+            "type": "string",
+            "description": "The http request method type e.g. GET, POST\n",
+            "example": "POST",
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "DELETE",
+              "OPTION",
+              "PATCH"
+            ]
+          },
+          "requestUri": {
+            "type": "string",
+            "description": "The request URI as it was sent\n",
+            "example": "/v1/events"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code\n",
+            "format": "int32",
+            "example": 400
+          },
+          "statusCodeText": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The textual representation of the status code\n",
+            "example": "Bad Request"
+          },
+          "errorMessage": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Other error information\n",
+            "example": "The supplied data could not be accepted"
+          },
+          "providerCorrelationID": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A unique identifier for the transaction, e.g. a UUID\n",
+            "example": "4426d965-0dd8-4005-8c63-dc68b01c4962"
+          },
+          "errorDateTime": {
+            "type": "string",
+            "description": "The date and time (in ISO 8601 format) the error occurred.\n",
+            "format": "date-time",
+            "example": "2019-11-12T07:41:00+08:30"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "description": "List of detailed errors, e.g. fields that could not pass validation\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/detailedError"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "detailedError": {
+        "required": [
+          "message",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "Standard error code see http://dcsa.org/error-codes (to be created). Examples: 7003 – out or range value, 7004 -  invalid type\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "field": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The field that caused the error, e.g. a failed validation. The field can be expressed as a [JSONpath](https://github.com/json-path/JsonPath)\n",
+            "example": "location.facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value of the field that caused the error\n",
+            "example": "SG SIN WHS"
+          },
+          "reason": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "High level error message\n",
+            "example": "invalidData"
+          },
+          "message": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Additional information as to why the error occured\n",
+            "example": "Spaces not allowed in facility code"
+          }
+        }
+      },
+      "transportDocument": {
+        "required": [
+          "cargoMovementTypeAtDestination",
+          "cargoMovementTypeAtOrigin",
+          "carrierCode",
+          "carrierCodeListProvider",
+          "consignmentItems",
+          "deliveryTypeAtDestination",
+          "documentParties",
+          "documentStatus",
+          "invoicePayableAt",
+          "isElectronic",
+          "isShippedOnBoardType",
+          "isToOrder",
+          "issuingParty",
+          "partyContactDetails",
+          "receiptTypeAtOrigin",
+          "shippingInstructionReference",
+          "termsAndConditions",
+          "transportDocumentReference",
+          "transportDocumentTypeCode",
+          "transports",
+          "utilizedTransportEquipments"
+        ],
+        "type": "object",
+        "description": "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill. \n",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "transportDocumentReference": {
+                "$ref": "#/components/schemas/transportDocumentReference"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "transportDocumentTypeCode": {
+                "$ref": "#/components/schemas/transportDocumentTypeCode"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "documentStatus": {
+                "$ref": "#/components/schemas/eblStatus"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "shippingInstructionReference": {
+                "$ref": "#/components/schemas/shippingInstructionReference"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "issueDate": {
+                "$ref": "#/components/schemas/issueDate"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "shippedOnBoardDate": {
+                "$ref": "#/components/schemas/shippedOnBoardDate"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "receivedForShipmentDate": {
+                "$ref": "#/components/schemas/receivedForShipmentDate"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "carrierCode": {
+                "$ref": "#/components/schemas/carrierCode"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "carrierCodeListProvider": {
+                "$ref": "#/components/schemas/carrierCodeListProvider"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "issuingParty": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/party_1"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfRiderPages": {
+                "$ref": "#/components/schemas/numberOfRiderPages"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "termsAndConditions": {
+                "$ref": "#/components/schemas/termsAndConditions"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "isShippedOnBoardType": {
+                "$ref": "#/components/schemas/isShippedOnBoardType"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "receiptTypeAtOrigin": {
+                "$ref": "#/components/schemas/receiptTypeAtOrigin"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "deliveryTypeAtDestination": {
+                "$ref": "#/components/schemas/deliveryTypeAtDestination"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoMovementTypeAtOrigin": {
+                "$ref": "#/components/schemas/cargoMovementTypeAtOrigin"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoMovementTypeAtDestination": {
+                "$ref": "#/components/schemas/cargoMovementTypeAtDestination"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "serviceContractReference": {
+                "$ref": "#/components/schemas/serviceContractReference"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "contractQuotationReference": {
+                "$ref": "#/components/schemas/contractQuotationReference"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "declaredValue": {
+                "$ref": "#/components/schemas/declaredValue"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "declaredValueCurrency": {
+                "$ref": "#/components/schemas/declaredValueCurrency"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "invoicePayableAt": {
+                "type": "object",
+                "description": "General purpose object to capture `Invoice Payable At` location specified as: location where payment by the customer will take place. Usually refers to Basic Ocean Freight alone.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or an `Address`.\n",
+                "example": {
+                  "locationName": "Eiffel Tower",
+                  "locationType": "UNLO",
+                  "UNLocationCode": "FRPAR"
+                },
+                "discriminator": {
+                  "propertyName": "locationType",
+                  "mapping": {
+                    "ADDR": "#/components/schemas/addressLocation",
+                    "UNLO": "#/components/schemas/unLocationLocation"
+                  }
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/addressLocation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/unLocationLocation"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfCopiesWithCharges": {
+                "$ref": "#/components/schemas/numberOfCopiesWithCharges"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfCopiesWithoutCharges": {
+                "$ref": "#/components/schemas/numberOfCopiesWithoutCharges"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfOriginalsWithCharges": {
+                "$ref": "#/components/schemas/numberOfOriginalsWithCharges"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfOriginalsWithoutCharges": {
+                "$ref": "#/components/schemas/numberOfOriginalsWithoutCharges"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "freightPaymentTermCode": {
+                "$ref": "#/components/schemas/freightPaymentTermCode"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "originChargesPaymentTermCode": {
+                "$ref": "#/components/schemas/originChargesPaymentTermCode"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "destinationChargesPaymentTermCode": {
+                "$ref": "#/components/schemas/destinationChargesPaymentTermCode"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "isElectronic": {
+                "$ref": "#/components/schemas/isElectronic"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "isToOrder": {
+                "$ref": "#/components/schemas/isToOrder"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "displayedNameForPlaceOfReceipt": {
+                "maxItems": 5,
+                "minItems": 1,
+                "type": "array",
+                "description": "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                "items": {
+                  "$ref": "#/components/schemas/displayedName"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "displayedNameForPortOfLoad": {
+                "maxItems": 5,
+                "minItems": 1,
+                "type": "array",
+                "description": "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                "items": {
+                  "$ref": "#/components/schemas/displayedName"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "displayedNameForPortOfDischarge": {
+                "maxItems": 5,
+                "minItems": 1,
+                "type": "array",
+                "description": "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                "items": {
+                  "$ref": "#/components/schemas/displayedName"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "displayedNameForPlaceOfDelivery": {
+                "maxItems": 5,
+                "minItems": 1,
+                "type": "array",
+                "description": "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                "items": {
+                  "$ref": "#/components/schemas/displayedName"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "placeOfIssue": {
+                "type": "object",
+                "description": "General purpose object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or an `Address`.\n",
+                "example": {
+                  "locationName": "DCSA Headquarters",
+                  "locationType": "UNLO",
+                  "UNLocationCode": "NLAMS"
+                },
+                "discriminator": {
+                  "propertyName": "locationType",
+                  "mapping": {
+                    "ADDR": "#/components/schemas/addressLocation",
+                    "UNLO": "#/components/schemas/unLocationLocation"
+                  }
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/addressLocation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/unLocationLocation"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/consignmentItems_Carrier"
+          },
+          {
+            "$ref": "#/components/schemas/utilizedTransportEquipments_Carrier"
+          },
+          {
+            "$ref": "#/components/schemas/documentParties"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "partyContactDetails": {
+                "type": "array",
+                "description": "The contact details of the person to contact in relation to the **Transport Document** (changes, notifications etc.) \n",
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/partyContactDetail"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "transports": {
+                "$ref": "#/components/schemas/transportDocument_transports"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/references"
+          },
+          {
+            "$ref": "#/components/schemas/customsReferences"
+          },
+          {
+            "$ref": "#/components/schemas/charges"
+          },
+          {
+            "$ref": "#/components/schemas/carrierClauses"
+          }
+        ]
+      },
+      "transportDocumentReference": {
+        "maxLength": 20,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+        "example": "HHL71800000"
+      },
+      "transportDocumentTypeCode": {
+        "type": "string",
+        "description": "Specifies the type of the transport document\n- BOL (Bill of Lading)\n- SWB (Sea Waybill)\n",
+        "example": "SWB",
+        "enum": [
+          "BOL",
+          "SWB"
+        ]
+      },
+      "eblStatus": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The status of the ebl. Possible values are:\n- RECEIVED\n- PENDING UPDATE\n- DRAFT\n- PENDING APPROVAL\n- APPROVED\n- ISSUED\n- REQUESTED TO SURRENDER FOR DELIVERY\n- REQUESTED TO SURRENDER FOR AMENDMENT\n- SURRENDERED\n- VOID\n- REJECTED\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "example": "RECEIVED"
+      },
+      "shippingInstructionReference": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The identifier for a `Shipping Istruction` provided by the carrier for system purposes.\n",
+        "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+      },
+      "issueDate": {
+        "type": "string",
+        "description": "Local date when the transport document has been issued.\n\nCan be omitted on draft transport documents, but must be provided when the document has been issued.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "shippedOnBoardDate": {
+        "type": "string",
+        "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "receivedForShipmentDate": {
+        "type": "string",
+        "description": "Date when the last container linked to the transport document is physically in the terminal (customers cleared against the intended vessel).\n\nWhen provided on a transport document, the transportDocument is a `Received For Shipment` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "carrierCode": {
+        "maxLength": 4,
+        "pattern": "^\\S+$",
+        "type": "string",
+        "description": "The code containing the SCAC and/or the SMDG code to specify the issuing carrier.  Details about the issuer can be given in the Document Parties entity using the party function code MS.\n",
+        "example": "MMCU"
+      },
+      "carrierCodeListProvider": {
+        "type": "string",
+        "description": "The provider used for identifying the issuer Code. Possible values are:\n- SMDG (Ship Message Design Group)\n- NMFTA (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+        "example": "NMFTA",
+        "enum": [
+          "SMDG",
+          "NMFTA"
+        ]
+      },
+      "party_1": {
+        "required": [
+          "partyContactDetails",
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "$ref": "#/components/schemas/partyName"
+          },
+          "address": {
+            "$ref": "#/components/schemas/address"
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details - the list cannot be empty\n",
+            "items": {
+              "$ref": "#/components/schemas/partyContactDetail"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/identifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/taxLegalReference"
+            }
+          }
+        },
+        "description": "refers to a company or a legal entity."
+      },
+      "partyName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the party.\n",
+        "example": "Asseco Denmark"
+      },
+      "address": {
+        "required": [
+          "country",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/addressName"
+          },
+          "street": {
+            "$ref": "#/components/schemas/streetName"
+          },
+          "streetNumber": {
+            "$ref": "#/components/schemas/streetNumber"
+          },
+          "floor": {
+            "$ref": "#/components/schemas/floor"
+          },
+          "postCode": {
+            "$ref": "#/components/schemas/postCode"
+          },
+          "city": {
+            "$ref": "#/components/schemas/cityName"
+          },
+          "stateRegion": {
+            "$ref": "#/components/schemas/stateRegion"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "description": "An object for storing address related information\n"
+      },
+      "addressName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the address\n",
+        "example": "Henrik"
+      },
+      "streetName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the street of the party’s address.",
+        "example": "Kronprinsessegade"
+      },
+      "streetNumber": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The number of the street of the party’s address.",
+        "example": "54"
+      },
+      "floor": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The floor of the party’s street number.\n",
+        "example": "5. sal"
+      },
+      "postCode": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The post code of the party’s address.",
+        "example": "1306"
+      },
+      "cityName": {
+        "maxLength": 65,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The city name of the party’s address.\n",
+        "example": "København"
+      },
+      "stateRegion": {
+        "maxLength": 65,
+        "type": "string",
+        "description": "The state/region of the party’s address.",
+        "nullable": true,
+        "example": "Copenhagen"
+      },
+      "country": {
+        "maxLength": 75,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The country of the party’s address.\n",
+        "example": "Denmark"
+      },
+      "partyContactDetail": {
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/contactName"
+          }
+        },
+        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` or `email` along with the `name`.\n",
+        "example": {
+          "name": "Henrik",
+          "phone": "+45 51801234"
+        },
+        "oneOf": [
+          {
+            "required": [
+              "phone"
+            ],
+            "type": "object",
+            "properties": {
+              "phone": {
+                "$ref": "#/components/schemas/contactPhone"
+              },
+              "email": {
+                "$ref": "#/components/schemas/email"
+              }
+            },
+            "description": "`Phone` is mandatory to provide - `email` is optional\n"
+          },
+          {
+            "required": [
+              "email"
+            ],
+            "type": "object",
+            "properties": {
+              "phone": {
+                "$ref": "#/components/schemas/contactPhone"
+              },
+              "email": {
+                "$ref": "#/components/schemas/email"
+              }
+            },
+            "description": "`Email` is mandatory to provide - `phone` is optional\n"
+          }
+        ]
+      },
+      "contactName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the contact\n",
+        "example": "Henrik"
+      },
+      "identifyingCode": {
+        "required": [
+          "DCSAResponsibleAgencyCode",
+          "partyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "DCSAResponsibleAgencyCode": {
+            "$ref": "#/components/schemas/DCSAResponsibleAgencyCode"
+          },
+          "partyCode": {
+            "$ref": "#/components/schemas/partyCode"
+          },
+          "codeListName": {
+            "$ref": "#/components/schemas/codeListName"
+          }
+        }
+      },
+      "DCSAResponsibleAgencyCode": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- ISO (International Standards Organization)\n- UNECE (United Nations Economic Commission for Europe)\n- LLOYD (Lloyd's register of shipping)\n- BIC (Bureau International des Containeurs)\n- IMO (International Maritime Organization)\n- SCAC (Standard Carrier Alpha Code)\n- ITIGG (International Transport Implementation Guidelines Group)\n- ITU (International Telecommunication Union)\n- SMDG (Shipplanning Message Development Group)\n- EXIS (Exis Technologies Ltd.)\n- FMC (Federal Maritime Commission)\n- CBSA (Canada Border Services Agency)\n- DCSA (Digitial Container Shipping Association)\n- DID (Decentralized Identifier)\n- LEI (Legal Entity Identifier)\n- EPI (EBL Platform Identifier)\n- ZZZ (Mutually defined)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/codelistresponsibleagencycodes.csv).\n",
+        "example": "SMDG"
+      },
+      "partyCode": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "Code to identify the party as provided by the agency\n",
+        "example": "MSK"
+      },
+      "codeListName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the list, provided by the responsible agency\n",
+        "example": "LCL"
+      },
+      "taxLegalReference": {
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/taxLegalReferenceType"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "value": {
+            "$ref": "#/components/schemas/taxLegalReferenceValue"
+          }
+        },
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/taxandlegalreferences.csv).\n"
+      },
+      "taxLegalReferenceType": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The reference type code as defined by the relevant tax and/or legal authority.\n",
+        "example": "PAN"
+      },
+      "countryCode": {
+        "maxLength": 2,
+        "minLength": 2,
+        "pattern": "^[A-Z]{2}$",
+        "type": "string",
+        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n",
+        "example": "DK"
+      },
+      "taxLegalReferenceValue": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The value of the `taxLegalReference`\n",
+        "example": "AAAAA0000A"
+      },
+      "numberOfRiderPages": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The number of additional pages required to contain the goods description on a transport document. Only applicable for physical transport documents.",
+        "format": "int32",
+        "example": 2
+      },
+      "termsAndConditions": {
+        "maxLength": 20000,
+        "type": "string",
+        "description": "Carrier terms and conditions of transport.\n"
+      },
+      "isShippedOnBoardType": {
+        "type": "boolean",
+        "description": "Specifies whether the Transport document is a received for shipment, or shipped on board.",
+        "example": true
+      },
+      "receiptTypeAtOrigin": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Indicates the type of service offered at Origin. Options are defined in the Receipt/Delivery entity.\n- CY (Container yard (incl. rail ramp))\n- SD (Store Door)\n- CFS (Container Freight Station)\n",
+        "example": "CY",
+        "enum": [
+          "CY",
+          "SD",
+          "CFS"
+        ]
+      },
+      "deliveryTypeAtDestination": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Indicates the type of service offered at Destination. Options are defined in the Receipt/Delivery entity.\n- CY (Container yard (incl. rail ramp))\n- SD (Store Door)\n- CFS (Container Freight Station)\n",
+        "example": "CY",
+        "enum": [
+          "CY",
+          "SD",
+          "CFS"
+        ]
+      },
+      "cargoMovementTypeAtOrigin": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity.\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n- BB (Break Bulk)\n",
+        "example": "FCL",
+        "enum": [
+          "FCL",
+          "LCL",
+          "BB"
+        ]
+      },
+      "cargoMovementTypeAtDestination": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity.\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n- BB (Break Bulk)\n",
+        "example": "FCL",
+        "enum": [
+          "FCL",
+          "LCL",
+          "BB"
+        ]
+      },
+      "serviceContractReference": {
+        "maxLength": 30,
+        "type": "string",
+        "description": "Reference number for agreement between shipper and carrier through which the shipper commits to provide a certain minimum quantity of cargo over a fixed period, and the carrier commits to a certain rate or rate schedule.",
+        "example": "HHL51800000"
+      },
+      "contractQuotationReference": {
+        "maxLength": 35,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
+        "example": "HHL1401"
+      },
+      "declaredValue": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+        "format": "float",
+        "example": 1231.1
+      },
+      "declaredValueCurrency": {
+        "maxLength": 3,
+        "pattern": "^[A-Z]{3}$",
+        "type": "string",
+        "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+        "example": "DKK"
+      },
+      "addressLocation": {
+        "required": [
+          "address",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `Address Location` interface\n",
+            "example": "ADDR"
+          },
+          "address": {
+            "$ref": "#/components/schemas/address"
+          }
+        },
+        "description": "An interface used to express a location using an `Address` object\n"
+      },
+      "locationName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The name of the location.\n",
+        "example": "Port of Amsterdam"
+      },
+      "unLocationLocation": {
+        "required": [
+          "UNLocationCode",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `UNLocation` location interface\n",
+            "example": "UNLO"
+          },
+          "UNLocationCode": {
+            "$ref": "#/components/schemas/UNLocationCode"
+          }
+        },
+        "description": "An interface used to express a location using a `Un Location Code`\n"
+      },
+      "UNLocationCode": {
+        "maxLength": 5,
+        "minLength": 5,
+        "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+        "type": "string",
+        "description": "The UN Location code specifying where the place is located. The pattern used must be\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here:  [UN/LOCODE](https://en.wikipedia.org/wiki/UN/LOCODE)\n",
+        "example": "FRPAR"
+      },
+      "numberOfCopiesWithCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+        "format": "int32",
+        "example": 2
+      },
+      "numberOfCopiesWithoutCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+        "format": "int32",
+        "example": 2
+      },
+      "numberOfOriginalsWithCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+        "format": "int32",
+        "example": 1
+      },
+      "numberOfOriginalsWithoutCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+        "format": "int32",
+        "example": 1
+      },
+      "freightPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether freight and charges for the main transport are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "originChargesPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether origin charges are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "destinationChargesPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether destination charges are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "isElectronic": {
+        "type": "boolean",
+        "description": "An indicator whether the transport document is electronically transferred.\n",
+        "example": true,
+        "default": false
+      },
+      "isToOrder": {
+        "type": "boolean",
+        "description": "Indicates whether the transport document is issued `to order` or not\n",
+        "example": false
+      },
+      "displayedName": {
+        "maxLength": 35,
+        "type": "string",
+        "description": "A line of the address to be displayed on the transport document.\n"
+      },
+      "consignmentItems_Carrier": {
+        "type": "object",
+        "properties": {
+          "consignmentItems": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of `ConsignmentItems`.\n",
+            "items": {
+              "$ref": "#/components/schemas/consignmentItem_Carrier"
+            }
+          }
+        }
+      },
+      "consignmentItem_Carrier": {
+        "required": [
+          "cargoItems"
+        ],
+        "type": "object",
+        "description": "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers (`UtilizedTransportEquipment`) by referencing multiple `CargoItems`\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/consignmentItemBase"
+          },
+          {
+            "$ref": "#/components/schemas/cargoItems_Carrier"
+          }
+        ]
+      },
+      "consignmentItemBase": {
+        "required": [
+          "HSCodes",
+          "cargoItems",
+          "carrierBookingReference",
+          "descriptionOfGoods",
+          "weight",
+          "weightUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierBookingReference": {
+            "maxLength": 35,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The associated booking number provided by the carrier for this `Consignment Item`.\n\nWhen multiple `carrierBookingReferences` are used then the bookings referred to must all contain the same:\n- transportPlan\n- shipmentLocations\n- receiptTypeAtOrigin\n- deliveryTypeAtDestination\n- cargoMovementTypeAtOrigin\n- cargoMovementTypeAtDestination\n- serviceContractReference\n- termsAndConditions\n- Invoice Payable At (if provided)\n- Place of B/L Issue (if provided)\n",
+            "example": "ABC709951"
+          },
+          "weight": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The total weight of all the `CargoItems` listed in the `ConsignmentItem`. Excludes the tare weight of the container(s).\n",
+            "format": "float",
+            "example": 13000.3
+          },
+          "volume": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The total volume of all the `CargoItems` listed in the `ConsignmentItem`.\n",
+            "format": "float",
+            "example": 12
+          },
+          "weightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "volumeUnit": {
+            "$ref": "#/components/schemas/volumeUnit"
+          },
+          "descriptionOfGoods": {
+            "$ref": "#/components/schemas/descriptionOfGoods"
+          },
+          "HSCodes": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `HS Codes` that apply to this `consignmentItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/HSCode"
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            }
+          },
+          "customsReferences": {
+            "type": "array",
+            "description": "A list of `Customs references`\n",
+            "items": {
+              "$ref": "#/components/schemas/CustomsReference"
+            }
+          }
+        },
+        "description": "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers (`UtilizedTransportEquipment`) by referencing multiple `CargoItems`\n"
+      },
+      "weightUnit": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in imperial or metric terms\n- KGM (Kilograms)\n- LBR (Pounds)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "LBR"
+        ]
+      },
+      "volumeUnit": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n",
+        "example": "MTQ",
+        "enum": [
+          "MTQ",
+          "FTQ"
+        ]
+      },
+      "descriptionOfGoods": {
+        "maxLength": 5000,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
+        "example": "300 boxes of blue shoes size 47"
+      },
+      "HSCode": {
+        "maxLength": 10,
+        "minLength": 6,
+        "pattern": "^\\d{6,10}$",
+        "type": "string",
+        "description": "Used by customs to classify the product being shipped. More information can be found here: [Harmonized Commodity Description and Coding Systems (HS)](https://unstats.un.org/wiki/pages/viewpage.action?pageId=87426301) or here: [Harmonized System Codes](https://www.foreign-trade.com/reference/hscode.htm)\n",
+        "example": "851712"
+      },
+      "Reference": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/referenceType"
+          },
+          "value": {
+            "$ref": "#/components/schemas/referenceValue"
+          }
+        },
+        "description": "References provided by the shipper or freight forwarder at the time of `Booking` or at the time of providing `Shipping Instruction`. Carriers share it back when providing track and trace event updates, some are also printed on the B/L. Customers can use these references to track shipments in their internal systems.\n"
+      },
+      "referenceType": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "The reference type codes defined by DCSA.\n- FF (Freight Forwarder’s Reference)\n- SI (Shipper’s Reference)\n- SPO (Shippers Purchase Order Reference)\n- CPO (Consignees Purchase Order Reference)\n- CR (Customer’s Reference)\n- AAO (Consignee’s Reference)\n- ECR (Empty container release reference)\n- CSI (Customer shipment ID)\n- BPR (Booking party reference number)\n- BID (Booking Request ID)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/referencetypes.csv).\n",
+        "example": "FF"
+      },
+      "referenceValue": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The actual value of the reference. \n",
+        "example": "HHL00103004"
+      },
+      "CustomsReference": {
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/customsReferenceType"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "value": {
+            "$ref": "#/components/schemas/customsReferenceValue"
+          }
+        },
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/customsreferences.csv).\n"
+      },
+      "customsReferenceType": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The reference type code as defined in the relevant customs jurisdiction.\n",
+        "example": "ACID"
+      },
+      "customsReferenceValue": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The value of the `customsReference`\n",
+        "example": "4988470982020120017"
+      },
+      "cargoItems_Carrier": {
+        "type": "object",
+        "properties": {
+          "cargoItems": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of all `cargoItems`\n",
+            "items": {
+              "$ref": "#/components/schemas/cargoItem_Carrier"
+            }
+          }
+        }
+      },
+      "cargoItem_Carrier": {
+        "required": [
+          "equipmentReference",
+          "outerPackaging",
+          "weight",
+          "weightUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "shippingMarks": {
+            "$ref": "#/components/schemas/ShippingMarks"
+          },
+          "equipmentReference": {
+            "$ref": "#/components/schemas/equipmentReference"
+          },
+          "weight": {
+            "$ref": "#/components/schemas/weight"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/volume"
+          },
+          "weightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "volumeUnit": {
+            "$ref": "#/components/schemas/volumeUnit"
+          },
+          "outerPackaging": {
+            "$ref": "#/components/schemas/outerPackaging_Carrier"
+          },
+          "customsReferences": {
+            "$ref": "#/components/schemas/customsReferencesX"
+          }
+        },
+        "description": "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n"
+      },
+      "ShippingMarks": {
+        "minItems": 1,
+        "type": "array",
+        "description": "A list of the `ShippingMarks` applicable to this `cargoItem`\n",
+        "items": {
+          "maxLength": 500,
+          "type": "string",
+          "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
+          "example": "Made in China"
+        }
+      },
+      "equipmentReference": {
+        "maxLength": 11,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
+        "example": "APZU4812090"
+      },
+      "weight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
+        "format": "float",
+        "example": 13000.3
+      },
+      "volume": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
+        "format": "float",
+        "example": 12
+      },
+      "outerPackaging_Carrier": {
+        "required": [
+          "numberOfPackages"
+        ],
+        "type": "object",
+        "properties": {
+          "packageCode": {
+            "$ref": "#/components/schemas/packageCode"
+          },
+          "numberOfPackages": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.\n",
+            "format": "int32",
+            "example": 18
+          },
+          "imoPackagingCode": {
+            "pattern": "^[A-Z0-9]{1,5}$",
+            "type": "string",
+            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the IMO IMDG code amendment version 41-22. If not available, the package code as per UN recommendation 21 should be used.\n",
+            "example": "1A2"
+          },
+          "description": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Description of the outer packaging/overpack.\n",
+            "example": "Drum, steel"
+          },
+          "dangerousGoods": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Dangerous Goods`\n",
+            "items": {
+              "$ref": "#/components/schemas/dangerousGoods_EBL"
+            }
+          }
+        },
+        "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport. It is an array of the attributes below.\n"
+      },
+      "packageCode": {
+        "pattern": "^[A-Z0-9]{2}$",
+        "type": "string",
+        "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+        "example": "5H"
+      },
+      "dangerousGoods_EBL": {
+        "required": [
+          "imoClass",
+          "properShippingName"
+        ],
+        "type": "object",
+        "description": "Specification for `Dangerous Goods`. It is mandatory to either provide the `unNumber` or the `naNumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/dangerousGoods_Base"
+          }
+        ]
+      },
+      "dangerousGoods_Base": {
+        "type": "object",
+        "properties": {
+          "codedVariantList": {
+            "$ref": "#/components/schemas/codedVariantList"
+          },
+          "properShippingName": {
+            "$ref": "#/components/schemas/properShippingName"
+          },
+          "technicalName": {
+            "$ref": "#/components/schemas/technicalName"
+          },
+          "imoClass": {
+            "$ref": "#/components/schemas/imoClass"
+          },
+          "subsidiaryRisk1": {
+            "$ref": "#/components/schemas/subsidiaryRisk"
+          },
+          "subsidiaryRisk2": {
+            "$ref": "#/components/schemas/subsidiaryRisk"
+          },
+          "isMarinePollutant": {
+            "$ref": "#/components/schemas/isMarinePollutant"
+          },
+          "packingGroup": {
+            "$ref": "#/components/schemas/packingGroup"
+          },
+          "isLimitedQuantity": {
+            "$ref": "#/components/schemas/isLimitedQuantity"
+          },
+          "isExceptedQuantity": {
+            "$ref": "#/components/schemas/isExceptedQuantity"
+          },
+          "isSalvagePackings": {
+            "$ref": "#/components/schemas/isSalvagePackings"
+          },
+          "isEmptyUncleanedResidue": {
+            "$ref": "#/components/schemas/isEmptyUncleanedResidue"
+          },
+          "isWaste": {
+            "$ref": "#/components/schemas/isWaste"
+          },
+          "isHot": {
+            "$ref": "#/components/schemas/isHot"
+          },
+          "isCompetentAuthorityApprovalProvided": {
+            "$ref": "#/components/schemas/isCompetentAuthorityApprovalProvided"
+          },
+          "competentAuthorityApproval": {
+            "$ref": "#/components/schemas/competentAuthorityApproval"
+          },
+          "segregationGroups": {
+            "minLength": 1,
+            "type": "array",
+            "description": "List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.\n\n**Condition:** only applicable to specific hazardous goods.\n",
+            "items": {
+              "maxLength": 2,
+              "type": "string",
+              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/segregationgroups.csv)\n",
+              "example": "12"
+            }
+          },
+          "innerPackagings": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Inner Packings` contained inside this `outer packaging/overpack`.\n",
+            "items": {
+              "$ref": "#/components/schemas/innerPackaging"
+            }
+          },
+          "emergencyContactDetails": {
+            "$ref": "#/components/schemas/emergencyContactDetails"
+          },
+          "EMSNumber": {
+            "$ref": "#/components/schemas/EMSNumber"
+          },
+          "endOfHoldingTime": {
+            "$ref": "#/components/schemas/endOfHoldingTime"
+          },
+          "fumigationDateTime": {
+            "$ref": "#/components/schemas/fumigationDateTime"
+          },
+          "isReportableQuantity": {
+            "$ref": "#/components/schemas/isReportableQuantity"
+          },
+          "inhalationZone": {
+            "$ref": "#/components/schemas/inhalationZone"
+          },
+          "grossWeight": {
+            "$ref": "#/components/schemas/dangerousGoods_Base_grossWeight"
+          },
+          "netWeight": {
+            "$ref": "#/components/schemas/dangerousGoods_Base_netWeight"
+          },
+          "netExplosiveContent": {
+            "$ref": "#/components/schemas/dangerousGoods_Base_netExplosiveContent"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/dangerousGoods_Base_volume"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/limits"
+          }
+        },
+        "oneOf": [
+          {
+            "title": "UN Number",
+            "required": [
+              "unNumber"
+            ],
+            "type": "object",
+            "properties": {
+              "unNumber": {
+                "$ref": "#/components/schemas/unNumber"
+              }
+            }
+          },
+          {
+            "title": "NA Number",
+            "required": [
+              "naNumber"
+            ],
+            "type": "object",
+            "properties": {
+              "naNumber": {
+                "$ref": "#/components/schemas/naNumber"
+              }
+            }
+          }
+        ]
+      },
+      "codedVariantList": {
+        "pattern": "^[0-3][0-9A-Z]{3}$",
+        "type": "string",
+        "description": "Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.\n\nCharacter | Valid Characters | Description\n:--------:|------------------|------------\n1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group\n2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs\n3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.\n",
+        "example": "2200"
+      },
+      "properShippingName": {
+        "maxLength": 250,
+        "type": "string",
+        "description": "The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.\n",
+        "example": "Chromium Trioxide, anhydrous"
+      },
+      "technicalName": {
+        "maxLength": 250,
+        "type": "string",
+        "description": "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.\n"
+      },
+      "imoClass": {
+        "maxLength": 4,
+        "type": "string",
+        "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n      \n      - `1.1A` (Substances and articles which have a mass explosion hazard)\n      - `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n      - `2.1` (Flammable gases)\n      - `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/imoclasses.csv)\n",
+        "example": "1.4S"
+      },
+      "subsidiaryRisk": {
+        "pattern": "^[0-9](\\.[0-9])?$",
+        "type": "string",
+        "description": "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.\n",
+        "example": "1.2"
+      },
+      "isMarinePollutant": {
+        "type": "boolean",
+        "description": "Indicates if the goods belong to the classification of Marine Pollutant.\n",
+        "example": false
+      },
+      "packingGroup": {
+        "maximum": 3,
+        "minimum": 1,
+        "type": "integer",
+        "description": "The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.\n",
+        "format": "int32",
+        "example": 3
+      },
+      "isLimitedQuantity": {
+        "type": "boolean",
+        "description": "Indicates if the dangerous goods can be transported as limited quantity in accordance with Chapter 3.4 of the IMO IMDG Code.\n",
+        "example": false
+      },
+      "isExceptedQuantity": {
+        "type": "boolean",
+        "description": "Indicates if the dangerous goods can be transported as excepted quantity in accordance with Chapter 3.5 of the IMO IMDG Code.\n",
+        "example": false
+      },
+      "isSalvagePackings": {
+        "type": "boolean",
+        "description": "Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective, leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.\n",
+        "example": false
+      },
+      "isEmptyUncleanedResidue": {
+        "type": "boolean",
+        "description": "Indicates if the cargo is residue.\n",
+        "example": false
+      },
+      "isWaste": {
+        "type": "boolean",
+        "description": "Indicates if waste is being shipped\n",
+        "example": false
+      },
+      "isHot": {
+        "type": "boolean",
+        "description": "Indicates if high temperature cargo is shipped.\n",
+        "example": false
+      },
+      "isCompetentAuthorityApprovalProvided": {
+        "type": "boolean",
+        "description": "Indicates if the cargo require approval from authorities\n",
+        "example": false
+      },
+      "competentAuthorityApproval": {
+        "maxLength": 70,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name and reference number of the competent authority providing the approval.\n",
+        "example": "{Name and reference...}"
+      },
+      "innerPackaging": {
+        "required": [
+          "description",
+          "material",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "description": "Count of `Inner Packagings` of the referenced `Dangerous Goods`.\n",
+            "format": "int32",
+            "example": 20
+          },
+          "material": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.\n",
+            "example": "Plastic"
+          },
+          "description": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Description of the packaging.\n",
+            "example": "Wowen plastic water resistant Bag"
+          }
+        },
+        "description": "Object for inner packaging specification\n"
+      },
+      "emergencyContactDetails": {
+        "required": [
+          "contact",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "contact": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Name of the Contact person during an emergency.\n",
+            "example": "Henrik Larsen"
+          },
+          "provider": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Name of the third party vendor providing emergency support\n",
+            "example": "GlobeTeam"
+          },
+          "phone": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/contactPhone"
+              }
+            ]
+          },
+          "referenceNumber": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Contract reference for the emergency support provided by an external third party vendor.\n",
+            "example": "12234"
+          }
+        },
+        "description": "24 hr emergency contact details\n"
+      },
+      "contactPhone": {
+        "maxLength": 30,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Phone number for the contact\n",
+        "example": "+45 70262970"
+      },
+      "EMSNumber": {
+        "maxLength": 7,
+        "type": "string",
+        "description": "The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.\n",
+        "example": "F-A S-Q"
+      },
+      "endOfHoldingTime": {
+        "type": "string",
+        "description": "Date by when the refrigerated liquid needs to be delivered.\n",
+        "format": "date",
+        "example": "2021-09-03"
+      },
+      "fumigationDateTime": {
+        "type": "string",
+        "description": "Date & time when the container was fumigated\n",
+        "format": "date-time",
+        "example": "2021-09-03T09:03:00-02:00"
+      },
+      "isReportableQuantity": {
+        "type": "boolean",
+        "description": "Indicates if a container of hazardous material is at the reportable quantity level. If `TRUE`, a report to the relevant authority must be made in case of spill.\n",
+        "example": false
+      },
+      "inhalationZone": {
+        "maxLength": 1,
+        "minLength": 1,
+        "type": "string",
+        "description": "The zone classification of the toxicity of the inhalant. Possible values are:\n- `A` (Hazard Zone A) can be asigned to specific gases and liquids\n- `B` (Hazard Zone B) can be asigned to specific gases and liquids\n- `C` (Hazard Zone C) can **only** be asigned to specific gases\n- `D` (Hazard Zone D) can **only** be asigned to specific gases\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/inhalationzones.csv)\n",
+        "example": "A"
+      },
+      "dgGrossWeight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The grand total weight of the DG cargo and weight per UNNumber/NANumber including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+        "format": "float",
+        "example": 12000
+      },
+      "netWeight": {
+        "type": "number",
+        "description": "Total weight of the goods carried, excluding packaging.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "netWeightUnit": {
+        "type": "string",
+        "description": "Unit of measure used to describe the `netWeight`. Possible values are\n- KGM (Kilograms)\n- LBR (Pounds)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "LBR"
+        ]
+      },
+      "netExplosiveContent": {
+        "type": "number",
+        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "netExplosiveContentUnit": {
+        "type": "string",
+        "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n- KGM (Kilograms)\n- GRM (Grams)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "GRM"
+        ]
+      },
+      "dgVolume": {
+        "type": "number",
+        "description": "The volume of the referenced dangerous goods.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "volumeUnitDG": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n- LTR (Litre)\n",
+        "example": "MTQ",
+        "enum": [
+          "MTQ",
+          "FTQ",
+          "LTR"
+        ]
+      },
+      "limits": {
+        "required": [
+          "temperatureUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "temperatureUnit": {
+            "type": "string",
+            "description": "The unit for **all attributes in the limits structure** in Celsius or Fahrenheit\n\n- CEL (Celsius)\n- FAH (Fahrenheit)\n",
+            "example": "CEL",
+            "enum": [
+              "CEL",
+              "FAH"
+            ]
+          },
+          "flashPoint": {
+            "$ref": "#/components/schemas/flashPoint"
+          },
+          "transportControlTemperature": {
+            "$ref": "#/components/schemas/transportControlTemperature"
+          },
+          "transportEmergencyTemperature": {
+            "$ref": "#/components/schemas/transportEmergencyTemperature"
+          },
+          "SADT": {
+            "$ref": "#/components/schemas/sadt"
+          },
+          "SAPT": {
+            "$ref": "#/components/schemas/sapt"
+          }
+        },
+        "description": "Limits for the Dangerous Goods. The same `Temperature Unit` needs to apply to all attributes in this structure.\n"
+      },
+      "flashPoint": {
+        "type": "number",
+        "description": "The flashpoint of the referenced dangerous goods according to the IMO IMDG Code expressed in degrees Celsius or Fahrenheit.\n",
+        "format": "float",
+        "example": 42
+      },
+      "transportControlTemperature": {
+        "type": "number",
+        "description": "Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.\n",
+        "format": "float",
+        "example": 24.1
+      },
+      "transportEmergencyTemperature": {
+        "type": "number",
+        "description": "Temperature at which emergency procedures shall be implemented\n",
+        "format": "float",
+        "example": 74.1
+      },
+      "sadt": {
+        "type": "number",
+        "description": "Lowest temperature in which self-accelerating decomposition may occur in a substance\n",
+        "format": "float",
+        "example": 54.1
+      },
+      "sapt": {
+        "type": "number",
+        "description": "Lowest temperature in which self-accelerating polymerization may occur in a substance\n",
+        "format": "float",
+        "example": 70
+      },
+      "customsReferencesX": {
+        "minLength": 1,
+        "type": "array",
+        "description": "A list of `Customs references`\n",
+        "items": {
+          "$ref": "#/components/schemas/CustomsReference"
+        }
+      },
+      "utilizedTransportEquipments_Carrier": {
+        "type": "object",
+        "properties": {
+          "utilizedTransportEquipments": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
+            "items": {
+              "$ref": "#/components/schemas/utilizedTransportEquipment_Carrier"
+            }
+          }
+        }
+      },
+      "utilizedTransportEquipment_Carrier": {
+        "required": [
+          "cargoGrossWeight",
+          "cargoGrossWeightUnit",
+          "equipment",
+          "isShipperOwned",
+          "seals"
+        ],
+        "type": "object",
+        "description": "Specifies the container (`equipment`), the total `weight`, total `volume`, `numberOfPacakges`, possible `ActiveReeferSettings` and the `seals` used\n",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "equipment": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/equipment"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoGrossWeight": {
+                "$ref": "#/components/schemas/cargoGrossWeight"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoGrossWeightUnit": {
+                "$ref": "#/components/schemas/weightUnit"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoGrossVolume": {
+                "minimum": 0,
+                "exclusiveMinimum": true,
+                "type": "number",
+                "description": "The grand total volume of the cargo per container, which can be expressed in imperial or metric terms, as provided by the carrier.\n",
+                "format": "float",
+                "example": 120
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cargoGrossVolumeUnit": {
+                "$ref": "#/components/schemas/volumeUnit"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "numberOfPackages": {
+                "minimum": 1,
+                "type": "integer",
+                "description": "Specifies the number of packages associated with an equipment (container)\n",
+                "format": "int32",
+                "example": 18
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "isShipperOwned": {
+                "$ref": "#/components/schemas/isShipperOwned"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "isNonOperatingReefer": {
+                "$ref": "#/components/schemas/isNonOperatingReefer"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "activeReeferSettings": {
+                "description": "The specifications for a Reefer equipment.\n\n**Condition:** Only applicable when`isNonOperatingReefer` is set to `false`\n",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/activeReeferSettings"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/seals"
+          },
+          {
+            "$ref": "#/components/schemas/references"
+          },
+          {
+            "$ref": "#/components/schemas/customsReferences"
+          }
+        ]
+      },
+      "equipment": {
+        "required": [
+          "equipmentReference"
+        ],
+        "type": "object",
+        "properties": {
+          "equipmentReference": {
+            "$ref": "#/components/schemas/equipmentReference"
+          },
+          "ISOEquipmentCode": {
+            "$ref": "#/components/schemas/ISOEquipmentCode"
+          },
+          "tareWeight": {
+            "$ref": "#/components/schemas/tareWeight"
+          },
+          "weightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          }
+        },
+        "description": "Used for storing cargo in/on during transport. The equipment size/type is defined by the ISO 6346 code. The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.\n"
+      },
+      "ISOEquipmentCode": {
+        "maxLength": 4,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
+        "example": "22GP"
+      },
+      "tareWeight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The weight of an empty container (gross container weight).\n",
+        "format": "float",
+        "example": 4800
+      },
+      "cargoGrossWeight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The grand total weight of the cargo and weight per container(s) including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper. Excludes the tare weight of the container(s).'\n",
+        "format": "float",
+        "example": 12000
+      },
+      "isShipperOwned": {
+        "type": "boolean",
+        "description": "Indicates whether the container is shipper owned (SOC).",
+        "example": true
+      },
+      "isNonOperatingReefer": {
+        "type": "boolean",
+        "description": "If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.\n\n**Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.\n",
+        "example": false
+      },
+      "activeReeferSettings": {
+        "type": "object",
+        "properties": {
+          "temperatureSetpoint": {
+            "$ref": "#/components/schemas/temperatureSetpoint"
+          },
+          "temperatureUnit": {
+            "$ref": "#/components/schemas/temperatureUnit"
+          },
+          "o2Setpoint": {
+            "$ref": "#/components/schemas/o2Setpoint"
+          },
+          "co2Setpoint": {
+            "$ref": "#/components/schemas/co2Setpoint"
+          },
+          "humiditySetpoint": {
+            "$ref": "#/components/schemas/humiditySetpoint"
+          },
+          "airExchangeSetpoint": {
+            "$ref": "#/components/schemas/airExchangeSetpoint"
+          },
+          "airExchangeUnit": {
+            "$ref": "#/components/schemas/airExchangeUnit"
+          },
+          "isVentilationOpen": {
+            "$ref": "#/components/schemas/isVentilationOpen"
+          },
+          "isDrainholesOpen": {
+            "$ref": "#/components/schemas/isDrainholesOpen"
+          },
+          "isBulbMode": {
+            "$ref": "#/components/schemas/isBulbMode"
+          },
+          "isColdTreatmentRequired": {
+            "$ref": "#/components/schemas/isColdTreatmentRequired"
+          },
+          "isControlledAtmosphereRequired": {
+            "$ref": "#/components/schemas/isControlledAtmosphereRequired"
+          }
+        }
+      },
+      "temperatureSetpoint": {
+        "type": "number",
+        "description": "Target value of the temperature for the Reefer based on the cargo requirement.\n",
+        "format": "float",
+        "example": -15
+      },
+      "temperatureUnit": {
+        "type": "string",
+        "description": "The unit for temperature in Celsius or Fahrenheit\n\n- CEL (Celsius)\n- FAH (Fahrenheit)\n",
+        "example": "CEL",
+        "enum": [
+          "CEL",
+          "FAH"
+        ]
+      },
+      "o2Setpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere O<sub>2</sub> target value\n",
+        "format": "float",
+        "example": 75.3
+      },
+      "co2Setpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere CO<sub>2</sub> target value\n",
+        "format": "float",
+        "example": 25
+      },
+      "humiditySetpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere humidity target value\n",
+        "format": "float",
+        "example": 95.6
+      },
+      "airExchangeSetpoint": {
+        "minimum": 0,
+        "type": "number",
+        "description": "Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container\n",
+        "format": "float",
+        "example": 15.4
+      },
+      "airExchangeUnit": {
+        "type": "string",
+        "description": "The unit for `airExchange` in metrics- or imperial- units per hour\n\n- MQH (Cubic metre per hour)\n- FQH (Cubic foot per hour)\n\n**NB:** This is a conditional field. If `airExchange` is specified then this field is required\n",
+        "example": "MQH",
+        "enum": [
+          "MQH",
+          "FQH"
+        ]
+      },
+      "isVentilationOpen": {
+        "type": "boolean",
+        "description": "If `true` the ventilation orifice is `Open` - if `false` the ventilation orifice is `closed`\n",
+        "example": true
+      },
+      "isDrainholesOpen": {
+        "type": "boolean",
+        "description": "Is drainholes open on the container\n",
+        "example": true
+      },
+      "isBulbMode": {
+        "type": "boolean",
+        "description": "Is special container setting for handling flower bulbs active\n",
+        "example": true
+      },
+      "isColdTreatmentRequired": {
+        "type": "boolean",
+        "description": "Indicator whether cargo requires cold treatment prior to loading at origin or during transit, but prior arrival at POD\n",
+        "example": true
+      },
+      "isControlledAtmosphereRequired": {
+        "type": "boolean",
+        "description": "Indicator of whether cargo requires Controlled Atmosphere.\n",
+        "example": true
+      },
+      "seals": {
+        "type": "object",
+        "properties": {
+          "seals": {
+            "$ref": "#/components/schemas/sealsX"
+          }
+        }
+      },
+      "sealsX": {
+        "minLength": 1,
+        "type": "array",
+        "description": "A list of `Seals`\n",
+        "items": {
+          "$ref": "#/components/schemas/seal"
+        }
+      },
+      "seal": {
+        "required": [
+          "number"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "$ref": "#/components/schemas/sealNumber"
+          },
+          "source": {
+            "$ref": "#/components/schemas/sealSource"
+          },
+          "type": {
+            "$ref": "#/components/schemas/sealType"
+          }
+        },
+        "description": "Addresses the seal-related information associated with the shipment equipment. A seal is put on a shipment equipment once it is loaded. This seal is meant to stay on until the shipment equipment reaches its final destination.\n"
+      },
+      "sealNumber": {
+        "maxLength": 15,
+        "type": "string",
+        "description": "Identifies a seal affixed to the container."
+      },
+      "sealSource": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity.\n- CAR (Carrier)\n- SHI (Shipper)\n- PHY (Phytosanitary)\n- VET (Veterinary)\n- CUS (Customs)\n\n**Condition:** Conditional on type of commodity\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/sealsourcecodes.csv)\n",
+        "example": "CUS"
+      },
+      "sealType": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "The type of seal. This attribute links to the Seal Type ID defined in the Seal Type reference data entity.\n- KLP (Keyless padlock)\n- BLT (Bolt)\n- WIR (Wire)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/sealtypecodes.csv)\n",
+        "example": "WIR"
+      },
+      "references": {
+        "type": "object",
+        "properties": {
+          "references": {
+            "$ref": "#/components/schemas/referencesX"
+          }
+        }
+      },
+      "referencesX": {
+        "minLength": 1,
+        "type": "array",
+        "description": "A list of `References`\n",
+        "items": {
+          "$ref": "#/components/schemas/Reference"
+        }
+      },
+      "customsReferences": {
+        "type": "object",
+        "properties": {
+          "customsReferences": {
+            "$ref": "#/components/schemas/customsReferencesX"
+          }
+        }
+      },
+      "documentParties": {
+        "type": "object",
+        "properties": {
+          "documentParties": {
+            "$ref": "#/components/schemas/documentPartiesX"
+          }
+        }
+      },
+      "documentPartiesX": {
+        "minLength": 1,
+        "type": "array",
+        "description": "A list of `Document Parties`\n",
+        "items": {
+          "$ref": "#/components/schemas/documentParty"
+        }
+      },
+      "documentParty": {
+        "required": [
+          "isToBeNotified",
+          "party",
+          "partyFunction"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "$ref": "#/components/schemas/party_1"
+          },
+          "partyFunction": {
+            "$ref": "#/components/schemas/partyFunction"
+          },
+          "displayedAddress": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "If switch to paper is needed then the `displayedAddress` object **MUST** be provided. In case it is missing it is not possible to switch the B/L to paper later in the process.\n",
+            "items": {
+              "$ref": "#/components/schemas/addressLine"
+            }
+          },
+          "isToBeNotified": {
+            "$ref": "#/components/schemas/isToBeNotified"
+          }
+        },
+        "description": "stores the parties involved in the transport document."
+      },
+      "partyFunction": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Specifies the role of the party in a given context\n- OS (Original shipper)\n- CN (Consignee)\n- COW (Invoice payer on behalf of the consignor (shipper))\n- COX (Invoice payer on behalf of the consignee)\n- MS (Document/message issuer/sender)\n- N1 (First Notify Party)\n- N2 (Second Notify Party)\n- NI (Other Notify Party)\n- DDR (Consignor's freight forwarder)\n- DDS (Consignee's freight forwarder)\n- HE (Carrier booking office (transportation office))\n- SCO (Service contract owner - Defined by DCSA)\n- BA (Booking Agency)\n- END (Endorsee Party)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/partyfunctioncodes.csv)\n",
+        "example": "DDS"
+      },
+      "addressLine": {
+        "maxLength": 35,
+        "type": "string",
+        "description": "A single address line to be used when a B/L needs to be printed.\n",
+        "example": "Kronprincessegade 54"
+      },
+      "isToBeNotified": {
+        "type": "boolean",
+        "description": "Used to decide whether the party will be notified of the arrival of the cargo.",
+        "example": true
+      },
+      "plannedArrivalDate": {
+        "type": "string",
+        "description": "The planned date of arrival.\n",
+        "format": "date"
+      },
+      "plannedDepartureDate": {
+        "type": "string",
+        "description": "The planned date of departure.\n",
+        "format": "date"
+      },
+      "placeOfReceipt": {
+        "description": "General purpose object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "facilityLocation": {
+        "required": [
+          "facilityCode",
+          "facilityCodeListProvider",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `Facility Location` interface\n",
+            "example": "FACI"
+          },
+          "UNLocationCode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UNLocationCode"
+              },
+              {
+                "description": "The UN Location code specifying where the place is located.\n\nThis field is **conditionally mandatory** depending on the value of the `facilityCodeListProvider` field.\n"
+              }
+            ]
+          },
+          "facilityCode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/facilityCode"
+              },
+              {
+                "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\n\nThe definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx) \n- for `BIC` - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)\n"
+              }
+            ]
+          },
+          "facilityCodeListProvider": {
+            "$ref": "#/components/schemas/facilityCodeListProvider"
+          }
+        },
+        "description": "An interface used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
+      },
+      "facilityCode": {
+        "maxLength": 6,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The code used for identifying the specific facility. This code does <b>not</b> include the UN Location Code.\n",
+        "nullable": false,
+        "example": "ADT"
+      },
+      "facilityCodeListProvider": {
+        "type": "string",
+        "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- BIC (Requires a UN Location Code)\n- SMDG (Requires a UN Location Code)\n",
+        "example": "SMDG",
+        "enum": [
+          "BIC",
+          "SMDG"
+        ]
+      },
+      "portOfLoading": {
+        "description": "General purpose object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "CITY": "#/components/schemas/cityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/cityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "cityLocation": {
+        "required": [
+          "city",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `City Location` interface\n",
+            "example": "CITY"
+          },
+          "city": {
+            "$ref": "#/components/schemas/city"
+          }
+        },
+        "description": "An interface used to express a location using a `City`, `state/region` and `country`\n"
+      },
+      "city": {
+        "required": [
+          "city",
+          "country"
+        ],
+        "type": "object",
+        "properties": {
+          "city": {
+            "$ref": "#/components/schemas/cityName"
+          },
+          "stateRegion": {
+            "$ref": "#/components/schemas/stateRegion"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "description": "An object for storing city, state/region and coutry related information\n"
+      },
+      "portOfDischarge": {
+        "description": "General purpose object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "CITY": "#/components/schemas/cityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/cityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "placeOfDelivery": {
+        "description": "General purpose object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "onwardInlandRouting": {
+        "description": "General purpose object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "carrierExportVoyageNumber": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
+        "example": "2103S"
+      },
+      "universalExportVoyageReference": {
+        "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
+        "type": "string",
+        "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
+        "example": "2103N"
+      },
+      "charges": {
+        "type": "object",
+        "properties": {
+          "charges": {
+            "maxLength": 1,
+            "type": "array",
+            "description": "A list of `Charges`\n",
+            "items": {
+              "$ref": "#/components/schemas/charge"
+            }
+          }
+        }
+      },
+      "charge": {
+        "required": [
+          "calculationBasis",
+          "chargeName",
+          "currencyAmount",
+          "currencyCode",
+          "paymentTermCode",
+          "quantity",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "chargeName": {
+            "$ref": "#/components/schemas/chargeName"
+          },
+          "currencyAmount": {
+            "$ref": "#/components/schemas/currencyAmount"
+          },
+          "currencyCode": {
+            "$ref": "#/components/schemas/currencyCode"
+          },
+          "paymentTermCode": {
+            "$ref": "#/components/schemas/paymentTermCode"
+          },
+          "calculationBasis": {
+            "$ref": "#/components/schemas/calculationBasis"
+          },
+          "unitPrice": {
+            "$ref": "#/components/schemas/unitPrice"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/quantity"
+          }
+        },
+        "description": "addresses the monetary value of freight and other service charges for a transport document.\n"
+      },
+      "chargeName": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Free text field describing the charge to apply\n",
+        "example": "Documentation fee - Destination"
+      },
+      "currencyAmount": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.\n",
+        "format": "float",
+        "example": 1012.12
+      },
+      "currencyCode": {
+        "maxLength": 3,
+        "pattern": "^[A-Z]{3}$",
+        "type": "string",
+        "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)).\n",
+        "example": "DKK"
+      },
+      "paymentTermCode": {
+        "type": "string",
+        "description": "Indicates whether freight & charges are due for payment before the shipment is effected, practically before the transport document is released to shipper (Prepaid) or before the shipment is finalized meaning cargo released to consignee (Collect)\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "calculationBasis": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+        "example": "Per day"
+      },
+      "unitPrice": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The unit price of this charge item in the currency of the charge.\n",
+        "format": "float",
+        "example": 3456.6
+      },
+      "quantity": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The amount of unit for this charge item.\n",
+        "format": "float",
+        "example": 34.4
+      },
+      "carrierClauses": {
+        "type": "object",
+        "properties": {
+          "carrierClauses": {
+            "type": "array",
+            "description": "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
+            "items": {
+              "$ref": "#/components/schemas/clauseContent"
+            }
+          }
+        }
+      },
+      "clauseContent": {
+        "maxLength": 20000,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The content of the clause.\n",
+        "example": "It is not allowed to..."
+      },
+      "email": {
+        "maxLength": 100,
+        "pattern": "^.+@\\S+$",
+        "type": "string",
+        "description": "`E-mail` address to be used\n",
+        "example": "info@dcsa.org"
+      },
+      "unNumber": {
+        "pattern": "^\\d{4}$",
+        "type": "string",
+        "description": "United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.\n",
+        "example": "1463"
+      },
+      "naNumber": {
+        "pattern": "^\\d{4}$",
+        "type": "string",
+        "description": "Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.\n",
+        "example": "9037"
+      },
+      "supportingPartyCodes_inner": {
+        "required": [
+          "partyCode",
+          "partyCodeListProvider"
+        ],
+        "type": "object",
+        "properties": {
+          "partyCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string"
+          },
+          "partyCodeListProvider": {
+            "type": "string",
+            "description": "Describes which party code list the party code is from. Options are:\n\n - `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by  Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n - `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n",
+            "enum": [
+              "LEI",
+              "DID"
+            ]
+          }
+        }
+      },
+      "transportDocument_transports": {
+        "required": [
+          "carrierExportVoyageNumber",
+          "plannedArrivalDate",
+          "plannedDepartureDate",
+          "portOfDischarge",
+          "portOfLoading",
+          "vesselName"
+        ],
+        "type": "object",
+        "properties": {
+          "plannedArrivalDate": {
+            "$ref": "#/components/schemas/plannedArrivalDate"
+          },
+          "plannedDepartureDate": {
+            "$ref": "#/components/schemas/plannedDepartureDate"
+          },
+          "preCarriageBy": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined.. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/modeoftransportcodes.csv)\n",
+            "example": "RAIL"
+          },
+          "onCarriageBy": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/modeoftransportcodes.csv)\n",
+            "example": "TRUCK"
+          },
+          "placeOfReceipt": {
+            "$ref": "#/components/schemas/placeOfReceipt"
+          },
+          "portOfLoading": {
+            "$ref": "#/components/schemas/portOfLoading"
+          },
+          "portOfDischarge": {
+            "$ref": "#/components/schemas/portOfDischarge"
+          },
+          "placeOfDelivery": {
+            "$ref": "#/components/schemas/placeOfDelivery"
+          },
+          "onwardInlandRouting": {
+            "$ref": "#/components/schemas/onwardInlandRouting"
+          },
+          "vesselName": {
+            "maxLength": 35,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The name of the first sea going Vessel on board which the cargo is loaded or intended to be loaded\n",
+            "example": "King of the Seas"
+          },
+          "carrierExportVoyageNumber": {
+            "$ref": "#/components/schemas/carrierExportVoyageNumber"
+          },
+          "universalExportVoyageReference": {
+            "$ref": "#/components/schemas/universalExportVoyageReference"
+          }
+        }
+      },
+      "dangerousGoods_Base_grossWeight": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/dgGrossWeight"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/weightUnit"
+          }
+        },
+        "description": "Total weight of the goods carried, including packaging.\n"
+      },
+      "dangerousGoods_Base_netWeight": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/netWeight"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/netWeightUnit"
+          }
+        },
+        "description": "Total weight of the goods carried, excluding packaging.\n"
+      },
+      "dangerousGoods_Base_netExplosiveContent": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/netExplosiveContent"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/netExplosiveContentUnit"
+          }
+        },
+        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
+      },
+      "dangerousGoods_Base_volume": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/dgVolume"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/volumeUnitDG"
+          }
+        },
+        "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
+      }
+    },
+    "responses": {
+      "documentIssuancePendingOrComplete": {
+        "description": "The carrier already finished an issuance transaction for this document. The document is either already issued or waiting for the platform to finish the issuance process.  Either way, the platform will inform the carrier when the carrier needs to act on this document again.\n\nIf the issuance is pending, then the carrier will be notified via the DCSA_ISS_RSP API once the issuance process completes.  If the issuance has already succeeded, the platform will notify the carrier when there is a surrender request via the DCSA_SUR API.\n",
+        "headers": {
+          "API-Version": {
+            "$ref": "#/components/headers/API-Version"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "transactionReference": {
+        "name": "transactionReference",
+        "in": "path",
+        "description": "The transaction reference for the issuance transaction.\n",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/transactionReference"
+        },
+        "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+      },
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "1"
+        }
+      }
+    },
+    "headers": {
+      "API-Version": {
+        "description": "SemVer used to indicate the version of the contract (API version) returned.",
+        "schema": {
+          "type": "string",
+          "example": "1.0.0"
+        }
+      }
+    }
+  }
+}

@@ -27,6 +27,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,10 @@ public class ConformanceApplication {
         }
       };
 
+  private final String localhostAuthUrlToken = UUID.randomUUID().toString();
+
+  private final LinkedList<String> homepageSandboxIds = new LinkedList<>();
+
   @PostConstruct
   public void postConstruct() {
     log.info(
@@ -147,42 +152,54 @@ public class ConformanceApplication {
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
 
-    EblSurrenderComponentFactory componentFactory =
-        new EblSurrenderComponentFactory(
-            new LinkedList<>(EblSurrenderComponentFactory.STANDARD_VERSIONS).getLast());
     Stream.concat(
-            conformanceConfiguration.createAutoTestingSandboxes
-                ? Stream.of(
-                    componentFactory.getJsonSandboxConfigurationTemplate(null, false, false),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.CARRIER.getConfigName(), false, false),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.CARRIER.getConfigName(), false, true),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.PLATFORM.getConfigName(), false, false),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.PLATFORM.getConfigName(), false, true))
-                : Stream.of(),
-            conformanceConfiguration.createManualTestingSandboxes
-                ? Stream.of(
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.CARRIER.getConfigName(), true, false),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.CARRIER.getConfigName(), true, true),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.PLATFORM.getConfigName(), true, false),
-                    componentFactory.getJsonSandboxConfigurationTemplate(
-                        EblSurrenderRole.PLATFORM.getConfigName(), true, true))
-                : Stream.of())
+            EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
+                .map(EblIssuanceComponentFactory::new),
+            EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
+                .map(EblSurrenderComponentFactory::new))
         .forEach(
-            jsonSandboxConfigurationTemplate ->
-                ConformanceSandbox.create(
-                    persistenceProvider,
-                    asyncWebClient,
-                    "spring-boot-env",
-                    jsonSandboxConfigurationTemplate.get("id").asText(),
-                    jsonSandboxConfigurationTemplate.get("name").asText(),
-                    SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate)));
+            componentFactory ->
+                Stream.concat(
+                        conformanceConfiguration.createAutoTestingSandboxes
+                            ? Stream.of(
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    null, false, false),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.CARRIER.getConfigName(), false, false),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.CARRIER.getConfigName(), false, true),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.PLATFORM.getConfigName(), false, false),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.PLATFORM.getConfigName(), false, true))
+                            : Stream.of(),
+                        conformanceConfiguration.createManualTestingSandboxes
+                            ? Stream.of(
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.CARRIER.getConfigName(), true, false),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.CARRIER.getConfigName(), true, true),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.PLATFORM.getConfigName(), true, false),
+                                componentFactory.getJsonSandboxConfigurationTemplate(
+                                    EblSurrenderRole.PLATFORM.getConfigName(), true, true))
+                            : Stream.of())
+                    .forEach(
+                        jsonSandboxConfigurationTemplate -> {
+                          String sandboxId = jsonSandboxConfigurationTemplate.get("id").asText();
+                          if (sandboxId.contains("-auto-")
+                              && (sandboxId.contains("all-in-one")
+                                  || sandboxId.contains("testing-counterparts"))) {
+                            homepageSandboxIds.add(sandboxId);
+                          }
+                          ConformanceSandbox.create(
+                              persistenceProvider,
+                              asyncWebClient,
+                              "spring-boot-env",
+                              sandboxId,
+                              jsonSandboxConfigurationTemplate.get("name").asText(),
+                              SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
+                        }));
   }
 
   @CrossOrigin(origins = "http://localhost:4200")
@@ -200,8 +217,6 @@ public class ConformanceApplication {
                 "local-user", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
   }
-
-  private final String localhostAuthUrlToken = UUID.randomUUID().toString();
 
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
@@ -297,9 +312,9 @@ public class ConformanceApplication {
         "<head><title>DCSA Conformance</title></head>",
         "<body style=\"font-family: sans-serif;\">",
         "<h2>DCSA Conformance</h2>",
-        _buildHomeSandboxSection("auto-all-in-one"),
-        _buildHomeSandboxSection("auto-carrier-testing-counterparts"),
-        _buildHomeSandboxSection("auto-platform-testing-counterparts"),
+        homepageSandboxIds.stream()
+            .map(this::_buildHomeSandboxSection)
+            .collect(Collectors.joining(System.lineSeparator())),
         "</body>",
         "</html>");
   }
@@ -308,16 +323,18 @@ public class ConformanceApplication {
     return String.join(
         System.lineSeparator(),
         "<h3>%s</h3>".formatted(sandboxId),
-        "<p><a href=\"/conformance/%s/sandbox/%s/reset\">Reset</a></p>"
+        "<p>",
+        "<a href=\"/conformance/%s/sandbox/%s/reset\">Reset</a> - "
             .formatted(localhostAuthUrlToken, sandboxId),
-        "<p><a href=\"/conformance/%s/sandbox/%s/status\">Status</a></p>"
+        "<a href=\"/conformance/%s/sandbox/%s/status\">Status</a> - "
             .formatted(localhostAuthUrlToken, sandboxId),
-        "<p><a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a></p>"
+        "<a href=\"/conformance/%s/sandbox/%s/report\">Report</a> - "
+            .formatted(localhostAuthUrlToken, sandboxId),
+        "<a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a> - "
             .formatted(localhostAuthUrlToken, sandboxId, "Carrier1"),
-        "<p><a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a></p>"
+        "<a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a>"
             .formatted(localhostAuthUrlToken, sandboxId, "Platform1"),
-        "<p><a href=\"/conformance/%s/sandbox/%s/report\">Report</a></p>"
-            .formatted(localhostAuthUrlToken, sandboxId));
+        "</p>");
   }
 
   public static void main(String[] args) {

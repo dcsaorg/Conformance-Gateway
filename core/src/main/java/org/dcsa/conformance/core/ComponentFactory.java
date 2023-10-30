@@ -32,4 +32,11 @@ public interface ComponentFactory {
 
   JsonNode getJsonSandboxConfigurationTemplate(
       String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig);
+
+  static String sandboxIdPrefix(String standardName, String standardVersion) {
+    return "%s-%s".formatted(
+            standardName.replaceAll(" ", ""),
+            standardVersion.replaceAll("\\.", "").replaceAll("-", "")
+    ).toLowerCase();
+  }
 }

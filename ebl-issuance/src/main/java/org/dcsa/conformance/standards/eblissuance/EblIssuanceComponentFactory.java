@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblsurrender;
+package org.dcsa.conformance.standards.eblissuance;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
@@ -16,12 +16,12 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
-import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderPlatform;
-import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
-public class EblSurrenderComponentFactory implements ComponentFactory {
-  public static final String STANDARD_NAME = "eBL Surrender";
+public class EblIssuanceComponentFactory implements ComponentFactory {
+  public static final String STANDARD_NAME = "eBL Issuance";
   public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1", "3.0.0-Beta-1");
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
@@ -29,7 +29,7 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
 
   private final String standardVersion;
 
-  public EblSurrenderComponentFactory(String standardVersion) {
+  public EblIssuanceComponentFactory(String standardVersion) {
     this.standardVersion = standardVersion;
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
@@ -52,25 +52,25 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration carrierConfiguration =
-        partyConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName());
+        partyConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName());
     if (carrierConfiguration != null) {
       parties.add(
-          new EblSurrenderCarrier(
+          new EblIssuanceCarrier(
               standardVersion,
               carrierConfiguration,
-              counterpartConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName()),
+              counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
               asyncWebClient,
               orchestratorAuthHeader));
     }
 
     PartyConfiguration platformConfiguration =
-        partyConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName());
+        partyConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName());
     if (platformConfiguration != null) {
       parties.add(
-          new EblSurrenderPlatform(
+          new EblIssuancePlatform(
               standardVersion,
               platformConfiguration,
-              counterpartConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName()),
               asyncWebClient,
               orchestratorAuthHeader));
     }
@@ -81,12 +81,12 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
   public ScenarioListBuilder<?> createScenarioListBuilder(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return EblSurrenderScenarioListBuilder.buildTree(
+    return EblIssuanceScenarioListBuilder.buildTree(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblSurrenderRole::isCarrier),
+            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isCarrier),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblSurrenderRole::isPlatform));
+            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isPlatform));
   }
 
   private static String _findPartyOrCounterpartName(
@@ -108,16 +108,16 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
 
   @Override
   public SortedSet<String> getRoleNames() {
-    return Arrays.stream(EblSurrenderRole.values())
-        .map(EblSurrenderRole::getConfigName)
+    return Arrays.stream(EblIssuanceRole.values())
+        .map(EblIssuanceRole::getConfigName)
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length == EblSurrenderRole.values().length
-            ? Arrays.stream(EblSurrenderRole.values()).map(EblSurrenderRole::getConfigName)
+    return (partyConfigurations.length == EblIssuanceRole.values().length
+            ? Arrays.stream(EblIssuanceRole.values()).map(EblIssuanceRole::getConfigName)
             : Arrays.stream(counterpartConfigurations)
                 .map(CounterpartConfiguration::getRole)
                 .filter(
@@ -130,22 +130,22 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath =
-        "/standards/eblsurrender/schemas/eblsurrender-%s-%s.json"
+        "/standards/eblissuance/schemas/eblissuance-%s-%s.json"
             .formatted(
                 standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
     String schemaName =
-        EblSurrenderRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")
-            : (forRequest ? "surrenderRequestAnswer" : null);
+        EblIssuanceRole.isCarrier(apiProviderRole)
+            ? (forRequest ? "issuanceRequest" : null)
+            : (forRequest ? "issuanceResponse" : null);
     return new JsonSchemaValidator(
-        EblSurrenderComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+        EblIssuanceComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
   }
 
   @SneakyThrows
   public JsonNode getJsonSandboxConfigurationTemplate(
       String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig) {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/eblsurrender/sandboxes/%s.json"
+        "/standards/eblissuance/sandboxes/%s.json"
             .formatted(
                 testedPartyRole == null
                     ? "auto-all-in-one"

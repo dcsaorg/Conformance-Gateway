@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
 @Slf4j
@@ -26,13 +27,21 @@ public class ConformanceWebuiHandler {
 
   private final SortedMap<String, SortedMap<String, ComponentFactory>> componentFactories =
       new TreeMap<>(
-          Map.of(
-              EblSurrenderComponentFactory.STANDARD_NAME,
-              new TreeMap<>(
-                  EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                      .collect(
-                          Collectors.toMap(
-                              Function.identity(), EblSurrenderComponentFactory::new)))));
+          Map.ofEntries(
+              Map.entry(
+                  EblIssuanceComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(
+                                  Function.identity(), EblIssuanceComponentFactory::new)))),
+              Map.entry(
+                  EblSurrenderComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(
+                                  Function.identity(), EblSurrenderComponentFactory::new))))));
 
   public ConformanceWebuiHandler(
       ConformanceAccessChecker accessChecker,

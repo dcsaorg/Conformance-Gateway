@@ -97,7 +97,7 @@ public class SurrenderRequestAction extends TdrAction {
             new UrlPathCheck(
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),
-                "/v1/surrender-requests"),
+                "/surrender-requests"),
             new ResponseStatusCheck(
                 EblSurrenderRole::isCarrier, getMatchedExchangeUuid(), getExpectedStatus()),
             new ApiHeaderCheck(

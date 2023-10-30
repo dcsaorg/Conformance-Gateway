@@ -1,0 +1,253 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DCSA OpenAPI specification for responding to an issuance request. \n",
+    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA_EBL_ISS](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS/2.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/2.0-beta1).\n\nAPI specification issued by DCSA.org.\n",
+    "contact": {
+      "name": "Digital Container Shipping Association (DCSA)",
+      "url": "https://dcsa.org",
+      "email": "info@dcsa.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "2.0-beta1"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS_RSP/3.0-beta1",
+      "description": "SwaggerHub API Auto Mocking"
+    }
+  ],
+  "paths": {
+    "/v1/issuance-responses": {
+      "post": {
+        "tags": [
+          "Issue Response"
+        ],
+        "summary": "Respond to a transport document issuance request",
+        "description": "Submit a response to a carrier issuance request.\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/issuanceResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Carrier's acknowledgement of the Issuance Response",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "default": {
+            "description": "Request successful",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "issuanceResponse": {
+        "required": [
+          "issuanceResponseCode",
+          "transportDocumentReference"
+        ],
+        "type": "object",
+        "properties": {
+          "transportDocumentReference": {
+            "$ref": "#/components/schemas/transportDocumentReference"
+          },
+          "issuanceResponseCode": {
+            "type": "string",
+            "description": "The platforms verdict on the issuance of the EBL  identified by the `transportDocumentReference`\n\nOptions are:\n  * `ISSU`: The document was successfully `ISSU` and successfully delivered to the initial possessor.\n  * `BREQ`: The platform reviewed the document and believe they cannot issue the document due to an error/issue with the content of the issuance request.\n  * `REFU`: The intended recipient (or their delegated EBL platform) refused to accept the delivery of the EBL for a reason that the issuing eBL platform cannot resolve. One reason could be that the `issueTo` referenced a valid eBL platform but the receiving platform did not recognise the recipient specified.\n\nRegardless of the response code, the issuance request is now considered handled. In case of successful issuance, the platform will still have some responsiblity but that is covered by other processes and APIs (e.g., the DCSA_SUR API mentioned in the description of this API). In case of failed issuance, it is up to the carrier to resolve the issue and, if needed, submit a revised issuance request.\n",
+            "enum": [
+              "ISSU",
+              "BDOC",
+              "REFU"
+            ]
+          },
+          "reason": {
+            "maxLength": 255,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "Human readable description of the rationale for an unsuccessful issuance.\n\nThe `reason` should be omitted when the `issuanceResponseCode` is `ISSU` or `TEXP`. If the platform for some reason chooses to deviate from this and provide the field anyway, they should use canned phrased like `Issued` that matches the meaning of the `issuanceResponseCode`.\n"
+          }
+        }
+      },
+      "error": {
+        "required": [
+          "errorDateTime",
+          "errors",
+          "httpMethod",
+          "requestUri",
+          "statusCode",
+          "statusCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "httpMethod": {
+            "type": "string",
+            "description": "The http request method type e.g. GET, POST\n",
+            "example": "POST",
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "DELETE",
+              "OPTION",
+              "PATCH"
+            ]
+          },
+          "requestUri": {
+            "type": "string",
+            "description": "The request URI as it was sent\n",
+            "example": "/v1/events"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code\n",
+            "format": "int32",
+            "example": 400
+          },
+          "statusCodeText": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The textual representation of the status code\n",
+            "example": "Bad Request"
+          },
+          "errorMessage": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Other error information\n",
+            "example": "The supplied data could not be accepted"
+          },
+          "providerCorrelationID": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A unique identifier for the transaction, e.g. a UUID\n",
+            "example": "4426d965-0dd8-4005-8c63-dc68b01c4962"
+          },
+          "errorDateTime": {
+            "type": "string",
+            "description": "The date and time (in ISO 8601 format) the error occurred.\n",
+            "format": "date-time",
+            "example": "2019-11-12T07:41:00+08:30"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "description": "List of detailed errors, e.g. fields that could not pass validation\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/detailedError"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "detailedError": {
+        "required": [
+          "message",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "Standard error code see http://dcsa.org/error-codes (to be created). Examples: 7003 – out or range value, 7004 -  invalid type\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "field": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The field that caused the error, e.g. a failed validation. The field can be expressed as a [JSONpath](https://github.com/json-path/JsonPath)\n",
+            "example": "location.facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value that of the field that caused the error\n",
+            "example": "SG SIN WHS"
+          },
+          "reason": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "High level error message\n",
+            "example": "invalidQuery"
+          },
+          "message": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Additional information as to why the error occured\n",
+            "example": "Spaces not allowed in facility code"
+          }
+        }
+      },
+      "transportDocumentReference": {
+        "maxLength": 20,
+        "type": "string",
+        "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n"
+      }
+    },
+    "parameters": {
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "1"
+        }
+      }
+    },
+    "headers": {
+      "API-Version": {
+        "description": "SemVer used to indicate the version of the contract (API version) returned.",
+        "schema": {
+          "type": "string",
+          "example": "1.0.0"
+        }
+      }
+    }
+  }
+}

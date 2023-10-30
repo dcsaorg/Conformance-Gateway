@@ -25,7 +25,7 @@ public class JsonSchemaValidator {
         new ValidationContext(
             jsonSchemaFactory.getUriFactory(),
             null,
-            JsonMetaSchema.getV7(),
+            JsonMetaSchema.getV4(),
             jsonSchemaFactory,
             schemaValidatorsConfig);
     jsonSchema = jsonSchemaFactory.create(

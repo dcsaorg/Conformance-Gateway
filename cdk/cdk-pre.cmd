@@ -1,6 +1,9 @@
 cd ..\core
 call mvn clean install
 
+cd ..\ebl-issuance
+call mvn clean install
+
 cd ..\ebl-surrender
 call mvn clean install
 

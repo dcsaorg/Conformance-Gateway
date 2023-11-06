@@ -1,0 +1,26 @@
+{
+  "id": "SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts",
+  "name": "Manual carrier testing counterparts",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "Shipper1",
+    "role" : "Shipper",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-tested-party/party/Carrier1/api"
+  }, {
+    "name" : "Shipper1",
+    "role" : "Shipper",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts/party/Shipper1/api"
+  } ]
+}

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblissuance;
+package org.dcsa.conformance.standards.booking;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
@@ -14,20 +14,20 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
-import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
-import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
+import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.Carrier;
+import org.dcsa.conformance.standards.booking.party.Shipper;
 
-public class EblIssuanceComponentFactory extends AbstractComponentFactory {
-  public static final String STANDARD_NAME = "eBL Issuance";
-  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1", "3.0.0-Beta-1");
+public class BookingComponentFactory extends AbstractComponentFactory {
+  public static final String STANDARD_NAME = "Booking";
+  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1");
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-  private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+  private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
   private final String standardVersion;
 
-  public EblIssuanceComponentFactory(String standardVersion) {
+  public BookingComponentFactory(String standardVersion) {
     this.standardVersion = standardVersion;
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
@@ -50,25 +50,25 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration carrierConfiguration =
-        partyConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName());
+        partyConfigurationsByRoleName.get(BookingRole.CARRIER.getConfigName());
     if (carrierConfiguration != null) {
       parties.add(
-          new EblIssuanceCarrier(
+          new Carrier(
               standardVersion,
               carrierConfiguration,
-              counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
+              counterpartConfigurationsByRoleName.get(BookingRole.SHIPPER.getConfigName()),
               asyncWebClient,
               orchestratorAuthHeader));
     }
 
-    PartyConfiguration platformConfiguration =
-        partyConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName());
-    if (platformConfiguration != null) {
+    PartyConfiguration shipperConfiguration =
+        partyConfigurationsByRoleName.get(BookingRole.SHIPPER.getConfigName());
+    if (shipperConfiguration != null) {
       parties.add(
-          new EblIssuancePlatform(
+          new Shipper(
               standardVersion,
-              platformConfiguration,
-              counterpartConfigurationsByRoleName.get(EblIssuanceRole.CARRIER.getConfigName()),
+              shipperConfiguration,
+              counterpartConfigurationsByRoleName.get(BookingRole.CARRIER.getConfigName()),
               asyncWebClient,
               orchestratorAuthHeader));
     }
@@ -79,26 +79,26 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
   public ScenarioListBuilder<?> createScenarioListBuilder(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return EblIssuanceScenarioListBuilder.buildTree(
+    return BookingScenarioListBuilder.buildTree(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isCarrier),
+            partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblIssuanceRole::isPlatform));
+            partyConfigurations, counterpartConfigurations, BookingRole::isShipper));
   }
 
   @Override
   public SortedSet<String> getRoleNames() {
-    return Arrays.stream(EblIssuanceRole.values())
-        .map(EblIssuanceRole::getConfigName)
+    return Arrays.stream(BookingRole.values())
+        .map(BookingRole::getConfigName)
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length == EblIssuanceRole.values().length
-            ? Arrays.stream(EblIssuanceRole.values()).map(EblIssuanceRole::getConfigName)
+    return (partyConfigurations.length == BookingRole.values().length
+            ? Arrays.stream(BookingRole.values()).map(BookingRole::getConfigName)
             : Arrays.stream(counterpartConfigurations)
                 .map(CounterpartConfiguration::getRole)
                 .filter(
@@ -111,22 +111,22 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath =
-        "/standards/eblissuance/schemas/eblissuance-%s-%s.json"
+        "/standards/booking/schemas/booking-%s-%s.json"
             .formatted(
                 standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
     String schemaName =
-        EblIssuanceRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "issuanceRequest" : null)
-            : (forRequest ? "issuanceResponse" : null);
+        BookingRole.isCarrier(apiProviderRole)
+            ? (forRequest ? "BookingNotification_data" : null)
+            : (forRequest ? "BookingNotification_data" : null);
     return new JsonSchemaValidator(
-        EblIssuanceComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+        BookingComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
   }
 
   @SneakyThrows
   public JsonNode getJsonSandboxConfigurationTemplate(
       String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig) {
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/eblissuance/sandboxes/%s.json"
+        "/standards/booking/sandboxes/%s.json"
             .formatted(
                 testedPartyRole == null
                     ? "auto-all-in-one"
@@ -139,7 +139,7 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
             Map.entry("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME),
             Map.entry("STANDARD_VERSION_PLACEHOLDER", standardVersion),
             Map.entry("CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER", CARRIER_AUTH_HEADER_VALUE),
-            Map.entry("PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER", PLATFORM_AUTH_HEADER_VALUE),
+            Map.entry("SHIPPER_AUTH_HEADER_VALUE_PLACEHOLDER", SHIPPER_AUTH_HEADER_VALUE),
             Map.entry(
                 "SANDBOX_ID_PREFIX",
                 AbstractComponentFactory._sandboxIdPrefix(STANDARD_NAME, standardVersion))));

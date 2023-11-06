@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.SneakyThrows;
-import org.dcsa.conformance.core.ComponentFactory;
+import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -20,7 +18,7 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderPlatform;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
-public class EblSurrenderComponentFactory implements ComponentFactory {
+public class EblSurrenderComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "eBL Surrender";
   public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1", "3.0.0-Beta-1");
 
@@ -89,23 +87,6 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
             partyConfigurations, counterpartConfigurations, EblSurrenderRole::isPlatform));
   }
 
-  private static String _findPartyOrCounterpartName(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations,
-      Predicate<String> rolePredicate) {
-    return Stream.concat(
-            Arrays.stream(partyConfigurations)
-                .filter(partyConfiguration -> rolePredicate.test(partyConfiguration.getRole()))
-                .map(PartyConfiguration::getName),
-            Arrays.stream(counterpartConfigurations)
-                .filter(
-                    counterpartConfigurationConfiguration ->
-                        rolePredicate.test(counterpartConfigurationConfiguration.getRole()))
-                .map(CounterpartConfiguration::getName))
-        .findFirst()
-        .orElseThrow();
-  }
-
   @Override
   public SortedSet<String> getRoleNames() {
     return Arrays.stream(EblSurrenderRole.values())
@@ -161,6 +142,6 @@ public class EblSurrenderComponentFactory implements ComponentFactory {
             Map.entry("PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER", PLATFORM_AUTH_HEADER_VALUE),
             Map.entry(
                 "SANDBOX_ID_PREFIX",
-                ComponentFactory.sandboxIdPrefix(STANDARD_NAME, standardVersion))));
+                AbstractComponentFactory._sandboxIdPrefix(STANDARD_NAME, standardVersion))));
   }
 }

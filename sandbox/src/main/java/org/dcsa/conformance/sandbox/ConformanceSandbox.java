@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.ComponentFactory;
+import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
@@ -48,7 +49,7 @@ public class ConformanceSandbox {
               originalOrchestratorState -> {
                 SandboxConfiguration sandboxConfiguration =
                     loadSandboxConfiguration(persistenceProvider, sandboxId);
-                ComponentFactory componentFactory =
+                AbstractComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
                 ConformanceOrchestrator orchestrator =
                     new ConformanceOrchestrator(
@@ -88,7 +89,7 @@ public class ConformanceSandbox {
               originalPartyState -> {
                 SandboxConfiguration sandboxConfiguration =
                     loadSandboxConfiguration(persistenceProvider, sandboxId);
-                ComponentFactory componentFactory =
+                AbstractComponentFactory componentFactory =
                     _createComponentFactory(sandboxConfiguration.getStandard());
 
                 Map<String, ? extends Collection<String>> orchestratorAuthHeader;
@@ -622,8 +623,11 @@ public class ConformanceSandbox {
             "sandbox#" + sandboxConfiguration.getId(), "config", sandboxConfiguration.toJsonNode());
   }
 
-  private static ComponentFactory _createComponentFactory(
+  private static AbstractComponentFactory _createComponentFactory(
       StandardConfiguration standardConfiguration) {
+    if (BookingComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new BookingComponentFactory(standardConfiguration.getVersion());
+    }
     if (EblIssuanceComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblIssuanceComponentFactory(standardConfiguration.getVersion());
     }

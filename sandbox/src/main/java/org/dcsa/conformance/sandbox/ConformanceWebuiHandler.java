@@ -10,11 +10,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.ComponentFactory;
+import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
@@ -25,9 +26,16 @@ public class ConformanceWebuiHandler {
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<ConformanceWebRequest> asyncWebClient;
 
-  private final SortedMap<String, SortedMap<String, ComponentFactory>> componentFactories =
+  private final SortedMap<String, SortedMap<String, AbstractComponentFactory>> componentFactories =
       new TreeMap<>(
           Map.ofEntries(
+//              Map.entry(
+//                  BookingComponentFactory.STANDARD_NAME,
+//                  new TreeMap<>(
+//                      BookingComponentFactory.STANDARD_VERSIONS.stream()
+//                          .collect(
+//                              Collectors.toMap(
+//                                  Function.identity(), BookingComponentFactory::new)))),
               Map.entry(
                   EblIssuanceComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

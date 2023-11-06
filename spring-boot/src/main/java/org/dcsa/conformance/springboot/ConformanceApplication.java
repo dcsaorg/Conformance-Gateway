@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -27,9 +28,9 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
+import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
-import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -152,54 +153,59 @@ public class ConformanceApplication {
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
 
-    Stream.concat(
-            EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
-                .map(EblIssuanceComponentFactory::new),
-            EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                .map(EblSurrenderComponentFactory::new))
-        .forEach(
-            componentFactory ->
-                Stream.concat(
-                        conformanceConfiguration.createAutoTestingSandboxes
-                            ? Stream.of(
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    null, false, false),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.CARRIER.getConfigName(), false, false),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.CARRIER.getConfigName(), false, true),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.PLATFORM.getConfigName(), false, false),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.PLATFORM.getConfigName(), false, true))
-                            : Stream.of(),
-                        conformanceConfiguration.createManualTestingSandboxes
-                            ? Stream.of(
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.CARRIER.getConfigName(), true, false),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.CARRIER.getConfigName(), true, true),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.PLATFORM.getConfigName(), true, false),
-                                componentFactory.getJsonSandboxConfigurationTemplate(
-                                    EblSurrenderRole.PLATFORM.getConfigName(), true, true))
-                            : Stream.of())
-                    .forEach(
-                        jsonSandboxConfigurationTemplate -> {
-                          String sandboxId = jsonSandboxConfigurationTemplate.get("id").asText();
-                          if (sandboxId.contains("-auto-")
-                              && (sandboxId.contains("all-in-one")
-                                  || sandboxId.contains("testing-counterparts"))) {
-                            homepageSandboxIds.add(sandboxId);
-                          }
-                          ConformanceSandbox.create(
-                              persistenceProvider,
-                              asyncWebClient,
-                              "spring-boot-env",
-                              sandboxId,
-                              jsonSandboxConfigurationTemplate.get("name").asText(),
-                              SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
-                        }));
+    Stream<AbstractComponentFactory> componentFactories =
+        Stream.of(
+//                BookingComponentFactory.STANDARD_VERSIONS.stream()
+//                    .map(BookingComponentFactory::new),
+                EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
+                    .map(EblIssuanceComponentFactory::new),
+                EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
+                    .map(EblSurrenderComponentFactory::new))
+            .flatMap(Function.identity());
+    componentFactories.forEach(
+        componentFactory -> {
+          ArrayList<String> roleNames = new ArrayList<>(componentFactory.getRoleNames());
+          String roleOne = roleNames.get(0);
+          String roleTwo = roleNames.get(1);
+          Stream.concat(
+                  conformanceConfiguration.createAutoTestingSandboxes
+                      ? Stream.of(
+                          componentFactory.getJsonSandboxConfigurationTemplate(null, false, false),
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleOne, false, false),
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleOne, false, true),
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleTwo, false, false),
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleTwo, false, true))
+                      : Stream.of(),
+                  conformanceConfiguration.createManualTestingSandboxes
+                      ? Stream.of(
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleOne, true, false),
+                          componentFactory.getJsonSandboxConfigurationTemplate(roleOne, true, true),
+                          componentFactory.getJsonSandboxConfigurationTemplate(
+                              roleTwo, true, false),
+                          componentFactory.getJsonSandboxConfigurationTemplate(roleTwo, true, true))
+                      : Stream.of())
+              .forEach(
+                  jsonSandboxConfigurationTemplate -> {
+                    String sandboxId = jsonSandboxConfigurationTemplate.get("id").asText();
+                    if (sandboxId.contains("-auto-")
+                        && (sandboxId.contains("all-in-one")
+                            || sandboxId.contains("testing-counterparts"))) {
+                      homepageSandboxIds.add(sandboxId);
+                    }
+                    ConformanceSandbox.create(
+                        persistenceProvider,
+                        asyncWebClient,
+                        "spring-boot-env",
+                        sandboxId,
+                        jsonSandboxConfigurationTemplate.get("name").asText(),
+                        SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
+                  });
+        });
   }
 
   @CrossOrigin(origins = "http://localhost:4200")

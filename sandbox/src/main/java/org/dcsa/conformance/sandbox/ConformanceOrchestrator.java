@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.ComponentFactory;
+import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ScenarioCheck;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -34,7 +34,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public ConformanceOrchestrator(
       SandboxConfiguration sandboxConfiguration,
-      ComponentFactory componentFactory,
+      AbstractComponentFactory componentFactory,
       TrafficRecorder trafficRecorder,
       Consumer<ConformanceWebRequest> asyncWebClient) {
     this.sandboxConfiguration = sandboxConfiguration;

@@ -1,6 +1,9 @@
 cd ..\core
 call mvn clean install
 
+cd ..\booking
+call mvn clean install
+
 cd ..\ebl-issuance
 call mvn clean install
 

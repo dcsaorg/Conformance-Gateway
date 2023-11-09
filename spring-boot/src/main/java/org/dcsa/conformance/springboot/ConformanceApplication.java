@@ -155,8 +155,8 @@ public class ConformanceApplication {
 
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
-//                BookingComponentFactory.STANDARD_VERSIONS.stream()
-//                    .map(BookingComponentFactory::new),
+                BookingComponentFactory.STANDARD_VERSIONS.stream()
+                    .map(BookingComponentFactory::new),
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()

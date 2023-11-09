@@ -29,13 +29,13 @@ public class ConformanceWebuiHandler {
   private final SortedMap<String, SortedMap<String, AbstractComponentFactory>> componentFactories =
       new TreeMap<>(
           Map.ofEntries(
-//              Map.entry(
-//                  BookingComponentFactory.STANDARD_NAME,
-//                  new TreeMap<>(
-//                      BookingComponentFactory.STANDARD_VERSIONS.stream()
-//                          .collect(
-//                              Collectors.toMap(
-//                                  Function.identity(), BookingComponentFactory::new)))),
+              Map.entry(
+                  BookingComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      BookingComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(
+                                  Function.identity(), BookingComponentFactory::new)))),
               Map.entry(
                   EblIssuanceComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

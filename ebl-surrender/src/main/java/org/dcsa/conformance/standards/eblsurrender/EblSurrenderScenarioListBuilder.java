@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.eblsurrender;
 
-import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -9,6 +8,11 @@ import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
+import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState;
+
+import java.util.function.Function;
+
+import static org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState.*;
 
 @Slf4j
 public class EblSurrenderScenarioListBuilder
@@ -26,53 +30,66 @@ public class EblSurrenderScenarioListBuilder
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
     return supplyAvailableTdrAction()
-        .thenEither(
-            requestSurrenderForDelivery(202).then(acceptSurrenderRequest(204)),
-            requestSurrenderForDelivery(202)
-                .thenEither(
-                    acceptSurrenderRequest(204)
-                        .thenEither(
-                            requestSurrenderForDelivery(409),
-                            requestSurrenderForAmendment(409),
-                            acceptSurrenderRequest(409),
-                            rejectSurrenderRequest(409)),
-                    rejectSurrenderRequest(204)
-                        .thenEither(
-                            requestSurrenderForDelivery(202).then(acceptSurrenderRequest(204)),
-                            requestSurrenderForAmendment(202).then(acceptSurrenderRequest(204))),
-                    requestSurrenderForDelivery(409).then(acceptSurrenderRequest(204)),
-                    requestSurrenderForAmendment(409).then(acceptSurrenderRequest(204))),
-            requestSurrenderForAmendment(202).then(acceptSurrenderRequest(204)),
-            requestSurrenderForAmendment(202)
-                .thenEither(
-                    acceptSurrenderRequest(204)
-                        .thenEither(
-                            requestSurrenderForDelivery(409),
-                            requestSurrenderForAmendment(409),
-                            acceptSurrenderRequest(409),
-                            rejectSurrenderRequest(409),
-                            voidAndReissue()
-                                .thenEither(
-                                    requestSurrenderForDelivery(202)
-                                        .then(acceptSurrenderRequest(204)),
-                                    requestSurrenderForAmendment(202)
-                                        .then(acceptSurrenderRequest(204)),
-                                    acceptSurrenderRequest(409),
-                                    rejectSurrenderRequest(409))),
-                    rejectSurrenderRequest(204)
-                        .thenEither(
-                            requestSurrenderForDelivery(202).then(acceptSurrenderRequest(204)),
-                            requestSurrenderForAmendment(202).then(acceptSurrenderRequest(204))),
-                    requestSurrenderForAmendment(409).then(acceptSurrenderRequest(204)),
-                    requestSurrenderForDelivery(409).then(acceptSurrenderRequest(204))),
-            acceptSurrenderRequest(409)
-                .thenEither(
-                    requestSurrenderForDelivery(202).then(acceptSurrenderRequest(204)),
-                    requestSurrenderForAmendment(202).then(acceptSurrenderRequest(204))),
-            rejectSurrenderRequest(409)
-                .thenEither(
-                    requestSurrenderForDelivery(202).then(acceptSurrenderRequest(204)),
-                    requestSurrenderForAmendment(202).then(acceptSurrenderRequest(204))));
+            .thenAllPathsFrom(AVAILABLE_FOR_SURRENDER);
+  }
+
+  private EblSurrenderScenarioListBuilder thenAllPathsFrom(
+          EblSurrenderState surrenderState) {
+    return switch (surrenderState) {
+      case AVAILABLE_FOR_SURRENDER -> thenEither(
+              requestSurrenderForDelivery(202).thenAllPathsFrom(DELIVERY_SURRENDER_REQUESTED),
+              requestSurrenderForAmendment(202).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED),
+              acceptSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER),
+              rejectSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER)
+      );
+      case DELIVERY_SURRENDER_REQUESTED -> thenEither(
+              acceptSurrenderRequest(204).thenAllPathsFrom(SURRENDERED_FOR_DELIVERY),
+              rejectSurrenderRequest(204).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER),
+              requestSurrenderForAmendment(409).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED),
+              requestSurrenderForDelivery(409).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED)
+      );
+      case SURRENDERED_FOR_DELIVERY -> thenAnyRequest(409);
+      case AMENDMENT_SURRENDER_REQUESTED -> thenEither(
+              acceptSurrenderRequest(204).thenAllPathsFrom(SURRENDERED_FOR_AMENDMENT),
+              rejectSurrenderRequest(204).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER),
+              requestSurrenderForAmendment(409).thenAllHappyPathsFrom(AMENDMENT_SURRENDER_REQUESTED),
+              requestSurrenderForDelivery(409).thenAllHappyPathsFrom(AMENDMENT_SURRENDER_REQUESTED)
+      );
+      case SURRENDERED_FOR_AMENDMENT -> thenEither(
+              acceptSurrenderRequest(409).thenAllHappyPathsFrom(SURRENDERED_FOR_AMENDMENT),
+              rejectSurrenderRequest(409).thenAllHappyPathsFrom(SURRENDERED_FOR_AMENDMENT),
+              requestSurrenderForAmendment(409).thenAllHappyPathsFrom(SURRENDERED_FOR_AMENDMENT),
+              requestSurrenderForDelivery(409).thenAllHappyPathsFrom(SURRENDERED_FOR_AMENDMENT),
+              voidAndReissue().thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER)
+      );
+    };
+  }
+
+  private EblSurrenderScenarioListBuilder thenAllHappyPathsFrom(
+          EblSurrenderState surrenderState) {
+    var cases = switch (surrenderState) {
+      case AVAILABLE_FOR_SURRENDER -> requestSurrenderForDelivery(202).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED);
+      case DELIVERY_SURRENDER_REQUESTED -> acceptSurrenderRequest(204);
+      case SURRENDERED_FOR_DELIVERY -> noAction();
+      case AMENDMENT_SURRENDER_REQUESTED -> acceptSurrenderRequest(204)
+              .thenAllHappyPathsFrom(SURRENDERED_FOR_AMENDMENT);
+      case SURRENDERED_FOR_AMENDMENT -> voidAndReissue().thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER);
+    };
+    return thenEither(cases);
+  }
+
+  private EblSurrenderScenarioListBuilder noAction() {
+    return new EblSurrenderScenarioListBuilder(null);
+  }
+
+  private EblSurrenderScenarioListBuilder thenAnyRequest(int status) {
+    return thenEither(
+            noAction(),
+            requestSurrenderForAmendment(status),
+            requestSurrenderForDelivery(status),
+            rejectSurrenderRequest(status),
+            acceptSurrenderRequest(status)
+    );
   }
 
   private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction() {

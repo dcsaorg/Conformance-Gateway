@@ -1,11 +1,5 @@
 package org.dcsa.conformance.core.report;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -13,6 +7,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class ConformanceReport {
@@ -106,32 +106,96 @@ public class ConformanceReport {
   public static String toHtmlReport(Map<String, ConformanceReport> reportsByRole) {
     return String.join(
         "\n",
+        "<!DOCTYPE html>",
         "<html>",
         "<body style=\"font-family: sans-serif;\">",
         "<div>%s</div>".formatted(getDcsaLogoImage()),
         "<h1>Conformance Report</h1>",
         reportsByRole.entrySet().stream()
             .map(
-                roleAndReport ->
-                    "<h2>%s conformance</h2>\n%s\n"
-                        .formatted(
-                            roleAndReport.getKey(), asHtmlBlock(roleAndReport.getValue(), 0)))
+                roleAndReport -> renderReportForRole(roleAndReport.getKey(), roleAndReport.getValue()))
             .collect(Collectors.joining("\n")),
         "</body>",
         "</html>");
   }
 
-  private static String asHtmlBlock(ConformanceReport report, int indent) {
-    return "<div style=\"margin-left: %dem\">\n<h4>%s</h4>\n<div>%s %s %s</div>\n<div>%s</div>\n</div>\n%s\n"
+  private static String renderReportForRole(String role, ConformanceReport report) {
+    return "<h2>%s conformance</h2><details open><summary>%s %s </summary>%n%s%n</details>%n"
+            .formatted(
+                    role,
+                    getConformanceIcon(report.conformanceStatus),
+                    getConformanceLabel(report.conformanceStatus),
+                    renderReport(report, 0));
+  }
+
+  private static String renderReport(ConformanceReport report, int level) {
+    if (level == 0) {
+      return scenarioListAsHtmlBlock(report, level);
+    }
+    if (level == 1) {
+      return scenarioAsHtmlBlock(report, level);
+    }
+    if (level > 1) {
+      return scenarioDetailsAsHtmlBlock(report, level);
+    }
+    return asHtmlBlock(report, level);
+  }
+
+  private static String scenarioAsHtmlBlock(ConformanceReport report, int level) {
+    return "<div style=\"margin-left: %dem\">%n<details><summary>%s %s</summary>%n<div>%s</div>%n%s%n</details></div>%n"
+            .formatted(
+                    level * 2,
+                    getConformanceIcon(report.conformanceStatus),
+                    report.title,
+                    getErrors(report),
+                    report.subReports.stream()
+                            .map(subReport -> renderReport(subReport, level + 1))
+                            .collect(Collectors.joining("\n")));
+  }
+
+  private static String scenarioDetailsAsHtmlBlock(ConformanceReport report, int level) {
+    if (report.subReports.isEmpty() && report.errorMessages.isEmpty()) {
+      return "<h5 style=\"margin-left: %dem\">%s %s (%s)</h5>"
+              .formatted(
+                      level * 2,
+                      getConformanceIcon(report.conformanceStatus),
+                      report.title.trim(),
+                      getConformanceLabel(report.conformanceStatus)
+                      );
+    }
+    return "<div style=\"margin-left: %dem\">%n<details><summary>%s %s</summary>%n<div>%s</div>%n%s%n</details></div>%n"
+            .formatted(
+                    level * 2,
+                    getConformanceIcon(report.conformanceStatus),
+                    report.title,
+                    getErrors(report),
+                    report.subReports.stream()
+                            .map(subReport -> renderReport(subReport, level + 1))
+                            .collect(Collectors.joining("\n")));
+  }
+
+  private static String scenarioListAsHtmlBlock(ConformanceReport report, int level) {
+    return "<div style=\"margin-left: %dem\">%n<h4>%s</h4>%n<div>%s</div>%n</div>%n%s%n"
+            .formatted(
+                    level * 2,
+                    report.title,
+                    getErrors(report),
+                    report.subReports.stream()
+                            .map(subReport -> renderReport(subReport, level + 1))
+                            .collect(Collectors.joining("\n")));
+  }
+
+  private static String asHtmlBlock(ConformanceReport report, int level) {
+    return "<div style=\"margin-left: %dem\">%n<h4>%s</h4>%n<div>%s %s %s</div>%n<div>%s</div>%n</div>%n%s%n"
         .formatted(
-            indent,
+            level * 2,
             report.title,
             getConformanceIcon(report.conformanceStatus),
             getConformanceLabel(report.conformanceStatus),
             getExchangesDetails(report),
             getErrors(report),
             report.subReports.stream()
-                .map(subReport -> asHtmlBlock(subReport, indent + 2))
+                .map(subReport -> renderReport(subReport, level + 1))
                 .collect(Collectors.joining("\n")));
   }
 
@@ -157,7 +221,7 @@ public class ConformanceReport {
     if (Instant.now().toEpochMilli() > 0) return "";
     if (report.conformanceStatus.equals(ConformanceStatus.NO_TRAFFIC)) return "";
     if (!report.subReports.isEmpty()) return "";
-    return "\n<ul>%s%s</ul>"
+    return "%n<ul>%s%s</ul>"
         .formatted(
             report.conformantExchangeCount == 0
                 ? ""
@@ -183,10 +247,11 @@ public class ConformanceReport {
   private static String getDcsaLogoImage() {
     try (InputStream logoStream =
         ConformanceReport.class.getResourceAsStream("/dcsa-logo-base64.txt")) {
-      return "<img src=\"data:image/png;base64,\n%s\n\" alt=\"DCSA logo\"/>"
+      return "<img src=\"data:image/png;base64,%s\" alt=\"DCSA logo\"/>"
           .formatted(
               new String(
-                  Objects.requireNonNull(logoStream).readAllBytes(), StandardCharsets.UTF_8));
+                  Objects.requireNonNull(logoStream).readAllBytes(), StandardCharsets.UTF_8)
+                      .replaceAll("\\s++", ""));
     }
   }
 }

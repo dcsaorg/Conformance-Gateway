@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -42,57 +43,16 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     ObjectMapper objectMapper = new ObjectMapper();
-    {
-      ArrayNode arrayNode = objectMapper.createArrayNode();
-      eblStatesByTdr.forEach(
-          (key, value) -> {
-            ObjectNode entryNode = objectMapper.createObjectNode();
-            entryNode.put("key", key);
-            entryNode.put("value", value.name());
-            arrayNode.add(entryNode);
-          });
-      targetObjectNode.set("eblStatesByTdr", arrayNode);
-    }
-    {
-      ArrayNode arrayNode = objectMapper.createArrayNode();
-      sirsByTdr.forEach(
-          (key, value) -> {
-            ObjectNode entryNode = objectMapper.createObjectNode();
-            entryNode.put("key", key);
-            entryNode.put("value", value);
-            arrayNode.add(entryNode);
-          });
-      targetObjectNode.set("sirsByTdr", arrayNode);
-    }
-    {
-      ArrayNode arrayNode = objectMapper.createArrayNode();
-      brsByTdr.forEach(
-          (key, value) -> {
-            ObjectNode entryNode = objectMapper.createObjectNode();
-            entryNode.put("key", key);
-            entryNode.put("value", value);
-            arrayNode.add(entryNode);
-          });
-      targetObjectNode.set("brsByTdr", arrayNode);
-    }
+    targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
+    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(objectMapper, sirsByTdr));
+    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(objectMapper, brsByTdr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StreamSupport.stream(sourceObjectNode.get("eblStatesByTdr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                eblStatesByTdr.put(
-                    entryNode.get("key").asText(),
-                    EblIssuanceState.valueOf(entryNode.get("value").asText())));
-    StreamSupport.stream(sourceObjectNode.get("sirsByTdr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                sirsByTdr.put(entryNode.get("key").asText(), entryNode.get("value").asText()));
-    StreamSupport.stream(sourceObjectNode.get("brsByTdr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                brsByTdr.put(entryNode.get("key").asText(), entryNode.get("value").asText()));
+    StateManagementUtil.restoreIntoMap(eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
+    StateManagementUtil.restoreIntoMap(sirsByTdr, sourceObjectNode.get("sirsByTdr"));
+    StateManagementUtil.restoreIntoMap(brsByTdr, sourceObjectNode.get("brsByTdr"));
   }
 
   @Override

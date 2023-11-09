@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -40,40 +41,14 @@ public class EblSurrenderPlatform extends ConformanceParty {
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
-    eblStatesById.forEach(
-        (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.put("value", value.name());
-          arrayNodeEblStatesById.add(entryNode);
-        });
-    targetObjectNode.set("eblStatesById", arrayNodeEblStatesById);
-
-    ArrayNode arrayNodeTdrsBySrr = objectMapper.createArrayNode();
-    tdrsBySrr.forEach(
-        (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.put("value", value);
-          arrayNodeTdrsBySrr.add(entryNode);
-        });
-    targetObjectNode.set("tdrsBySrr", arrayNodeTdrsBySrr);
+    targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
+    targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(objectMapper, tdrsBySrr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StreamSupport.stream(sourceObjectNode.get("eblStatesById").spliterator(), false)
-        .forEach(
-            entryNode ->
-                eblStatesById.put(
-                    entryNode.get("key").asText(),
-                    EblSurrenderState.valueOf(entryNode.get("value").asText())));
-
-    StreamSupport.stream(sourceObjectNode.get("tdrsBySrr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                tdrsBySrr.put(entryNode.get("key").asText(), entryNode.get("value").asText()));
+    StateManagementUtil.restoreIntoMap(eblStatesById, sourceObjectNode.get("eblStatesById"), EblSurrenderState::valueOf);
+    StateManagementUtil.restoreIntoMap(tdrsBySrr, sourceObjectNode.get("tdrsBySrr"));
   }
 
   @Override

@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -40,25 +41,12 @@ public class EblSurrenderCarrier extends ConformanceParty {
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode arrayNode = objectMapper.createArrayNode();
-    eblStatesById.forEach(
-        (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.put("value", value.name());
-          arrayNode.add(entryNode);
-        });
-    targetObjectNode.set("eblStatesById", arrayNode);
+    targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StreamSupport.stream(sourceObjectNode.get("eblStatesById").spliterator(), false)
-        .forEach(
-            entryNode ->
-                eblStatesById.put(
-                    entryNode.get("key").asText(),
-                    EblSurrenderState.valueOf(entryNode.get("value").asText())));
+    StateManagementUtil.restoreIntoMap(eblStatesById, sourceObjectNode.get("eblStatesById"), EblSurrenderState::valueOf);
   }
 
   @Override

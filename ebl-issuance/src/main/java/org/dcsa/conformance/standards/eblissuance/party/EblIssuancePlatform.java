@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -39,26 +40,12 @@ public class EblIssuancePlatform extends ConformanceParty {
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     ObjectMapper objectMapper = new ObjectMapper();
-
-    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
-    eblStatesByTdr.forEach(
-        (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.put("value", value.name());
-          arrayNodeEblStatesById.add(entryNode);
-        });
-    targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
+    targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StreamSupport.stream(sourceObjectNode.get("eblStatesByTdr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                eblStatesByTdr.put(
-                    entryNode.get("key").asText(),
-                    EblIssuanceState.valueOf(entryNode.get("value").asText())));
+    StateManagementUtil.restoreIntoMap(eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
   }
 
   @Override

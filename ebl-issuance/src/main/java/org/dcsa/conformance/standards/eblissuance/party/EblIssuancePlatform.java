@@ -22,6 +22,7 @@ import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblIssuancePlatform(
       String apiVersion,
@@ -39,7 +40,6 @@ public class EblIssuancePlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
     targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
   }
 
@@ -74,7 +74,7 @@ public class EblIssuancePlatform extends ConformanceParty {
 
     asyncCounterpartPost(
         "/v1/issuance-responses",
-        new ObjectMapper()
+        objectMapper
             .createObjectNode()
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", irc));
@@ -98,7 +98,7 @@ public class EblIssuancePlatform extends ConformanceParty {
               400,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
-                  new ObjectMapper()
+                  objectMapper
                       .createObjectNode()
                       .put(
                           "message",
@@ -110,14 +110,14 @@ public class EblIssuancePlatform extends ConformanceParty {
           request.createResponse(
               204,
               Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+              new ConformanceMessageBody(objectMapper.createObjectNode()));
     } else {
       response =
           request.createResponse(
               409,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
-                  new ObjectMapper()
+                  objectMapper
                       .createObjectNode()
                       .put(
                           "message",

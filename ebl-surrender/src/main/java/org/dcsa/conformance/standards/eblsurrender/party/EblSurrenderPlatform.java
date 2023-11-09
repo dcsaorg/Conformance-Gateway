@@ -22,6 +22,7 @@ import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction
 public class EblSurrenderPlatform extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblSurrenderPlatform(
       String apiVersion,
@@ -39,8 +40,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
-
     targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
     targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(objectMapper, tdrsBySrr));
   }
@@ -75,7 +74,6 @@ public class EblSurrenderPlatform extends ConformanceParty {
         forAmendment
             ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
-    ObjectMapper objectMapper = new ObjectMapper();
     ObjectNode jsonRequestBody =
         objectMapper
             .createObjectNode()
@@ -137,7 +135,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
           request.createResponse(
               204,
               Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+              new ConformanceMessageBody(objectMapper.createObjectNode()));
     } else if (Objects.equals(
         EblSurrenderState.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
@@ -149,14 +147,14 @@ public class EblSurrenderPlatform extends ConformanceParty {
           request.createResponse(
               204,
               Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+              new ConformanceMessageBody(objectMapper.createObjectNode()));
     } else {
       response =
           request.createResponse(
               409,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
-                  new ObjectMapper()
+                  objectMapper
                       .createObjectNode()
                       .put(
                           "comments",

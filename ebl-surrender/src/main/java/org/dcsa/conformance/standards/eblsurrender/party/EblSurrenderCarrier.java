@@ -23,6 +23,7 @@ import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -40,7 +41,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
     targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
   }
 
@@ -65,10 +65,10 @@ public class EblSurrenderCarrier extends ConformanceParty {
   private void supplyAvailableTdr(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderCarrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
+    String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
-        new ObjectMapper()
+          objectMapper
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
             .put("input", tdr));
@@ -86,7 +86,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
-        new ObjectMapper()
+        objectMapper
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText()));
     addOperatorLogEntry(
@@ -118,7 +118,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     asyncCounterpartPost(
         "/v1/surrender-request-responses",
-        new ObjectMapper()
+        objectMapper
             .createObjectNode()
             .put("surrenderRequestReference", srr)
             .put("action", accept ? "SURR" : "SREJ"));
@@ -151,7 +151,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
           202,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
-              new ObjectMapper()
+              objectMapper
                   .createObjectNode()
                   .put("surrenderRequestReference", srr)
                   .put("transportDocumentReference", tdr)));
@@ -160,7 +160,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
           409,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
-              new ObjectMapper()
+              objectMapper
                   .createObjectNode()
                   .put(
                       "comments",

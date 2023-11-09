@@ -25,6 +25,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblIssuanceCarrier(
       String apiVersion,
@@ -42,7 +43,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
     targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
     targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(objectMapper, sirsByTdr));
     targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(objectMapper, brsByTdr));
@@ -120,13 +120,13 @@ public class EblIssuanceCarrier extends ConformanceParty {
       return request.createResponse(
           204,
           Map.of("Api-Version", List.of(apiVersion)),
-          new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+          new ConformanceMessageBody(objectMapper.createObjectNode()));
     } else {
       return request.createResponse(
           409,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
-              new ObjectMapper()
+              objectMapper
                   .createObjectNode()
                   .put(
                       "message",

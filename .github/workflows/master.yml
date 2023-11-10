@@ -27,8 +27,7 @@ jobs:
         run: cd Conformance-Gateway && mvn clean -U -B package -DskipTests
 
       - name: Run the app
-        run: cd Conformance-Gateway/spring-boot/ &&  mvn spring-boot:run
-
+        run: cd Conformance-Gateway/spring-boot/ && docker-compose -f docker-compose.yml up -d -V --build
 
       - name: Fetch Backend Status
         run: |

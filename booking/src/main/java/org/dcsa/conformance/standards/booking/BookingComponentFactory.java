@@ -116,8 +116,8 @@ public class BookingComponentFactory extends AbstractComponentFactory {
                 standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
     String schemaName =
         BookingRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "BookingNotification_data" : null)
-            : (forRequest ? "BookingNotification_data" : "BookingNotification_data");
+            ? (forRequest ? "BookingNotification" : null)
+            : (forRequest ? "BookingNotification" : "BookingNotification");
     return new JsonSchemaValidator(
         BookingComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
   }

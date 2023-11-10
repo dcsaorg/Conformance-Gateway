@@ -3,7 +3,9 @@ name: Conformance-Gateway CI
 on:
   workflow_dispatch:
   push:
-    branches: [ "dev" ]
+    branches:
+      - dev
+      - DT-613-Conformance-framework-add-CI-CD-pipeline
   pull_request:
     branches: [ "dev" ]
 

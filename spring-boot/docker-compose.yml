@@ -1,0 +1,9 @@
+version: '3.5'
+
+services:
+  conformance-gateway:
+    container_name: conformance-gateway
+    build:
+      .
+    ports:
+      - 8080:8080

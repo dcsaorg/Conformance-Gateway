@@ -10,7 +10,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 EXPOSE 8080
 
-#VOLUME /tmp
-#
-#COPY --from=builder /src/target/*.jar spring-boot-0.0.1.jar
-#ENTRYPOINT ["java","-jar","/spring-boot-0.0.1.jar"]
+VOLUME /tmp
+
+COPY --from=builder /src/target/*.jar spring-boot-0.0.1.jar
+ENTRYPOINT ["java","-jar","/spring-boot-0.0.1.jar"]

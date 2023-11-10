@@ -2,9 +2,10 @@ name: Conformance-Gateway CI
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "dev" ]
   pull_request:
-    branches:
-      - master
+    branches: [ "dev" ]
 
 jobs:
   build:

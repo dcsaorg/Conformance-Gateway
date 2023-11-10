@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: Conformance-Gateway
-          submodules: recursive
+#          submodules: recursive
 
       - name: Set up Java JDK
         uses: actions/setup-java@v3
@@ -25,11 +25,11 @@ jobs:
           java-version: 17
           cache: 'maven'
 
-      - name: Build Conformance-Gateway
-        run: cd Conformance-Gateway && mvn clean -U -B package -DskipTests
+#      - name: Build Conformance-Gateway
+#        run: cd Conformance-Gateway && mvn clean -U -B package -DskipTests
 
       - name: Run the app
-        run: cd Conformance-Gateway/spring-boot/ && docker-compose -f docker-compose.yml up -d -V --build
+        run: cd spring-boot/ && docker-compose -f docker-compose.yml up -d -V --build
 
       - name: Fetch Backend Status
         run: |

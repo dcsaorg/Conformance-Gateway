@@ -3,8 +3,7 @@ package org.dcsa.conformance.standards.booking.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.*;
-import java.util.function.Consumer;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -18,11 +17,15 @@ import org.dcsa.conformance.standards.booking.action.Carrier_SupplyScenarioParam
 import org.dcsa.conformance.standards.booking.action.UC11_Carrier_ConfirmBookingCompletedAction;
 import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
 
+import java.util.*;
+import java.util.function.Consumer;
+
 @Slf4j
 public class Carrier extends ConformanceParty {
   private static final Random RANDOM = new Random();
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final Map<String, BookingState> bookingStatesByCbrr = new HashMap<>();
+  private final Map<String, String> cbrrToCbr = new HashMap<>();
 
   public Carrier(
       String apiVersion,
@@ -43,12 +46,17 @@ public class Carrier extends ConformanceParty {
     targetObjectNode.set(
         "bookingStatesByCbrr",
         StateManagementUtil.storeMap(objectMapper, bookingStatesByCbrr, BookingState::name));
+      targetObjectNode.set(
+              "cbrrToCbr",
+              StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(
         bookingStatesByCbrr, sourceObjectNode.get("bookingStatesByCbrr"), BookingState::valueOf);
+      StateManagementUtil.restoreIntoMap(
+              cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
   }
 
   @Override
@@ -103,14 +111,33 @@ public class Carrier extends ConformanceParty {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.get("cbrr").asText();
-
+    String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
+    boolean isCorrect = actionPrompt.get("isCorrect").asBoolean();
     if (!Objects.equals(BookingState.CONFIRMED, currentState)) {
       throw new IllegalStateException(
               "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
     }
+    if (cbr == null && isCorrect) {
+        throw new IllegalStateException(
+                "Booking '%s' did not have a carrier booking reference".formatted(cbrr));
+    }
 
-    bookingStatesByCbrr.put(cbrr, BookingState.COMPLETED);
+    if (isCorrect) {
+        bookingStatesByCbrr.put(cbrr, BookingState.COMPLETED);
+    }
+    var notification = BookingNotification.builder()
+              .apiVersion(apiVersion)
+              .carrierBookingReference(cbr)
+              .bookingStatus(BookingState.COMPLETED.name())
+              .build()
+              .asJsonNode();
+
+    if (!isCorrect) {
+        ((ObjectNode) notification.get("data")).remove("bookingStatus");
+    }
+
+    asyncCounterpartPost("/v1/booking-notifications", notification);
 
     asyncOrchestratorPostPartyInput(
             objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
@@ -177,5 +204,60 @@ public class Carrier extends ConformanceParty {
     addOperatorLogEntry(
         "Accepted booking request '%s' (now in state '%s')".formatted(cbrr, bookingState.name()));
     return response;
+  }
+
+  @Builder
+  private static class BookingNotification {
+    @Builder.Default
+    private String id = UUID.randomUUID().toString();
+    @Builder.ObtainVia(method = "defaultSource")
+    private String source;
+    private String type;
+    private String apiVersion;
+
+    private String carrierBookingReference;
+    private String carrierBookingRequestReference;
+    private String bookingStatus;
+    private String origin;
+
+    private String defaultSource() {
+            return "https://conformance.dcsa.org";
+        }
+
+    private String computedType() {
+      if (type != null) {
+        return type;
+      }
+      if (apiVersion != null) {
+        var majorVersion = String.valueOf(apiVersion.charAt(0));
+        return "org.dcsa.bookingnotification.v" + majorVersion;
+      }
+      return null;
+    }
+
+    public JsonNode asJsonNode() {
+      ObjectMapper objectMapper = new ObjectMapper();
+      var notification = objectMapper.createObjectNode();
+      setIfNotNull(notification, "id", id);
+      setIfNotNull(notification, "source", source);
+      setIfNotNull(notification, "type", computedType());
+      var data = objectMapper.createObjectNode();
+
+      setIfNotNull(notification, "carrierBookingReference", carrierBookingReference);
+      setIfNotNull(notification, "carrierBookingRequestReference", carrierBookingRequestReference);
+      setIfNotNull(notification, "bookingStatus", bookingStatus);
+      setIfNotNull(notification, "origin", origin);
+
+      if (!data.isEmpty()) {
+        notification.putObject("data").put("datacontenttype", "application/json");
+      }
+      return notification;
+    }
+
+    private void setIfNotNull(ObjectNode node, String key, String value) {
+      if (value != null) {
+        node.put(key, value);
+      }
+    }
   }
 }

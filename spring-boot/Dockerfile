@@ -1,8 +1,8 @@
 FROM maven:3.8.5-eclipse-temurin-17-alpine as builder
 
-#COPY build.sh /opt/src/scripts/build.sh
-#RUN /opt/src/scripts/build.sh
-CMD ["/build.sh"]
+COPY build.sh /opt/src/scripts/build.sh
+RUN /opt/src/scripts/build.sh
+#CMD ["/build.sh"]
 WORKDIR /src
 COPY . .
 

@@ -359,13 +359,13 @@ public class ConformanceWebuiHandler {
   private JsonNode _handleActionInput(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
-    JsonNode actionInputNode = requestNode.get("actionInput");
+    JsonNode actionInputOrNull = requestNode.get("actionInput");
     return ConformanceSandbox.handleActionInput(
         persistenceProvider,
         asyncWebClient,
         sandboxId,
         requestNode.get("actionId").asText(),
-        actionInputNode == null ? null : actionInputNode.asText());
+        actionInputOrNull);
   }
 
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {

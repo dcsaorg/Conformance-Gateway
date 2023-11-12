@@ -366,10 +366,10 @@ public class ConformanceSandbox {
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId,
       String actionId,
-      String actionInputOrNull) {
+      JsonNode actionInputOrNull) {
     ObjectNode partyInput = new ObjectMapper().createObjectNode().put("actionId", actionId);
     if (actionInputOrNull != null) {
-      partyInput.put("input", actionInputOrNull);
+      partyInput.set("input", actionInputOrNull);
     }
     new OrchestratorTask(
             persistenceProvider,

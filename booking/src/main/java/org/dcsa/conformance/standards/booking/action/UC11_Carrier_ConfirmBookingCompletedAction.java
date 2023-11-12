@@ -22,8 +22,8 @@ public class UC11_Carrier_ConfirmBookingCompletedAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC11: Complete the booking request with CBR %s"
-        .formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC11: Complete the booking request with CBRR %s"
+        .formatted(getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override

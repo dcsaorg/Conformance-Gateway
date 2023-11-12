@@ -65,6 +65,10 @@ export class ScenarioComponent {
     }
   }
 
+  getJsonForPromptText(): string {
+    return JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
+  }
+
   cannotSubmit(): boolean {
     return this.actionInput.trim() === '';
   }
@@ -74,7 +78,7 @@ export class ScenarioComponent {
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
-      withInput ? this.actionInput.trim() : undefined);
+      withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
     await this.loadScenarioStatus();
   }
 }

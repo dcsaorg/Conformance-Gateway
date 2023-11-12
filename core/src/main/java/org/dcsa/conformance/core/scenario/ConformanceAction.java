@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.state.StatefulEntity;
@@ -62,7 +60,7 @@ public abstract class ConformanceAction implements StatefulEntity {
   public abstract String getHumanReadablePrompt();
 
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new TextNode("");
+    return null;
   }
 
   public boolean isConfirmationRequired() {

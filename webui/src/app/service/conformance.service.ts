@@ -80,7 +80,7 @@ export class ConformanceService {
     return scenarioStatus;
   }
 
-  async handleActionInput(sandboxId: string, scenarioId: string, actionId: string, actionInput: string | undefined): Promise<ScenarioStatus> {
+  async handleActionInput(sandboxId: string, scenarioId: string, actionId: string, actionInput: any | string | undefined): Promise<ScenarioStatus> {
     const scenarioStatus: ScenarioStatus = await this.apiService.call({
       operation: "handleActionInput",
       sandboxId,

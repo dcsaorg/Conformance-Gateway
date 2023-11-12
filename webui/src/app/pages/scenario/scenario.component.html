@@ -25,6 +25,10 @@
             <div *ngIf="scenarioStatus.promptText">
                 <div class="paragraph">{{scenarioStatus.promptText}}</div>
     
+                <div *ngIf="scenarioStatus.jsonForPromptText" class="paragraph">
+                    <pre>{{getJsonForPromptText()}}</pre>
+                </div>
+    
                 <div *ngIf="scenarioStatus.inputRequired">
                     <div class="paragraph">
                         <mat-form-field

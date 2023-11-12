@@ -74,9 +74,6 @@ public class Shipper_GetBookingAction extends BookingAction {
                 HttpMessageType.RESPONSE) {
               @Override
               protected Set<String> checkConformance(ConformanceExchange exchange) {
-                // TODO
-                // Pass UUID -> message function to doCheck() instead of exchange
-                // Check more fields against previousAction.getMatchedExchangeUuid()
                 String exchangeState =
                     exchange
                         .getResponse()

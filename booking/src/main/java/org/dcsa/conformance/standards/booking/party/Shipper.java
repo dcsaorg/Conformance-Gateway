@@ -35,17 +35,17 @@ public class Shipper extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    // TODO
+    // no state to export
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    // TODO
+    // no state to import
   }
 
   @Override
   protected void doReset() {
-    // TODO
+    // no state to reset
   }
 
   @Override
@@ -90,28 +90,15 @@ public class Shipper extends ConformanceParty {
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Shipper.handleRequest(%s)".formatted(request));
-    ConformanceResponse response;
-    if (System.currentTimeMillis() < 0) { // FIXME 🦖
-      response =
-          request.createResponse(
-              204,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
-    } else {
-      response =
-          request.createResponse(
-              409,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(
-                  new ObjectMapper()
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting booking request '%s' because '%s'"
-                              .formatted("TODO", "TODO"))));
-    }
+
+    ConformanceResponse response =
+        request.createResponse(
+            204,
+            Map.of("Api-Version", List.of(apiVersion)),
+            new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+
     addOperatorLogEntry(
-        "Handling booking request '%s' (now in state '%s')".formatted("TODO", "TODO"));
+        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
 }

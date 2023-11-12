@@ -22,7 +22,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    if (System.currentTimeMillis() > 0) { // FIXME 🦖
+    if (System.currentTimeMillis() > 0) { // FIXME
       return carrier_SupplyScenarioParameters()
           .then(
               uc1_shipper_SubmitBookingRequest()

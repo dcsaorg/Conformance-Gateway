@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.booking.action;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -8,16 +10,20 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class Shipper_GetBookingAction extends BookingAction {
+  private final BookingState expectedState;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public Shipper_GetBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedState,
       JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "GET", 200);
+    this.expectedState = expectedState;
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
@@ -43,7 +49,7 @@ public class Shipper_GetBookingAction extends BookingAction {
             new UrlPathCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v2/booking/" + getDspSupplier().get().carrierBookingRequestReference()),
+                "/v2/bookings/" + getDspSupplier().get().carrierBookingRequestReference()),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
@@ -70,8 +76,20 @@ public class Shipper_GetBookingAction extends BookingAction {
               protected Set<String> checkConformance(ConformanceExchange exchange) {
                 // TODO
                 // Pass UUID -> message function to doCheck() instead of exchange
-                // Check against previousAction.getMatchedExchangeUuid()
-                return null;
+                // Check more fields against previousAction.getMatchedExchangeUuid()
+                String exchangeState =
+                    exchange
+                        .getResponse()
+                        .message()
+                        .body()
+                        .getJsonBody()
+                        .get("bookingStatus")
+                        .asText();
+                return Objects.equals(exchangeState, expectedState.name())
+                    ? Collections.emptySet()
+                    : Set.of(
+                        "Expected bookingStatus '%s' but found '%s'"
+                            .formatted(expectedState.name(), exchangeState));
               }
             })
         // .filter(Objects::nonNull)

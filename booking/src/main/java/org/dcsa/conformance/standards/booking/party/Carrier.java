@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.Carrier_SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.booking.action.UC11_Carrier_ConfirmBookingCompletedAction;
 import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
 
 @Slf4j
@@ -59,7 +60,8 @@ public class Carrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-        Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest));
+        Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
+        Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -83,17 +85,37 @@ public class Carrier extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
 
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    switch (currentState) {
-      case RECEIVED:
-      case PENDING_UPDATE_CONFIRMATION:
-        bookingStatesByCbrr.put(cbrr, BookingState.CONFIRMED);
-        break;
-      default:
-        throw new IllegalStateException(
-            "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
+    if (!Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION)
+        .contains(currentState)) {
+      throw new IllegalStateException(
+          "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
     }
 
+    bookingStatesByCbrr.put(cbrr, BookingState.CONFIRMED);
+
+    asyncOrchestratorPostPartyInput(
+        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+
     addOperatorLogEntry("Confirmed the booking request with CBRR '%s'".formatted(cbrr));
+  }
+
+  private void confirmBookingCompleted(JsonNode actionPrompt) {
+    log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    BookingState currentState = bookingStatesByCbrr.get(cbrr);
+    if (!Objects.equals(BookingState.CONFIRMED, currentState)) {
+      throw new IllegalStateException(
+              "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
+    }
+
+    bookingStatesByCbrr.put(cbrr, BookingState.COMPLETED);
+
+    asyncOrchestratorPostPartyInput(
+            objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+
+    addOperatorLogEntry("Completed the booking request with CBRR '%s'".formatted(cbrr));
   }
 
   @Override

@@ -29,7 +29,7 @@ public class UC11_Carrier_ConfirmBookingCompletedAction extends BookingAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
+    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
   }
 

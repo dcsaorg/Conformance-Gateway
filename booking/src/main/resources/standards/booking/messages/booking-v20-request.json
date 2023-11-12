@@ -1,1 +1,7 @@
-{}
+{
+  "vessel": {
+    "vesselIMONumber": "VESSEL_IMO_NUMBER_PLACEHOLDER"
+  },
+  "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
+  "TODO": "..."
+}

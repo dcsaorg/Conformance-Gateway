@@ -2,24 +2,23 @@ package org.dcsa.conformance.standards.booking.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.booking.action.Shipper_GetBookingAction;
+import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
 
 @Slf4j
 public class Shipper extends ConformanceParty {
-  private final Map<String, BookingState> eblStatesByTdr = new HashMap<>();
-
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -36,78 +35,63 @@ public class Shipper extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
-    eblStatesByTdr.forEach(
-        (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.put("value", value.name());
-          arrayNodeEblStatesById.add(entryNode);
-        });
-    targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
+    // TODO
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StreamSupport.stream(sourceObjectNode.get("eblStatesByTdr").spliterator(), false)
-        .forEach(
-            entryNode ->
-                eblStatesByTdr.put(
-                    entryNode.get("key").asText(),
-                    BookingState.valueOf(entryNode.get("value").asText())));
+    // TODO
   }
 
   @Override
   protected void doReset() {
-    eblStatesByTdr.clear();
+    // TODO
   }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries();
+    return Map.ofEntries(
+        Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
+        Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest));
   }
 
-  private void sendBookingResponse(JsonNode actionPrompt) {
-    log.info("BookingShipper.sendBookingResponse(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
-    String irc = actionPrompt.get("irc").asText();
+  private void getBookingRequest(JsonNode actionPrompt) {
+    log.info("Shipper.getBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
 
-    asyncCounterpartPost(
-        "/v1/booking-responses",
-        new ObjectMapper()
-            .createObjectNode()
-            .put("transportDocumentReference", tdr)
-            .put("bookingResponseCode", irc));
+    asyncCounterpartGet("/v2/bookings/" + cbrr);
+
+    addOperatorLogEntry("Sent a GET request for booking with CBRR: %s".formatted(cbrr));
+  }
+
+  private void sendBookingRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    CarrierScenarioParameters carrierScenarioParameters =
+        CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+
+    JsonNode jsonRequestBody =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/booking/messages/booking-v20-request.json",
+            Map.ofEntries(
+                Map.entry(
+                    "CARRIER_SERVICE_NAME_PLACEHOLDER",
+                    carrierScenarioParameters.carrierServiceName()),
+                Map.entry(
+                    "VESSEL_IMO_NUMBER_PLACEHOLDER", carrierScenarioParameters.vesselIMONumber())));
+
+    asyncCounterpartPost("/v2/bookings", jsonRequestBody);
 
     addOperatorLogEntry(
-        "Sending booking response with bookingResponseCode '%s' for eBL with transportDocumentReference '%s'"
-            .formatted(irc, tdr));
+        "Sent a booking request with the parameters: %s"
+            .formatted(carrierScenarioParameters.toJson()));
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("BookingShipper.handleRequest(%s)".formatted(request));
-    JsonNode jsonRequest = request.message().body().getJsonBody();
-
-    String tdr = jsonRequest.get("document").get("transportDocumentReference").asText();
-
+    log.info("Shipper.handleRequest(%s)".formatted(request));
     ConformanceResponse response;
-    if (!jsonRequest.get("document").has("issuingParty")) {
-      response =
-          request.createResponse(
-              400,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(
-                  new ObjectMapper()
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting booking request for document '%s' because the issuing party is missing"
-                              .formatted(tdr))));
-    } else if (!eblStatesByTdr.containsKey(tdr)) {
-      eblStatesByTdr.put(tdr, BookingState.RECEIVED);
+    if (System.currentTimeMillis() < 0) { // FIXME 🦖
       response =
           request.createResponse(
               204,
@@ -123,12 +107,11 @@ public class Shipper extends ConformanceParty {
                       .createObjectNode()
                       .put(
                           "message",
-                          "Rejecting booking request for document '%s' because it is in state '%s'"
-                              .formatted(tdr, eblStatesByTdr.get(tdr)))));
+                          "Rejecting booking request '%s' because '%s'"
+                              .formatted("TODO", "TODO"))));
     }
     addOperatorLogEntry(
-        "Handling booking request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(tdr, eblStatesByTdr.get(tdr)));
+        "Handling booking request '%s' (now in state '%s')".formatted("TODO", "TODO"));
     return response;
   }
 }

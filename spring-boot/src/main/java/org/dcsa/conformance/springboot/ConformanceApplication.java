@@ -336,6 +336,8 @@ public class ConformanceApplication {
             .formatted(localhostAuthUrlToken, sandboxId),
         "<a href=\"/conformance/%s/sandbox/%s/report\">Report</a> - "
             .formatted(localhostAuthUrlToken, sandboxId),
+        "<a href=\"/conformance/%s/sandbox/%s/printableReport\">Printable</a> - "
+            .formatted(localhostAuthUrlToken, sandboxId),
         "<a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a> - "
             .formatted(localhostAuthUrlToken, sandboxId, "Carrier1"),
         "<a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Platform1 prompt</a>"

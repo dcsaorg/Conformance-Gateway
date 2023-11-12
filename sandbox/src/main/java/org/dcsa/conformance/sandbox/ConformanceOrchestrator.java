@@ -255,7 +255,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     notifyNextActionParty();
   }
 
-  public String generateReport(Set<String> roleNames) {
+  public String generateReport(Set<String> roleNames, boolean printable) {
     if (!sandboxConfiguration.getOrchestrator().isActive()) throw new IllegalStateException();
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
@@ -268,7 +268,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
         .forEach(conformanceCheck::check);
 
     return ConformanceReport.toHtmlReport(
-        ConformanceReport.createForRoles(conformanceCheck, roleNames));
+        ConformanceReport.createForRoles(conformanceCheck, roleNames), printable);
   }
 
   public ArrayNode getScenarioDigests() {
@@ -343,6 +343,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
         && Objects.equals(nextAction.getSourcePartyName(), _getManualCounterpart().getName())) {
       scenarioNode.put("promptActionId", nextAction.getId().toString());
       scenarioNode.put("promptText", nextAction.getHumanReadablePrompt());
+      scenarioNode.set("jsonForPromptText", nextAction.getJsonForHumanReadablePrompt());
       scenarioNode.put("confirmationRequired", nextAction.isConfirmationRequired());
       scenarioNode.put("inputRequired", nextAction.isInputRequired());
     }

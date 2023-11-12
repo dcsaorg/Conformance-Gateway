@@ -1,55 +1,37 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
 import java.util.stream.Stream;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
-@Getter
-@Slf4j
-public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
-  private final JsonSchemaValidator requestSchemaValidator;
+public class Shipper_GetBookingAction extends BookingAction {
+  private final JsonSchemaValidator responseSchemaValidator;
 
-  public UC1_Shipper_SubmitBookingRequestAction(
+  public Shipper_GetBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
-    this.requestSchemaValidator = requestSchemaValidator;
-  }
-
-  @Override
-  public String getHumanReadablePrompt() {
-    return ("UC1: Submit a booking request using the following parameters:");
-  }
-
-  @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
+      JsonSchemaValidator responseSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "GET", 200);
+    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("csp", getCspSupplier().get().toJson());
+    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
   }
 
   @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
-    JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    getDspConsumer()
-        .accept(
-            new DynamicScenarioParameters(
-                responseJsonNode.get("carrierBookingRequestReference").asText(),
-                getDspSupplier().get().carrierBookingReference()));
+  public String getHumanReadablePrompt() {
+    return "GET the booking with CBR '%s'"
+        .formatted(getDspSupplier().get().carrierBookingReference());
   }
 
   @Override
@@ -58,7 +40,10 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings"),
+            new UrlPathCheck(
+                BookingRole::isShipper,
+                getMatchedExchangeUuid(),
+                "/v2/booking/" + getDspSupplier().get().carrierBookingRequestReference()),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
@@ -75,7 +60,20 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator))
+                responseSchemaValidator),
+            new ActionCheck(
+                "GET returns the expected Booking data",
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE) {
+              @Override
+              protected Set<String> checkConformance(ConformanceExchange exchange) {
+                // TODO
+                // Pass UUID -> message function to doCheck() instead of exchange
+                // Check against previousAction.getMatchedExchangeUuid()
+                return null;
+              }
+            })
         // .filter(Objects::nonNull)
         ;
       }

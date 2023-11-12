@@ -131,6 +131,28 @@ public abstract class ConformanceParty implements StatefulEntity {
                 System.currentTimeMillis())));
   }
 
+  protected void asyncCounterpartGet(String path) {
+    asyncWebClient.accept(
+        new ConformanceRequest(
+            "GET",
+            counterpartConfiguration.getUrl() + path,
+            Collections.emptyMap(),
+            new ConformanceMessage(
+                partyConfiguration.getName(),
+                partyConfiguration.getRole(),
+                counterpartConfiguration.getName(),
+                counterpartConfiguration.getRole(),
+                counterpartConfiguration.getAuthHeaderName().isBlank()
+                    ? Map.of("Api-Version", List.of(apiVersion))
+                    : Map.of(
+                        "Api-Version",
+                        List.of(apiVersion),
+                        counterpartConfiguration.getAuthHeaderName(),
+                        List.of(counterpartConfiguration.getAuthHeaderValue())),
+                new ConformanceMessageBody(""),
+                System.currentTimeMillis())));
+  }
+
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
     asyncWebClient.accept(
         new ConformanceRequest(
@@ -167,15 +189,13 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   public void reset() {
-    log.info(
-            "%s[%s].reset()"
-                    .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    log.info("%s[%s].reset()".formatted(getClass().getSimpleName(), partyConfiguration.getName()));
     this.actionPromptsQueue.clear();
     this.operatorLog.clear();
     doReset();
   }
 
-  abstract protected void doReset();
+  protected abstract void doReset();
 
   @SneakyThrows
   private JsonNode _syncGetPartyPrompt() {

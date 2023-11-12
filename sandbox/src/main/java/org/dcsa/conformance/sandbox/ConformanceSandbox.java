@@ -254,7 +254,9 @@ public class ConformanceSandbox {
     } else if (remainingUri.equals("/status")) {
       return _handleGetStatus(persistenceProvider, asyncWebClient, sandboxId);
     } else if (remainingUri.equals("/report")) {
-      return _handleGenerateReport(persistenceProvider, asyncWebClient, sandboxId);
+      return _handleGenerateReport(persistenceProvider, asyncWebClient, sandboxId, false);
+    } else if (remainingUri.equals("/printableReport")) {
+      return _handleGenerateReport(persistenceProvider, asyncWebClient, sandboxId, true);
     } else if (remainingUri.equals("/reset")) {
       return _handleReset(persistenceProvider, asyncWebClient, sandboxId);
     }
@@ -552,7 +554,8 @@ public class ConformanceSandbox {
   private static ConformanceWebResponse _handleGenerateReport(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
-      String sandboxId) {
+      String sandboxId,
+      boolean printable) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
 
@@ -567,7 +570,7 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "generating report for roles: " + reportRoleNames,
-            orchestrator -> reportReference.set(orchestrator.generateReport(reportRoleNames)))
+            orchestrator -> reportReference.set(orchestrator.generateReport(reportRoleNames, printable)))
         .run();
     return new ConformanceWebResponse(
         200, "text/html;charset=utf-8", Collections.emptyMap(), reportReference.get());

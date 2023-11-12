@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -17,32 +16,20 @@ public class UC11_Carrier_ConfirmBookingCompletedAction extends BookingAction {
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(
-        carrierPartyName,
-        shipperPartyName,
-        previousAction,
-        "UC11",
-        204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC11", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
-  protected Supplier<String> getCbrrSupplier() {
-    return ((BookingAction) this.previousAction).getCbrrSupplier();
-  }
-
-  @Override
   public String getHumanReadablePrompt() {
-    return ("UC11: Complete the booking request with CBRR %s".formatted(getCbrrSupplier().get()));
+    return ("UC11: Complete the booking request with CBR %s"
+        .formatted(getDspSupplier().get().carrierBookingReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    String cbrr = getCbrrSupplier().get();
-    if (cbrr != null) {
-      jsonNode.put("cbrr", cbrr);
-    }
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 

@@ -213,18 +213,14 @@ public class Carrier extends ConformanceParty {
   private static class BookingNotification {
     @Builder.Default
     private String id = UUID.randomUUID().toString();
-    @Builder.ObtainVia(method = "defaultSource")
-    private String source;
+    @Builder.Default
+    private String source = "https://conformance.dcsa.org";
     private String type;
     private String apiVersion;
 
     private String carrierBookingReference;
     private String carrierBookingRequestReference;
     private String bookingStatus;
-
-    private String defaultSource() {
-      return "https://conformance.dcsa.org";
-    }
 
     private String computedType() {
       if (type != null) {

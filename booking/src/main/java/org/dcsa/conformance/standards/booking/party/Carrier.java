@@ -73,12 +73,30 @@ public class Carrier extends ConformanceParty {
         Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
+  private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
+    int sum = 0;
+    assert vesselIMONumberSansCheckDigit.length() == 6;
+    for (int i = 0; i < 6; i++) {
+      char c = vesselIMONumberSansCheckDigit.charAt(i);
+      assert c >= '0' && c <= '9';
+      sum += (7 - i) * Character.getNumericValue(c);
+    }
+    String s = String.valueOf(sum);
+    return s.charAt(s.length() - 1);
+  }
+
+  private String generateSchemaValidVesselIMONumber() {
+    var vesselIMONumberSansCheckDigit = "%06d".formatted(RANDOM.nextInt(999999));
+    var checkDigit = computeVesselIMONumberCheckDigit(vesselIMONumberSansCheckDigit);
+    return vesselIMONumberSansCheckDigit + checkDigit;
+  }
+
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-            "9%06d".formatted(RANDOM.nextInt(999999)));
+            generateSchemaValidVesselIMONumber());
     asyncOrchestratorPostPartyInput(
         objectMapper
             .createObjectNode()

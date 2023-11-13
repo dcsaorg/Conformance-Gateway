@@ -2,7 +2,9 @@ package org.dcsa.conformance.core.check;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -28,16 +30,16 @@ public class ConformanceCheck {
     return _subChecks;
   }
 
-  public final void check(ConformanceExchange exchange) {
+  public final void check(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     List<ConformanceCheck> subChecks = getSubChecks();
     if (subChecks.isEmpty()) {
-      this.doCheck(exchange);
+      this.doCheck(getExchangeByUuid);
     } else {
-      subChecks.forEach(subCheck -> subCheck.check(exchange));
+      subChecks.forEach(subCheck -> subCheck.check(getExchangeByUuid));
     }
   }
 
-  protected void doCheck(ConformanceExchange exchange) {}
+  protected void doCheck(Function<UUID, ConformanceExchange> getExchangeByUuid) {}
 
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.empty();

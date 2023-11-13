@@ -3,6 +3,7 @@ package org.dcsa.conformance.core.check;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -23,7 +24,9 @@ public class ResponseStatusCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(ConformanceExchange exchange) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+    if (exchange == null) return Collections.emptySet();
     int responseStatus = exchange.getResponse().statusCode();
     return responseStatus == expectedResponseStatus
         ? Collections.emptySet()

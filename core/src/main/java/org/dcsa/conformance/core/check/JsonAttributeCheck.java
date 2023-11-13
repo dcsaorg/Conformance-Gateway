@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.check;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -28,8 +29,13 @@ public class JsonAttributeCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(ConformanceExchange exchange) {
-    JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+    if (exchange == null) return Collections.emptySet();
+    JsonNode jsonBody = exchange
+            .getMessage(httpMessageType)
+            .body()
+            .getJsonBody();
     String actualValue = JsonToolkit.getTextAttributeOrNull(jsonBody, attributeName);
     return expectedValue.equals(actualValue)
         ? Collections.emptySet()

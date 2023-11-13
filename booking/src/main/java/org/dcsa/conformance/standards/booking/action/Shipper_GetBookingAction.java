@@ -1,12 +1,12 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
@@ -73,20 +73,45 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE) {
               @Override
-              protected Set<String> checkConformance(ConformanceExchange exchange) {
+              protected Set<String> checkConformance(
+                  Function<UUID, ConformanceExchange> getExchangeByUuid) {
+                ConformanceExchange getExchange = getExchangeByUuid.apply(getMatchedExchangeUuid());
+                if (getExchange == null) return Set.of();
                 String exchangeState =
-                    exchange
+                    getExchange
                         .getResponse()
                         .message()
                         .body()
                         .getJsonBody()
                         .get("bookingStatus")
                         .asText();
-                return Objects.equals(exchangeState, expectedState.wireName())
-                    ? Collections.emptySet()
-                    : Set.of(
-                        "Expected bookingStatus '%s' but found '%s'"
-                            .formatted(expectedState.wireName(), exchangeState));
+                Set<String> conformanceErrors = new HashSet<>();
+                if (!Objects.equals(exchangeState, expectedState.wireName())) {
+                  conformanceErrors.add(
+                      "Expected bookingStatus '%s' but found '%s'"
+                          .formatted(expectedState.wireName(), exchangeState));
+                }
+                if (previousAction
+                    instanceof UC1_Shipper_SubmitBookingRequestAction submitBookingRequestAction) {
+                  ConformanceExchange submitBookingRequestExchange =
+                      getExchangeByUuid.apply(submitBookingRequestAction.getMatchedExchangeUuid());
+                  if (submitBookingRequestExchange == null) return Set.of();
+                  // this is just an example
+                  String uc1CarrierServiceName =
+                      JsonToolkit.getTextAttributeOrNull(
+                          submitBookingRequestExchange.getRequest().message().body().getJsonBody(),
+                          "carrierServiceName");
+                  String getCarrierServiceName =
+                      JsonToolkit.getTextAttributeOrNull(
+                          getExchange.getRequest().message().body().getJsonBody(),
+                          "carrierServiceName");
+                  if (!Objects.equals(uc1CarrierServiceName, getCarrierServiceName)) {
+                    conformanceErrors.add(
+                        "Expected carrierServiceName '%s' but found '%s'"
+                            .formatted(uc1CarrierServiceName, getCarrierServiceName));
+                  }
+                }
+                return conformanceErrors;
               }
             })
         // .filter(Objects::nonNull)

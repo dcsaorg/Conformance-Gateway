@@ -1,6 +1,7 @@
 package org.dcsa.conformance.core.check;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -23,9 +24,10 @@ public class ApiHeaderCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(ConformanceExchange exchange) {
-    Map<String, ? extends Collection<String>> headers =
-        exchange.getMessage(httpMessageType).headers();
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+    if (exchange == null) return Collections.emptySet();
+    Map<String, ? extends Collection<String>> headers = exchange.getMessage(httpMessageType).headers();
     String headerName =
         headers.keySet().stream()
             .filter(key -> key.equalsIgnoreCase("api-version"))

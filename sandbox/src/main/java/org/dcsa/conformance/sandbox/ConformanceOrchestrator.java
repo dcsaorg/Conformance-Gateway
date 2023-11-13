@@ -262,10 +262,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     Map<String, List<ConformanceExchange>> trafficByScenarioRun =
         trafficRecorder.getTrafficByScenarioRun();
-    latestRunIdsByScenarioId.values().stream()
-        .filter(latestRunId -> trafficByScenarioRun.containsKey(latestRunId.toString()))
-        .flatMap(latestRunId -> trafficByScenarioRun.get(latestRunId.toString()).stream())
-        .forEach(conformanceCheck::check);
+    Map<UUID, ConformanceExchange> exchangesByUuid =
+        latestRunIdsByScenarioId.values().stream()
+            .filter(latestRunId -> trafficByScenarioRun.containsKey(latestRunId.toString()))
+            .flatMap(latestRunId -> trafficByScenarioRun.get(latestRunId.toString()).stream())
+            .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
+    conformanceCheck.check(exchangesByUuid::get);
 
     return ConformanceReport.toHtmlReport(
         ConformanceReport.createForRoles(conformanceCheck, roleNames), printable);
@@ -280,10 +282,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     Map<String, List<ConformanceExchange>> trafficByScenarioRun =
         trafficRecorder.getTrafficByScenarioRun();
-    latestRunIdsByScenarioId.values().stream()
-        .filter(latestRunId -> trafficByScenarioRun.containsKey(latestRunId.toString()))
-        .flatMap(latestRunId -> trafficByScenarioRun.get(latestRunId.toString()).stream())
-        .forEach(conformanceCheck::check);
+    Map<UUID, ConformanceExchange> exchangesByUuid =
+        latestRunIdsByScenarioId.values().stream()
+            .filter(latestRunId -> trafficByScenarioRun.containsKey(latestRunId.toString()))
+            .flatMap(latestRunId -> trafficByScenarioRun.get(latestRunId.toString()).stream())
+            .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
+    conformanceCheck.check(exchangesByUuid::get);
 
     new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
 
@@ -357,7 +361,10 @@ public class ConformanceOrchestrator implements StatefulEntity {
     List<ConformanceExchange> scenarioRunExchanges =
         Objects.requireNonNullElse(
             trafficByScenarioRun.get(runUuid.toString()), Collections.emptyList());
-    scenarioRunExchanges.forEach(conformanceCheck::check);
+    Map<UUID, ConformanceExchange> exchangesByUuid =
+        scenarioRunExchanges.stream()
+            .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
+    conformanceCheck.check(exchangesByUuid::get);
     ConformanceReport fullReport =
         new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
     ConformanceReport scenarioSubReport =

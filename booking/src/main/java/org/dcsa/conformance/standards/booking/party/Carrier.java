@@ -88,24 +88,54 @@ public class Carrier extends ConformanceParty {
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
+  private static boolean getBoolean(JsonNode node, String key, boolean defaultValueIfMissing) {
+    var valueNode = node.get(key);
+    if (valueNode == null || valueNode.isMissingNode()) {
+      return defaultValueIfMissing;
+    }
+    return valueNode.asBoolean();
+  }
+
   private void confirmBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.get("cbrr").asText();
-
+    String cbr = cbrrToCbr.get(cbrr);
+    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
+    var targetState = BookingState.CONFIRMED;
     if (!Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION)
         .contains(currentState)) {
       throw new IllegalStateException(
           "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
     }
 
-    bookingStatesByCbrr.put(cbrr, BookingState.CONFIRMED);
+    if (isCorrect) {
+      if (cbr == null) {
+        cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        cbrrToCbr.put(cbrr, cbr);
+      }
+      bookingStatesByCbrr.put(cbrr, targetState);
+    }
+    var notification = BookingNotification.builder()
+      .apiVersion(apiVersion)
+      .carrierBookingRequestReference(cbrr)
+      .carrierBookingReference(cbr)
+      .bookingStatus(targetState.name())
+      .build()
+      .asJsonNode();
 
-    asyncOrchestratorPostPartyInput(
+    if (!isCorrect) {
+      notification.remove("bookingStatus");
+    }
+
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartPost("/v1/booking-notifications", notification);
+    } else {
+      asyncOrchestratorPostPartyInput(
         objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
-
-    addOperatorLogEntry("Confirmed the booking request with CBRR '%s'".formatted(cbrr));
+    }
+    addOperatorLogEntry("Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
   }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
@@ -114,7 +144,7 @@ public class Carrier extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    boolean isCorrect = actionPrompt.get("isCorrect").asBoolean();
+    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
     var targetState = BookingState.COMPLETED;
     if (!Objects.equals(BookingState.CONFIRMED, currentState)) {
       throw new IllegalStateException(
@@ -136,7 +166,7 @@ public class Carrier extends ConformanceParty {
               .asJsonNode();
 
     if (!isCorrect) {
-        ((ObjectNode) notification.get("data")).remove("bookingStatus");
+      notification.remove("bookingStatus");
     }
 
     if (isShipperNotificationEnabled) {
@@ -233,7 +263,7 @@ public class Carrier extends ConformanceParty {
       return null;
     }
 
-    public JsonNode asJsonNode() {
+    public ObjectNode asJsonNode() {
       ObjectMapper objectMapper = new ObjectMapper();
       var notification = objectMapper.createObjectNode();
       setIfNotNull(notification, "id", id);

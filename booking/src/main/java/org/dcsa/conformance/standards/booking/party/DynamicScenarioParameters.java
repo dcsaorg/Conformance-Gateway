@@ -3,7 +3,9 @@ package org.dcsa.conformance.standards.booking.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.With;
 
+@With
 public record DynamicScenarioParameters(
     String carrierBookingRequestReference, String carrierBookingReference) {
   public ObjectNode toJson() {

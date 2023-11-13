@@ -6,10 +6,30 @@ public enum BookingState {
     PENDING_UPDATE,
     PENDING_UPDATE_CONFIRMATION,
     REJECTED,
-    CANCELED,
+    CANCELLED,
     CONFIRMED,
     PENDING_AMENDMENT,
     PENDING_AMENDMENT_APPROVAL,
     DECLINED,
     COMPLETED,
+  ;
+
+  public String wireName() {
+    if (hasWireName()) {
+      throw new IllegalArgumentException("State does not have a name visible in any transmission");
+    }
+    return this.name().replace("_", " ");
+  }
+
+  private boolean hasWireName() {
+    return this != START;
+  }
+
+  public static BookingState fromWireName(String wireName) {
+    var v = BookingState.valueOf(wireName.replace(" ", "_"));
+    if (!v.hasWireName()) {
+      throw new IllegalArgumentException("The State does not have a wire name");
+    }
+    return v;
+  }
 }

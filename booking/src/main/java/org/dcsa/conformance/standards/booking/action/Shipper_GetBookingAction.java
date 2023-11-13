@@ -82,11 +82,11 @@ public class Shipper_GetBookingAction extends BookingAction {
                         .getJsonBody()
                         .get("bookingStatus")
                         .asText();
-                return Objects.equals(exchangeState, expectedState.name())
+                return Objects.equals(exchangeState, expectedState.wireName())
                     ? Collections.emptySet()
                     : Set.of(
                         "Expected bookingStatus '%s' but found '%s'"
-                            .formatted(expectedState.name(), exchangeState));
+                            .formatted(expectedState.wireName(), exchangeState));
               }
             })
         // .filter(Objects::nonNull)

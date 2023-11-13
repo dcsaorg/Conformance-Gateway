@@ -218,7 +218,6 @@ public class Carrier extends ConformanceParty {
     private String carrierBookingReference;
     private String carrierBookingRequestReference;
     private String bookingStatus;
-    private String origin;
 
     private String defaultSource() {
             return "https://conformance.dcsa.org";
@@ -246,7 +245,6 @@ public class Carrier extends ConformanceParty {
       setIfNotNull(notification, "carrierBookingReference", carrierBookingReference);
       setIfNotNull(notification, "carrierBookingRequestReference", carrierBookingRequestReference);
       setIfNotNull(notification, "bookingStatus", bookingStatus);
-      setIfNotNull(notification, "origin", origin);
 
       if (!data.isEmpty()) {
         notification.putObject("data").put("datacontenttype", "application/json");

@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.Carrier_SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.booking.action.UC11_Carrier_ConfirmBookingCompletedAction;
+import org.dcsa.conformance.standards.booking.action.UC4_Carrier_RejectBookingRequestAction;
 import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
 
 import java.util.*;
@@ -69,6 +70,7 @@ public class Carrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
         Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
         Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
@@ -155,6 +157,44 @@ public class Carrier extends ConformanceParty {
     }
     addOperatorLogEntry("Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
   }
+
+
+  private void rejectBookingRequest(JsonNode actionPrompt) {
+    log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbrr = actionPrompt.get("cbrr").asText();
+    BookingState currentState = bookingStatesByCbrr.get(cbrr);
+    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
+    var targetState = BookingState.REJECTED;
+    if (!Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION)
+      .contains(currentState)) {
+      throw new IllegalStateException(
+        "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
+    }
+
+    if (isCorrect) {
+      bookingStatesByCbrr.put(cbrr, targetState);
+    }
+    var notification = BookingNotification.builder()
+      .apiVersion(apiVersion)
+      .carrierBookingRequestReference(cbrr)
+      .bookingStatus(targetState.name())
+      .build()
+      .asJsonNode();
+
+    if (!isCorrect) {
+      notification.remove("bookingStatus");
+    }
+
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartPost("/v1/booking-notifications", notification);
+    } else {
+      asyncOrchestratorPostPartyInput(
+        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+    }
+    addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
+  }
+
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));

@@ -223,8 +223,8 @@ public class Carrier extends ConformanceParty {
     private String bookingStatus;
 
     private String defaultSource() {
-            return "https://conformance.dcsa.org";
-        }
+      return "https://conformance.dcsa.org";
+    }
 
     private String computedType() {
       if (type != null) {

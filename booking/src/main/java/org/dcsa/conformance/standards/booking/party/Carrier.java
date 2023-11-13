@@ -141,7 +141,7 @@ public class Carrier extends ConformanceParty {
       .apiVersion(apiVersion)
       .carrierBookingRequestReference(cbrr)
       .carrierBookingReference(cbr)
-      .bookingStatus(targetState.name())
+      .bookingStatus(targetState.wireName())
       .build()
       .asJsonNode();
 
@@ -178,7 +178,7 @@ public class Carrier extends ConformanceParty {
     var notification = BookingNotification.builder()
       .apiVersion(apiVersion)
       .carrierBookingRequestReference(cbrr)
-      .bookingStatus(targetState.name())
+      .bookingStatus(targetState.wireName())
       .build()
       .asJsonNode();
 
@@ -219,7 +219,7 @@ public class Carrier extends ConformanceParty {
     var notification = BookingNotification.builder()
               .apiVersion(apiVersion)
               .carrierBookingReference(cbr)
-              .bookingStatus(targetState.name())
+              .bookingStatus(targetState.wireName())
               .build()
               .asJsonNode();
 
@@ -271,11 +271,11 @@ public class Carrier extends ConformanceParty {
                 objectMapper
                     .createObjectNode()
                     .put("carrierBookingRequestReference", cbrr)
-                    .put("bookingStatus", bookingStatesByCbrr.get(cbrr).name())
+                    .put("bookingStatus", bookingStatesByCbrr.get(cbrr).wireName())
                     .put("TODO", "...")));
     addOperatorLogEntry(
         "Responded to GET booking request '%s' (in state '%s')"
-            .formatted(cbrr, BookingState.RECEIVED.name()));
+            .formatted(cbrr, BookingState.RECEIVED.wireName()));
     return response;
   }
 
@@ -291,9 +291,9 @@ public class Carrier extends ConformanceParty {
                 objectMapper
                     .createObjectNode()
                     .put("carrierBookingRequestReference", cbrr)
-                    .put("bookingStatus", bookingState.name())));
+                    .put("bookingStatus", bookingState.wireName())));
     addOperatorLogEntry(
-        "Accepted booking request '%s' (now in state '%s')".formatted(cbrr, bookingState.name()));
+        "Accepted booking request '%s' (now in state '%s')".formatted(cbrr, bookingState.wireName()));
     return response;
   }
 

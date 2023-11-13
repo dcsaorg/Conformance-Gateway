@@ -150,7 +150,7 @@ public class Carrier extends ConformanceParty {
     }
 
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v1/booking-notifications", notification);
+      asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
@@ -187,7 +187,7 @@ public class Carrier extends ConformanceParty {
     }
 
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v1/booking-notifications", notification);
+      asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
@@ -228,7 +228,7 @@ public class Carrier extends ConformanceParty {
     }
 
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v1/booking-notifications", notification);
+      asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));

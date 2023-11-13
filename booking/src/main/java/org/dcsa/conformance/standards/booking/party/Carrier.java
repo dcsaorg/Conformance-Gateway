@@ -26,6 +26,7 @@ public class Carrier extends ConformanceParty {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final Map<String, BookingState> bookingStatesByCbrr = new HashMap<>();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
+  protected boolean isShipperNotificationEnabled = false;
 
   public Carrier(
       String apiVersion,
@@ -114,6 +115,7 @@ public class Carrier extends ConformanceParty {
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
     boolean isCorrect = actionPrompt.get("isCorrect").asBoolean();
+    var targetState = BookingState.COMPLETED;
     if (!Objects.equals(BookingState.CONFIRMED, currentState)) {
       throw new IllegalStateException(
               "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
@@ -124,12 +126,12 @@ public class Carrier extends ConformanceParty {
     }
 
     if (isCorrect) {
-        bookingStatesByCbrr.put(cbrr, BookingState.COMPLETED);
+        bookingStatesByCbrr.put(cbrr, targetState);
     }
     var notification = BookingNotification.builder()
               .apiVersion(apiVersion)
               .carrierBookingReference(cbr)
-              .bookingStatus(BookingState.COMPLETED.name())
+              .bookingStatus(targetState.name())
               .build()
               .asJsonNode();
 
@@ -137,12 +139,13 @@ public class Carrier extends ConformanceParty {
         ((ObjectNode) notification.get("data")).remove("bookingStatus");
     }
 
-    asyncCounterpartPost("/v1/booking-notifications", notification);
-
-    asyncOrchestratorPostPartyInput(
-            objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
-
-    addOperatorLogEntry("Completed the booking request with CBRR '%s'".formatted(cbrr));
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartPost("/v1/booking-notifications", notification);
+    } else {
+      asyncOrchestratorPostPartyInput(
+        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+    }
+    addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
   @Override

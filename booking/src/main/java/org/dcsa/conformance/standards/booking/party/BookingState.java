@@ -15,7 +15,7 @@ public enum BookingState {
   ;
 
   public String wireName() {
-    if (hasWireName()) {
+    if (!hasWireName()) {
       throw new IllegalArgumentException("State does not have a name visible in any transmission");
     }
     return this.name().replace("_", " ");

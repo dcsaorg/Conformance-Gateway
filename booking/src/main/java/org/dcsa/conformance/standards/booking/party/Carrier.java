@@ -13,10 +13,7 @@ import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.booking.action.Carrier_SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.booking.action.UC11_Carrier_ConfirmBookingCompletedAction;
-import org.dcsa.conformance.standards.booking.action.UC4_Carrier_RejectBookingRequestAction;
-import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.*;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -70,6 +67,7 @@ public class Carrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+        Map.entry(UC2_Carrier_RequestUpdateToBookingRequestAction.class, this::requestUpdateToBookingRequest),
         Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
         Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
         Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
@@ -150,6 +148,20 @@ public class Carrier extends ConformanceParty {
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
 
+  private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
+    log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.PENDING_UPDATE,
+      Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION),
+      ReferenceState.PROVIDE_IF_EXIST,
+      true
+    );
+    addOperatorLogEntry("Requested update to the booking request with CBRR '%s'".formatted(cbrr));
+  }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));

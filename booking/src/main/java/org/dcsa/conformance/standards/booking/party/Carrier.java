@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Builder;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -33,12 +35,14 @@ public class Carrier extends ConformanceParty {
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
+      JsonNodeMap persistentMap,
       Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
         partyConfiguration,
         counterpartConfiguration,
+        persistentMap,
         asyncWebClient,
         orchestratorAuthHeader);
   }
@@ -48,17 +52,14 @@ public class Carrier extends ConformanceParty {
     targetObjectNode.set(
         "bookingStatesByCbrr",
         StateManagementUtil.storeMap(objectMapper, bookingStatesByCbrr, BookingState::name));
-      targetObjectNode.set(
-              "cbrrToCbr",
-              StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
+    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
     StateManagementUtil.restoreIntoMap(
         bookingStatesByCbrr, sourceObjectNode.get("bookingStatesByCbrr"), BookingState::valueOf);
-      StateManagementUtil.restoreIntoMap(
-              cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
+    StateManagementUtil.restoreIntoMap(cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
   }
 
   @Override
@@ -121,19 +122,18 @@ public class Carrier extends ConformanceParty {
 
     String cbrr = actionPrompt.get("cbrr").asText();
     processAndEmitNotificationForStateTransition(
-      actionPrompt,
-      BookingState.CONFIRMED,
-      Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION),
-      ReferenceState.GENERATE_IF_MISSING,
-      true
-    );
+        actionPrompt,
+        BookingState.CONFIRMED,
+        Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION),
+        ReferenceState.GENERATE_IF_MISSING,
+        true);
     // processAndEmitNotificationForStateTransition will insert a CBR for the cbrr if needed,
     // so this lookup has to happen after.
     String cbr = cbrrToCbr.get(cbrr);
 
-    addOperatorLogEntry("Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
+    addOperatorLogEntry(
+        "Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
   }
-
 
   private void rejectBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
@@ -141,15 +141,16 @@ public class Carrier extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
 
     processAndEmitNotificationForStateTransition(
-      actionPrompt,
-      BookingState.REJECTED,
-      Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION),
-      ReferenceState.PROVIDE_IF_EXIST,
-      true
-    );
+        actionPrompt,
+        BookingState.REJECTED,
+        Set.of(
+            BookingState.RECEIVED,
+            BookingState.PENDING_UPDATE,
+            BookingState.PENDING_UPDATE_CONFIRMATION),
+        ReferenceState.PROVIDE_IF_EXIST,
+        true);
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
-
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
@@ -158,29 +159,27 @@ public class Carrier extends ConformanceParty {
     String cbr = cbrrToCbr.get(cbrr);
 
     processAndEmitNotificationForStateTransition(
-      actionPrompt,
-      BookingState.COMPLETED,
-      Set.of(BookingState.CONFIRMED),
-      ReferenceState.MUST_EXIST,
-      false
-    );
+        actionPrompt,
+        BookingState.COMPLETED,
+        Set.of(BookingState.CONFIRMED),
+        ReferenceState.MUST_EXIST,
+        false);
     addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
   private void processAndEmitNotificationForStateTransition(
-    JsonNode actionPrompt,
-    BookingState targetState,
-    Set<BookingState> expectedState,
-    ReferenceState cbrHandling,
-    boolean includeCbrr
-  ) {
+      JsonNode actionPrompt,
+      BookingState targetState,
+      Set<BookingState> expectedState,
+      ReferenceState cbrHandling,
+      boolean includeCbrr) {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
     boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
     if (!expectedState.contains(currentState)) {
       throw new IllegalStateException(
-        "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
+          "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
     }
 
     if (isCorrect) {
@@ -189,7 +188,8 @@ public class Carrier extends ConformanceParty {
         case MUST_EXIST -> {
           if (cbr == null) {
             throw new IllegalStateException(
-              "Booking '%s' did not have a carrier booking reference and must have one".formatted(cbrr));
+                "Booking '%s' did not have a carrier booking reference and must have one"
+                    .formatted(cbrr));
           }
         }
         case GENERATE_IF_MISSING -> {
@@ -198,22 +198,24 @@ public class Carrier extends ConformanceParty {
             cbrrToCbr.put(cbrr, cbr);
           }
         }
-        case PROVIDE_IF_EXIST -> { /* Do nothing */ }
+        case PROVIDE_IF_EXIST -> {
+          /* Do nothing */
+        }
       }
       if (!includeCbrr && cbr == null) {
         throw new IllegalArgumentException(
-          "If includeCbrr is false, then cbrHandling must ensure" +
-          " that a carrierBookingReference is provided"
-        );
+            "If includeCbrr is false, then cbrHandling must ensure"
+                + " that a carrierBookingReference is provided");
       }
     }
-    var notification = BookingNotification.builder()
-      .apiVersion(apiVersion)
-      .carrierBookingRequestReference(includeCbrr ? cbrr : null)
-      .carrierBookingReference(cbr)
-      .bookingStatus(targetState.wireName())
-      .build()
-      .asJsonNode();
+    var notification =
+        BookingNotification.builder()
+            .apiVersion(apiVersion)
+            .carrierBookingRequestReference(includeCbrr ? cbrr : null)
+            .carrierBookingReference(cbr)
+            .bookingStatus(targetState.wireName())
+            .build()
+            .asJsonNode();
 
     if (!isCorrect) {
       notification.remove("bookingStatus");
@@ -223,7 +225,7 @@ public class Carrier extends ConformanceParty {
       asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+          objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     }
   }
 
@@ -258,18 +260,14 @@ public class Carrier extends ConformanceParty {
         request.createResponse(
             200,
             Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(
-                objectMapper
-                    .createObjectNode()
-                    .put("carrierBookingRequestReference", cbrr)
-                    .put("bookingStatus", bookingStatesByCbrr.get(cbrr).wireName())
-                    .put("TODO", "...")));
+            new ConformanceMessageBody(persistentMap.load(cbrr)));
     addOperatorLogEntry(
         "Responded to GET booking request '%s' (in state '%s')"
             .formatted(cbrr, BookingState.RECEIVED.wireName()));
     return response;
   }
 
+  @SneakyThrows
   private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
     String cbrr = UUID.randomUUID().toString();
     BookingState bookingState = BookingState.RECEIVED;
@@ -283,17 +281,23 @@ public class Carrier extends ConformanceParty {
                     .createObjectNode()
                     .put("carrierBookingRequestReference", cbrr)
                     .put("bookingStatus", bookingState.wireName())));
+
+    ObjectNode booking =
+        (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
+    booking.put("carrierBookingRequestReference", cbrr);
+    booking.put("bookingStatus", bookingState.wireName());
+    persistentMap.save(cbrr, booking);
+
     addOperatorLogEntry(
-        "Accepted booking request '%s' (now in state '%s')".formatted(cbrr, bookingState.wireName()));
+        "Accepted booking request '%s' (now in state '%s')"
+            .formatted(cbrr, bookingState.wireName()));
     return response;
   }
 
   @Builder
   private static class BookingNotification {
-    @Builder.Default
-    private String id = UUID.randomUUID().toString();
-    @Builder.Default
-    private String source = "https://conformance.dcsa.org";
+    @Builder.Default private String id = UUID.randomUUID().toString();
+    @Builder.Default private String source = "https://conformance.dcsa.org";
     private String type;
     private String apiVersion;
 

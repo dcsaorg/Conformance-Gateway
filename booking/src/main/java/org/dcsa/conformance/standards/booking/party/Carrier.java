@@ -120,26 +120,96 @@ public class Carrier extends ConformanceParty {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.get("cbrr").asText();
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.CONFIRMED,
+      Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION),
+      ReferenceState.GENERATE_IF_MISSING,
+      true
+    );
+    // processAndEmitNotificationForStateTransition will insert a CBR for the cbrr if needed,
+    // so this lookup has to happen after.
     String cbr = cbrrToCbr.get(cbrr);
-    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
+
+    addOperatorLogEntry("Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
+  }
+
+
+  private void rejectBookingRequest(JsonNode actionPrompt) {
+    log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.REJECTED,
+      Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION),
+      ReferenceState.PROVIDE_IF_EXIST,
+      true
+    );
+    addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
+  }
+
+
+  private void confirmBookingCompleted(JsonNode actionPrompt) {
+    log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = cbrrToCbr.get(cbrr);
+
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.COMPLETED,
+      Set.of(BookingState.CONFIRMED),
+      ReferenceState.MUST_EXIST,
+      false
+    );
+    addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
+  }
+
+  private void processAndEmitNotificationForStateTransition(
+    JsonNode actionPrompt,
+    BookingState targetState,
+    Set<BookingState> expectedState,
+    ReferenceState cbrHandling,
+    boolean includeCbrr
+  ) {
+    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    var targetState = BookingState.CONFIRMED;
-    if (!Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION)
-        .contains(currentState)) {
+    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
+    if (!expectedState.contains(currentState)) {
       throw new IllegalStateException(
-          "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
+        "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
     }
 
     if (isCorrect) {
-      if (cbr == null) {
-        cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-        cbrrToCbr.put(cbrr, cbr);
-      }
       bookingStatesByCbrr.put(cbrr, targetState);
+      switch (cbrHandling) {
+        case MUST_EXIST -> {
+          if (cbr == null) {
+            throw new IllegalStateException(
+              "Booking '%s' did not have a carrier booking reference and must have one".formatted(cbrr));
+          }
+        }
+        case GENERATE_IF_MISSING -> {
+          if (cbr == null) {
+            cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+            cbrrToCbr.put(cbrr, cbr);
+          }
+        }
+        case PROVIDE_IF_EXIST -> { /* Do nothing */ }
+      }
+      if (!includeCbrr && cbr == null) {
+        throw new IllegalArgumentException(
+          "If includeCbrr is false, then cbrHandling must ensure" +
+          " that a carrierBookingReference is provided"
+        );
+      }
     }
     var notification = BookingNotification.builder()
       .apiVersion(apiVersion)
-      .carrierBookingRequestReference(cbrr)
+      .carrierBookingRequestReference(includeCbrr ? cbrr : null)
       .carrierBookingReference(cbr)
       .bookingStatus(targetState.wireName())
       .build()
@@ -155,85 +225,6 @@ public class Carrier extends ConformanceParty {
       asyncOrchestratorPostPartyInput(
         objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     }
-    addOperatorLogEntry("Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
-  }
-
-
-  private void rejectBookingRequest(JsonNode actionPrompt) {
-    log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
-
-    String cbrr = actionPrompt.get("cbrr").asText();
-    BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
-    var targetState = BookingState.REJECTED;
-    if (!Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION)
-      .contains(currentState)) {
-      throw new IllegalStateException(
-        "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
-    }
-
-    if (isCorrect) {
-      bookingStatesByCbrr.put(cbrr, targetState);
-    }
-    var notification = BookingNotification.builder()
-      .apiVersion(apiVersion)
-      .carrierBookingRequestReference(cbrr)
-      .bookingStatus(targetState.wireName())
-      .build()
-      .asJsonNode();
-
-    if (!isCorrect) {
-      notification.remove("bookingStatus");
-    }
-
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v2/booking-notifications", notification);
-    } else {
-      asyncOrchestratorPostPartyInput(
-        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
-    }
-    addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
-  }
-
-
-  private void confirmBookingCompleted(JsonNode actionPrompt) {
-    log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
-
-    String cbrr = actionPrompt.get("cbrr").asText();
-    String cbr = cbrrToCbr.get(cbrr);
-    BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
-    var targetState = BookingState.COMPLETED;
-    if (!Objects.equals(BookingState.CONFIRMED, currentState)) {
-      throw new IllegalStateException(
-              "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
-    }
-    if (cbr == null && isCorrect) {
-        throw new IllegalStateException(
-                "Booking '%s' did not have a carrier booking reference".formatted(cbrr));
-    }
-
-    if (isCorrect) {
-        bookingStatesByCbrr.put(cbrr, targetState);
-    }
-    var notification = BookingNotification.builder()
-              .apiVersion(apiVersion)
-              .carrierBookingReference(cbr)
-              .bookingStatus(targetState.wireName())
-              .build()
-              .asJsonNode();
-
-    if (!isCorrect) {
-      notification.remove("bookingStatus");
-    }
-
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v2/booking-notifications", notification);
-    } else {
-      asyncOrchestratorPostPartyInput(
-        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
-    }
-    addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
   @Override
@@ -344,5 +335,12 @@ public class Carrier extends ConformanceParty {
         node.put(key, value);
       }
     }
+  }
+
+  private enum ReferenceState {
+    MUST_EXIST,
+    PROVIDE_IF_EXIST,
+    GENERATE_IF_MISSING,
+    ;
   }
 }

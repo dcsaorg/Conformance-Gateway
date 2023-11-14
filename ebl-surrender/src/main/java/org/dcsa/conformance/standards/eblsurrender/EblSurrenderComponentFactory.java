@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
@@ -38,6 +39,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
+      JsonNodeMap persistentMap,
       Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
@@ -57,6 +59,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
               standardVersion,
               carrierConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName()),
+              persistentMap,
               asyncWebClient,
               orchestratorAuthHeader));
     }
@@ -69,6 +72,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
               standardVersion,
               platformConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName()),
+              persistentMap,
               asyncWebClient,
               orchestratorAuthHeader));
     }

@@ -15,6 +15,7 @@ import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -27,6 +28,15 @@ public abstract class ConformanceParty implements StatefulEntity {
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
 
+  /**
+   * Used to store full documents between steps.
+   * Unlike the state saved and loaded via exportJsonState and importJsonState,
+   * which is entirely (the whole map) stored within a single DynamoDB item,
+   * the items in this map are separately stored each in its own DynamoDB item.
+   * This is to avoid growing the state map past the size limit of DynamoDB items.
+   */
+  protected final JsonNodeMap persistentMap;
+
   private final Consumer<ConformanceRequest> asyncWebClient;
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
@@ -38,11 +48,13 @@ public abstract class ConformanceParty implements StatefulEntity {
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
+      JsonNodeMap persistentMap,
       Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     this.apiVersion = apiVersion;
     this.partyConfiguration = partyConfiguration;
     this.counterpartConfiguration = counterpartConfiguration;
+    this.persistentMap = persistentMap;
     this.asyncWebClient = asyncWebClient;
     this.orchestratorAuthHeader =
         orchestratorAuthHeader.isEmpty()

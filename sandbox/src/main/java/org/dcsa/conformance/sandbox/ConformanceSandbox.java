@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
@@ -123,6 +124,10 @@ public class ConformanceSandbox {
                         .createParties(
                             sandboxConfiguration.getParties(),
                             sandboxConfiguration.getCounterparts(),
+                            new JsonNodeMap(
+                                persistenceProvider.getNonLockingMap(),
+                                "session#" + currentSessionId,
+                                "map#party#" + partyName),
                             conformanceRequest ->
                                 _handlePartyOutboundConformanceRequest(
                                     persistenceProvider,
@@ -317,11 +322,11 @@ public class ConformanceSandbox {
   }
 
   public static void resetParty(
-          ConformancePersistenceProvider persistenceProvider,
-          Consumer<ConformanceWebRequest> asyncWebClient,
-          String sandboxId) {
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
-            loadSandboxConfiguration(persistenceProvider, sandboxId);
+        loadSandboxConfiguration(persistenceProvider, sandboxId);
     if (sandboxConfiguration.getOrchestrator().isActive()) return;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
@@ -332,7 +337,7 @@ public class ConformanceSandbox {
             partyName,
             "resetting party " + partyName,
             ConformanceParty::reset)
-            .run();
+        .run();
   }
 
   public static ObjectNode getScenarioDigest(
@@ -570,7 +575,8 @@ public class ConformanceSandbox {
             asyncWebClient,
             sandboxId,
             "generating report for roles: " + reportRoleNames,
-            orchestrator -> reportReference.set(orchestrator.generateReport(reportRoleNames, printable)))
+            orchestrator ->
+                reportReference.set(orchestrator.generateReport(reportRoleNames, printable)))
         .run();
     return new ConformanceWebResponse(
         200, "text/html;charset=utf-8", Collections.emptyMap(), reportReference.get());

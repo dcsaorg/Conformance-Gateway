@@ -103,7 +103,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                           "carrierServiceName");
                   String getCarrierServiceName =
                       JsonToolkit.getTextAttributeOrNull(
-                          getExchange.getRequest().message().body().getJsonBody(),
+                          getExchange.getResponse().message().body().getJsonBody(),
                           "carrierServiceName");
                   if (!Objects.equals(uc1CarrierServiceName, getCarrierServiceName)) {
                     conformanceErrors.add(

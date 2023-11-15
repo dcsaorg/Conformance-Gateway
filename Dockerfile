@@ -4,9 +4,7 @@ WORKDIR /build
 
 COPY . .
 
-RUN for pom in core booking ebl-issuance ebl-surrender sandbox spring-boot; do \
-        mvn install -U -B -DskipTests -f "$pom/pom.xml" || exit 1; \
-    done
+RUN mvn install -DskipTests -U -B
 
 FROM openjdk:17-alpine3.14
 

@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.dcsa.conformance</groupId>
+    <artifactId>Conformance-Gateway</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>core</module>
+        <module>booking</module>
+        <module>ebl-issuance</module>
+        <module>ebl-surrender</module>
+        <module>cdk</module>
+        <module>lambda</module>
+        <module>sandbox</module>
+        <module>spring-boot</module>
+    </modules>
+
+</project>

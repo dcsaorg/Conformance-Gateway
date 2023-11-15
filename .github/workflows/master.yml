@@ -25,10 +25,10 @@ jobs:
           java-version: 17
           cache: 'maven'
 
-#      - name: Build Conformance-Gateway
-#        run: |
-#          cd Conformance-Gateway
-#          find . -name "pom.xml" -exec mvn install -U -B -DskipTests -f '{}' \;
+      - name: Build Conformance-Gateway
+        run: |
+          cd Conformance-Gateway
+          find . -name "pom.xml" -exec mvn install -U -B -DskipTests -f '{}' \;
 
       - name: Run the app
         run: |

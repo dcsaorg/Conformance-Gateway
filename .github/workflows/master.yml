@@ -27,7 +27,7 @@ jobs:
       - name: Build Conformance-Gateway
         run: |
           cd Conformance-Gateway
-          find . -name "pom.xml" -exec mvn install -U -B -DskipTests -f '{}' \;
+          mvn install -DskipTests -U -B
 
       - name: Run the app
         run: |

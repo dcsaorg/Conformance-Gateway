@@ -124,7 +124,14 @@ public class Carrier extends ConformanceParty {
         BookingState.CONFIRMED,
         Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION),
         ReferenceState.GENERATE_IF_MISSING,
-        true);
+        true,
+        booking -> {
+          var clauses = booking.putArray("carrierClauses");
+          booking.put("termsAndConditions", termsAndConditions());
+          for (var clause : carrierClauses()) {
+            clauses.add(clause);
+          }
+      });
     // processAndEmitNotificationForStateTransition will insert a CBR for the cbrr if needed,
     // so this lookup has to happen after.
     String cbr = cbrrToCbr.get(cbrr);
@@ -160,7 +167,10 @@ public class Carrier extends ConformanceParty {
       BookingState.PENDING_UPDATE,
       Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE, BookingState.PENDING_UPDATE_CONFIRMATION),
       ReferenceState.PROVIDE_IF_EXIST,
-      true);
+      true,
+      booking -> booking.putArray("requestedChanges")
+        .addObject()
+        .put("message", "Please perform the changes requested by the Conformance orchestrator"));
     addOperatorLogEntry("Requested update to the booking request with CBRR '%s'".formatted(cbrr));
   }
 
@@ -180,11 +190,27 @@ public class Carrier extends ConformanceParty {
   }
 
   private void processAndEmitNotificationForStateTransition(
+    JsonNode actionPrompt,
+    BookingState targetState,
+    Set<BookingState> expectedState,
+    ReferenceState cbrHandling,
+    boolean includeCbrr) {
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      targetState,
+      expectedState,
+      cbrHandling,
+      includeCbrr,
+      null
+    );
+  }
+  private void processAndEmitNotificationForStateTransition(
       JsonNode actionPrompt,
       BookingState targetState,
       Set<BookingState> expectedState,
       ReferenceState cbrHandling,
-      boolean includeCbrr) {
+      boolean includeCbrr,
+      Consumer<ObjectNode> bookingMutator) {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
@@ -195,6 +221,8 @@ public class Carrier extends ConformanceParty {
     }
 
     if (isCorrect) {
+      var booking = (ObjectNode)persistentMap.load(cbrr);
+      boolean generatedCBR = false;
       bookingStatesByCbrr.put(cbrr, targetState);
       switch (cbrHandling) {
         case MUST_EXIST -> {
@@ -208,6 +236,7 @@ public class Carrier extends ConformanceParty {
           if (cbr == null) {
             cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
             cbrrToCbr.put(cbrr, cbr);
+            generatedCBR = true;
           }
         }
         case PROVIDE_IF_EXIST -> {
@@ -218,6 +247,17 @@ public class Carrier extends ConformanceParty {
         throw new IllegalArgumentException(
             "If includeCbrr is false, then cbrHandling must ensure"
                 + " that a carrierBookingReference is provided");
+      }
+
+      if (booking != null) {
+        booking.put("bookingStatus", targetState.wireName());
+        if (generatedCBR) {
+          booking.put("carrierBookingReference", cbr);
+        }
+        if (bookingMutator != null) {
+          bookingMutator.accept(booking);
+        }
+        persistentMap.save(cbrr, booking);
       }
     }
     var notification =
@@ -358,5 +398,39 @@ public class Carrier extends ConformanceParty {
     PROVIDE_IF_EXIST,
     GENERATE_IF_MISSING,
     ;
+  }
+
+  private static List<String> carrierClauses() {
+    return List.of(
+      "Per terms and conditions (see the termsAndConditions field), this is not a real booking.",
+      "A real booking would probably have more legal text here."
+    );
+  }
+
+  private static String termsAndConditions() {
+    return """
+            You agree that this booking exist is name only for the sake of
+            testing your conformance with the DCSA BKG API. This booking is NOT backed
+            by a real booking with ANY carrier and NONE of the requested services will be
+            carried out in real life.
+
+            Unless required by applicable law or agreed to in writing, DCSA provides
+            this JSON data on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+            ANY KIND, either express or implied, including, without limitation, any
+            warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,
+            or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
+            determining the appropriateness of using or redistributing this JSON
+            data and assume any risks associated with Your usage of this data.
+
+            In no event and under no legal theory, whether in tort (including negligence),
+            contract, or otherwise, unless required by applicable law (such as deliberate
+            and grossly negligent acts) or agreed to in writing, shall DCSA be liable to
+            You for damages, including any direct, indirect, special, incidental, or
+            consequential damages of any character arising as a result of this terms or conditions
+            or out of the use or inability to use the provided JSON data (including but not limited
+            to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any
+            and all other commercial damages or losses), even if DCSA has been advised of the
+            possibility of such damages.
+            """;
   }
 }

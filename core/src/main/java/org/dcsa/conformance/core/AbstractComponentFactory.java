@@ -32,9 +32,6 @@ public abstract class AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations);
 
-  public abstract JsonSchemaValidator getMessageSchemaValidator(
-      String apiProviderRole, boolean forRequest);
-
   public abstract JsonNode getJsonSandboxConfigurationTemplate(
       String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig);
 

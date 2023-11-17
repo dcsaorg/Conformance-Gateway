@@ -151,7 +151,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 (BookingAction) previousAction,
                 expectedState,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), false)));
+                    BookingRole.SHIPPER.getConfigName(), false, null)));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
@@ -165,7 +165,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), true)));
+                    BookingRole.SHIPPER.getConfigName(), true,
+                  "UC1_Shipper_SubmitBookingRequestAction")));
   }
 
   private static BookingScenarioListBuilder uc2_carrier_requestUpdateToBookingRequest() {
@@ -179,7 +180,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true)));
+            BookingRole.CARRIER.getConfigName(), true,null)));
   }
 
   private static BookingScenarioListBuilder uc3_shipper_submitUpdatedBookingRequest() {
@@ -197,7 +198,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true)));
+            BookingRole.CARRIER.getConfigName(), true,null)));
   }
 
   private static BookingScenarioListBuilder uc5_carrier_confirmBookingRequest() {
@@ -211,7 +212,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.CARRIER.getConfigName(), true)));
+                    BookingRole.CARRIER.getConfigName(), true,null)));
   }
 
   private static BookingScenarioListBuilder uc6_carrier_requestBookingAmendment() {
@@ -249,7 +250,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.CARRIER.getConfigName(), true)));
+                    BookingRole.CARRIER.getConfigName(), true,null)));
   }
 
   private static BookingScenarioListBuilder uc12_shipper_cancelBooking() {

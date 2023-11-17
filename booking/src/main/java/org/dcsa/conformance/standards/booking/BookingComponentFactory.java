@@ -26,6 +26,12 @@ public class BookingComponentFactory extends AbstractComponentFactory {
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
+  private static final String UCI_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_Shipper_SubmitBookingRequestAction";
+
+  private static final String BOOKING_SCHEMA_NAME = "postBooking";
+
+  private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
+
   private final String standardVersion;
 
   public BookingComponentFactory(String standardVersion) {
@@ -113,17 +119,35 @@ public class BookingComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
-    String schemaFilePath =
-        "/standards/booking/schemas/booking-%s-%s.json"
-            .formatted(
-                standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
-    String schemaName =
-        BookingRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "postBooking" : null)
-            : (forRequest ? "BookingNotification" : "BookingNotification");
+  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest, String action) {
+    String schemaName = getSchemaName(apiProviderRole, forRequest, action);
+    String schemaFilePath = null;
+    if (schemaName.equals(BOOKING_NOTIFICATION_SCHEMA_NAME)) {
+      schemaFilePath =  "/standards/booking/schemas/booking-%s-%s-%s.json"
+        .formatted(
+          "notification",standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
+    }
+    else {
+      schemaFilePath =  "/standards/booking/schemas/booking-%s-%s.json"
+        .formatted(standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
+    }
     return new JsonSchemaValidator(
         BookingComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+  }
+
+  private String getSchemaName(String apiProviderRole, boolean forRequest, String action) {
+    String schemaName = BOOKING_NOTIFICATION_SCHEMA_NAME;
+    if (BookingRole.isCarrier(apiProviderRole)) {
+      if (forRequest) {
+        if (UCI_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION.equals(action)) {
+          schemaName = BOOKING_SCHEMA_NAME;
+        }
+        else {
+          schemaName = BOOKING_NOTIFICATION_SCHEMA_NAME;
+        }
+      }
+    }
+    return schemaName;
   }
 
   @SneakyThrows

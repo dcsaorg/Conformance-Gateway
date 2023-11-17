@@ -5,8 +5,13 @@ on:
   push:
     branches:
       - dev
+      - test
+      - master
   pull_request:
-    branches: [ "dev" ]
+    branches:
+      - dev
+      - test
+      - master
 
 jobs:
   build:

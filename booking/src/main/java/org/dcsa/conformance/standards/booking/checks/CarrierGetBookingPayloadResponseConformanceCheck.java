@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.booking.checks;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -25,7 +24,8 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
 
   private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
-    BookingState.COMPLETED
+    BookingState.COMPLETED,
+    BookingState.DECLINED
   );
 
   private static final Set<String> MANDATORY_ON_CONFIRMED_BOOKING = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(

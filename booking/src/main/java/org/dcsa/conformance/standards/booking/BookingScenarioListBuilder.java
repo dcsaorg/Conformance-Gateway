@@ -32,9 +32,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                               uc5_carrier_confirmBookingRequest()
                                   .then(
                                       shipper_GetBooking(CONFIRMED)
-                                          .then(
+                                          .thenEither(
                                               uc11_carrier_confirmBookingCompleted()
-                                                  .then(shipper_GetBooking(COMPLETED)))),
+                                                  .then(shipper_GetBooking(COMPLETED)),
+                                            uc10_carrier_declineBooking()
+                                                .then(shipper_GetBooking(DECLINED)))),
                               uc4_carrier_rejectBookingRequest()
                                 .then(shipper_GetBooking(REJECTED)),
                               uc2_carrier_requestUpdateToBookingRequest()
@@ -235,7 +237,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc10_carrier_declineBooking() {
-    return tbdCarrierAction();
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction ->
+        new UC10_Carrier_RejectBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            BookingRole.CARRIER.getConfigName(), true)));
   }
 
   private static BookingScenarioListBuilder uc11_carrier_confirmBookingCompleted() {

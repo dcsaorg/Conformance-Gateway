@@ -71,6 +71,7 @@ public class Carrier extends ConformanceParty {
         Map.entry(UC2_Carrier_RequestUpdateToBookingRequestAction.class, this::requestUpdateToBookingRequest),
         Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
         Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
+        Map.entry(UC10_Carrier_RejectBookingAction.class, this::declineBooking),
         Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
@@ -157,6 +158,23 @@ public class Carrier extends ConformanceParty {
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
 
+  private void declineBooking(JsonNode actionPrompt) {
+    log.info("Carrier.declineBooking(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbr = actionPrompt.get("cbr").asText();
+
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.DECLINED,
+      Set.of(
+        BookingState.CONFIRMED,
+        BookingState.PENDING_AMENDMENT,
+        BookingState.PENDING_AMENDMENT_APPROVAL),
+      ReferenceState.PROVIDE_IF_EXIST,
+      false);
+    addOperatorLogEntry("Declined the booking with CBR '%s'".formatted(cbr));
+  }
+
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
@@ -204,6 +222,7 @@ public class Carrier extends ConformanceParty {
       null
     );
   }
+
   private void processAndEmitNotificationForStateTransition(
       JsonNode actionPrompt,
       BookingState targetState,

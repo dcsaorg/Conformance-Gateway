@@ -1,24 +1,32 @@
 package org.dcsa.conformance.standards.booking;
 
-import static org.dcsa.conformance.standards.booking.party.BookingState.*;
-
-import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+
+import java.util.function.Function;
+
+import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
 
-  private static final String UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_SHIPPER_SUBMIT_BOOKING_REQUEST";
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
+
+  private static final String BOOKING_API = "api";
+  private static final String BOOKING_NOTIFICATIONS_API = "notification";
+  private static final String POST_SCHEMA_NAME = "postBooking";
+  private static final String GET_BOOKING_SCHEMA_NAME = "getBooking";
+
+  private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
+
+
 
   public static BookingScenarioListBuilder buildTree(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
@@ -156,7 +164,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 (BookingAction) previousAction,
                 expectedState,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), false, null)));
+                  new JsonSchema(BOOKING_API, GET_BOOKING_SCHEMA_NAME))));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
@@ -170,7 +178,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), true, UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION)));
+                  new JsonSchema(BOOKING_API, POST_SCHEMA_NAME))));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(CarrierNotificationUseCase constructor) {
@@ -184,7 +192,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true, null))
+            new JsonSchema(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)))
       );
   }
 
@@ -280,4 +288,5 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       JsonSchemaValidator requestSchemaValidator
     );
   }
+
 }

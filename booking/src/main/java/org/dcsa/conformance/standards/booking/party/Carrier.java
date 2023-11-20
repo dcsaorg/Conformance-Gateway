@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -17,8 +18,13 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class Carrier extends ConformanceParty {
@@ -108,14 +114,6 @@ public class Carrier extends ConformanceParty {
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
-  private static boolean getBoolean(JsonNode node, String key, boolean defaultValueIfMissing) {
-    var valueNode = node.get(key);
-    if (valueNode == null || valueNode.isMissingNode()) {
-      return defaultValueIfMissing;
-    }
-    return valueNode.asBoolean();
-  }
-
   private void confirmBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
@@ -132,6 +130,10 @@ public class Carrier extends ConformanceParty {
           for (var clause : carrierClauses()) {
             clauses.add(clause);
           }
+          replaceConfirmedEquipments(booking);
+          addCharge(booking);
+          generateTransportPlan(booking);
+          replaceShipmentCutOffTimes(booking);
       });
     // processAndEmitNotificationForStateTransition will insert a CBR for the cbrr if needed,
     // so this lookup has to happen after.
@@ -139,6 +141,146 @@ public class Carrier extends ConformanceParty {
 
     addOperatorLogEntry(
         "Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
+  }
+
+  private String extractUnLocationCode(JsonNode locationNode) {
+    if (locationNode != null) {
+      var loc = locationNode.path("location");
+      var locType = loc.path("locationType").asText("");
+      var unloc = loc.path("UNLocationCode").asText("");
+      if ((locType.equals("UNLO") || locType.equals("FACI")) && !unloc.isBlank()) {
+        return unloc;
+      }
+    }
+    return null;
+  }
+
+  private void generateTransportPlan(ObjectNode booking) {
+    // Default values if we cannot "guessimate" a better default.
+    LocalDate departureDate = LocalDate.now().plusMonths(1);
+    LocalDate arrivalDate = departureDate.plusWeeks(2);
+    var loadLocation = "NLRTM";
+    var dischargeLocation = "DKCPH";
+    if (booking.get("shipmentLocations") instanceof ArrayNode shipmentLocations && !shipmentLocations.isEmpty()) {
+      var polNode = StreamSupport.stream(shipmentLocations.spliterator(), false)
+        .filter(o -> o.path("locationTypeCode").asText("").equals("POL"))
+        .findFirst()
+        .orElse(null);
+      var podNode = StreamSupport.stream(shipmentLocations.spliterator(), false)
+        .filter(o -> o.path("locationTypeCode").asText("").equals("POD"))
+        .findFirst()
+        .orElse(null);
+
+      loadLocation = Objects.requireNonNullElse(extractUnLocationCode(polNode), loadLocation);
+      dischargeLocation = Objects.requireNonNullElse(extractUnLocationCode(podNode), loadLocation);
+    }
+
+    /*
+     * TODO: At some point there should be:
+     *
+     *  * Vessel information
+     *  * Pre carriage steps
+     *  * Onward carriage steps
+     */
+    new TransportPlanBuilder(booking)
+      .addTransportLeg()
+      .transportPlanStage("MNC")
+      .loadLocation()
+      .unlocation(loadLocation)
+      .dischargeLocation()
+      .unlocation(dischargeLocation)
+      .plannedDepartureDate(departureDate.toString())
+      .plannedArrivalDate(arrivalDate.toString());
+  }
+
+  private void replaceShipmentCutOffTimes(ObjectNode booking) {
+    var shipmentCutOffTimes = booking.putArray("shipmentCutOffTimes");
+    var firstTransportActionByCarrier = OffsetDateTime.now().plusMonths(1);
+    if (booking.get("transportPlan") instanceof ArrayNode transportPlan && !transportPlan.isEmpty()) {
+      var plannedDepartureDateNode = transportPlan.path(0).path("plannedDepartureDate");
+      if (plannedDepartureDateNode.isTextual()) {
+        try {
+          var plannedDepartureDate = LocalDate.parse(plannedDepartureDateNode.asText());
+          firstTransportActionByCarrier = plannedDepartureDate.atStartOfDay().atOffset(ZoneOffset.UTC);
+        } catch (IllegalArgumentException ignored) {
+          // We have a fallback already.
+        }
+      }
+    }
+
+    var oneWeekPrior = firstTransportActionByCarrier.minusWeeks(1).toString();
+    var twoWeeksPrior = firstTransportActionByCarrier.minusWeeks(2).toString();
+
+    addShipmentCutOff(shipmentCutOffTimes, "DCO", oneWeekPrior);
+    addShipmentCutOff(shipmentCutOffTimes, "VCO", oneWeekPrior);
+    addShipmentCutOff(shipmentCutOffTimes, "FCO", oneWeekPrior);
+    addShipmentCutOff(shipmentCutOffTimes, "LCO", oneWeekPrior);
+    addShipmentCutOff(shipmentCutOffTimes, "EFC", oneWeekPrior);
+
+    // It would be impossible if ECP was the same time as the others, so we give another
+    // week for that one.
+    addShipmentCutOff(shipmentCutOffTimes, "ECP", twoWeeksPrior);
+  }
+
+  private void addShipmentCutOff(ArrayNode shipmentCutOffTimes, String cutOffDateTimeCode, String cutOffDateTime) {
+    shipmentCutOffTimes.addObject()
+      .put("cutOffDateTimeCode", cutOffDateTimeCode)
+      .put("cutOffDateTime", cutOffDateTime);
+  }
+
+  private void addCharge(ObjectNode booking) {
+    ArrayNode charges;
+    if (booking.get("charges") instanceof ArrayNode chargeNode) {
+      charges = chargeNode;
+    } else {
+      charges = booking.putArray("charges");
+    }
+    if (!charges.isEmpty()) {
+      charges.addObject()
+        .put("chargeName", "Fictive booking fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "PRE")
+        .put("calculationBasis", "For the entire booking")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
+    } else {
+      charges.addObject()
+        .put("chargeName", "Fictive admentment fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "COL")
+        .put("calculationBasis", "For the concrete amendment")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
+    }
+  }
+
+  private void replaceConfirmedEquipments(ObjectNode booking) {
+    if (booking.get("requestedEquipments") instanceof ArrayNode requestedEquipments && !requestedEquipments.isEmpty()) {
+      var confirmedEquipments = booking.putArray("confirmedEquipments");
+      for (var requestedEquipment : requestedEquipments) {
+        var equipmentCodeNode = requestedEquipment.get("ISOEquipmentCode");
+        var unitsNode = requestedEquipment.get("units");
+        var equipmentCode = "22GP";
+        var units = 1L;
+        if (equipmentCodeNode.isTextual()) {
+          equipmentCode = equipmentCodeNode.asText();
+        }
+        if (unitsNode.canConvertToLong()) {
+          units = Math.min(unitsNode.longValue(), 1L);
+        }
+        confirmedEquipments.addObject()
+          .put("ISOEquipmentCode", equipmentCode)
+          .put("units", units);
+      }
+    } else {
+      // It is required even if we got nothing to go on.
+      booking.putArray("confirmedEquipments")
+        .addObject()
+        .put("ISOEquipmentCode", "22GP")
+        .put("units", 1);
+    }
   }
 
   private void rejectBookingRequest(JsonNode actionPrompt) {
@@ -233,7 +375,7 @@ public class Carrier extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
-    boolean isCorrect = getBoolean(actionPrompt, "isCorrect", true);
+    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean(true);
     if (!expectedState.contains(currentState)) {
       throw new IllegalStateException(
           "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
@@ -409,6 +551,97 @@ public class Carrier extends ConformanceParty {
       if (value != null) {
         node.put(key, value);
       }
+    }
+  }
+
+  private record LocationBuilder<T>(ObjectNode location, Function<ObjectNode, T> onCompletion) {
+
+    // TODO: Add Address here at some point
+
+      public T unlocation(String unlocationCode) {
+        location.put("locationType", "UNLO")
+          .put("UNLocationCode", unlocationCode);
+        return endLocation();
+      }
+
+      public T facility(String unlocationCode, String facilityCode, String facilityCodeListProvider) {
+        location.put("locationType", "FACI")
+          .put("UNLocationCode", unlocationCode)
+          .put("facilityCode", facilityCode)
+          .put("facilityCodeListProvider", facilityCodeListProvider);
+        return endLocation();
+      }
+
+      private T endLocation() {
+        return this.onCompletion.apply(location);
+      }
+    }
+
+    private record TransportPlanStepBuilder(TransportPlanBuilder parentBuilder, ObjectNode transportPlanStep) {
+      public LocationBuilder<TransportPlanStepBuilder> loadLocation() {
+        return new LocationBuilder<>(transportPlanStep.putObject("loadLocation"), (ignored -> this));
+      }
+
+      public LocationBuilder<TransportPlanStepBuilder> dischargeLocation() {
+        return new LocationBuilder<>(transportPlanStep.putObject("dischargeLocation"), (ignored -> this));
+      }
+
+      public TransportPlanStepBuilder plannedArrivalDate(String plannedArrivalDate) {
+        return setStringField("plannedArrivalDate", plannedArrivalDate);
+      }
+
+      public TransportPlanStepBuilder plannedDepartureDate(String plannedDepartureDate) {
+        return setStringField("plannedDepartureDate", plannedDepartureDate);
+      }
+
+      public TransportPlanStepBuilder transportPlanStage(String transportPlanStage) {
+        return setStringField("transportPlanStage", transportPlanStage);
+      }
+
+      public TransportPlanStepBuilder modeOfTransport(String modeOfTransport) {
+        return setStringField("modeOfTransport", modeOfTransport);
+      }
+
+      public TransportPlanStepBuilder vesselName(String vesselName) {
+        return setStringField("vesselName", vesselName);
+      }
+
+      public TransportPlanStepBuilder vesselIMONumber(String vesselIMONumber) {
+        return setStringField("vesselIMONumber", vesselIMONumber);
+      }
+
+      private TransportPlanStepBuilder setStringField(String fieldName, String value) {
+        this.transportPlanStep.put(fieldName, value);
+        return this;
+      }
+
+      public TransportPlanStepBuilder nextTransportLeg() {
+        return parentBuilder.addTransportLeg();
+      }
+
+      public JsonNode buildTransportPlan() {
+        return parentBuilder.build();
+      }
+    }
+
+  private static class TransportPlanBuilder {
+
+    private final ArrayNode transportPlan;
+    private int sequenceNumber = 1;
+    TransportPlanBuilder(ObjectNode booking) {
+      this.transportPlan = booking.putArray("transportPlan");
+    }
+
+    private TransportPlanStepBuilder addTransportLeg() {
+      var step = transportPlan.addObject()
+          // Yes, this is basically the array index (+1), but it is required, so here goes.
+          .put("transportPlanStageSequenceNumber", sequenceNumber++);
+      return new TransportPlanStepBuilder(this, step);
+    }
+
+    public JsonNode build() {
+      // just to match the pattern really
+      return transportPlan;
     }
   }
 

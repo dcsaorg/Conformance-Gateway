@@ -32,6 +32,7 @@ public class Carrier extends ConformanceParty {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final Map<String, BookingState> bookingStatesByCbrr = new HashMap<>();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
+  private final Map<String, String> cbrToCbrr = new HashMap<>();
   protected boolean isShipperNotificationEnabled = false;
 
   public Carrier(
@@ -56,6 +57,7 @@ public class Carrier extends ConformanceParty {
         "bookingStatesByCbrr",
         StateManagementUtil.storeMap(objectMapper, bookingStatesByCbrr, BookingState::name));
     targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
+    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(objectMapper, cbrToCbrr));
   }
 
   @Override
@@ -63,11 +65,14 @@ public class Carrier extends ConformanceParty {
     StateManagementUtil.restoreIntoMap(
         bookingStatesByCbrr, sourceObjectNode.get("bookingStatesByCbrr"), BookingState::valueOf);
     StateManagementUtil.restoreIntoMap(cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
+    StateManagementUtil.restoreIntoMap(cbrToCbrr, sourceObjectNode.get("cbrToCbrr"));
   }
 
   @Override
   protected void doReset() {
     bookingStatesByCbrr.clear();
+    cbrrToCbr.clear();
+    cbrToCbrr.clear();
   }
 
   @Override
@@ -397,6 +402,7 @@ public class Carrier extends ConformanceParty {
           if (cbr == null) {
             cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
             cbrrToCbr.put(cbrr, cbr);
+            cbrToCbrr.put(cbr, cbrr);
             generatedCBR = true;
           }
         }
@@ -467,16 +473,24 @@ public class Carrier extends ConformanceParty {
     }
   }
 
+  private String lastUrlSegment(String url) {
+    // ".../foo" and ".../foo/" should be the same
+    return url.substring(1 + url.replaceAll("/++$", "").lastIndexOf("/"));
+  }
+
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
-    String cbrr = request.url().substring(1 + request.url().lastIndexOf("/"));
+    var bookingReference = lastUrlSegment(request.url());
+    // bookingReference can either be a CBR or CBRR.
+    var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
+    var booking = persistentMap.load(cbrr);
     ConformanceResponse response =
         request.createResponse(
             200,
             Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(persistentMap.load(cbrr)));
+            new ConformanceMessageBody(booking));
     addOperatorLogEntry(
         "Responded to GET booking request '%s' (in state '%s')"
-            .formatted(cbrr, BookingState.RECEIVED.wireName()));
+            .formatted(bookingReference, booking.get("bookingStatus")));
     return response;
   }
 

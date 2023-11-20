@@ -1,8 +1,8 @@
 package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -27,6 +27,8 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
     BookingState.COMPLETED,
     BookingState.DECLINED
   );
+  private static final JsonPath BOOKING_STATE_PATH = JsonPath.compile("$.bookingStatus");
+  private static final JsonPath REQUESTED_CHANGES_PATH = JsonPath.compile("$.requestedChanges");
 
   private static final Set<String> MANDATORY_ON_CONFIRMED_BOOKING = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
     "confirmedEquipments",
@@ -37,7 +39,7 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
     "termsAndConditions"
   )));
 
-  private static final Function<ObjectNode, Set<String>> ALL_OK = unused -> Collections.emptySet();
+  private static final Function<DocumentContext, Set<String>> ALL_OK = unused -> Collections.emptySet();
 
   private final BookingState expectedState;
 
@@ -68,31 +70,34 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
       this::checkPendingUpdates,
       checks::add
     );
-    for (var fieldName : MANDATORY_ON_CONFIRMED_BOOKING) {
-      addSubCheck(fieldName + " is required for confirmed bookings",
-        requiredIfState(CONFIRMED_BOOKING_STATES, fieldName),
-        checks::add
-      );
+    if (CONFIRMED_BOOKING_STATES.contains(this.expectedState)) {
+      for (var fieldName : MANDATORY_ON_CONFIRMED_BOOKING) {
+        addSubCheck(fieldName + " is mandatory for confirmed bookings (optional otherwise)",
+          requiredIfState(CONFIRMED_BOOKING_STATES, JsonPath.compile("$['" + fieldName + "']")),
+          checks::add
+        );
+      }
     }
     return checks.stream();
   }
 
-  private void addSubCheck(String subtitle, Function<ObjectNode, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
+  private void addSubCheck(String subtitle, Function<DocumentContext, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
     var check = new ActionCheck(subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
       protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
         if (exchange == null) return Collections.emptySet();
-        var responsePayload =
+        var booking =
           exchange
             .getResponse()
             .message()
             .body()
-            .getJsonBody();
-        if (responsePayload instanceof ObjectNode booking) {
+            .getJsonPathBody();
+        try {
           return subCheck.apply(booking);
+        } catch (RuntimeException e){
+          return Set.of(e.getLocalizedMessage());
         }
-        return Set.of("Could not perform the check as the payload was not correct format");
       }
     };
     addCheck.accept(check);
@@ -104,54 +109,51 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
     return Collections.emptySet();
   }
 
-  private Set<String> ensureBookingStateIsCorrect(JsonNode responsePayload) {
-    String actualState = null;
-    if (responsePayload.get("bookingStatus") instanceof TextNode statusNode) {
-      actualState = statusNode.asText();
-      if (actualState.equals(this.expectedState.wireName())) {
-        return Collections.emptySet();
-      }
+  private Set<String> ensureBookingStateIsCorrect(DocumentContext booking) {
+    String actualState = booking.read(BOOKING_STATE_PATH);
+    if (Objects.equals(actualState, this.expectedState.wireName())) {
+      return Collections.emptySet();
     }
     return Set.of("Expected bookingStatus '%s' but found '%s'"
       .formatted(expectedState.wireName(), actualState));
   }
 
-  private Set<String> checkPendingUpdates(JsonNode responsePayload) {
-    var requestedChangesKey = "requestedChanges";
+  private Set<String> checkPendingUpdates(DocumentContext booking) {
     if (PENDING_CHANGES_STATES.contains(this.expectedState)) {
-      return nonEmptyField(responsePayload, requestedChangesKey);
+      return nonEmptyField(booking, REQUESTED_CHANGES_PATH);
     }
-    return fieldIsOmitted(responsePayload, requestedChangesKey);
+    return fieldIsOmitted(booking, REQUESTED_CHANGES_PATH);
   }
 
-  private Function<ObjectNode, Set<String>> requiredIfState(Set<BookingState> conditionalInTheseStates, String fieldName) {
+  private Function<DocumentContext, Set<String>> requiredIfState(Set<BookingState> conditionalInTheseStates, JsonPath jsonPath) {
     if (conditionalInTheseStates.contains(this.expectedState)) {
-      return booking -> nonEmptyField(booking, fieldName);
+      return booking -> nonEmptyField(booking, jsonPath);
     }
     return ALL_OK;
   }
 
-  private Set<String> fieldIsOmitted(JsonNode responsePayload, String key) {
-    if (responsePayload.has(key) || responsePayload.get(key) != null) {
-      return Set.of("The field '%s' must *NOT* be a present for a booking in status '%s'".formatted(
-        key, this.expectedState.wireName()
+  private Set<String> fieldIsOmitted(DocumentContext booking, JsonPath key) {
+    var field = booking.read(key);
+    if (field != null) {
+      return Set.of("The JsonPath %s must *NOT* be a present for a booking in status '%s'".formatted(
+        key.getPath(), this.expectedState.wireName()
       ));
     }
     return Collections.emptySet();
   }
 
-  private Set<String> nonEmptyField(JsonNode responsePayload, String key) {
-    var field = responsePayload.get(key);
+  private Set<String> nonEmptyField(DocumentContext booking, JsonPath key) {
+    var field = booking.read(key);
     if (field != null) {
-      if (field.isTextual() && !field.asText().isBlank()) {
+      if ((field instanceof Map m && !m.isEmpty()) || (field instanceof Collection c && !c.isEmpty())) {
         return Collections.emptySet();
       }
-      if (!field.isEmpty() || field.isValueNode()) {
+      if (field instanceof String s && !s.isBlank()) {
         return Collections.emptySet();
       }
     }
-    return Set.of("The field '%s' must be a present and non-empty for a booking in status '%s'".formatted(
-      key, this.expectedState.wireName()
+    return Set.of("The JsonPath %s must be a present and non-empty for a booking in status '%s'".formatted(
+      key.getPath(), this.expectedState.wireName()
     ));
   }
 }

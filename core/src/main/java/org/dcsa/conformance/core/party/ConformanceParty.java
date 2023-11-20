@@ -165,10 +165,22 @@ public abstract class ConformanceParty implements StatefulEntity {
                 System.currentTimeMillis())));
   }
 
+  protected void asyncCounterpartPatch(String path, JsonNode jsonBody) {
+    _asyncCounterpartPatchPostOrPut("PATCH", path, jsonBody);
+  }
+
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
+    _asyncCounterpartPatchPostOrPut("POST", path, jsonBody);
+  }
+
+  protected void asyncCounterpartPut(String path, JsonNode jsonBody) {
+    _asyncCounterpartPatchPostOrPut("PUT", path, jsonBody);
+  }
+
+  private void _asyncCounterpartPatchPostOrPut(String method, String path, JsonNode jsonBody) {
     asyncWebClient.accept(
         new ConformanceRequest(
-            "POST",
+            method,
             counterpartConfiguration.getUrl() + path,
             Collections.emptyMap(),
             new ConformanceMessage(

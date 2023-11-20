@@ -2,6 +2,8 @@ package org.dcsa.conformance.core.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -9,11 +11,13 @@ import java.util.TreeMap;
 public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
 
+  @SneakyThrows
   @Override
   public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
+    JsonNode valueCopy = new ObjectMapper().readTree(value.toString());
     memoryMap
         .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .put(sortKey, new ObjectMapper().createObjectNode().set("value", value));
+        .put(sortKey, new ObjectMapper().createObjectNode().set("value", valueCopy));
   }
 
   @Override

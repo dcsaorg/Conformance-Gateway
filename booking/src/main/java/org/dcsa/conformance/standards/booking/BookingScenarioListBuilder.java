@@ -13,6 +13,8 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+
+  private static final String UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_SHIPPER_SUBMIT_BOOKING_REQUEST";
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -154,7 +156,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 (BookingAction) previousAction,
                 expectedState,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), false)));
+                    BookingRole.SHIPPER.getConfigName(), false, null)));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
@@ -168,7 +170,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), true)));
+                    BookingRole.SHIPPER.getConfigName(), true, UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION)));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(CarrierNotificationUseCase constructor) {
@@ -182,7 +184,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true))
+            BookingRole.CARRIER.getConfigName(), true, null))
       );
   }
 

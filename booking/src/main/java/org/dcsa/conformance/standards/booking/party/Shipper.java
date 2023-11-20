@@ -75,7 +75,7 @@ public class Shipper extends ConformanceParty {
 
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/booking/messages/booking-v20-request.json",
+          "/standards/booking/messages/booking-api-v20-request.json",
             Map.ofEntries(
                 Map.entry(
                     "CARRIER_SERVICE_NAME_PLACEHOLDER",

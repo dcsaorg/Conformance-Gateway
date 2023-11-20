@@ -26,7 +26,7 @@ public class BookingComponentFactory extends AbstractComponentFactory {
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
-  private static final String UCI_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_Shipper_SubmitBookingRequestAction";
+  private static final String UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_SHIPPER_SUBMIT_BOOKING_REQUEST";
 
   private static final String BOOKING_SCHEMA_NAME = "postBooking";
 
@@ -136,11 +136,8 @@ public class BookingComponentFactory extends AbstractComponentFactory {
     String schemaName = BOOKING_NOTIFICATION_SCHEMA_NAME;
     if (BookingRole.isShipper(apiProviderRole)) {
       if (forRequest) {
-        if (UCI_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION.equals(action)) {
+        if (UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION.equals(action)) {
           schemaName = BOOKING_SCHEMA_NAME;
-        }
-        else {
-          schemaName = BOOKING_NOTIFICATION_SCHEMA_NAME;
         }
       }
     }

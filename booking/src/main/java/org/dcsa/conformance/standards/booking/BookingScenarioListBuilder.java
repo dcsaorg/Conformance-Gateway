@@ -4,6 +4,7 @@ import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
@@ -12,6 +13,8 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+
+  private static final String UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION = "UC1_SHIPPER_SUBMIT_BOOKING_REQUEST";
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -32,9 +35,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                               uc5_carrier_confirmBookingRequest()
                                   .then(
                                       shipper_GetBooking(CONFIRMED)
-                                          .then(
+                                          .thenEither(
                                               uc11_carrier_confirmBookingCompleted()
-                                                  .then(shipper_GetBooking(COMPLETED)))),
+                                                  .then(shipper_GetBooking(COMPLETED)),
+                                            uc10_carrier_declineBooking()
+                                                .then(shipper_GetBooking(DECLINED)))),
                               uc4_carrier_rejectBookingRequest()
                                 .then(shipper_GetBooking(REJECTED)),
                               uc2_carrier_requestUpdateToBookingRequest()
@@ -165,22 +170,26 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    BookingRole.SHIPPER.getConfigName(), true,
-                  "UC1_Shipper_SubmitBookingRequestAction")));
+                    BookingRole.SHIPPER.getConfigName(), true, UC1_SHIPPER_SUBMIT_BOOKING_REQUEST_ACTION)));
   }
 
-  private static BookingScenarioListBuilder uc2_carrier_requestUpdateToBookingRequest() {
+  private static BookingScenarioListBuilder carrierStateChange(CarrierNotificationUseCase constructor) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
       previousAction ->
-        new UC2_Carrier_RequestUpdateToBookingRequestAction(
+        constructor.newInstance(
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true,null)));
+            BookingRole.CARRIER.getConfigName(), true, null))
+      );
+  }
+
+  private static BookingScenarioListBuilder uc2_carrier_requestUpdateToBookingRequest() {
+    return carrierStateChange(UC2_Carrier_RequestUpdateToBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc3_shipper_submitUpdatedBookingRequest() {
@@ -188,31 +197,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc4_carrier_rejectBookingRequest() {
-    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-      previousAction ->
-        new UC4_Carrier_RejectBookingRequestAction(
-          carrierPartyName,
-          shipperPartyName,
-          (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(
-            BookingRole.CARRIER.getConfigName(), true,null)));
+    return carrierStateChange(UC4_Carrier_RejectBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc5_carrier_confirmBookingRequest() {
-    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new UC5_Carrier_ConfirmBookingRequestAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    BookingRole.CARRIER.getConfigName(), true,null)));
+    return carrierStateChange(UC5_Carrier_ConfirmBookingRequestAction::new);
   }
 
   private static BookingScenarioListBuilder uc6_carrier_requestBookingAmendment() {
@@ -236,21 +225,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc10_carrier_declineBooking() {
-    return tbdCarrierAction();
+    return carrierStateChange(UC10_Carrier_RejectBookingAction::new);
   }
 
   private static BookingScenarioListBuilder uc11_carrier_confirmBookingCompleted() {
-    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new UC11_Carrier_ConfirmBookingCompletedAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    BookingRole.CARRIER.getConfigName(), true,null)));
+    return carrierStateChange(UC11_Carrier_ConfirmBookingCompletedAction::new);
   }
 
   private static BookingScenarioListBuilder uc12_shipper_cancelBooking() {
@@ -291,5 +270,14 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 return "TBD shipper action";
               }
             }) {};
+  }
+
+  private interface CarrierNotificationUseCase {
+    BookingAction newInstance(
+      String carrierPartyName,
+      String shipperPartyName,
+      BookingAction previousAction,
+      JsonSchemaValidator requestSchemaValidator
+    );
   }
 }

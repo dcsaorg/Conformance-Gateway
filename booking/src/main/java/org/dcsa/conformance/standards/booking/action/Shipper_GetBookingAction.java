@@ -9,10 +9,12 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierGetBookingPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class Shipper_GetBookingAction extends BookingAction {
+
   private final BookingState expectedState;
   private final JsonSchemaValidator responseSchemaValidator;
 
@@ -67,6 +69,10 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 responseSchemaValidator),
+            new CarrierGetBookingPayloadResponseConformanceCheck(
+              getMatchedExchangeUuid(),
+              expectedState
+            ),
             new ActionCheck(
                 "GET returns the expected Booking data",
                 BookingRole::isCarrier,
@@ -77,20 +83,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                   Function<UUID, ConformanceExchange> getExchangeByUuid) {
                 ConformanceExchange getExchange = getExchangeByUuid.apply(getMatchedExchangeUuid());
                 if (getExchange == null) return Set.of();
-                String exchangeState =
-                    getExchange
-                        .getResponse()
-                        .message()
-                        .body()
-                        .getJsonBody()
-                        .get("bookingStatus")
-                        .asText();
                 Set<String> conformanceErrors = new HashSet<>();
-                if (!Objects.equals(exchangeState, expectedState.wireName())) {
-                  conformanceErrors.add(
-                      "Expected bookingStatus '%s' but found '%s'"
-                          .formatted(expectedState.wireName(), exchangeState));
-                }
                 if (previousAction
                     instanceof UC1_Shipper_SubmitBookingRequestAction submitBookingRequestAction) {
                   ConformanceExchange submitBookingRequestExchange =

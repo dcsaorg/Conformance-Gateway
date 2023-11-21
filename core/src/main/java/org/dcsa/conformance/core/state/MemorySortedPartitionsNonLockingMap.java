@@ -9,22 +9,25 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
+
 
   @SneakyThrows
   @Override
   public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
-    JsonNode valueCopy = new ObjectMapper().readTree(value.toString());
+    JsonNode valueCopy = OBJECT_MAPPER.readTree(value.toString());
     memoryMap
         .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .put(sortKey, new ObjectMapper().createObjectNode().set("value", valueCopy));
+        .put(sortKey, OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
   }
 
   @Override
   public synchronized JsonNode getItemValue(String partitionKey, String sortKey) {
     return memoryMap
         .getOrDefault(partitionKey, new TreeMap<>())
-        .getOrDefault(sortKey, new ObjectMapper().createObjectNode())
+        .getOrDefault(sortKey, OBJECT_MAPPER.createObjectNode())
         .get("value");
   }
 

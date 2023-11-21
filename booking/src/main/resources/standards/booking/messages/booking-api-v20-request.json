@@ -109,18 +109,18 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationTypeCode": "UNLO",
+        "locationType": "UNLO",
         "UNLocationCode": "NLRTM"
       },
-      "shipmentLocationTypeCode": "POL",
+      "locationTypeCode": "POL",
       "eventDateTime": "2022-11-15T10:34:41.99631016+01:00"
     },
     {
       "location": {
-        "locationTypeCode": "UNLO",
+        "locationType": "UNLO",
         "UNLocationCode": "USMIA"
       },
-      "shipmentLocationTypeCode": "POD",
+      "locationTypeCode": "POD",
       "eventDateTime": "2022-11-15T10:34:41.99631016+01:00"
     }
   ]

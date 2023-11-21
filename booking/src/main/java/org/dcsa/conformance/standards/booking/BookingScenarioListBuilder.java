@@ -46,6 +46,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                           .thenEither(
                                               uc11_carrier_confirmBookingCompleted()
                                                   .then(shipper_GetBooking(COMPLETED)),
+                                            uc6_carrier_requestUpdateToConfirmedBooking()
+                                              .then(shipper_GetBooking(PENDING_AMENDMENT)),
                                             uc10_carrier_declineBooking()
                                                 .then(shipper_GetBooking(DECLINED)))),
                               uc4_carrier_rejectBookingRequest()
@@ -210,6 +212,10 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder uc5_carrier_confirmBookingRequest() {
     return carrierStateChange(UC5_Carrier_ConfirmBookingRequestAction::new);
+  }
+
+  private static BookingScenarioListBuilder uc6_carrier_requestUpdateToConfirmedBooking() {
+    return carrierStateChange(UC6_Carrier_RequestUpdateToConfirmedBookingAction::new);
   }
 
   private static BookingScenarioListBuilder uc6_carrier_requestBookingAmendment() {

@@ -19,7 +19,8 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends ActionChec
 
 
   private static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
-    BookingState.PENDING_UPDATE
+    BookingState.PENDING_UPDATE,
+    BookingState.PENDING_AMENDMENT
   );
 
   private static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(

@@ -109,7 +109,7 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
+        "locationTypeCode": "UNLO",
         "UNLocationCode": "NLRTM"
       },
       "shipmentLocationTypeCode": "POL",
@@ -117,7 +117,7 @@
     },
     {
       "location": {
-        "locationType": "UNLO",
+        "locationTypeCode": "UNLO",
         "UNLocationCode": "USMIA"
       },
       "shipmentLocationTypeCode": "POD",

@@ -82,6 +82,7 @@ public class Carrier extends ConformanceParty {
         Map.entry(UC2_Carrier_RequestUpdateToBookingRequestAction.class, this::requestUpdateToBookingRequest),
         Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
         Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
+        Map.entry(UC6_Carrier_RequestUpdateToConfirmedBookingAction.class, this::requestUpdateToConfirmedBooking),
         Map.entry(UC10_Carrier_RejectBookingAction.class, this::declineBooking),
         Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
@@ -323,7 +324,7 @@ public class Carrier extends ConformanceParty {
   }
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
-    log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("Carrier.requestUpdateToBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.get("cbrr").asText();
 
@@ -352,6 +353,23 @@ public class Carrier extends ConformanceParty {
         ReferenceState.MUST_EXIST,
         false);
     addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
+  }
+
+  private void requestUpdateToConfirmedBooking(JsonNode actionPrompt) {
+    log.info("Carrier.requestUpdateToConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbr = actionPrompt.get("cbr").asText();
+
+    processAndEmitNotificationForStateTransition(
+      actionPrompt,
+      BookingState.PENDING_AMENDMENT,
+      Set.of(BookingState.CONFIRMED, BookingState.PENDING_AMENDMENT),
+      ReferenceState.PROVIDE_IF_EXIST,
+      true,
+      booking -> booking.putArray("requestedChanges")
+        .addObject()
+        .put("message", "Please perform the changes requested by the Conformance orchestrator"));
+    addOperatorLogEntry("Requested update to the booking with CBR '%s'".formatted(cbr));
   }
 
   private void processAndEmitNotificationForStateTransition(

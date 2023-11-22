@@ -466,29 +466,52 @@ public class Carrier extends ConformanceParty {
     }
   }
 
+  private ConformanceResponse return405(ConformanceRequest request, String ... allowedMethods) {
+    return request.createResponse(
+      405,
+      Map.of("Api-Version", List.of(apiVersion),
+        "Allow", List.of(String.join(",", allowedMethods))
+      ),
+      new ConformanceMessageBody(
+        objectMapper
+          .createObjectNode()
+          .put(
+            "message",
+            "Returning 405 because the method was not supported")));
+  }
+
+
+  private ConformanceResponse return404(ConformanceRequest request) {
+    return request.createResponse(
+        404,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(
+          objectMapper
+            .createObjectNode()
+            .put(
+              "message",
+              "Returning 404 since the request did not match any known URL")));
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Carrier.handleRequest(%s)".formatted(request));
-    if (request.method().equals("GET")) {
-      return _handleGetBookingRequest(request);
-    } else if (request.method().equals("POST") && request.url().endsWith("/v2/bookings")) {
-      return _handlePostBookingRequest(request);
-    } else {
-      ConformanceResponse response =
-          request.createResponse(
-              409,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(
-                  objectMapper
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting '%s' for Booking '%s' because it is in state '%s'"
-                              .formatted("TODO", "TODO", "TODO"))));
-      addOperatorLogEntry(
-          "Handling booking request '%s' (now in state '%s')".formatted("TODO", "TODO"));
-      return response;
-    }
+    var result = switch (request.method()) {
+      case "GET" -> _handleGetBookingRequest(request);
+      case "POST" -> {
+        var url = request.url();
+        if (url.endsWith("/v2/bookings") || url.endsWith("/v2/bookings/")) {
+          yield _handlePostBookingRequest(request);
+        }
+        yield return404(request);
+      }
+      case "PUT", "PATCH" -> throw new UnsupportedOperationException();
+      default -> return405(request, "GET", "POST", "PUT", "PATCH");
+    };
+    addOperatorLogEntry(
+      "Responded to request '%s %s' with '%d'"
+          .formatted(request.method(), request.url(), result.statusCode()));
+    return result;
   }
 
   private String lastUrlSegment(String url) {
@@ -501,15 +524,18 @@ public class Carrier extends ConformanceParty {
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var booking = persistentMap.load(cbrr);
-    ConformanceResponse response =
+    if (booking != null) {
+      ConformanceResponse response =
         request.createResponse(
-            200,
-            Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(booking));
-    addOperatorLogEntry(
+          200,
+          Map.of("Api-Version", List.of(apiVersion)),
+          new ConformanceMessageBody(booking));
+      addOperatorLogEntry(
         "Responded to GET booking request '%s' (in state '%s')"
             .formatted(bookingReference, booking.get("bookingStatus")));
-    return response;
+      return response;
+    }
+    return return404(request);
   }
 
   @SneakyThrows

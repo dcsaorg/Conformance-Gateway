@@ -2,32 +2,31 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+
+import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
+public class UC12_Shipper_CancelEntireBookingAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC1_Shipper_SubmitBookingRequestAction(
+  public UC12_Shipper_CancelEntireBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC12", 200);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a booking request using the following parameters:");
+    return ("UC12: Cancel an entire booking");
   }
 
   @Override
@@ -38,19 +37,8 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("csp", getCspSupplier().get().toJson());
+    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
-  }
-
-  @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
-    JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    // FIXME: Guard against non-conformant parties
-    getDspConsumer()
-        .accept(
-            new DynamicScenarioParameters(
-                responseJsonNode.get("carrierBookingRequestReference").asText(),
-                getDspSupplier().get().carrierBookingReference()));
   }
 
   @Override
@@ -58,8 +46,9 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var cbrr = getDspSupplier().get().carrierBookingRequestReference();
         return Stream.of(
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings"),
+            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

@@ -166,23 +166,28 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   protected void asyncCounterpartPatch(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("PATCH", path, jsonBody);
+    _asyncCounterpartPatchPostOrPut("PATCH", path, Collections.emptyMap(), jsonBody);
   }
 
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("POST", path, jsonBody);
+    _asyncCounterpartPatchPostOrPut("POST", path, Collections.emptyMap(), jsonBody);
   }
 
   protected void asyncCounterpartPut(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("PUT", path, jsonBody);
+    _asyncCounterpartPatchPostOrPut("PUT", path, Collections.emptyMap(), jsonBody);
   }
 
-  private void _asyncCounterpartPatchPostOrPut(String method, String path, JsonNode jsonBody) {
+  private void _asyncCounterpartPatchPostOrPut(
+    String method,
+    String path,
+    Map<String, ? extends Collection<String>> queryParams,
+    JsonNode jsonBody
+  ) {
     asyncWebClient.accept(
         new ConformanceRequest(
             method,
             counterpartConfiguration.getUrl() + path,
-            Collections.emptyMap(),
+            queryParams,
             new ConformanceMessage(
                 partyConfiguration.getName(),
                 partyConfiguration.getRole(),

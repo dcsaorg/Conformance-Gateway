@@ -16,6 +16,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.Shipper_GetBookingAction;
+import org.dcsa.conformance.standards.booking.action.UC12_Shipper_CancelEntireBookingAction;
 import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
 
 @Slf4j
@@ -55,7 +56,8 @@ public class Shipper extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
-        Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest));
+        Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
+        Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
   }
 
   private void getBookingRequest(JsonNode actionPrompt) {
@@ -88,6 +90,21 @@ public class Shipper extends ConformanceParty {
     addOperatorLogEntry(
         "Sent a booking request with the parameters: %s"
             .formatted(carrierScenarioParameters.toJson()));
+  }
+
+  private void sendCancelEntireBooking(JsonNode actionPrompt) {
+    log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    asyncCounterpartPatch(
+      "/v2/bookings/%s?operation=cancelBooking".formatted(cbrr),
+      new ObjectMapper().createObjectNode()
+        .put("bookingStatus", BookingState.CANCELLED.wireName())
+    );
+
+    addOperatorLogEntry(
+      "Sent a cancel booking request of '%s'"
+        .formatted(cbrr));
   }
 
   @Override

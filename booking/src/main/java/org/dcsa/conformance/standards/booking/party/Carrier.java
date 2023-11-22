@@ -18,12 +18,15 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 @Slf4j
@@ -372,6 +375,17 @@ public class Carrier extends ConformanceParty {
     addOperatorLogEntry("Requested update to the booking with CBR '%s'".formatted(cbr));
   }
 
+  private void checkState(String reference, BookingState currentState, Predicate<BookingState> expectedState) {
+    if (!expectedState.test(currentState)) {
+      throw new IllegalStateException(
+        "Booking '%s' is in state '%s'".formatted(reference, currentState));
+    }
+  }
+
+  private void checkState(String reference, BookingState currentState, Set<BookingState> expectedState) {
+    checkState(reference, currentState, expectedState::contains);
+  }
+
   private void processAndEmitNotificationForStateTransition(
     JsonNode actionPrompt,
     BookingState targetState,
@@ -399,10 +413,7 @@ public class Carrier extends ConformanceParty {
     String cbr = cbrrToCbr.get(cbrr);
     BookingState currentState = bookingStatesByCbrr.get(cbrr);
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean(true);
-    if (!expectedState.contains(currentState)) {
-      throw new IllegalStateException(
-          "Booking '%s' is in state '%s'".formatted(cbrr, currentState));
-    }
+    checkState(cbrr, currentState, expectedState);
 
     if (isCorrect) {
       var booking = (ObjectNode)persistentMap.load(cbrr);
@@ -481,16 +492,39 @@ public class Carrier extends ConformanceParty {
   }
 
 
-  private ConformanceResponse return404(ConformanceRequest request) {
+  private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
-        404,
+        400,
         Map.of("Api-Version", List.of(apiVersion)),
         new ConformanceMessageBody(
           objectMapper
             .createObjectNode()
             .put(
-              "message",
-              "Returning 404 since the request did not match any known URL")));
+              "message", message)));
+  }
+
+  private ConformanceResponse return404(ConformanceRequest request) {
+    return request.createResponse(
+      404,
+      Map.of("Api-Version", List.of(apiVersion)),
+      new ConformanceMessageBody(
+        objectMapper
+          .createObjectNode()
+          .put(
+            "message",
+            "Returning 404 since the request did not match any known URL")));
+  }
+
+  private ConformanceResponse return409(ConformanceRequest request, String message) {
+    return request.createResponse(
+      409,
+      Map.of("Api-Version", List.of(apiVersion)),
+      new ConformanceMessageBody(
+        objectMapper
+          .createObjectNode()
+          .put(
+            "message",
+            message)));
   }
 
   @Override
@@ -505,7 +539,8 @@ public class Carrier extends ConformanceParty {
         }
         yield return404(request);
       }
-      case "PUT", "PATCH" -> throw new UnsupportedOperationException();
+      case "PATCH" -> _handlePatchBookingRequest(request);
+      case "PUT" -> throw new UnsupportedOperationException();
       default -> return405(request, "GET", "POST", "PUT", "PATCH");
     };
     addOperatorLogEntry(
@@ -517,6 +552,85 @@ public class Carrier extends ConformanceParty {
   private String lastUrlSegment(String url) {
     // ".../foo" and ".../foo/" should be the same
     return url.substring(1 + url.replaceAll("/++$", "").lastIndexOf("/"));
+  }
+
+  private String readCancelOperation(ConformanceRequest request) {
+    var queryParams = request.queryParams();
+    var operationParams = queryParams.get("operation");
+    if (operationParams == null || operationParams.isEmpty()) {
+      return null;
+    }
+    var operation = operationParams.iterator().next();
+    if (operationParams.size() > 1 || !(operation.equals("cancelBooking") || operation.equals("cancelAmendment"))) {
+      return "!INVALID-VALUE!";
+    }
+    return operation;
+  }
+
+  private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
+    var cancelOperation = readCancelOperation(request);
+    if (cancelOperation == null) {
+      return return400(request, "Missing mandatory 'operation' query parameter");
+    }
+    if (!cancelOperation.equals("cancelBooking") && !cancelOperation.equals("cancelAmendment")) {
+      return return400(request,
+        "The 'operation' query parameter must be given exactly one and have" +
+        " value either 'cancelBooking' OR 'cancelAmendment'"
+      );
+    }
+    var bookingReference = lastUrlSegment(request.url());
+    // bookingReference can either be a CBR or CBRR.
+    var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
+    if (!bookingStatesByCbrr.containsKey(cbrr)) {
+      return return404(request);
+    }
+    ObjectNode booking;
+    try {
+      booking = setState(cbrr, BookingState.CANCELLED, s -> s != BookingState.CANCELLED);
+    } catch (IllegalStateException e) {
+      return return409(request, "Booking was not in the correct state");
+    }
+    return returnBookingStatusResponse(200, request, booking, bookingReference);
+  }
+
+  private ConformanceResponse returnBookingStatusResponse(int responseCode, ConformanceRequest request, ObjectNode booking, String bookingReference) {
+    var cbrr = booking.get("carrierBookingRequestReference").asText();
+    var bookingStatus = booking.get("bookingStatus").asText();
+    var statusObject = objectMapper.createObjectNode()
+      .put("bookingStatus", bookingStatus)
+      .put("carrierBookingRequestReference", cbrr);
+    var cbr = booking.get("carrierBookingReference");
+    var reason = booking.get("reason");
+    if (cbr != null) {
+      statusObject.set("carrierBookingReference", cbr);
+    }
+    if (cbr != null) {
+      statusObject.set("reason", reason);
+    }
+    ConformanceResponse response =
+      request.createResponse(
+        responseCode,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(statusObject));
+    addOperatorLogEntry(
+      "Responded %d to %s booking '%s' (resulting state '%s')"
+        .formatted(responseCode, request.method(), bookingReference, bookingStatus));
+    return response;
+  }
+
+  private ObjectNode setState(String carrierBookingRequestReference, BookingState newState, Predicate<BookingState> expectedState) {
+    var booking = persistentMap.load(carrierBookingRequestReference);
+    if (booking == null) {
+      throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
+    }
+    checkState(
+      carrierBookingRequestReference,
+      BookingState.fromWireName(booking.required("bookingStatus").asText()),
+      expectedState
+    );
+    ((ObjectNode)booking).put("bookingStatus", newState.wireName());
+    bookingStatesByCbrr.put(carrierBookingRequestReference, newState);
+    return (ObjectNode) booking;
   }
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
@@ -543,26 +657,13 @@ public class Carrier extends ConformanceParty {
     String cbrr = UUID.randomUUID().toString();
     BookingState bookingState = BookingState.RECEIVED;
     bookingStatesByCbrr.put(cbrr, bookingState);
-    ConformanceResponse response =
-        request.createResponse(
-            201,
-            Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(
-                objectMapper
-                    .createObjectNode()
-                    .put("carrierBookingRequestReference", cbrr)
-                    .put("bookingStatus", bookingState.wireName())));
-
     ObjectNode booking =
         (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
     booking.put("carrierBookingRequestReference", cbrr);
     booking.put("bookingStatus", bookingState.wireName());
     persistentMap.save(cbrr, booking);
 
-    addOperatorLogEntry(
-        "Accepted booking request '%s' (now in state '%s')"
-            .formatted(cbrr, bookingState.wireName()));
-    return response;
+    return returnBookingStatusResponse(201, request, booking, cbrr);
   }
 
   @Builder

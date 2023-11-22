@@ -24,6 +24,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String POST_SCHEMA_NAME = "postBooking";
   private static final String GET_BOOKING_SCHEMA_NAME = "getBooking";
 
+  private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
+
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
 
@@ -52,6 +54,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                 .then(shipper_GetBooking(DECLINED)))),
                               uc4_carrier_rejectBookingRequest()
                                 .then(shipper_GetBooking(REJECTED)),
+                              uc12_shipper_cancelBooking()
+                                .then(shipper_GetBooking(CANCELLED)),
                               uc2_carrier_requestUpdateToBookingRequest()
                                 .then(shipper_GetBooking(PENDING_UPDATE))
                                 // Need UC3 to continue after UC2
@@ -247,7 +251,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc12_shipper_cancelBooking() {
-    return tbdShipperAction();
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction ->
+        new UC12_Shipper_CancelEntireBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            new JsonSchema(BOOKING_API, CANCEL_SCHEMA_NAME))));
   }
 
   private static BookingScenarioListBuilder tbdCarrierAction() {

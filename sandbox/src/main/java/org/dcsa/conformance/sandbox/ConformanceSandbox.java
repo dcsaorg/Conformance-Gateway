@@ -649,7 +649,7 @@ public class ConformanceSandbox {
 
   @SneakyThrows
   private static ConformanceResponse _syncHttpRequest(ConformanceRequest conformanceRequest) {
-    URI uri = URI.create(conformanceRequest.url());
+    URI uri = conformanceRequest.toURI();
     log.info(
         "ConformanceSandbox.syncHttpRequest(%s) calling: %s"
             .formatted(conformanceRequest.toJson().toPrettyString(), uri));

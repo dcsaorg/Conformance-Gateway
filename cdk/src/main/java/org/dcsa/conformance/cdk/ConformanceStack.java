@@ -51,6 +51,7 @@ public class ConformanceStack extends Stack {
   public ConformanceStack(
       Construct parent,
       StackProps stackProps,
+      String stackName,
       String prefix,
       String hostedZoneId,
       String hostedZoneName,
@@ -58,7 +59,7 @@ public class ConformanceStack extends Stack {
       String restApiCertificateArn,
       String webuiApiCertificateArn,
       String webuiDistCertificateArn) {
-    super(parent, prefix + "ConformanceStack", stackProps);
+    super(parent, stackName, stackProps);
 
     UserPool userPool =
         UserPool.Builder.create(this, prefix + "UserPool")

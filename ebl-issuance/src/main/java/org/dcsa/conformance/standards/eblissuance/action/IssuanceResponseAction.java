@@ -60,7 +60,7 @@ public class IssuanceResponseAction extends IssuanceAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "/v1/issuance-responses"),
+                EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "/ebl-issuance-responses"),
             new ResponseStatusCheck(
                 EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

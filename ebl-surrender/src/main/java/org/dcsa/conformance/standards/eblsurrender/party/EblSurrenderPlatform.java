@@ -88,8 +88,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
-    log.info(
-        "EblSurrenderPlatform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("EblSurrenderPlatform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
     String srr = UUID.randomUUID().toString();
     String tdr = actionPrompt.get("tdr").asText();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
@@ -135,7 +134,9 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
     jsonRequestBody.set(
         "endorsementChain", objectMapper.createArrayNode().add(endorsementChainLink));
-    asyncCounterpartPost("/v1/surrender-requests", jsonRequestBody);
+    asyncCounterpartPost(
+        "/%s/ebl-surrender-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        jsonRequestBody);
 
     addOperatorLogEntry(
         "Sending surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s'"

@@ -118,7 +118,7 @@ public class IssuanceRequestAction extends IssuanceAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
                 new UrlPathCheck(
-                    EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "/issue-ebls"),
+                    EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "/ebl-issuance-requests"),
                 new ResponseStatusCheck(
                     EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

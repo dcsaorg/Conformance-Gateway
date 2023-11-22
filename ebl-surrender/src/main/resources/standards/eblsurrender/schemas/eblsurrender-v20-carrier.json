@@ -16,21 +16,29 @@
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0-beta1",
-      "description": "SwaggerHub API Auto Mocking"
-    },
-    {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_SUR/1.0-alpha",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/2.0-beta1",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "paths": {
-    "/v1/surrender-requests": {
+    "/v2/ebl-surrender-requests": {
       "post": {
         "tags": [
           "Surrender Requests"
         ],
         "description": "The EBL Solution Platform uses this endpoint to submit a surrender request.\n\nThe carrier's answer to the surrender request will be returned via a callback response (see the `Callbacks` tab)\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -377,6 +385,18 @@
               "DID"
             ]
           }
+        }
+      }
+    },
+    "parameters": {
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "1"
         }
       }
     },

@@ -129,7 +129,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
       srr = UUID.randomUUID().toString();
     }
     asyncCounterpartPost(
-        "/v1/surrender-request-responses",
+        "/%s/ebl-surrender-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         new ObjectMapper()
             .createObjectNode()
             .put("surrenderRequestReference", srr)

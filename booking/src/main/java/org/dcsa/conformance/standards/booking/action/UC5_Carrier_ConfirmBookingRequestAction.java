@@ -43,6 +43,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
   @Override
   public void doHandleExchange(ConformanceExchange exchange) {
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
+    // FIXME: Guard against non-conformant parties
     var cbr = responseJsonNode.get("carrierBookingReference").asText();
     var dsp = getDspSupplier().get();
     if (cbr != null && !cbr.isBlank()) {

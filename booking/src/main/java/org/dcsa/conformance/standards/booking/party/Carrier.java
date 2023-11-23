@@ -691,7 +691,7 @@ public class Carrier extends ConformanceParty {
     if (cbr != null) {
       statusObject.set("carrierBookingReference", cbr);
     }
-    if (cbr != null) {
+    if (reason != null) {
       statusObject.set("reason", reason);
     }
     ConformanceResponse response =

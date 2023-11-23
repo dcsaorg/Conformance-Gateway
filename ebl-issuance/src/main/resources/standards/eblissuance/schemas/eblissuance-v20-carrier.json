@@ -21,7 +21,7 @@
     }
   ],
   "paths": {
-    "/v1/issue-ebls": {
+    "/v2/ebl-issuance-requests": {
       "put": {
         "tags": [
           "Issuance EBL"

@@ -2,9 +2,11 @@ package org.dcsa.conformance.standards.eblsurrender.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -42,12 +44,26 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
+    ObjectMapper objectMapper = new ObjectMapper();
+    ArrayNode arrayNode = objectMapper.createArrayNode();
+    eblStatesById.forEach(
+        (key, value) -> {
+          ObjectNode entryNode = objectMapper.createObjectNode();
+          entryNode.put("key", key);
+          entryNode.put("value", value.name());
+          arrayNode.add(entryNode);
+        });
+    targetObjectNode.set("eblStatesById", arrayNode);
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StateManagementUtil.restoreIntoMap(eblStatesById, sourceObjectNode.get("eblStatesById"), EblSurrenderState::valueOf);
+    StreamSupport.stream(sourceObjectNode.get("eblStatesById").spliterator(), false)
+        .forEach(
+            entryNode ->
+                eblStatesById.put(
+                    entryNode.get("key").asText(),
+                    EblSurrenderState.valueOf(entryNode.get("value").asText())));
   }
 
   @Override
@@ -66,7 +82,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
   private void supplyAvailableTdr(JsonNode actionPrompt) {
     log.info(
         "EblSurrenderCarrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+    String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
           objectMapper
@@ -118,7 +134,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
       srr = UUID.randomUUID().toString();
     }
     asyncCounterpartPost(
-        "/v1/surrender-request-responses",
+        "/%s/ebl-surrender-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         objectMapper
             .createObjectNode()
             .put("surrenderRequestReference", srr)

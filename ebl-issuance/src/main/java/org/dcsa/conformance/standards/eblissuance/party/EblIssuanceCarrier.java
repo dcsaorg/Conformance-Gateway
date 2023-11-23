@@ -95,7 +95,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
       ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
     }
 
-    asyncCounterpartPost("/v1/issue-ebls", jsonRequestBody);
+    asyncCounterpartPost(
+        "/%s/ebl-issuance-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        jsonRequestBody);
 
     addOperatorLogEntry(
         "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"

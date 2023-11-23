@@ -3,10 +3,12 @@
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
     "transportDocumentTypeCode": "BOL",
     "documentStatus": "ISSUED",
-    "shippingInstructionReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
+    "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
     "carrierCode": "ASDF",
     "carrierCodeListProvider": "SMDG",
     "issuingParty": {
+      "eblPlatformIdentifier": "epi@example.com",
+      "legalName": "legal name",
       "partyName": "issuing party",
       "partyContactDetails": [
         {
@@ -66,6 +68,8 @@
     "documentParties": [
       {
         "party": {
+          "eblPlatformIdentifier": "epi@example.com",
+          "legalName": "legal name",
           "partyName": "party name",
           "partyContactDetails": [
             {

@@ -21,12 +21,24 @@
     }
   ],
   "paths": {
-    "/v1/surrender-request-responses": {
+    "/v2/ebl-surrender-responses": {
       "post": {
         "tags": [
           "Surrender Request responses"
         ],
         "description": "The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -234,6 +246,18 @@
             "description": "Additional information as to why the error occured\n",
             "example": "Spaces not allowed in facility code"
           }
+        }
+      }
+    },
+    "parameters": {
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "1"
         }
       }
     },

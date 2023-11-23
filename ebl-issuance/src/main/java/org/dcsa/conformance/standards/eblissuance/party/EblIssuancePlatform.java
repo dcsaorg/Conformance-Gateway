@@ -2,9 +2,11 @@ package org.dcsa.conformance.standards.eblissuance.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -41,12 +43,27 @@ public class EblIssuancePlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
+    eblStatesByTdr.forEach(
+        (key, value) -> {
+          ObjectNode entryNode = objectMapper.createObjectNode();
+          entryNode.put("key", key);
+          entryNode.put("value", value.name());
+          arrayNodeEblStatesById.add(entryNode);
+        });
+    targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StateManagementUtil.restoreIntoMap(eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
+    StreamSupport.stream(sourceObjectNode.get("eblStatesByTdr").spliterator(), false)
+        .forEach(
+            entryNode ->
+                eblStatesByTdr.put(
+                    entryNode.get("key").asText(),
+                    EblIssuanceState.valueOf(entryNode.get("value").asText())));
   }
 
   @Override
@@ -74,7 +91,7 @@ public class EblIssuancePlatform extends ConformanceParty {
     }
 
     asyncCounterpartPost(
-        "/v1/issuance-responses",
+        "/%s/ebl-issuance-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         objectMapper
             .createObjectNode()
             .put("transportDocumentReference", tdr)

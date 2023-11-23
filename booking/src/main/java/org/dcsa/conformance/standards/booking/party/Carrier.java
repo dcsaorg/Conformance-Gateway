@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+<<<<<<< HEAD
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
+=======
+>>>>>>> dcf5bd5 (Booking: Implement more conditional checks on `GET` booking response)
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,16 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class Carrier extends ConformanceParty {
@@ -315,7 +328,9 @@ public class Carrier extends ConformanceParty {
             BookingState.PENDING_UPDATE,
             BookingState.PENDING_UPDATE_CONFIRMATION),
         ReferenceState.PROVIDE_IF_EXIST,
-        true);
+        true,
+        booking -> booking.put("reason", "Rejected as required by the conformance scenario")
+    );
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
 
@@ -325,6 +340,7 @@ public class Carrier extends ConformanceParty {
     String cbr = actionPrompt.get("cbr").asText();
 
     processAndEmitNotificationForStateTransition(
+<<<<<<< HEAD
         actionPrompt,
         BookingState.DECLINED,
         Set.of(
@@ -333,6 +349,18 @@ public class Carrier extends ConformanceParty {
             BookingState.AMENDMENT_RECEIVED),
         ReferenceState.PROVIDE_IF_EXIST,
         false);
+=======
+      actionPrompt,
+      BookingState.DECLINED,
+      Set.of(
+        BookingState.CONFIRMED,
+        BookingState.PENDING_AMENDMENT,
+        BookingState.PENDING_AMENDMENT_APPROVAL),
+      ReferenceState.PROVIDE_IF_EXIST,
+      false,
+      booking -> booking.put("reason", "Declined as required by the conformance scenario")
+    );
+>>>>>>> dcf5bd5 (Booking: Implement more conditional checks on `GET` booking response)
     addOperatorLogEntry("Declined the booking with CBR '%s'".formatted(cbr));
   }
 
@@ -643,6 +671,9 @@ public class Carrier extends ConformanceParty {
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
     }
+    var reason = request.message().body().getJsonBody().path("reason")
+      .asText("Cancelled by shipper (no reason given)");
+    booking.put("reason", reason);
     return returnBookingStatusResponse(200, request, booking, bookingReference);
   }
 

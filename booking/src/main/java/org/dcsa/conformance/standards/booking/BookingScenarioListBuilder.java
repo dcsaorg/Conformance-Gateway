@@ -1,15 +1,14 @@
 package org.dcsa.conformance.standards.booking;
 
+import static org.dcsa.conformance.standards.booking.party.BookingState.*;
+
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.function.Function;
-
-import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
@@ -183,7 +182,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 (BookingAction) previousAction,
                 expectedBookingStatus,
                 expectedAmendedBookingStatus,
-                componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME)));
+                componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME),
+                false));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {

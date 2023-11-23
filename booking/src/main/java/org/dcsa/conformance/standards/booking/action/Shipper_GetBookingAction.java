@@ -18,6 +18,7 @@ public class Shipper_GetBookingAction extends BookingAction {
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
   private final JsonSchemaValidator responseSchemaValidator;
+  private final boolean requestAmendedStatus;
 
   public Shipper_GetBookingAction(
       String carrierPartyName,
@@ -25,11 +26,13 @@ public class Shipper_GetBookingAction extends BookingAction {
       BookingAction previousAction,
       BookingState expectedBookingStatus,
       BookingState expectedAmendedBookingStatus,
-      JsonSchemaValidator responseSchemaValidator) {
+      JsonSchemaValidator responseSchemaValidator,
+      boolean requestAmendedStatus) {
     super(shipperPartyName, carrierPartyName, previousAction, "GET", 200);
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.responseSchemaValidator = responseSchemaValidator;
+    this.requestAmendedStatus = requestAmendedStatus;
   }
 
   @Override
@@ -70,7 +73,8 @@ public class Shipper_GetBookingAction extends BookingAction {
             new CarrierGetBookingPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
-              expectedAmendedBookingStatus
+              expectedAmendedBookingStatus,
+              requestAmendedStatus
             ),
             new ActionCheck(
                 "GET returns the expected Booking data",

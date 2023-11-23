@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -26,7 +27,7 @@ public class Shipper extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -77,7 +78,7 @@ public class Shipper extends ConformanceParty {
 
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-          "/standards/booking/messages/booking-api-v20-request.json",
+            "/standards/booking/messages/booking-api-v20-request.json",
             Map.ofEntries(
                 Map.entry(
                     "CARRIER_SERVICE_NAME_PLACEHOLDER",
@@ -85,7 +86,19 @@ public class Shipper extends ConformanceParty {
                 Map.entry(
                     "VESSEL_IMO_NUMBER_PLACEHOLDER", carrierScenarioParameters.vesselIMONumber())));
 
-    asyncCounterpartPost("/v2/bookings", jsonRequestBody);
+    asyncCounterpartPost(
+        "/v2/bookings",
+        jsonRequestBody,
+        conformanceResponse -> {
+          JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+          String cbrr = jsonBody.get("carrierBookingRequestReference").asText();
+          String bookingStatus = jsonBody.get("bookingStatus").asText();
+          ObjectNode updatedBooking =
+                ((ObjectNode) jsonRequestBody)
+                  .put("bookingStatus", bookingStatus)
+                  .put("carrierBookingRequestReference", cbrr);
+          persistentMap.save(cbrr, updatedBooking);
+        });
 
     addOperatorLogEntry(
         "Sent a booking request with the parameters: %s"
@@ -97,14 +110,12 @@ public class Shipper extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
 
     asyncCounterpartPatch(
-      "/v2/bookings/%s?operation=cancelBooking".formatted(cbrr),
-      new ObjectMapper().createObjectNode()
-        .put("bookingStatus", BookingState.CANCELLED.wireName())
-    );
+        "/v2/bookings/%s?operation=cancelBooking".formatted(cbrr),
+        new ObjectMapper()
+            .createObjectNode()
+            .put("bookingStatus", BookingState.CANCELLED.wireName()));
 
-    addOperatorLogEntry(
-      "Sent a cancel booking request of '%s'"
-        .formatted(cbrr));
+    addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
   }
 
   @Override

@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
@@ -29,15 +30,14 @@ public abstract class ConformanceParty implements StatefulEntity {
   protected final CounterpartConfiguration counterpartConfiguration;
 
   /**
-   * Used to store full documents between steps.
-   * Unlike the state saved and loaded via exportJsonState and importJsonState,
-   * which is entirely (the whole map) stored within a single DynamoDB item,
-   * the items in this map are separately stored each in its own DynamoDB item.
-   * This is to avoid growing the state map past the size limit of DynamoDB items.
+   * Used to store full documents between steps. Unlike the state saved and loaded via
+   * exportJsonState and importJsonState, which is entirely (the whole map) stored within a single
+   * DynamoDB item, the items in this map are separately stored each in its own DynamoDB item. This
+   * is to avoid growing the state map past the size limit of DynamoDB items.
    */
   protected final JsonNodeMap persistentMap;
 
-  private final Consumer<ConformanceRequest> asyncWebClient;
+  private final BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient;
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
@@ -49,7 +49,7 @@ public abstract class ConformanceParty implements StatefulEntity {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     this.apiVersion = apiVersion;
     this.partyConfiguration = partyConfiguration;
@@ -140,10 +140,15 @@ public abstract class ConformanceParty implements StatefulEntity {
                 "orchestrator",
                 orchestratorAuthHeader,
                 new ConformanceMessageBody(jsonPartyInput),
-                System.currentTimeMillis())));
+                System.currentTimeMillis())),
+        conformanceResponse -> {});
   }
 
   protected void asyncCounterpartGet(String path) {
+    asyncCounterpartGet(path, conformanceResponse -> {});
+  }
+
+  protected void asyncCounterpartGet(String path, Consumer<ConformanceResponse> responseCallback) {
     asyncWebClient.accept(
         new ConformanceRequest(
             "GET",
@@ -162,27 +167,40 @@ public abstract class ConformanceParty implements StatefulEntity {
                         counterpartConfiguration.getAuthHeaderName(),
                         List.of(counterpartConfiguration.getAuthHeaderValue())),
                 new ConformanceMessageBody(""),
-                System.currentTimeMillis())));
+                System.currentTimeMillis())),
+        responseCallback);
   }
 
   protected void asyncCounterpartPatch(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("PATCH", path, Collections.emptyMap(), jsonBody);
+    asyncCounterpartPatch(path, jsonBody, conformanceResponse -> {});
   }
 
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("POST", path, Collections.emptyMap(), jsonBody);
+    asyncCounterpartPost(path, jsonBody, conformanceResponse -> {});
   }
 
   protected void asyncCounterpartPut(String path, JsonNode jsonBody) {
-    _asyncCounterpartPatchPostOrPut("PUT", path, Collections.emptyMap(), jsonBody);
+    asyncCounterpartPut(path, jsonBody, conformanceResponse -> {});
+  }
+
+  protected void asyncCounterpartPatch(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut("PATCH", path, Collections.emptyMap(), jsonBody, responseCallback);
+  }
+
+  protected void asyncCounterpartPost(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut("POST", path, Collections.emptyMap(), jsonBody, responseCallback);
+  }
+
+  protected void asyncCounterpartPut(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut("PUT", path, Collections.emptyMap(), jsonBody, responseCallback);
   }
 
   private void _asyncCounterpartPatchPostOrPut(
-    String method,
-    String path,
-    Map<String, ? extends Collection<String>> queryParams,
-    JsonNode jsonBody
-  ) {
+      String method,
+      String path,
+      Map<String, ? extends Collection<String>> queryParams,
+      JsonNode jsonBody,
+      Consumer<ConformanceResponse> responseCallback) {
     asyncWebClient.accept(
         new ConformanceRequest(
             method,
@@ -201,7 +219,8 @@ public abstract class ConformanceParty implements StatefulEntity {
                         counterpartConfiguration.getAuthHeaderName(),
                         List.of(counterpartConfiguration.getAuthHeaderValue())),
                 new ConformanceMessageBody(jsonBody),
-                System.currentTimeMillis())));
+                System.currentTimeMillis())),
+        responseCallback);
   }
 
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);

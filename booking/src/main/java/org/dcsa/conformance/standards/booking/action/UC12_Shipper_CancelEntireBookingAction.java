@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.stream.Stream;
 
@@ -55,6 +57,10 @@ public class UC12_Shipper_CancelEntireBookingAction extends BookingAction {
             new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new CarrierBookingRefStatusPayloadResponseConformanceCheck(
+              getMatchedExchangeUuid(),
+              BookingState.CANCELLED
+            ),
             new ApiHeaderCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

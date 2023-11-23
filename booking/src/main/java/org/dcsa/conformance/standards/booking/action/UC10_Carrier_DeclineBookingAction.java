@@ -4,15 +4,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.stream.Stream;
 
 @Getter
-public class UC10_Carrier_RejectBookingAction extends BookingAction {
+public class UC10_Carrier_DeclineBookingAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC10_Carrier_RejectBookingAction(
+  public UC10_Carrier_DeclineBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
@@ -23,7 +25,7 @@ public class UC10_Carrier_RejectBookingAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC10: Reject the booking request with CBR %s"
+    return ("UC10: Decline the booking request with CBR %s"
         .formatted(getDspSupplier().get().carrierBookingReference()));
   }
 
@@ -45,6 +47,7 @@ public class UC10_Carrier_RejectBookingAction extends BookingAction {
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
+            // TODO: Add notification validation
             new ApiHeaderCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

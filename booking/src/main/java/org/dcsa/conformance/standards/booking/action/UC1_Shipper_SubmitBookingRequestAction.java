@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -73,6 +74,10 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            new CarrierBookingRefStatusPayloadResponseConformanceCheck(
+              getMatchedExchangeUuid(),
+              BookingState.RECEIVED
+            ),
             new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

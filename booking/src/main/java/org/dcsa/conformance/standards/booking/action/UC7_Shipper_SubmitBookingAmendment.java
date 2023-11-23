@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -102,7 +103,12 @@ public class UC7_Shipper_SubmitBookingAmendment extends BookingAction {
           }
         }
         return Stream.concat(
-            primaryExchangeChecks,
+            Stream.concat(primaryExchangeChecks,
+            Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
+              getMatchedExchangeUuid(),
+              notificationBookingStatus,
+              BookingState.AMENDMENT_RECEIVED
+            ))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

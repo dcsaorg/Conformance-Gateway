@@ -282,7 +282,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc10_carrier_declineBooking() {
-    return carrierStateChange(UC10_Carrier_RejectBookingAction::new);
+    return carrierStateChange(UC10_Carrier_DeclineBookingAction::new);
   }
 
   private static BookingScenarioListBuilder uc11_carrier_confirmBookingCompleted() {

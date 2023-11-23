@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.stream.Stream;
 
@@ -44,6 +46,7 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends BookingActi
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
+            // TODO: Add Notification Validation
             new ApiHeaderCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

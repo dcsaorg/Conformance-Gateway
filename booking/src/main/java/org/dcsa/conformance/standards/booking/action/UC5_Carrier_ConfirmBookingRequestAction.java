@@ -6,7 +6,9 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
 public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
@@ -53,6 +55,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
+            // TODO: Add notification validation
             new ApiHeaderCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

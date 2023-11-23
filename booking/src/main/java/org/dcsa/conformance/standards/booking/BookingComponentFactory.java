@@ -113,12 +113,12 @@ public class BookingComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(JsonSchema jsonSchema) {
+  public JsonSchemaValidator getMessageSchemaValidator(String apiName, String jsonSchema) {
     String schemaFilePath = "/standards/booking/schemas/booking-%s-v%s0.json"
-      .formatted(jsonSchema.apiName(), standardVersion.charAt(0));
+      .formatted(apiName, standardVersion.charAt(0));
 
     return new JsonSchemaValidator(
-      BookingComponentFactory.class.getResourceAsStream(schemaFilePath), jsonSchema.schemaName());
+      BookingComponentFactory.class.getResourceAsStream(schemaFilePath), jsonSchema);
   }
 
   @SneakyThrows

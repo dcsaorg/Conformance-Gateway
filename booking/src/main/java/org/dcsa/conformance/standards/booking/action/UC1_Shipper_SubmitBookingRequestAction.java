@@ -15,14 +15,17 @@ import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 @Slf4j
 public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator responseSchemaValidator;
 
   public UC1_Shipper_SubmitBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
@@ -77,7 +80,12 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator))
+                requestSchemaValidator),
+            new JsonSchemaCheck(
+              BookingRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator))
         // .filter(Objects::nonNull)
         ;
       }

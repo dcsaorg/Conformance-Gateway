@@ -23,6 +23,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_NOTIFICATIONS_API = "notification";
   private static final String POST_SCHEMA_NAME = "postBooking";
   private static final String GET_BOOKING_SCHEMA_NAME = "getBooking";
+  private static final String BOOKING_REF_STATUS_SCHEMA = "bookingRefStatus";
 
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
 
@@ -169,8 +170,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 shipperPartyName,
                 (BookingAction) previousAction,
                 expectedState,
-                componentFactory.getMessageSchemaValidator(
-                  new JsonSchema(BOOKING_API, GET_BOOKING_SCHEMA_NAME))));
+                componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME)
+            ));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
@@ -183,8 +184,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
-                  new JsonSchema(BOOKING_API, POST_SCHEMA_NAME))));
+                componentFactory.getMessageSchemaValidator(BOOKING_API, POST_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA)
+              ));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(CarrierNotificationUseCase constructor) {
@@ -198,7 +200,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           shipperPartyName,
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            new JsonSchema(BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)))
+            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME))
       );
   }
 
@@ -260,8 +262,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(
-            new JsonSchema(BOOKING_API, CANCEL_SCHEMA_NAME))));
+          componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA)));
   }
 
   private static BookingScenarioListBuilder tbdCarrierAction() {

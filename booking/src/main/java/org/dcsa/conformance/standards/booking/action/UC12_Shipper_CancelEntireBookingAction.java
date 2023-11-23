@@ -14,14 +14,17 @@ import java.util.stream.Stream;
 @Slf4j
 public class UC12_Shipper_CancelEntireBookingAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator responseSchemaValidator;
 
   public UC12_Shipper_CancelEntireBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC12", 200);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
@@ -66,7 +69,12 @@ public class UC12_Shipper_CancelEntireBookingAction extends BookingAction {
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator))
+                requestSchemaValidator),
+            new JsonSchemaCheck(
+              BookingRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator))
         // .filter(Objects::nonNull)
         ;
       }

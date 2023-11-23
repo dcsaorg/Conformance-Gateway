@@ -39,6 +39,7 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends BookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
+          new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "GET"),
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(

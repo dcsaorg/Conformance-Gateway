@@ -48,6 +48,7 @@ public class UC12_Shipper_CancelEntireBookingAction extends BookingAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var cbrr = getDspSupplier().get().carrierBookingRequestReference();
         return Stream.of(
+            new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
             new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),

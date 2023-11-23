@@ -59,6 +59,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
+            new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "POST"),
             new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings"),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),

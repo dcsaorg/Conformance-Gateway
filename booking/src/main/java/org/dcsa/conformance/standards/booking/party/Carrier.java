@@ -33,7 +33,6 @@ import java.util.stream.StreamSupport;
 public class Carrier extends ConformanceParty {
   private static final Random RANDOM = new Random();
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final Map<String, BookingState> bookingStatesByCbrr = new HashMap<>();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
   protected boolean isShipperNotificationEnabled = false;
@@ -56,24 +55,18 @@ public class Carrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set(
-        "bookingStatesByCbrr",
-        StateManagementUtil.storeMap(objectMapper, bookingStatesByCbrr, BookingState::name));
     targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
     targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(objectMapper, cbrToCbrr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StateManagementUtil.restoreIntoMap(
-        bookingStatesByCbrr, sourceObjectNode.get("bookingStatesByCbrr"), BookingState::valueOf);
     StateManagementUtil.restoreIntoMap(cbrrToCbr, sourceObjectNode.get("cbrrToCbr"));
     StateManagementUtil.restoreIntoMap(cbrToCbrr, sourceObjectNode.get("cbrToCbrr"));
   }
 
   @Override
   protected void doReset() {
-    bookingStatesByCbrr.clear();
     cbrrToCbr.clear();
     cbrToCbrr.clear();
   }
@@ -411,14 +404,11 @@ public class Carrier extends ConformanceParty {
       Consumer<ObjectNode> bookingMutator) {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
-    BookingState currentState = bookingStatesByCbrr.get(cbrr);
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean(true);
-    checkState(cbrr, currentState, expectedState);
 
     if (isCorrect) {
-      var booking = (ObjectNode)persistentMap.load(cbrr);
       boolean generatedCBR = false;
-      bookingStatesByCbrr.put(cbrr, targetState);
+      var booking = setStateFromCBR(cbrr, targetState, expectedState::contains);
       switch (cbrHandling) {
         case MUST_EXIST -> {
           if (cbr == null) {
@@ -581,12 +571,13 @@ public class Carrier extends ConformanceParty {
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
-    if (!bookingStatesByCbrr.containsKey(cbrr)) {
+    var bookingData = persistentMap.load(cbrr);
+    ObjectNode booking;
+    if (bookingData == null || bookingData.isMissingNode()) {
       return return404(request);
     }
-    ObjectNode booking;
     try {
-      booking = setState(cbrr, BookingState.CANCELLED, s -> s != BookingState.CANCELLED);
+      booking = setState(bookingReference, bookingData, BookingState.CANCELLED, s -> s != BookingState.CANCELLED);
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
     }
@@ -618,19 +609,22 @@ public class Carrier extends ConformanceParty {
     return response;
   }
 
-  private ObjectNode setState(String carrierBookingRequestReference, BookingState newState, Predicate<BookingState> expectedState) {
-    var booking = persistentMap.load(carrierBookingRequestReference);
-    if (booking == null) {
-      throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
-    }
+  private ObjectNode setState(String bookingReference, JsonNode booking, BookingState newState, Predicate<BookingState> expectedState) {
     checkState(
-      carrierBookingRequestReference,
+      bookingReference,
       BookingState.fromWireName(booking.required("bookingStatus").asText()),
       expectedState
     );
     ((ObjectNode)booking).put("bookingStatus", newState.wireName());
-    bookingStatesByCbrr.put(carrierBookingRequestReference, newState);
     return (ObjectNode) booking;
+  }
+
+  private ObjectNode setStateFromCBR(String carrierBookingRequestReference, BookingState newState, Predicate<BookingState> expectedState) {
+    var booking = persistentMap.load(carrierBookingRequestReference);
+    if (booking == null) {
+      throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
+    }
+    return setState(carrierBookingRequestReference, booking, newState, expectedState);
   }
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
@@ -656,7 +650,6 @@ public class Carrier extends ConformanceParty {
   private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
     String cbrr = UUID.randomUUID().toString();
     BookingState bookingState = BookingState.RECEIVED;
-    bookingStatesByCbrr.put(cbrr, bookingState);
     ObjectNode booking =
         (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
     booking.put("carrierBookingRequestReference", cbrr);

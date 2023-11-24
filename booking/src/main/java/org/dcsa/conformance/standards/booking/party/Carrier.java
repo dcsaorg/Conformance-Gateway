@@ -311,7 +311,7 @@ public class Carrier extends ConformanceParty {
       Set.of(
         BookingState.CONFIRMED,
         BookingState.PENDING_AMENDMENT,
-        BookingState.PENDING_AMENDMENT_APPROVAL),
+        BookingState.AMENDMENT_RECEIVED),
       ReferenceState.PROVIDE_IF_EXIST,
       false);
     addOperatorLogEntry("Declined the booking with CBR '%s'".formatted(cbr));
@@ -562,6 +562,10 @@ public class Carrier extends ConformanceParty {
     var bookingReference = lastUrlSegment(request.url());
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var bookingData = persistentMap.load(cbrr);
+    String bookingStatus = bookingData.get("bookingStatus").asText();
+    if (bookingStatus.equals(BookingState.CONFIRMED.wireName())) {
+      bookingState = BookingState.AMENDMENT_RECEIVED;
+    }
     ObjectNode booking =
       (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
     if (bookingData == null || bookingData.isMissingNode()) {

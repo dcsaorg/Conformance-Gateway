@@ -528,7 +528,7 @@ public class Carrier extends ConformanceParty {
         yield return404(request);
       }
       case "PATCH" -> _handlePatchBookingRequest(request);
-      case "PUT" -> throw new UnsupportedOperationException();
+      case "PUT" -> _handlePutBookingRequest(request);
       default -> return405(request, "GET", "POST", "PUT", "PATCH");
     };
     addOperatorLogEntry(
@@ -555,6 +555,23 @@ public class Carrier extends ConformanceParty {
     return operation;
   }
 
+  @SneakyThrows
+  private ConformanceResponse _handlePutBookingRequest(ConformanceRequest request) {
+    BookingState bookingState = BookingState.PENDING_UPDATE_CONFIRMATION;
+    // bookingReference can either be a CBR or CBRR.
+    var bookingReference = lastUrlSegment(request.url());
+    var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
+    var bookingData = persistentMap.load(cbrr);
+    ObjectNode booking =
+      (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
+    if (bookingData == null || bookingData.isMissingNode()) {
+      return return404(request);
+    }
+    booking.put("bookingStatus", bookingState.wireName());
+    persistentMap.save(cbrr, booking);
+    return returnBookingStatusResponse(200, request, booking, cbrr);
+  }
+
   private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
     if (cancelOperation == null) {
@@ -563,7 +580,7 @@ public class Carrier extends ConformanceParty {
     if (!cancelOperation.equals("cancelBooking") && !cancelOperation.equals("cancelAmendment")) {
       return return400(request,
         "The 'operation' query parameter must be given exactly one and have" +
-        " value either 'cancelBooking' OR 'cancelAmendment'"
+          " value either 'cancelBooking' OR 'cancelAmendment'"
       );
     }
     var bookingReference = lastUrlSegment(request.url());
@@ -581,6 +598,8 @@ public class Carrier extends ConformanceParty {
     }
     return returnBookingStatusResponse(200, request, booking, bookingReference);
   }
+
+
 
   private ConformanceResponse returnBookingStatusResponse(int responseCode, ConformanceRequest request, ObjectNode booking, String bookingReference) {
     var cbrr = booking.get("carrierBookingRequestReference").asText();

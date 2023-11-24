@@ -133,7 +133,7 @@ public class Shipper extends ConformanceParty {
       "/v2/bookings/%s".formatted(cbrr),bookingData);
 
     addOperatorLogEntry(
-      "Sent a Updated booking request with the parameters: %s"
+      "Sent an updated booking request with the parameters: %s"
         .formatted(cbrr));
   }
 

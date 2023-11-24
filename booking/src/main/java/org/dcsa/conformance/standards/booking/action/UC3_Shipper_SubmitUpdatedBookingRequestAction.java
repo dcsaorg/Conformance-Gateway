@@ -31,7 +31,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC3 Submit an Updated booking request using the following parameters:");
+    return ("UC3: Submit an updated booking request");
   }
 
   @Override
@@ -44,17 +44,6 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
-  }
-
-  @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
-    JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    // FIXME: Guard against non-conformant parties
-    getDspConsumer()
-        .accept(
-            new DynamicScenarioParameters(
-                responseJsonNode.get("carrierBookingRequestReference").asText(),
-                getDspSupplier().get().carrierBookingReference()));
   }
 
   @Override

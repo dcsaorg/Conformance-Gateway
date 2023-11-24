@@ -23,10 +23,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_NOTIFICATIONS_API = "notification";
   private static final String POST_SCHEMA_NAME = "postBooking";
   private static final String GET_BOOKING_SCHEMA_NAME = "getBooking";
+  private static final String PUT_SCHEMA_NAME = "putBooking";
   private static final String BOOKING_REF_STATUS_SCHEMA = "bookingRefStatus";
-
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
-
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
 
@@ -219,7 +218,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(BOOKING_API, POST_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, PUT_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA)
         ));
   }

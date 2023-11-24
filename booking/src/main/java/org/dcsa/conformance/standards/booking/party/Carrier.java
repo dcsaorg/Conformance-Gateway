@@ -557,9 +557,9 @@ public class Carrier extends ConformanceParty {
 
   @SneakyThrows
   private ConformanceResponse _handlePutBookingRequest(ConformanceRequest request) {
-    var bookingReference = lastUrlSegment(request.url());
-    // bookingReference can either be a CBR or CBRR.
     BookingState bookingState = BookingState.PENDING_UPDATE_CONFIRMATION;
+    // bookingReference can either be a CBR or CBRR.
+    var bookingReference = lastUrlSegment(request.url());
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var bookingData = persistentMap.load(cbrr);
     ObjectNode booking =
@@ -567,7 +567,6 @@ public class Carrier extends ConformanceParty {
     if (bookingData == null || bookingData.isMissingNode()) {
       return return404(request);
     }
-    booking.put("carrierBookingRequestReference", cbrr);
     booking.put("bookingStatus", bookingState.wireName());
     persistentMap.save(cbrr, booking);
     return returnBookingStatusResponse(200, request, booking, cbrr);

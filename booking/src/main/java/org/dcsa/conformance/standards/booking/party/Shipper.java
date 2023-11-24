@@ -23,6 +23,9 @@ import org.dcsa.conformance.standards.booking.action.UC3_Shipper_SubmitUpdatedBo
 
 @Slf4j
 public class Shipper extends ConformanceParty {
+
+  private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
+  private static final String SERVICE_REF_PUT = "serviceRefPut";
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -124,8 +127,8 @@ public class Shipper extends ConformanceParty {
     log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
 
-    var bookingData = persistentMap.load(NO_CBRR);
-    ((ObjectNode) bookingData).put("serviceContractReference", "serviceRefPut");
+    var bookingData = persistentMap.load(cbrr);
+    ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     asyncCounterpartPut(
       "/v2/bookings/%s".formatted(cbrr),bookingData);
 

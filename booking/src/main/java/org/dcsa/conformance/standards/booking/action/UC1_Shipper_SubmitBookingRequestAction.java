@@ -34,11 +34,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
   }
 
   @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
-  }
-
-  @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());

@@ -16,10 +16,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.booking.action.Shipper_GetBookingAction;
-import org.dcsa.conformance.standards.booking.action.UC12_Shipper_CancelEntireBookingAction;
-import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
-import org.dcsa.conformance.standards.booking.action.UC3_Shipper_SubmitUpdatedBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.*;
 
 @Slf4j
 public class Shipper extends ConformanceParty {
@@ -63,6 +60,7 @@ public class Shipper extends ConformanceParty {
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
         Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
+        Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
         Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
   }
 
@@ -134,6 +132,20 @@ public class Shipper extends ConformanceParty {
 
     addOperatorLogEntry(
       "Sent an updated booking request with the parameters: %s"
+        .formatted(cbrr));
+  }
+
+  private void sendUpdatedConfirmedBooking(JsonNode actionPrompt) {
+    log.info("Shipper.sendUpdatedConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    var bookingData = persistentMap.load(cbrr);
+    ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
+    asyncCounterpartPut(
+      "/v2/bookings/%s".formatted(cbrr),bookingData);
+
+    addOperatorLogEntry(
+      "Sent an updated confirmed booking with the parameters: %s"
         .formatted(cbrr));
   }
 

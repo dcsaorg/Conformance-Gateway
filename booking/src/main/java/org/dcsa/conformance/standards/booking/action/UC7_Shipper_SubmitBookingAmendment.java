@@ -11,24 +11,24 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction {
+public class UC7_Shipper_SubmitBookingAmendment extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
 
-  public UC3_Shipper_SubmitUpdatedBookingRequestAction(
+  public UC7_Shipper_SubmitBookingAmendment(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC3: Submit an updated booking request");
+    return ("UC7: Submit Amendment to confirmed booking");
   }
 
   @Override

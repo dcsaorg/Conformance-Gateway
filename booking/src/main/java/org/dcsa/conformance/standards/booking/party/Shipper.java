@@ -18,9 +18,12 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.Shipper_GetBookingAction;
 import org.dcsa.conformance.standards.booking.action.UC12_Shipper_CancelEntireBookingAction;
 import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC3_Shipper_SubmitUpdatedBookingRequestAction;
 
 @Slf4j
 public class Shipper extends ConformanceParty {
+
+  private static final String NO_CBRR = "NO_CBRR";
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -57,6 +60,7 @@ public class Shipper extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
         Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
+        Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
         Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
   }
 
@@ -86,7 +90,7 @@ public class Shipper extends ConformanceParty {
                     "VESSEL_IMO_NUMBER_PLACEHOLDER", carrierScenarioParameters.vesselIMONumber())));
 
     asyncCounterpartPost("/v2/bookings", jsonRequestBody);
-
+    persistentMap.save(NO_CBRR,jsonRequestBody);
     addOperatorLogEntry(
         "Sent a booking request with the parameters: %s"
             .formatted(carrierScenarioParameters.toJson()));
@@ -106,6 +110,21 @@ public class Shipper extends ConformanceParty {
       "Sent a cancel booking request of '%s'"
         .formatted(cbrr));
   }
+
+  private void sendUpdatedBooking(JsonNode actionPrompt) {
+    log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    var bookingData = persistentMap.load(NO_CBRR);
+    ((ObjectNode) bookingData).put("serviceContractReference", "serviceRefPut");
+    asyncCounterpartPut(
+      "/v2/bookings/%s".formatted(cbrr),bookingData);
+
+    addOperatorLogEntry(
+      "Sent a Updated booking request with the parameters: %s"
+        .formatted(cbrr));
+  }
+
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {

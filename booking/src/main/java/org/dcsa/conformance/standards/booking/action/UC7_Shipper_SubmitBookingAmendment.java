@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +29,6 @@ public class UC7_Shipper_SubmitBookingAmendment extends BookingAction {
   @Override
   public String getHumanReadablePrompt() {
     return ("UC7: Submit Amendment to confirmed booking");
-  }
-
-  @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
   }
 
   @Override

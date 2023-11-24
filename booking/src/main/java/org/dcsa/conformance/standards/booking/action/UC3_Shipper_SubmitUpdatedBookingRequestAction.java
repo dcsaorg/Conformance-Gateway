@@ -1,14 +1,11 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 import java.util.stream.Stream;
 
@@ -32,11 +29,6 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction
   @Override
   public String getHumanReadablePrompt() {
     return ("UC3: Submit an updated booking request");
-  }
-
-  @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
   }
 
   @Override

@@ -128,12 +128,13 @@ public class ConformanceSandbox {
                                 persistenceProvider.getNonLockingMap(),
                                 "session#" + currentSessionId,
                                 "map#party#" + partyName),
-                            conformanceRequest ->
+                          (conformanceRequest, requestCallback) ->
                                 _handlePartyOutboundConformanceRequest(
                                     persistenceProvider,
                                     asyncWebClient,
                                     sandboxId,
-                                    conformanceRequest),
+                                    conformanceRequest,
+                                  requestCallback),
                             orchestratorAuthHeader)
                         .stream()
                         .filter(createdParty -> partyName.equals(createdParty.getName()))
@@ -475,7 +476,8 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId,
-      ConformanceRequest conformanceRequest) {
+      ConformanceRequest conformanceRequest,
+      Consumer<ConformanceResponse> responseCallback) {
     ConformanceResponse conformanceResponse = _syncHttpRequest(conformanceRequest);
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -497,6 +499,11 @@ public class ConformanceSandbox {
                         new ConformanceExchange(conformanceRequest, conformanceResponse)))
             .run();
       }
+    }
+    try {
+      responseCallback.accept(conformanceResponse);
+    } catch (Exception e) {
+      log.warn("Response callback exception", e);
     }
   }
 

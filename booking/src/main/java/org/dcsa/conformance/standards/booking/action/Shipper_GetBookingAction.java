@@ -15,17 +15,20 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class Shipper_GetBookingAction extends BookingAction {
 
-  private final BookingState expectedState;
+  private final BookingState expectedBookingStatus;
+  private final BookingState expectedAmendedBookingStatus;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public Shipper_GetBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      BookingState expectedState,
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator responseSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "GET", 200);
-    this.expectedState = expectedState;
+    this.expectedBookingStatus = expectedBookingStatus;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
@@ -66,7 +69,8 @@ public class Shipper_GetBookingAction extends BookingAction {
                 expectedApiVersion),
             new CarrierGetBookingPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
-              expectedState
+              expectedBookingStatus,
+              expectedAmendedBookingStatus
             ),
             new ActionCheck(
                 "GET returns the expected Booking data",

@@ -20,7 +20,16 @@ public abstract class ActionCheck extends ConformanceCheck {
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType) {
-    super(title);
+    this("", title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+  }
+
+  public ActionCheck(
+      String titlePrefix,
+      String title,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType) {
+    super(titlePrefix + (titlePrefix.endsWith(" ") ? "" : " ") + title);
     this.isRelevantForRoleName = isRelevantForRoleName;
     this.matchedExchangeUuid = matchedExchangeUuid;
     this.httpMessageType = httpMessageType;
@@ -56,5 +65,6 @@ public abstract class ActionCheck extends ConformanceCheck {
     }
   }
 
-  protected abstract Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid);
+  protected abstract Set<String> checkConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid);
 }

@@ -13,7 +13,16 @@ public class UrlPathCheck extends ActionCheck {
 
   public UrlPathCheck(
       Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, String expectedUrlPath) {
+    this("", isRelevantForRoleName, matchedExchangeUuid, expectedUrlPath);
+  }
+
+  public UrlPathCheck(
+      String titlePrefix,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedUrlPath) {
     super(
+        titlePrefix,
         "The URL path of the HTTP request is correct",
         isRelevantForRoleName,
         matchedExchangeUuid,
@@ -28,7 +37,6 @@ public class UrlPathCheck extends ActionCheck {
     String requestUrl = exchange.getRequest().url();
     return requestUrl.endsWith(expectedUrlPath)
         ? Collections.emptySet()
-        : Set.of(
-            "Request URL '%s' does not end with '%s'".formatted(requestUrl, expectedUrlPath));
+        : Set.of("Request URL '%s' does not end with '%s'".formatted(requestUrl, expectedUrlPath));
   }
 }

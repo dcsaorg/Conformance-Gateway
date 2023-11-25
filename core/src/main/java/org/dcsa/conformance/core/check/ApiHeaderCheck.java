@@ -14,7 +14,17 @@ public class ApiHeaderCheck extends ActionCheck {
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType,
       String expectedVersion) {
+    this("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, expectedVersion);
+  }
+
+  public ApiHeaderCheck(
+      String titlePrefix,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      String expectedVersion) {
     super(
+        titlePrefix,
         "The HTTP %s has a correct Api-Version header"
             .formatted(httpMessageType.name().toLowerCase()),
         isRelevantForRoleName,
@@ -27,7 +37,8 @@ public class ApiHeaderCheck extends ActionCheck {
   protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Collections.emptySet();
-    Map<String, ? extends Collection<String>> headers = exchange.getMessage(httpMessageType).headers();
+    Map<String, ? extends Collection<String>> headers =
+        exchange.getMessage(httpMessageType).headers();
     String headerName =
         headers.keySet().stream()
             .filter(key -> key.equalsIgnoreCase("api-version"))

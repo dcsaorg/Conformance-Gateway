@@ -48,6 +48,17 @@ public enum JsonToolkit {
     return attributeNode == null ? null : attributeNode.asText();
   }
 
+  public static String getTextAttributeOrNull(JsonNode jsonNode, List<String> attributePath) {
+    if (attributePath.size() == 1) {
+      return getTextAttributeOrNull(jsonNode, attributePath.get(0));
+    } else {
+      JsonNode subNode = jsonNode.get(attributePath.get(0));
+      if (subNode == null) return null;
+      return getTextAttributeOrNull(
+          subNode, attributePath.stream().skip(1).collect(Collectors.toList()));
+    }
+  }
+
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
     ArrayNode arrayNode = new ObjectMapper().createArrayNode();
     strings.forEach(arrayNode::add);

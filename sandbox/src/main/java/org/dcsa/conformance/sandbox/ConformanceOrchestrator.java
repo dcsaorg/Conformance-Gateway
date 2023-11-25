@@ -244,15 +244,18 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
 
     ConformanceScenario currentScenario = scenariosById.get(currentScenarioId);
-    if (currentScenario.peekNextAction() == null) {
+    ConformanceAction nextAction = currentScenario.peekNextAction();
+    if (nextAction == null) {
       log.info(
           "Ignoring exchange because the currently active scenario '%s' has no next action: %s"
               .formatted(currentScenario.toString(), exchange));
       return;
     }
 
-    currentScenario.popNextAction().handleExchange(exchange);
-    notifyNextActionParty();
+    if (nextAction.handleExchange(exchange)) {
+      currentScenario.popNextAction();
+      notifyNextActionParty();
+    }
   }
 
   public String generateReport(Set<String> roleNames, boolean printable) {

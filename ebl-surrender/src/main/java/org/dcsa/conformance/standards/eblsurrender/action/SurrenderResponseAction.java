@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.eblsurrender.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -103,7 +104,7 @@ public class SurrenderResponseAction extends TdrAction {
                     EblSurrenderRole::isCarrier,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    "action",
+                    List.of("action"),
                     accept ? "SURR" : "SREJ"),
                 expectedSrr == null || expectedSrr.equals("*")
                     ? null
@@ -111,7 +112,7 @@ public class SurrenderResponseAction extends TdrAction {
                         EblSurrenderRole::isCarrier,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        "surrenderRequestReference",
+                        List.of("surrenderRequestReference"),
                         expectedSrr))
             .filter(Objects::nonNull);
       }

@@ -2,6 +2,8 @@ package org.dcsa.conformance.standards.eblsurrender.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -81,7 +83,7 @@ public class SurrenderRequestAction extends TdrAction {
   }
 
   @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
+  protected void doHandleExchange(ConformanceExchange exchange) {
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     String srr = requestJsonNode.get("surrenderRequestReference").asText();
     log.info("Updating SurrenderRequestAction '%s' with SRR '%s'".formatted(getActionTitle(), srr));
@@ -95,9 +97,7 @@ public class SurrenderRequestAction extends TdrAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                EblSurrenderRole::isPlatform,
-                getMatchedExchangeUuid(),
-                "/ebl-surrender-requests"),
+                EblSurrenderRole::isPlatform, getMatchedExchangeUuid(), "/ebl-surrender-requests"),
             new ResponseStatusCheck(
                 EblSurrenderRole::isCarrier, getMatchedExchangeUuid(), getExpectedStatus()),
             new ApiHeaderCheck(
@@ -124,13 +124,13 @@ public class SurrenderRequestAction extends TdrAction {
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                "surrenderRequestCode",
+                List.of("surrenderRequestCode"),
                 forAmendment ? "AREQ" : "SREQ"),
             new JsonAttributeCheck(
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                "transportDocumentReference",
+                List.of("transportDocumentReference"),
                 tdrSupplier.get()));
       }
     };

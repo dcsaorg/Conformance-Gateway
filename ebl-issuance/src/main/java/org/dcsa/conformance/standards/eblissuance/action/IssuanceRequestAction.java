@@ -96,7 +96,7 @@ public class IssuanceRequestAction extends IssuanceAction {
   }
 
   @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
+  protected void doHandleExchange(ConformanceExchange exchange) {
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     String exchangeTdr = requestJsonNode.get("document").get("transportDocumentReference").asText();
     if (transportDocumentReference != null && transportDocumentReference.get() == null) {

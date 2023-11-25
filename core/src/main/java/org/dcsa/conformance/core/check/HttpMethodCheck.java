@@ -13,8 +13,19 @@ public class HttpMethodCheck extends ActionCheck {
   private final String expectedHttpMethod;
 
   public HttpMethodCheck(
-      Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, String expectedHttpMethod) {
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedHttpMethod) {
+    this("", isRelevantForRoleName, matchedExchangeUuid, expectedHttpMethod);
+  }
+
+  public HttpMethodCheck(
+      String titlePrefix,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedHttpMethod) {
     super(
+        titlePrefix,
         "The HTTP request method is correct",
         isRelevantForRoleName,
         matchedExchangeUuid,
@@ -30,6 +41,7 @@ public class HttpMethodCheck extends ActionCheck {
     return method.equals(expectedHttpMethod)
         ? Collections.emptySet()
         : Set.of(
-            "Request HTTP method was '%s' but should have been '%s'".formatted(method, expectedHttpMethod));
+            "Request HTTP method was '%s' but should have been '%s'"
+                .formatted(method, expectedHttpMethod));
   }
 }

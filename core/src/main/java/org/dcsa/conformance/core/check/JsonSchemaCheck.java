@@ -18,7 +18,17 @@ public class JsonSchemaCheck extends ActionCheck {
       UUID matchedExchangeUuid,
       HttpMessageType httpMessageType,
       JsonSchemaValidator jsonSchemaValidator) {
+    this("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, jsonSchemaValidator);
+  }
+
+  public JsonSchemaCheck(
+      String titlePrefix,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      JsonSchemaValidator jsonSchemaValidator) {
     super(
+        titlePrefix,
         "The HTTP %s matches the standard JSON schema"
             .formatted(httpMessageType.name().toLowerCase()),
         isRelevantForRoleName,

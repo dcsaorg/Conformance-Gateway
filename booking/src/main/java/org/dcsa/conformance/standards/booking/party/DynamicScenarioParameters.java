@@ -16,9 +16,7 @@ public record DynamicScenarioParameters(
     if (carrierBookingReference != null) {
       dspNode.put("carrierBookingReference", carrierBookingReference);
     }
-    return dspNode
-        .put("carrierBookingRequestReference", carrierBookingRequestReference())
-        .put("carrierBookingReference", carrierBookingReference());
+    return dspNode;
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {

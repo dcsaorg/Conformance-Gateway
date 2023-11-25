@@ -20,8 +20,9 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   protected UUID id = UUID.randomUUID();
   private UUID matchedExchangeUuid;
+  private UUID matchedNotificationExchangeUuid;
 
-  public ConformanceAction(
+  protected ConformanceAction(
       String sourcePartyName,
       String targetPartyName,
       ConformanceAction previousAction,
@@ -46,6 +47,9 @@ public abstract class ConformanceAction implements StatefulEntity {
     if (matchedExchangeUuid != null) {
       jsonState.put("matchedExchangeUuid", matchedExchangeUuid.toString());
     }
+    if (matchedNotificationExchangeUuid != null) {
+      jsonState.put("matchedNotificationExchangeUuid", matchedNotificationExchangeUuid.toString());
+    }
     return jsonState;
   }
 
@@ -54,6 +58,10 @@ public abstract class ConformanceAction implements StatefulEntity {
     id = UUID.fromString(jsonState.get("id").asText());
     if (jsonState.has("matchedExchangeUuid")) {
       this.matchedExchangeUuid = UUID.fromString(jsonState.get("matchedExchangeUuid").asText());
+    }
+    if (jsonState.has("matchedNotificationExchangeUuid")) {
+      this.matchedNotificationExchangeUuid =
+          UUID.fromString(jsonState.get("matchedNotificationExchangeUuid").asText());
     }
   }
 
@@ -71,12 +79,32 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
-  public final void handleExchange(ConformanceExchange exchange) {
-    matchedExchangeUuid = exchange.getUuid();
-    doHandleExchange(exchange);
+  /**
+   * Saves the matched UUIDs and captures dynamic parameters like document references.
+   *
+   * @param exchange the regular or notification exchange to handle
+   * @return true if all expected exchanges were handled, false otherwise
+   */
+  public final boolean handleExchange(ConformanceExchange exchange) {
+    String exchangeSourcePartyName = exchange.getRequest().message().sourcePartyName();
+    if (Objects.equals(exchangeSourcePartyName, sourcePartyName)) {
+      matchedExchangeUuid = exchange.getUuid();
+      doHandleExchange(exchange);
+    } else if (Objects.equals(exchangeSourcePartyName, targetPartyName)) {
+      matchedNotificationExchangeUuid = exchange.getUuid();
+      doHandleNotificationExchange(exchange);
+    }
+    return matchedExchangeUuid != null
+        && (matchedNotificationExchangeUuid != null || !expectsNotificationExchange());
   }
 
-  public void doHandleExchange(ConformanceExchange exchange) {}
+  protected void doHandleExchange(ConformanceExchange exchange) {}
+
+  protected boolean expectsNotificationExchange() {
+    return false;
+  }
+
+  protected void doHandleNotificationExchange(ConformanceExchange exchange) {}
 
   public ConformanceCheck createCheck(String expectedApiVersion) {
     return null;

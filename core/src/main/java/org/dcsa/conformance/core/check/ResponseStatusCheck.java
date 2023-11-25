@@ -15,7 +15,16 @@ public class ResponseStatusCheck extends ActionCheck {
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       int expectedResponseStatus) {
+    this("", isRelevantForRoleName, matchedExchangeUuid, expectedResponseStatus);
+  }
+
+  public ResponseStatusCheck(
+      String titlePrefix,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      int expectedResponseStatus) {
     super(
+        titlePrefix,
         "The HTTP response status is correct",
         isRelevantForRoleName,
         matchedExchangeUuid,

@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -8,7 +7,6 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 @Getter
 public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
@@ -42,15 +40,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
 
   @Override
   public void doHandleExchange(ConformanceExchange exchange) {
-    JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    // FIXME: Guard against non-conformant parties
-    var cbr = responseJsonNode.get("carrierBookingReference").asText();
-    var dsp = getDspSupplier().get();
-    if (cbr != null && !cbr.isBlank()) {
-      var refinedDsp = dsp.withCarrierBookingReference(cbr);
-      getDspConsumer()
-        .accept(refinedDsp);
-    }
+    storeCbrAndCbrrIfPresent(exchange);
   }
 
   @Override

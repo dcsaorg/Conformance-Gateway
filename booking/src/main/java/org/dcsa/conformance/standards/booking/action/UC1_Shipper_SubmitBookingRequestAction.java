@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -9,23 +8,26 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
 @Slf4j
 public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
+  private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC1_Shipper_SubmitBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator) {
+      JsonSchemaValidator responseSchemaValidator,
+      JsonSchemaValidator notificationSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
+    this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
   @Override
@@ -41,14 +43,13 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
   }
 
   @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
-    JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    // FIXME: Guard against non-conformant parties
-    getDspConsumer()
-        .accept(
-            new DynamicScenarioParameters(
-                responseJsonNode.get("carrierBookingRequestReference").asText(),
-                getDspSupplier().get().carrierBookingReference()));
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    storeCbrAndCbrrIfPresent(exchange);
+  }
+
+  @Override
+  protected boolean expectsNotificationExchange() {
+    return true;
   }
 
   @Override
@@ -56,7 +57,8 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
+        Stream<ActionCheck> primaryExchangeChecks =
+          Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "POST"),
             new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings"),
             new ResponseStatusCheck(
@@ -77,12 +79,17 @@ public class UC1_Shipper_SubmitBookingRequestAction extends BookingAction {
                 HttpMessageType.REQUEST,
                 requestSchemaValidator),
             new JsonSchemaCheck(
-              BookingRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator))
-        // .filter(Objects::nonNull)
-        ;
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator));
+        return Stream.concat(
+          primaryExchangeChecks,
+          getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            BookingState.RECEIVED,
+            null));
       }
     };
   }

@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -104,7 +105,7 @@ public class SurrenderResponseAction extends TdrAction {
                     EblSurrenderRole::isCarrier,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    List.of("action"),
+                    JsonPointer.compile("/action"),
                     accept ? "SURR" : "SREJ"),
                 expectedSrr == null || expectedSrr.equals("*")
                     ? null
@@ -112,7 +113,7 @@ public class SurrenderResponseAction extends TdrAction {
                         EblSurrenderRole::isCarrier,
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
-                        List.of("surrenderRequestReference"),
+                        JsonPointer.compile("/surrenderRequestReference"),
                         expectedSrr))
             .filter(Objects::nonNull);
       }

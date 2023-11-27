@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking.action;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -120,7 +121,7 @@ public abstract class BookingAction extends ConformanceAction {
                     BookingRole::isCarrier,
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    List.of("data", "carrierBookingReference"),
+                    JsonPointer.compile("/data/carrierBookingReference"),
                     cbr),
             cbrr == null
                 ? null
@@ -129,7 +130,7 @@ public abstract class BookingAction extends ConformanceAction {
                     BookingRole::isCarrier,
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    List.of("data", "carrierBookingRequestReference"),
+                    JsonPointer.compile("/data/carrierBookingRequestReference"),
                     cbrr),
             bookingState == null
                 ? null
@@ -138,7 +139,7 @@ public abstract class BookingAction extends ConformanceAction {
                     BookingRole::isCarrier,
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    List.of("data", "bookingStatus"),
+                    JsonPointer.compile("/data/bookingStatus"),
                     bookingState.wireName()),
             amendedBookingState == null
                 ? null
@@ -147,7 +148,7 @@ public abstract class BookingAction extends ConformanceAction {
                     BookingRole::isCarrier,
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    List.of("data", "amendedBookingStatus"),
+                    JsonPointer.compile("/data/amendedBookingStatus"),
                     amendedBookingState.wireName()))
         .filter(Objects::nonNull);
   }

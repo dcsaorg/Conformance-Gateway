@@ -131,9 +131,9 @@ public class Carrier extends ConformanceParty {
         actionPrompt,
         BookingState.CONFIRMED,
         Set.of(BookingState.RECEIVED, BookingState.PENDING_UPDATE_CONFIRMATION),
-        ReferenceState.GENERATE_IF_MISSING,
         true,
         booking -> {
+          ensureBookingHasCBR(booking);
           var clauses = booking.putArray("carrierClauses");
           booking.put("termsAndConditions", termsAndConditions());
           for (var clause : carrierClauses()) {
@@ -313,7 +313,6 @@ public class Carrier extends ConformanceParty {
             BookingState.RECEIVED,
             BookingState.PENDING_UPDATE,
             BookingState.PENDING_UPDATE_CONFIRMATION),
-        ReferenceState.PROVIDE_IF_EXIST,
         true,
         booking -> booking.put("reason", "Rejected as required by the conformance scenario")
     );
@@ -332,7 +331,6 @@ public class Carrier extends ConformanceParty {
         BookingState.CONFIRMED,
         BookingState.PENDING_AMENDMENT,
         BookingState.AMENDMENT_RECEIVED),
-      ReferenceState.PROVIDE_IF_EXIST,
       false,
       booking -> booking.put("reason", "Declined as required by the conformance scenario")
     );
@@ -351,7 +349,6 @@ public class Carrier extends ConformanceParty {
             BookingState.RECEIVED,
             BookingState.PENDING_UPDATE,
             BookingState.PENDING_UPDATE_CONFIRMATION),
-        ReferenceState.PROVIDE_IF_EXIST,
         true,
         booking ->
             booking
@@ -372,9 +369,7 @@ public class Carrier extends ConformanceParty {
     processAndEmitNotificationForStateTransition(
         actionPrompt,
         BookingState.COMPLETED,
-        Set.of(BookingState.CONFIRMED),
-        ReferenceState.MUST_EXIST,
-        false);
+        Set.of(BookingState.CONFIRMED));
     addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
@@ -388,7 +383,6 @@ public class Carrier extends ConformanceParty {
         actionPrompt,
         BookingState.PENDING_AMENDMENT,
         Set.of(BookingState.CONFIRMED, BookingState.PENDING_AMENDMENT),
-        ReferenceState.PROVIDE_IF_EXIST,
         true,
         booking ->
             booking
@@ -408,92 +402,54 @@ public class Carrier extends ConformanceParty {
     }
   }
 
-  private void checkState(
-      String reference, BookingState currentState, Set<BookingState> expectedState) {
-    checkState(reference, currentState, expectedState::contains);
-  }
-
   private void processAndEmitNotificationForStateTransition(
       JsonNode actionPrompt,
       BookingState targetState,
-      Set<BookingState> expectedState,
-      ReferenceState cbrHandling,
-      boolean includeCbrr) {
+      Set<BookingState> expectedState) {
     processAndEmitNotificationForStateTransition(
-        actionPrompt, targetState, expectedState, cbrHandling, includeCbrr, null);
+        actionPrompt, targetState, expectedState, false, null);
+  }
+
+  private void ensureBookingHasCBR(ObjectNode booking) {
+    if (!booking.has("carrierBookingReference")) {
+      var cbrr = booking.required("carrierBookingRequestReference").asText();
+      var cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+      assert cbrr != null;
+      cbrrToCbr.put(cbrr, cbr);
+      cbrToCbrr.put(cbr, cbrr);
+      booking.put("carrierBookingReference", cbr);
+    }
   }
 
   private void processAndEmitNotificationForStateTransition(
       JsonNode actionPrompt,
       BookingState targetState,
       Set<BookingState> expectedState,
-      ReferenceState cbrHandling,
       boolean includeCbrr,
       Consumer<ObjectNode> bookingMutator) {
     String cbrr = actionPrompt.get("cbrr").asText();
-    String cbr = cbrrToCbr.get(cbrr);
-    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean(true);
-    ObjectNode booking = null;
-
-    if (isCorrect) {
-      boolean generatedCBR = false;
-      booking = setStateFromCBR(cbrr, targetState, expectedState::contains);
-      switch (cbrHandling) {
-        case MUST_EXIST -> {
-          if (cbr == null) {
-            throw new IllegalStateException(
-                "Booking '%s' did not have a carrier booking reference and must have one"
-                    .formatted(cbrr));
-          }
-        }
-        case GENERATE_IF_MISSING -> {
-          if (cbr == null) {
-            cbr = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-            cbrrToCbr.put(cbrr, cbr);
-            cbrToCbrr.put(cbr, cbrr);
-            generatedCBR = true;
-          }
-        }
-        case PROVIDE_IF_EXIST -> {
-          /* Do nothing */
-        }
-      }
-      if (!includeCbrr && cbr == null) {
-        throw new IllegalArgumentException(
-            "If includeCbrr is false, then cbrHandling must ensure"
-                + " that a carrierBookingReference is provided");
-      }
-
-      if (booking != null) {
-        booking.put("bookingStatus", targetState.wireName());
-        if (generatedCBR) {
-          booking.put("carrierBookingReference", cbr);
-        }
-        if (bookingMutator != null) {
-          bookingMutator.accept(booking);
-        }
-        persistentMap.save(cbrr, booking);
-      }
+    var booking = setStateFromCBR(cbrr, targetState, expectedState::contains);
+    booking.put("bookingStatus", targetState.wireName());
+    if (bookingMutator != null) {
+      bookingMutator.accept(booking);
     }
+    persistentMap.save(cbrr, booking);
+    generateAndEmitNotificationFromBooking(actionPrompt, booking, includeCbrr);
+  }
+
+  private void generateAndEmitNotificationFromBooking(JsonNode actionPrompt, JsonNode booking, boolean includeCbrr) {
     var notification =
-        BookingNotification.builder()
-            .apiVersion(apiVersion)
-            .carrierBookingRequestReference(includeCbrr ? cbrr : null)
-            .carrierBookingReference(cbr)
-            .bookingStatus(targetState.wireName())
-            .reason(booking != null ? booking.path("reason").asText(null) : null)
-            .build()
-            .asJsonNode();
-
-    if (!isCorrect) {
-      notification.remove("bookingStatus");
-    }
-
+      BookingNotification.builder()
+        .apiVersion(apiVersion)
+        .booking(booking)
+        .includeCarrierBookingRequestReference(includeCbrr)
+        .build()
+        .asJsonNode();
     if (isShipperNotificationEnabled) {
       asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-          objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     }
   }
 
@@ -607,10 +563,7 @@ public class Carrier extends ConformanceParty {
                   "/v2/booking-notifications",
                   BookingNotification.builder()
                       .apiVersion(apiVersion)
-                      .carrierBookingRequestReference(cbrr)
-                      .bookingStatus(newBookingStatus.wireName())
-                      .amendedBookingStatus(
-                          amendedBookingStatus == null ? null : amendedBookingStatus.wireName())
+                      .booking(booking)
                       .build()
                       .asJsonNode()),
           1,
@@ -640,7 +593,7 @@ public class Carrier extends ConformanceParty {
     }
     try {
       booking =
-          setState(
+          setBookingState(
               bookingReference,
               bookingData,
               BookingState.CANCELLED,
@@ -682,18 +635,44 @@ public class Carrier extends ConformanceParty {
     return response;
   }
 
-  private ObjectNode setState(
+  private static BookingState getBookingState(JsonNode booking) {
+    var s = booking.path("amendedBookingStatus");
+    if (s.isTextual()) {
+      return BookingState.fromWireName(s.asText());
+    }
+    return BookingState.fromWireName(booking.required("bookingStatus").asText());
+  }
+
+  private void changeState(ObjectNode booking, String attributeName, BookingState newState) {
+    booking.put(attributeName, newState.wireName());
+  }
+
+  private ObjectNode setBookingState(
       String bookingReference,
       JsonNode booking,
       BookingState newState,
       Predicate<BookingState> expectedState) {
     checkState(
         bookingReference,
-        BookingState.fromWireName(booking.required("bookingStatus").asText()),
+        getBookingState(booking),
         expectedState);
-    ((ObjectNode) booking).put("bookingStatus", newState.wireName());
+    changeState(((ObjectNode) booking), "bookingStatus", newState);
     return (ObjectNode) booking;
   }
+
+  private ObjectNode setAmendedBookingState(
+    String bookingReference,
+    JsonNode booking,
+    BookingState newState,
+    Predicate<BookingState> expectedState) {
+    checkState(
+      bookingReference,
+      getBookingState(booking),
+      expectedState);
+    changeState(((ObjectNode) booking), "amendedBookingStatus", newState);
+    return (ObjectNode) booking;
+  }
+
 
   private ObjectNode setStateFromCBR(
       String carrierBookingRequestReference,
@@ -703,7 +682,7 @@ public class Carrier extends ConformanceParty {
     if (booking == null) {
       throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
     }
-    return setState(carrierBookingRequestReference, booking, newState, expectedState);
+    return setBookingState(carrierBookingRequestReference, booking, newState, expectedState);
   }
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
@@ -739,8 +718,7 @@ public class Carrier extends ConformanceParty {
                   "/v2/booking-notifications",
                   BookingNotification.builder()
                       .apiVersion(apiVersion)
-                      .carrierBookingRequestReference(cbrr)
-                      .bookingStatus(bookingState.wireName())
+                      .booking(booking)
                       .build()
                       .asJsonNode()),
           1,
@@ -761,6 +739,10 @@ public class Carrier extends ConformanceParty {
     private String bookingStatus;
     private String amendedBookingStatus;
     private String reason;
+
+    private JsonNode booking;
+    @Builder.Default
+    private boolean includeCarrierBookingRequestReference = true;
 
     private String computedType() {
       if (type != null) {
@@ -784,11 +766,14 @@ public class Carrier extends ConformanceParty {
       notification.put("datacontenttype", "application/json");
 
       var data = objectMapper.createObjectNode();
-      setIfNotNull(data, "carrierBookingReference", carrierBookingReference);
-      setIfNotNull(data, "carrierBookingRequestReference", carrierBookingRequestReference);
-      setIfNotNull(data, "bookingStatus", bookingStatus);
-      setIfNotNull(data, "amendedBookingStatus", amendedBookingStatus);
-      setIfNotNull(data, "reason", reason);
+      setBookingProvidedField(data, "carrierBookingReference", carrierBookingReference);
+      if (includeCarrierBookingRequestReference) {
+        setBookingProvidedField(
+            data, "carrierBookingRequestReference", carrierBookingRequestReference);
+      }
+      setBookingProvidedField(data, "bookingStatus", bookingStatus);
+      setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
+      setBookingProvidedField(data, "reason", reason);
       notification.set("data", data);
 
       return notification;
@@ -798,6 +783,16 @@ public class Carrier extends ConformanceParty {
       if (value != null) {
         node.put(key, value);
       }
+    }
+
+    private void setBookingProvidedField(ObjectNode node, String key, String value) {
+      if (value == null && booking != null) {
+        var v = booking.get(key);
+        if (v != null) {
+          value = v.asText(null);
+        }
+      }
+      setIfNotNull(node, key, value);
     }
   }
 
@@ -895,13 +890,6 @@ public class Carrier extends ConformanceParty {
       // just to match the pattern really
       return transportPlan;
     }
-  }
-
-  private enum ReferenceState {
-    MUST_EXIST,
-    PROVIDE_IF_EXIST,
-    GENERATE_IF_MISSING,
-    ;
   }
 
   private static List<String> carrierClauses() {

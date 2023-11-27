@@ -433,10 +433,11 @@ public class Carrier extends ConformanceParty {
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean(true);
+    ObjectNode booking = null;
 
     if (isCorrect) {
       boolean generatedCBR = false;
-      var booking = setStateFromCBR(cbrr, targetState, expectedState::contains);
+      booking = setStateFromCBR(cbrr, targetState, expectedState::contains);
       switch (cbrHandling) {
         case MUST_EXIST -> {
           if (cbr == null) {
@@ -480,6 +481,7 @@ public class Carrier extends ConformanceParty {
             .carrierBookingRequestReference(includeCbrr ? cbrr : null)
             .carrierBookingReference(cbr)
             .bookingStatus(targetState.wireName())
+            .reason(booking != null ? booking.path("reason").asText(null) : null)
             .build()
             .asJsonNode();
 

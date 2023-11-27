@@ -16,6 +16,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
+import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
@@ -36,6 +37,12 @@ public class ConformanceWebuiHandler {
                           .collect(
                               Collectors.toMap(
                                   Function.identity(), BookingComponentFactory::new)))),
+              Map.entry(
+                  EblComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      EblComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), EblComponentFactory::new)))),
               Map.entry(
                   EblIssuanceComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

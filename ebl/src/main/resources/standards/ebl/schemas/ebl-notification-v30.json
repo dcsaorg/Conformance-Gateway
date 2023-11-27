@@ -1,0 +1,273 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DCSA OpenAPI specification for Electronic Bill of Lading Notifications",
+    "description": "API specification issued by DCSA.org.\n\nElectronic Bill of Lading Notifications for [DCSA OpenAPI specification for Electronic Bill of Lading](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL/3.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The POST endPoint of the consumer is called whenever a `Shipping Instructions` or a `Transport Document` that is being subscribed to changes state.\n\nSetting up the notification is done outside scope of this API.\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/notification/v3#v300B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "contact": {
+      "name": "Digital Container Shipping Association (DCSA)",
+      "url": "https://dcsa.org",
+      "email": "info@dcsa.org"
+    },
+    "version": "3.0.0-Beta-1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Notifications",
+      "description": "Notification operations"
+    }
+  ],
+  "paths": {
+    "/v3/shipping-instructions-notifications": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Send a new Shipping Instructions Notification",
+        "description": "Send a new  `Shipping Instructions Notification`\n",
+        "operationId": "post-si-notifications",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShippingInstructionsNotification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v3/transport-document-notifications": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Send a new Transport Document Notification",
+        "description": "Send a new `Transport Document Notification`\n",
+        "operationId": "post-td-notifications",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransportDocumentNotification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ShippingInstructionsNotification": {
+        "title": "Shipping Instructions Notification",
+        "required": [
+          "data",
+          "datacontenttype",
+          "id",
+          "source",
+          "specversion",
+          "time",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "description": "The version of the CloudEvents specification which the event uses. This enables the interpretation of the context. Compliant event producers MUST use a value of `1.0` when referring to this version of the specification.\n\nCurrently, this attribute will only have the 'major' and 'minor' version numbers included in it. This allows for 'patch' changes to the specification to be made without changing this property's value in the serialization. Note: for 'release candidate' releases a suffix might be used for testing purposes.\n",
+            "example": "1.0",
+            "enum": [
+              "1.0"
+            ]
+          },
+          "id": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Identifies the event. Producers MUST ensure that `source` + `id` is unique for each distinct event. If a duplicate event is re-sent (e.g. due to a network error) it MAY have the same `id`. Consumers MAY assume that Events with identical `source` and `id` are duplicates.\n",
+            "example": "3cecb101-7a1a-43a4-9d62-e88a131651e2"
+          },
+          "source": {
+            "maxLength": 4096,
+            "type": "string",
+            "description": "Identifies the context in which an event happened. Often this will include information such as the type of the event source, the organization publishing the event or the process that produced the event. The exact syntax and semantics behind the data encoded in the URI is defined by the event producer.\n\nProducers MUST ensure that `source` + `id` is unique for each distinct event.\n\nAn application MAY assign a unique `source` to each distinct producer, which makes it easy to produce unique IDs since no other producer will have the same source. The application MAY use UUIDs, URNs, DNS authorities or an application-specific scheme to create unique `source` identifiers.\n\nA source MAY include more than one producer. In that case the producers MUST collaborate to ensure that `source` + `id` is unique for each distinct event.\n",
+            "example": "https://member.com/"
+          },
+          "type": {
+            "type": "string",
+            "description": "This attribute contains a value describing the type of event related to the originating occurrence. Often this attribute is used for routing, observability, policy enforcement, etc. The format of this is producer defined and might include information such as the version of the type - see [Versioning of CloudEvents in the Primer](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/primer.md#versioning-of-cloudevents) for more information.\n",
+            "example": "org.dcsa.shipping-instructions-notification.v3",
+            "enum": [
+              "org.dcsa.shipping-instructions-notification.v3"
+            ]
+          },
+          "time": {
+            "type": "string",
+            "description": "Timestamp of when the occurrence happened. If the time of the occurrence cannot be determined then this attribute MAY be set to some other time (such as the current time) by the CloudEvents producer, however all producers for the same `source` MUST be consistent in this respect. In other words, either they all use the actual time of the occurrence or they all use the same algorithm to determine the value used.\n",
+            "format": "date-time",
+            "example": "2018-04-05T17:31:00Z"
+          },
+          "datacontenttype": {
+            "type": "string",
+            "description": "Content type of `data` value. This attribute enables `data` to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, an event rendered using the [JSON envelope](formats/json-format.md#3-envelope) format might carry an XML payload in `data`, and the consumer is informed by this attribute being set to \"application/xml\". The rules for how `data` content is rendered for different `datacontenttype` values are defined in the event format specifications; for example, the JSON event format defines the relationship in [section 3.1](formats/json-format.md#31-handling-of-data).\n\nFor some binary mode protocol bindings, this field is directly mapped to the respective protocol's content-type metadata property. Normative rules for the binary mode and the content-type metadata mapping can be found in the respective protocol.\n\nIn some event formats the `datacontenttype` attribute MAY be omitted. For example, if a JSON format event has no `datacontenttype` attribute, then it is implied that the `data` is a JSON value conforming to the \"application/json\" media type. In other words: a JSON-format event with no `datacontenttype` is exactly equivalent to one with `datacontenttype=\"application/json\"`.\n\nWhen translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.\n",
+            "example": "application/json",
+            "enum": [
+              "application/json"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/ShippingInstructionsNotification_data"
+          }
+        }
+      },
+      "TransportDocumentNotification": {
+        "title": "Transport Document Notification",
+        "required": [
+          "data",
+          "datacontenttype",
+          "id",
+          "source",
+          "specversion",
+          "time",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "description": "The version of the CloudEvents specification which the event uses. This enables the interpretation of the context. Compliant event producers MUST use a value of `1.0` when referring to this version of the specification.\n\nCurrently, this attribute will only have the 'major' and 'minor' version numbers included in it. This allows for 'patch' changes to the specification to be made without changing this property's value in the serialization. Note: for 'release candidate' releases a suffix might be used for testing purposes.\n",
+            "example": "1.0",
+            "enum": [
+              "1.0"
+            ]
+          },
+          "id": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Identifies the event. Producers MUST ensure that `source` + `id` is unique for each distinct event. If a duplicate event is re-sent (e.g. due to a network error) it MAY have the same `id`. Consumers MAY assume that Events with identical `source` and `id` are duplicates.\n",
+            "example": "3cecb101-7a1a-43a4-9d62-e88a131651e2"
+          },
+          "source": {
+            "maxLength": 4096,
+            "type": "string",
+            "description": "Identifies the context in which an event happened. Often this will include information such as the type of the event source, the organization publishing the event or the process that produced the event. The exact syntax and semantics behind the data encoded in the URI is defined by the event producer.\n\nProducers MUST ensure that `source` + `id` is unique for each distinct event.\n\nAn application MAY assign a unique `source` to each distinct producer, which makes it easy to produce unique IDs since no other producer will have the same source. The application MAY use UUIDs, URNs, DNS authorities or an application-specific scheme to create unique `source` identifiers.\n\nA source MAY include more than one producer. In that case the producers MUST collaborate to ensure that `source` + `id` is unique for each distinct event.\n",
+            "example": "https://member.com/"
+          },
+          "type": {
+            "type": "string",
+            "description": "This attribute contains a value describing the type of event related to the originating occurrence. Often this attribute is used for routing, observability, policy enforcement, etc. The format of this is producer defined and might include information such as the version of the type - see [Versioning of CloudEvents in the Primer](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/primer.md#versioning-of-cloudevents) for more information.\n",
+            "example": "org.dcsa.transport-document-notification.v3",
+            "enum": [
+              "org.dcsa.transport-document-notification.v3"
+            ]
+          },
+          "time": {
+            "type": "string",
+            "description": "Timestamp of when the occurrence happened. If the time of the occurrence cannot be determined then this attribute MAY be set to some other time (such as the current time) by the CloudEvents producer, however all producers for the same `source` MUST be consistent in this respect. In other words, either they all use the actual time of the occurrence or they all use the same algorithm to determine the value used.\n",
+            "format": "date-time",
+            "example": "2018-04-05T17:31:00Z"
+          },
+          "datacontenttype": {
+            "type": "string",
+            "description": "Content type of `data` value. This attribute enables `data` to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, an event rendered using the [JSON envelope](formats/json-format.md#3-envelope) format might carry an XML payload in `data`, and the consumer is informed by this attribute being set to \"application/xml\". The rules for how `data` content is rendered for different `datacontenttype` values are defined in the event format specifications; for example, the JSON event format defines the relationship in [section 3.1](formats/json-format.md#31-handling-of-data).\n\nFor some binary mode protocol bindings, this field is directly mapped to the respective protocol's content-type metadata property. Normative rules for the binary mode and the content-type metadata mapping can be found in the respective protocol.\n\nIn some event formats the `datacontenttype` attribute MAY be omitted. For example, if a JSON format event has no `datacontenttype` attribute, then it is implied that the `data` is a JSON value conforming to the \"application/json\" media type. In other words: a JSON-format event with no `datacontenttype` is exactly equivalent to one with `datacontenttype=\"application/json\"`.\n\nWhen translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.\n",
+            "example": "application/json",
+            "enum": [
+              "application/json"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/TransportDocumentNotification_data"
+          }
+        }
+      },
+      "ShippingInstructionsNotification_data": {
+        "required": [
+          "shippingInstructionsStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "shippingInstructionsStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "example": "RECEIVED"
+          },
+          "updatedShippingInstructionsStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of latest update added to the `Shipping Instructions`. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `CANCELLED` (An update to a Shipping Instructions is discontinued)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "example": "UPDATE RECEIVED"
+          },
+          "shippingInstructionsReference": {
+            "maxLength": 100,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n\n**Conditional:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+            "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+          },
+          "transportDocumentReference": {
+            "maxLength": 20,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Conditional:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+            "example": "HHL71800000"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "This field can be used to explain `shippingInstructionsStatus`.\n",
+            "example": "Selected vessel is overbooked - please update VesselName"
+          }
+        }
+      },
+      "TransportDocumentNotification_data": {
+        "required": [
+          "transportDocumentReference",
+          "transportDocumentStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "transportDocumentStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the `Transport Document`. Possible values are:\n- `DRAFT` (Transport Document is Drafted)\n- `APPROVED` (Transport Document has been Approved by consumer)\n- `ISSUED` (Transport Document has been Issued by provider)\n- `PENDING SURRENDER FOR AMENDMENT` (Transport Document is Pending for Surrender for an Amendment)\n- `SURRENDER FOR AMENDMENT` (Transport Document Surrendered for an Amendment)\n- `VOID` (the Transport Document has been Voided)\n- `PENDING SURRENDER FOR DELIVERY` (Transport Document pending surrender for Delivery)\n- `SURRENDERED FOR DELIVERY` (Transport Document surrendered for Delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "example": "DRAFT"
+          },
+          "shippingInstructionsReference": {
+            "maxLength": 100,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+            "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+          },
+          "transportDocumentReference": {
+            "maxLength": 20,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+            "example": "HHL71800000"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "This field can be used to explain `Transport Document Status`.\n",
+            "example": "Voided because a new Transport Document has been issued"
+          }
+        }
+      }
+    }
+  }
+}

@@ -25,6 +25,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
+import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 
@@ -643,6 +644,9 @@ public class ConformanceSandbox {
       StandardConfiguration standardConfiguration) {
     if (BookingComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new BookingComponentFactory(standardConfiguration.getVersion());
+    }
+    if (EblComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new EblComponentFactory(standardConfiguration.getVersion());
     }
     if (EblIssuanceComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblIssuanceComponentFactory(standardConfiguration.getVersion());

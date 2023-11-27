@@ -10,6 +10,7 @@
     <modules>
         <module>core</module>
         <module>booking</module>
+				<module>ebl</module>
         <module>ebl-issuance</module>
         <module>ebl-surrender</module>
         <module>cdk</module>

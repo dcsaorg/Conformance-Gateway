@@ -2,20 +2,15 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.ConformanceCheck;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadContentConformanceCheck {
+abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConformanceCheck {
 
 
   protected static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
@@ -39,6 +34,7 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadCon
     BookingState.RECEIVED,
     BookingState.REJECTED,
     BookingState.PENDING_UPDATE,
+    BookingState.PENDING_UPDATE_CONFIRMATION,
     /* CANCELLED depends on whether cancel happens before CONFIRMED, but the logic does not track prior
      * states. Therefore, we just assume it is optional in CANCELLED here.
      */
@@ -49,21 +45,22 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadCon
   protected final BookingState expectedAmendedBookingStatus;
   protected final boolean amendedContent;
 
-  protected AbstractCarrierPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingState) {
-    this(matchedExchangeUuid, bookingState, null, false);
+  protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
+    this(matchedExchangeUuid, httpMessageType, bookingState, null, false);
   }
 
-  protected AbstractCarrierPayloadResponseConformanceCheck(
+  protected AbstractCarrierPayloadConformanceCheck(
     UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
     BookingState bookingState,
     BookingState expectedAmendedBookingStatus,
     boolean amendedContent
   ) {
     super(
-      "Validate the carrier response",
+      "Validate the carrier payload",
       BookingRole::isCarrier,
       matchedExchangeUuid,
-      HttpMessageType.RESPONSE
+      httpMessageType
     );
     this.expectedBookingStatus = bookingState;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
@@ -111,7 +108,7 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadCon
     return check.test(state);
   }
 
-  protected Function<ObjectNode, Set<String>> requiredOrExcludedByState(Set<BookingState> conditionalInTheseStates, String fieldName) {
+  protected Function<JsonNode, Set<String>> requiredOrExcludedByState(Set<BookingState> conditionalInTheseStates, String fieldName) {
     if (expectedStateMatch(conditionalInTheseStates)) {
       return payload -> nonEmptyField(payload, fieldName);
     }
@@ -119,7 +116,7 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadCon
   }
 
 
-  protected Function<ObjectNode, Set<String>> requiredCarrierAttributeIfState(Set<BookingState> conditionalInTheseStates, String fieldName) {
+  protected Function<JsonNode, Set<String>> requiredCarrierAttributeIfState(Set<BookingState> conditionalInTheseStates, String fieldName) {
     if (!amendedContent && conditionalInTheseStates.contains(this.expectedBookingStatus)) {
       return booking -> nonEmptyField(booking, fieldName);
     }

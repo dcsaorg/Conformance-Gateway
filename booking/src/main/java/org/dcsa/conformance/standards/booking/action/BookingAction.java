@@ -5,6 +5,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
@@ -89,6 +90,11 @@ public abstract class BookingAction extends ConformanceAction {
                 "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
+            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+              getMatchedNotificationExchangeUuid(),
+              bookingState,
+              amendedBookingState
+            ),
             new ApiHeaderCheck(
                 titlePrefix,
                 BookingRole::isCarrier,

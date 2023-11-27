@@ -1,15 +1,16 @@
 package org.dcsa.conformance.standards.booking.checks;
 
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends AbstractCarrierPayloadResponseConformanceCheck {
+public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends AbstractCarrierPayloadConformanceCheck {
 
   public CarrierBookingRefStatusPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingStatus) {
-    super(matchedExchangeUuid, bookingStatus);
+    super(matchedExchangeUuid, HttpMessageType.RESPONSE, bookingStatus);
   }
 
   public CarrierBookingRefStatusPayloadResponseConformanceCheck(
@@ -19,6 +20,7 @@ public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends Abst
   ) {
     super(
       matchedExchangeUuid,
+      HttpMessageType.RESPONSE,
       bookingStatus,
       expectedAmendedBookingStatus,
       false

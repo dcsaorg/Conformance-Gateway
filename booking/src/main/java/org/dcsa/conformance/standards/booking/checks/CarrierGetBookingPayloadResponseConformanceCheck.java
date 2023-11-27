@@ -3,9 +3,10 @@ package org.dcsa.conformance.standards.booking.checks;
 import java.util.*;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ConformanceCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCarrierPayloadResponseConformanceCheck {
+public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCarrierPayloadConformanceCheck {
 
   private static final Set<String> MANDATORY_ON_CONFIRMED_BOOKING = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
     "confirmedEquipments",
@@ -16,10 +17,6 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCa
     "termsAndConditions"
   )));
 
-  public CarrierGetBookingPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingStatus) {
-    super(matchedExchangeUuid, bookingStatus);
-  }
-
   public CarrierGetBookingPayloadResponseConformanceCheck(
     UUID matchedExchangeUuid,
     BookingState bookingStatus,
@@ -28,6 +25,7 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCa
   ) {
     super(
       matchedExchangeUuid,
+      HttpMessageType.RESPONSE,
       bookingStatus,
       expectedAmendedBookingStatus,
       amendedContent

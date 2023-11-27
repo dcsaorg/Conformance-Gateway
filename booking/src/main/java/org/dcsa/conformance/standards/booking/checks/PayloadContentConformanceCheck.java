@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.ActionCheck;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
 
 public abstract class PayloadContentConformanceCheck extends ActionCheck {
 
-  protected static final Function<ObjectNode, Set<String>> ALL_OK = unused -> Collections.emptySet();
+  protected static final Function<JsonNode, Set<String>> ALL_OK = unused -> Collections.emptySet();
 
   protected static final String UNSET_MARKER = "<unset>";
 
@@ -35,11 +36,17 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   protected abstract Stream<? extends ConformanceCheck> createSubChecks();
 
 
-  protected void addSubCheck(String subtitle, Function<ObjectNode, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
+  protected Function<JsonNode, Set<String>> at(String path, Function<JsonNode, Set<String>> subCheck) {
+    // Eagerly compile to the pointer to weed out syntax errors early.
+    var pointer = JsonPointer.compile(path);
+    return payload -> subCheck.apply(payload.at(pointer));
+  }
+
+  protected void addSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
     addCheck.accept(createSubCheck(subtitle, subCheck));
   }
 
-  protected ConformanceCheck createSubCheck(String subtitle, Function<ObjectNode, Set<String>> subCheck) {
+  protected ConformanceCheck createSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck) {
     return new ActionCheck(subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
       protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
@@ -48,11 +55,8 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
         var conformanceMessage = this.httpMessageType == HttpMessageType.RESPONSE
           ? exchange.getResponse().message()
           : exchange.getRequest().message();
-        var responsePayload = conformanceMessage.body().getJsonBody();
-        if (responsePayload instanceof ObjectNode booking) {
-          return subCheck.apply(booking);
-        }
-        return Set.of("Could not perform the check as the payload was not correct format");
+        var payload = conformanceMessage.body().getJsonBody();
+        return subCheck.apply(payload);
       }
     };
   }

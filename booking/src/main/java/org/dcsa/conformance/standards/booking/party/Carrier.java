@@ -33,6 +33,25 @@ import org.dcsa.conformance.standards.booking.action.*;
 
 @Slf4j
 public class Carrier extends ConformanceParty {
+
+  private static final String[] METADATA_FIELDS_TO_PRESERVE = {
+    "carrierBookingRequestReference",
+    "carrierBookingReference",
+    "bookingStatus",
+    "amendedBookingStatus",
+  };
+
+  private static final Set<BookingState> MAY_AMEND_STATES = Set.of(
+    BookingState.CONFIRMED,
+    BookingState.PENDING_AMENDMENT
+  );
+
+  private static final Set<BookingState> MAY_UPDATE_REQUEST_STATES = Set.of(
+    BookingState.RECEIVED,
+    BookingState.PENDING_UPDATE,
+    BookingState.PENDING_UPDATE_CONFIRMATION
+  );
+
   ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
   private static final Random RANDOM = new Random();
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -530,6 +549,17 @@ public class Carrier extends ConformanceParty {
     return operation;
   }
 
+  private void copyMetadataFields(JsonNode originalBooking, ObjectNode updatedBooking) {
+    for (String field : METADATA_FIELDS_TO_PRESERVE) {
+      var previousValue = originalBooking.path(field);
+      if (previousValue != null && previousValue.isTextual()){
+        updatedBooking.put(field, previousValue.asText());
+      } else {
+        updatedBooking.remove(field);
+      }
+    }
+  }
+
   @SneakyThrows
   private ConformanceResponse _handlePutBookingRequest(ConformanceRequest request) {
     // bookingReference can either be a CBR or CBRR.
@@ -539,21 +569,26 @@ public class Carrier extends ConformanceParty {
     if (bookingData == null || bookingData.isMissingNode()) {
       return return404(request);
     }
-    BookingState oldBookingStatus =
-        BookingState.fromWireName(bookingData.get("bookingStatus").asText());
+    var currentState = getBookingState(bookingData);
     boolean isAmendment =
-        oldBookingStatus.equals(BookingState.CONFIRMED)
-            || oldBookingStatus.equals(BookingState.PENDING_AMENDMENT);
+      currentState.equals(BookingState.CONFIRMED)
+            || currentState.equals(BookingState.PENDING_AMENDMENT);
     BookingState newBookingStatus =
-        isAmendment ? oldBookingStatus : BookingState.PENDING_UPDATE_CONFIRMATION;
-    BookingState amendedBookingStatus = isAmendment ? BookingState.AMENDMENT_RECEIVED : null;
+        isAmendment ? BookingState.AMENDMENT_RECEIVED : BookingState.PENDING_UPDATE_CONFIRMATION;
 
-    ObjectNode booking =
-        (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
-    booking.put("bookingStatus", newBookingStatus.wireName());
-    if (amendedBookingStatus != null) {
-      booking.put("amendedBookingStatus", amendedBookingStatus.wireName());
+    try {
+      if (isAmendment) {
+        setAmendedBookingState(bookingReference, bookingData, newBookingStatus, MAY_AMEND_STATES::contains);
+      } else {
+        setBookingState(bookingReference, bookingData, newBookingStatus, MAY_UPDATE_REQUEST_STATES::contains);
+      }
+    } catch (IllegalStateException e) {
+      return return409(request, "Invalid state");
     }
+    // readTree(json.toString()) because we want a deep copy
+    ObjectNode booking =
+      (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
+    copyMetadataFields(bookingData, booking);
     persistentMap.save(cbrr, booking);
 
     if (isShipperNotificationEnabled) {
@@ -617,9 +652,13 @@ public class Carrier extends ConformanceParty {
             .put("bookingStatus", bookingStatus)
             .put("carrierBookingRequestReference", cbrr);
     var cbr = booking.get("carrierBookingReference");
+    var amendedBookingStatus = booking.get("amendedBookingStatus");
     var reason = booking.get("reason");
     if (cbr != null) {
       statusObject.set("carrierBookingReference", cbr);
+    }
+    if (amendedBookingStatus != null) {
+      statusObject.set("amendedBookingStatus", amendedBookingStatus);
     }
     if (reason != null) {
       statusObject.set("reason", reason);

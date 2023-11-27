@@ -20,6 +20,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
     BookingState.CONFIRMED,
+    BookingState.PENDING_AMENDMENT,
     BookingState.COMPLETED,
     BookingState.DECLINED
   );

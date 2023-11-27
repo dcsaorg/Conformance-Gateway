@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-abstract class AbstractCarrierPayloadResponseConformanceCheck extends ActionCheck {
+abstract class AbstractCarrierPayloadResponseConformanceCheck extends PayloadContentConformanceCheck {
 
 
   protected static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
@@ -45,10 +45,6 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends ActionChec
     BookingState.CANCELLED
   );
 
-  protected static final Function<ObjectNode, Set<String>> ALL_OK = unused -> Collections.emptySet();
-
-  protected static final String UNSET_MARKER = "<unset>";
-
   protected final BookingState expectedBookingStatus;
   protected final BookingState expectedAmendedBookingStatus;
   protected final boolean amendedContent;
@@ -72,39 +68,6 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends ActionChec
     this.expectedBookingStatus = bookingState;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.amendedContent = amendedContent;
-  }
-
-  @Override
-  protected abstract Stream<? extends ConformanceCheck> createSubChecks();
-
-  protected void addSubCheck(String subtitle, Function<ObjectNode, Set<String>> subCheck, Consumer<ConformanceCheck> addCheck) {
-    addCheck.accept(createSubCheck(subtitle, subCheck));
-  }
-
-  protected ConformanceCheck createSubCheck(String subtitle, Function<ObjectNode, Set<String>> subCheck) {
-    return new ActionCheck(subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
-      @Override
-      protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-        ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-        if (exchange == null) return Collections.emptySet();
-        var responsePayload =
-          exchange
-            .getResponse()
-            .message()
-            .body()
-            .getJsonBody();
-        if (responsePayload instanceof ObjectNode booking) {
-          return subCheck.apply(booking);
-        }
-        return Set.of("Could not perform the check as the payload was not correct format");
-      }
-    };
-  }
-
-  @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
-    // All checks are delegated to sub-checks; nothing to do in here.
-    return Collections.emptySet();
   }
 
   protected Set<String> ensureCarrierBookingReferenceCompliance(JsonNode responsePayload) {
@@ -174,13 +137,8 @@ abstract class AbstractCarrierPayloadResponseConformanceCheck extends ActionChec
 
   protected Set<String> nonEmptyField(JsonNode responsePayload, String key) {
     var field = responsePayload.get(key);
-    if (field != null) {
-      if (field.isTextual() && !field.asText().isBlank()) {
-        return Collections.emptySet();
-      }
-      if (!field.isEmpty() || field.isValueNode()) {
-        return Collections.emptySet();
-      }
+    if (isNonEmptyNode(field)) {
+      return Collections.emptySet();
     }
     return Set.of("The field '%s' must be a present and non-empty for a booking in status '%s'".formatted(
       key, this.expectedBookingStatus.wireName()

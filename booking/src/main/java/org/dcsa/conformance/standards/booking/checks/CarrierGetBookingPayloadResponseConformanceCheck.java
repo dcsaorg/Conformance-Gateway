@@ -17,7 +17,7 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCa
   )));
 
   public CarrierGetBookingPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingStatus) {
-    this(matchedExchangeUuid, bookingStatus, null, false);
+    super(matchedExchangeUuid, bookingStatus);
   }
 
   public CarrierGetBookingPayloadResponseConformanceCheck(

@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends AbstractCarrierPayloadResponseConformanceCheck {
 
   public CarrierBookingRefStatusPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingStatus) {
-    this(matchedExchangeUuid, bookingStatus, null, false);
+    super(matchedExchangeUuid, bookingStatus);
   }
 
   public CarrierBookingRefStatusPayloadResponseConformanceCheck(

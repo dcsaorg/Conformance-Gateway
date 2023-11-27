@@ -60,7 +60,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                       shipper_GetBooking(
                                                           CONFIRMED, AMENDMENT_RECEIVED)),
                                               uc10_carrier_declineBooking()
-                                                  .then(shipper_GetBooking(DECLINED)))),
+                                                  .then(shipper_GetBooking(DECLINED)),
+                                              uc12_shipper_cancelBooking()
+                                                  .then(shipper_GetBooking(CANCELLED)))),
                               uc4_carrier_rejectBookingRequest().then(shipper_GetBooking(REJECTED)),
                               uc12_shipper_cancelBooking().then(shipper_GetBooking(CANCELLED)),
                               uc2_carrier_requestUpdateToBookingRequest()

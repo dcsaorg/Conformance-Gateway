@@ -522,6 +522,20 @@ public class Carrier extends ConformanceParty {
     return operation;
   }
 
+  private String readAmendedContent(ConformanceRequest request) {
+    var queryParams = request.queryParams();
+    var operationParams = queryParams.get("amendedContent");
+    if (operationParams == null || operationParams.isEmpty()) {
+      return "false";
+    }
+    var operation = operationParams.iterator().next();
+    if (operationParams.size() > 1
+      || !(operation.equals("true") || operation.equals("false"))) {
+      return "!INVALID-VALUE!";
+    }
+    return operation;
+  }
+
 
   @SneakyThrows
   private ConformanceResponse _handlePutBookingRequest(ConformanceRequest request) {
@@ -631,18 +645,36 @@ public class Carrier extends ConformanceParty {
   }
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
+    var amendedContentRaw = readAmendedContent(request);
+    boolean amendedContent;
+    if (amendedContentRaw.equals("true") || amendedContentRaw.equals("false")) {
+      amendedContent = amendedContentRaw.equals("true");
+    } else {
+      return return400(request, "The amendedContent queryParam must be used at most once and" +
+        " must be one of true or false");
+    }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var persistedBookingData = persistentMap.load(cbrr);
 
+
     if (persistedBookingData != null) {
       var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistedBookingData);
+      JsonNode body;
+      if (amendedContent) {
+        body = persistableCarrierBooking.getAmendedBooking().orElse(null);
+        if (body == null) {
+          return return404(request, "No amended version of booking with reference: " + bookingReference);
+        }
+      } else {
+        body = persistableCarrierBooking.getBooking();
+      }
       ConformanceResponse response =
           request.createResponse(
               200,
             Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(persistableCarrierBooking.getBooking()));
+            new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
               .formatted(bookingReference, persistableCarrierBooking.getBookingState().wireName()));

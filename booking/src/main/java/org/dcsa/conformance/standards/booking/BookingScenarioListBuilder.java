@@ -68,7 +68,16 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                               uc2_carrier_requestUpdateToBookingRequest()
                                   .then(shipper_GetBooking(PENDING_UPDATE)),
                               uc3_shipper_submitUpdatedBookingRequest()
-                                  .then(shipper_GetBooking(PENDING_UPDATE_CONFIRMATION)))));
+                                  .then(shipper_GetBooking(PENDING_UPDATE_CONFIRMATION)),
+                            shipper_GetAmendedBooking404().then(
+                              uc5_carrier_confirmBookingRequest().then(
+                                shipper_GetAmendedBooking404().then(uc7_shipper_submitBookingAmendment()
+                                  .then(
+                                    shipper_GetBooking(
+                                      CONFIRMED,
+                                      AMENDMENT_RECEIVED,
+                                      true
+                                      ))))))));
     }
     return carrier_SupplyScenarioParameters().thenAllPathsFrom(START);
   }
@@ -173,19 +182,35 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder shipper_GetBooking(
       BookingState expectedBookingStatus, BookingState expectedAmendedBookingStatus) {
+    return shipper_GetBooking(expectedBookingStatus, expectedAmendedBookingStatus, false);
+  }
+
+  private static BookingScenarioListBuilder shipper_GetBooking(
+    BookingState expectedBookingStatus, BookingState expectedAmendedBookingStatus, boolean requestAmendedContent) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
-        previousAction ->
-            new Shipper_GetBookingAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME),
-                false));
+      previousAction ->
+        new Shipper_GetBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          expectedBookingStatus,
+          expectedAmendedBookingStatus,
+          componentFactory.getMessageSchemaValidator(BOOKING_API, GET_BOOKING_SCHEMA_NAME),
+          requestAmendedContent));
+  }
+
+  private static BookingScenarioListBuilder shipper_GetAmendedBooking404() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction ->
+        new Shipper_GetAmendedBooking404Action(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction));
   }
 
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {

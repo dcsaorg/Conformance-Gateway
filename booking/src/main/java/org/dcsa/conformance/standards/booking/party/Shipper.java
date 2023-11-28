@@ -59,6 +59,7 @@ public class Shipper extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
         Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
+        Map.entry(Shipper_GetAmendedBooking404Action.class, this::getBookingRequest),
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
         Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
         Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelEntireBooking),
@@ -68,8 +69,12 @@ public class Shipper extends ConformanceParty {
   private void getBookingRequest(JsonNode actionPrompt) {
     log.info("Shipper.getBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
+    boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
+    Map<String, List<String>> queryParams = requestAmendment
+      ? Map.of("amendedContent", List.of("true"))
+      : Collections.emptyMap();
 
-    asyncCounterpartGet("/v2/bookings/" + cbrr);
+    asyncCounterpartGet("/v2/bookings/" + cbrr, queryParams);
 
     addOperatorLogEntry("Sent a GET request for booking with CBRR: %s".formatted(cbrr));
   }

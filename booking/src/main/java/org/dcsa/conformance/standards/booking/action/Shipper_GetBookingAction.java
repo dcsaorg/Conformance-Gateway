@@ -18,7 +18,7 @@ public class Shipper_GetBookingAction extends BookingAction {
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
   private final JsonSchemaValidator responseSchemaValidator;
-  private final boolean requestAmendedStatus;
+  private final boolean requestAmendedContent;
 
   public Shipper_GetBookingAction(
       String carrierPartyName,
@@ -28,18 +28,18 @@ public class Shipper_GetBookingAction extends BookingAction {
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, requestAmendedStatus ? "GET (amended content)" : "GET", 200);
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.responseSchemaValidator = responseSchemaValidator;
-    this.requestAmendedStatus = requestAmendedStatus;
+    this.requestAmendedContent = requestAmendedStatus;
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
-    return jsonNode;
+    return super.asJsonNode()
+      .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+      .put("amendedContent", requestAmendedContent);
   }
 
   @Override
@@ -70,11 +70,17 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            new JsonSchemaCheck(
+              BookingRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator
+            ),
             new CarrierGetBookingPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
               expectedAmendedBookingStatus,
-              requestAmendedStatus
+              requestAmendedContent
             ),
             new ActionCheck(
                 "GET returns the expected Booking data",

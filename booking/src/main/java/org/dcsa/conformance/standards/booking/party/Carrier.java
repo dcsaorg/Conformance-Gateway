@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -224,8 +225,9 @@ public class Carrier extends ConformanceParty {
       }
     }
 
-    var oneWeekPrior = firstTransportActionByCarrier.minusWeeks(1).toString();
-    var twoWeeksPrior = firstTransportActionByCarrier.minusWeeks(2).toString();
+    var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    var oneWeekPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(1));
+    var twoWeeksPrior = formatter.format(firstTransportActionByCarrier.minusWeeks(2));
 
     addShipmentCutOff(shipmentCutOffTimes, "DCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "VCO", oneWeekPrior);

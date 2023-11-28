@@ -70,6 +70,12 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            new JsonSchemaCheck(
+              BookingRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator
+            ),
             new CarrierGetBookingPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,

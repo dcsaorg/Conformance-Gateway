@@ -36,10 +36,10 @@ import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 @Slf4j
 public class Carrier extends ConformanceParty {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
   private static final Random RANDOM = new Random();
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
   protected boolean isShipperNotificationEnabled = true;
@@ -62,8 +62,8 @@ public class Carrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(objectMapper, cbrrToCbr));
-    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(objectMapper, cbrToCbrr));
+    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrrToCbr));
+    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrToCbrr));
   }
 
   @Override
@@ -119,7 +119,7 @@ public class Carrier extends ConformanceParty {
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
             generateSchemaValidVesselIMONumber());
     asyncOrchestratorPostPartyInput(
-        objectMapper
+        OBJECT_MAPPER
             .createObjectNode()
             .put("actionId", actionPrompt.get("actionId").asText())
             .set("input", carrierScenarioParameters.toJson()));
@@ -438,7 +438,7 @@ public class Carrier extends ConformanceParty {
       asyncCounterpartPost("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     }
   }
 
@@ -448,7 +448,7 @@ public class Carrier extends ConformanceParty {
         Map.of(
             "Api-Version", List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
         new ConformanceMessageBody(
-            objectMapper
+            OBJECT_MAPPER
                 .createObjectNode()
                 .put("message", "Returning 405 because the method was not supported")));
   }
@@ -457,24 +457,27 @@ public class Carrier extends ConformanceParty {
     return request.createResponse(
         400,
         Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(objectMapper.createObjectNode().put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   private ConformanceResponse return404(ConformanceRequest request) {
+    return return404(request, "Returning 404 since the request did not match any known URL");
+  }
+  private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
         404,
         Map.of("Api-Version", List.of(apiVersion)),
         new ConformanceMessageBody(
-            objectMapper
+            OBJECT_MAPPER
                 .createObjectNode()
-                .put("message", "Returning 404 since the request did not match any known URL")));
+                .put("message", message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
         Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(objectMapper.createObjectNode().put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   @Override
@@ -530,7 +533,7 @@ public class Carrier extends ConformanceParty {
       return return404(request);
     }
     ObjectNode updatedBookingRequest =
-      (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
+      (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(bookingData);
     try {
       persistableCarrierBooking.putBooking(bookingReference, updatedBookingRequest);
@@ -600,7 +603,7 @@ public class Carrier extends ConformanceParty {
     var cbrr = booking.get("carrierBookingRequestReference").asText();
     var bookingStatus = booking.get("bookingStatus").asText();
     var statusObject =
-        objectMapper
+        OBJECT_MAPPER
             .createObjectNode()
             .put("bookingStatus", bookingStatus)
             .put("carrierBookingRequestReference", cbrr);
@@ -651,7 +654,7 @@ public class Carrier extends ConformanceParty {
   @SneakyThrows
   private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
     ObjectNode bookingRequestPayload =
-        (ObjectNode) objectMapper.readTree(request.message().body().getJsonBody().toString());
+        (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var persistableCarrierBooking = PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
     persistableCarrierBooking.save(persistentMap);
     if (isShipperNotificationEnabled) {
@@ -704,8 +707,7 @@ public class Carrier extends ConformanceParty {
     }
 
     public ObjectNode asJsonNode() {
-      ObjectMapper objectMapper = new ObjectMapper();
-      var notification = objectMapper.createObjectNode();
+      var notification = OBJECT_MAPPER.createObjectNode();
       notification.put("specversion", "1.0");
       setIfNotNull(notification, "id", id);
       setIfNotNull(notification, "source", source);
@@ -713,7 +715,7 @@ public class Carrier extends ConformanceParty {
       notification.put("time", Instant.now().toString());
       notification.put("datacontenttype", "application/json");
 
-      var data = objectMapper.createObjectNode();
+      var data = OBJECT_MAPPER.createObjectNode();
       setBookingProvidedField(data, "carrierBookingReference", carrierBookingReference);
       if (includeCarrierBookingRequestReference) {
         setBookingProvidedField(

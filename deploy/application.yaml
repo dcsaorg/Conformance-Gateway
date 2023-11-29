@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+spec:
+  destination:
+    namespace: conformance-gateway-dev
+    name: in-cluster
+  project: conformance-gateway
+  source:
+    repoURL: 'https://github.com/dcsaorg/chart-nodejs-webapp'
+    path: charts/nodejs-webapp
+    targetRevision: main
+    helm:
+      valuesFile: values-dev.yaml
+  syncPolicy:
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground # Supported policies are background, foreground and orphan.
+      - PruneLast=true

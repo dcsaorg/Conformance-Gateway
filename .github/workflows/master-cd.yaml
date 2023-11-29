@@ -1,0 +1,45 @@
+name: Conformance-Gateway CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions: # required for AWS oauth
+  id-token: write
+  contents: read
+
+jobs:
+  build-deploy:
+    name: build-deploy
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone application repository
+        uses: actions/checkout@v4
+
+      - name: Clone private github actions
+        uses: actions/checkout@v4
+        with:
+          repository: dcsaorg/shared-github-actions
+          ref: v1.0.0
+          token: ${{ secrets.REPO_ACCESS_PAT }}
+          path: .private-actions
+
+      - name: Build and upload docker container
+        uses: ./.private-actions/aws-docker-build
+        with:
+          ECR_ROLE: ${{ secrets.ECR_ROLE }}
+          IMAGE_TAG: ${{ github.sha }}
+
+      - name: Deploy to Dev environment
+        uses: ./.private-actions/argocd-helm-deploy
+        with:
+          NAME: api
+          ENVIRONMENT: dev
+          NAMESPACE: conformance
+          MANIFEST: deploy
+          ARGOCD_BOT_TOKEN: ${{ secrets.ARGOCD_BOT_TOKEN }}
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          IMAGE_TAG: ${{ github.sha }}

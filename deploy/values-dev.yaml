@@ -1,0 +1,30 @@
+image:
+  repository: eu-west-1.amazonaws.com???
+resources:
+  requests:
+    cpu: 1
+    memory: 2024Mi
+  limits:
+    cpu: 1
+    memory: 2024Mi
+application:
+  healthcheck:
+    httpGet:
+      path: /actuator/health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  network:
+    - name: http
+      dest: 80
+      containerPort: 8080
+      protocol: TCP
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1???
+  hosts:
+    - host: ???.dcsa.org
+      paths:
+        - path: /
+          pathType: Prefix

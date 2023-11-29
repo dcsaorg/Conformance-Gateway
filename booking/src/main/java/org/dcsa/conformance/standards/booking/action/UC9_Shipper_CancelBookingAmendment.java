@@ -52,6 +52,12 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
           new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
           new ResponseStatusCheck(
             BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+          new QueryParamCheck(
+            BookingRole::isShipper,
+            getMatchedExchangeUuid(),
+            "operation",
+            "cancelAmendment"
+          ),
           new ApiHeaderCheck(
             BookingRole::isShipper,
             getMatchedExchangeUuid(),

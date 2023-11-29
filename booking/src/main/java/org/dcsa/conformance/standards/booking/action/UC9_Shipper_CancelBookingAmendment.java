@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC9_Shipper_CancelBookingAmendment extends BookingAction {
+public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
 
@@ -52,10 +52,6 @@ public class UC9_Shipper_CancelBookingAmendment extends BookingAction {
           new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
           new ResponseStatusCheck(
             BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-          new CarrierBookingRefStatusPayloadResponseConformanceCheck(
-            getMatchedExchangeUuid(),
-            BookingState.CANCELLED
-          ),
           new ApiHeaderCheck(
             BookingRole::isShipper,
             getMatchedExchangeUuid(),

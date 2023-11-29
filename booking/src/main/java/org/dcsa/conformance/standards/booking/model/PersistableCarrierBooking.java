@@ -126,8 +126,10 @@ public class PersistableCarrierBooking {
     if (reason == null || reason.isBlank()) {
       reason = "Amendment cancelled by shipper (no reason given)";
     }
+    final var cancelReason = reason;
+    getBooking().put("reason", cancelReason);
     var amendedBooking = getAmendedBooking().orElseThrow(AssertionError::new);
-    amendedBooking.put("reason", reason);
+    amendedBooking.put("reason", cancelReason);
   }
 
   private void changeState(String attributeName, BookingState newState) {

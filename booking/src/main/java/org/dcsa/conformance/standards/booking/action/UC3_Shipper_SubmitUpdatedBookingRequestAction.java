@@ -12,7 +12,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
 @Slf4j
-public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction {
+public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
@@ -40,11 +40,6 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends BookingAction
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
-  }
-
-  @Override
-  protected void doHandleExchange(ConformanceExchange exchange) {
-    storeCbrAndCbrrIfPresent(exchange);
   }
 
   @Override

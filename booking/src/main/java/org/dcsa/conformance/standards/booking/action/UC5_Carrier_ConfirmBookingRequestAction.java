@@ -12,7 +12,7 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
+public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC5_Carrier_ConfirmBookingRequestAction(
@@ -39,11 +39,6 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends BookingAction {
     ObjectNode jsonNode = super.asJsonNode();
     return jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
         .put("cbr", getDspSupplier().get().carrierBookingReference());
-  }
-
-  @Override
-  public void doHandleExchange(ConformanceExchange exchange) {
-    storeCbrAndCbrrIfPresent(exchange);
   }
 
   @Override

@@ -12,7 +12,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 import java.util.stream.Stream;
 
 @Getter
-public class UC2_Carrier_RequestUpdateToBookingRequestAction extends BookingAction {
+public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC2_Carrier_RequestUpdateToBookingRequestAction(

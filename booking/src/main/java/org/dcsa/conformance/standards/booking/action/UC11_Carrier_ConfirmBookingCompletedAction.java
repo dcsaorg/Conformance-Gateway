@@ -11,7 +11,7 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC11_Carrier_ConfirmBookingCompletedAction extends BookingAction {
+public class UC11_Carrier_ConfirmBookingCompletedAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
   public UC11_Carrier_ConfirmBookingCompletedAction(

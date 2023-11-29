@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -79,24 +80,43 @@ public abstract class BookingAction extends ConformanceAction {
     return dspReference::get;
   }
 
-  protected void storeCbrAndCbrrIfPresent(ConformanceExchange exchange) {
+  private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+    if (value == null) {
+      return dsp;
+    }
+    return with.apply(value);
+  }
+
+  private static BookingState parseBookingState(String v) {
+    if (v == null) {
+      return null;
+    }
+    try {
+      return BookingState.fromWireName(v);
+    } catch (IllegalArgumentException e) {
+      // Do not assume conformant payload.
+      return null;
+    }
+  }
+
+  protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dsp = dspReference.get();
-    String oldCbrr = dsp.carrierBookingRequestReference();
-    String oldCbr = dsp.carrierBookingReference();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
-    String newCbrr =
-        responseJsonNode.has("carrierBookingRequestReference")
-            ? responseJsonNode.get("carrierBookingRequestReference").asText()
-            : oldCbrr;
-    String newCbr =
-        responseJsonNode.has("carrierBookingReference")
-            ? responseJsonNode.get("carrierBookingReference").asText()
-            : oldCbr;
+    var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
+    var newCbr = responseJsonNode.path("carrierBookingReference").asText(null);
+    var newBookingStatus = parseBookingState(responseJsonNode.path("bookingStatus").asText(null));
+    var newAmendedBookingStatus = parseBookingState(responseJsonNode.path("amendedBookingStatus").asText(null));
 
-    if ((newCbrr != null && !newCbrr.equals(oldCbrr))
-        || (newCbr != null && !newCbr.equals(oldCbr))) {
-      dspReference.set(new DynamicScenarioParameters(newCbrr, newCbr));
+    var updatedDsp = dsp;
+    updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
+    updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
+    updatedDsp = updateIfNotNull(updatedDsp, newBookingStatus, updatedDsp::withBookingStatus);
+    updatedDsp = updateIfNotNull(updatedDsp, newAmendedBookingStatus, updatedDsp::withAmendedBookingStatus);
+
+
+    if (!dsp.equals(updatedDsp)) {
+      dspReference.set(updatedDsp);
     }
   }
 

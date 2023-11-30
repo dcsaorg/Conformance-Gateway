@@ -157,6 +157,10 @@ public class PersistableCarrierBooking {
     }
   }
 
+  /**
+   * Replace this with a more concrete call (like confirmBooking()) when needed
+   */
+  @Deprecated
   public void performSimpleStatusChange(String reference, BookingState newState, String reason) {
     // FIXME: Have logic for amendment vs. non-amendment states
     if (NOT_APPLICABLE_FOR_SIMPLE_STATE_CHANGE.contains(newState)) {

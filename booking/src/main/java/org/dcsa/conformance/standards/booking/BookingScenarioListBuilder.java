@@ -54,11 +54,20 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                                   .then(
                                                                       shipper_GetBooking(
                                                                           PENDING_AMENDMENT,
-                                                                          AMENDMENT_RECEIVED)))),
+                                                                          AMENDMENT_RECEIVED)
+                                                                        .then (uc9_shipper_cancelBookingAmendment()
+                                                                          .then(shipper_GetBooking(
+                                                                            PENDING_AMENDMENT,
+                                                                            CANCELLED)))))),
                                               uc7_shipper_submitBookingAmendment()
                                                   .then(
                                                       shipper_GetBooking(
-                                                          CONFIRMED, AMENDMENT_RECEIVED)),
+                                                        CONFIRMED,
+                                                        AMENDMENT_RECEIVED)
+                                                        .then (uc9_shipper_cancelBookingAmendment()
+                                                          .then(shipper_GetBooking(
+                                                            CONFIRMED,
+                                                            CANCELLED)))),
                                               uc10_carrier_declineBooking()
                                                   .then(shipper_GetBooking(DECLINED)),
                                               uc12_shipper_cancelBooking()
@@ -305,7 +314,18 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   }
 
   private static BookingScenarioListBuilder uc9_shipper_cancelBookingAmendment() {
-    return tbdShipperAction();
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction ->
+        new UC9_Shipper_CancelBookingAmendment(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(
+            BOOKING_API, BOOKING_REF_STATUS_SCHEMA)));
   }
 
   private static BookingScenarioListBuilder uc10_carrier_declineBooking() {

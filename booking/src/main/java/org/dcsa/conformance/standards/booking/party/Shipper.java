@@ -62,6 +62,7 @@ public class Shipper extends ConformanceParty {
         Map.entry(Shipper_GetAmendedBooking404Action.class, this::getBookingRequest),
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
         Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
+        Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
         Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
   }
 
@@ -116,14 +117,29 @@ public class Shipper extends ConformanceParty {
   private void sendCancelEntireBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
-
+    Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelBooking"));
     asyncCounterpartPatch(
-        "/v2/bookings/%s?operation=cancelBooking".formatted(cbrr),
+        "/v2/bookings/%s".formatted(cbrr),
+        queryParams,
         new ObjectMapper()
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.wireName()));
 
     addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
+  }
+
+  private void sendCancelBookingAmendment(JsonNode actionPrompt) {
+    log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
+    Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelAmendment"));
+    asyncCounterpartPatch(
+      "/v2/bookings/%s".formatted(cbrr),
+      queryParams,
+      new ObjectMapper()
+        .createObjectNode()
+        .put("bookingStatus", BookingState.CANCELLED.wireName()));
+
+    addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(cbrr));
   }
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {

@@ -183,6 +183,10 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncCounterpartPatch(path, jsonBody, conformanceResponse -> {});
   }
 
+  protected void asyncCounterpartPatch(String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
+    asyncCounterpartPatch(path, queryParams, jsonBody, conformanceResponse -> {});
+  }
+
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
     asyncCounterpartPost(path, jsonBody, conformanceResponse -> {});
   }
@@ -193,6 +197,11 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected void asyncCounterpartPatch(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
     _asyncCounterpartPatchPostOrPut("PATCH", path, Collections.emptyMap(), jsonBody, responseCallback);
+  }
+
+  protected void asyncCounterpartPatch(String path,Map<String, ? extends Collection<String>> queryParams,
+                                       JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut("PATCH", path, queryParams, jsonBody, responseCallback);
   }
 
   protected void asyncCounterpartPost(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {

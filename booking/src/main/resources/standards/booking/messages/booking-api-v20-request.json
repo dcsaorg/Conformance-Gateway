@@ -3,81 +3,36 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
-  "vessel": {
-    "name": "King of the Seas",
-    "vesselIMONumber": "VESSEL_IMO_NUMBER_PLACEHOLDER"
-  },
-  "serviceContractReference": "serviceRef",
-  "carrierExportVoyageNumber": "2106W",
+  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
-  "declaredValue": 3.14,
-  "declaredValueCurrency": "DKK",
-  "isPartialLoadAllowed": true,
-  "isExportDeclarationRequired": true,
-  "exportDeclarationReference": "exportDeclarationRef",
-  "isImportLicenseRequired": true,
-  "importLicenseReference": "importLicenseRef",
-  "expectedDepartureDate": "2052-11-15",
-  "expectedArrivalAtPlaceOfDeliveryStartDate": "2052-11-15",
-  "expectedArrivalAtPlaceOfDeliveryEndDate": "2052-11-15",
-  "transportDocumentTypeCode": "BOL",
-  "transportDocumentReference": "transportDocumentRef",
-  "bookingChannelReference": "bookingChannelRef",
-  "incoTerms": "FOB",
+  "isPartialLoadAllowed": false,
+  "isExportDeclarationRequired": false,
+  "isImportLicenseRequired": false,
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
-  "placeOfBLIssue": {
-    "locationName": "Asseco DK office",
-    "locationType": "ADDR",
-    "address": {
-      "name": "Asseco DK",
-      "street": "Kronprinsessegade",
-      "streetNumber": "54",
-      "floor": "5. sal",
-      "postCode": "1306",
-      "city": "København",
-      "country": "Denmark"
-    }
-  },
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "22G1",
+      "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [
         {
-          "HSCodes": ["411510"],
-          "commodityType": "commodity type",
+          "HSCodes": ["COMMODITY_HS_CODE"],
+          "commodityType": "COMMODITY_TYPE_PLACEHOLDER",
           "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM",
-          "cargoGrossVolume": 100.0,
-          "cargoGrossVolumeUnit": "MTQ",
-          "outerPackaging": {
-            "packageCode" : "1A",
-            "imoPackagingCode": "A1222",
-            "numberOfPackages": 1,
-            "description": "steel"
-
-          },
-          "exportLicenseIssueDate": "2022-11-15",
-          "exportLicenseExpiryDate": "2023-05-15"
+          "cargoGrossWeightUnit": "KGM"
         }
       ]
-    }
-  ],
-  "references": [
-    {
-      "type": "AAO",
-      "value": "ref value"
     }
   ],
   "documentParties": [
     {
       "party": {
-        "partyName": "boring party",
+        "partyName": "DCSA Conformance Toolkit",
         "address": {
-          "name": "Asseco DK",
-          "street": "Kronprinsessegade",
+          "name": "TODO",
+          "street": "TODO",
           "streetNumber": "54",
           "floor": "5. sal",
           "postCode": "1306",
@@ -89,39 +44,26 @@
             "name": "Henrik",
             "phone": "+31611444666"
           }
-        ],
-        "identifyingCodes": [
-          {
-            "DCSAResponsibleAgencyCode": "DCSA",
-            "partyCode": "reponsible fun",
-            "codeListName": "irreponsible fun"
-          }
         ]
       },
       "partyFunction": "BA",
-      "displayedAddress": [
-        "line1",
-        "line2"
-      ],
-      "isToBeNotified": true
+      "isToBeNotified": false
     }
   ],
   "shipmentLocations": [
     {
       "location": {
         "locationType": "UNLO",
-        "UNLocationCode": "NLRTM"
+        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
-      "locationTypeCode": "POL",
-      "eventDateTime": "2022-11-15T10:34:41.99631016+01:00"
+      "locationTypeCode": "POL"
     },
     {
       "location": {
         "locationType": "UNLO",
-        "UNLocationCode": "USMIA"
+        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
-      "locationTypeCode": "POD",
-      "eventDateTime": "2022-11-15T10:34:41.99631016+01:00"
+      "locationTypeCode": "POD"
     }
   ]
 }

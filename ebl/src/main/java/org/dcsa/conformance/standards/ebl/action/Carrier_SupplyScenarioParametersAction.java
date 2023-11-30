@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends EblAction {
   private CarrierScenarioParameters carrierScenarioParameters = null;
-  private DynamicScenarioParameters dynamicScenarioParameters = new DynamicScenarioParameters(null, null);
 
   public Carrier_SupplyScenarioParametersAction(String carrierPartyName) {
     super(carrierPartyName, null, null, "SupplyCSP", -1);
@@ -19,7 +17,6 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   public void reset() {
     super.reset();
     carrierScenarioParameters = null;
-    dynamicScenarioParameters = new DynamicScenarioParameters(null, null);
   }
 
   @Override
@@ -27,9 +24,6 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     ObjectNode jsonState = super.exportJsonState();
     if (carrierScenarioParameters != null) {
       jsonState.set("carrierScenarioParameters", carrierScenarioParameters.toJson());
-    }
-    if (dynamicScenarioParameters != null) {
-      jsonState.set("dynamicScenarioParameters", dynamicScenarioParameters.toJson());
     }
     return jsonState;
   }
@@ -40,10 +34,6 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     JsonNode cspNode = jsonState.get("carrierScenarioParameters");
     if (cspNode != null) {
       carrierScenarioParameters = CarrierScenarioParameters.fromJson(cspNode);
-    }
-    JsonNode dspNode = jsonState.get("dynamicScenarioParameters");
-    if (dspNode != null) {
-      dynamicScenarioParameters = DynamicScenarioParameters.fromJson(dspNode);
     }
   }
 
@@ -74,17 +64,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   }
 
   @Override
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dsp -> this.dynamicScenarioParameters = dsp;
-  }
-
-  @Override
   protected Supplier<CarrierScenarioParameters> getCspSupplier() {
     return () -> carrierScenarioParameters;
-  }
-
-  @Override
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return () -> dynamicScenarioParameters;
   }
 }

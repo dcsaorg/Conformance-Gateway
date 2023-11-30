@@ -10,30 +10,39 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Getter
-public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingAction {
+public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC10_Carrier_DeclineBookingAction(
+  private final boolean acceptAmendment;
+
+  public UC8_Carrier_ProcessAmendmentAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204);
+      JsonSchemaValidator requestSchemaValidator,
+      boolean acceptAmendment) {
+    super(
+        carrierPartyName,
+        shipperPartyName,
+        previousAction,
+        "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D") ,
+        204);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.acceptAmendment = acceptAmendment;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC10: Decline the booking request with CBR %s"
-        .formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC8: Process the booking amendment with CBR %s".formatted(getDspSupplier().get().carrierBookingReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbr", dsp.carrierBookingReference())
-      .put("cbrr", dsp.carrierBookingRequestReference() );
+    return jsonNode.put("cbrr", dsp.carrierBookingRequestReference())
+        .put("cbr", dsp.carrierBookingReference())
+        .put("acceptAmendment", acceptAmendment);
   }
 
   @Override
@@ -42,15 +51,16 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
+        var bookingStatus = dsp.bookingStatus();
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                BookingState.DECLINED,
-                dsp.amendedBookingStatus() != null ? BookingState.DECLINED : null
+              getMatchedExchangeUuid(),
+              acceptAmendment ? BookingState.CONFIRMED : bookingStatus,
+              acceptAmendment ? BookingState.CONFIRMED : BookingState.DECLINED
             ),
             new ApiHeaderCheck(
                 BookingRole::isCarrier,

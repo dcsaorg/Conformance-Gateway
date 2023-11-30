@@ -125,7 +125,7 @@ public class Shipper extends ConformanceParty {
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.wireName()));
 
-    addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(cbrr));
+    addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {

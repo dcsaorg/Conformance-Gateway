@@ -45,8 +45,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                       shipper_GetBooking(CONFIRMED)
                                           .thenEither(
                                             uc5_carrier_confirmBookingRequest()
-                                              .then(uc11_carrier_confirmBookingCompleted()
-                                                  .then(shipper_GetBooking(COMPLETED))),
+                                              .then(
+                                                shipper_GetBooking(CONFIRMED)
+                                                  .then(
+                                                  uc11_carrier_confirmBookingCompleted()
+                                                    .then(shipper_GetBooking(COMPLETED)))),
                                               uc11_carrier_confirmBookingCompleted()
                                                   .then(shipper_GetBooking(COMPLETED)),
                                               uc6_carrier_requestUpdateToConfirmedBooking()

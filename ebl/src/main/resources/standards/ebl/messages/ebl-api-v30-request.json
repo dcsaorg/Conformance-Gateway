@@ -1,5 +1,65 @@
 {
-  "transportDocumentTypeCode": "SWB",
+  "transportDocumentTypeCode": "BOL",
   "isElectronic": true,
-  "TODO": "the rest of the fields"
+  "isToOrder": true,
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "locationType": "UNCO",
+    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+  },
+  "partyContactDetails": [
+    {
+      "name": "DCSA test person",
+      "email": "no-reply@dcsa.example.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+      "weight": 320.12,
+      "weightUnit": "KGM",
+      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "HSCodes": [
+        "CONSIGNMENT_ITEM_HS_CODE"
+      ],
+      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "cargoItems": [
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "weight": 320.12,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "numberOfPackages": 5
+          }
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "seals": [
+        {
+          "number": "DCSA-CTK-1234"
+        }
+      ]
+    }
+  ],
+  "documentParties": [
+    {
+      "party": {
+        "partyName": "DCSA CTK",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "OS",
+      "isToBeNotified": false
+    }
+  ]
 }

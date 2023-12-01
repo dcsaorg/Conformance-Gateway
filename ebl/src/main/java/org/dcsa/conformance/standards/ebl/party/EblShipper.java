@@ -12,10 +12,12 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
@@ -54,8 +56,53 @@ public class EblShipper extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
+      Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest)
     );
+  }
+
+
+  private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    CarrierScenarioParameters carrierScenarioParameters =
+      CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+
+    JsonNode jsonRequestBody =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/ebl/messages/ebl-api-v30-request.json",
+            Map.ofEntries(
+                Map.entry(
+                    "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+                    carrierScenarioParameters.carrierBookingReference()),
+                Map.entry(
+                    "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+                    carrierScenarioParameters.commoditySubreference()),
+                Map.entry(
+                    "EQUIPMENT_REFERENCE_PLACEHOLDER",
+                    carrierScenarioParameters.equipmentReference()),
+              Map.entry("INVOICE_PAYABLE_AT_UNLOCATION_CODE", carrierScenarioParameters.invoicePayableAtUNLocationCode()),
+              Map.entry("CONSIGNMENT_ITEM_HS_CODE", carrierScenarioParameters.consignmentItemHSCode()),
+              Map.entry("DESCRIPTION_OF_GOODS_PLACEHOLDER", carrierScenarioParameters.descriptionOfGoods())
+              ));
+
+    asyncCounterpartPost(
+      "/v3/shipping-instructions",
+      jsonRequestBody,
+      conformanceResponse -> {
+        JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+        String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
+        String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
+        ObjectNode updatedBooking =
+          ((ObjectNode) jsonRequestBody)
+            .put("shippingInstructionsStatus", shippingInstructionsStatus)
+            .put("shippingInstructionsReference", shippingInstructionsReference);
+        persistentMap.save(shippingInstructionsReference, updatedBooking);
+      });
+
+    addOperatorLogEntry(
+      "Sent a booking request with the parameters: %s"
+        .formatted(carrierScenarioParameters.toJson()));
   }
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {
@@ -66,7 +113,7 @@ public class EblShipper extends ConformanceParty {
       ? Map.of("amendedContent", List.of("true"))
       : Collections.emptyMap();
 
-    asyncCounterpartGet("/v2/shipping-instructions/" + sir, queryParams);
+    asyncCounterpartGet("/v3/shipping-instructions/" + sir, queryParams);
 
     addOperatorLogEntry("Sent a GET request for shipping instructions with SIR: %s".formatted(sir));
   }

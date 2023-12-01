@@ -44,7 +44,15 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new CarrierScenarioParameters("Example Carrier Service", "1234567890").toJson();
+    return new CarrierScenarioParameters(
+      "Booking ref X",
+      "Commodity Subref for X",
+      "APZU4812090",
+      "DKCPH",
+      "Consignment Item HS Code",
+      "Shoes"
+
+    ).toJson();
   }
 
   @Override

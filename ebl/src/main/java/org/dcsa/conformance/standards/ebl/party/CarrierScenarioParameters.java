@@ -4,18 +4,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record CarrierScenarioParameters(String carrierBookingReference, String commoditySubreference) {
+public record CarrierScenarioParameters(String carrierBookingReference, String commoditySubreference, String equipmentReference, String invoicePayableAtUNLocationCode, String consignmentItemHSCode, String descriptionOfGoods) {
   public ObjectNode toJson() {
     return new ObjectMapper()
         .createObjectNode()
         .put("carrierBookingReference", carrierBookingReference())
-        .put("commoditySubreference", commoditySubreference());
+        .put("commoditySubreference", commoditySubreference())
+        .put("equipmentReference", equipmentReference)
+        .put("invoicePayableAtUNLocationCode", invoicePayableAtUNLocationCode)
+        .put("consignmentItemHSCode", consignmentItemHSCode)
+        .put("descriptionOfGoods", descriptionOfGoods);
   }
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
     return new CarrierScenarioParameters(
-      jsonNode.path("carrierBookingReference").asText(),
-      jsonNode.path("commoditySubreference").asText()
+      jsonNode.required("carrierBookingReference").asText(),
+      jsonNode.required("commoditySubreference").asText(),
+      jsonNode.required("equipmentReference").asText(),
+      jsonNode.required("invoicePayableAtUNLocationCode").asText(),
+      jsonNode.required("consignmentItemHSCode").asText(),
+      jsonNode.required("descriptionOfGoods").asText()
     );
   }
 }

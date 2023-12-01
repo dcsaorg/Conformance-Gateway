@@ -151,7 +151,7 @@ public abstract class EblAction extends ConformanceAction {
     return with.apply(value);
   }
 
-  protected Stream<ActionCheck> getNotificationChecks(
+  protected Stream<ActionCheck> getSINotificationChecks(
       String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
     String titlePrefix = "[Notification]";
     return Stream.of(
@@ -161,7 +161,7 @@ public abstract class EblAction extends ConformanceAction {
                 titlePrefix,
                 EblRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
-                "/v2/shipping-instruction-notifications"),
+                "/v3/shipping-instructions-notifications"),
             new ResponseStatusCheck(
                 titlePrefix, EblRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
             new ApiHeaderCheck(

@@ -20,7 +20,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
 
   private static final String EBL_API = "api";
-  private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
+
+  private static final String EBL_NOTIFICATIONS_API = "notification";
+  private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructionsResponse";
+  private static final String POST_EBL_SCHEMA_NAME = "ShippingInstructionsRequest";
+  private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
+  private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
 
   public static EblScenarioListBuilder buildTree(
       EblComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
@@ -99,7 +104,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc1_shipper_submitShippingInstructions() {
-    return noAction();
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC1_Shipper_SubmitShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument() {

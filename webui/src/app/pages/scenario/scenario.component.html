@@ -75,42 +75,9 @@
 
     <div *ngIf="scenario && scenarioStatus?.conformanceSubReport">
         <div class="pageSubtitle">Conformance status</div>
-        <div style="margin-top: 1em">
-            <span
-            class="conformanceStatus"
-            [title]="getConformanceStatusTitle(scenarioStatus.conformanceSubReport.status)"
-            >{{getConformanceStatusEmoji(scenarioStatus.conformanceSubReport.status)}}</span>
-            
-            <span>{{scenarioStatus.conformanceSubReport.title}}</span>
-
-            <div *ngFor="let subReport of scenarioStatus.conformanceSubReport.subReports"
-            style="margin-top: 1em; margin-left: 1em">
-                <span
-                class="conformanceStatus"
-                [title]="getConformanceStatusTitle(subReport.status)"
-                >{{getConformanceStatusEmoji(subReport.status)}}</span>
-                
-                <span>{{subReport.title}}</span>
-
-                <div *ngFor="let subSubReport of subReport.subReports"
-                style="margin-top: 1em; margin-left: 2em">
-                    <span
-                    class="conformanceStatus"
-                    [title]="getConformanceStatusTitle(subSubReport.status)"
-                    >{{getConformanceStatusEmoji(subSubReport.status)}}</span>
-                    
-                    <span>{{subSubReport.title}}</span>
-                    
-                    <div *ngFor="let errorMessage of subSubReport.errorMessages"
-                    style="margin-top: .5em; margin-left: 3em">
-                        <span
-                        class="conformanceStatus"
-                        >❌</span>
-                        
-                        <span>{{errorMessage}}</span>
-                    </div>
-                </div>
-        </div>
-        </div>
+        <app-report
+        *ngIf="scenario && scenarioStatus?.conformanceSubReport"
+        [report]="scenarioStatus.conformanceSubReport"
+        ></app-report>
     </div>
 </div>

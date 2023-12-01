@@ -1,0 +1,14 @@
+<div style="margin-top: 1em">
+    <span
+    class="conformanceStatus"
+    [title]="getConformanceStatusTitle(report.status)"
+    >{{getConformanceStatusEmoji(report.status)}}</span>
+    
+    <span>{{report.title}}</span>
+
+    <div style="margin-left: 2em">
+        <app-report *ngFor="let subReport of report.subReports"
+        [report]="subReport"
+        ></app-report>
+    </div>
+</div>

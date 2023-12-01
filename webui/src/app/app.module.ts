@@ -27,6 +27,7 @@ import { SandboxComponent } from './pages/sandbox/sandbox.component';
 import { ScenarioComponent } from './pages/scenario/scenario.component';
 import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.component';
 import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.component';
+import { ReportComponent } from './pages/report/report.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.componen
     HomeComponent,
     LoginComponent,
     MessageDialog,
+    ReportComponent,
     SandboxComponent,
     ScenarioComponent,
     SimpleTextComponent,

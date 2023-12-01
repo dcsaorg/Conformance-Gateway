@@ -23,6 +23,8 @@ public class Shipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
+  private static final String BOOKING_STATUS = "bookingStatus";
+
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -61,6 +63,7 @@ public class Shipper extends ConformanceParty {
         Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
         Map.entry(Shipper_GetAmendedBooking404Action.class, this::getBookingRequest),
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
+        Map.entry(UC5_Shipper_RepostConfirmedBooking.class, this::sendReConfirmedBooking),
         Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
         Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
         Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
@@ -170,6 +173,22 @@ public class Shipper extends ConformanceParty {
         .formatted(cbrr));
   }
 
+
+  private void sendReConfirmedBooking(JsonNode actionPrompt) {
+    log.info("Shipper.sendUpdatedConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.get("cbrr").asText();
+
+    var bookingData = persistentMap.load(cbrr);
+    ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT)
+      .put(BOOKING_STATUS,BookingState.CONFIRMED.wireName());
+
+    asyncCounterpartPut(
+      "/v2/bookings/%s".formatted(cbrr),bookingData);
+
+    addOperatorLogEntry(
+      "Sent an updated confirmed booking with the parameters: %s"
+        .formatted(cbrr));
+  }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {

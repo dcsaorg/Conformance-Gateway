@@ -228,27 +228,33 @@ public class PersistableCarrierBooking {
 
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
     var currentState = getBookingState();
-    boolean isAmendment =
-      currentState.equals(BookingState.CONFIRMED)
-        || currentState.equals(BookingState.PENDING_AMENDMENT);
+    String requestBookingStatus = newBookingData.get("bookingStatus").asText();
+    boolean sameState = requestBookingStatus.equals(currentState.wireName());
+    if (sameState) {
+      setBooking(getBooking());
+    }else {
+      boolean isAmendment =
+        currentState.equals(BookingState.CONFIRMED)
+          || currentState.equals(BookingState.PENDING_AMENDMENT);
 
-    checkState(
-      bookingReference,
-      currentState,
-      (isAmendment ? MAY_AMEND_STATES : MAY_UPDATE_REQUEST_STATES)::contains
-    );
-    if (isAmendment) {
-      changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
-    } else {
-      changeState(BOOKING_STATUS, BookingState.PENDING_UPDATE_CONFIRMATION);
+      checkState(
+        bookingReference,
+        currentState,
+        (isAmendment ? MAY_AMEND_STATES : MAY_UPDATE_REQUEST_STATES)::contains
+      );
+      if (isAmendment) {
+        changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
+      } else {
+        changeState(BOOKING_STATUS, BookingState.PENDING_UPDATE_CONFIRMATION);
+      }
+      copyMetadataFields(getBooking(), newBookingData);
+      if (isAmendment) {
+        setAmendedBooking(newBookingData);
+      } else {
+        setBooking(newBookingData);
+      }
+      removeRequestedChanges();
     }
-    copyMetadataFields(getBooking(), newBookingData);
-    if (isAmendment) {
-      setAmendedBooking(newBookingData);
-    } else {
-      setBooking(newBookingData);
-    }
-    removeRequestedChanges();
   }
 
   public BookingState getBookingState() {

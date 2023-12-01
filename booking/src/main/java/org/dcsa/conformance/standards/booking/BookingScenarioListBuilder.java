@@ -44,6 +44,12 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                   .then(
                                       shipper_GetBooking(CONFIRMED)
                                           .thenEither(
+                                            uc5_shipper_repostConfirmedBooking()
+                                              .then(
+                                                shipper_GetBooking(CONFIRMED)
+                                                  .then (
+                                                    uc11_carrier_confirmBookingCompleted()
+                                                      .then(shipper_GetBooking(COMPLETED)))),
                                               uc11_carrier_confirmBookingCompleted()
                                                   .then(shipper_GetBooking(COMPLETED)),
                                               uc6_carrier_requestUpdateToConfirmedBooking()
@@ -110,6 +116,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case CONFIRMED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
+                  uc5_shipper_repostConfirmedBooking().thenHappyPathFrom(COMPLETED),
                   uc6_carrier_requestBookingAmendment().thenAllPathsFrom(PENDING_AMENDMENT),
                   uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, CONFIRMED),
@@ -287,6 +294,20 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder uc5_carrier_confirmBookingRequest() {
     return carrierStateChange(UC5_Carrier_ConfirmBookingRequestAction::new);
+  }
+
+  private static BookingScenarioListBuilder uc5_shipper_repostConfirmedBooking() {
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction ->
+        new UC5_Shipper_RepostConfirmedBooking(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getMessageSchemaValidator(BOOKING_API, PUT_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA)));
   }
 
   private static BookingScenarioListBuilder uc6_carrier_requestUpdateToConfirmedBooking() {

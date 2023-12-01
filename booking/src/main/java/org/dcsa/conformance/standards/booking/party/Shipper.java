@@ -175,7 +175,7 @@ public class Shipper extends ConformanceParty {
 
 
   private void sendReConfirmedBooking(JsonNode actionPrompt) {
-    log.info("Shipper.sendUpdatedConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("Shipper.sendReConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
 
     var bookingData = persistentMap.load(cbrr);
@@ -186,7 +186,7 @@ public class Shipper extends ConformanceParty {
       "/v2/bookings/%s".formatted(cbrr),bookingData);
 
     addOperatorLogEntry(
-      "Sent an updated confirmed booking with the parameters: %s"
+      "Sent a reconfirmed booking with the parameters: %s"
         .formatted(cbrr));
   }
 

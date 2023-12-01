@@ -156,6 +156,10 @@ public class Carrier extends ConformanceParty {
       "Confirmed the booking request with CBRR '%s'".formatted(cbrr));
 
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var bookingStatus = persistableCarrierBooking.getBooking().get("bookingStatus").asText();
+    if (bookingStatus.equals(BookingState.CONFIRMED.wireName())) {
+      persistableCarrierBooking.getBooking().put("importLicenseReference","importLicenseRefUpdate");
+    }
     persistableCarrierBooking.confirmBooking(cbrr, () -> generateAndAssociateCBR(cbrr), null);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -219,6 +223,7 @@ public class Carrier extends ConformanceParty {
 
     String cbrr = actionPrompt.get("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
+
 
     processAndEmitNotificationForStateTransition(
         actionPrompt,

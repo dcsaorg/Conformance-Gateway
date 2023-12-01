@@ -20,13 +20,6 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class PersistableCarrierBooking {
 
-  private static final String[] METADATA_FIELDS_TO_PRESERVE = {
-    "carrierBookingRequestReference",
-    "carrierBookingReference",
-    "bookingStatus",
-    "amendedBookingStatus",
-  };
-
   private static final Map<BookingState, Predicate<BookingState>> PREREQUISITE_STATE_FOR_TARGET_STATE = Map.ofEntries(
     Map.entry(CONFIRMED, Set.of(RECEIVED, PENDING_UPDATE_CONFIRMATION, CONFIRMED)::contains),
     Map.entry(REJECTED, Set.of(RECEIVED, PENDING_UPDATE, PENDING_UPDATE_CONFIRMATION)::contains),
@@ -60,6 +53,17 @@ public class PersistableCarrierBooking {
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
 
+  private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
+  private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
+
+
+  private static final String[] METADATA_FIELDS_TO_PRESERVE = {
+    CARRIER_BOOKING_REQUEST_REFERENCE,
+    CARRIER_BOOKING_REFERENCE,
+    BOOKING_STATUS,
+    AMENDED_BOOKING_STATUS,
+  };
+
   private static final String BOOKING_DATA_FIELD = "booking";
   private static final String AMENDED_BOOKING_DATA_FIELD = "amendedBooking";
 
@@ -71,11 +75,11 @@ public class PersistableCarrierBooking {
   }
 
   public String getCarrierBookingRequestReference() {
-    return getBooking().path("carrierBookingRequestReference").asText();
+    return getBooking().required(CARRIER_BOOKING_REQUEST_REFERENCE).asText();
   }
 
   public String getCarrierBookingReference() {
-    return getBooking().path("carrierBookingReference").asText(null);
+    return getBooking().path(CARRIER_BOOKING_REFERENCE).asText(null);
   }
 
   public ObjectNode getBooking() {
@@ -112,7 +116,7 @@ public class PersistableCarrierBooking {
     checkState(reference, getBookingState(), prerequisites);
     if (this.getCarrierBookingReference() == null) {
       var newCbr = cbrGenerator.get();
-      mutateBookingAndAmendment(b -> b.put("carrierBookingReference", newCbr));
+      mutateBookingAndAmendment(b -> b.put(CARRIER_BOOKING_REFERENCE, newCbr));
     }
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
@@ -262,7 +266,7 @@ public class PersistableCarrierBooking {
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {
     String cbrr = UUID.randomUUID().toString();
-    bookingRequest.put("carrierBookingRequestReference", cbrr)
+    bookingRequest.put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
       .put(BOOKING_STATUS, BookingState.RECEIVED.wireName());
     var state = OBJECT_MAPPER.createObjectNode();
     state.set(BOOKING_DATA_FIELD, bookingRequest);

@@ -100,8 +100,8 @@ public class Shipper extends ConformanceParty {
         jsonRequestBody,
         conformanceResponse -> {
           JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
-          String cbrr = jsonBody.get("carrierBookingRequestReference").asText();
-          String bookingStatus = jsonBody.get("bookingStatus").asText();
+          String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
+          String bookingStatus = jsonBody.path("bookingStatus").asText();
           ObjectNode updatedBooking =
                 ((ObjectNode) jsonRequestBody)
                   .put("bookingStatus", bookingStatus)

@@ -51,7 +51,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v2/shipping-instructions/" + getDspSupplier().get().shippingInstructionsReference()),
+                "/v3/shipping-instructions/" + getDspSupplier().get().shippingInstructionsReference()),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

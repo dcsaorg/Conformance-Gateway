@@ -1,31 +1,45 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
 public enum ShippingInstructionsStatus {
-  SI_ANY,
-  SI_START,
-  SI_RECEIVED,
-  SI_PENDING_UPDATE,
-  SI_UPDATE_RECEIVED,
-  SI_CANCELLED,
-  SI_DECLINED,
-  SI_COMPLETED,
+  SI_ANY(null),
+  SI_START(null),
+  SI_RECEIVED("RECEIVED"),
+  SI_PENDING_UPDATE("PENDING UDPATE"),
+  SI_UPDATE_RECEIVED("UPDATE RECEIVED"),
+  SI_CANCELLED("CANCELLED"),
+  SI_DECLINED("DECLINED"),
+  SI_COMPLETED("COMPLETED"),
   ;
+
+  private final String wireName;
+
+  private static final Map<String, ShippingInstructionsStatus> WIRENAME2STATUS = Arrays.stream(values())
+    .filter(ShippingInstructionsStatus::hasWireName)
+    .collect(Collectors.toMap(ShippingInstructionsStatus::wireName, Function.identity()));
 
   public String wireName() {
     if (!hasWireName()) {
-      throw new IllegalArgumentException("State does not have a name visible in any transmission");
+      throw new IllegalArgumentException("State " + this.name() + " does not have a name visible in any transmission");
     }
-    return this.name().replace("_", " ");
+    return wireName;
   }
 
   private boolean hasWireName() {
-    return this != SI_START;
+    return wireName != null;
   }
 
   public static ShippingInstructionsStatus fromWireName(String wireName) {
-    var v = ShippingInstructionsStatus.valueOf(wireName.replace(" ", "_"));
-    if (!v.hasWireName()) {
-      throw new IllegalArgumentException("The State does not have a wire name");
+    var v = WIRENAME2STATUS.get(wireName);
+    if (v == null) {
+      throw new IllegalArgumentException("Unknown SI status or the status does not have a wireName");
     }
     return v;
   }

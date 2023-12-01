@@ -15,11 +15,11 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
 
 @Slf4j
 public class EblCarrier extends ConformanceParty {
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public EblCarrier(
       String apiVersion,
@@ -48,7 +48,24 @@ public class EblCarrier extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries();
+    return Map.ofEntries(
+      Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters)
+    );
+  }
+
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    CarrierScenarioParameters carrierScenarioParameters =
+      new CarrierScenarioParameters(
+        "CARRIER_BOOKING_REFX",
+        "COMMODITY_SUBREFERENCE_FOR_REFX");
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.get("actionId").asText())
+        .set("input", carrierScenarioParameters.toJson()));
+    addOperatorLogEntry(
+      "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
   @Override
@@ -57,7 +74,7 @@ public class EblCarrier extends ConformanceParty {
         404,
         Map.of("Api-Version", List.of(apiVersion)),
         new ConformanceMessageBody(
-            objectMapper
+            OBJECT_MAPPER
                 .createObjectNode()
                 .put("message", "Returning 404 since the request did not match any known URL")));
   }

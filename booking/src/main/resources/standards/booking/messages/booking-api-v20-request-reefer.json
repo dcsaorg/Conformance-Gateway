@@ -13,7 +13,7 @@
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "22RP", //TODO find a reefer code
+      "ISOEquipmentCode": "22RT",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [

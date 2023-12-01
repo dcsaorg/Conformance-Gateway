@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
@@ -52,8 +53,24 @@ public class EblShipper extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries();
+    return Map.ofEntries(
+      Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest)
+    );
   }
+
+  private void getShippingInstructionsRequest(JsonNode actionPrompt) {
+    log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String sir = actionPrompt.get("sir").asText();
+    boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
+    Map<String, List<String>> queryParams = requestAmendment
+      ? Map.of("amendedContent", List.of("true"))
+      : Collections.emptyMap();
+
+    asyncCounterpartGet("/v2/shipping-instructions/" + sir, queryParams);
+
+    addOperatorLogEntry("Sent a GET request for shipping instructions with SIR: %s".formatted(sir));
+  }
+
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {

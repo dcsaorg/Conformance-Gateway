@@ -20,7 +20,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
 
   private static final String EBL_API = "api";
-  private static final String GET_EBL_SCHEMA_NAME = "getShippingInstructions";
+  private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
 
   public static EblScenarioListBuilder buildTree(
       EblComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {

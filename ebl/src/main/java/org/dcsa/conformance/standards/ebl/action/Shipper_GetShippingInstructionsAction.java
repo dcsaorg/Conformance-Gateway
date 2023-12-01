@@ -32,14 +32,14 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("cbrr", getDspSupplier().get().shippingInstructionsReference());
+    jsonNode.put("sir", getDspSupplier().get().shippingInstructionsReference());
     return jsonNode;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the ebl with CBR '%s'"
-        .formatted(getDspSupplier().get().transportDocumentReference());
+    return "GET the SI with reference '%s'"
+        .formatted(getDspSupplier().get().shippingInstructionsReference());
   }
 
   @Override
@@ -51,7 +51,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v2/ebls/" + getDspSupplier().get().shippingInstructionsReference()),
+                "/v2/shipping-instructions/" + getDspSupplier().get().shippingInstructionsReference()),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

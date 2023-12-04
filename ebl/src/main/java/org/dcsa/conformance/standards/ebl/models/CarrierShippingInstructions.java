@@ -4,6 +4,7 @@ import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatu
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.*;
@@ -12,10 +13,9 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 public class CarrierShippingInstructions {
 
-
-
-  private static final Map<ShippingInstructionsStatus, Predicate<ShippingInstructionsStatus>> PREREQUISITE_STATE_FOR_TARGET_STATE = Map.ofEntries(
-
+  private static final Set<ShippingInstructionsStatus> PENDING_UPDATE_PREREQUISITE_STATES = Set.of(
+    SI_RECEIVED,
+    SI_UPDATE_RECEIVED
   );
 
   private static final String SI_STATUS = "shippingInstructionsStatus";
@@ -66,6 +66,11 @@ public class CarrierShippingInstructions {
     state.set(UPDATED_SI_DATA_FIELD, node);
   }
 
+  private void clearUpdatedShippingInstructions() {
+    state.remove(UPDATED_SI_DATA_FIELD);
+    mutateShippingInstructionsAndUpdate(siData -> siData.remove(UPDATED_SI_STATUS));
+  }
+
 
   private void setReason(String reason) {
     if (reason != null) {
@@ -82,6 +87,14 @@ public class CarrierShippingInstructions {
       reason = "Update cancelled by shipper (no reason given)";
     }
     setReason(reason);
+  }
+
+  public void requestChangesToShippingInstructions(String documentReference, Consumer<ArrayNode> requestedChangesGenerator) {
+    checkState(documentReference, getShippingInstructionsState(), PENDING_UPDATE_PREREQUISITE_STATES::contains);
+    clearUpdatedShippingInstructions();
+    changeState(SI_STATUS, SI_PENDING_UPDATE);
+    setReason(null);
+    mutateShippingInstructionsAndUpdate(siData -> requestedChangesGenerator.accept(siData.putArray("requestedChanges")));
   }
 
   private void changeState(String attributeName, ShippingInstructionsStatus newState) {

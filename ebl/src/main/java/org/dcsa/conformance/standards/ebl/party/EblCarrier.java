@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.ebl.action.UC2_Carrier_RequestUpdateToShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -68,7 +69,8 @@ public class EblCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters)
+      Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+      Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions)
     );
   }
 
@@ -90,6 +92,38 @@ public class EblCarrier extends ConformanceParty {
         .set("input", carrierScenarioParameters.toJson()));
     addOperatorLogEntry(
       "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
+  }
+
+  private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
+    log.info("Carrier.requestUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.get("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.requestChangesToShippingInstructions(documentReference, requestedChanges -> requestedChanges.addObject()
+      .put("message", "Please perform the changes requested by the Conformance orchestrator")
+    );
+    si.save(persistentMap);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+
+    addOperatorLogEntry("Requested update to the shipping instructions with document reference '%s'".formatted(documentReference));
+  }
+
+  private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
+    var notification =
+      ShippingInstructionsNotification.builder()
+        .apiVersion(apiVersion)
+        .shippingInstructions(shippingInstructions.getShippingInstructions())
+        .includeShippingInstructionsReference(includeShippingInstructionsReference)
+        .build()
+        .asJsonNode();
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartPost("/v3/shipping-instructions-notifications", notification);
+    } else {
+      asyncOrchestratorPostPartyInput(
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
+    }
   }
 
 

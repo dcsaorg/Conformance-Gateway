@@ -58,7 +58,7 @@ public class CarrierShippingInstructions {
     state.set(SI_DATA_FIELD, node);
   }
 
-  public Optional<ObjectNode> getAmendedBooking() {
+  public Optional<ObjectNode> getUpdatedShippingInstructions() {
     return Optional.ofNullable((ObjectNode)state.get(UPDATED_SI_DATA_FIELD));
   }
 
@@ -90,7 +90,7 @@ public class CarrierShippingInstructions {
 
   private void mutateShippingInstructionsAndUpdate(Consumer<ObjectNode> mutator) {
     mutator.accept(getShippingInstructions());
-    getAmendedBooking().ifPresent(mutator);
+    getUpdatedShippingInstructions().ifPresent(mutator);
   }
 
   private static void checkState(
@@ -103,20 +103,20 @@ public class CarrierShippingInstructions {
 
   private void removeRequestedChanges() {
     getShippingInstructions().remove("requestedChanges");
-    getAmendedBooking().ifPresent(amendedBooking -> amendedBooking.remove("requestedChanges"));
+    getUpdatedShippingInstructions().ifPresent(amendedBooking -> amendedBooking.remove("requestedChanges"));
   }
 
-  public void putShippingInstructions(String bookingReference, ObjectNode newBookingData) {
+  public void putShippingInstructions(String documentReference, ObjectNode newShippingInstructionData) {
     var currentState = getShippingInstructionsState();
 
     checkState(
-      bookingReference,
+      documentReference,
       currentState,
       s -> s != SI_DECLINED && s != SI_COMPLETED
     );
     changeState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
-    copyMetadataFields(getShippingInstructions(), newBookingData);
-    setUpdatedShippingInstructions(newBookingData);
+    copyMetadataFields(getShippingInstructions(), newShippingInstructionData);
+    setUpdatedShippingInstructions(newShippingInstructionData);
     removeRequestedChanges();
   }
 

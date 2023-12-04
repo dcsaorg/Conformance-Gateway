@@ -24,6 +24,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String EBL_NOTIFICATIONS_API = "notification";
   private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructionsResponse";
   private static final String POST_EBL_SCHEMA_NAME = "ShippingInstructionsRequest";
+  private static final String PUT_EBL_SCHEMA_NAME = "ShippingInstructionsUpdate";
   private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
 
@@ -43,7 +44,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
                       .thenAllPathsFrom(SI_RECEIVED)));
-      case SI_RECEIVED -> then(
+      case SI_RECEIVED -> thenEither(
+          uc3_shipper_submitUpdatedShippingInstructions()
+            .then(
+              shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
+                .then(uc6_carrier_publishDraftTransportDocument()
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
+                      .thenAllPathsFrom(TD_DRAFT)
+                  ))),
           uc6_carrier_publishDraftTransportDocument()
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
@@ -86,8 +95,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName));
   }
 
+
   private static EblScenarioListBuilder shipper_GetShippingInstructions(
-      ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus) {
+    ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus) {
+    return shipper_GetShippingInstructions(expectedSiStatus, null, expectedTdStatus);
+  }
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+      ShippingInstructionsStatus expectedSiStatus,
+      ShippingInstructionsStatus expectedUpdatedSiStatus,
+      TransportDocumentStatus expectedTdStatus) {
     EblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -98,7 +114,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 shipperPartyName,
                 (EblAction) previousAction,
                 expectedSiStatus,
-                null,
+                expectedUpdatedSiStatus,
                 componentFactory.getMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
                 false));
   }
@@ -116,6 +132,22 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           componentFactory.getMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc3_shipper_submitUpdatedShippingInstructions() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC3_Shipper_SubmitUpdatedShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument() {

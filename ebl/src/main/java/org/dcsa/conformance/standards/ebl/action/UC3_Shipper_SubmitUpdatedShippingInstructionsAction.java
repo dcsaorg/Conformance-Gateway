@@ -10,19 +10,19 @@ import org.dcsa.conformance.standards.ebl.party.EblRole;
 
 @Getter
 @Slf4j
-public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingSIAction {
+public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
-  public UC1_Shipper_SubmitShippingInstructionsAction(
+  public UC3_Shipper_SubmitUpdatedShippingInstructionsAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -30,14 +30,13 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a shipping instructions using the following parameters:");
+    return ("UC3: Submit an updated shipping instructions request using the following parameters:");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.set("csp", getCspSupplier().get().toJson());
-    return jsonNode;
+    return super.asJsonNode()
+      .put("sir", getDspSupplier().get().shippingInstructionsReference());
   }
 
   @Override
@@ -50,10 +49,11 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var dsp = getDspSupplier().get();
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
-            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "POST"),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions"),
+            new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
+            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(dsp.shippingInstructionsReference())),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

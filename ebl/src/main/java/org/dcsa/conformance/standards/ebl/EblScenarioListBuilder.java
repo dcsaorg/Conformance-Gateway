@@ -23,10 +23,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private static final String EBL_NOTIFICATIONS_API = "notification";
   private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructionsResponse";
+  private static final String GET_TD_SCHEMA_NAME = "getTransportDocument";
   private static final String POST_EBL_SCHEMA_NAME = "ShippingInstructionsRequest";
   private static final String PUT_EBL_SCHEMA_NAME = "ShippingInstructionsUpdate";
   private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
+  private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
 
   public static EblScenarioListBuilder buildTree(
       EblComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
@@ -51,19 +53,16 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           uc3_shipper_submitUpdatedShippingInstructions()
             .then(
               shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-                .thenEither(uc6_carrier_publishDraftTransportDocument()
-                  .then(
-                    shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
-                      .thenAllPathsFrom(TD_DRAFT)
-                  ),
+                .then(
                   uc2_carrier_requestUpdateToShippingInstruction()
                     .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
                       .thenHappyPathFrom(SI_PENDING_UPDATE)))),
           uc6_carrier_publishDraftTransportDocument()
               .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
-                      .thenAllPathsFrom(TD_DRAFT)));
-      default -> null; // TODO
+                  shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
+                    .then(shipper_GetTransportDocument(TD_DRAFT)
+                      .thenAllPathsFrom(TD_DRAFT))));
+      default -> then(noAction()); // TODO
     };
   }
 
@@ -79,7 +78,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .then(
                   shipper_GetShippingInstructions(SI_ANY, TD_ISSUED).thenAllPathsFrom(TD_ISSUED)));
       case TD_ISSUED -> then(noAction()); // TODO
-      default -> null; // TODO
+      default -> then(noAction()); // TODO
     };
   }
 
@@ -106,23 +105,54 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus) {
     return shipper_GetShippingInstructions(expectedSiStatus, null, expectedTdStatus);
   }
+
   private static EblScenarioListBuilder shipper_GetShippingInstructions(
-      ShippingInstructionsStatus expectedSiStatus,
-      ShippingInstructionsStatus expectedUpdatedSiStatus,
-      TransportDocumentStatus expectedTdStatus) {
+    ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus, boolean recordTDR) {
+    return shipper_GetShippingInstructions(expectedSiStatus, null, expectedTdStatus, false, recordTDR);
+  }
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    ShippingInstructionsStatus expectedUpdatedSiStatus,
+    TransportDocumentStatus expectedTdStatus) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, expectedTdStatus, false, false);
+  }
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    ShippingInstructionsStatus expectedUpdatedSiStatus,
+    TransportDocumentStatus expectedTdStatus,
+    boolean requestAmendedSI,
+    boolean recordTDR) {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new Shipper_GetShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          expectedSiStatus,
+          expectedUpdatedSiStatus,
+          componentFactory.getMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
+          requestAmendedSI,
+          recordTDR));
+  }
+
+  private static EblScenarioListBuilder shipper_GetTransportDocument(
+    TransportDocumentStatus expectedTdStatus) {
     EblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
         previousAction ->
-            new Shipper_GetShippingInstructionsAction(
+            new Shipper_GetTransportDocumentAction(
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
-                expectedSiStatus,
-                expectedUpdatedSiStatus,
-                componentFactory.getMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
-                false));
+                expectedTdStatus,
+                componentFactory.getMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc1_shipper_submitShippingInstructions() {
@@ -171,7 +201,17 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument() {
-    return noAction();
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC6_Carrier_PublishDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc8_carrier_issueTransportDocument() {

@@ -76,7 +76,11 @@ public abstract class EblAction extends ConformanceAction {
     return dspReference::get;
   }
 
-  protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
+  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
+    return dspReference::set;
+  }
+
+  protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dsp = dspReference.get();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();

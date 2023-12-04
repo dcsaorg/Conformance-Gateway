@@ -12,6 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.SneakyThrows;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -24,6 +25,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.ebl.action.UC2_Carrier_RequestUpdateToShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -70,7 +72,8 @@ public class EblCarrier extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions)
+      Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
+      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument)
     );
   }
 
@@ -110,6 +113,23 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry("Requested update to the shipping instructions with document reference '%s'".formatted(documentReference));
   }
 
+
+  private void publishDraftTransportDocument(JsonNode actionPrompt) {
+    log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.get("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.publishDraftTransportDocument(documentReference);
+    si.save(persistentMap);
+    tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
+    // generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));
+  }
+
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
     var notification =
       ShippingInstructionsNotification.builder()
@@ -126,6 +146,22 @@ public class EblCarrier extends ConformanceParty {
     }
   }
 
+
+  private void generateAndEmitNotificationFromTransportDocument(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
+    var notification =
+      TransportDocumentNotification.builder()
+        .apiVersion(apiVersion)
+        .transportDocument(shippingInstructions.getTransportDocument().orElseThrow())
+        .includeShippingInstructionsReference(includeShippingInstructionsReference)
+        .build()
+        .asJsonNode();
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartPost("/v3/transport-document-notifications", notification);
+    } else {
+      asyncOrchestratorPostPartyInput(
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
+    }
+  }
 
   private ConformanceResponse return405(ConformanceRequest request, String... allowedMethods) {
     return request.createResponse(
@@ -179,7 +215,7 @@ public class EblCarrier extends ConformanceParty {
     return operation;
   }
 
-  private ConformanceResponse _handleGetShippingInstructionsRequest(ConformanceRequest request) {
+  private ConformanceResponse _handleGetShippingInstructionsRequest(ConformanceRequest request, String documentReference) {
     var amendedContentRaw = readAmendedContent(request);
     boolean amendedContent;
     if (amendedContentRaw.equals("true") || amendedContentRaw.equals("false")) {
@@ -188,22 +224,20 @@ public class EblCarrier extends ConformanceParty {
       return return400(request, "The amendedContent queryParam must be used at most once and" +
         " must be one of true or false");
     }
-    var bookingReference = lastUrlSegment(request.url());
-    // bookingReference can either be a CBR or CBRR.
-    var cbrr = tdrToSir.getOrDefault(bookingReference, bookingReference);
-    var persistedBookingData = persistentMap.load(cbrr);
-
+    // documentReference can either be a SIR or TDR.
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var persistedBookingData = persistentMap.load(sir);
 
     if (persistedBookingData != null) {
-      var persistableCarrierBooking = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
+      var si = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
       JsonNode body;
       if (amendedContent) {
-        body = persistableCarrierBooking.getUpdatedShippingInstructions().orElse(null);
+        body = si.getUpdatedShippingInstructions().orElse(null);
         if (body == null) {
-          return return404(request, "No amended version of booking with reference: " + bookingReference);
+          return return404(request, "No amended version of booking with reference: " + documentReference);
         }
       } else {
-        body = persistableCarrierBooking.getShippingInstructions();
+        body = si.getShippingInstructions();
       }
       ConformanceResponse response =
         request.createResponse(
@@ -211,13 +245,36 @@ public class EblCarrier extends ConformanceParty {
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(body));
       addOperatorLogEntry(
-        "Responded to GET booking request '%s' (in state '%s')"
-          .formatted(bookingReference, persistableCarrierBooking.getShippingInstructionsState().wireName()));
+        "Responded to GET shipping instructions request '%s' (in state '%s')"
+          .formatted(documentReference, si.getShippingInstructionsState().wireName()));
       return response;
     }
     return return404(request);
   }
 
+  private ConformanceResponse _handleGetTransportDocument(ConformanceRequest request, String documentReference) {
+    // bookingReference can either be a CBR or CBRR.
+    var sir = tdrToSir.get(documentReference);
+    if (sir == null) {
+      return return404(request);
+    }
+    var persistedBookingData = persistentMap.load(sir);
+    if (persistedBookingData == null) {
+      throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
+    }
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
+    // If the TDR is resolvable, then the document must have a TD.
+    var body = si.getTransportDocument().orElseThrow();
+    ConformanceResponse response =
+      request.createResponse(
+        200,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(body));
+    addOperatorLogEntry(
+      "Responded to GET transport document request '%s' (in state '%s')"
+        .formatted(documentReference, si.getShippingInstructionsState().wireName()));
+    return response;
+  }
 
   private ConformanceResponse returnShippingInstructionsRefStatusResponse(
     int responseCode, ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
@@ -313,7 +370,18 @@ public class EblCarrier extends ConformanceParty {
     log.info("Carrier.handleRequest(%s)".formatted(request));
     var result =
       switch (request.method()) {
-        case "GET" -> _handleGetShippingInstructionsRequest(request);
+        case "GET" -> {
+          var url = request.url().replaceAll("/++$", "");
+          var lastSegment = lastUrlSegment(url);
+          var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+          if (urlStem.endsWith("/v3/shipping-instructions")) {
+            yield _handleGetShippingInstructionsRequest(request, lastSegment);
+          }
+          if (urlStem.endsWith("/v3/transport-documents")) {
+            yield _handleGetTransportDocument(request, lastSegment);
+          }
+          yield return404(request);
+        }
         case "POST" -> {
           var url = request.url();
           if (url.endsWith("/v3/shipping-instructions") || url.endsWith("/v3/shipping-instructions/")) {
@@ -337,10 +405,11 @@ public class EblCarrier extends ConformanceParty {
   }
 
 
-  @Builder
-  private static class ShippingInstructionsNotification {
-    @Builder.Default private String id = UUID.randomUUID().toString();
-    @Builder.Default private String source = "https://conformance.dcsa.org";
+  @SuperBuilder
+  private abstract static class DocumentNotification {
+    @Builder.Default protected String id = UUID.randomUUID().toString();
+    @Builder.Default protected String source = "https://conformance.dcsa.org";
+
     private String type;
     private String apiVersion;
 
@@ -348,11 +417,11 @@ public class EblCarrier extends ConformanceParty {
     private String transportDocumentReference;
     private String shippingInstructionsStatus;
     private String updatedShippingInstructionsStatus;
+    private String transportDocumentStatus;
     private String reason;
-
-    private JsonNode shippingInstructions;
     @Builder.Default
     private boolean includeShippingInstructionsReference = true;
+
 
     private String computedType() {
       if (type != null) {
@@ -360,10 +429,16 @@ public class EblCarrier extends ConformanceParty {
       }
       if (apiVersion != null) {
         var majorVersion = String.valueOf(apiVersion.charAt(0));
-        return "org.dcsa.shipping-instructions-notification.v" + majorVersion;
+        return typePrefix() + ".v" + majorVersion;
       }
       return null;
     }
+
+    protected abstract JsonNode referenceDocument();
+
+    protected abstract String typePrefix();
+
+    protected abstract boolean isSINotification();
 
     public ObjectNode asJsonNode() {
       var notification = OBJECT_MAPPER.createObjectNode();
@@ -375,33 +450,82 @@ public class EblCarrier extends ConformanceParty {
       notification.put("datacontenttype", "application/json");
 
       var data = OBJECT_MAPPER.createObjectNode();
-      setBookingProvidedField(data, "transportDocumentReference", transportDocumentReference);
+      setDocumentProvidedField(data, "transportDocumentReference", transportDocumentReference);
       if (includeShippingInstructionsReference) {
-        setBookingProvidedField(
+        setDocumentProvidedField(
           data, "shippingInstructionsReference", shippingInstructionsReference);
       }
-      setBookingProvidedField(data, "shippingInstructionsStatus", shippingInstructionsStatus);
-      setBookingProvidedField(data, "updatedShippingInstructionsStatus", updatedShippingInstructionsStatus);
-      setBookingProvidedField(data, "reason", reason);
+      if (isSINotification()) {
+        setDocumentProvidedField(data, "shippingInstructionsStatus", shippingInstructionsStatus);
+        setDocumentProvidedField(
+            data, "updatedShippingInstructionsStatus", updatedShippingInstructionsStatus);
+      } else {
+        setDocumentProvidedField(data, "transportDocumentStatus", transportDocumentStatus);
+      }
+      setDocumentProvidedField(data, "reason", reason);
       notification.set("data", data);
 
       return notification;
     }
 
-    private void setIfNotNull(ObjectNode node, String key, String value) {
+    protected void setIfNotNull(ObjectNode node, String key, String value) {
       if (value != null) {
         node.put(key, value);
       }
     }
 
-    private void setBookingProvidedField(ObjectNode node, String key, String value) {
-      if (value == null && shippingInstructions != null) {
-        var v = shippingInstructions.get(key);
+    protected void setDocumentProvidedField(ObjectNode node, String key, String value) {
+      var document = referenceDocument();
+      if (value == null && document != null) {
+        var v = document.get(key);
         if (v != null) {
           value = v.asText(null);
         }
       }
       setIfNotNull(node, key, value);
+    }
+  }
+
+  @SuperBuilder
+  private static class TransportDocumentNotification extends DocumentNotification {
+
+    private JsonNode transportDocument;
+
+    @Override
+    protected JsonNode referenceDocument() {
+      return transportDocument;
+    }
+
+    @Override
+    protected String typePrefix() {
+      return "org.dcsa.transport-document-notification";
+    }
+
+    @Override
+    protected boolean isSINotification() {
+      return false;
+    }
+  }
+
+  @SuperBuilder
+  private static class ShippingInstructionsNotification extends DocumentNotification {
+
+
+    private JsonNode shippingInstructions;
+
+    @Override
+    protected JsonNode referenceDocument() {
+      return shippingInstructions;
+    }
+
+    @Override
+    protected String typePrefix() {
+      return "org.dcsa.shipping-instructions-notification";
+    }
+
+    @Override
+    protected boolean isSINotification() {
+      return true;
     }
   }
 }

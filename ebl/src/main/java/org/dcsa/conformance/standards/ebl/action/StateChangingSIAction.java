@@ -10,6 +10,6 @@ public abstract class StateChangingSIAction extends EblAction {
   @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
-    updateDSPFromResponsePayload(exchange);
+    updateDSPFromSIResponsePayload(exchange);
   }
 }

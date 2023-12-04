@@ -17,6 +17,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.Shipper_GetTransportDocumentAction;
 import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC3_Shipper_SubmitUpdatedShippingInstructionsAction;
 
@@ -59,6 +60,7 @@ public class EblShipper extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
+      Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
       Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest)
     );
   }
@@ -140,6 +142,15 @@ public class EblShipper extends ConformanceParty {
     asyncCounterpartGet("/v3/shipping-instructions/" + sir, queryParams);
 
     addOperatorLogEntry("Sent a GET request for shipping instructions with SIR: %s".formatted(sir));
+  }
+
+  private void getTransportDocument(JsonNode actionPrompt) {
+    log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+    String tdr = actionPrompt.required("tdr").asText();
+
+    asyncCounterpartGet("/v3/transport-documents/" + tdr);
+
+    addOperatorLogEntry("Sent a GET request for transport document with TDR: %s".formatted(tdr));
   }
 
 

@@ -164,7 +164,7 @@ public class EblCarrier extends ConformanceParty {
       var persistableCarrierBooking = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
       JsonNode body;
       if (amendedContent) {
-        body = persistableCarrierBooking.getAmendedBooking().orElse(null);
+        body = persistableCarrierBooking.getUpdatedShippingInstructions().orElse(null);
         if (body == null) {
           return return404(request, "No amended version of booking with reference: " + bookingReference);
         }
@@ -218,11 +218,11 @@ public class EblCarrier extends ConformanceParty {
   }
 
   @SneakyThrows
-  private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
+  private ConformanceResponse _handlePostShippingInstructions(ConformanceRequest request) {
     ObjectNode siPayload =
       (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
-    var persistableCarrierBooking = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload);
-    persistableCarrierBooking.save(persistentMap);
+    var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload);
+    si.save(persistentMap);
     if (isShipperNotificationEnabled) {
       executor.schedule(
         () ->
@@ -230,7 +230,7 @@ public class EblCarrier extends ConformanceParty {
             "/v3/shipping-instructions-notifications",
             ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
-              .booking(persistableCarrierBooking.getShippingInstructions())
+              .shippingInstructions(si.getShippingInstructions())
               .build()
               .asJsonNode()),
         1,
@@ -240,10 +240,39 @@ public class EblCarrier extends ConformanceParty {
       201,
       request,
       siPayload,
-      persistableCarrierBooking.getShippingInstructionsReference()
+      si.getShippingInstructionsReference()
     );
   }
 
+
+  @SneakyThrows
+  private ConformanceResponse _handlePutShippingInstructions(ConformanceRequest request) {
+    var url = request.url();
+    var documentReference = lastUrlSegment(url);
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var siData = persistentMap.load(sir);
+    if (siData == null || siData.isMissingNode()) {
+      return return404(request);
+    }
+    ObjectNode updatedShippingInstructions =
+      (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
+    var si = CarrierShippingInstructions.fromPersistentStore(siData);
+    si.putShippingInstructions(sir, updatedShippingInstructions);
+    if (isShipperNotificationEnabled) {
+      executor.schedule(
+        () ->
+          asyncCounterpartPost(
+            "/v3/shipping-instructions-notifications",
+            ShippingInstructionsNotification.builder()
+              .apiVersion(apiVersion)
+              .shippingInstructions(si.getShippingInstructions())
+              .build()
+              .asJsonNode()),
+        1,
+        TimeUnit.SECONDS);
+    }
+    return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
+  }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
@@ -254,12 +283,12 @@ public class EblCarrier extends ConformanceParty {
         case "POST" -> {
           var url = request.url();
           if (url.endsWith("/v3/shipping-instructions") || url.endsWith("/v3/shipping-instructions/")) {
-            yield _handlePostBookingRequest(request);
+            yield _handlePostShippingInstructions(request);
           }
           yield return404(request);
         }
-        // case "PATCH" -> _handlePatchBookingRequest(request);
-        // case "PUT" -> _handlePutBookingRequest(request);
+        // case "PATCH" -> _handlePatchRequest(request);
+        case "PUT" -> _handlePutShippingInstructions(request);
         default -> return405(request, "GET", "POST", "PUT", "PATCH");
       };
     addOperatorLogEntry(
@@ -287,7 +316,7 @@ public class EblCarrier extends ConformanceParty {
     private String updatedShippingInstructionsStatus;
     private String reason;
 
-    private JsonNode booking;
+    private JsonNode shippingInstructions;
     @Builder.Default
     private boolean includeShippingInstructionsReference = true;
 
@@ -332,8 +361,8 @@ public class EblCarrier extends ConformanceParty {
     }
 
     private void setBookingProvidedField(ObjectNode node, String key, String value) {
-      if (value == null && booking != null) {
-        var v = booking.get(key);
+      if (value == null && shippingInstructions != null) {
+        var v = shippingInstructions.get(key);
         if (v != null) {
           value = v.asText(null);
         }

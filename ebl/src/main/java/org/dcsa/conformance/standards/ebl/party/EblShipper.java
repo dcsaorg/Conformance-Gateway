@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.UC3_Shipper_SubmitUpdatedShippingInstructionsAction;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
@@ -57,7 +58,8 @@ public class EblShipper extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
-      Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest)
+      Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
+      Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest)
     );
   }
 
@@ -93,16 +95,38 @@ public class EblShipper extends ConformanceParty {
         JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
         String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
         String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
-        ObjectNode updatedBooking =
+        ObjectNode updatedShippingInstructions =
           ((ObjectNode) jsonRequestBody)
             .put("shippingInstructionsStatus", shippingInstructionsStatus)
             .put("shippingInstructionsReference", shippingInstructionsReference);
-        persistentMap.save(shippingInstructionsReference, updatedBooking);
+        persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
       });
 
     addOperatorLogEntry(
       "Sent a booking request with the parameters: %s"
         .formatted(carrierScenarioParameters.toJson()));
+  }
+
+  private void sendUpdatedShippingInstructionsRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendUpdatedShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var sir = actionPrompt.required("sir").asText();
+    var si = (ObjectNode) persistentMap.load(sir);
+
+    si.put("transportDocumentTypeCode", "SWB");
+    asyncCounterpartPut(
+      "/v3/shipping-instructions/%s".formatted(sir),
+      si,
+      conformanceResponse -> {
+        JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+        String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
+        ObjectNode updatedBooking = si.put("shippingInstructionsStatus", shippingInstructionsStatus);
+        persistentMap.save(sir, updatedBooking);
+      });
+
+    addOperatorLogEntry(
+      "Sent a shipping instructions update with the parameters: %s"
+        .formatted(actionPrompt.toPrettyString()));
   }
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {

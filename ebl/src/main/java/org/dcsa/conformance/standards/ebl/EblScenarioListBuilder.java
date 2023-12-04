@@ -45,14 +45,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
                       .thenAllPathsFrom(SI_RECEIVED)));
       case SI_RECEIVED -> thenEither(
+          uc2_carrier_requestUpdateToShippingInstruction()
+            .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+              .thenHappyPathFrom(SI_PENDING_UPDATE)),
           uc3_shipper_submitUpdatedShippingInstructions()
             .then(
               shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-                .then(uc6_carrier_publishDraftTransportDocument()
+                .thenEither(uc6_carrier_publishDraftTransportDocument()
                   .then(
                     shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
                       .thenAllPathsFrom(TD_DRAFT)
-                  ))),
+                  ),
+                  uc2_carrier_requestUpdateToShippingInstruction()
+                    .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+                      .thenHappyPathFrom(SI_PENDING_UPDATE)))),
           uc6_carrier_publishDraftTransportDocument()
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT)
@@ -146,6 +152,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 (EblAction) previousAction,
                 componentFactory.getMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc2_carrier_requestUpdateToShippingInstruction() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC2_Carrier_RequestUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }

@@ -8,22 +8,22 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 
 @Getter
-public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends StateChangingSIAction {
+public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC2_Carrier_RequestUpdateToShippingInstructionsAction(
+  public UC8_Carrier_IssueTransportDocumentAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC2", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC8", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC2: Request update to the shipping instructions with shipping instructions reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return ("UC8: Issue transport document with transport document reference %s"
+        .formatted(getDspSupplier().get().transportDocumentReference()));
   }
 
   @Override
@@ -37,7 +37,7 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getSINotificationChecks(
+        return getTDNotificationChecks(
           getMatchedExchangeUuid(),
           expectedApiVersion,
           requestSchemaValidator

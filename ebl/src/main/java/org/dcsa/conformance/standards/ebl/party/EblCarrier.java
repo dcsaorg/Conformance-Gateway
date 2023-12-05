@@ -26,6 +26,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.ebl.action.UC2_Carrier_RequestUpdateToShippingInstructionsAction;
 import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.UC8_Carrier_IssueTransportDocumentAction;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -73,7 +74,8 @@ public class EblCarrier extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
       Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
-      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument)
+      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
+      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument)
     );
   }
 
@@ -124,10 +126,23 @@ public class EblCarrier extends ConformanceParty {
     si.publishDraftTransportDocument(documentReference);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
-    // generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
     addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));
+  }
+
+  private void issueTransportDocument(JsonNode actionPrompt) {
+    log.info("Carrier.issueTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.get("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.issueTransportDocument(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Issued transport document '%s'".formatted(documentReference));
   }
 
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {

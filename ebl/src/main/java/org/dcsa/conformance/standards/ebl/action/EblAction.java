@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -156,36 +157,78 @@ public abstract class EblAction extends ConformanceAction {
   }
 
   protected Stream<ActionCheck> getSINotificationChecks(
-      String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
+    String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
+    return getSINotificationChecks(getMatchedNotificationExchangeUuid(), expectedApiVersion, notificationSchemaValidator);
+  }
+
+  protected Stream<ActionCheck> getSINotificationChecks(
+    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
     String titlePrefix = "[Notification]";
     return Stream.of(
             new HttpMethodCheck(
-                titlePrefix, EblRole::isCarrier, getMatchedNotificationExchangeUuid(), "POST"),
+                titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
             new UrlPathCheck(
                 titlePrefix,
                 EblRole::isCarrier,
-                getMatchedNotificationExchangeUuid(),
+                notificationExchangeUuid,
                 "/v3/shipping-instructions-notifications"),
             new ResponseStatusCheck(
-                titlePrefix, EblRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
+                titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
             new ApiHeaderCheck(
                 titlePrefix,
                 EblRole::isCarrier,
-                getMatchedNotificationExchangeUuid(),
+                notificationExchangeUuid,
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
             new ApiHeaderCheck(
                 titlePrefix,
                 EblRole::isShipper,
-                getMatchedNotificationExchangeUuid(),
+                notificationExchangeUuid,
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
                 titlePrefix,
                 EblRole::isCarrier,
-                getMatchedNotificationExchangeUuid(),
+                notificationExchangeUuid,
                 HttpMessageType.REQUEST,
-                notificationSchemaValidator))
-        .filter(Objects::nonNull);
+                notificationSchemaValidator));
+  }
+
+  protected Stream<ActionCheck> getTDNotificationChecks(
+    String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
+    return getTDNotificationChecks(getMatchedNotificationExchangeUuid(), expectedApiVersion, notificationSchemaValidator);
+  }
+
+  protected Stream<ActionCheck> getTDNotificationChecks(
+    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
+    String titlePrefix = "[Notification]";
+    return Stream.of(
+      new HttpMethodCheck(
+        titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
+      new UrlPathCheck(
+        titlePrefix,
+        EblRole::isCarrier,
+        notificationExchangeUuid,
+        "/v3/transport-document-notifications"),
+      new ResponseStatusCheck(
+        titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
+      new ApiHeaderCheck(
+        titlePrefix,
+        EblRole::isCarrier,
+        notificationExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion),
+      new ApiHeaderCheck(
+        titlePrefix,
+        EblRole::isShipper,
+        notificationExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion),
+      new JsonSchemaCheck(
+        titlePrefix,
+        EblRole::isCarrier,
+        notificationExchangeUuid,
+        HttpMessageType.REQUEST,
+        notificationSchemaValidator));
   }
 }

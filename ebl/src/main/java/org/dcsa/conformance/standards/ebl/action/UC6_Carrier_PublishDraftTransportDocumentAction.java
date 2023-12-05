@@ -37,28 +37,11 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new HttpMethodCheck(EblRole::isCarrier, getMatchedExchangeUuid(), "POST"),
-            new UrlPathCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), "/v3/transport-document-notifications"),
-            new ResponseStatusCheck(
-                EblRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            // TODO: Notification payload check
-            new ApiHeaderCheck(
-              EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-              EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-              EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return getTDNotificationChecks(
+          getMatchedExchangeUuid(),
+          expectedApiVersion,
+          requestSchemaValidator
+        );
       }
     };
   }

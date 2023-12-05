@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Electronic Bill of Lading Notifications",
-    "description": "API specification issued by DCSA.org.\n\nElectronic Bill of Lading Notifications for [DCSA OpenAPI specification for Electronic Bill of Lading](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL/3.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The POST endPoint of the consumer is called whenever a `Shipping Instructions` or a `Transport Document` that is being subscribed to changes state.\n\nSetting up the notification is done outside scope of this API.\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/notification/v3#v300B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nElectronic Bill of Lading Notifications for [DCSA OpenAPI specification for Electronic Bill of Lading](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL/3.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Shipping Instructions` or a `Transport Document` that is being subscribed to changes state.\n\nSubscribing to notification is done outside scope of this API.\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/notification/v3#v300B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -28,20 +28,81 @@
           "Notifications"
         ],
         "summary": "Send a new Shipping Instructions Notification",
-        "description": "Send a new  `Shipping Instructions Notification`\n",
-        "operationId": "post-si-notifications",
+        "description": "Creates a new `Shipping Instructions Notification`. This endPoint is called whenever a `Shipping Instructions` that a cosumer has subscribed to changes state or is updated.\n",
+        "operationId": "shipping-instructions-notifications",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MUST** be provided to the request (mandatory). The header **MUST** be a [SemVer](https://semver.org/) specifying the provider (the calling party) API version.\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "3.0.0-Beta-1"
+            }
+          }
+        ],
         "requestBody": {
+          "description": "The payload used to create a `Shipping Instructions Notification`\n",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ShippingInstructionsNotification"
+              },
+              "examples": {
+                "receivedExample": {
+                  "summary": "Shipping Instructions request received\n",
+                  "description": "A notification explaining that a new `Shipping Instructions` has been received and stored in provider system (`shippingInstructionsStatus='RECEIVED'`).\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.shipping-instructions-notification.v3",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "data": {
+                      "shippingInstructionsStatus": "RECEIVED",
+                      "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+                    }
+                  }
+                },
+                "declinedExample": {
+                  "summary": "Shipping Instructions update declined\n",
+                  "description": "A notification explaining that an update to a `Shipping Instructions`, that was pending an update by the consumer (`shippingInstructionsStatus='PENDING UPDATE'`), has been declined (`updatedShippingInstructionsStatus='UPDATE DECLINED'`)\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.shipping-instructions-notification.v3",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "data": {
+                      "shippingInstructionsStatus": "PENDING UPDATE",
+                      "updatedShippingInstructionsStatus": "UPDATE DECLINED",
+                      "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+                    }
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "No Content\n",
+            "headers": {
+              "API-Version": {
+                "description": "[SemVer](https://semver.org/) used to indicate the version of the consumer (the responding party). This is optional to provide.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "3.0.0-Beta-1"
+                }
+              }
+            }
           }
         }
       }
@@ -52,20 +113,80 @@
           "Notifications"
         ],
         "summary": "Send a new Transport Document Notification",
-        "description": "Send a new `Transport Document Notification`\n",
-        "operationId": "post-td-notifications",
+        "description": "Creates a new `Transport Document Notification`. This endPoint is called whenever a `Transport Document` that a cosumer has subscribed to changes state or is updated.\n",
+        "operationId": "transport-document-notifications",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MUST** be provided to the request (mandatory). The header **MUST** be a [SemVer](https://semver.org/) specifying the provider (the calling party) API version.\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "3.0.0-Beta-1"
+            }
+          }
+        ],
         "requestBody": {
+          "description": "The payload used to create a `Transport Document Notification`\n",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TransportDocumentNotification"
+              },
+              "examples": {
+                "draftExample": {
+                  "summary": "Transport Document Draft created\n",
+                  "description": "A notification explaining that a new `Draft Transport Document` has been created and stored in provider system (`transportDocumentStatus='DRAFT'`).\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.transport-document-notification.v3",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "data": {
+                      "transportDocumentStatus": "DRAFT",
+                      "transportDocumentReference": "HHL71800000"
+                    }
+                  }
+                },
+                "issuedExample": {
+                  "summary": "Transport Document has been issued\n",
+                  "description": "A notification explaining that a `Transport Document` has been issued (`transportDocumentStatus='ISSUED'`)\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.transport-document-notification.v3",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "data": {
+                      "transportDocumentStatus": "ISSUED",
+                      "transportDocumentReference": "HHL71800000"
+                    }
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "No Content\n",
+            "headers": {
+              "API-Version": {
+                "description": "[SemVer](https://semver.org/) used to indicate the version of the consumer (the responding party). This is optional to provide.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "3.0.0-Beta-1"
+                }
+              }
+            }
           }
         }
       }
@@ -131,7 +252,9 @@
           "data": {
             "$ref": "#/components/schemas/ShippingInstructionsNotification_data"
           }
-        }
+        },
+        "additionalProperties": false,
+        "description": "`CloudEvent` specific properties for the `Notification`.\n"
       },
       "TransportDocumentNotification": {
         "title": "Transport Document Notification",
@@ -191,7 +314,9 @@
           "data": {
             "$ref": "#/components/schemas/TransportDocumentNotification_data"
           }
-        }
+        },
+        "additionalProperties": false,
+        "description": "`CloudEvent` specific properties for the `Notification`.\n"
       },
       "ShippingInstructionsNotification_data": {
         "required": [
@@ -202,36 +327,38 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest update added to the `Shipping Instructions`. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `CANCELLED` (An update to a Shipping Instructions is discontinued)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "description": "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions has been recieved and is awaiting to be processed)\n- `UPDATE CONFIRMED` (Update is confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
             "example": "UPDATE RECEIVED"
           },
           "shippingInstructionsReference": {
             "maxLength": 100,
             "pattern": "^\\S+(\\s+\\S+)*$",
             "type": "string",
-            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n\n**Conditional:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+            "description": "The identifier for a `Shipping Istruction` provided by the carrier for system purposes.\n\n**Conditional:** `shippingInstructionReference` and/or `transportDocumentReference` is required to provide\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
             "maxLength": 20,
             "pattern": "^\\S+(\\s+\\S+)*$",
             "type": "string",
-            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Conditional:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Conditional:** `shippingInstructionReference` and/or `transportDocumentReference` is required to provide\n",
             "example": "HHL71800000"
           },
           "reason": {
             "maxLength": 5000,
             "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus`.\n",
+            "description": "This field can be used to explain `shippingInstructionStatus`.\n",
             "example": "Selected vessel is overbooked - please update VesselName"
           }
-        }
+        },
+        "additionalProperties": false,
+        "description": "`Shipping Instructions` specific properties for the `Notification`\n"
       },
       "TransportDocumentNotification_data": {
         "required": [
@@ -250,7 +377,7 @@
             "maxLength": 100,
             "pattern": "^\\S+(\\s+\\S+)*$",
             "type": "string",
-            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+            "description": "The identifier for a `Shipping Istruction` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
@@ -263,10 +390,12 @@
           "reason": {
             "maxLength": 5000,
             "type": "string",
-            "description": "This field can be used to explain `Transport Document Status`.\n",
+            "description": "This field can be used to explain Transport Document Status.\n",
             "example": "Voided because a new Transport Document has been issued"
           }
-        }
+        },
+        "additionalProperties": false,
+        "description": "`Transport Document` specific properties for the `Notification`\n"
       }
     }
   }

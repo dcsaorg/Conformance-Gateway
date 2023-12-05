@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 public class CarrierShippingInstructions {
 
@@ -148,7 +149,7 @@ public class CarrierShippingInstructions {
 
   public void cancelShippingInstructionsUpdate(String shippingInstructionsReference, String reason) {
     checkState(shippingInstructionsReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
-    changeState(UPDATED_SI_STATUS, SI_CANCELLED);
+    changeSIState(UPDATED_SI_STATUS, SI_CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Update cancelled by shipper (no reason given)";
     }
@@ -158,7 +159,7 @@ public class CarrierShippingInstructions {
   public void requestChangesToShippingInstructions(String documentReference, Consumer<ArrayNode> requestedChangesGenerator) {
     checkState(documentReference, getShippingInstructionsState(), PENDING_UPDATE_PREREQUISITE_STATES::contains);
     clearUpdatedShippingInstructions();
-    changeState(SI_STATUS, SI_PENDING_UPDATE);
+    changeSIState(SI_STATUS, SI_PENDING_UPDATE);
     setReason(null);
     mutateShippingInstructionsAndUpdate(siData -> requestedChangesGenerator.accept(siData.putArray("requestedChanges")));
   }
@@ -170,7 +171,7 @@ public class CarrierShippingInstructions {
     clearUpdatedShippingInstructions();
     setReason(null);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
-    changeState(SI_STATUS, SI_RECEIVED);
+    changeSIState(SI_STATUS, SI_RECEIVED);
   }
 
   public void publishDraftTransportDocument(String documentReference) {
@@ -180,6 +181,20 @@ public class CarrierShippingInstructions {
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
     mutateShippingInstructionsAndUpdate(si -> si.put(TRANSPORT_DOCUMENT_REFERENCE, tdr));
+  }
+
+  public void issueTransportDocument(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT || s == TD_APPROVED);
+    var td = getTransportDocument().orElseThrow();
+    var date = LocalDate.now().toString();
+    var shippedDateField = td.path("isShippedOnBoardType").asBoolean(true)
+      ? "shippedOnBoardDate"
+      : "receivedForShipmentDate";
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName())
+      .put("issueDate", date)
+      // Reset the shippedOnBoardDate as it generally cannot happen before the issueDate.
+      // It is less clear whether we should do it for receivedForShipmentDate but ¯\_(ツ)_/¯
+      .put(shippedDateField, date);
   }
 
   private void copyFieldIfPresent(JsonNode source, ObjectNode dest, String field) {
@@ -221,7 +236,7 @@ public class CarrierShippingInstructions {
     state.set(TD_DATA_FIELD, td);
   }
 
-  private void changeState(String attributeName, ShippingInstructionsStatus newState) {
+  private void changeSIState(String attributeName, ShippingInstructionsStatus newState) {
     mutateShippingInstructionsAndUpdate(b -> b.put(attributeName, newState.wireName()));
   }
 
@@ -234,7 +249,15 @@ public class CarrierShippingInstructions {
     String reference, ShippingInstructionsStatus currentState, Predicate<ShippingInstructionsStatus> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
-        "Booking '%s' is in state '%s'".formatted(reference, currentState));
+        "SI '%s' is in state '%s'".formatted(reference, currentState));
+    }
+  }
+
+  private static void checkState(
+    String reference, TransportDocumentStatus currentState, Predicate<TransportDocumentStatus> expectedState) {
+    if (!expectedState.test(currentState)) {
+      throw new IllegalStateException(
+        "TD '%s' is in state '%s'".formatted(reference, currentState));
     }
   }
 
@@ -251,19 +274,32 @@ public class CarrierShippingInstructions {
       currentState,
       s -> s != SI_DECLINED && s != SI_COMPLETED
     );
-    changeState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
+    changeSIState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
     copyMetadataFields(getShippingInstructions(), newShippingInstructionData);
     setUpdatedShippingInstructions(newShippingInstructionData);
     removeRequestedChanges();
   }
 
   public ShippingInstructionsStatus getShippingInstructionsState() {
-    var booking = getShippingInstructions();
-    var s = booking.path(UPDATED_SI_STATUS);
+    var siData = getShippingInstructions();
+    var s = siData.path(UPDATED_SI_STATUS);
     if (s.isTextual()) {
       return ShippingInstructionsStatus.fromWireName(s.asText());
     }
-    return ShippingInstructionsStatus.fromWireName(booking.required(SI_STATUS).asText());
+    return ShippingInstructionsStatus.fromWireName(siData.required(SI_STATUS).asText());
+  }
+
+
+  public TransportDocumentStatus getTransportDocumentState() {
+    var tdData = getTransportDocument().orElse(null);
+    if (tdData == null) {
+      return TD_START;
+    }
+    var s = tdData.required(TRANSPORT_DOCUMENT_STATUS);
+    if (s.isTextual()) {
+      return TransportDocumentStatus.fromWireName(s.asText());
+    }
+    return TD_START;
   }
 
   public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode bookingRequest) {

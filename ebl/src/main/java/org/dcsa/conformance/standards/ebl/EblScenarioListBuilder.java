@@ -76,7 +76,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       case TD_DRAFT -> then(
           uc8_carrier_issueTransportDocument()
               .then(
-                  shipper_GetShippingInstructions(SI_ANY, TD_ISSUED).thenAllPathsFrom(TD_ISSUED)));
+                  shipper_GetTransportDocument(TD_ISSUED)
+                    .thenAllPathsFrom(TD_ISSUED)));
       case TD_ISSUED -> then(noAction()); // TODO
       default -> then(noAction()); // TODO
     };
@@ -215,6 +216,16 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder uc8_carrier_issueTransportDocument() {
-    return noAction();
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC8_Carrier_IssueTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 }

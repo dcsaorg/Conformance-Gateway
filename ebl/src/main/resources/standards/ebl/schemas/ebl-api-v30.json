@@ -208,7 +208,7 @@
           "Shipping Instructions"
         ],
         "summary": "Gets the Shipping Instructions\n",
-        "description": "Retrieves the `Shipping Instructions` with the `documentReference` (can be either a `shippingInstructionsReference` or `transportDocumentReference`) in the path. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions` it is neccessary to use the query parameter `updatedContent` and set it to `true`.\n\nThe `status` of both versions of the `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus` and `updatedShippingInstructionsStatus`.\n\nIf the provider is requesting some changes to the `Shipping Instructions` this will also be part of the \"original\" `Shipping Instructions` payload in the `requestedChanges` field. This field is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n\nIn case no subscription (`Notification`) has been set up - it is possbile to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n",
+        "description": "Retrieves the `Shipping Instructions` with the `documentReference` (can be either a `shippingInstructionsReference` or `transportDocumentReference`) in the path. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions` it is neccessary to use the query parameter `updatedContent` and set it to `true`.\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n\nThe `status` of the \"original\" `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus`. `updatedShippingInstructionsStatus` and related content is only available after a consumer has requested an update via **UseCase 3: Submit updated Shipping Instructions** and until:\n- the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessable\n- the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\"\n\nIf `updatedContent=true` is requested but no update has yet been provided by the consumer **or** the state of the \"original\" `Shipping Instructions` is `PENDING UPDATE` - then a `404` (Not Found) is returned.\n\nIf the provider is requesting some changes to the `Shipping Instructions` this will also be part of the \"original\" `Shipping Instructions` payload in the `requestedChanges` field. This field is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n\nIn case no subscription (`Notification`) has been set up - it is possbile to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n",
         "operationId": "get-shipping-instructions",
         "parameters": [
           {
@@ -228,7 +228,7 @@
           {
             "name": "updatedContent",
             "in": "query",
-            "description": "If set to `true` the payload returned is the content of the `Updated Shipping Instructions`.\n\nDefault value is `false` in which case the content of the \"original\" `Shipping Instructions` is returned\n\n**Condition:** Can only be used if an update has been made. If no updates have been made a `404` (Not Found) response will be returned\n",
+            "description": "If set to `true` the payload returned is the content of the `Updated Shipping Instructions`.\n\nDefault value is `false` in which case the content of the \"original\" `Shipping Instructions` is returned\n\n**Condition:** Can only be used if an update has been made by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) and **until** a new updated is requested by the provider. If no updates have been made a `404` (Not Found) response will be returned\n",
             "required": false,
             "style": "form",
             "explode": true,
@@ -316,7 +316,7 @@
                 },
                 "examples": {
                   "internalServerErrorExample": {
-                    "summary": "Internal Server Error while fetching the `Shipping Instructions`\n",
+                    "summary": "Internal Server Error while fetching the Shipping Instructions\n",
                     "description": "An Internal Server Error has occurred - the consumer should contact {provider-support} and provide the `providerCorrelationID` (in the example this is `4426d965-0dd8-4005-8c63-dc68b01c4962`)\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
@@ -383,7 +383,7 @@
           "Shipping Instructions"
         ],
         "summary": "Updates the Shipping Instructions\n",
-        "description": "Updates the `Shipping Instructions` with the `documentReference` (can be either a `shippingInstructionsReference` or `transportDocumentReference`) in the path. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\nThis endPoint is to be used in response to **UseCase 2 - Request to update Shipping Instructions** in which case `documentStatus='PENDING UPDATE'`. The endPoint can also be used in case `documentStatus='RECEIVED'` and the consumer has an update to the `Shipping Instructions`.\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**) - from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` co-exist until a new update is submitted. The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Process\nThe following occurs when a provider recieves an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n    - all required fields are provided\n    - all values provided have correct data type\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which useCase is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED` then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions` - this is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE` then this endPoint is being used as a reponse to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` stays as `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n      \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updateShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `PUT` `Shipping Instructions` the process ends here. The `Updated Shipping Instructions`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the useCase):\n    - `shippingInstructionsStatus='RECEIVED'` and `updateShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n  - '_relevant_' subscribers have been notified\n\nAsynchronious processing will now start by the provider. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint in order to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n",
+        "description": "Updates the `Shipping Instructions` with the `documentReference` (can be either a `shippingInstructionsReference` or `transportDocumentReference`) in the path. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\nThis endPoint is to be used in response to **UseCase 2 - Request to update Shipping Instructions** in which case `documentStatus='PENDING UPDATE'`. The endPoint can also be used in case `documentStatus='RECEIVED'` and the consumer has an update to the `Shipping Instructions`.\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**) - from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Process\nThe following occurs when a provider recieves an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n    - all required fields are provided\n    - all values provided have correct data type\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which useCase is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED` then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions` - this is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE` then this endPoint is being used as a reponse to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` stays as `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n      \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updateShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `PUT` `Shipping Instructions` the process ends here. The `Updated Shipping Instructions`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the useCase):\n    - `shippingInstructionsStatus='RECEIVED'` and `updateShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n  - '_relevant_' subscribers have been notified\n\nAsynchronious processing will now start by the provider. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint in order to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \n  It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessable\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\"\n",
         "operationId": "update-shipping-instructions",
         "parameters": [
           {
@@ -624,7 +624,7 @@
           "Shipping Instructions"
         ],
         "summary": "Cancels an update to a Shipping Instructions\n",
-        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Process\nThe following occurs when a provider recieves a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `updatedShippingInstructionsStatus` is set to `CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n",
+        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Process\nThe following occurs when a provider recieves a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n",
         "operationId": "patch-shipping-instructions",
         "parameters": [
           {
@@ -665,7 +665,7 @@
         },
         "responses": {
           "200": {
-            "description": "The `Updated Shipping Instructions` is now cancelled. The `updatedShippingInstructionsStatus` is now `CANCELLED`. The `shippingInstructionsStatus` is left unchanged.\n",
+            "description": "The `Updated Shipping Instructions` is now cancelled. The `updatedShippingInstructionsStatus` is now `UPDATE CANCELLED`. The `shippingInstructionsStatus` is left unchanged.\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -678,12 +678,12 @@
                 },
                 "examples": {
                   "getExample": {
-                    "summary": "Shipping Instructions cancelled\n",
+                    "summary": "Update to a Shipping Instructions cancelled\n",
                     "description": "The `Updated Shipping Instructions` is now cancelled by consumer. The `shippingInstructionsStatus` remains unchanged - in this example an update was requested to a `Shipping Instructions` just recieved by the provider (it was not an update requested by the provider)\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "shippingInstructionsStatus": "RECEIVED",
-                      "updatedShippingInstructionsStatus": "CANCELLED"
+                      "updatedShippingInstructionsStatus": "UPDATE CANCELLED"
                     }
                   }
                 }
@@ -719,7 +719,7 @@
                           "errorCode": 7003,
                           "field": "updatedShippingInstructionsStatus",
                           "reason": "incorrect value",
-                          "message": "Only CANCELLED is an allowed value: APPROVE was inserted"
+                          "message": "Only UPDATE CANCELLED is an allowed value: APPROVE was inserted"
                         }
                       ]
                     }
@@ -729,7 +729,7 @@
             }
           },
           "404": {
-            "description": "In case the consumer is trying to cancel `Shipping Instructions` that does not have an ongoing update request (an `Updated Shipping Instruction` that is in state `UPDATE RECEIVED`)\n",
+            "description": "In case the consumer is trying to cancel `Shipping Instructions` that does not have an ongoing update request (an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`)\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -766,7 +766,7 @@
             }
           },
           "409": {
-            "description": "In case the provider is already processing the `Updated Shipping Instructions` matching `shippingInstructionsReference='si-123'` or for any other reason cannot process the request, it is possible to reject the `PATCH` request with a `409` (Conflict) response\n",
+            "description": "In case the provider is already processing the `Updated Shipping Instructions` matching `shippingInstructionsReference='si-123'` it is possible to reject the `PATCH` request with a `409` (Conflict) response\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -940,7 +940,7 @@
                 },
                 "examples": {
                   "internalServerErrorExample": {
-                    "summary": "Internal Server Error while fetching the `Transport Document`\n",
+                    "summary": "Internal Server Error while fetching the Transport Document\n",
                     "description": "An Internal Server Error has occurred - the consumer should contact {provider-support} and provide the `providerCorrelationID` (in the example this is `4426d965-0dd8-4005-8c63-dc68b01c4962`)\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
@@ -2427,14 +2427,14 @@
       "shippingInstructionsStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instruction can no longer be modified - the related Transport Document has been surrendered for delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
         "example": "RECEIVED"
       },
       "updatedShippingInstructionsStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the updated `Shipping Instructions`. Possible values are:\n- `RECEIVED` (An update to a Shipping Instructions has been accepted and is now the current received Shipping Instructions)\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
-        "example": "RECEIVED"
+        "description": "The status of the updated `Shipping Instructions`. Possible values are:\n- `RECEIVED` (An update to a Shipping Instructions has been accepted and is now the current received Shipping Instructions)\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "example": "UPDATE RECEIVED"
       },
       "RequestedChange": {
         "required": [
@@ -2588,7 +2588,7 @@
           "isShippedOnBoardType",
           "isToOrder",
           "partyContactDetails",
-          "shippingInstructionStatus",
+          "shippingInstructionsStatus",
           "transportDocumentTypeCode",
           "utilizedTransportEquipments"
         ],
@@ -3019,11 +3019,11 @@
         "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
         "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
       },
-      "cancelUpdatedShippingInstructionStatus": {
+      "shippingInstructionsUpdateCancelledStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the `Updated Shipping Instructions`. It can only be `CANCELLED`\n",
-        "example": "CANCELLED"
+        "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE CANCELLED`\n",
+        "example": "UPDATE CANCELLED"
       },
       "transportDocumentReference": {
         "maxLength": 20,
@@ -3300,7 +3300,7 @@
         "maxLength": 50,
         "type": "string",
         "description": "The status of the Transport Document. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
-        "example": "RECEIVED"
+        "example": "DRAFT"
       },
       "shippedOnBoardDate": {
         "type": "string",
@@ -4506,7 +4506,7 @@
         "description": "Indicator of whether cargo requires Controlled Atmosphere.\n",
         "example": true
       },
-      "approvedTransportDocumentStatus": {
+      "transportDocumentApprovedStatus": {
         "maxLength": 50,
         "type": "string",
         "description": "The status of the `Transport Document`. It can only be `APPROVED`\n",
@@ -4547,7 +4547,7 @@
         "type": "object",
         "properties": {
           "updatedShippingInstructionsStatus": {
-            "$ref": "#/components/schemas/cancelUpdatedShippingInstructionStatus"
+            "$ref": "#/components/schemas/shippingInstructionsUpdateCancelledStatus"
           }
         }
       },
@@ -4558,7 +4558,7 @@
         "type": "object",
         "properties": {
           "transportDocumentStatus": {
-            "$ref": "#/components/schemas/approvedTransportDocumentStatus"
+            "$ref": "#/components/schemas/transportDocumentApprovedStatus"
           }
         }
       },
@@ -4652,7 +4652,7 @@
       "updatedContent": {
         "name": "updatedContent",
         "in": "query",
-        "description": "If set to `true` the payload returned is the content of the `Updated Shipping Instructions`.\n\nDefault value is `false` in which case the content of the \"original\" `Shipping Instructions` is returned\n\n**Condition:** Can only be used if an update has been made. If no updates have been made a `404` (Not Found) response will be returned\n",
+        "description": "If set to `true` the payload returned is the content of the `Updated Shipping Instructions`.\n\nDefault value is `false` in which case the content of the \"original\" `Shipping Instructions` is returned\n\n**Condition:** Can only be used if an update has been made by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) and **until** a new updated is requested by the provider. If no updates have been made a `404` (Not Found) response will be returned\n",
         "required": false,
         "style": "form",
         "explode": true,

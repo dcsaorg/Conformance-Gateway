@@ -23,10 +23,7 @@ import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.ebl.action.UC2_Carrier_RequestUpdateToShippingInstructionsAction;
-import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
-import org.dcsa.conformance.standards.ebl.action.UC8_Carrier_IssueTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -74,6 +71,7 @@ public class EblCarrier extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
       Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
+      Map.entry(UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class, this::processUpdatedShippingInstructions),
       Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
       Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument)
     );
@@ -93,7 +91,7 @@ public class EblCarrier extends ConformanceParty {
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()
-        .put("actionId", actionPrompt.get("actionId").asText())
+        .put("actionId", actionPrompt.required("actionId").asText())
         .set("input", carrierScenarioParameters.toJson()));
     addOperatorLogEntry(
       "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
@@ -102,7 +100,7 @@ public class EblCarrier extends ConformanceParty {
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var documentReference = actionPrompt.get("documentReference").asText();
+    var documentReference = actionPrompt.required("documentReference").asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
@@ -115,6 +113,25 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry("Requested update to the shipping instructions with document reference '%s'".formatted(documentReference));
   }
 
+
+  private void processUpdatedShippingInstructions(JsonNode actionPrompt) {
+    log.info("Carrier.processUpdatedShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var accept = actionPrompt.required("acceptChanges").asBoolean(true);
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    if (accept) {
+      si.acceptUpdatedShippingInstructions(documentReference);
+    } else {
+      si.declineUpdatedShippingInstructions(documentReference, "Declined as requested by the Conformance orchestrator");
+    }
+    si.save(persistentMap);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+
+    addOperatorLogEntry("Processed update to the shipping instructions with document reference '%s'".formatted(documentReference));
+  }
 
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));

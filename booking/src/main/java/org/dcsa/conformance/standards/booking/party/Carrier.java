@@ -122,8 +122,8 @@ public class Carrier extends ConformanceParty {
           "service name",
             "%07d".formatted(RANDOM.nextInt(999999)),
             "Commodity Type",
-            generateRandomString(5),
-            generateRandomString(5));
+          generateValidUnLocationCode(),
+          generateValidUnLocationCode());
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -134,15 +134,9 @@ public class Carrier extends ConformanceParty {
   }
 
 
-  private String generateRandomString(int stringLength)  {
-    int leftLimit = 97; // letter 'a'
-    int rightLimit = 122; // letter 'z'
-    Random random = new Random();
-
-     return random.ints(leftLimit, rightLimit + 1)
-      .limit(stringLength)
-      .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-      .toString();
+  private String generateValidUnLocationCode()  {
+    List<String> validUnLocationCode = Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
+    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {

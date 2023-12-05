@@ -85,15 +85,8 @@ public class Shipper extends ConformanceParty {
     CarrierScenarioParameters carrierScenarioParameters =
         CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
 
-    JsonNode jsonRequestBody =
-        JsonToolkit.templateFileToJsonNode(
-          "/standards/booking/messages/booking-api-v20-request.json",
-            Map.ofEntries(
-                Map.entry(
-                    "CARRIER_SERVICE_NAME_PLACEHOLDER",
-                    carrierScenarioParameters.carrierServiceName()),
-                Map.entry(
-                    "VESSEL_IMO_NUMBER_PLACEHOLDER", carrierScenarioParameters.vesselIMONumber())));
+
+    JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
 
     asyncCounterpartPost(
         "/v2/bookings",
@@ -112,6 +105,34 @@ public class Shipper extends ConformanceParty {
     addOperatorLogEntry(
         "Sent a booking request with the parameters: %s"
             .formatted(carrierScenarioParameters.toJson()));
+  }
+
+  private JsonNode replaceBookingPlaceHolders(JsonNode actionPrompt) {
+
+    CarrierScenarioParameters carrierScenarioParameters =
+      CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+
+    JsonNode jsonRequestBody =
+      JsonToolkit.templateFileToJsonNode(
+        "/standards/booking/messages/booking-api-v20-request.json",
+        Map.ofEntries(
+          Map.entry(
+            "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+            carrierScenarioParameters.contractQuotationReference()),
+          Map.entry(
+            "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER", carrierScenarioParameters.carrierExportVoyageNumber()),
+          Map.entry(
+            "CARRIER_SERVICE_NAME_PLACEHOLDER", carrierScenarioParameters.carrierServiceName()),
+          Map.entry(
+            "COMMODITY_HS_CODE", carrierScenarioParameters.hsCodes()),
+          Map.entry(
+            "COMMODITY_TYPE_PLACEHOLDER", carrierScenarioParameters.commodityType() ),
+          Map.entry(
+            "POL_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.polUNLocationCode()),
+          Map.entry(
+            "POD_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.podUNLocationCode()) ));
+
+    return jsonRequestBody;
   }
 
   private void sendCancelEntireBooking(JsonNode actionPrompt) {

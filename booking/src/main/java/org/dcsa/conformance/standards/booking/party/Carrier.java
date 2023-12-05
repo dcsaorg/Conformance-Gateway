@@ -118,7 +118,8 @@ public class Carrier extends ConformanceParty {
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-            generateSchemaValidVesselIMONumber());
+            generateSchemaValidVesselIMONumber(),
+          "service name",null,null,null,null);
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()

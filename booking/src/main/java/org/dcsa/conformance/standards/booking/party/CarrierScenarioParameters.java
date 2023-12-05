@@ -28,12 +28,12 @@ public record CarrierScenarioParameters(String contractQuotationReference,
     ObjectNode cspNode = (ObjectNode) jsonNode;
 
     return new CarrierScenarioParameters(
-        cspNode.get("contractQuotationReference").asText(),
-        cspNode.get("carrierExportVoyageNumber").asText(),
-        cspNode.get("carrierServiceName").asText(),
-        cspNode.get("hsCodes").asText(),
-        cspNode.get("commodityType").asText(),
-        cspNode.get("polUNLocationCode").asText(),
-        cspNode.get("podUNLocationCode").asText());
+        cspNode.required("contractQuotationReference").asText(),
+        cspNode.required("carrierExportVoyageNumber").asText(),
+        cspNode.required("carrierServiceName").asText(),
+        cspNode.required("hsCodes").asText(),
+        cspNode.required("commodityType").asText(),
+        cspNode.required("polUNLocationCode").asText(),
+        cspNode.required("podUNLocationCode").asText());
   }
 }

@@ -64,23 +64,23 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                                                                         .then (uc9_shipper_cancelBookingAmendment()
                                                                           .then(shipper_GetBooking(
                                                                             PENDING_AMENDMENT,
-                                                                            CANCELLED)))))),
+                                                                            AMENDMENT_CANCELLED)))))),
                                               uc7_shipper_submitBookingAmendment()
                                                   .then(
                                                       shipper_GetBooking(CONFIRMED, AMENDMENT_RECEIVED)
                                                         .thenEither(
                                                             uc8a_carrier_approveBookingAmendment()
                                                               .then(shipper_GetBooking(
-                                                                CONFIRMED, CONFIRMED)),
+                                                                CONFIRMED, AMENDMENT_CONFIRMED)),
                                                             uc8b_carrier_declineBookingAmendment()
                                                               .then(shipper_GetBooking(
-                                                                CONFIRMED, DECLINED)),
+                                                                CONFIRMED, AMENDMENT_DECLINED)),
                                                             uc9_shipper_cancelBookingAmendment()
                                                               .then(shipper_GetBooking(
-                                                                CONFIRMED, CANCELLED)),
+                                                                CONFIRMED, AMENDMENT_CANCELLED)),
                                                             uc10_carrier_declineBooking()
                                                               .then(shipper_GetBooking(
-                                                                DECLINED, DECLINED))
+                                                                DECLINED, AMENDMENT_DECLINED))
                                                         )),
                                               uc10_carrier_declineBooking()
                                                   .then(shipper_GetBooking(DECLINED)),
@@ -112,8 +112,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private BookingScenarioListBuilder thenAllPathsFrom(
       BookingState bookingState, BookingState originalBookingState) {
     return switch (bookingState) {
-      case CANCELLED, COMPLETED, DECLINED, REJECTED -> then(shipper_GetBooking(bookingState));
-      case CONFIRMED -> then(
+      case CANCELLED, COMPLETED, DECLINED, REJECTED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED  -> then(shipper_GetBooking(bookingState));
+      case CONFIRMED,AMENDMENT_CONFIRMED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                   uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
@@ -172,8 +172,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private BookingScenarioListBuilder thenHappyPathFrom(BookingState bookingState) {
     return switch (bookingState) {
-      case CANCELLED, COMPLETED, DECLINED, REJECTED -> then(noAction());
-      case CONFIRMED -> then(uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED));
+      case CANCELLED, COMPLETED, DECLINED, AMENDMENT_DECLINED,AMENDMENT_CANCELLED,  REJECTED -> then(noAction());
+      case CONFIRMED, AMENDMENT_CONFIRMED -> then(uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED));
       case PENDING_AMENDMENT -> then(
           uc7_shipper_submitBookingAmendment().thenHappyPathFrom(AMENDMENT_RECEIVED));
       case AMENDMENT_RECEIVED -> then(

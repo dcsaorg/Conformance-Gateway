@@ -60,7 +60,7 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
               getMatchedExchangeUuid(),
               acceptAmendment ? BookingState.CONFIRMED : bookingStatus,
-              acceptAmendment ? BookingState.CONFIRMED : BookingState.DECLINED
+              acceptAmendment ? BookingState.AMENDMENT_CONFIRMED : BookingState.AMENDMENT_DECLINED
             ),
             new ApiHeaderCheck(
                 BookingRole::isCarrier,

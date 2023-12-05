@@ -105,7 +105,7 @@ public class PersistableCarrierBooking {
   public void confirmBookingAmendment(String reference, String reason) {
     checkState(reference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
     changeState(BOOKING_STATUS, CONFIRMED);
-    changeState(AMENDED_BOOKING_STATUS, CONFIRMED);
+    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     setReason(reason);
   }
@@ -142,14 +142,14 @@ public class PersistableCarrierBooking {
     checkState(reference, getBookingState(), prerequisites);
     changeState(BOOKING_STATUS, DECLINED);
     if (getAmendedBooking().isPresent()) {
-      changeState(AMENDED_BOOKING_STATUS, DECLINED);
+      changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
     }
     setReason(reason);
   }
 
   public void declineBookingAmendment(String reference, String reason) {
     checkState(reference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
-    changeState(AMENDED_BOOKING_STATUS, DECLINED);
+    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
     setReason(reason);
   }
 
@@ -189,14 +189,14 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment((bookingContent, isAmendedContent) -> {
       bookingContent.put("reason", cancelReason);
       if (isAmendedContent) {
-        bookingContent.put(AMENDED_BOOKING_STATUS, CANCELLED.wireName());
+        bookingContent.put(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED.wireName());
       }
     });
   }
 
   public void cancelBookingAmendment(String bookingReference, String reason) {
     checkState(bookingReference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
-    changeState(AMENDED_BOOKING_STATUS, CANCELLED);
+    changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Amendment cancelled by shipper (no reason given)";
     }

@@ -19,12 +19,8 @@ public class CarrierShippingInstructions {
 
   private static final Set<ShippingInstructionsStatus> PENDING_UPDATE_PREREQUISITE_STATES = Set.of(
     SI_RECEIVED,
-    SI_UPDATE_RECEIVED
-  );
-
-  private static final Set<ShippingInstructionsStatus> DRAFT_TRANSPORT_DOCUMENT_PREREQUISITE_STATES = Set.of(
-    SI_RECEIVED,
-    SI_UPDATE_RECEIVED
+    SI_UPDATE_RECEIVED,
+    SI_DECLINED
   );
 
   private static final String SI_STATUS = "shippingInstructionsStatus";
@@ -174,9 +170,20 @@ public class CarrierShippingInstructions {
     changeSIState(SI_STATUS, SI_RECEIVED);
   }
 
+  public void declineUpdatedShippingInstructions(String documentReference, String reason) {
+    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
+    var updated = getUpdatedShippingInstructions().orElseThrow();
+    setShippingInstructions(updated);
+    clearUpdatedShippingInstructions();
+    setReason(reason);
+    mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
+    changeSIState(UPDATED_SI_STATUS, SI_DECLINED);
+  }
+
   public void publishDraftTransportDocument(String documentReference) {
-    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_RECEIVED);
-    assert getUpdatedShippingInstructions().isEmpty();
+    // SI_DECLINED only applies to the updated SI. UC1 -> UC3 -> UC4 (decline) -> UC6 is applicable and
+    // in this case, the SI would be in RECEIVED with updated state SI_DECLINED.
+    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_RECEIVED || s == SI_DECLINED);
     this.generateTDFromSI();
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
@@ -272,7 +279,7 @@ public class CarrierShippingInstructions {
     checkState(
       documentReference,
       currentState,
-      s -> s != SI_DECLINED && s != SI_COMPLETED
+      s -> s != SI_COMPLETED
     );
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
     copyMetadataFields(getShippingInstructions(), newShippingInstructionData);

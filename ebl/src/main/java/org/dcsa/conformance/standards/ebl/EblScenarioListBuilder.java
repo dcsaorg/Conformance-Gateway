@@ -49,26 +49,59 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       case SI_RECEIVED -> thenEither(
           uc2_carrier_requestUpdateToShippingInstruction()
             .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-              .thenHappyPathFrom(SI_PENDING_UPDATE)),
+              .thenAllPathsFrom(SI_PENDING_UPDATE)),
           uc3_shipper_submitUpdatedShippingInstructions()
             .then(
               shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-                .then(
-                  uc2_carrier_requestUpdateToShippingInstruction()
-                    .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-                      .thenHappyPathFrom(SI_PENDING_UPDATE)))),
+                .thenAllPathsFrom(SI_UPDATE_RECEIVED)),
           uc6_carrier_publishDraftTransportDocument()
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
                     .then(shipper_GetTransportDocument(TD_DRAFT)
                       .thenAllPathsFrom(TD_DRAFT))));
+      case SI_UPDATE_RECEIVED -> thenEither(
+        uc2_carrier_requestUpdateToShippingInstruction()
+          .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+            .thenHappyPathFrom(SI_PENDING_UPDATE)),
+        uc4a_carrier_acceptUpdatedShippingInstructions()
+          .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+            .thenHappyPathFrom(SI_RECEIVED)),
+        uc4d_carrier_declineUpdatedShippingInstructions()
+          .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_DECLINED, TD_START)
+            .thenAllPathsFrom(SI_DECLINED)));
+      case SI_DECLINED -> thenEither(
+        uc6_carrier_publishDraftTransportDocument()
+          .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
+            .then(shipper_GetTransportDocument(TD_DRAFT)
+              .thenHappyPathFrom(TD_DRAFT))),
+        uc2_carrier_requestUpdateToShippingInstruction()
+          .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+            .thenHappyPathFrom(SI_PENDING_UPDATE)),
+        uc3_shipper_submitUpdatedShippingInstructions()
+          .then(shipper_GetShippingInstructions(SI_UPDATE_RECEIVED, TD_START)
+            .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
       default -> then(noAction()); // TODO
     };
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(
       ShippingInstructionsStatus shippingInstructionsStatus) {
-    return then(noAction()); // TODO
+    return switch (shippingInstructionsStatus) {
+      case SI_RECEIVED, SI_DECLINED -> then(uc6_carrier_publishDraftTransportDocument()
+        .then(
+          shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
+            .then(shipper_GetTransportDocument(TD_DRAFT)
+              .thenHappyPathFrom(TD_DRAFT))));
+      case SI_PENDING_UPDATE -> then(uc3_shipper_submitUpdatedShippingInstructions()
+        .then(
+          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
+            .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
+      case SI_UPDATE_RECEIVED -> then(uc4a_carrier_acceptUpdatedShippingInstructions()
+        .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+          .thenHappyPathFrom(SI_RECEIVED))
+      );
+      default -> then(noAction()); // TODO
+    };
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(TransportDocumentStatus transportDocumentStatus) {
@@ -199,6 +232,36 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 (EblAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc4a_carrier_acceptUpdatedShippingInstructions() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+              true));
+  }
+
+  private static EblScenarioListBuilder uc4d_carrier_declineUpdatedShippingInstructions() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+              false));
   }
 
   private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument() {

@@ -119,7 +119,11 @@ public class Carrier extends ConformanceParty {
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
             generateSchemaValidVesselIMONumber(),
-          "service name",null,null,null,null);
+          "service name",
+            "%07d".formatted(RANDOM.nextInt(999999)),
+            "Commodity Type",
+            generateRandomString(5),
+            generateRandomString(5));
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -129,6 +133,17 @@ public class Carrier extends ConformanceParty {
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
+
+  private String generateRandomString(int stringLength)  {
+    int leftLimit = 97; // letter 'a'
+    int rightLimit = 122; // letter 'z'
+    Random random = new Random();
+
+     return random.ints(leftLimit, rightLimit + 1)
+      .limit(stringLength)
+      .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+      .toString();
+  }
 
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));

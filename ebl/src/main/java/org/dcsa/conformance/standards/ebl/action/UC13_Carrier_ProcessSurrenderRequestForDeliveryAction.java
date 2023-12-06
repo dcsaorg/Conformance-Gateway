@@ -34,7 +34,7 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
+      .put("documentReference", getDspSupplier().get().transportDocumentReference())
       .put("acceptDeliveryRequest", acceptDeliveryRequest);
   }
 

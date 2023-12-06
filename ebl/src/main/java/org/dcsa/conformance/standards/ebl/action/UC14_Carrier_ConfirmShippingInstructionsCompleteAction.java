@@ -6,28 +6,28 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 
 @Getter
-public class UC12_Carrier_AwaitSurrenderRequestForDeliveryAction extends StateChangingSIAction {
+public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC12_Carrier_AwaitSurrenderRequestForDeliveryAction(
+  public UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC12", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204);
     this.requestSchemaValidator = requestSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC12: Shipper requests surrender for delivery (via the surrender API if applicable) for transport document with reference %s and carrier sends notification that surrender has been requested. Note when the conformance toolkit is acting as carrier, no action is required from the shipper (the action will auto-resolve). When the conformance toolkit is acting like the Shipper, you will have to ensure that the carrier system sees a surrender request (the surrender uses a different API not in scope for this test)."
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return ("UC14: Confirm shipping instructions with reference %s is complete."
+        .formatted(getDspSupplier().get().shippingInstructionsReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().transportDocumentReference());
+      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
   }
 
   @Override

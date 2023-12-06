@@ -126,12 +126,18 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             .thenHappyPathFrom(TD_ISSUED)
         )
       );
+      case TD_SURRENDERED_FOR_DELIVERY -> thenHappyPathFrom(transportDocumentStatus);
       default -> then(noAction()); // TODO
     };
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(TransportDocumentStatus transportDocumentStatus) {
     return switch (transportDocumentStatus) {
+      case TD_DRAFT -> then(
+        uc8_carrier_issueTransportDocument()
+          .then(
+            shipper_GetTransportDocument(TD_ISSUED)
+              .thenAllPathsFrom(TD_ISSUED)));
       case TD_ISSUED -> then(
         uc12_carrier_awaitSurrenderRequestForDelivery()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY)
@@ -141,6 +147,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         uc13a_carrier_acceptSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_SURRENDERED_FOR_DELIVERY)
             .thenHappyPathFrom(TD_SURRENDERED_FOR_DELIVERY)
+        )
+      );
+      case TD_SURRENDERED_FOR_DELIVERY -> then(
+        uc14_carrier_confirmShippingInstructionsComplete().then(
+          shipper_GetShippingInstructions(SI_COMPLETED, TD_SURRENDERED_FOR_DELIVERY)
         )
       );
       default -> then(noAction()); // TODO
@@ -361,5 +372,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 componentFactory.getMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
                 false));
+  }
+
+
+  private static EblScenarioListBuilder uc14_carrier_confirmShippingInstructionsComplete() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 }

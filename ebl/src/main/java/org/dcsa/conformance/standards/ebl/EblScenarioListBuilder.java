@@ -111,13 +111,22 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .then(
                   shipper_GetTransportDocument(TD_ISSUED)
                     .thenAllPathsFrom(TD_ISSUED)));
-      case TD_ISSUED -> then(noAction()); // TODO
+      case TD_ISSUED -> then(
+        uc12_carrier_awaitSurrenderRequestForDelivery()
+          .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY))
+      );
       default -> then(noAction()); // TODO
     };
   }
 
-  private EblScenarioListBuilder thenHappyPathFrom(TransportDocumentStatus tdStatus) {
-    return then(noAction()); // TODO
+  private EblScenarioListBuilder thenHappyPathFrom(TransportDocumentStatus transportDocumentStatus) {
+    return switch (transportDocumentStatus) {
+      case TD_ISSUED -> then(
+        uc12_carrier_awaitSurrenderRequestForDelivery()
+          .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY))
+      );
+      default -> then(noAction()); // TODO
+    };
   }
 
   private EblScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
@@ -290,5 +299,19 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           (EblAction) previousAction,
           componentFactory.getMessageSchemaValidator(
             EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc12_carrier_awaitSurrenderRequestForDelivery() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC12_Carrier_AwaitSurrenderRequestForDeliveryAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }
 }

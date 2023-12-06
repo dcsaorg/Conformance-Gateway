@@ -112,12 +112,12 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private BookingScenarioListBuilder thenAllPathsFrom(
       BookingState bookingState, BookingState originalBookingState) {
     return switch (bookingState) {
-      case CANCELLED, COMPLETED, DECLINED, REJECTED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED  -> then(shipper_GetBooking(bookingState));
-      case CONFIRMED,AMENDMENT_CONFIRMED -> then(
+      case CANCELLED, COMPLETED, DECLINED, REJECTED  -> then(shipper_GetBooking(bookingState));
+      case CONFIRMED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                   uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
-                  uc6_carrier_requestBookingAmendment().thenAllPathsFrom(PENDING_AMENDMENT),
+                  uc6_carrier_requestUpdateToConfirmedBooking().thenAllPathsFrom(PENDING_AMENDMENT),
                   uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, CONFIRMED),
                   uc10_carrier_declineBooking().thenAllPathsFrom(DECLINED),
@@ -153,7 +153,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
-                  uc6_carrier_requestBookingAmendment().thenHappyPathFrom(PENDING_AMENDMENT),
+                  uc6_carrier_requestUpdateToConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
                   uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, PENDING_AMENDMENT),
                   uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
@@ -161,18 +161,28 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case AMENDMENT_RECEIVED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
-                  uc6_carrier_requestBookingAmendment().thenHappyPathFrom(PENDING_AMENDMENT),
-                  uc8a_carrier_approveBookingAmendment().thenHappyPathFrom(CONFIRMED),
-                  uc8b_carrier_declineBookingAmendment().thenHappyPathFrom(CONFIRMED),
-                  uc9_shipper_cancelBookingAmendment().thenHappyPathFrom(originalBookingState),
+                  uc6_carrier_requestUpdateToConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
+                  uc8a_carrier_approveBookingAmendment().thenAllPathsFrom(AMENDMENT_CONFIRMED,CONFIRMED),
+                  uc8b_carrier_declineBookingAmendment().thenAllPathsFrom(AMENDMENT_DECLINED,CONFIRMED),
+                  uc9_shipper_cancelBookingAmendment().thenAllPathsFrom(AMENDMENT_CANCELLED,CONFIRMED),
                   uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
                   uc12_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
+      case AMENDMENT_CANCELLED -> then(
+        shipper_GetBooking(originalBookingState)
+          .thenEither(
+            uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED),
+            uc6_carrier_requestUpdateToConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT)));
+      case AMENDMENT_DECLINED, AMENDMENT_CONFIRMED -> then(
+        shipper_GetBooking(originalBookingState)
+          .then(
+            uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED)
+            ));
     };
   }
 
   private BookingScenarioListBuilder thenHappyPathFrom(BookingState bookingState) {
     return switch (bookingState) {
-      case CANCELLED, COMPLETED, DECLINED, AMENDMENT_DECLINED,AMENDMENT_CANCELLED,  REJECTED -> then(noAction());
+      case CANCELLED, COMPLETED, DECLINED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED,  REJECTED -> then(noAction());
       case CONFIRMED, AMENDMENT_CONFIRMED -> then(uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED));
       case PENDING_AMENDMENT -> then(
           uc7_shipper_submitBookingAmendment().thenHappyPathFrom(AMENDMENT_RECEIVED));
@@ -298,10 +308,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private static BookingScenarioListBuilder uc6_carrier_requestUpdateToConfirmedBooking() {
     return carrierStateChange(UC6_Carrier_RequestUpdateToConfirmedBookingAction::new);
-  }
-
-  private static BookingScenarioListBuilder uc6_carrier_requestBookingAmendment() {
-    return tbdCarrierAction();
   }
 
   private static BookingScenarioListBuilder uc7_shipper_submitBookingAmendment() {

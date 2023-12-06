@@ -31,8 +31,8 @@
       "party": {
         "partyName": "DCSA Conformance Toolkit",
         "address": {
-          "name": "TODO",
-          "street": "TODO",
+          "name": "Mustermann",
+          "street": "Beispielstreet",
           "streetNumber": "54",
           "floor": "5. sal",
           "postCode": "1306",

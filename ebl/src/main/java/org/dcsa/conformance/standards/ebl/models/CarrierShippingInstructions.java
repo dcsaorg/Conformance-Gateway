@@ -180,6 +180,18 @@ public class CarrierShippingInstructions {
     changeSIState(UPDATED_SI_STATUS, SI_DECLINED);
   }
 
+  public void acceptSurrenderForDelivery(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_AMENDMENT.wireName());
+  }
+
+  public void rejectSurrenderForDelivery(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName());
+  }
+
   public void publishDraftTransportDocument(String documentReference) {
     // SI_DECLINED only applies to the updated SI. UC1 -> UC3 -> UC4 (decline) -> UC6 is applicable and
     // in this case, the SI would be in RECEIVED with updated state SI_DECLINED.

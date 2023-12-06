@@ -6,36 +6,36 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 
 @Getter
-public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends StateChangingSIAction {
+public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
-  private final boolean acceptChanges;
+  private final boolean acceptDeliveryRequest;
 
-  public UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
+  public UC13_Carrier_ProcessSurrenderRequestForDeliveryAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      boolean acceptChanges) {
-    super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204);
+      boolean acceptDeliveryRequest) {
+    super(carrierPartyName, shipperPartyName, previousAction, acceptDeliveryRequest ? "UC13a" : "UC13r", 204);
     this.requestSchemaValidator = requestSchemaValidator;
-    this.acceptChanges = acceptChanges;
+    this.acceptDeliveryRequest = acceptDeliveryRequest;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    if (acceptChanges) {
-      return ("UC4a: Accept updated shipping instructions with document reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    if (acceptDeliveryRequest) {
+      return ("UC13a: Accept surrender request for delivery for transport document with reference %s"
+        .formatted(getDspSupplier().get().transportDocumentReference()));
     }
-    return ("UC4d: Decline updated shipping instructions with document reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return ("UC13r: Reject surrender request for delivery for transport document with reference %s"
+        .formatted(getDspSupplier().get().transportDocumentReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
       .put("documentReference", getDspSupplier().get().shippingInstructionsReference())
-      .put("acceptChanges",  acceptChanges);
+      .put("acceptDeliveryRequest", acceptDeliveryRequest);
   }
 
   @Override
@@ -43,7 +43,7 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getSINotificationChecks(
+        return getTDNotificationChecks(
           getMatchedExchangeUuid(),
           expectedApiVersion,
           requestSchemaValidator

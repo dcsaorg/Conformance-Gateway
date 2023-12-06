@@ -180,6 +180,11 @@ public class CarrierShippingInstructions {
     changeSIState(UPDATED_SI_STATUS, SI_DECLINED);
   }
 
+  public void confirmShippingInstructionsComplete(String documentReference) {
+    checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
+    changeSIState(SI_STATUS, SI_COMPLETED);
+  }
+
   public void acceptSurrenderForDelivery(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
     var td = getTransportDocument().orElseThrow();
@@ -303,6 +308,12 @@ public class CarrierShippingInstructions {
     copyMetadataFields(getShippingInstructions(), newShippingInstructionData);
     setUpdatedShippingInstructions(newShippingInstructionData);
     removeRequestedChanges();
+  }
+
+  public ShippingInstructionsStatus getOriginalShippingInstructionState() {
+    var siData = getShippingInstructions();
+    var s = siData.required(SI_STATUS);
+    return ShippingInstructionsStatus.fromWireName(s.asText());
   }
 
   public ShippingInstructionsStatus getShippingInstructionsState() {

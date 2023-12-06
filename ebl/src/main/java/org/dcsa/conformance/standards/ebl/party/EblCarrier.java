@@ -73,7 +73,8 @@ public class EblCarrier extends ConformanceParty {
       Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
       Map.entry(UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class, this::processUpdatedShippingInstructions),
       Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
-      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument)
+      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
+      Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery)
     );
   }
 
@@ -161,6 +162,21 @@ public class EblCarrier extends ConformanceParty {
 
     addOperatorLogEntry("Issued transport document '%s'".formatted(documentReference));
   }
+
+  private void notifyOfSurrenderForDelivery(JsonNode actionPrompt) {
+    log.info("Carrier.notifyOfSurrenderForDelivery(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.get("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.surrenderForDeliveryRequest(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Sent notification for surrender for delivery of transport document '%s'".formatted(documentReference));
+  }
+
 
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
     var notification =

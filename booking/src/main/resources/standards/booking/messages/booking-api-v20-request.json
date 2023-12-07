@@ -32,12 +32,12 @@
         "partyName": "DCSA Conformance Toolkit",
         "address": {
           "name": "Mustermann",
-          "street": "Beispielstreet",
-          "streetNumber": "54",
-          "floor": "5. sal",
-          "postCode": "1306",
-          "city": "København",
-          "country": "Denmark"
+          "street": "Strawinskylaan",
+          "streetNumber": "4117",
+          "floor": "6",
+          "postCode": "1077 ZX",
+          "city": "Amsterdam",
+          "country": "Netherlands"
         },
         "partyContactDetails": [
           {

@@ -375,11 +375,11 @@ public class EblCarrier extends ConformanceParty {
     if (sir == null) {
       return return404(request);
     }
-    var persistedBookingData = persistentMap.load(sir);
-    if (persistedBookingData == null) {
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
       throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
     }
-    var si = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
     // If the TDR is resolvable, then the document must have a TD.
     var body = si.getTransportDocument().orElseThrow();
     ConformanceResponse response =
@@ -391,6 +391,41 @@ public class EblCarrier extends ConformanceParty {
       "Responded to GET transport document request '%s' (in state '%s')"
         .formatted(documentReference, si.getShippingInstructionsState().wireName()));
     return response;
+  }
+
+  private ConformanceResponse _handlePatchTransportDocument(ConformanceRequest request, String documentReference) {
+    // bookingReference can either be a CBR or CBRR.
+    var sir = tdrToSir.get(documentReference);
+    if (sir == null) {
+      return return404(request);
+    }
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
+      throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
+    }
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
+    si.approveDraftTransportDocument(documentReference);
+    si.save(persistentMap);
+    var td = si.getTransportDocument().orElseThrow();
+    if (isShipperNotificationEnabled) {
+      executor.schedule(
+        () ->
+          asyncCounterpartPost(
+            "/v3/transport-document-notifications",
+            TransportDocumentNotification.builder()
+              .apiVersion(apiVersion)
+              .transportDocument(td)
+              .build()
+              .asJsonNode()),
+        1,
+        TimeUnit.SECONDS);
+    }
+    return returnTransportDocumentRefStatusResponse(
+      200,
+      request,
+      td,
+      documentReference
+    );
   }
 
   private ConformanceResponse returnShippingInstructionsRefStatusResponse(
@@ -422,6 +457,27 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry(
       "Responded %d to %s SI '%s' (resulting state '%s')"
         .formatted(responseCode, request.method(), documentReference, siStatus));
+    return response;
+  }
+
+
+  private ConformanceResponse returnTransportDocumentRefStatusResponse(
+    int responseCode, ConformanceRequest request, ObjectNode transportDocument, String documentReference) {
+    var tdr = transportDocument.required("transportDocumentReference").asText();
+    var tdStatus = transportDocument.required("transportDocumentStatus").asText();
+    var statusObject =
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("transportDocumentStatus", tdStatus)
+        .put("transportDocumentReference", tdr);
+    ConformanceResponse response =
+      request.createResponse(
+        responseCode,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(statusObject));
+    addOperatorLogEntry(
+      "Responded %d to %s TD '%s' (resulting state '%s')"
+        .formatted(responseCode, request.method(), documentReference, tdStatus));
     return response;
   }
 
@@ -506,7 +562,15 @@ public class EblCarrier extends ConformanceParty {
           }
           yield return404(request);
         }
-        // case "PATCH" -> _handlePatchRequest(request);
+        case "PATCH" -> {
+          var url = request.url().replaceAll("/++$", "");
+          var lastSegment = lastUrlSegment(url);
+          var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+          if (urlStem.endsWith("/v3/transport-documents")) {
+            yield _handlePatchTransportDocument(request, lastSegment);
+          }
+          yield return404(request);
+        }
         case "PUT" -> _handlePutShippingInstructions(request);
         default -> return405(request, "GET", "POST", "PUT", "PATCH");
       };

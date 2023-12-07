@@ -185,6 +185,11 @@ public class CarrierShippingInstructions {
     changeSIState(SI_STATUS, SI_COMPLETED);
   }
 
+  public void approveDraftTransportDocument(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_APPROVED.wireName());
+  }
 
   public void acceptSurrenderForAmendment(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);

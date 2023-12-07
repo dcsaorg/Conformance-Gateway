@@ -115,15 +115,16 @@ public class Carrier extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes();
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
             generateSchemaValidVesselIMONumber(),
           "service name",
-          generateValidCommodityTypeAndHSCodes().get(0),
-          generateValidCommodityTypeAndHSCodes().get(1),
-          generateValidUnLocationCode(),
-          generateValidUnLocationCode());
+          validHsCodeAndCommodityType.get(0),
+          validHsCodeAndCommodityType.get(1),
+          generateValidPolUNLocationCode(),
+          generateValidPodUNLocationCode());
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -134,15 +135,22 @@ public class Carrier extends ConformanceParty {
   }
 
 
-  private String generateValidUnLocationCode()  {
+  private String generateValidPolUNLocationCode()  {
     List<String> validUnLocationCode = Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
+    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
+  }
+
+  private String generateValidPodUNLocationCode()  {
+    List<String> validUnLocationCode = Arrays.asList("DEBRV", "CNSGH", "JPTYO", "AEAUH", "AEJEA", "AEKHL", "AEKLF");
     return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
   }
 
   private List<String> generateValidCommodityTypeAndHSCodes()  {
     Map<Integer, List<String>>  mapHSCodesAndCommodityType = Map.of(
       0,Arrays.asList("411510", "Leather"),
-      1,Arrays.asList("843420", "Dairy machinery")
+      1,Arrays.asList("843420", "Dairy machinery"),
+      2,Arrays.asList("721911", "Stainless steel"),
+      3,Arrays.asList("730110", "Iron or steel")
     );
     return mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
   }

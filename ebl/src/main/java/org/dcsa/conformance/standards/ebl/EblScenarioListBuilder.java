@@ -68,7 +68,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             .thenHappyPathFrom(SI_RECEIVED)),
         uc4d_carrier_declineUpdatedShippingInstructions()
           .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_DECLINED, TD_START)
-            .thenAllPathsFrom(SI_DECLINED)));
+            .thenHappyPathFrom(SI_DECLINED)));
       case SI_DECLINED -> thenEither(
         uc6_carrier_publishDraftTransportDocument()
           .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
@@ -79,7 +79,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             .thenHappyPathFrom(SI_PENDING_UPDATE)),
         uc3_shipper_submitUpdatedShippingInstructions()
           .then(shipper_GetShippingInstructions(SI_UPDATE_RECEIVED, TD_START)
+            .thenAllPathsFrom(SI_UPDATE_RECEIVED)));
+      case SI_PENDING_UPDATE -> then(uc3_shipper_submitUpdatedShippingInstructions()
+        .then(
+          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
             .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
+      case SI_ANY -> throw new AssertionError("Not a real/reachable state");
+      case SI_COMPLETED -> then(noAction());
       default -> then(noAction()); // TODO
     };
   }
@@ -100,6 +106,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
           .thenHappyPathFrom(SI_RECEIVED))
       );
+      case SI_COMPLETED -> then(noAction());
+      case SI_START, SI_ANY -> throw new AssertionError("Not a real/reachable state");
       default -> then(noAction()); // TODO
     };
   }
@@ -111,11 +119,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .then(
                   shipper_GetTransportDocument(TD_ISSUED)
                     .thenAllPathsFrom(TD_ISSUED)));
-      case TD_ISSUED -> then(
+      case TD_ISSUED -> thenEither(
+        uc9_carrier_awaitSurrenderRequestForAmendment()
+          .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
+            .thenAllPathsFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT)),
         uc12_carrier_awaitSurrenderRequestForDelivery()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY)
             .thenAllPathsFrom(TD_PENDING_SURRENDER_FOR_DELIVERY))
       );
+      case TD_PENDING_SURRENDER_FOR_AMENDMENT -> then(noAction()); // TODO: Implement
       case TD_PENDING_SURRENDER_FOR_DELIVERY -> thenEither(
         uc13a_carrier_acceptSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_SURRENDERED_FOR_DELIVERY)
@@ -127,7 +139,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         )
       );
       case TD_SURRENDERED_FOR_DELIVERY -> thenHappyPathFrom(transportDocumentStatus);
-      default -> then(noAction()); // TODO
+      case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
+      case TD_VOIDED -> then(noAction());
+      default -> throw new AssertionError("Not implemented: " + transportDocumentStatus.name());
     };
   }
 
@@ -143,6 +157,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY)
             .thenHappyPathFrom(TD_PENDING_SURRENDER_FOR_DELIVERY))
       );
+      case TD_PENDING_SURRENDER_FOR_AMENDMENT -> then(noAction());  // TODO: Implement
       case TD_PENDING_SURRENDER_FOR_DELIVERY -> then(
         uc13a_carrier_acceptSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_SURRENDERED_FOR_DELIVERY)
@@ -154,7 +169,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           shipper_GetShippingInstructions(SI_COMPLETED, TD_SURRENDERED_FOR_DELIVERY)
         )
       );
-      default -> then(noAction()); // TODO
+      case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
+      case TD_VOIDED -> then(noAction());
+      default -> throw new AssertionError("Not implemented: " + transportDocumentStatus.name());
     };
   }
 
@@ -323,6 +340,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return new EblScenarioListBuilder(
       previousAction ->
         new UC8_Carrier_IssueTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc9_carrier_awaitSurrenderRequestForAmendment() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
           carrierPartyName,
           shipperPartyName,
           (EblAction) previousAction,

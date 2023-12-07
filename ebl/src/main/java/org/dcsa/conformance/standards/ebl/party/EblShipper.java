@@ -16,10 +16,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ebl.action.Shipper_GetShippingInstructionsAction;
-import org.dcsa.conformance.standards.ebl.action.Shipper_GetTransportDocumentAction;
-import org.dcsa.conformance.standards.ebl.action.UC1_Shipper_SubmitShippingInstructionsAction;
-import org.dcsa.conformance.standards.ebl.action.UC3_Shipper_SubmitUpdatedShippingInstructionsAction;
+import org.dcsa.conformance.standards.ebl.action.*;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
@@ -61,7 +58,8 @@ public class EblShipper extends ConformanceParty {
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
       Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
-      Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest)
+      Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
+      Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
     );
   }
 
@@ -130,6 +128,23 @@ public class EblShipper extends ConformanceParty {
       "Sent a shipping instructions update with the parameters: %s"
         .formatted(actionPrompt.toPrettyString()));
   }
+
+  private void approveDraftTransportDocument(JsonNode actionPrompt) {
+    log.info("Shipper.approveDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var sir = actionPrompt.required("documentReference").asText();
+    var approvePayload = new ObjectMapper().createObjectNode()
+      .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
+
+    asyncCounterpartPatch(
+      "/v3/transport-documents/%s".formatted(sir),
+      approvePayload);
+
+    addOperatorLogEntry(
+      "Approved transport document the parameters: %s"
+        .formatted(actionPrompt.toPrettyString()));
+  }
+
 
   private void getShippingInstructionsRequest(JsonNode actionPrompt) {
     log.info("Shipper.getShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));

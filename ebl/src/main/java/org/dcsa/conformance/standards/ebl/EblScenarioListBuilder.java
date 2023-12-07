@@ -26,7 +26,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String GET_TD_SCHEMA_NAME = "getTransportDocument";
   private static final String POST_EBL_SCHEMA_NAME = "ShippingInstructionsRequest";
   private static final String PUT_EBL_SCHEMA_NAME = "ShippingInstructionsUpdate";
+  private static final String PATCH_TD_SCHEMA_NAME = "transportdocuments_transportDocumentReference_body";
   private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
+  private static final String TD_REF_STATUS_SCHEMA_NAME = "TransportDocumentRefStatus";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
 
@@ -114,11 +116,23 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private EblScenarioListBuilder thenAllPathsFrom(TransportDocumentStatus transportDocumentStatus) {
     return switch (transportDocumentStatus) {
-      case TD_DRAFT -> then(
+      case TD_DRAFT -> thenEither(
           uc8_carrier_issueTransportDocument()
               .then(
                   shipper_GetTransportDocument(TD_ISSUED)
-                    .thenAllPathsFrom(TD_ISSUED)));
+                    // Using happy path here as requested in
+                    // https://github.com/dcsaorg/Conformance-Gateway/pull/29#discussion_r1421732797
+                    .thenHappyPathFrom(TD_ISSUED)),
+          uc7_shipper_approveDraftTransportDocument()
+            .then(shipper_GetTransportDocument(TD_APPROVED)
+              .thenAllPathsFrom(TD_APPROVED))
+        );
+      case TD_APPROVED -> then(
+        uc8_carrier_issueTransportDocument()
+          .then(
+            shipper_GetTransportDocument(TD_ISSUED)
+              .thenAllPathsFrom(TD_ISSUED))
+      );
       case TD_ISSUED -> thenEither(
         uc9_carrier_awaitSurrenderRequestForAmendment()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
@@ -157,11 +171,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
 
   private EblScenarioListBuilder thenHappyPathFrom(TransportDocumentStatus transportDocumentStatus) {
     return switch (transportDocumentStatus) {
-      case TD_DRAFT -> then(
+      case TD_DRAFT -> thenEither(
         uc8_carrier_issueTransportDocument()
           .then(
             shipper_GetTransportDocument(TD_ISSUED)
-              .thenHappyPathFrom(TD_ISSUED)));
+              .thenHappyPathFrom(TD_ISSUED)),
+        uc7_shipper_approveDraftTransportDocument()
+          .then(shipper_GetTransportDocument(TD_APPROVED)
+            .thenHappyPathFrom(TD_APPROVED)));
+      case TD_APPROVED -> then(
+        uc8_carrier_issueTransportDocument()
+          .then(
+            shipper_GetTransportDocument(TD_ISSUED)
+              .thenHappyPathFrom(TD_ISSUED))
+      );
       case TD_ISSUED -> then(
         uc12_carrier_awaitSurrenderRequestForDelivery()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY)
@@ -345,6 +368,24 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           carrierPartyName,
           shipperPartyName,
           (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc7_shipper_approveDraftTransportDocument() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC7_Shipper_ApproveDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_API, PATCH_TD_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(
+            EBL_API, TD_REF_STATUS_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(
             EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
   }

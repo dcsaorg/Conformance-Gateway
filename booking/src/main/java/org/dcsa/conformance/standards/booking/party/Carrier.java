@@ -120,8 +120,8 @@ public class Carrier extends ConformanceParty {
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
             generateSchemaValidVesselIMONumber(),
           "service name",
-            "%07d".formatted(RANDOM.nextInt(999999)),
-            "Commodity Type",
+          generateValidCommodityTypeAndHSCodes().get(0),
+          generateValidCommodityTypeAndHSCodes().get(1),
           generateValidUnLocationCode(),
           generateValidUnLocationCode());
     asyncOrchestratorPostPartyInput(
@@ -137,6 +137,14 @@ public class Carrier extends ConformanceParty {
   private String generateValidUnLocationCode()  {
     List<String> validUnLocationCode = Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
     return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
+  }
+
+  private List<String> generateValidCommodityTypeAndHSCodes()  {
+    Map<Integer, List<String>>  mapHSCodesAndCommodityType = Map.of(
+      0,Arrays.asList("411510", "Leather"),
+      1,Arrays.asList("843420", "Dairy machinery")
+    );
+    return mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {

@@ -182,7 +182,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
 
   private BookingScenarioListBuilder thenHappyPathFrom(BookingState bookingState) {
     return switch (bookingState) {
-      case CANCELLED, COMPLETED, DECLINED, AMENDMENT_DECLINED, AMENDMENT_CANCELLED,  REJECTED -> then(noAction());
+      case CANCELLED, COMPLETED, DECLINED, REJECTED -> then(noAction());
       case CONFIRMED, AMENDMENT_CONFIRMED -> then(uc11_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED));
       case PENDING_AMENDMENT -> then(
           uc7_shipper_submitBookingAmendment().thenHappyPathFrom(AMENDMENT_RECEIVED));
@@ -193,6 +193,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case PENDING_UPDATE_CONFIRMATION, RECEIVED -> then(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED));
       case START -> then(uc1_shipper_SubmitBookingRequest().thenHappyPathFrom(RECEIVED));
+      case AMENDMENT_DECLINED, AMENDMENT_CANCELLED -> throw new AssertionError(
+        "This happyPath from this state requires a context state");
     };
   }
 

@@ -75,6 +75,7 @@ public class EblCarrier extends ConformanceParty {
       Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
       Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
       Map.entry(UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class, this::notifyOfSurrenderForAmendment),
+      Map.entry(UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class, this::processSurrenderRequestForAmendment),
       Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery),
       Map.entry(UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class, this::processSurrenderRequestForDelivery),
       Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete)
@@ -194,6 +195,24 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry("Sent notification for surrender for delivery of transport document with reference '%s'".formatted(documentReference));
   }
 
+  private void processSurrenderRequestForAmendment(JsonNode actionPrompt) {
+    log.info("Carrier.processSurrenderRequestForAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var accept = actionPrompt.required("acceptAmendmentRequest").asBoolean(true);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    if (accept) {
+      si.acceptSurrenderForAmendment(documentReference);
+    } else {
+      si.rejectSurrenderForAmendment(documentReference);
+    }
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+  }
 
   private void processSurrenderRequestForDelivery(JsonNode actionPrompt) {
     log.info("Carrier.processSurrenderRequestForDelivery(%s)".formatted(actionPrompt.toPrettyString()));

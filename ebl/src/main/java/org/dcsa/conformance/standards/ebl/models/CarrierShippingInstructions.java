@@ -185,10 +185,23 @@ public class CarrierShippingInstructions {
     changeSIState(SI_STATUS, SI_COMPLETED);
   }
 
+
+  public void acceptSurrenderForAmendment(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_AMENDMENT.wireName());
+  }
+
+  public void rejectSurrenderForAmendment(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName());
+  }
+
   public void acceptSurrenderForDelivery(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_DELIVERY);
     var td = getTransportDocument().orElseThrow();
-    td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_AMENDMENT.wireName());
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_DELIVERY.wireName());
   }
 
   public void rejectSurrenderForDelivery(String documentReference) {

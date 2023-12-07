@@ -221,11 +221,18 @@ public class CarrierShippingInstructions {
       .put(shippedDateField, date);
   }
 
+  public void surrenderForAmendmentRequest(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_ISSUED);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_PENDING_SURRENDER_FOR_AMENDMENT.wireName());
+  }
+
   public void surrenderForDeliveryRequest(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_ISSUED);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_PENDING_SURRENDER_FOR_DELIVERY.wireName());
   }
+
 
   private void copyFieldIfPresent(JsonNode source, ObjectNode dest, String field) {
     var data = source.get(field);

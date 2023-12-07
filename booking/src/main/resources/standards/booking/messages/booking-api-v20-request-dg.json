@@ -21,7 +21,17 @@
           "HSCodes": ["COMMODITY_HS_CODE"],
           "commodityType": "COMMODITY_TYPE_PLACEHOLDER",
           "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeightUnit": "KGM",
+          "outerPackaging": {
+            "packageCode": "1A",
+            "numberOfPackages": 5,
+            "description": "Drum, Steel",
+            "dangerousGoods": [
+              {
+                // Provide DG-PLACEHOLDER for all attributes
+              }
+            ]
+          }
         }
       ]
     }

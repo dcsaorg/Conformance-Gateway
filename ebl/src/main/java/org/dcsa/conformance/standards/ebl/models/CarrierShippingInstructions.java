@@ -17,12 +17,6 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 public class CarrierShippingInstructions {
 
-  private static final Set<ShippingInstructionsStatus> PENDING_UPDATE_PREREQUISITE_STATES = Set.of(
-    SI_RECEIVED,
-    SI_UPDATE_RECEIVED,
-    SI_DECLINED
-  );
-
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
 
@@ -143,17 +137,14 @@ public class CarrierShippingInstructions {
     }
   }
 
-  public void cancelShippingInstructionsUpdate(String shippingInstructionsReference, String reason) {
+  public void cancelShippingInstructionsUpdate(String shippingInstructionsReference) {
     checkState(shippingInstructionsReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     changeSIState(UPDATED_SI_STATUS, SI_CANCELLED);
-    if (reason == null || reason.isBlank()) {
-      reason = "Update cancelled by shipper (no reason given)";
-    }
-    setReason(reason);
+    setReason(null);
   }
 
   public void requestChangesToShippingInstructions(String documentReference, Consumer<ArrayNode> requestedChangesGenerator) {
-    checkState(documentReference, getShippingInstructionsState(), PENDING_UPDATE_PREREQUISITE_STATES::contains);
+    checkState(documentReference, getShippingInstructionsState(), s -> s != SI_PENDING_UPDATE && s != SI_COMPLETED );
     clearUpdatedShippingInstructions();
     changeSIState(SI_STATUS, SI_PENDING_UPDATE);
     setReason(null);
@@ -216,9 +207,11 @@ public class CarrierShippingInstructions {
   }
 
   public void publishDraftTransportDocument(String documentReference) {
-    // SI_DECLINED only applies to the updated SI. UC1 -> UC3 -> UC4 (decline) -> UC6 is applicable and
-    // in this case, the SI would be in RECEIVED with updated state SI_DECLINED.
-    checkState(documentReference, getShippingInstructionsState(), s -> s == SI_RECEIVED || s == SI_DECLINED);
+    // We allow draft when:
+    //  1) The original ("black") state is RECEIVED, *and*
+    //  2) There is no update received (that is "grey" is not UPDATE_RECEIVED)
+    checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
+    checkState(documentReference, getOriginalShippingInstructionState(), s -> s != SI_UPDATE_RECEIVED);
     this.generateTDFromSI();
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
@@ -383,7 +376,7 @@ public class CarrierShippingInstructions {
   public static CarrierShippingInstructions fromPersistentStore(JsonNodeMap jsonNodeMap, String shippingInstructionsReference) {
     var data = jsonNodeMap.load(shippingInstructionsReference);
     if (data == null) {
-      throw new IllegalArgumentException("Unknown CBRR: " + shippingInstructionsReference);
+      throw new IllegalArgumentException("Unknown SI Reference: " + shippingInstructionsReference);
     }
     return fromPersistentStore(data);
   }

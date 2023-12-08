@@ -26,6 +26,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String GET_TD_SCHEMA_NAME = "getTransportDocument";
   private static final String POST_EBL_SCHEMA_NAME = "ShippingInstructionsRequest";
   private static final String PUT_EBL_SCHEMA_NAME = "ShippingInstructionsUpdate";
+  private static final String PATCH_SI_SCHEMA_NAME = "shippinginstructions_documentReference_body";
   private static final String PATCH_TD_SCHEMA_NAME = "transportdocuments_transportDocumentReference_body";
   private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
   private static final String TD_REF_STATUS_SCHEMA_NAME = "TransportDocumentRefStatus";
@@ -41,7 +42,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
-      ShippingInstructionsStatus shippingInstructionsStatus) {
+    ShippingInstructionsStatus shippingInstructionsStatus) {
+    return thenAllPathsFrom(shippingInstructionsStatus, null);
+  }
+
+  private EblScenarioListBuilder thenAllPathsFrom(
+      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState) {
     return switch (shippingInstructionsStatus) {
       case SI_START -> then(
           uc1_shipper_submitShippingInstructions()
@@ -50,52 +56,70 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                       .thenAllPathsFrom(SI_RECEIVED)));
       case SI_RECEIVED -> thenEither(
           uc2_carrier_requestUpdateToShippingInstruction()
-            .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-              .thenAllPathsFrom(SI_PENDING_UPDATE)),
+              .then(
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+                      .thenAllPathsFrom(SI_PENDING_UPDATE)),
           uc3_shipper_submitUpdatedShippingInstructions()
-            .then(
-              shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-                .thenAllPathsFrom(SI_UPDATE_RECEIVED)),
+              .then(
+                  shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
+                      .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED)),
           uc6_carrier_publishDraftTransportDocument()
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
-                    .then(shipper_GetTransportDocument(TD_DRAFT)
-                      .thenAllPathsFrom(TD_DRAFT))));
-      case SI_UPDATE_RECEIVED -> thenEither(
-        uc2_carrier_requestUpdateToShippingInstruction()
-          .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-            .thenHappyPathFrom(SI_PENDING_UPDATE)),
-        uc4a_carrier_acceptUpdatedShippingInstructions()
-          .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
-            .thenHappyPathFrom(SI_RECEIVED)),
-        uc4d_carrier_declineUpdatedShippingInstructions()
-          .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_DECLINED, TD_START)
-            .thenHappyPathFrom(SI_DECLINED)));
-      case SI_DECLINED -> thenEither(
-        uc6_carrier_publishDraftTransportDocument()
-          .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
-            .then(shipper_GetTransportDocument(TD_DRAFT)
-              .thenHappyPathFrom(TD_DRAFT))),
-        uc2_carrier_requestUpdateToShippingInstruction()
-          .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-            .thenHappyPathFrom(SI_PENDING_UPDATE)),
-        uc3_shipper_submitUpdatedShippingInstructions()
-          .then(shipper_GetShippingInstructions(SI_UPDATE_RECEIVED, TD_START)
-            .thenAllPathsFrom(SI_UPDATE_RECEIVED)));
-      case SI_PENDING_UPDATE -> then(uc3_shipper_submitUpdatedShippingInstructions()
-        .then(
-          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-            .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
+                      .then(shipper_GetTransportDocument(TD_DRAFT).thenAllPathsFrom(TD_DRAFT))));
+      case SI_UPDATE_RECEIVED -> {
+        if (memoryState == null) {
+          throw new IllegalArgumentException(
+              shippingInstructionsStatus.name() + " requires a memory state");
+        }
+        yield thenEither(
+            uc2_carrier_requestUpdateToShippingInstruction()
+                .then(
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+                        .thenHappyPathFrom(SI_PENDING_UPDATE)),
+            uc4a_carrier_acceptUpdatedShippingInstructions()
+                .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+                        .thenHappyPathFrom(SI_RECEIVED)),
+            uc4d_carrier_declineUpdatedShippingInstructions()
+                .then(
+                    shipper_GetShippingInstructions(memoryState, SI_DECLINED, TD_START)
+                        .thenHappyPathFrom(memoryState)),
+            uc5_shipper_cancelUpdateToShippingInstructions()
+              .then(
+                shipper_GetShippingInstructions(memoryState, SI_CANCELLED, TD_START)
+                  .thenHappyPathFrom(memoryState)));
+      }
+      case SI_PENDING_UPDATE -> then(
+          uc3_shipper_submitUpdatedShippingInstructions()
+              .then(
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
+                    .thenEither(
+                      noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
+                      // Special-case: UC2 -> UC3 -> UC5 -> ...
+                      // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 -> UC2 -> UC3 -> ...
+                      //   patterns (it eventually resolves, but it is unhelpful many cases)
+                      // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually the subtree here.
+                      // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow because neither UC2 and UC5
+                      // are considered happy paths.
+                      uc5_shipper_cancelUpdateToShippingInstructions()
+                        .then(
+                          shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_CANCELLED, TD_START)
+                            .thenEither(
+                              noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
+                              uc3_shipper_submitUpdatedShippingInstructions().then(
+                                shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
+                                  .thenHappyPathFrom(SI_UPDATE_RECEIVED)))))));
+      case SI_CANCELLED, SI_DECLINED -> throw new AssertionError("Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
       case SI_COMPLETED -> then(noAction());
-      default -> then(noAction()); // TODO
     };
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(
       ShippingInstructionsStatus shippingInstructionsStatus) {
     return switch (shippingInstructionsStatus) {
-      case SI_RECEIVED, SI_DECLINED -> then(uc6_carrier_publishDraftTransportDocument()
+      case SI_RECEIVED -> then(uc6_carrier_publishDraftTransportDocument()
         .then(
           shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
             .then(shipper_GetTransportDocument(TD_DRAFT)
@@ -109,8 +133,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           .thenHappyPathFrom(SI_RECEIVED))
       );
       case SI_COMPLETED -> then(noAction());
+      case SI_CANCELLED, SI_DECLINED -> throw new AssertionError("Please use the black state rather than DECLINED");
       case SI_START, SI_ANY -> throw new AssertionError("Not a real/reachable state");
-      default -> then(noAction()); // TODO
     };
   }
 
@@ -165,7 +189,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       case TD_SURRENDERED_FOR_DELIVERY -> thenHappyPathFrom(transportDocumentStatus);
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
       case TD_VOIDED -> then(noAction());
-      default -> throw new AssertionError("Not implemented: " + transportDocumentStatus.name());
     };
   }
 
@@ -356,6 +379,24 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 componentFactory.getMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
               false));
+  }
+
+  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC5_Shipper_CancelUpdateToShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          componentFactory.getMessageSchemaValidator(
+            EBL_API, PATCH_SI_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(
+            EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument() {

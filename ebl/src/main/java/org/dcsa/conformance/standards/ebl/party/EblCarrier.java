@@ -393,8 +393,39 @@ public class EblCarrier extends ConformanceParty {
     return response;
   }
 
+
+  private ConformanceResponse _handlePatchShippingInstructions(ConformanceRequest request, String documentReference) {
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
+      return return404(request);
+    }
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
+    si.cancelShippingInstructionsUpdate(documentReference);
+    si.save(persistentMap);
+    var siData = si.getShippingInstructions();
+    if (isShipperNotificationEnabled) {
+      executor.schedule(
+        () ->
+          asyncCounterpartPost(
+            "/v3/shipping-instructions-notifications",
+            ShippingInstructionsNotification.builder()
+              .apiVersion(apiVersion)
+              .shippingInstructions(siData)
+              .build()
+              .asJsonNode()),
+        1,
+        TimeUnit.SECONDS);
+    }
+    return returnShippingInstructionsRefStatusResponse(
+      200,
+      request,
+      siData,
+      documentReference
+    );
+  }
+
   private ConformanceResponse _handlePatchTransportDocument(ConformanceRequest request, String documentReference) {
-    // bookingReference can either be a CBR or CBRR.
     var sir = tdrToSir.get(documentReference);
     if (sir == null) {
       return return404(request);
@@ -566,6 +597,9 @@ public class EblCarrier extends ConformanceParty {
           var url = request.url().replaceAll("/++$", "");
           var lastSegment = lastUrlSegment(url);
           var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+          if (urlStem.endsWith("/v3/shipping-instructions")) {
+            yield _handlePatchShippingInstructions(request, lastSegment);
+          }
           if (urlStem.endsWith("/v3/transport-documents")) {
             yield _handlePatchTransportDocument(request, lastSegment);
           }

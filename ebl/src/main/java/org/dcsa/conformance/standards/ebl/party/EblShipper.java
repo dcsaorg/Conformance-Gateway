@@ -59,6 +59,7 @@ public class EblShipper extends ConformanceParty {
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
       Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
       Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
+      Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
       Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
     );
   }
@@ -129,15 +130,31 @@ public class EblShipper extends ConformanceParty {
         .formatted(actionPrompt.toPrettyString()));
   }
 
+  private void cancelUpdateToShippingInstructions(JsonNode actionPrompt) {
+    log.info("Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var approvePayload = new ObjectMapper().createObjectNode()
+      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_CANCELLED.wireName());
+
+    asyncCounterpartPatch(
+      "/v3/shipping-instructions/%s".formatted(documentReference),
+      approvePayload);
+
+    addOperatorLogEntry(
+      "Approved transport document the parameters: %s"
+        .formatted(actionPrompt.toPrettyString()));
+  }
+
   private void approveDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Shipper.approveDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var sir = actionPrompt.required("documentReference").asText();
+    var documentReference = actionPrompt.required("documentReference").asText();
     var approvePayload = new ObjectMapper().createObjectNode()
       .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
     asyncCounterpartPatch(
-      "/v3/transport-documents/%s".formatted(sir),
+      "/v3/transport-documents/%s".formatted(documentReference),
       approvePayload);
 
     addOperatorLogEntry(

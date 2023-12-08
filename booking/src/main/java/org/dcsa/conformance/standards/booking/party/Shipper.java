@@ -23,6 +23,7 @@ public class Shipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
+  private static final String FILE_SUFFIX_REEFER = "-reefer";
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -85,7 +86,6 @@ public class Shipper extends ConformanceParty {
     CarrierScenarioParameters carrierScenarioParameters =
         CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
 
-
     JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
 
     asyncCounterpartPost(
@@ -111,10 +111,11 @@ public class Shipper extends ConformanceParty {
 
     CarrierScenarioParameters carrierScenarioParameters =
       CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
+    String bookingVariant = actionPrompt.get("bookingVariant").asText();
 
-    JsonNode jsonRequestBody =
-      JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/booking-api-v20-request.json",
+    String fileSuffix = bookingVariant.equals("reefer") ? FILE_SUFFIX_REEFER: "";
+    return JsonToolkit.templateFileToJsonNode(
+        "/standards/booking/messages/booking-api-v20%s-request.json".formatted(fileSuffix),
         Map.ofEntries(
           Map.entry(
             "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
@@ -131,8 +132,6 @@ public class Shipper extends ConformanceParty {
             "POL_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.polUNLocationCode()),
           Map.entry(
             "POD_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.podUNLocationCode()) ));
-
-    return jsonRequestBody;
   }
 
   private void sendCancelEntireBooking(JsonNode actionPrompt) {

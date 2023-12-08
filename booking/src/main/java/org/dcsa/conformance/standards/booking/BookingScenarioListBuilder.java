@@ -17,7 +17,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
-
   private static final String BOOKING_API = "api";
   private static final String BOOKING_NOTIFICATIONS_API = "notification";
   private static final String POST_SCHEMA_NAME = "postBooking";
@@ -26,6 +25,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_REF_STATUS_SCHEMA = "bookingRefStatus";
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
+  private static final String BOOKING_WITH_REEFER = "reefer";
 
   public static BookingScenarioListBuilder buildTree(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
@@ -35,8 +35,17 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     if (System.currentTimeMillis() > 0) { // FIXME remove this
       // This is what's been implemented so far and should still work on PR.
       return carrier_SupplyScenarioParameters()
-          .then(
-              uc1_shipper_SubmitBookingRequest()
+          .thenEither(
+            uc1_shipper_SubmitBookingRequest(BOOKING_WITH_REEFER).then(
+              shipper_GetBooking(RECEIVED)
+                .then(
+                  uc5_carrier_confirmBookingRequest()
+                    .then(
+                      shipper_GetBooking(CONFIRMED)
+                        .then(
+                          uc11_carrier_confirmBookingCompleted()
+                            .then(shipper_GetBooking(COMPLETED)))))),
+              uc1_shipper_SubmitBookingRequest(null)
                   .then(
                       shipper_GetBooking(RECEIVED)
                           .thenEither(
@@ -149,7 +158,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                   uc4_carrier_rejectBookingRequest().thenAllPathsFrom(REJECTED),
                   uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
                   uc12_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
-      case START -> then(uc1_shipper_SubmitBookingRequest().thenAllPathsFrom(RECEIVED));
+      case START -> thenEither(
+        uc1_shipper_SubmitBookingRequest(null).thenAllPathsFrom(RECEIVED),
+        uc1_shipper_SubmitBookingRequest(BOOKING_WITH_REEFER).thenHappyPathFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
@@ -182,7 +193,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           uc3_shipper_submitUpdatedBookingRequest().thenHappyPathFrom(PENDING_UPDATE_CONFIRMATION));
       case PENDING_UPDATE_CONFIRMATION, RECEIVED -> then(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED));
-      case START -> then(uc1_shipper_SubmitBookingRequest().thenHappyPathFrom(RECEIVED));
+      case START -> then(uc1_shipper_SubmitBookingRequest(null).thenHappyPathFrom(RECEIVED));
     };
   }
 
@@ -237,21 +248,24 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction));
   }
 
-  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
+  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(String bookingVariant) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
-        previousAction ->
-            new UC1_Shipper_SubmitBookingRequestAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(BOOKING_API, POST_SCHEMA_NAME),
-                componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
-                componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+      previousAction ->
+        new UC1_Shipper_SubmitBookingRequestAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          componentFactory.getMessageSchemaValidator(BOOKING_API, POST_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
+          componentFactory.getMessageSchemaValidator(
+            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
+          bookingVariant));
   }
+
+
 
   private static BookingScenarioListBuilder carrierStateChange(
       CarrierNotificationUseCase constructor) {

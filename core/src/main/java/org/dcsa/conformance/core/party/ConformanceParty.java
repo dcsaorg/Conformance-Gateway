@@ -16,6 +16,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.StatefulEntity;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
@@ -143,12 +144,15 @@ public abstract class ConformanceParty implements StatefulEntity {
                 counterpartConfiguration.getName(),
                 counterpartConfiguration.getRole(),
                 counterpartConfiguration.getAuthHeaderName().isBlank()
-                    ? Map.of("Api-Version", List.of(apiVersion))
-                    : Map.of(
-                        "Api-Version",
-                        List.of(apiVersion),
-                        counterpartConfiguration.getAuthHeaderName(),
-                        List.of(counterpartConfiguration.getAuthHeaderValue())),
+                    ? Map.ofEntries(
+                        Map.entry("Api-Version", List.of(apiVersion)),
+                        Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
+                    : Map.ofEntries(
+                        Map.entry("Api-Version", List.of(apiVersion)),
+                        Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
+                        Map.entry(
+                            counterpartConfiguration.getAuthHeaderName(),
+                            List.of(counterpartConfiguration.getAuthHeaderValue()))),
                 new ConformanceMessageBody(jsonBody),
                 System.currentTimeMillis())));
   }
@@ -167,15 +171,13 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   public void reset() {
-    log.info(
-            "%s[%s].reset()"
-                    .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    log.info("%s[%s].reset()".formatted(getClass().getSimpleName(), partyConfiguration.getName()));
     this.actionPromptsQueue.clear();
     this.operatorLog.clear();
     doReset();
   }
 
-  abstract protected void doReset();
+  protected abstract void doReset();
 
   @SneakyThrows
   private JsonNode _syncGetPartyPrompt() {

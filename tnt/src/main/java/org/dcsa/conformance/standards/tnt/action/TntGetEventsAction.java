@@ -1,12 +1,8 @@
 package org.dcsa.conformance.standards.tnt.action;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import java.util.*;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
@@ -47,27 +43,38 @@ public class TntGetEventsAction extends TntAction {
                 TntRole::isPublisher,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE) {
+
+              private boolean isEventNode(JsonNode jsonNode) {
+                return jsonNode.isObject() && !jsonNode.path("eventType").isMissingNode();
+              }
+
+              private ArrayList<JsonNode> _findEventNodes(
+                  ArrayList<JsonNode> foundEventNodes, JsonNode searchInJsonNode) {
+                if (isEventNode(searchInJsonNode)) {
+                  foundEventNodes.add(searchInJsonNode);
+                } else {
+                  searchInJsonNode.forEach(
+                      elementNode -> _findEventNodes(foundEventNodes, elementNode));
+                }
+                return foundEventNodes;
+              }
+
               @Override
               protected Set<String> checkConformance(ConformanceExchange exchange) {
                 JsonNode jsonResponse = exchange.getMessage(httpMessageType).body().getJsonBody();
                 LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
                 if (!jsonResponse.isArray()) {
                   validationErrors.add("The root JSON response must be an array of events");
-                  return validationErrors;
                 }
-                ArrayNode arrayResponse = (ArrayNode) jsonResponse;
-                int eventCount = arrayResponse.size();
+                ArrayList<JsonNode> eventNodes = _findEventNodes(new ArrayList<>(), jsonResponse);
+                int eventCount = eventNodes.size();
                 for (int eventIndex = 0; eventIndex < eventCount; ++eventIndex) {
-                  JsonNode eventNode = arrayResponse.get(eventIndex);
+                  JsonNode eventNode = eventNodes.get(eventIndex);
                   JsonNode eventTypeNode = eventNode.path("eventType");
-                  if (eventTypeNode.isMissingNode()) {
-                    validationErrors.add(
-                        "Event #%d: missing eventType attribute".formatted(eventIndex));
-                    continue;
-                  }
                   TntEventType eventType;
+                  String eventTypeText = eventTypeNode.asText().toUpperCase();
                   try {
-                    eventType = TntEventType.valueOf(eventTypeNode.asText());
+                    eventType = TntEventType.valueOf(eventTypeText);
                   } catch (RuntimeException e) {
                     validationErrors.add(
                         "Event #%d: incorrect eventType attribute: %s"

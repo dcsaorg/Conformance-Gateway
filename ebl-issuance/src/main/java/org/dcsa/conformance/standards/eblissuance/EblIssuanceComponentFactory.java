@@ -124,8 +124,7 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
         EblIssuanceRole.isCarrier(apiProviderRole)
             ? (forRequest ? "issuanceRequest" : null)
             : (forRequest ? "issuanceResponse" : null);
-    return new JsonSchemaValidator(
-        EblIssuanceComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 
   @SneakyThrows

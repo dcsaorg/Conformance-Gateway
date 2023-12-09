@@ -124,8 +124,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
         EblSurrenderRole.isCarrier(apiProviderRole)
             ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")
             : (forRequest ? "surrenderRequestAnswer" : null);
-    return new JsonSchemaValidator(
-        EblSurrenderComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 
   @SneakyThrows

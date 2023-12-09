@@ -119,8 +119,7 @@ public class BookingComponentFactory extends AbstractComponentFactory {
     String schemaFilePath = "/standards/booking/schemas/booking-%s-v%s0.json"
       .formatted(apiName, standardVersion.charAt(0));
 
-    return new JsonSchemaValidator(
-      BookingComponentFactory.class.getResourceAsStream(schemaFilePath), jsonSchema);
+    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 
   @SneakyThrows

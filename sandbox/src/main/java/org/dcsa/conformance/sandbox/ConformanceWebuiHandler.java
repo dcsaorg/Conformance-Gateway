@@ -17,6 +17,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
 @Slf4j
@@ -51,6 +52,12 @@ public class ConformanceWebuiHandler {
                           .collect(
                               Collectors.toMap(
                                   Function.identity(), EblSurrenderComponentFactory::new)))),
+              Map.entry(
+                  OvsComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      OvsComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), OvsComponentFactory::new)))),
               Map.entry(
                   TntComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

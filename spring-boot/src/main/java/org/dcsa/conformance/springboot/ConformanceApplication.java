@@ -30,6 +30,7 @@ import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -161,6 +162,7 @@ public class ConformanceApplication {
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblSurrenderComponentFactory::new),
+                OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
                 TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());
     componentFactories.forEach(

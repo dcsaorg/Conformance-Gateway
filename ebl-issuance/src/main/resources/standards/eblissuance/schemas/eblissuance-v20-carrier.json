@@ -60,7 +60,7 @@
             }
           },
           "409": {
-            "description": "The carrier already finished an issuance transaction for this document. The document is either already issued or waiting for the platform to finish the issuance process.  Either way, the platform will inform the carrier when the carrier needs to act on this document again.\n\nIf the issuance is pending, then the carrier will be notified via the DCSA_ISS_RSP API once the issuance process completes.  If the issuance has already succeeded, the platform will notify the carrier when there is a surrender request via the DCSA_SUR API.\n",
+            "description": "An Issuance Request is made with a Transport Document Reference (TDR), that was used previously to request the issuance of a Transport Document (TD). The document is either already issued or an TD with the same TDR. \n\nThe eBL platform will inform the carrier when the carrier needs to act on this document again. If the issuance is pending, then the carrier will be notified via the DCSA_EBL_ISS_RSP API once the issuance process completes. If the issuance has already succeeded, the eBL platform will notify the carrier when there is a surrender request via the DCSA_EBL_SUR API.\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -114,7 +114,7 @@
         "minLength": 2,
         "pattern": "^[A-Z]+$",
         "type": "string",
-        "description": "country code of the location of registration according to ISO 3166-1 alpha-2",
+        "description": "Country code of the location of registration according to ISO 3166-1 alpha-2",
         "example": "NL"
       },
       "transactionReference": {
@@ -163,17 +163,17 @@
       },
       "party": {
         "required": [
-          "eblPlatformIdentifier",
-          "legalName"
+          "legalName",
+          "sendToPlatform"
         ],
         "type": "object",
         "properties": {
-          "eblPlatformIdentifier": {
-            "maxLength": 100,
-            "pattern": "\\S+@\\S+",
+          "sendToPlatform": {
+            "maxLength": 4,
+            "pattern": "\\S+",
             "type": "string",
-            "description": "The eBL Platform identifier to issue the document to. This defines the initial possesor of the EBL.\nThe titleholder of the document is listed inside the document itself as the consignee document party.",
-            "example": "43549850248@exampleplatform.com"
+            "description": "The sendToPlatform is the EBL platform the eBL is issued to/the eBL platform of the shipper. Should be a code from https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv.",
+            "example": "BOLE"
           },
           "legalName": {
             "$ref": "#/components/schemas/legalName"
@@ -187,18 +187,18 @@
           "taxReference": {
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "tax reference used in the location of registration",
+            "description": "Tax reference used in the location of registration",
             "example": "NL859951480B01"
           },
-          "supportingPartyCodes": {
-            "$ref": "#/components/schemas/supportingPartyCodes"
+          "partyCodes": {
+            "$ref": "#/components/schemas/partyCodes"
           }
         }
       },
-      "supportingPartyCodes": {
+      "partyCodes": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/supportingPartyCodes_inner"
+          "$ref": "#/components/schemas/partyCodes_inner"
         }
       },
       "error": {
@@ -2852,7 +2852,7 @@
         "type": "string",
         "description": "The content of the clause."
       },
-      "supportingPartyCodes_inner": {
+      "partyCodes_inner": {
         "required": [
           "partyCode",
           "partyCodeListProvider"
@@ -2867,18 +2867,25 @@
           },
           "partyCodeListProvider": {
             "type": "string",
-            "description": "Describes which party code list the party code is from. Options are:\n\n - `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by  Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n - `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n",
+            "description": "Describes the organisation that provides the party code.\n\n - `EPUI`:The party code is an EBL Platform User Identifier (that is, an identifier provided by a platform, used to transfer eBLs). EPIU should be combined with the `codeListName`, to identify the platform that issued the identifier.\n - `GLEIF`: The party code is issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en. The `codeNameList` (if omitted) defaults to `LEI`.\n - `W3C`: The party code is issued by a standard created by World Wide Web Consortium (W3C). See https://www.w3.org/. The `codeNameList` (if omitted) defaults to `DID`.\n",
             "enum": [
-              "LEI",
-              "DID"
+              "GLEIF",
+              "W3C",
+              "EPUI"
             ]
+          },
+          "codeListName": {
+            "maxLength": 100,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The name of the code list / code generation mechanism / code authority for the party code.\n\nFor `EPUI`:\n * `Wave`: An identifier provided by Wave BL.\n * `CargoX`: An identifier provided by CargoX\n * `EdoxOnline`: An identifier provided by EdoxOnline\n * `IQAX`: An identifier provided by IQAX\n * `EssDOCS`: An identifier provided by essDOCS\n * `Bolero`: An identifier provided by Bolero\n * `TradeGO`: An identifierprovided by TradeGo\n * `Secro`: An identifier provided by Secro\n * `GSBN`: An identifier provided by GSBN\n * `WiseTech`: An identifier provided by WiseTech\n\nFor `W3C`:\n * `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n\nFor `GLEIF`:\n * `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n"
           }
         }
       }
     },
     "responses": {
       "documentIssuancePendingOrComplete": {
-        "description": "The carrier already finished an issuance transaction for this document. The document is either already issued or waiting for the platform to finish the issuance process.  Either way, the platform will inform the carrier when the carrier needs to act on this document again.\n\nIf the issuance is pending, then the carrier will be notified via the DCSA_ISS_RSP API once the issuance process completes.  If the issuance has already succeeded, the platform will notify the carrier when there is a surrender request via the DCSA_SUR API.\n",
+        "description": "An Issuance Request is made with a Transport Document Reference (TDR), that was used previously to request the issuance of a Transport Document (TD). The document is either already issued or an TD with the same TDR. \n\nThe eBL platform will inform the carrier when the carrier needs to act on this document again. If the issuance is pending, then the carrier will be notified via the DCSA_EBL_ISS_RSP API once the issuance process completes. If the issuance has already succeeded, the eBL platform will notify the carrier when there is a surrender request via the DCSA_EBL_SUR API.\n",
         "headers": {
           "API-Version": {
             "$ref": "#/components/headers/API-Version"

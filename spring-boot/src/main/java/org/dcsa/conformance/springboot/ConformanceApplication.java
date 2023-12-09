@@ -28,9 +28,9 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
-import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -155,12 +155,13 @@ public class ConformanceApplication {
 
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
-//                BookingComponentFactory.STANDARD_VERSIONS.stream()
-//                    .map(BookingComponentFactory::new),
+                //                BookingComponentFactory.STANDARD_VERSIONS.stream()
+                //                    .map(BookingComponentFactory::new),
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                    .map(EblSurrenderComponentFactory::new))
+                    .map(EblSurrenderComponentFactory::new),
+                TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());
     componentFactories.forEach(
         componentFactory -> {
@@ -306,7 +307,7 @@ public class ConformanceApplication {
 
   @GetMapping(value = "/")
   public void handleGetRoot(
-      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+      HttpServletRequest ignoredServletRequest, HttpServletResponse servletResponse) {
     _writeResponse(
         servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
   }

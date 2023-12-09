@@ -15,9 +15,9 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
 @Slf4j
 public class ConformanceWebuiHandler {
@@ -29,13 +29,14 @@ public class ConformanceWebuiHandler {
   private final SortedMap<String, SortedMap<String, AbstractComponentFactory>> componentFactories =
       new TreeMap<>(
           Map.ofEntries(
-//              Map.entry(
-//                  BookingComponentFactory.STANDARD_NAME,
-//                  new TreeMap<>(
-//                      BookingComponentFactory.STANDARD_VERSIONS.stream()
-//                          .collect(
-//                              Collectors.toMap(
-//                                  Function.identity(), BookingComponentFactory::new)))),
+              //              Map.entry(
+              //                  BookingComponentFactory.STANDARD_NAME,
+              //                  new TreeMap<>(
+              //                      BookingComponentFactory.STANDARD_VERSIONS.stream()
+              //                          .collect(
+              //                              Collectors.toMap(
+              //                                  Function.identity(),
+              // BookingComponentFactory::new)))),
               Map.entry(
                   EblIssuanceComponentFactory.STANDARD_NAME,
                   new TreeMap<>(
@@ -49,7 +50,13 @@ public class ConformanceWebuiHandler {
                       EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                           .collect(
                               Collectors.toMap(
-                                  Function.identity(), EblSurrenderComponentFactory::new))))));
+                                  Function.identity(), EblSurrenderComponentFactory::new)))),
+              Map.entry(
+                  TntComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      TntComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), TntComponentFactory::new))))));
 
   public ConformanceWebuiHandler(
       ConformanceAccessChecker accessChecker,

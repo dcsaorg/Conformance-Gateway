@@ -1,0 +1,27 @@
+{
+  "id": "SANDBOX_ID_PREFIX-manual-publisher-tested-party",
+  "name": "Manual publisher tested party",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": false
+  },
+  "parties" : [ {
+    "inManualMode": true,
+    "name" : "Publisher1",
+    "role" : "Publisher",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-publisher-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "Publisher1",
+    "role" : "Publisher",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-publisher-tested-party/party/Publisher1/api"
+  }, {
+    "name" : "Subscriber1",
+    "role" : "Subscriber",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-publisher-testing-counterparts/party/Subscriber1/api"
+  } ]
+}

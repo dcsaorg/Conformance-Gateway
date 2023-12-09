@@ -132,6 +132,30 @@ public abstract class ConformanceParty implements StatefulEntity {
                 System.currentTimeMillis())));
   }
 
+  protected void asyncCounterpartGet(
+      String path,
+      Map<String, ? extends Collection<String>> queryParams) {
+    asyncWebClient.accept(
+        new ConformanceRequest(
+            "GET",
+            counterpartConfiguration.getUrl() + path,
+            queryParams,
+            new ConformanceMessage(
+                partyConfiguration.getName(),
+                partyConfiguration.getRole(),
+                counterpartConfiguration.getName(),
+                counterpartConfiguration.getRole(),
+                counterpartConfiguration.getAuthHeaderName().isBlank()
+                    ? Map.of("Api-Version", List.of(apiVersion))
+                    : Map.of(
+                        "Api-Version",
+                        List.of(apiVersion),
+                        counterpartConfiguration.getAuthHeaderName(),
+                        List.of(counterpartConfiguration.getAuthHeaderValue())),
+                new ConformanceMessageBody(""),
+                System.currentTimeMillis())));
+  }
+
   protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
     asyncWebClient.accept(
         new ConformanceRequest(

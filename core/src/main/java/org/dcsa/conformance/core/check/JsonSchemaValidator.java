@@ -1,6 +1,7 @@
 package org.dcsa.conformance.core.check;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.*;
 import java.io.InputStream;
@@ -20,7 +21,8 @@ public class JsonSchemaValidator {
             .build();
     SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
     schemaValidatorsConfig.setTypeLoose(true);
-    JsonSchema rootJsonSchema = jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
+    JsonSchema rootJsonSchema =
+        jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
     ValidationContext validationContext =
         new ValidationContext(
             jsonSchemaFactory.getUriFactory(),
@@ -28,7 +30,8 @@ public class JsonSchemaValidator {
             JsonMetaSchema.getV4(),
             jsonSchemaFactory,
             schemaValidatorsConfig);
-    jsonSchema = jsonSchemaFactory.create(
+    jsonSchema =
+        jsonSchemaFactory.create(
             validationContext,
             "#/components/schemas/" + schemaName,
             rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
@@ -38,8 +41,11 @@ public class JsonSchemaValidator {
 
   @SneakyThrows
   public Set<String> validate(String jsonString) {
-    Set<ValidationMessage> validationMessageSet =
-        jsonSchema.validate(new ObjectMapper().readTree(jsonString));
+    return validate(new ObjectMapper().readTree(jsonString));
+  }
+
+  public Set<String> validate(JsonNode jsonNode) {
+    Set<ValidationMessage> validationMessageSet = jsonSchema.validate(jsonNode);
     return validationMessageSet.stream()
         .map(ValidationMessage::toString)
         .collect(Collectors.toSet());

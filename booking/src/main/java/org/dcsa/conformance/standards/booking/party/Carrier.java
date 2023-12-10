@@ -2,22 +2,14 @@ package org.dcsa.conformance.standards.booking.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -450,8 +442,8 @@ public class Carrier extends ConformanceParty {
                       .booking(booking)
                       .build()
                       .asJsonNode()),
-          1,
-          TimeUnit.SECONDS);
+          100,
+          TimeUnit.MILLISECONDS);
     }
     return returnBookingStatusResponse(200, request, booking, cbrr);
   }
@@ -581,8 +573,8 @@ public class Carrier extends ConformanceParty {
                       .booking(persistableCarrierBooking.getBooking())
                       .build()
                       .asJsonNode()),
-          1,
-          TimeUnit.SECONDS);
+          100,
+          TimeUnit.MILLISECONDS);
     }
     return returnBookingStatusResponse(
       201,

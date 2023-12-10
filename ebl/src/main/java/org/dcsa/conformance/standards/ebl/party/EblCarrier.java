@@ -441,8 +441,8 @@ public class EblCarrier extends ConformanceParty {
               .shippingInstructions(si.getShippingInstructions())
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnShippingInstructionsRefStatusResponse(
       201,
@@ -476,8 +476,8 @@ public class EblCarrier extends ConformanceParty {
               .shippingInstructions(si.getShippingInstructions())
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
   }

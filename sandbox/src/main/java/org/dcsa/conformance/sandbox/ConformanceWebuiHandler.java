@@ -387,7 +387,7 @@ public class ConformanceWebuiHandler {
         asyncWebClient,
         sandboxId,
         requestNode.get("actionId").asText(),
-        actionInputNode == null ? null : actionInputNode.asText());
+        actionInputNode);
   }
 
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {

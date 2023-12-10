@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ovs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,8 +13,10 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ovs.party.OvsPublisher;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
@@ -38,7 +41,8 @@ public class OvsComponentFactory extends AbstractComponentFactory {
   public List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
-      Consumer<ConformanceRequest> asyncWebClient,
+      JsonNodeMap persistentMap,
+      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
@@ -57,6 +61,7 @@ public class OvsComponentFactory extends AbstractComponentFactory {
               standardVersion,
               publisherConfiguration,
               counterpartConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName()),
+              persistentMap,
               asyncWebClient,
               orchestratorAuthHeader));
     }
@@ -69,6 +74,7 @@ public class OvsComponentFactory extends AbstractComponentFactory {
               standardVersion,
               subscriberConfiguration,
               counterpartConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName()),
+              persistentMap,
               asyncWebClient,
               orchestratorAuthHeader));
     }
@@ -116,8 +122,7 @@ public class OvsComponentFactory extends AbstractComponentFactory {
                 standardVersion.startsWith("2") ? "v22" : "v30", apiProviderRole.toLowerCase());
     String schemaName =
         OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
-    return new JsonSchemaValidator(
-        OvsComponentFactory.class.getResourceAsStream(schemaFilePath), schemaName);
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 
   @SneakyThrows

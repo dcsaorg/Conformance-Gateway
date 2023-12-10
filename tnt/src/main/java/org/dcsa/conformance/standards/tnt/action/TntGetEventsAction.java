@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.tnt.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,8 @@ public class TntGetEventsAction extends TntAction {
               }
 
               @Override
-              protected Set<String> checkConformance(ConformanceExchange exchange) {
+              protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+                ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
                 JsonNode jsonResponse = exchange.getMessage(httpMessageType).body().getJsonBody();
                 LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
                 if (!jsonResponse.isArray()) {

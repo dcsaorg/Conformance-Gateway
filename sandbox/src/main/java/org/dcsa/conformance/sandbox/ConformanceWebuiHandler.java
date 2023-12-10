@@ -19,6 +19,8 @@ import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
+import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
 @Slf4j
 public class ConformanceWebuiHandler {
@@ -56,7 +58,19 @@ public class ConformanceWebuiHandler {
                       EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                           .collect(
                               Collectors.toMap(
-                                  Function.identity(), EblSurrenderComponentFactory::new))))));
+                                  Function.identity(), EblSurrenderComponentFactory::new)))),
+              Map.entry(
+                  OvsComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      OvsComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), OvsComponentFactory::new)))),
+              Map.entry(
+                  TntComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      TntComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), TntComponentFactory::new))))));
 
   public ConformanceWebuiHandler(
       ConformanceAccessChecker accessChecker,
@@ -262,8 +276,9 @@ public class ConformanceWebuiHandler {
   private JsonNode _getAvailableStandards(String ignoredUserId) {
     ObjectMapper objectMapper = new ObjectMapper();
     ArrayNode standardsNode = objectMapper.createArrayNode();
-    componentFactories
-        .keySet()
+    TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
+    sortedStandardNames.addAll(componentFactories.keySet());
+    sortedStandardNames
         .forEach(
             standardName -> {
               ObjectNode standardNode = objectMapper.createObjectNode().put("name", standardName);
@@ -366,13 +381,13 @@ public class ConformanceWebuiHandler {
   private JsonNode _handleActionInput(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
-    JsonNode actionInputOrNull = requestNode.get("actionInput");
+    JsonNode actionInputNode = requestNode.get("actionInput");
     return ConformanceSandbox.handleActionInput(
         persistenceProvider,
         asyncWebClient,
         sandboxId,
         requestNode.get("actionId").asText(),
-        actionInputOrNull);
+        actionInputNode == null ? null : actionInputNode.asText());
   }
 
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {

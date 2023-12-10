@@ -32,6 +32,8 @@ import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
+import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -162,7 +164,9 @@ public class ConformanceApplication {
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                    .map(EblSurrenderComponentFactory::new))
+                    .map(EblSurrenderComponentFactory::new),
+                OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
+                TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());
     componentFactories.forEach(
         componentFactory -> {
@@ -308,7 +312,7 @@ public class ConformanceApplication {
 
   @GetMapping(value = "/")
   public void handleGetRoot(
-      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+      HttpServletRequest ignoredServletRequest, HttpServletResponse servletResponse) {
     _writeResponse(
         servletResponse, 200, "text/html;charset=utf-8", Collections.emptyMap(), _buildHomePage());
   }
@@ -337,8 +341,6 @@ public class ConformanceApplication {
         "<a href=\"/conformance/%s/sandbox/%s/status\">Status</a> - "
             .formatted(localhostAuthUrlToken, sandboxId),
         "<a href=\"/conformance/%s/sandbox/%s/report\">Report</a> - "
-            .formatted(localhostAuthUrlToken, sandboxId),
-        "<a href=\"/conformance/%s/sandbox/%s/printableReport\">Printable</a> - "
             .formatted(localhostAuthUrlToken, sandboxId),
         "<a href=\"/conformance/%s/sandbox/%s/party/%s/prompt/json\">Carrier1 prompt</a> - "
             .formatted(localhostAuthUrlToken, sandboxId, "Carrier1"),

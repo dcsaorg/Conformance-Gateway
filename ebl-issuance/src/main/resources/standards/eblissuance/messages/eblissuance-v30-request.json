@@ -2,7 +2,7 @@
   "document": {
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
     "transportDocumentTypeCode": "BOL",
-    "documentStatus": "ISSUED",
+    "transportDocumentStatus": "ISSUED",
     "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
     "carrierCode": "ASDF",
     "carrierCodeListProvider": "SMDG",
@@ -19,6 +19,7 @@
     },
     "termsAndConditions": "terms and conditions",
     "isShippedOnBoardType": true,
+    "freightPaymentTermCode": "PRE",
     "receiptTypeAtOrigin": "CY",
     "deliveryTypeAtDestination": "CY",
     "cargoMovementTypeAtOrigin": "FCL",
@@ -44,7 +45,8 @@
             "weight": 123.45,
             "weightUnit": "KGM",
             "outerPackaging": {
-              "numberOfPackages": 1
+              "numberOfPackages": 1,
+              "description": "outer packaging description"
             }
           }
         ]
@@ -104,7 +106,7 @@
     }
   },
   "issueTo": {
-    "eblPlatformIdentifier": "epi@example.com",
+    "sendToPlatform": "ASDF",
     "legalName": "legal name"
   }
 }

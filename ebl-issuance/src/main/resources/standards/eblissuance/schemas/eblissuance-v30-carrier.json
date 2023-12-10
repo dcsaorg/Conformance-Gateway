@@ -918,13 +918,16 @@
       },
       "PartyContactDetail": {
         "title": "Party Contact Detail",
-        "required": [
-          "name"
-        ],
         "type": "object",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/contactName"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "email": {
+            "$ref": "#/components/schemas/email"
           }
         },
         "description": "The contact details of the person to contact. It is mandatory to provide either `phone` or `email` along with the `name`.\n",
@@ -932,12 +935,12 @@
           "name": "Henrik",
           "phone": "+45 51801234"
         },
-        "oneOf": [
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/PhoneRequired"
+            "required": ["name", "phone"]
           },
           {
-            "$ref": "#/components/schemas/EmailRequired"
+            "required": ["name", "email"]
           }
         ]
       },

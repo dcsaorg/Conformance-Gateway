@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Issuance an EBL to an EBL platform.\n",
-    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1).\n\nAPI specification issued by DCSA.org.\n",
+    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1). \n\nAPI specification issued by DCSA.org.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -134,7 +134,7 @@
             "$ref": "#/components/schemas/TransportDocument"
           },
           "issueTo": {
-            "$ref": "#/components/schemas/party"
+            "$ref": "#/components/schemas/issueToParty"
           },
           "eBLVisualisationByCarrier": {
             "$ref": "#/components/schemas/supportingDocument"
@@ -161,7 +161,7 @@
           }
         }
       },
-      "party": {
+      "issueToParty": {
         "required": [
           "legalName",
           "sendToPlatform"
@@ -463,7 +463,7 @@
             "$ref": "#/components/schemas/carrierCodeListProvider"
           },
           "issuingParty": {
-            "$ref": "#/components/schemas/party"
+            "$ref": "#/components/schemas/Party"
           },
           "carrierClauses": {
             "type": "array",
@@ -786,6 +786,294 @@
           "NMFTA"
         ]
       },
+      "Party": {
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "$ref": "#/components/schemas/partyName"
+          },
+          "address": {
+            "$ref": "#/components/schemas/address"
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity.\n"
+      },
+      "partyName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the party.\n",
+        "example": "Asseco Denmark"
+      },
+      "address": {
+        "required": [
+          "country",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/addressName"
+          },
+          "street": {
+            "$ref": "#/components/schemas/streetName"
+          },
+          "streetNumber": {
+            "$ref": "#/components/schemas/streetNumber"
+          },
+          "floor": {
+            "$ref": "#/components/schemas/floor"
+          },
+          "postCode": {
+            "$ref": "#/components/schemas/postCode"
+          },
+          "city": {
+            "$ref": "#/components/schemas/cityName"
+          },
+          "stateRegion": {
+            "$ref": "#/components/schemas/stateRegion"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "description": "An object for storing address related information\n"
+      },
+      "addressName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the address\n",
+        "example": "Henrik"
+      },
+      "streetName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the street of the party’s address.",
+        "example": "Kronprinsessegade"
+      },
+      "streetNumber": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The number of the street of the party’s address.",
+        "example": "54"
+      },
+      "floor": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The floor of the party’s street number.\n",
+        "example": "5. sal"
+      },
+      "postCode": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The post code of the party’s address.",
+        "example": "1306"
+      },
+      "cityName": {
+        "maxLength": 65,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The city name of the party’s address.\n",
+        "example": "København"
+      },
+      "stateRegion": {
+        "maxLength": 65,
+        "type": "string",
+        "description": "The state/region of the party’s address.",
+        "nullable": true,
+        "example": "Copenhagen"
+      },
+      "country": {
+        "maxLength": 75,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The country of the party’s address.\n",
+        "example": "Denmark"
+      },
+      "PartyContactDetail": {
+        "title": "Party Contact Detail",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/contactName"
+          }
+        },
+        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` or `email` along with the `name`.\n",
+        "example": {
+          "name": "Henrik",
+          "phone": "+45 51801234"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PhoneRequired"
+          },
+          {
+            "$ref": "#/components/schemas/EmailRequired"
+          }
+        ]
+      },
+      "PhoneRequired": {
+        "title": "Phone required - email optional",
+        "required": [
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "phone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "email": {
+            "$ref": "#/components/schemas/email"
+          }
+        },
+        "description": "`Phone` is mandatory to provide - `email` is optional\n"
+      },
+      "contactPhone": {
+        "maxLength": 30,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Phone number for the contact\n",
+        "example": "+45 70262970"
+      },
+      "email": {
+        "maxLength": 100,
+        "pattern": "^.+@\\S+$",
+        "type": "string",
+        "description": "`E-mail` address to be used\n",
+        "example": "info@dcsa.org"
+      },
+      "EmailRequired": {
+        "title": "Email required - phone optional",
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "phone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "email": {
+            "$ref": "#/components/schemas/email"
+          }
+        },
+        "description": "`Email` is mandatory to provide - `phone` is optional\n"
+      },
+      "contactName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the contact\n",
+        "example": "Henrik"
+      },
+      "IdentifyingCode": {
+        "title": "Identifying Code",
+        "required": [
+          "DCSAResponsibleAgencyCode",
+          "partyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "DCSAResponsibleAgencyCode": {
+            "$ref": "#/components/schemas/DCSAResponsibleAgencyCode"
+          },
+          "partyCode": {
+            "$ref": "#/components/schemas/partyCode"
+          },
+          "codeListName": {
+            "$ref": "#/components/schemas/codeListName"
+          }
+        }
+      },
+      "DCSAResponsibleAgencyCode": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- ISO (International Standards Organization)\n- UNECE (United Nations Economic Commission for Europe)\n- LLOYD (Lloyd's register of shipping)\n- BIC (Bureau International des Containeurs)\n- IMO (International Maritime Organization)\n- SCAC (Standard Carrier Alpha Code)\n- ITIGG (International Transport Implementation Guidelines Group)\n- ITU (International Telecommunication Union)\n- SMDG (Shipplanning Message Development Group)\n- EXIS (Exis Technologies Ltd.)\n- FMC (Federal Maritime Commission)\n- CBSA (Canada Border Services Agency)\n- DCSA (Digitial Container Shipping Association)\n- DID (Decentralized Identifier)\n- LEI (Legal Entity Identifier)\n- EPI (EBL Platform Identifier)\n- ZZZ (Mutually defined)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/codelistresponsibleagencycodes.csv).\n",
+        "example": "SMDG"
+      },
+      "partyCode": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "Code to identify the party as provided by the agency\n",
+        "example": "MSK"
+      },
+      "codeListName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the list, provided by the responsible agency\n",
+        "example": "LCL"
+      },
+      "TaxLegalReference": {
+        "title": "Tax & Legal Reference",
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/taxLegalReferenceType"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "value": {
+            "$ref": "#/components/schemas/taxLegalReferenceValue"
+          }
+        },
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/taxandlegalreferences.csv).\n"
+      },
+      "taxLegalReferenceType": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The reference type code as defined by the relevant tax and/or legal authority.\n",
+        "example": "PAN"
+      },
+      "countryCode": {
+        "maxLength": 2,
+        "minLength": 2,
+        "pattern": "^[A-Z]{2}$",
+        "type": "string",
+        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n",
+        "example": "DK"
+      },
+      "taxLegalReferenceValue": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The value of the `taxLegalReference`\n",
+        "example": "AAAAA0000A"
+      },
       "clauseContent": {
         "maxLength": 20000,
         "pattern": "^\\S+(\\s+\\S+)*$",
@@ -923,93 +1211,6 @@
         "type": "string",
         "description": "The name of the location.\n",
         "example": "Port of Amsterdam"
-      },
-      "address": {
-        "required": [
-          "country",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "$ref": "#/components/schemas/addressName"
-          },
-          "street": {
-            "$ref": "#/components/schemas/streetName"
-          },
-          "streetNumber": {
-            "$ref": "#/components/schemas/streetNumber"
-          },
-          "floor": {
-            "$ref": "#/components/schemas/floor"
-          },
-          "postCode": {
-            "$ref": "#/components/schemas/postCode"
-          },
-          "city": {
-            "$ref": "#/components/schemas/cityName"
-          },
-          "stateRegion": {
-            "$ref": "#/components/schemas/stateRegion"
-          },
-          "country": {
-            "$ref": "#/components/schemas/country"
-          }
-        },
-        "description": "An object for storing address related information\n"
-      },
-      "addressName": {
-        "maxLength": 100,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "Name of the address\n",
-        "example": "Henrik"
-      },
-      "streetName": {
-        "maxLength": 100,
-        "type": "string",
-        "description": "The name of the street of the party’s address.",
-        "example": "Kronprinsessegade"
-      },
-      "streetNumber": {
-        "maxLength": 50,
-        "type": "string",
-        "description": "The number of the street of the party’s address.",
-        "example": "54"
-      },
-      "floor": {
-        "maxLength": 50,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "The floor of the party’s street number.\n",
-        "example": "5. sal"
-      },
-      "postCode": {
-        "maxLength": 50,
-        "type": "string",
-        "description": "The post code of the party’s address.",
-        "example": "1306"
-      },
-      "cityName": {
-        "maxLength": 65,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "The city name of the party’s address.\n",
-        "example": "København"
-      },
-      "stateRegion": {
-        "maxLength": 65,
-        "type": "string",
-        "description": "The state/region of the party’s address.",
-        "nullable": true,
-        "example": "Copenhagen"
-      },
-      "country": {
-        "maxLength": 75,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "The country of the party’s address.\n",
-        "example": "Denmark"
       },
       "facilityLocation": {
         "required": [
@@ -1339,84 +1540,6 @@
         "format": "float",
         "example": 34.4
       },
-      "PartyContactDetail": {
-        "title": "Party Contact Detail",
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "$ref": "#/components/schemas/contactName"
-          }
-        },
-        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` or `email` along with the `name`.\n",
-        "example": {
-          "name": "Henrik",
-          "phone": "+45 51801234"
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/PhoneRequired"
-          },
-          {
-            "$ref": "#/components/schemas/EmailRequired"
-          }
-        ]
-      },
-      "PhoneRequired": {
-        "title": "Phone required - email optional",
-        "required": [
-          "phone"
-        ],
-        "type": "object",
-        "properties": {
-          "phone": {
-            "$ref": "#/components/schemas/contactPhone"
-          },
-          "email": {
-            "$ref": "#/components/schemas/email"
-          }
-        },
-        "description": "`Phone` is mandatory to provide - `email` is optional\n"
-      },
-      "contactPhone": {
-        "maxLength": 30,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "Phone number for the contact\n",
-        "example": "+45 70262970"
-      },
-      "email": {
-        "maxLength": 100,
-        "pattern": "^.+@\\S+$",
-        "type": "string",
-        "description": "`E-mail` address to be used\n",
-        "example": "info@dcsa.org"
-      },
-      "EmailRequired": {
-        "title": "Email required - phone optional",
-        "required": [
-          "email"
-        ],
-        "type": "object",
-        "properties": {
-          "phone": {
-            "$ref": "#/components/schemas/contactPhone"
-          },
-          "email": {
-            "$ref": "#/components/schemas/email"
-          }
-        },
-        "description": "`Email` is mandatory to provide - `phone` is optional\n"
-      },
-      "contactName": {
-        "maxLength": 100,
-        "pattern": "^\\S+(\\s+\\S+)*$",
-        "type": "string",
-        "description": "Name of the contact\n",
-        "example": "Henrik"
-      },
       "DocumentParty": {
         "title": "Document Party",
         "required": [
@@ -1427,7 +1550,7 @@
         "type": "object",
         "properties": {
           "party": {
-            "$ref": "#/components/schemas/party"
+            "$ref": "#/components/schemas/Party"
           },
           "partyFunction": {
             "$ref": "#/components/schemas/partyFunction"
@@ -1644,14 +1767,6 @@
         "type": "string",
         "description": "The reference type code as defined in the relevant customs jurisdiction.\n",
         "example": "ACID"
-      },
-      "countryCode": {
-        "maxLength": 2,
-        "minLength": 2,
-        "pattern": "^[A-Z]{2}$",
-        "type": "string",
-        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n",
-        "example": "DK"
       },
       "customsReferenceValue": {
         "maxLength": 100,

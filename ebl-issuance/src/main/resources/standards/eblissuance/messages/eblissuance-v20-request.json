@@ -47,7 +47,7 @@
     }
   },
   "issueTo": {
-    "eblPlatformIdentifier": "epi@example.com",
+    "sendToPlatform": "ASDF",
     "legalName": "legal name"
   }
 }

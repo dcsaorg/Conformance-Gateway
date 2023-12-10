@@ -269,8 +269,9 @@ public class ConformanceWebuiHandler {
   private JsonNode _getAvailableStandards(String ignoredUserId) {
     ObjectMapper objectMapper = new ObjectMapper();
     ArrayNode standardsNode = objectMapper.createArrayNode();
-    componentFactories
-        .keySet()
+    TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
+    sortedStandardNames.addAll(componentFactories.keySet());
+    sortedStandardNames
         .forEach(
             standardName -> {
               ObjectNode standardNode = objectMapper.createObjectNode().put("name", standardName);

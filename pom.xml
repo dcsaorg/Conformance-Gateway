@@ -13,6 +13,8 @@
 				<module>ebl</module>
         <module>ebl-issuance</module>
         <module>ebl-surrender</module>
+        <module>ovs</module>
+        <module>tnt</module>
         <module>cdk</module>
         <module>lambda</module>
         <module>sandbox</module>

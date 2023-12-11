@@ -1,9 +1,13 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends StateChangingSIAction {
@@ -43,11 +47,23 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getSINotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator
+        var dsp = getDspSupplier().get();
+        var currentState = Objects.requireNonNullElse(
+          dsp.shippingInstructionsStatus(),
+          ShippingInstructionsStatus.SI_RECEIVED  // Placeholder to avoid NPE
         );
+        return Stream.concat(
+          EBLChecks.siNotificationSIR(
+            getMatchedExchangeUuid(),
+            dsp.shippingInstructionsReference()
+          ),
+          getSINotificationChecks(
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            acceptChanges ? ShippingInstructionsStatus.SI_RECEIVED : currentState,
+            acceptChanges ? null : ShippingInstructionsStatus.SI_DECLINED
+          ));
       }
     };
   }

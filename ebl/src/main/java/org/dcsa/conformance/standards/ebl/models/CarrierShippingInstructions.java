@@ -173,6 +173,9 @@ public class CarrierShippingInstructions {
 
   public void confirmShippingInstructionsComplete(String documentReference) {
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
+    clearUpdatedShippingInstructions();
+    setReason(null);
+    changeSIState(UPDATED_SI_STATUS, null);
     changeSIState(SI_STATUS, SI_COMPLETED);
   }
 
@@ -285,7 +288,16 @@ public class CarrierShippingInstructions {
   }
 
   private void changeSIState(String attributeName, ShippingInstructionsStatus newState) {
-    mutateShippingInstructionsAndUpdate(b -> b.put(attributeName, newState.wireName()));
+    if (newState == null && attributeName.equals(SI_STATUS)) {
+      throw new IllegalArgumentException("The attribute " + SI_STATUS + " is mandatory");
+    }
+    mutateShippingInstructionsAndUpdate(b -> {
+      if (newState != null) {
+        b.put(attributeName, newState.wireName());
+      } else {
+        b.remove(attributeName);
+      }
+    });
   }
 
   private void mutateShippingInstructionsAndUpdate(Consumer<ObjectNode> mutator) {

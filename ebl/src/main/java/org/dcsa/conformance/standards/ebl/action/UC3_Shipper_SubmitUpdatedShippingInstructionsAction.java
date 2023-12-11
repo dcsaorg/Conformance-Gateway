@@ -1,12 +1,16 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j
@@ -50,6 +54,10 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
+        var currentState = Objects.requireNonNullElse(
+          dsp.shippingInstructionsStatus(),
+          ShippingInstructionsStatus.SI_RECEIVED  // Placeholder to avoid NPE
+        );
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
@@ -80,9 +88,20 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 responseSchemaValidator));
         return Stream.concat(
           primaryExchangeChecks,
-          getSINotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator));
+          Stream.concat(
+            Stream.concat(
+              EBLChecks.siRefSIR(getMatchedExchangeUuid(), dsp.shippingInstructionsReference()),
+              EBLChecks.siRefStatusChecks(
+                getMatchedExchangeUuid(),
+                currentState,
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED
+            )),
+            getSINotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              currentState,
+              ShippingInstructionsStatus.SI_UPDATE_RECEIVED))
+        );
       }
     };
   }

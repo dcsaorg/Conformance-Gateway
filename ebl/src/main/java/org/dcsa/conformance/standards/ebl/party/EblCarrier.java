@@ -242,7 +242,7 @@ public class EblCarrier extends ConformanceParty {
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.confirmShippingInstructionsComplete(documentReference);
     si.save(persistentMap);
-    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
 
     addOperatorLogEntry("Confirmed shipping instructions with reference %s is complete".formatted(documentReference));
   }

@@ -1,12 +1,15 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j
@@ -66,7 +69,13 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Carrier Ref Status Payload response check
+            new JsonAttributeCheck(
+              EblRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              JsonPointer.compile("/shippingInstructionsStatus"),
+              ShippingInstructionsStatus.SI_RECEIVED.wireName()
+            ),
             // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
@@ -80,9 +89,18 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 responseSchemaValidator));
         return Stream.concat(
           primaryExchangeChecks,
-          getSINotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator));
+          Stream.concat(
+            Stream.concat(
+              EBLChecks.siRefSIRIsPresent(getMatchedExchangeUuid()),
+              EBLChecks.siRefStatusChecks(
+                getMatchedExchangeUuid(),
+                ShippingInstructionsStatus.SI_RECEIVED
+            )),
+            getSINotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              ShippingInstructionsStatus.SI_RECEIVED))
+        );
       }
     };
   }

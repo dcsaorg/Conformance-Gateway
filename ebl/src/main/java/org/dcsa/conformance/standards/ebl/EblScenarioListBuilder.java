@@ -545,6 +545,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           shipperPartyName,
           (EblAction) previousAction,
           componentFactory.getMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 }

@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
 @Slf4j
@@ -82,9 +84,15 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                 responseSchemaValidator));
         return Stream.concat(
           primaryExchangeChecks,
-          getTDNotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator));
+          Stream.concat(
+            Stream.concat(
+              EBLChecks.tdRefTDR(getMatchedExchangeUuid(), tdr),
+              EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), TransportDocumentStatus.TD_APPROVED)
+            ),
+            getTDNotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              TransportDocumentStatus.TD_APPROVED)));
       }
     };
   }

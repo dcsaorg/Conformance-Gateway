@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
 public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends StateChangingSIAction {
@@ -43,11 +45,20 @@ public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends Stat
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return getTDNotificationChecks(
-          getMatchedExchangeUuid(),
-          expectedApiVersion,
-          requestSchemaValidator
-        );
+        var expectedStatus = acceptAmendmentRequest
+          ? TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT
+          : TransportDocumentStatus.TD_ISSUED;
+        return Stream.concat(
+          Stream.concat(
+            EBLChecks.tdNotificationTDR(getMatchedExchangeUuid(), getDspSupplier().get().transportDocumentReference()),
+            EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), expectedStatus)
+          ),
+          getTDNotificationChecks(
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            expectedStatus
+          ));
       }
     };
   }

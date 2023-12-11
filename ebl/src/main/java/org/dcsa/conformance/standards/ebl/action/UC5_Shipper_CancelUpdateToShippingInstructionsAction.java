@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -56,6 +57,7 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         var sir = dsp.shippingInstructionsReference() != null ? dsp.shippingInstructionsReference() : "<DSP MISSING SI REFERENCE>";
+        var siStatus = Objects.requireNonNullElse(dsp.shippingInstructionsStatus(), ShippingInstructionsStatus.SI_RECEIVED);
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
@@ -86,9 +88,19 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
                 responseSchemaValidator));
         return Stream.concat(
           primaryExchangeChecks,
-          getSINotificationChecks(
-            expectedApiVersion,
-            notificationSchemaValidator));
+          Stream.concat(
+            Stream.concat(
+              EBLChecks.siRefSIR(getMatchedExchangeUuid(), sir),
+              EBLChecks.siRefStatusChecks(
+                getMatchedExchangeUuid(),
+                siStatus,
+                ShippingInstructionsStatus.SI_CANCELLED
+              )),
+            getSINotificationChecks(
+              expectedApiVersion,
+              notificationSchemaValidator,
+              siStatus,
+              ShippingInstructionsStatus.SI_CANCELLED)));
       }
     };
   }

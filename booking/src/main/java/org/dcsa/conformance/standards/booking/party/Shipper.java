@@ -23,7 +23,6 @@ public class Shipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
-  private static final String FILE_SUFFIX_REEFER = "-reefer";
   public Shipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -112,10 +111,8 @@ public class Shipper extends ConformanceParty {
     CarrierScenarioParameters carrierScenarioParameters =
       CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
     String bookingVariant = actionPrompt.get("bookingVariant").asText();
-
-    String fileSuffix = bookingVariant.equals("reefer") ? FILE_SUFFIX_REEFER: "";
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/booking-api-v20%s-request.json".formatted(fileSuffix),
+        "/standards/booking/messages/booking-api-v20-%s-request.json".formatted(bookingVariant),
         Map.ofEntries(
           Map.entry(
             "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",

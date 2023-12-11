@@ -45,7 +45,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());
-    jsonNode.set("bookingVariant", new TextNode(bookingVariant.getValue()));
+    jsonNode.put("bookingVariant", bookingVariant.getValue());
     return jsonNode;
   }
 

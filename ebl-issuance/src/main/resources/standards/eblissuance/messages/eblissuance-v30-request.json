@@ -13,7 +13,8 @@
       "partyContactDetails": [
         {
           "name": "issuing party",
-          "phone": "+1234567890"
+          "phone": "+1234567890",
+          "email": "someone@example.com"
         }
       ]
     },
@@ -87,7 +88,7 @@
     "partyContactDetails": [
       {
         "name": "party name",
-        "phone": "+1234567890"
+        "email": "someone@example.com"
       }
     ],
     "transports": {

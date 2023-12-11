@@ -2,6 +2,8 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
@@ -11,6 +13,7 @@ import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayl
 import org.dcsa.conformance.standards.booking.checks.ShipperBookingContentConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.BookingVariant;
 
 @Getter
 @Slf4j
@@ -25,8 +28,9 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
+      JsonSchemaValidator notificationSchemaValidator,
+      BookingVariant bookingVariant) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1(%s)".formatted( bookingVariant.getValue()), 201,bookingVariant);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -34,13 +38,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a booking request using the following parameters:");
+    return ("UC1: Submit a booking %s request using the following parameters:".formatted(bookingVariant.getValue()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());
+    jsonNode.set("bookingVariant", new TextNode(bookingVariant.getValue()));
     return jsonNode;
   }
 

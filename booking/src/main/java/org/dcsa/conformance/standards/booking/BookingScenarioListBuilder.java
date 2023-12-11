@@ -9,6 +9,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.BookingVariant;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
@@ -25,7 +26,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_REF_STATUS_SCHEMA = "bookingRefStatus";
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
-  private static final String BOOKING_WITH_REEFER = "reefer";
 
   public static BookingScenarioListBuilder buildTree(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
@@ -36,7 +36,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       // This is what's been implemented so far and should still work on PR.
       return carrier_SupplyScenarioParameters()
           .thenEither(
-            uc1_shipper_SubmitBookingRequest(BOOKING_WITH_REEFER).then(
+            uc1_shipper_SubmitBookingRequest(BookingVariant.REEFER).then(
               shipper_GetBooking(RECEIVED)
                 .then(
                   uc5_carrier_confirmBookingRequest()
@@ -45,7 +45,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                         .then(
                           uc11_carrier_confirmBookingCompleted()
                             .then(shipper_GetBooking(COMPLETED)))))),
-              uc1_shipper_SubmitBookingRequest(null)
+              uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR)
                   .then(
                       shipper_GetBooking(RECEIVED)
                           .thenEither(
@@ -159,8 +159,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                   uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
                   uc12_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
       case START -> thenEither(
-        uc1_shipper_SubmitBookingRequest(null).thenAllPathsFrom(RECEIVED),
-        uc1_shipper_SubmitBookingRequest(BOOKING_WITH_REEFER).thenHappyPathFrom(RECEIVED));
+        uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenAllPathsFrom(RECEIVED),
+        uc1_shipper_SubmitBookingRequest(BookingVariant.REEFER).thenHappyPathFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
@@ -193,7 +193,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           uc3_shipper_submitUpdatedBookingRequest().thenHappyPathFrom(PENDING_UPDATE_CONFIRMATION));
       case PENDING_UPDATE_CONFIRMATION, RECEIVED -> then(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED));
-      case START -> then(uc1_shipper_SubmitBookingRequest(null).thenHappyPathFrom(RECEIVED));
+      case START -> then(uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenHappyPathFrom(RECEIVED));
     };
   }
 
@@ -248,7 +248,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction));
   }
 
-  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(String bookingVariant) {
+  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(BookingVariant variant) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -262,7 +262,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
           componentFactory.getMessageSchemaValidator(
             BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          bookingVariant));
+          variant));
   }
 
 

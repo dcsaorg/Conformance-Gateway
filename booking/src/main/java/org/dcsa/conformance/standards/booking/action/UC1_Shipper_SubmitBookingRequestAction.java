@@ -13,6 +13,7 @@ import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayl
 import org.dcsa.conformance.standards.booking.checks.ShipperBookingContentConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.BookingVariant;
 
 @Getter
 @Slf4j
@@ -28,8 +29,8 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator,
-      String bookingVariant) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1(%s)".formatted( bookingVariant!= null? bookingVariant : "normal"), 201,bookingVariant);
+      BookingVariant bookingVariant) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1(%s)".formatted( bookingVariant.getValue()), 201,bookingVariant);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -37,14 +38,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a booking %s request using the following parameters:".formatted( bookingVariant != null? bookingVariant : "normal"));
+    return ("UC1: Submit a booking %s request using the following parameters:".formatted(bookingVariant.getValue()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());
-    jsonNode.set("bookingVariant", new TextNode(bookingVariant));
+    jsonNode.set("bookingVariant", new TextNode(bookingVariant.getValue()));
     return jsonNode;
   }
 

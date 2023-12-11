@@ -172,7 +172,7 @@
             "maxLength": 4,
             "pattern": "\\S+",
             "type": "string",
-            "description": "The sendToPlatform is the EBL platform the eBL is issued to/the eBL platform of the shipper. Should be a code from https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv.",
+            "description": "The sendToPlatform is the EBL platform the eBL is issued to/the eBL platform of the shipper. Must be a code from https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv.",
             "example": "BOLE"
           },
           "legalName": {
@@ -918,34 +918,31 @@
       },
       "PartyContactDetail": {
         "title": "Party Contact Detail",
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/contactName"
-          },
-          "phone": {
-            "$ref": "#/components/schemas/contactPhone"
-          },
-          "email": {
-            "$ref": "#/components/schemas/email"
           }
         },
-        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` or `email` along with the `name`.\n",
+        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`.\n",
         "example": {
           "name": "Henrik",
           "phone": "+45 51801234"
         },
         "anyOf": [
           {
-            "required": ["name", "phone"]
+            "$ref": "#/components/schemas/PhoneRequired"
           },
           {
-            "required": ["name", "email"]
+            "$ref": "#/components/schemas/EmailRequired"
           }
         ]
       },
       "PhoneRequired": {
-        "title": "Phone required - email optional",
+        "title": "Phone required",
         "required": [
           "phone"
         ],
@@ -953,12 +950,9 @@
         "properties": {
           "phone": {
             "$ref": "#/components/schemas/contactPhone"
-          },
-          "email": {
-            "$ref": "#/components/schemas/email"
           }
         },
-        "description": "`Phone` is mandatory to provide - `email` is optional\n"
+        "description": "`Phone` is mandatory to provide\n"
       },
       "contactPhone": {
         "maxLength": 30,
@@ -967,28 +961,25 @@
         "description": "Phone number for the contact\n",
         "example": "+45 70262970"
       },
+      "EmailRequired": {
+        "title": "Email required",
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/email"
+          }
+        },
+        "description": "`Email` is mandatory to provide\n"
+      },
       "email": {
         "maxLength": 100,
         "pattern": "^.+@\\S+$",
         "type": "string",
         "description": "`E-mail` address to be used\n",
         "example": "info@dcsa.org"
-      },
-      "EmailRequired": {
-        "title": "Email required - phone optional",
-        "required": [
-          "email"
-        ],
-        "type": "object",
-        "properties": {
-          "phone": {
-            "$ref": "#/components/schemas/contactPhone"
-          },
-          "email": {
-            "$ref": "#/components/schemas/email"
-          }
-        },
-        "description": "`Email` is mandatory to provide - `phone` is optional\n"
       },
       "contactName": {
         "maxLength": 100,

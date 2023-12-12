@@ -77,7 +77,12 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 EblRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            new JsonSchemaCheck(
+              EblRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator));
       }
     };
   }

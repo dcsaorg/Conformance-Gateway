@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.*;
@@ -16,6 +15,8 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 public class CarrierShippingInstructions {
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final Random RANDOM = new Random();
 
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
@@ -59,28 +60,106 @@ public class CarrierShippingInstructions {
     "utilizedTransportEquipments",
     "references",
     "customsReferences",
+    "isShippedOnBoardType",
   };
 
-  private static final String[] PRESERVE_TD_FIELDS = {
-    TRANSPORT_DOCUMENT_REFERENCE,
-    TRANSPORT_DOCUMENT_STATUS,
-    "termsAndConditions",
-    "issueDate",
-    "serviceContractReference",
-    "contractQuotationReference",
-    "declaredValue",
-    "declaredValueCurrency",
-    "carrierCode",
-    "carrierCodeListProvider",
-    "issuingParty",
-    "carrierClauses",
-    "numberOfRiderPages",
-    "transports",
-    "charges",
-    "placeOfIssue",
-    "isShippedOnBoardType",
-    "shippedOnBoardDate",
-    "receivedForShipmentDate",
+  private static JsonNode issuingCarrier(String name, String smdgCode) {
+    var issuingCarrier = OBJECT_MAPPER.createObjectNode()
+      .put("partyName", name);
+    issuingCarrier
+      .putArray("identifyingCodes")
+      .addObject()
+      .put("DCSAResponsibleAgencyCode", "SMDG")
+      .put("codeListName", "LCL")
+      .put("partyCode", smdgCode);
+    return issuingCarrier;
+  }
+
+  // Randomize the issuing carrier to avoid favouring a particular carrier
+  private static final JsonNode[] ISSUING_CARRIER_DEFINITIONS = {
+    // Name is from the SMDG code list
+    issuingCarrier("CMA CGM", "CMA"),
+    issuingCarrier("Evergreen Marine Corporation", "EMC"),
+    issuingCarrier("Hapag Lloyd", "HLC"),
+    issuingCarrier("Hyundai", "HMM"),
+    issuingCarrier("Maersk", "MSK"),
+    issuingCarrier("Mediterranean Shipping Company", "MSC"),
+    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE"),
+    issuingCarrier("Yang Ming Line", "YML"),
+    issuingCarrier("Zim Israel Navigation Company", "ZIM")
+  };
+
+  private static TDField initialFieldValue(String attribute, String value) {
+    return initialFieldValue(attribute, (o, a) -> o.put(a, value));
+  }
+
+  private static TDField initialFieldValue(String attribute, Supplier<String> valueGenerator) {
+    return initialFieldValue(attribute, (o, a) -> o.put(a, valueGenerator.get()));
+  }
+
+  private static TDField initialFieldValue(String attribute, BiConsumer<ObjectNode, String> valueSetter) {
+    return new TDField(attribute, valueSetter);
+  }
+
+  private static TDField preserveIfPresent(String attribute) {
+    return new TDField(attribute, (o, a) -> {});
+  }
+
+  private static TDField issuingParty() {
+    return initialFieldValue("issuingParty", (o, a) -> {
+      int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
+      var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
+      o.set(a, choice.deepCopy());
+    });
+  }
+
+  private record TDField(
+    String attribute,
+    BiConsumer<ObjectNode, String> provider
+  ) {}
+
+  private static final TDField[] CARRIER_PROVIDED_TD_FIELDS = {
+    initialFieldValue(
+        "transportDocumentReference",
+        () -> UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0, 20)),
+    initialFieldValue("transportDocumentStatus", TD_DRAFT.wireName()),
+    initialFieldValue("cargoMovementTypeAtOrigin", "FCL"),
+    initialFieldValue("cargoMovementTypeAtDestination", "FCL"),
+    initialFieldValue("receiptTypeAtOrigin", "CY"),
+    initialFieldValue("deliveryTypeAtDestination", "CY"),
+    initialFieldValue(
+        "shippedOnBoardDate",
+        (o, a) -> {
+          if (o.path("isShippedOnBoardType").asBoolean(true)) {
+            o.put(a, LocalDate.now().toString());
+          }
+        }),
+    initialFieldValue(
+        "receivedForShipmentDate",
+        (o, a) -> {
+          if (!o.path("isShippedOnBoardType").asBoolean(true)) {
+            o.put(a, LocalDate.now().toString());
+          }
+        }),
+    initialFieldValue("termsAndConditions", termsAndConditions()),
+    preserveIfPresent("issueDate"),
+    preserveIfPresent("declaredValue"),
+    preserveIfPresent("declaredValueCurrency"),
+    preserveIfPresent("serviceContractReference"),
+    preserveIfPresent("contractQuotationReference"),
+    issuingParty(),
+    initialFieldValue(
+        "carrierCode",
+        (o, a) -> {
+          var identifyingPartyCode = o.path("issuingParty").path("identifyingCodes").path(0);
+          assert Objects.equals(
+              identifyingPartyCode.path("DCSAResponsibleAgencyCode").asText(), "SMDG");
+          assert Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "LCL");
+          var result = identifyingPartyCode.path("partyCode");
+          assert result.isTextual();
+          o.set(a, result);
+        }),
+    initialFieldValue("carrierCodeListProvider", "SMDG")
   };
 
   private static final String SI_DATA_FIELD = "si";
@@ -88,7 +167,6 @@ public class CarrierShippingInstructions {
 
   private static final String TD_DATA_FIELD = "td";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final ObjectNode state;
 
   private CarrierShippingInstructions(ObjectNode state) {
@@ -247,17 +325,55 @@ public class CarrierShippingInstructions {
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_PENDING_SURRENDER_FOR_DELIVERY.wireName());
   }
 
-
-  private void copyFieldIfPresent(JsonNode source, ObjectNode dest, String field) {
-    var data = source.get(field);
-    if (data != null) {
-      dest.set(field, data);
+  private void copyFieldsWherePresent(JsonNode source, ObjectNode dest, String ... fields) {
+    for (var field : fields) {
+      var data = source.get(field);
+      if (data != null) {
+        dest.set(field, data.deepCopy());
+      }
     }
   }
 
-  private void copyFieldsWherePresent(JsonNode source, ObjectNode dest, String ... fields) {
-    for (var field : fields) {
-      copyFieldIfPresent(source, dest, field);
+  private void preserveOrGenerateCarrierFields(JsonNode source, ObjectNode dest) {
+    for (var entry : CARRIER_PROVIDED_TD_FIELDS) {
+      var field = entry.attribute();
+      var data = source != null ? source.get(field) : null;
+      if (data != null) {
+        dest.set(field, data.deepCopy());
+      } else {
+        var generator = entry.provider();
+        generator.accept(dest, field);
+      }
+    }
+  }
+
+  private void fixupConsignmentItems(ObjectNode transportDocument) {
+    for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
+      for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
+        var outerPackagingNode = cargoItemNode.path("outerPackaging");
+        if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {
+          continue;
+        }
+        ObjectNode outerPackaging = (ObjectNode)outerPackagingNode;
+        // The packaging code has to be aligned with the description. To simplify things, we replace
+        // the packageCode to ensure they are aligned. Which is not perfect, but better than
+        // inconsistent data.
+        outerPackaging.put("packageCode", "1A")
+          .put("description", "Drum, Steel");
+
+      }
+    }
+  }
+
+  private void fixupUtilizedTransportEquipments(ObjectNode transportDocument) {
+    for (JsonNode node : transportDocument.path("utilizedTransportEquipments")) {
+      if (!node.isObject()) {
+        continue;
+      }
+      ObjectNode ute = (ObjectNode)node;
+      var ref = ute.path("equipmentReference");
+      ute.putObject("equipment").set("equipmentReference", ref);
+      ute.remove("equipmentReference");
     }
   }
 
@@ -266,24 +382,9 @@ public class CarrierShippingInstructions {
     var siData = getShippingInstructions();
     var existingTd = getTransportDocument().orElse(null);
     copyFieldsWherePresent(siData, td, COPY_SI_INTO_TD_FIELDS);
-    if (existingTd == null) {
-      var tdr = UUID.randomUUID().toString()
-        .replace("-", "")
-        .toUpperCase()
-        .substring(0, 20);
-      var isShippedOnBoardType = siData.path("isShippedOnBoardType").asBoolean(true);
-      var date = LocalDate.now().toString();
-      var shippedDateField = isShippedOnBoardType
-        ? "shippedOnBoardDate"
-        : "receivedForShipmentDate";
-      existingTd =
-          OBJECT_MAPPER.createObjectNode()
-            .put(TRANSPORT_DOCUMENT_REFERENCE, tdr)
-            .put(TRANSPORT_DOCUMENT_STATUS, TD_DRAFT.wireName())
-            .put("isShippedOnBoardType", isShippedOnBoardType)
-            .put(shippedDateField, date);
-    }
-    copyFieldsWherePresent(existingTd, td, PRESERVE_TD_FIELDS);
+    preserveOrGenerateCarrierFields(existingTd, td);
+    fixupUtilizedTransportEquipments(td);
+    fixupConsignmentItems(td);
     state.set(TD_DATA_FIELD, td);
   }
 
@@ -406,5 +507,32 @@ public class CarrierShippingInstructions {
         updatedBooking.remove(field);
       }
     }
+  }
+
+  private static String termsAndConditions() {
+    return """
+            You agree that this booking exist is name only for the sake of
+            testing your conformance with the DCSA EBL API. This transport document is NOT backed
+            by a real shipment with ANY carrier and NONE of the requested services will be
+            carried out in real life.
+
+            Unless required by applicable law or agreed to in writing, DCSA provides
+            this JSON data on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+            ANY KIND, either express or implied, including, without limitation, any
+            warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,
+            or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
+            determining the appropriateness of using or redistributing this JSON
+            data and assume any risks associated with Your usage of this data.
+
+            In no event and under no legal theory, whether in tort (including negligence),
+            contract, or otherwise, unless required by applicable law (such as deliberate
+            and grossly negligent acts) or agreed to in writing, shall DCSA be liable to
+            You for damages, including any direct, indirect, special, incidental, or
+            consequential damages of any character arising as a result of this terms or conditions
+            or out of the use or inability to use the provided JSON data (including but not limited
+            to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any
+            and all other commercial damages or losses), even if DCSA has been advised of the
+            possibility of such damages.
+            """;
   }
 }

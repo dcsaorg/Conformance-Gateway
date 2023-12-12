@@ -58,7 +58,12 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 EblRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                expectedApiVersion));
+                expectedApiVersion),
+            new JsonSchemaCheck(
+              EblRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator));
       }
     };
   }

@@ -31,7 +31,7 @@ public class JsonSchemaValidator {
             .objectMapper(new ObjectMapper(new JsonFactory()))
             .build();
     SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
-    schemaValidatorsConfig.setTypeLoose(true);
+    schemaValidatorsConfig.setTypeLoose(false);
     JsonSchema rootJsonSchema =
         jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
     ValidationContext validationContext =

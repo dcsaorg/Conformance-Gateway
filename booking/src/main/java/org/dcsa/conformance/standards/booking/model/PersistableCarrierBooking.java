@@ -432,7 +432,7 @@ public class PersistableCarrierBooking {
     } else {
       charges = booking.putArray("charges");
     }
-    if (!charges.isEmpty()) {
+    if (charges.isEmpty()) {
       charges
         .addObject()
         .put("chargeName", "Fictive booking fee")

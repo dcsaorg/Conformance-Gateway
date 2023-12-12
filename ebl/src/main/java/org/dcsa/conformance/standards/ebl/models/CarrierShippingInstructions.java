@@ -98,11 +98,15 @@ public class CarrierShippingInstructions {
   }
 
   private static TDField initialFieldValue(String attribute, BiConsumer<ObjectNode, String> valueSetter) {
-    return new TDField(attribute, valueSetter);
+    return new TDField(attribute, valueSetter, null);
   }
 
   private static TDField preserveIfPresent(String attribute) {
-    return new TDField(attribute, (o, a) -> {});
+    return new TDField(attribute, null, null);
+  }
+
+  private static TDField field(String attribute, BiConsumer<ObjectNode, String> initializer, BiConsumer<ObjectNode, String> updater) {
+    return new TDField(attribute, initializer, updater);
   }
 
   private static TDField issuingParty() {
@@ -115,8 +119,22 @@ public class CarrierShippingInstructions {
 
   private record TDField(
     String attribute,
-    BiConsumer<ObjectNode, String> provider
-  ) {}
+    BiConsumer<ObjectNode, String> initializer,
+    BiConsumer<ObjectNode, String> updater
+  ) {
+
+    public void provideField(JsonNode source, ObjectNode dest) {
+      var data = source != null ? source.get(attribute) : null;
+      if (data != null) {
+        dest.set(attribute, data.deepCopy());
+        if (updater != null) {
+          updater.accept(dest, attribute);
+        }
+      } else if (initializer != null) {
+        initializer.accept(dest, attribute);
+      }
+    }
+  }
 
   private static final TDField[] CARRIER_PROVIDED_TD_FIELDS = {
     initialFieldValue(
@@ -159,8 +177,42 @@ public class CarrierShippingInstructions {
           assert result.isTextual();
           o.set(a, result);
         }),
-    initialFieldValue("carrierCodeListProvider", "SMDG")
+    initialFieldValue("carrierCodeListProvider", "SMDG"),
+    // We always add a charge per amendment to ensure an amendment is never identical to the document
+    // it replaces (which could cause issues with the issuance API). In reality, the carrier would also
+    // change some other detail (like the requested change or the issuance date). But in the
+    // conformance tests every thing happens in the same day and when the conformance toolkit is
+    // the carrier, booking amendments are "zero-change" amendments.
+    field("charges", (o, a) -> addCharge(o.putArray(a)), (o, a) -> addCharge(o.path(a)))
   };
+
+  private static void addCharge(JsonNode chargesArray) {
+    if (!chargesArray.isArray()) {
+      return;
+    }
+    var charges = (ArrayNode)chargesArray;
+    if (charges.isEmpty()) {
+      charges
+        .addObject()
+        .put("chargeName", "Fictive transport document fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "COL")
+        .put("calculationBasis", "For the concrete transport document")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
+    } else {
+      charges
+        .addObject()
+        .put("chargeName", "Fictive amendment fee")
+        .put("currencyAmount", 1f)
+        .put("currencyCode", "EUR")
+        .put("paymentTermCode", "PRE")
+        .put("calculationBasis", "For the entire amendment")
+        .put("unitPrice", 1f)
+        .put("quantity", 1);
+    }
+  }
 
   private static final String SI_DATA_FIELD = "si";
   private static final String UPDATED_SI_DATA_FIELD = "updatedSi";
@@ -269,6 +321,21 @@ public class CarrierShippingInstructions {
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_SURRENDERED_FOR_AMENDMENT.wireName());
   }
 
+  public void voidTransportDocument(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_SURRENDERED_FOR_AMENDMENT);
+    var td = getTransportDocument().orElseThrow();
+    td.put(TRANSPORT_DOCUMENT_STATUS, TD_VOIDED.wireName());
+  }
+
+  public void issueAmendedTransportDocument(String documentReference) {
+    checkState(documentReference, getTransportDocumentState(), s -> s == TD_VOIDED);
+    this.generateDraftTD();
+    updateTDForIssuance();
+    var tdData = getTransportDocument().orElseThrow();
+    var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
+    mutateShippingInstructionsAndUpdate(si -> si.put(TRANSPORT_DOCUMENT_REFERENCE, tdr));
+  }
+
   public void rejectSurrenderForAmendment(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_PENDING_SURRENDER_FOR_AMENDMENT);
     var td = getTransportDocument().orElseThrow();
@@ -293,7 +360,7 @@ public class CarrierShippingInstructions {
     //  2) There is no update received (that is "grey" is not UPDATE_RECEIVED)
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s != SI_UPDATE_RECEIVED);
-    this.generateTDFromSI();
+    this.generateDraftTD();
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
     mutateShippingInstructionsAndUpdate(si -> si.put(TRANSPORT_DOCUMENT_REFERENCE, tdr));
@@ -301,6 +368,10 @@ public class CarrierShippingInstructions {
 
   public void issueTransportDocument(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT || s == TD_APPROVED);
+    updateTDForIssuance();
+  }
+
+  private void updateTDForIssuance() {
     var td = getTransportDocument().orElseThrow();
     var date = LocalDate.now().toString();
     var shippedDateField = td.path("isShippedOnBoardType").asBoolean(true)
@@ -336,14 +407,7 @@ public class CarrierShippingInstructions {
 
   private void preserveOrGenerateCarrierFields(JsonNode source, ObjectNode dest) {
     for (var entry : CARRIER_PROVIDED_TD_FIELDS) {
-      var field = entry.attribute();
-      var data = source != null ? source.get(field) : null;
-      if (data != null) {
-        dest.set(field, data.deepCopy());
-      } else {
-        var generator = entry.provider();
-        generator.accept(dest, field);
-      }
+      entry.provideField(source, dest);
     }
   }
 
@@ -380,7 +444,7 @@ public class CarrierShippingInstructions {
     }
   }
 
-  private void generateTDFromSI() {
+  private void generateDraftTD() {
     var td = OBJECT_MAPPER.createObjectNode();
     var siData = getShippingInstructions();
     var existingTd = getTransportDocument().orElse(null);

@@ -358,6 +358,9 @@ public class CarrierShippingInstructions {
         // The packaging code has to be aligned with the description. To simplify things, we replace
         // the packageCode to ensure they are aligned. Which is not perfect, but better than
         // inconsistent data.
+        //
+        // The alternative is having a look-up table of all known packageCode's and their relevant
+        // description.
         outerPackaging.put("packageCode", "1A")
           .put("description", "Drum, Steel");
 
@@ -511,7 +514,7 @@ public class CarrierShippingInstructions {
 
   private static String termsAndConditions() {
     return """
-            You agree that this booking exist is name only for the sake of
+            You agree that this transport document exist is name only for the sake of
             testing your conformance with the DCSA EBL API. This transport document is NOT backed
             by a real shipment with ANY carrier and NONE of the requested services will be
             carried out in real life.

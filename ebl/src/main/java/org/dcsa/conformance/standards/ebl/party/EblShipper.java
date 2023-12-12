@@ -114,6 +114,7 @@ public class EblShipper extends ConformanceParty {
     var sir = actionPrompt.required("sir").asText();
     var si = (ObjectNode) persistentMap.load(sir);
 
+    // TODO: Make a repeatable change (like change the weight)
     si.put("transportDocumentTypeCode", "SWB");
     asyncCounterpartPut(
       "/v3/shipping-instructions/%s".formatted(sir),

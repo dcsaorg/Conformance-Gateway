@@ -158,6 +158,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .thenAllPathsFrom(TD_ISSUED))
       );
       case TD_ISSUED -> thenEither(
+        // TODO: We should have uc3 + uc4a + uc9 for an SI based amendment in parallel with UC9
+        //  (without uc3 + uc4a, which is basically a booking based amendment)
         uc9_carrier_awaitSurrenderRequestForAmendment()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
             .thenAllPathsFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT)),
@@ -175,7 +177,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .thenHappyPathFrom(TD_ISSUED)
           )
       );
-      case TD_SURRENDERED_FOR_AMENDMENT -> then(noAction()); // TODO: Implement
+      case TD_SURRENDERED_FOR_AMENDMENT -> then(
+        uc11_carrier_voidTransportDocument()
+          .then(uc11i_carrier_issueAmendedTransportDocument()
+            .then(shipper_GetTransportDocument(TD_ISSUED)
+              .thenHappyPathFrom(TD_ISSUED))));
       case TD_PENDING_SURRENDER_FOR_DELIVERY -> thenEither(
         uc13a_carrier_acceptSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_SURRENDERED_FOR_DELIVERY)
@@ -219,7 +225,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             .thenHappyPathFrom(TD_SURRENDERED_FOR_AMENDMENT)
         )
       );
-      case TD_SURRENDERED_FOR_AMENDMENT -> then(noAction()); // TODO: Implement
+      case TD_SURRENDERED_FOR_AMENDMENT -> then(
+        uc11_carrier_voidTransportDocument()
+          .then(uc11i_carrier_issueAmendedTransportDocument()
+            .then(shipper_GetTransportDocument(TD_ISSUED)
+              .thenHappyPathFrom(TD_ISSUED))));
       case TD_PENDING_SURRENDER_FOR_DELIVERY -> then(
         uc13a_carrier_acceptSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_SURRENDERED_FOR_DELIVERY)
@@ -488,6 +498,36 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
           false));
   }
+
+  private static EblScenarioListBuilder uc11_carrier_voidTransportDocument() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+            previousAction ->
+                new UC11v_Carrier_VoidTransportDocumentAction(
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    componentFactory.getMessageSchemaValidator(
+                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+    }
+
+  private static EblScenarioListBuilder uc11i_carrier_issueAmendedTransportDocument() {
+    EblComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                componentFactory.getMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+
 
   private static EblScenarioListBuilder uc12_carrier_awaitSurrenderRequestForDelivery() {
     EblComponentFactory componentFactory = threadLocalComponentFactory.get();

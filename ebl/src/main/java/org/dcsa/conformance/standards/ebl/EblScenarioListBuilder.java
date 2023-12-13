@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -38,7 +39,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    return carrier_SupplyScenarioParameters().thenAllPathsFrom(SI_START);
+    return noAction().thenEither(
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR).thenAllPathsFrom(SI_START),
+      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START)
+    );
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
@@ -119,6 +123,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private EblScenarioListBuilder thenHappyPathFrom(
       ShippingInstructionsStatus shippingInstructionsStatus) {
     return switch (shippingInstructionsStatus) {
+      case SI_START -> then(
+        uc1_shipper_submitShippingInstructions()
+          .then(
+            shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+              .thenHappyPathFrom(SI_RECEIVED)));
       case SI_RECEIVED -> then(uc6_carrier_publishDraftTransportDocument()
         .then(
           shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
@@ -134,7 +143,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       );
       case SI_COMPLETED -> then(noAction());
       case SI_CANCELLED, SI_DECLINED -> throw new AssertionError("Please use the black state rather than DECLINED");
-      case SI_START, SI_ANY -> throw new AssertionError("Not a real/reachable state");
+      case SI_ANY -> throw new AssertionError("Not a real/reachable state");
     };
   }
 
@@ -255,10 +264,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return new EblScenarioListBuilder(null);
   }
 
-  private static EblScenarioListBuilder carrier_SupplyScenarioParameters() {
+  private static EblScenarioListBuilder carrier_SupplyScenarioParameters(ScenarioType scenarioType) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName));
+        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
   }
 
 

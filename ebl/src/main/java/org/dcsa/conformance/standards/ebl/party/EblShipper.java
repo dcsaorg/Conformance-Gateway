@@ -95,10 +95,8 @@ public class EblShipper extends ConformanceParty {
       conformanceResponse -> {
         JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
         String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
-        String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
         ObjectNode updatedShippingInstructions =
           ((ObjectNode) jsonRequestBody)
-            .put("shippingInstructionsStatus", shippingInstructionsStatus)
             .put("shippingInstructionsReference", shippingInstructionsReference);
         persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
       });

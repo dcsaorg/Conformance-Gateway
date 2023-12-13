@@ -1,16 +1,14 @@
 package org.dcsa.conformance.core.check;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.NonNull;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import lombok.NonNull;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 class JsonAttributeBasedCheck extends ActionCheck {
 

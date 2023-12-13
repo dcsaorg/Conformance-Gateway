@@ -131,6 +131,30 @@ public class JsonAttribute {
         }));
   }
 
+  public static ActionCheck mustBeDatasetKeyword(
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    JsonPointer jsonPointer,
+    KeywordDataset dataset
+  ) {
+    return new JsonAttributeBasedCheck(
+      "",
+      actionTitle(httpMessageType, jsonPointer),
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType,
+      at(jsonPointer, node -> {
+        var text = node.asText();
+        if (!dataset.contains(text)) {
+          return Set.of(
+            "The attribute '%s' had value '%s' which was not a valid keyword here."
+              .formatted(renderJsonPointer(jsonPointer), renderValue(node.asText(null))));
+        }
+        return Collections.emptySet();
+      }));
+  }
+
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
     return (refNode) -> refNode.at(jsonPointer);
   }

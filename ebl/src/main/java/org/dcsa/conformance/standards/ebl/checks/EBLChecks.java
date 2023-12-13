@@ -29,6 +29,8 @@ public class EBLChecks {
   private static final JsonPointer TD_NOTIFICATION_TDR_PTR = JsonPointer.compile("/data/transportDocumentReference");
   private static final JsonPointer TD_NOTIFICATION_TD_STATUS_PTR = JsonPointer.compile("/data/transportDocumentStatus");
 
+  private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
+  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/sendToPlatform");
 
   public static Stream<ActionCheck> siRefSIRIsPresent(UUID matched) {
     return Stream.of(
@@ -55,6 +57,24 @@ public class EBLChecks {
     );
   }
 
+  public static Stream<ActionCheck> siRequestContentChecks(UUID matched) {
+    return Stream.of(
+      JsonAttribute.mustBeDatasetKeyword(
+        EblRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
+        EblDatasets.UN_LOCODE_DATASET
+      ),
+      JsonAttribute.mustBeDatasetKeyword(
+        EblRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        SI_REQUEST_SEND_TO_PLATFORM,
+        EblDatasets.EBL_PLATFORMS_DATASET
+      )
+    );
+  }
 
   public static Stream<ActionCheck> siRefStatusChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus) {
     return siRefStatusChecks(matched, shippingInstructionsStatus, null);

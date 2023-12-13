@@ -4,13 +4,29 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import lombok.NonNull;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends EblAction {
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
-  public Carrier_SupplyScenarioParametersAction(String carrierPartyName) {
-    super(carrierPartyName, null, null, "SupplyCSP", -1);
+  private ScenarioType scenarioType;
+
+  public Carrier_SupplyScenarioParametersAction(String carrierPartyName, @NonNull ScenarioType scenarioType) {
+    super(
+      carrierPartyName,
+      null,
+      null,
+      switch (scenarioType) {
+        case REGULAR -> "SupplyCSP";
+        case REEFER -> "SupplyCSP-AR";
+      },
+      -1);
+    this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
   @Override
@@ -20,12 +36,18 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   }
 
   @Override
+  public ObjectNode asJsonNode() {
+    return super.asJsonNode()
+      .put("scenarioType", scenarioType.name());
+  }
+
+  @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (carrierScenarioParameters != null) {
       jsonState.set("carrierScenarioParameters", carrierScenarioParameters.toJson());
     }
-    return jsonState;
+    return jsonState.put("scenarioType", scenarioType.name());
   }
 
   @Override
@@ -35,6 +57,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     if (cspNode != null) {
       carrierScenarioParameters = CarrierScenarioParameters.fromJson(cspNode);
     }
+    this.scenarioType = ScenarioType.valueOf(jsonState.required("scenarioType").asText());
   }
 
   @Override
@@ -44,15 +67,27 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new CarrierScenarioParameters(
-      "Booking ref X",
-      "Commodity Subref for X",
-      "APZU4812090",
-      "DKCPH",
-      "Consignment Item HS Code",
-      "Shoes"
-
-    ).toJson();
+    var csp = switch (scenarioType) {
+      case REGULAR -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity subreference for regular (non-DG, non-reefer) cargo",
+        // Any valid regular equipment reference will do as an example.
+        "NARU3472484",
+        "DKCPH",
+        "851712",
+        "300 boxes of blue shoes size 47"
+      );
+      case REEFER -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity subreference for cargo requiring an *active* reefer",
+        // Any valid reefer equipment reference will do as an example.
+        "BBCU5200220",
+        "DKCPH",
+        "04052090",
+        "Dairy products"
+      );
+    };
+    return csp.toJson();
   }
 
   @Override

@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -327,9 +328,9 @@ public class CarrierShippingInstructions {
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_VOIDED.wireName());
   }
 
-  public void issueAmendedTransportDocument(String documentReference) {
+  public void issueAmendedTransportDocument(String documentReference, ScenarioType scenarioType) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_VOIDED);
-    this.generateDraftTD();
+    this.generateDraftTD(scenarioType);
     updateTDForIssuance();
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
@@ -354,13 +355,13 @@ public class CarrierShippingInstructions {
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_ISSUED.wireName());
   }
 
-  public void publishDraftTransportDocument(String documentReference) {
+  public void publishDraftTransportDocument(String documentReference, ScenarioType scenarioType) {
     // We allow draft when:
     //  1) The original ("black") state is RECEIVED, *and*
     //  2) There is no update received (that is "grey" is not UPDATE_RECEIVED)
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s != SI_UPDATE_RECEIVED);
-    this.generateDraftTD();
+    this.generateDraftTD(scenarioType);
     var tdData = getTransportDocument().orElseThrow();
     var tdr = tdData.required(TRANSPORT_DOCUMENT_REFERENCE).asText();
     mutateShippingInstructionsAndUpdate(si -> si.put(TRANSPORT_DOCUMENT_REFERENCE, tdr));
@@ -432,25 +433,37 @@ public class CarrierShippingInstructions {
     }
   }
 
-  private void fixupUtilizedTransportEquipments(ObjectNode transportDocument) {
+  private void fixupUtilizedTransportEquipments(ObjectNode transportDocument, ScenarioType scenarioType) {
+    var containerISOEquipmentCode = switch (scenarioType) {
+      case REEFER -> "22RB";
+      case REGULAR -> "22G1";
+    };
     for (JsonNode node : transportDocument.path("utilizedTransportEquipments")) {
       if (!node.isObject()) {
         continue;
       }
       ObjectNode ute = (ObjectNode)node;
       var ref = ute.path("equipmentReference");
-      ute.putObject("equipment").set("equipmentReference", ref);
+      ute.putObject("equipment")
+        .put("ISOEquipmentCode", containerISOEquipmentCode)
+        .set("equipmentReference", ref);
       ute.remove("equipmentReference");
+      if (scenarioType == ScenarioType.REEFER) {
+        ute.put("isNonOperatingReefer", false)
+          .putObject("activeReeferSettings")
+          .put("temperatureSetpoint", -18)
+          .put("temperatureUnit", "CEL");
+      }
     }
   }
 
-  private void generateDraftTD() {
+  private void generateDraftTD(ScenarioType scenarioType) {
     var td = OBJECT_MAPPER.createObjectNode();
     var siData = getShippingInstructions();
     var existingTd = getTransportDocument().orElse(null);
     copyFieldsWherePresent(siData, td, COPY_SI_INTO_TD_FIELDS);
     preserveOrGenerateCarrierFields(existingTd, td);
-    fixupUtilizedTransportEquipments(td);
+    fixupUtilizedTransportEquipments(td, scenarioType);
     fixupConsignmentItems(td);
     state.set(TD_DATA_FIELD, td);
   }

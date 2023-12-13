@@ -24,6 +24,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -86,15 +87,28 @@ public class EblCarrier extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
-      new CarrierScenarioParameters(
-        "CARRIER_BOOKING_REFX",
-        "COMMODITY_SUBREFERENCE_FOR_REFX",
-        "APZU4812090",
-        "DKCPH",
-        "851712",
-        "300 boxes of blue shoes size 47"
+      switch (scenarioType) {
+        case REGULAR -> new CarrierScenarioParameters(
+          "CBR_123_REGULAR",
+          "Some Commodity Subreference 123",
+          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "NARU3472484",
+          "DKCPH",
+          "851712",
+          "300 boxes of blue shoes size 47"
         );
+        case REEFER -> new CarrierScenarioParameters(
+          "CBR_123_REEFER",
+          "Some reefer Commodity Subreference 123",
+          // A "22RB" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "BBCU5200220",
+          "DKCPH",
+          "04052090",
+          "Dairy products"
+        );
+    };
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()
@@ -144,10 +158,11 @@ public class EblCarrier extends ConformanceParty {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required("documentReference").asText();
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.publishDraftTransportDocument(documentReference);
+    si.publishDraftTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
@@ -234,10 +249,11 @@ public class EblCarrier extends ConformanceParty {
     log.info("Carrier.issueAmendedTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required("documentReference").asText();
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.issueAmendedTransportDocument(documentReference);
+    si.issueAmendedTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);

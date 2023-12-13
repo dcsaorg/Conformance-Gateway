@@ -8,6 +8,9 @@ import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
+import static org.dcsa.conformance.core.check.JsonAttribute.renderJsonPointer;
+import static org.dcsa.conformance.core.check.JsonAttribute.renderValue;
+
 public class JsonAttributeCheck extends ActionCheck {
   private final JsonPointer jsonPointer;
   private final String expectedValue;
@@ -45,13 +48,6 @@ public class JsonAttributeCheck extends ActionCheck {
     this.expectedValue = expectedValue;
   }
 
-  private static String renderValue(String v) {
-    return v == null ? "(null)" : v;
-  }
-
-  private static String renderJsonPointer(JsonPointer jsonPointer) {
-    return jsonPointer.toString().substring(1).replace("/", ".");
-  }
 
   @Override
   protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {

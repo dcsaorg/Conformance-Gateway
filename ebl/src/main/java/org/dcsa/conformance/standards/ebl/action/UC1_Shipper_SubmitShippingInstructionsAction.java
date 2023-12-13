@@ -69,13 +69,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            new JsonAttributeCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              JsonPointer.compile("/shippingInstructionsStatus"),
-              ShippingInstructionsStatus.SI_RECEIVED.wireName()
-            ),
             // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,

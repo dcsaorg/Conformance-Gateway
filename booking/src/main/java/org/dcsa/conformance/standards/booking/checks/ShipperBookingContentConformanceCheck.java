@@ -58,8 +58,8 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
           "the ISOEquipmentCode implies that the container is a reefer container"
         );
         if (node != null && node.isBoolean()) {
-          var isNOR = node.asBoolean();
-          if (isNOR) {
+          var isNOR = node.booleanValue();
+          if (!isNOR) {
             fieldRequired(
               requestedEquipment,
               ACTIVE_REEFER_SETTINGS_FIELD,

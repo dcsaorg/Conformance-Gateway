@@ -119,8 +119,7 @@ public class EblComponentFactory extends AbstractComponentFactory {
     String schemaFilePath = "/standards/ebl/schemas/ebl-%s-v%s0.json"
       .formatted(apiName, standardVersion.charAt(0));
 
-    return new JsonSchemaValidator(
-      EblComponentFactory.class.getResourceAsStream(schemaFilePath), jsonSchema);
+    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 
   @SneakyThrows

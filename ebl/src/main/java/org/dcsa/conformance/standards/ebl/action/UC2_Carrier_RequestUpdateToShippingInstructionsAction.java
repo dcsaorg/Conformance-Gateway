@@ -5,7 +5,9 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends StateChangingSIAction {
@@ -37,28 +39,17 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-          new HttpMethodCheck(EblRole::isCarrier, getMatchedExchangeUuid(), "POST"),
-            new UrlPathCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), "/v3/shipping-instructions-notifications"),
-            new ResponseStatusCheck(
-                EblRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            // TODO: Notification payload check
-            new ApiHeaderCheck(
-              EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-              EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-              EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+        return Stream.concat(
+          EBLChecks.siNotificationSIR(
+            getMatchedExchangeUuid(),
+            getDspSupplier().get().shippingInstructionsReference()
+          ),
+          getSINotificationChecks(
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            requestSchemaValidator,
+            ShippingInstructionsStatus.SI_PENDING_UPDATE
+        ));
       }
     };
   }

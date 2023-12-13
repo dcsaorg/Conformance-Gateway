@@ -1,0 +1,23 @@
+{
+  "surrenderRequestReference": "SURRENDER_REQUEST_REFERENCE_PLACEHOLDER",
+  "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+  "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
+  "surrenderRequestedBy": {
+    "eblPlatform": "ASDF",
+    "legalName": "Legal Name"
+  },
+  "endorsementChain": [
+    {
+      "action": "ETOF",
+      "actionDateTime": "ACTION_DATE_TIME_PLACEHOLDER",
+      "actor": {
+        "eblPlatform": "ASDF",
+        "legalName": "Legal Name"
+      },
+      "recipient": {
+        "eblPlatform": "ASDF",
+        "legalName": "Legal Name"
+      }
+    }
+  ]
+}

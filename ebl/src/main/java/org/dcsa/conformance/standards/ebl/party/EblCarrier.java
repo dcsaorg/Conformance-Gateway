@@ -23,9 +23,7 @@ import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ebl.action.Carrier_SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.ebl.action.UC2_Carrier_RequestUpdateToShippingInstructionsAction;
-import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
 @Slf4j
@@ -73,7 +71,16 @@ public class EblCarrier extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(Carrier_SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
       Map.entry(UC2_Carrier_RequestUpdateToShippingInstructionsAction.class, this::requestUpdateToShippingInstructions),
-      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument)
+      Map.entry(UC4_Carrier_ProcessUpdateToShippingInstructionsAction.class, this::processUpdatedShippingInstructions),
+      Map.entry(UC6_Carrier_PublishDraftTransportDocumentAction.class, this::publishDraftTransportDocument),
+      Map.entry(UC8_Carrier_IssueTransportDocumentAction.class, this::issueTransportDocument),
+      Map.entry(UC9_Carrier_AwaitSurrenderRequestForAmendmentAction.class, this::notifyOfSurrenderForAmendment),
+      Map.entry(UC10_Carrier_ProcessSurrenderRequestForAmendmentAction.class, this::processSurrenderRequestForAmendment),
+      Map.entry(UC11v_Carrier_VoidTransportDocumentAction.class, this::voidTransportDocument),
+      Map.entry(UC11i_Carrier_IssueAmendedTransportDocumentAction.class, this::issueAmendedTransportDocument),
+      Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery),
+      Map.entry(UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class, this::processSurrenderRequestForDelivery),
+      Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete)
     );
   }
 
@@ -91,7 +98,7 @@ public class EblCarrier extends ConformanceParty {
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()
-        .put("actionId", actionPrompt.get("actionId").asText())
+        .put("actionId", actionPrompt.required("actionId").asText())
         .set("input", carrierScenarioParameters.toJson()));
     addOperatorLogEntry(
       "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
@@ -100,7 +107,7 @@ public class EblCarrier extends ConformanceParty {
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var documentReference = actionPrompt.get("documentReference").asText();
+    var documentReference = actionPrompt.required("documentReference").asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
@@ -114,20 +121,161 @@ public class EblCarrier extends ConformanceParty {
   }
 
 
+  private void processUpdatedShippingInstructions(JsonNode actionPrompt) {
+    log.info("Carrier.processUpdatedShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var accept = actionPrompt.required("acceptChanges").asBoolean(true);
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    if (accept) {
+      si.acceptUpdatedShippingInstructions(documentReference);
+    } else {
+      si.declineUpdatedShippingInstructions(documentReference, "Declined as requested by the Conformance orchestrator");
+    }
+    si.save(persistentMap);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+
+    addOperatorLogEntry("Processed update to the shipping instructions with document reference '%s'".formatted(documentReference));
+  }
+
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var documentReference = actionPrompt.get("documentReference").asText();
+    var documentReference = actionPrompt.required("documentReference").asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.publishDraftTransportDocument(documentReference);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
-    // generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
     addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));
+  }
+
+  private void issueTransportDocument(JsonNode actionPrompt) {
+    log.info("Carrier.issueTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.issueTransportDocument(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Issued transport document '%s'".formatted(documentReference));
+  }
+
+  private void notifyOfSurrenderForAmendment(JsonNode actionPrompt) {
+    log.info("Carrier.notifyOfSurrenderForAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.surrenderForAmendmentRequest(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Sent notification for surrender for amendment of transport document with reference '%s'".formatted(documentReference));
+  }
+
+  private void notifyOfSurrenderForDelivery(JsonNode actionPrompt) {
+    log.info("Carrier.notifyOfSurrenderForDelivery(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.surrenderForDeliveryRequest(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Sent notification for surrender for delivery of transport document with reference '%s'".formatted(documentReference));
+  }
+
+  private void processSurrenderRequestForAmendment(JsonNode actionPrompt) {
+    log.info("Carrier.processSurrenderRequestForAmendment(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var accept = actionPrompt.required("acceptAmendmentRequest").asBoolean(true);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    if (accept) {
+      si.acceptSurrenderForAmendment(documentReference);
+    } else {
+      si.rejectSurrenderForAmendment(documentReference);
+    }
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+  }
+
+  private void voidTransportDocument(JsonNode actionPrompt) {
+    log.info("Carrier.voidTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.voidTransportDocument(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Voided transport document '%s'".formatted(documentReference));
+  }
+
+  private void issueAmendedTransportDocument(JsonNode actionPrompt) {
+    log.info("Carrier.issueAmendedTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.issueAmendedTransportDocument(documentReference);
+    si.save(persistentMap);
+    tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Issued amended transport document '%s'".formatted(documentReference));
+  }
+
+  private void processSurrenderRequestForDelivery(JsonNode actionPrompt) {
+    log.info("Carrier.processSurrenderRequestForDelivery(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var accept = actionPrompt.required("acceptDeliveryRequest").asBoolean(true);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    if (accept) {
+      si.acceptSurrenderForDelivery(documentReference);
+    } else {
+      si.rejectSurrenderForDelivery(documentReference);
+    }
+    si.save(persistentMap);
+    generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
+
+    addOperatorLogEntry("Processed surrender request for delivery of transport document with reference '%s'".formatted(documentReference));
+  }
+
+  private void confirmShippingInstructionsComplete(JsonNode actionPrompt) {
+    log.info("Carrier.confirmShippingInstructionsComplete(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    si.confirmShippingInstructionsComplete(documentReference);
+    si.save(persistentMap);
+    generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
+
+    addOperatorLogEntry("Confirmed shipping instructions with reference %s is complete".formatted(documentReference));
   }
 
   private void generateAndEmitNotificationFromShippingInstructions(JsonNode actionPrompt, CarrierShippingInstructions shippingInstructions, boolean includeShippingInstructionsReference) {
@@ -258,11 +406,11 @@ public class EblCarrier extends ConformanceParty {
     if (sir == null) {
       return return404(request);
     }
-    var persistedBookingData = persistentMap.load(sir);
-    if (persistedBookingData == null) {
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
       throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
     }
-    var si = CarrierShippingInstructions.fromPersistentStore(persistedBookingData);
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
     // If the TDR is resolvable, then the document must have a TD.
     var body = si.getTransportDocument().orElseThrow();
     ConformanceResponse response =
@@ -274,6 +422,72 @@ public class EblCarrier extends ConformanceParty {
       "Responded to GET transport document request '%s' (in state '%s')"
         .formatted(documentReference, si.getShippingInstructionsState().wireName()));
     return response;
+  }
+
+
+  private ConformanceResponse _handlePatchShippingInstructions(ConformanceRequest request, String documentReference) {
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
+      return return404(request);
+    }
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
+    si.cancelShippingInstructionsUpdate(documentReference);
+    si.save(persistentMap);
+    var siData = si.getShippingInstructions();
+    if (isShipperNotificationEnabled) {
+      executor.schedule(
+        () ->
+          asyncCounterpartPost(
+            "/v3/shipping-instructions-notifications",
+            ShippingInstructionsNotification.builder()
+              .apiVersion(apiVersion)
+              .shippingInstructions(siData)
+              .build()
+              .asJsonNode()),
+        1,
+        TimeUnit.SECONDS);
+    }
+    return returnShippingInstructionsRefStatusResponse(
+      200,
+      request,
+      siData,
+      documentReference
+    );
+  }
+
+  private ConformanceResponse _handlePatchTransportDocument(ConformanceRequest request, String documentReference) {
+    var sir = tdrToSir.get(documentReference);
+    if (sir == null) {
+      return return404(request);
+    }
+    var persistedSi = persistentMap.load(sir);
+    if (persistedSi == null) {
+      throw new IllegalStateException("We had a TDR -> SIR mapping, but there is no data related to that reference");
+    }
+    var si = CarrierShippingInstructions.fromPersistentStore(persistedSi);
+    si.approveDraftTransportDocument(documentReference);
+    si.save(persistentMap);
+    var td = si.getTransportDocument().orElseThrow();
+    if (isShipperNotificationEnabled) {
+      executor.schedule(
+        () ->
+          asyncCounterpartPost(
+            "/v3/transport-document-notifications",
+            TransportDocumentNotification.builder()
+              .apiVersion(apiVersion)
+              .transportDocument(td)
+              .build()
+              .asJsonNode()),
+        1,
+        TimeUnit.SECONDS);
+    }
+    return returnTransportDocumentRefStatusResponse(
+      200,
+      request,
+      td,
+      documentReference
+    );
   }
 
   private ConformanceResponse returnShippingInstructionsRefStatusResponse(
@@ -308,6 +522,27 @@ public class EblCarrier extends ConformanceParty {
     return response;
   }
 
+
+  private ConformanceResponse returnTransportDocumentRefStatusResponse(
+    int responseCode, ConformanceRequest request, ObjectNode transportDocument, String documentReference) {
+    var tdr = transportDocument.required("transportDocumentReference").asText();
+    var tdStatus = transportDocument.required("transportDocumentStatus").asText();
+    var statusObject =
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("transportDocumentStatus", tdStatus)
+        .put("transportDocumentReference", tdr);
+    ConformanceResponse response =
+      request.createResponse(
+        responseCode,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(statusObject));
+    addOperatorLogEntry(
+      "Responded %d to %s TD '%s' (resulting state '%s')"
+        .formatted(responseCode, request.method(), documentReference, tdStatus));
+    return response;
+  }
+
   @SneakyThrows
   private ConformanceResponse _handlePostShippingInstructions(ConformanceRequest request) {
     ObjectNode siPayload =
@@ -324,8 +559,8 @@ public class EblCarrier extends ConformanceParty {
               .shippingInstructions(si.getShippingInstructions())
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnShippingInstructionsRefStatusResponse(
       201,
@@ -359,8 +594,8 @@ public class EblCarrier extends ConformanceParty {
               .shippingInstructions(si.getShippingInstructions())
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
   }
@@ -389,7 +624,18 @@ public class EblCarrier extends ConformanceParty {
           }
           yield return404(request);
         }
-        // case "PATCH" -> _handlePatchRequest(request);
+        case "PATCH" -> {
+          var url = request.url().replaceAll("/++$", "");
+          var lastSegment = lastUrlSegment(url);
+          var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+          if (urlStem.endsWith("/v3/shipping-instructions")) {
+            yield _handlePatchShippingInstructions(request, lastSegment);
+          }
+          if (urlStem.endsWith("/v3/transport-documents")) {
+            yield _handlePatchTransportDocument(request, lastSegment);
+          }
+          yield return404(request);
+        }
         case "PUT" -> _handlePutShippingInstructions(request);
         default -> return405(request, "GET", "POST", "PUT", "PATCH");
       };

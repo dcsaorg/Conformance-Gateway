@@ -2,15 +2,20 @@ package org.dcsa.conformance.standards.eblsurrender.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -75,40 +80,17 @@ public class EblSurrenderPlatform extends ConformanceParty {
         forAmendment
             ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
-    ObjectNode jsonRequestBody =
-        objectMapper
-            .createObjectNode()
-            .put("surrenderRequestReference", srr)
-            .put("transportDocumentReference", tdr)
-            .put("surrenderRequestCode", src);
 
-    jsonRequestBody.set(
-        "surrenderRequestedBy",
-        objectMapper
-            .createObjectNode()
-            .put("eblPlatformIdentifier", "one@example.com")
-            .put("legalName", "Legal Name One"));
+    JsonNode jsonRequestBody =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/eblsurrender/messages/eblsurrender-api-%s-request.json"
+                .formatted(apiVersion.startsWith("3") ? "v30" : "v20"),
+            Map.ofEntries(
+                Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
+                Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
+                Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
+                Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
-    ObjectNode endorsementChainLink =
-        objectMapper
-            .createObjectNode()
-            .put("action", "ETOF")
-            .put("actionDateTime", "2023-08-27T19:38:24.342Z");
-    endorsementChainLink.set(
-        "actor",
-        objectMapper
-            .createObjectNode()
-            .put("eblPlatformIdentifier", "two@example.com")
-            .put("legalName", "Legal Name Two"));
-    endorsementChainLink.set(
-        "recipient",
-        objectMapper
-            .createObjectNode()
-            .put("eblPlatformIdentifier", "three@example.com")
-            .put("legalName", "Legal Name Three"));
-
-    jsonRequestBody.set(
-        "endorsementChain", objectMapper.createArrayNode().add(endorsementChainLink));
     asyncCounterpartPost(
         "/%s/ebl-surrender-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         jsonRequestBody);

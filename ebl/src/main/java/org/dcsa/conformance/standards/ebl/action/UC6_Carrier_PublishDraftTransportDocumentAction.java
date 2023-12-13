@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
@@ -37,28 +37,17 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
-            new HttpMethodCheck(EblRole::isCarrier, getMatchedExchangeUuid(), "POST"),
-            new UrlPathCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), "/v3/transport-document-notifications"),
-            new ResponseStatusCheck(
-                EblRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            // TODO: Notification payload check
-            new ApiHeaderCheck(
-              EblRole::isCarrier,
+        return Stream.concat(
+            Stream.concat(
+              EBLChecks.tdNotificationTDRIsPresent(getMatchedExchangeUuid()),
+              EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), TransportDocumentStatus.TD_DRAFT)
+            ),
+            getTDNotificationChecks(
                 getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-              EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
-            new JsonSchemaCheck(
-              EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator));
+                expectedApiVersion,
+                requestSchemaValidator,
+                TransportDocumentStatus.TD_DRAFT,
+                false));
       }
     };
   }

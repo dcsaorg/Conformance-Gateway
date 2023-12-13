@@ -4,6 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -21,7 +26,7 @@ public class ConformanceReport {
   private final ConformanceStatus conformanceStatus;
   private int conformantExchangeCount;
   private int nonConformantExchangeCount;
-  private final Set<String> errorMessages = new TreeSet<>();
+  private final Set<String> errorMessages = new LinkedHashSet<>();
   private final List<ConformanceReport> subReports;
 
   public ConformanceReport(ConformanceCheck conformanceCheck, String roleName) {

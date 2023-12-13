@@ -2,22 +2,14 @@ package org.dcsa.conformance.standards.booking.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -115,10 +107,16 @@ public class Carrier extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes();
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-            generateSchemaValidVesselIMONumber());
+            generateSchemaValidVesselIMONumber(),
+          "service name",
+          validHsCodeAndCommodityType.get(0),
+          validHsCodeAndCommodityType.get(1),
+          generateValidPolUNLocationCode(),
+          generateValidPodUNLocationCode());
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -128,6 +126,26 @@ public class Carrier extends ConformanceParty {
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
+
+  private String generateValidPolUNLocationCode()  {
+    List<String> validUnLocationCode = Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
+    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
+  }
+
+  private String generateValidPodUNLocationCode()  {
+    List<String> validUnLocationCode = Arrays.asList("DEBRV", "CNSGH", "JPTYO", "AEAUH", "AEJEA", "AEKHL", "AEKLF");
+    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
+  }
+
+  private List<String> generateValidCommodityTypeAndHSCodes()  {
+    Map<Integer, List<String>>  mapHSCodesAndCommodityType = Map.of(
+      0,Arrays.asList("411510", "Leather"),
+      1,Arrays.asList("843420", "Dairy machinery"),
+      2,Arrays.asList("721911", "Stainless steel"),
+      3,Arrays.asList("730110", "Iron or steel")
+    );
+    return mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
+  }
 
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
@@ -424,8 +442,8 @@ public class Carrier extends ConformanceParty {
                       .booking(booking)
                       .build()
                       .asJsonNode()),
-          1,
-          TimeUnit.SECONDS);
+          100,
+          TimeUnit.MILLISECONDS);
     }
     return returnBookingStatusResponse(200, request, booking, cbrr);
   }
@@ -555,8 +573,8 @@ public class Carrier extends ConformanceParty {
                       .booking(persistableCarrierBooking.getBooking())
                       .build()
                       .asJsonNode()),
-          1,
-          TimeUnit.SECONDS);
+          100,
+          TimeUnit.MILLISECONDS);
     }
     return returnBookingStatusResponse(
       201,

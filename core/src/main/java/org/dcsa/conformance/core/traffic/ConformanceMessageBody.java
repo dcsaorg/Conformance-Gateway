@@ -15,11 +15,11 @@ public class ConformanceMessageBody {
   private final JsonNode jsonBody;
 
   public ConformanceMessageBody(String stringBody) {
-    this.stringBody = stringBody;
+    this.stringBody = stringBody == null ? "" : stringBody;
     boolean isCorrectJson;
     JsonNode jsonBody;
     try {
-      jsonBody = new ObjectMapper().readTree(stringBody);
+      jsonBody = new ObjectMapper().readTree(this.stringBody);
       isCorrectJson = true;
     } catch (JsonProcessingException e) {
       jsonBody = new ObjectMapper().createObjectNode();

@@ -37,7 +37,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.RECEIVED,
     BookingState.REJECTED,
     BookingState.PENDING_UPDATE,
-    BookingState.PENDING_UPDATE_CONFIRMATION,
+    BookingState.UPDATE_RECEIVED,
     /* CANCELLED depends on whether cancel happens before CONFIRMED, but the logic does not track prior
      * states. Therefore, we just assume it is optional in CANCELLED here.
      */

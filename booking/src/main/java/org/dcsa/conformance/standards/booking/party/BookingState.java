@@ -4,7 +4,7 @@ public enum BookingState {
     START,
     RECEIVED,
     PENDING_UPDATE,
-    PENDING_UPDATE_CONFIRMATION,
+    UPDATE_RECEIVED,
     REJECTED,
     CANCELLED,
     CONFIRMED,

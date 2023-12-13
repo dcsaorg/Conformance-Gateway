@@ -84,7 +84,7 @@ public class Carrier extends ConformanceParty {
             this::requestUpdateToConfirmedBooking),
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
-        Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
+        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
   private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
@@ -197,7 +197,8 @@ public class Carrier extends ConformanceParty {
         actionPrompt,
         BookingState.REJECTED,
         true,
-        booking -> booking.put("reason", "Rejected as required by the conformance scenario")
+        booking -> booking.put("reason", "Rejected as required by the conformance scenario"),
+      false
     );
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
@@ -232,7 +233,8 @@ public class Carrier extends ConformanceParty {
                 .addObject()
                 .put(
                     "message",
-                    "Please perform the changes requested by the Conformance orchestrator"));
+                    "Please perform the changes requested by the Conformance orchestrator"),
+      false);
     addOperatorLogEntry("Requested update to the booking request with CBRR '%s'".formatted(cbrr));
   }
 
@@ -255,6 +257,7 @@ public class Carrier extends ConformanceParty {
 
     String cbr = actionPrompt.get("cbr").asText();
 
+
     processAndEmitNotificationForStateTransition(
         actionPrompt,
         BookingState.PENDING_AMENDMENT,
@@ -265,7 +268,8 @@ public class Carrier extends ConformanceParty {
                 .addObject()
                 .put(
                     "message",
-                    "Please perform the changes requested by the Conformance orchestrator"));
+                    "Please perform the changes requested by the Conformance orchestrator"),
+      true);
     addOperatorLogEntry("Requested update to the booking with CBR '%s'".formatted(cbr));
   }
 
@@ -273,7 +277,7 @@ public class Carrier extends ConformanceParty {
       JsonNode actionPrompt,
       BookingState targetState) {
     processAndEmitNotificationForStateTransition(
-        actionPrompt, targetState, false, null);
+        actionPrompt, targetState, false, null, false);
   }
 
   private String generateAndAssociateCBR(String cbrr) {
@@ -288,13 +292,17 @@ public class Carrier extends ConformanceParty {
       JsonNode actionPrompt,
       BookingState targetState,
       boolean includeCbrr,
-      Consumer<ObjectNode> bookingMutator) {
+      Consumer<ObjectNode> bookingMutator,
+      boolean resetAmendedBookingStatus) {
     String cbrr = actionPrompt.get("cbrr").asText();
     var peristableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     peristableCarrierBooking.performSimpleStatusChange(cbrr, targetState);
     var booking = peristableCarrierBooking.getBooking();
     if (bookingMutator != null) {
       bookingMutator.accept(booking);
+    }
+    if (resetAmendedBookingStatus) {
+      peristableCarrierBooking.resetAmendedState();
     }
     peristableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, peristableCarrierBooking, includeCbrr);

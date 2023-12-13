@@ -63,7 +63,7 @@ public class Shipper extends ConformanceParty {
         Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
         Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
         Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
-        Map.entry(UC12_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
+        Map.entry(UC11_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking));
   }
 
   private void getBookingRequest(JsonNode actionPrompt) {

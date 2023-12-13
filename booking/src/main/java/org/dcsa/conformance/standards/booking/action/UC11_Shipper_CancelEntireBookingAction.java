@@ -14,24 +14,24 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC12_Shipper_CancelEntireBookingAction extends StateChangingBookingAction {
+public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
 
-  public UC12_Shipper_CancelEntireBookingAction(
+  public UC11_Shipper_CancelEntireBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC12", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC12: Cancel an entire booking");
+    return ("UC11: Cancel an entire booking");
   }
 
   @Override

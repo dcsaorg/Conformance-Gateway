@@ -21,10 +21,10 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 public class PersistableCarrierBooking {
 
   private static final Map<BookingState, Predicate<BookingState>> PREREQUISITE_STATE_FOR_TARGET_STATE = Map.ofEntries(
-    Map.entry(CONFIRMED, Set.of(RECEIVED, PENDING_UPDATE_CONFIRMATION, CONFIRMED)::contains),
-    Map.entry(REJECTED, Set.of(RECEIVED, PENDING_UPDATE, PENDING_UPDATE_CONFIRMATION)::contains),
+    Map.entry(CONFIRMED, Set.of(RECEIVED, UPDATE_RECEIVED, CONFIRMED)::contains),
+    Map.entry(REJECTED, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
     Map.entry(DECLINED, Set.of(CONFIRMED, PENDING_AMENDMENT, AMENDMENT_RECEIVED)::contains),
-    Map.entry(PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, PENDING_UPDATE_CONFIRMATION)::contains),
+    Map.entry(PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
     Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
     Map.entry(COMPLETED, Set.of(CONFIRMED)::contains)
   );
@@ -32,7 +32,7 @@ public class PersistableCarrierBooking {
   private static final Set<BookingState> NOT_APPLICABLE_FOR_SIMPLE_STATE_CHANGE = Set.of(
     START,
     RECEIVED,
-    PENDING_UPDATE_CONFIRMATION,
+    UPDATE_RECEIVED,
     AMENDMENT_RECEIVED,
     CANCELLED,
     CONFIRMED,
@@ -47,7 +47,7 @@ public class PersistableCarrierBooking {
   private static final Set<BookingState> MAY_UPDATE_REQUEST_STATES = Set.of(
     RECEIVED,
     PENDING_UPDATE,
-    PENDING_UPDATE_CONFIRMATION
+    UPDATE_RECEIVED
   );
 
   private static final String BOOKING_STATUS = "bookingStatus";
@@ -103,7 +103,7 @@ public class PersistableCarrierBooking {
   }
 
   public void confirmBookingAmendment(String reference, String reason) {
-    checkState(reference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
+    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
@@ -118,12 +118,15 @@ public class PersistableCarrierBooking {
       var newCbr = cbrGenerator.get();
       mutateBookingAndAmendment(b -> b.put(CARRIER_BOOKING_REFERENCE, newCbr));
     }
+    resetAmendedState();
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     setReason(reason);
   }
 
-
+  public void resetAmendedState() {
+    mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
+  }
 
   private void ensureConfirmedBookingHasCarrierFields(ObjectNode booking) {
     var clauses = booking.putArray("carrierClauses");
@@ -148,7 +151,7 @@ public class PersistableCarrierBooking {
   }
 
   public void declineBookingAmendment(String reference, String reason) {
-    checkState(reference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
+    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
     setReason(reason);
   }
@@ -195,7 +198,7 @@ public class PersistableCarrierBooking {
   }
 
   public void cancelBookingAmendment(String bookingReference, String reason) {
-    checkState(bookingReference, getBookingState(), s -> s == AMENDMENT_RECEIVED);
+    checkState(bookingReference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Amendment cancelled by shipper (no reason given)";
@@ -244,7 +247,7 @@ public class PersistableCarrierBooking {
     if (isAmendment) {
       changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
     } else {
-      changeState(BOOKING_STATUS, BookingState.PENDING_UPDATE_CONFIRMATION);
+      changeState(BOOKING_STATUS, BookingState.UPDATE_RECEIVED);
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
@@ -257,11 +260,13 @@ public class PersistableCarrierBooking {
 
   public BookingState getBookingState() {
     var booking = getBooking();
-    var s = booking.path(AMENDED_BOOKING_STATUS);
-    if (s.isTextual()) {
-      return BookingState.fromWireName(s.asText());
-    }
     return BookingState.fromWireName(booking.required(BOOKING_STATUS).asText());
+  }
+
+  public BookingState getBookingAmendedState() {
+    var booking = getBooking();
+    var s = booking.path(AMENDED_BOOKING_STATUS);
+    return BookingState.fromWireName(s.asText());
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {

@@ -87,7 +87,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
-                BookingState.PENDING_UPDATE_CONFIRMATION,
+                BookingState.UPDATE_RECEIVED,
                 null));
       }
     };

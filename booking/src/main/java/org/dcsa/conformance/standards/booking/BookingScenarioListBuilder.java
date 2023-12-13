@@ -167,7 +167,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                   uc4_carrier_rejectBookingRequest().thenAllPathsFrom(REJECTED),
                   uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
                   uc11_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
-      case START -> then(uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenAllPathsFrom(RECEIVED));
+      case START -> thenEither(
+        uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenAllPathsFrom(RECEIVED),
+        uc1_shipper_SubmitBookingRequest(BookingVariant.REEFER).thenHappyPathFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(

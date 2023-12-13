@@ -2,6 +2,7 @@
   "transportDocumentTypeCode": "BOL",
   "isElectronic": true,
   "isToOrder": true,
+  "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {

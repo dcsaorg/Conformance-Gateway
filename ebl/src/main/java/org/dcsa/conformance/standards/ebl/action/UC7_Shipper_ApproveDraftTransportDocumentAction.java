@@ -81,18 +81,14 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                 EblRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator));
+                responseSchemaValidator),
+                EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), getDspSupplier(), TransportDocumentStatus.TD_APPROVED));
         return Stream.concat(
           primaryExchangeChecks,
-          Stream.concat(
-            Stream.concat(
-              EBLChecks.tdRefTDR(getMatchedExchangeUuid(), tdr),
-              EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), TransportDocumentStatus.TD_APPROVED)
-            ),
-            getTDNotificationChecks(
-              expectedApiVersion,
-              notificationSchemaValidator,
-              TransportDocumentStatus.TD_APPROVED)));
+          getTDNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            TransportDocumentStatus.TD_APPROVED));
       }
     };
   }

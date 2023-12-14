@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -39,17 +38,12 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.concat(
-            Stream.concat(
-              EBLChecks.tdNotificationTDRIsPresent(getMatchedExchangeUuid()),
-              EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), TransportDocumentStatus.TD_DRAFT)
-            ),
-            getTDNotificationChecks(
+        return getTDNotificationChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
                 requestSchemaValidator,
                 TransportDocumentStatus.TD_DRAFT,
-                false));
+                false);
       }
     };
   }

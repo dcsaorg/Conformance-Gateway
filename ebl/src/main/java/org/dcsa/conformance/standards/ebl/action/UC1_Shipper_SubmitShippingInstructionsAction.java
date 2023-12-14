@@ -68,7 +68,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -78,23 +77,23 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 EblRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator));
+                responseSchemaValidator),
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()));
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()),
-            Stream.concat(
-              Stream.concat(
-                EBLChecks.siRefSIRIsPresent(getMatchedExchangeUuid()),
-                EBLChecks.siRefStatusChecks(
-                  getMatchedExchangeUuid(),
-                  ShippingInstructionsStatus.SI_RECEIVED
-                )),
+              EBLChecks.siRefStatusContentChecks(
+                getMatchedExchangeUuid(),
+                ShippingInstructionsStatus.SI_RECEIVED,
+                EBLChecks.SIR_REQUIRED_IN_REF_STATUS
+              ),
               getSINotificationChecks(
+                getMatchedNotificationExchangeUuid(),
                 expectedApiVersion,
                 notificationSchemaValidator,
-                ShippingInstructionsStatus.SI_RECEIVED))
-          ));
+                ShippingInstructionsStatus.SI_RECEIVED,
+                EBLChecks.SIR_REQUIRED_IN_NOTIFICATION))
+          );
       }
     };
   }

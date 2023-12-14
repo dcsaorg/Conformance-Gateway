@@ -74,8 +74,6 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Carrier Ref Status Payload response check
-            // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -89,18 +87,19 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
-            Stream.concat(
-              EBLChecks.siRefSIR(getMatchedExchangeUuid(), sir),
-              EBLChecks.siRefStatusChecks(
-                getMatchedExchangeUuid(),
-                siStatus,
-                ShippingInstructionsStatus.SI_UPDATE_CANCELLED
-              )),
+            EBLChecks.siRefStatusContentChecks(
+              getMatchedExchangeUuid(),
+              siStatus,
+              ShippingInstructionsStatus.SI_UPDATE_CANCELLED,
+              EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())
+            ),
             getSINotificationChecks(
+              getMatchedNotificationExchangeUuid(),
               expectedApiVersion,
               notificationSchemaValidator,
               siStatus,
-              ShippingInstructionsStatus.SI_UPDATE_CANCELLED)));
+              ShippingInstructionsStatus.SI_UPDATE_CANCELLED,
+              EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier()))));
       }
     };
   }

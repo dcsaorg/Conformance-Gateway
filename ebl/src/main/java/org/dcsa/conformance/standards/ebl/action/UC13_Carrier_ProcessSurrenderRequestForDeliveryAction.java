@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -48,17 +47,12 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
         var expectedStatus = acceptDeliveryRequest
           ? TransportDocumentStatus.TD_SURRENDERED_FOR_DELIVERY
           : TransportDocumentStatus.TD_ISSUED;
-        return Stream.concat(
-          Stream.concat(
-            EBLChecks.tdNotificationTDR(getMatchedExchangeUuid(), getDspSupplier().get().transportDocumentReference()),
-            EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), expectedStatus)
-          ),
-          getTDNotificationChecks(
-            getMatchedExchangeUuid(),
-            expectedApiVersion,
-            requestSchemaValidator,
-            expectedStatus
-          ));
+        return getTDNotificationChecks(
+          getMatchedExchangeUuid(),
+          expectedApiVersion,
+          requestSchemaValidator,
+          expectedStatus
+        );
       }
     };
   }

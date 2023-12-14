@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -74,7 +73,6 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -84,25 +82,25 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 EblRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
-                responseSchemaValidator));
+                responseSchemaValidator),
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid())
+        );
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()),
-            Stream.concat(
-              Stream.concat(
-                EBLChecks.siRefSIR(getMatchedExchangeUuid(), dsp.shippingInstructionsReference()),
-                EBLChecks.siRefStatusChecks(
-                  getMatchedExchangeUuid(),
-                  currentState,
-                  ShippingInstructionsStatus.SI_UPDATE_RECEIVED
-                )),
+              EBLChecks.siRefStatusContentChecks(
+                getMatchedExchangeUuid(),
+                currentState,
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+                EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())),
               getSINotificationChecks(
+                getMatchedNotificationExchangeUuid(),
                 expectedApiVersion,
                 notificationSchemaValidator,
                 currentState,
-                ShippingInstructionsStatus.SI_UPDATE_RECEIVED))
-          ));
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+                EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())))
+          );
       }
     };
   }

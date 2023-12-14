@@ -2,6 +2,11 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
@@ -10,12 +15,6 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
-
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public abstract class EblAction extends ConformanceAction {
   protected final int expectedStatus;
@@ -158,26 +157,14 @@ public abstract class EblAction extends ConformanceAction {
   }
 
   protected Stream<ActionCheck> getSINotificationChecks(
-    String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus) {
-    return getSINotificationChecks(expectedApiVersion, notificationSchemaValidator, expectedStatus, null);
+    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, JsonContentCheck ... extraChecks) {
+    return getSINotificationChecks(notificationExchangeUuid, expectedApiVersion, notificationSchemaValidator, expectedStatus, null, extraChecks);
   }
 
   protected Stream<ActionCheck> getSINotificationChecks(
-    String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, ShippingInstructionsStatus expectedUpdatedStatus) {
-    return getSINotificationChecks(getMatchedNotificationExchangeUuid(), expectedApiVersion, notificationSchemaValidator, expectedStatus, expectedUpdatedStatus);
-  }
-
-  protected Stream<ActionCheck> getSINotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus) {
-    return getSINotificationChecks(notificationExchangeUuid, expectedApiVersion, notificationSchemaValidator, expectedStatus, null);
-  }
-
-  protected Stream<ActionCheck> getSINotificationChecks(
-    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, ShippingInstructionsStatus expectedUpdatedStatus) {
+    UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, ShippingInstructionsStatus expectedStatus, ShippingInstructionsStatus expectedUpdatedStatus, JsonContentCheck ... extraChecks) {
     String titlePrefix = "[Notification]";
-    var dsp = getDspSupplier().get();
-
-    return Stream.concat(Stream.of(
+    return Stream.of(
             new HttpMethodCheck(
                 titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
             new UrlPathCheck(
@@ -204,11 +191,8 @@ public abstract class EblAction extends ConformanceAction {
                 EblRole::isCarrier,
                 notificationExchangeUuid,
                 HttpMessageType.REQUEST,
-                notificationSchemaValidator)),
-            Stream.concat(
-              EBLChecks.siNotificationSIRIsPresent(notificationExchangeUuid),
-              EBLChecks.siNotificationStatusChecks(notificationExchangeUuid, expectedStatus, expectedUpdatedStatus)
-            )
+                notificationSchemaValidator),
+          EBLChecks.siNotificationContentChecks(notificationExchangeUuid, expectedStatus, expectedUpdatedStatus, extraChecks)
       );
   }
 
@@ -225,13 +209,11 @@ public abstract class EblAction extends ConformanceAction {
   protected Stream<ActionCheck> getTDNotificationChecks(
     UUID notificationExchangeUuid, String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator, TransportDocumentStatus transportDocumentStatus, boolean tdrIsKnown) {
     String titlePrefix = "[Notification]";
-    var dsp = getDspSupplier().get();
-
     var tdrCheck = tdrIsKnown
-      ? EBLChecks.tdNotificationTDR(notificationExchangeUuid, dsp.transportDocumentReference())
-      : EBLChecks.tdNotificationTDRIsPresent(notificationExchangeUuid);
+      ? EBLChecks.tdrInNotificationMustMatchDSP(getDspSupplier())
+      : EBLChecks.TDR_REQUIRED_IN_NOTIFICATION;
 
-    return Stream.concat(Stream.of(
+    return Stream.of(
       new HttpMethodCheck(
         titlePrefix, EblRole::isCarrier, notificationExchangeUuid, "POST"),
       new UrlPathCheck(
@@ -258,11 +240,8 @@ public abstract class EblAction extends ConformanceAction {
         EblRole::isCarrier,
         notificationExchangeUuid,
         HttpMessageType.REQUEST,
-        notificationSchemaValidator)),
-        Stream.concat(
-          tdrCheck,
-          EBLChecks.tdNotificationStatusChecks(notificationExchangeUuid, transportDocumentStatus)
-        )
-      );
+        notificationSchemaValidator),
+        EBLChecks.tdNotificationContentChecks(notificationExchangeUuid, transportDocumentStatus, tdrCheck)
+     );
   }
 }

@@ -37,17 +37,12 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.concat(
-          Stream.concat(
-            EBLChecks.tdNotificationTDR(getMatchedExchangeUuid(), getDspSupplier().get().transportDocumentReference()),
-            EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT)
-          ),
-          getTDNotificationChecks(
-            getMatchedExchangeUuid(),
-            expectedApiVersion,
-            requestSchemaValidator,
-            TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT
-          ));
+        return getTDNotificationChecks(
+          getMatchedExchangeUuid(),
+          expectedApiVersion,
+          requestSchemaValidator,
+          TransportDocumentStatus.TD_PENDING_SURRENDER_FOR_AMENDMENT
+        );
       }
     };
   }

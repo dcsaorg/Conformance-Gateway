@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -52,18 +51,14 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
           dsp.shippingInstructionsStatus(),
           ShippingInstructionsStatus.SI_RECEIVED  // Placeholder to avoid NPE
         );
-        return Stream.concat(
-          EBLChecks.siNotificationSIR(
-            getMatchedExchangeUuid(),
-            dsp.shippingInstructionsReference()
-          ),
-          getSINotificationChecks(
-            getMatchedExchangeUuid(),
-            expectedApiVersion,
-            requestSchemaValidator,
-            acceptChanges ? ShippingInstructionsStatus.SI_RECEIVED : currentState,
-            acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED
-          ));
+        return getSINotificationChecks(
+          getMatchedExchangeUuid(),
+          expectedApiVersion,
+          requestSchemaValidator,
+          acceptChanges ? ShippingInstructionsStatus.SI_RECEIVED : currentState,
+          acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED,
+          EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())
+        );
       }
     };
   }

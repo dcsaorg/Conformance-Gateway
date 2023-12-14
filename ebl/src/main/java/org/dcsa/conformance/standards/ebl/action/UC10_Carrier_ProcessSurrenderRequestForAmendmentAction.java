@@ -48,17 +48,12 @@ public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends Stat
         var expectedStatus = acceptAmendmentRequest
           ? TransportDocumentStatus.TD_SURRENDERED_FOR_AMENDMENT
           : TransportDocumentStatus.TD_ISSUED;
-        return Stream.concat(
-          Stream.concat(
-            EBLChecks.tdNotificationTDR(getMatchedExchangeUuid(), getDspSupplier().get().transportDocumentReference()),
-            EBLChecks.tdNotificationStatusChecks(getMatchedExchangeUuid(), expectedStatus)
-          ),
-          getTDNotificationChecks(
-            getMatchedExchangeUuid(),
-            expectedApiVersion,
-            requestSchemaValidator,
-            expectedStatus
-          ));
+        return getTDNotificationChecks(
+          getMatchedExchangeUuid(),
+          expectedApiVersion,
+          requestSchemaValidator,
+          expectedStatus
+        );
       }
     };
   }

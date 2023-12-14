@@ -293,16 +293,13 @@ public class Carrier extends ConformanceParty {
       BookingState targetState,
       boolean includeCbrr,
       Consumer<ObjectNode> bookingMutator,
-      boolean resetAmendedBookingStatus) {
+      boolean resetAmendedBookingState) {
     String cbrr = actionPrompt.get("cbrr").asText();
     var peristableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    peristableCarrierBooking.performSimpleStatusChange(cbrr, targetState);
+    peristableCarrierBooking.performSimpleStatusChange(cbrr, targetState, resetAmendedBookingState);
     var booking = peristableCarrierBooking.getBooking();
     if (bookingMutator != null) {
       bookingMutator.accept(booking);
-    }
-    if (resetAmendedBookingStatus) {
-      peristableCarrierBooking.resetAmendedState();
     }
     peristableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, peristableCarrierBooking, includeCbrr);
@@ -559,7 +556,7 @@ public class Carrier extends ConformanceParty {
             new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
-              .formatted(bookingReference, persistableCarrierBooking.getBookingState().wireName()));
+              .formatted(bookingReference, persistableCarrierBooking.getOriginalBookingState().wireName()));
       return response;
     }
     return return404(request);

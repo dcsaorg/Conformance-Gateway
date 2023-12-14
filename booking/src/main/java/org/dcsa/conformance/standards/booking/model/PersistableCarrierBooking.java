@@ -102,8 +102,15 @@ public class PersistableCarrierBooking {
     performSimpleStatusChange(reference, newState, null);
   }
 
+  public void performSimpleStatusChange(String reference, BookingState newState, boolean resetAmendedBookingState) {
+    if(resetAmendedBookingState) {
+      resetAmendedBookingState();
+    }
+    performSimpleStatusChange(reference, newState, null);
+  }
+
   public void confirmBookingAmendment(String reference, String reason) {
-    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
+    checkState(reference, getBookingAmendedState(), s -> s!=null && s == AMENDMENT_RECEIVED);
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
@@ -113,18 +120,17 @@ public class PersistableCarrierBooking {
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CONFIRMED);
-    checkState(reference, getBookingState(), prerequisites);
+    checkState(reference, getOriginalBookingState(), prerequisites);
     if (this.getCarrierBookingReference() == null) {
       var newCbr = cbrGenerator.get();
       mutateBookingAndAmendment(b -> b.put(CARRIER_BOOKING_REFERENCE, newCbr));
     }
-    resetAmendedState();
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     setReason(reason);
   }
 
-  public void resetAmendedState() {
+  public void resetAmendedBookingState() {
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
   }
 
@@ -142,7 +148,7 @@ public class PersistableCarrierBooking {
 
   public void declineBooking(String reference, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(DECLINED);
-    checkState(reference, getBookingState(), prerequisites);
+    checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, DECLINED);
     if (getAmendedBooking().isPresent()) {
       changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
@@ -177,13 +183,13 @@ public class PersistableCarrierBooking {
     if (prerequisiteState == null) {
       throw new IllegalArgumentException("Missing dependency check for state " + newState.wireName());
     }
-    checkState(reference, getBookingState(), prerequisiteState);
+    checkState(reference, getOriginalBookingState(), prerequisiteState);
     changeState(BOOKING_STATUS, newState);
     setReason(reason);
   }
 
   public void cancelEntireBooking(String bookingReference, String reason) {
-    checkState(bookingReference, getBookingState(), s -> s != CANCELLED);
+    checkState(bookingReference, getOriginalBookingState(), s -> s != CANCELLED);
     changeState(BOOKING_STATUS, CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Entire booking cancelled by shipper (no reason given)";
@@ -234,7 +240,7 @@ public class PersistableCarrierBooking {
   }
 
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
-    var currentState = getBookingState();
+    var currentState = getOriginalBookingState();
     boolean isAmendment =
       currentState.equals(BookingState.CONFIRMED)
         || currentState.equals(BookingState.PENDING_AMENDMENT);
@@ -258,7 +264,7 @@ public class PersistableCarrierBooking {
     removeRequestedChanges();
   }
 
-  public BookingState getBookingState() {
+  public BookingState getOriginalBookingState() {
     var booking = getBooking();
     return BookingState.fromWireName(booking.required(BOOKING_STATUS).asText());
   }
@@ -266,7 +272,7 @@ public class PersistableCarrierBooking {
   public BookingState getBookingAmendedState() {
     var booking = getBooking();
     var s = booking.path(AMENDED_BOOKING_STATUS);
-    return BookingState.fromWireName(s.asText());
+    return !s.asText().isEmpty()? BookingState.fromWireName(s.asText()) : null;
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {

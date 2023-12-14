@@ -51,12 +51,12 @@ public class UC11_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
               getMatchedExchangeUuid(),
               BookingState.COMPLETED
             ),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,

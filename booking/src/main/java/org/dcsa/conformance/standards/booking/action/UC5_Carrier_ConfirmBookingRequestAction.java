@@ -55,12 +55,12 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
               getMatchedExchangeUuid(),
               BookingState.CONFIRMED
             ),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,

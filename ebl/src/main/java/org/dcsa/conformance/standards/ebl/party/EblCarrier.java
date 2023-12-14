@@ -303,7 +303,7 @@ public class EblCarrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v3/shipping-instructions-notifications", notification);
+      asyncCounterpartPostNotification("/v3/shipping-instructions-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
@@ -320,7 +320,7 @@ public class EblCarrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v3/transport-document-notifications", notification);
+      asyncCounterpartPostNotification("/v3/transport-document-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
@@ -454,15 +454,15 @@ public class EblCarrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
         () ->
-          asyncCounterpartPost(
+          asyncCounterpartPostNotification(
             "/v3/shipping-instructions-notifications",
             ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(siData)
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnShippingInstructionsRefStatusResponse(
       200,
@@ -488,15 +488,15 @@ public class EblCarrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
         () ->
-          asyncCounterpartPost(
+          asyncCounterpartPostNotification(
             "/v3/transport-document-notifications",
             TransportDocumentNotification.builder()
               .apiVersion(apiVersion)
               .transportDocument(td)
               .build()
               .asJsonNode()),
-        1,
-        TimeUnit.SECONDS);
+        100,
+        TimeUnit.MILLISECONDS);
     }
     return returnTransportDocumentRefStatusResponse(
       200,
@@ -568,7 +568,7 @@ public class EblCarrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
         () ->
-          asyncCounterpartPost(
+          asyncCounterpartPostNotification(
             "/v3/shipping-instructions-notifications",
             ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
@@ -603,7 +603,7 @@ public class EblCarrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
         () ->
-          asyncCounterpartPost(
+          asyncCounterpartPostNotification(
             "/v3/shipping-instructions-notifications",
             ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)

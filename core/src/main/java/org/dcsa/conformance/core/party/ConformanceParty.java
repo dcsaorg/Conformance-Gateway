@@ -149,7 +149,8 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncCounterpartGet(path, conformanceResponse -> {});
   }
 
-  protected void asyncCounterpartGet(String path, Map<String, ? extends Collection<String>> queryParams) {
+  protected void asyncCounterpartGet(
+      String path, Map<String, ? extends Collection<String>> queryParams) {
     asyncCounterpartGet(path, queryParams, conformanceResponse -> {});
   }
 
@@ -157,7 +158,11 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncCounterpartGet(path, Collections.emptyMap(), responseCallback);
   }
 
-  protected void asyncCounterpartGet(String path, Map<String, ? extends Collection<String>> queryParams, Consumer<ConformanceResponse> responseCallback) {
+  protected void asyncCounterpartGet(
+      String path,
+      Map<String, ? extends Collection<String>> queryParams,
+      Consumer<ConformanceResponse> responseCallback) {
+    String apiVersionHeaderValue = apiVersion.split("\\.")[0];
     asyncWebClient.accept(
         new ConformanceRequest(
             "GET",
@@ -169,10 +174,10 @@ public abstract class ConformanceParty implements StatefulEntity {
                 counterpartConfiguration.getName(),
                 counterpartConfiguration.getRole(),
                 counterpartConfiguration.getAuthHeaderName().isBlank()
-                    ? Map.of("Api-Version", List.of(apiVersion))
+                    ? Map.of("Api-Version", List.of(apiVersionHeaderValue))
                     : Map.of(
                         "Api-Version",
-                        List.of(apiVersion),
+                        List.of(apiVersionHeaderValue),
                         counterpartConfiguration.getAuthHeaderName(),
                         List.of(counterpartConfiguration.getAuthHeaderValue())),
                 new ConformanceMessageBody(""),
@@ -184,7 +189,8 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncCounterpartPatch(path, jsonBody, conformanceResponse -> {});
   }
 
-  protected void asyncCounterpartPatch(String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
+  protected void asyncCounterpartPatch(
+      String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
     asyncCounterpartPatch(path, queryParams, jsonBody, conformanceResponse -> {});
   }
 
@@ -192,25 +198,44 @@ public abstract class ConformanceParty implements StatefulEntity {
     asyncCounterpartPost(path, jsonBody, conformanceResponse -> {});
   }
 
+  protected void asyncCounterpartPostNotification(String path, JsonNode jsonBody) {
+    asyncCounterpartPostNotification(path, jsonBody, conformanceResponse -> {});
+  }
+
   protected void asyncCounterpartPut(String path, JsonNode jsonBody) {
     asyncCounterpartPut(path, jsonBody, conformanceResponse -> {});
   }
 
-  protected void asyncCounterpartPatch(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut("PATCH", path, Collections.emptyMap(), jsonBody, responseCallback);
+  protected void asyncCounterpartPatch(
+      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut(
+        "PATCH", path, Collections.emptyMap(), jsonBody, responseCallback, false);
   }
 
-  protected void asyncCounterpartPatch(String path,Map<String, ? extends Collection<String>> queryParams,
-                                       JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut("PATCH", path, queryParams, jsonBody, responseCallback);
+  protected void asyncCounterpartPatch(
+      String path,
+      Map<String, ? extends Collection<String>> queryParams,
+      JsonNode jsonBody,
+      Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut("PATCH", path, queryParams, jsonBody, responseCallback, false);
   }
 
-  protected void asyncCounterpartPost(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut("POST", path, Collections.emptyMap(), jsonBody, responseCallback);
+  protected void asyncCounterpartPost(
+      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut(
+        "POST", path, Collections.emptyMap(), jsonBody, responseCallback, false);
   }
 
-  protected void asyncCounterpartPut(String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut("PUT", path, Collections.emptyMap(), jsonBody, responseCallback);
+  protected void asyncCounterpartPostNotification(
+      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut(
+        "POST", path, Collections.emptyMap(), jsonBody, responseCallback, true);
+  }
+
+  protected void asyncCounterpartPut(
+      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
+    _asyncCounterpartPatchPostOrPut(
+        "PUT", path, Collections.emptyMap(), jsonBody, responseCallback, false);
   }
 
   private void _asyncCounterpartPatchPostOrPut(
@@ -218,7 +243,10 @@ public abstract class ConformanceParty implements StatefulEntity {
       String path,
       Map<String, ? extends Collection<String>> queryParams,
       JsonNode jsonBody,
-      Consumer<ConformanceResponse> responseCallback) {
+      Consumer<ConformanceResponse> responseCallback,
+      boolean withFullApiVersionHeader) {
+    String apiVersionHeaderValue =
+        withFullApiVersionHeader ? apiVersion : apiVersion.split("\\.")[0];
     asyncWebClient.accept(
         new ConformanceRequest(
             method,
@@ -231,10 +259,10 @@ public abstract class ConformanceParty implements StatefulEntity {
                 counterpartConfiguration.getRole(),
                 counterpartConfiguration.getAuthHeaderName().isBlank()
                     ? Map.ofEntries(
-                        Map.entry("Api-Version", List.of(apiVersion)),
+                        Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
                         Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
                     : Map.ofEntries(
-                        Map.entry("Api-Version", List.of(apiVersion)),
+                        Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
                         Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
                         Map.entry(
                             counterpartConfiguration.getAuthHeaderName(),

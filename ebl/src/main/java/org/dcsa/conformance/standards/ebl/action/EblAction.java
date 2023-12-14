@@ -187,13 +187,13 @@ public abstract class EblAction extends ConformanceAction {
                 "/v3/shipping-instructions-notifications"),
             new ResponseStatusCheck(
                 titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 EblRole::isCarrier,
                 notificationExchangeUuid,
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 EblRole::isShipper,
                 notificationExchangeUuid,
@@ -241,13 +241,13 @@ public abstract class EblAction extends ConformanceAction {
         "/v3/transport-document-notifications"),
       new ResponseStatusCheck(
         titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-      new ApiHeaderCheck(
+      ApiHeaderCheck.createNotificationCheck(
         titlePrefix,
         EblRole::isCarrier,
         notificationExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion),
-      new ApiHeaderCheck(
+      ApiHeaderCheck.createNotificationCheck(
         titlePrefix,
         EblRole::isShipper,
         notificationExchangeUuid,

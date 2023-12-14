@@ -18,7 +18,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 320.12,
+      "weight": 12000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
       "HSCodes": [
@@ -28,10 +28,10 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 320.12,
+          "weight": 12000,
           "weightUnit": "KGM",
           "outerPackaging": {
-            "numberOfPackages": 5
+            "numberOfPackages": 400
           }
         }
       ]

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Electronic Bill of Lading",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2023.Q3]() *** _Will be updated_ ***. This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [Electronic Bill of Lading IFS]() *** _Will be updated_ *** to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://knowledge.dcsa.org/s/publication?publicationId=a0r7T000000L8lPQAS)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Electronic Bill of Lading Notification API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1). Signing up for notifications is defined outside the scope of this API specification.\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300B1). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2023.Q3]() *** _Will be updated_ ***. This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [Electronic Bill of Lading IFS]() *** _Will be updated_ *** to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://knowledge.dcsa.org/s/publication?publicationId=a0r7T000000L8lPQAS)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Electronic Bill of Lading Notification API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300B1). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -464,16 +464,6 @@
                       "updatedShippingInstructionsStatus": "UPDATE RECEIVED"
                     }
                   }
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "New response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "": ""
                 }
               }
             }
@@ -1418,7 +1408,7 @@
       },
       "freightPaymentTermCode": {
         "type": "string",
-        "description": "An indicator of whether freight and charges for the main transport are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "description": "An indicator of whether freight and ancillary fees for the main transport are prepaid (PRE) or collect (COL). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- PRE (Prepaid)\n- COL (Collect)\n",
         "example": "PRE",
         "enum": [
           "PRE",
@@ -1427,7 +1417,7 @@
       },
       "originChargesPaymentTermCode": {
         "type": "string",
-        "description": "An indicator of whether origin charges are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "description": "An indicator of whether origin charges are prepaid (PRE) or collect (COL). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided). Examples of origin charges are customs clearance fees, documentation fees, container packing and loading charges levied at the port of origin to cover the costs of preparing the cargo for shipment. They include the cost of inland transportation to the port, when applicable.\n- PRE (Prepaid)\n- COL (Collect)\n",
         "example": "PRE",
         "enum": [
           "PRE",
@@ -1436,7 +1426,7 @@
       },
       "destinationChargesPaymentTermCode": {
         "type": "string",
-        "description": "An indicator of whether destination charges are prepaid or collect.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "description": "An indicator of whether destination charges are prepaid (PRE) or collect (COL). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided). Examples of destination charges are customs clearance fees, documentation fees, terminal handling fees at the destination port and the costs of inland transportation from the port to the final delivery location, when applicable.\n- PRE (Prepaid)\n- COL (Collect)\n",
         "example": "PRE",
         "enum": [
           "PRE",
@@ -1452,12 +1442,12 @@
       "sendToPlatform": {
         "maxLength": 4,
         "type": "string",
-        "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDocs)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv)\n",
+        "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDocs)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n",
         "example": "WAVE"
       },
       "isToOrder": {
         "type": "boolean",
-        "description": "Indicates whether the transport document is issued `to order` or not\n",
+        "description": "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n",
         "example": false
       },
       "numberOfCopiesWithCharges": {
@@ -1566,47 +1556,47 @@
         "maxLength": 100,
         "type": "string",
         "description": "The name of the street of the party’s address.",
-        "example": "Kronprinsessegade"
+        "example": "Ruijggoordweg"
       },
       "streetNumber": {
         "maxLength": 50,
         "type": "string",
         "description": "The number of the street of the party’s address.",
-        "example": "54"
+        "example": "100"
       },
       "floor": {
         "maxLength": 50,
         "pattern": "^\\S+(\\s+\\S+)*$",
         "type": "string",
         "description": "The floor of the party’s street number.\n",
-        "example": "5. sal"
+        "example": "N/A"
       },
       "postCode": {
         "maxLength": 50,
         "type": "string",
         "description": "The post code of the party’s address.",
-        "example": "1306"
+        "example": "1047 HM"
       },
       "cityName": {
         "maxLength": 65,
         "pattern": "^\\S+(\\s+\\S+)*$",
         "type": "string",
         "description": "The city name of the party’s address.\n",
-        "example": "København"
+        "example": "Amsterdam"
       },
       "stateRegion": {
         "maxLength": 65,
         "type": "string",
         "description": "The state/region of the party’s address.",
         "nullable": true,
-        "example": "Copenhagen"
+        "example": "North Holland"
       },
       "country": {
         "maxLength": 75,
         "pattern": "^\\S+(\\s+\\S+)*$",
         "type": "string",
         "description": "The country of the party’s address.\n",
-        "example": "Denmark"
+        "example": "The Netherlands"
       },
       "unLocationLocation": {
         "required": [
@@ -1634,7 +1624,7 @@
         "minLength": 5,
         "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
         "type": "string",
-        "description": "The UN Location code specifying where the place is located. The pattern used must be\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here:  [UN/LOCODE](https://en.wikipedia.org/wiki/UN/LOCODE)\n",
+        "description": "The UN Location code specifying where the place is located. The pattern used must be\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here:  [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
         "example": "FRPAR"
       },
       "PartyContactDetail": {
@@ -1785,13 +1775,13 @@
       "IdentifyingCode": {
         "title": "Identifying Code",
         "required": [
-          "DCSAResponsibleAgencyCode",
+          "codeListProvider",
           "partyCode"
         ],
         "type": "object",
         "properties": {
-          "DCSAResponsibleAgencyCode": {
-            "$ref": "#/components/schemas/DCSAResponsibleAgencyCode"
+          "codeListProvider": {
+            "$ref": "#/components/schemas/codeListProvider"
           },
           "partyCode": {
             "$ref": "#/components/schemas/partyCode"
@@ -1801,22 +1791,22 @@
           }
         }
       },
-      "DCSAResponsibleAgencyCode": {
+      "codeListProvider": {
         "maxLength": 5,
         "type": "string",
-        "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- ISO (International Standards Organization)\n- UNECE (United Nations Economic Commission for Europe)\n- LLOYD (Lloyd's register of shipping)\n- BIC (Bureau International des Containeurs)\n- IMO (International Maritime Organization)\n- SCAC (Standard Carrier Alpha Code)\n- ITIGG (International Transport Implementation Guidelines Group)\n- ITU (International Telecommunication Union)\n- SMDG (Shipplanning Message Development Group)\n- EXIS (Exis Technologies Ltd.)\n- FMC (Federal Maritime Commission)\n- CBSA (Canada Border Services Agency)\n- DCSA (Digitial Container Shipping Association)\n- DID (Decentralized Identifier)\n- LEI (Legal Entity Identifier)\n- EPI (EBL Platform Identifier)\n- ZZZ (Mutually defined)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/codelistresponsibleagencycodes.csv).\n",
+        "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- ISO (International Standards Organization)\n- UNECE (United Nations Economic Commission for Europe)\n- LLOYD (Lloyd's register of shipping)\n- BIC (Bureau International des Containeurs)\n- IMO (International Maritime Organization)\n- SCAC (Standard Carrier Alpha Code)\n- ITIGG (International Transport Implementation Guidelines Group)\n- ITU (International Telecommunication Union)\n- SMDG (Shipplanning Message Development Group)\n- NCBH (NCB Hazcheck)\n- FMC (Federal Maritime Commission)\n- CBSA (Canada Border Services Agency)\n- DCSA (Digitial Container Shipping Association)\n- W3C (World Wide Web Consortium)\n- GLEIF (Global Legal Entity Identifier Foundation)\n- EPI (EBL Platform Identifier)\n- ZZZ (Mutually defined)\n",
         "example": "SMDG"
       },
       "partyCode": {
         "maxLength": 100,
         "type": "string",
-        "description": "Code to identify the party as provided by the agency\n",
+        "description": "Code to identify the party as provided by the code list provider\n",
         "example": "MSK"
       },
       "codeListName": {
         "maxLength": 100,
         "type": "string",
-        "description": "The name of the list, provided by the responsible agency\n",
+        "description": "The name of the list, provided by the code list provider\n",
         "example": "LCL"
       },
       "TaxLegalReference": {
@@ -1838,7 +1828,7 @@
             "$ref": "#/components/schemas/taxLegalReferenceValue"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/taxandlegalreferences.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
       },
       "taxLegalReferenceType": {
         "maxLength": 50,
@@ -1852,7 +1842,7 @@
         "minLength": 2,
         "pattern": "^[A-Z]{2}$",
         "type": "string",
-        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n",
+        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
         "example": "DK"
       },
       "taxLegalReferenceValue": {
@@ -1865,7 +1855,7 @@
       "partyFunction": {
         "maxLength": 3,
         "type": "string",
-        "description": "Specifies the role of the party in a given context\n- OS (Original shipper)\n- CN (Consignee)\n- COW (Invoice payer on behalf of the consignor (shipper))\n- COX (Invoice payer on behalf of the consignee)\n- MS (Document/message issuer/sender)\n- N1 (First Notify Party)\n- N2 (Second Notify Party)\n- NI (Other Notify Party)\n- DDR (Consignor's freight forwarder)\n- DDS (Consignee's freight forwarder)\n- HE (Carrier booking office (transportation office))\n- SCO (Service contract owner - Defined by DCSA)\n- BA (Booking Agency)\n- END (Endorsee Party)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/partyfunctioncodes.csv)\n",
+        "description": "Specifies the role of the party in a given context. Possible values are:\n- `OS` (Original shipper)\n- `CN` (Consignee)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `MS` (Document/message issuer/sender)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `HE` (Carrier booking office (transportation office))\n- `SCO` (Service contract owner - Defined by DCSA)\n- `BA` (Booking Agency)\n- `END` (Endorsee Party)\n",
         "example": "DDS"
       },
       "addressLine": {
@@ -2031,7 +2021,7 @@
       "referenceType": {
         "maxLength": 3,
         "type": "string",
-        "description": "The reference type codes defined by DCSA.\n- FF (Freight Forwarder’s Reference)\n- SI (Shipper’s Reference)\n- SPO (Shippers Purchase Order Reference)\n- CPO (Consignees Purchase Order Reference)\n- CR (Customer’s Reference)\n- AAO (Consignee’s Reference)\n- ECR (Empty container release reference)\n- CSI (Customer shipment ID)\n- BPR (Booking party reference number)\n- BID (Booking Request ID)\n- SAC (Shipping Agency Code)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/referencetypes.csv).\n",
+        "description": "The reference type codes defined by DCSA. Possible values are:\n- FF (Freight Forwarder’s Reference)\n- SI (Shipper’s Reference)\n- SPO (Shippers Purchase Order Reference)\n- CPO (Consignees Purchase Order Reference)\n- CR (Customer’s Reference)\n- AAO (Consignee’s Reference)\n- ECR (Empty container release reference)\n- CSI (Customer shipment ID)\n- BPR (Booking party reference number)\n- BID (Booking Request ID)\n- SAC (Shipping Agency Code)\n",
         "example": "FF"
       },
       "referenceValue": {
@@ -2059,7 +2049,7 @@
             "$ref": "#/components/schemas/customsReferenceValue"
           }
         },
-        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/customsreferences.csv).\n"
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
       },
       "customsReferenceType": {
         "maxLength": 50,
@@ -2354,13 +2344,13 @@
       "sealSource": {
         "maxLength": 5,
         "type": "string",
-        "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity.\n- CAR (Carrier)\n- SHI (Shipper)\n- PHY (Phytosanitary)\n- VET (Veterinary)\n- CUS (Customs)\n\n**Condition:** Conditional on type of commodity\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/sealsourcecodes.csv)\n",
+        "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity. Possible values are:\n- CAR (Carrier)\n- SHI (Shipper)\n- PHY (Phytosanitary)\n- VET (Veterinary)\n- CUS (Customs)\n\n**Condition:** Conditional on type of commodity\n",
         "example": "CUS"
       },
       "sealType": {
         "maxLength": 5,
         "type": "string",
-        "description": "The type of seal. This attribute links to the Seal Type ID defined in the Seal Type reference data entity.\n- KLP (Keyless padlock)\n- BLT (Bolt)\n- WIR (Wire)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/sealtypecodes.csv)\n",
+        "description": "The type of seal. This attribute links to the Seal Type ID defined in the Seal Type reference data entity. Possible values are:\n- KLP (Keyless padlock)\n- BLT (Bolt)\n- WIR (Wire)\n",
         "example": "WIR"
       },
       "AdvanceManifestFiling_EBL": {
@@ -2404,7 +2394,7 @@
             "$ref": "#/components/schemas/countryCode"
           }
         },
-        "description": "An Advance Maifest Filing defined by a Manifest type code in combination with a country code.\n\nA list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/advancedmanifestfilings.csv). A (small) subset can be seen here:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n",
+        "description": "An Advance Maifest Filing defined by a Manifest type code in combination with a country code.\n\nA list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv). A (small) subset can be seen here:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n",
         "example": {
           "manifestTypeCode": "ACE",
           "countryCode": "US"
@@ -2414,7 +2404,7 @@
         "maxLength": 50,
         "pattern": "^\\S+(\\s+\\S+)*$",
         "type": "string",
-        "description": "The Manifest type code as defined by the provider. A list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub (to be created)]()\n",
+        "description": "The Manifest type code as defined by the provider. A list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv)\n",
         "example": "ACE"
       },
       "selfFilerCode": {
@@ -2428,14 +2418,14 @@
         "title": "Requested Carrier Certificate",
         "maxLength": 100,
         "type": "string",
-        "description": "Name of the certificate. Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/carriercertificates.csv).\n",
+        "description": "Name of the certificate. Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n",
         "example": "VESSEL_PARTICULARS_1"
       },
       "RequestedCarrierClause": {
         "title": "Requested Carrier Clause",
         "maxLength": 100,
         "type": "string",
-        "description": "A clause to request from the carrier. Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures / Mixed loads)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/carrierclauses.csv).\n",
+        "description": "A clause to request from the carrier. Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures / Mixed loads)\n",
         "example": "CARGO_CARGOSPECIFICS"
       },
       "ShippingInstructionsRefStatus": {
@@ -2487,13 +2477,13 @@
       "shippingInstructionsStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
         "example": "RECEIVED"
       },
       "updatedShippingInstructionsStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the updated `Shipping Instructions`. Possible values are:\n- `RECEIVED` (An update to a Shipping Instructions has been accepted and is now the current received Shipping Instructions)\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
         "example": "UPDATE RECEIVED"
       },
       "RequestedChange": {
@@ -3143,6 +3133,7 @@
           "transportDocumentReference",
           "transportDocumentStatus",
           "transportDocumentTypeCode",
+          "transports",
           "utilizedTransportEquipments"
         ],
         "type": "object",
@@ -3389,7 +3380,7 @@
       "transportDocumentStatus": {
         "maxLength": 50,
         "type": "string",
-        "description": "The status of the Transport Document. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+        "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
         "example": "DRAFT"
       },
       "shippedOnBoardDate": {
@@ -3428,13 +3419,13 @@
       "cargoMovementTypeAtOrigin": {
         "maxLength": 3,
         "type": "string",
-        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity.\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/cargoMovementType.csv)\n",
+        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n",
         "example": "FCL"
       },
       "cargoMovementTypeAtDestination": {
         "maxLength": 3,
         "type": "string",
-        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity.\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/cargoMovementType.csv)\n",
+        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n",
         "example": "FCL"
       },
       "issueDate": {
@@ -3526,13 +3517,13 @@
           "preCarriageBy": {
             "maxLength": 50,
             "type": "string",
-            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/modeoftransportcodes.csv)\n",
+            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n",
             "example": "RAIL"
           },
           "onCarriageBy": {
             "maxLength": 50,
             "type": "string",
-            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/modeoftransportcodes.csv)\n",
+            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n",
             "example": "TRUCK"
           },
           "placeOfReceipt": {
@@ -3873,7 +3864,7 @@
       },
       "paymentTermCode": {
         "type": "string",
-        "description": "Indicates whether freight & charges are due for payment before the shipment is effected, practically before the transport document is released to shipper (Prepaid) or before the shipment is finalized meaning cargo released to consignee (Collect)\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "description": "An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- PRE (Prepaid)\n- COL (Collect)\n",
         "example": "PRE",
         "enum": [
           "PRE",
@@ -4065,7 +4056,7 @@
             "items": {
               "maxLength": 2,
               "type": "string",
-              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/segregationgroups.csv)\n",
+              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n",
               "example": "12"
             }
           },
@@ -4158,7 +4149,7 @@
       "imoClass": {
         "maxLength": 4,
         "type": "string",
-        "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n      \n      - `1.1A` (Substances and articles which have a mass explosion hazard)\n      - `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n      - `2.1` (Flammable gases)\n      - `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/imoclasses.csv)\n",
+        "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n      \n      - `1.1A` (Substances and articles which have a mass explosion hazard)\n      - `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n      - `2.1` (Flammable gases)\n      - `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
         "example": "1.4S"
       },
       "subsidiaryRisk": {
@@ -4311,7 +4302,7 @@
         "maxLength": 1,
         "minLength": 1,
         "type": "string",
-        "description": "The zone classification of the toxicity of the inhalant. Possible values are:\n- `A` (Hazard Zone A) can be asigned to specific gases and liquids\n- `B` (Hazard Zone B) can be asigned to specific gases and liquids\n- `C` (Hazard Zone C) can **only** be asigned to specific gases\n- `D` (Hazard Zone D) can **only** be asigned to specific gases\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/inhalationzones.csv)\n",
+        "description": "The zone classification of the toxicity of the inhalant. Possible values are:\n- `A` (Hazard Zone A) can be asigned to specific gases and liquids\n- `B` (Hazard Zone B) can be asigned to specific gases and liquids\n- `C` (Hazard Zone C) can **only** be asigned to specific gases\n- `D` (Hazard Zone D) can **only** be asigned to specific gases\n",
         "example": "A"
       },
       "dgGrossWeight": {
@@ -4434,6 +4425,8 @@
       "UtilizedTransportEquipment_CAR": {
         "title": "Utilized Transport Equipment",
         "required": [
+          "cargoGrossWeight",
+          "cargoGrossWeightUnit",
           "equipment",
           "isShipperOwned",
           "seals"
@@ -4442,6 +4435,34 @@
         "properties": {
           "equipment": {
             "$ref": "#/components/schemas/Equipment"
+          },
+          "cargoGrossWeight": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total weight of the cargo and weight per container including packaging, which can be expressed in imperial or metric terms, as provided by the shipper. Excludes the tare weight of the container.\n",
+            "format": "float",
+            "example": 12000
+          },
+          "cargoGrossWeightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "cargoGrossVolume": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total volume of the cargo per container, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 120
+          },
+          "cargoGrossVolumeUnit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n\n**Conditional:** if `cargoGrossVolume` is provided then `cargoGrossVolumeUnit` is required\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
           },
           "isShipperOwned": {
             "$ref": "#/components/schemas/isShipperOwned"

@@ -41,7 +41,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalShipperPartyName.set(shipperPartyName);
     return noAction().thenEither(
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR).thenAllPathsFrom(SI_START),
-      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START)
+      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START),
+      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START)
     );
   }
 

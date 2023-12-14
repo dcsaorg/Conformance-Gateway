@@ -64,13 +64,26 @@ public class CarrierShippingInstructions {
     "isShippedOnBoardType",
   };
 
+  private static final Map<String, VesselDetails> CARRIER_SMDG_2_VESSEL = Map.ofEntries(
+    Map.entry("CMA", new VesselDetails("9839179", "CMA CGM Jacques Saadé")),
+    Map.entry("EMC", new VesselDetails("9893890", "Ever Ace")),
+    Map.entry("HLC", new VesselDetails("9540118", "Berlin Express")),
+    Map.entry("HMM", new VesselDetails("9863297", "HMM Algeciras")),
+    Map.entry("MSK", new VesselDetails("9778791", "Madrid Maersk")),
+    Map.entry("MSC", new VesselDetails("9839430", "MSC Gülsün")),
+    Map.entry("ONE", new VesselDetails("9865879", "CONFIDENCE")),
+    Map.entry("YML", new VesselDetails("9757228", "YM WARRANTY")),
+    Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON"))
+
+  );
+
   private static JsonNode issuingCarrier(String name, String smdgCode) {
     var issuingCarrier = OBJECT_MAPPER.createObjectNode()
       .put("partyName", name);
     issuingCarrier
       .putArray("identifyingCodes")
       .addObject()
-      .put("DCSAResponsibleAgencyCode", "SMDG")
+      .put("codeListProvider", "SMDG")
       .put("codeListName", "LCL")
       .put("partyCode", smdgCode);
     return issuingCarrier;
@@ -184,8 +197,32 @@ public class CarrierShippingInstructions {
     // change some other detail (like the requested change or the issuance date). But in the
     // conformance tests every thing happens in the same day and when the conformance toolkit is
     // the carrier, booking amendments are "zero-change" amendments.
-    field("charges", (o, a) -> addCharge(o.putArray(a)), (o, a) -> addCharge(o.path(a)))
+    field("charges", (o, a) -> addCharge(o.putArray(a)), (o, a) -> addCharge(o.path(a))),
+    initialFieldValue("transports", (o, a) -> initializeTransports(o, o.putObject(a)))
   };
+
+  private static void initializeTransports(ObjectNode td, ObjectNode transportsNode) {
+    var carrierCode = td.required("carrierCode").asText("<MISSING>");
+    var vessel = CARRIER_SMDG_2_VESSEL.get(carrierCode);
+    if (vessel == null) {
+      throw new AssertionError("Cannot find a vessel for carrier with code: " + carrierCode);
+    }
+    var today = LocalDate.now();
+    // The voyage is/was based on scheduled voyage of "MARSEILLE MAERSK" ("402E") as it looked on
+    // December 15th, 2023. The schedule has been rebased onto "today"
+    transportsNode.put("plannedDepartureDate", today.toString())
+        .put("plannedArrivalDate", today.plusDays(2).toString());
+    transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
+    unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
+    transportsNode
+      .put("vesselName", vessel.vesselName())
+      .put("carrierExportVoyageNumber", "402E");
+  }
+
+  private static void unLocation(ObjectNode locationNode, String unlocationCode) {
+    locationNode.put("locationType", "UNLO")
+      .put("UNLocationCode", unlocationCode);
+  }
 
   private static void addCharge(JsonNode chargesArray) {
     if (!chargesArray.isArray()) {
@@ -199,7 +236,7 @@ public class CarrierShippingInstructions {
         .put("currencyAmount", 1f)
         .put("currencyCode", "EUR")
         .put("paymentTermCode", "COL")
-        .put("calculationBasis", "For the concrete transport document")
+        .put("calculationBasis", "Per transport document")
         .put("unitPrice", 1f)
         .put("quantity", 1);
     } else {
@@ -209,7 +246,7 @@ public class CarrierShippingInstructions {
         .put("currencyAmount", 1f)
         .put("currencyCode", "EUR")
         .put("paymentTermCode", "PRE")
-        .put("calculationBasis", "For the entire amendment")
+        .put("calculationBasis", "Per amendment")
         .put("unitPrice", 1f)
         .put("quantity", 1);
     }
@@ -412,7 +449,41 @@ public class CarrierShippingInstructions {
     }
   }
 
-  private void fixupConsignmentItems(ObjectNode transportDocument) {
+  private void computeWeightForUTE(ObjectNode ute, String equipmentReference, JsonNode consignmentItems) {
+    double weightInKGM = 0;
+    double weightInLBR = 0;
+
+    for (var consignmentItemNode : consignmentItems) {
+      for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
+        if (!cargoItemNode.path("equipmentReference").asText("").equals(equipmentReference)) {
+          continue;
+        }
+        var weight = Math.max(cargoItemNode.path("weight").asDouble(0.0), 0.0);
+        var weightUnit = cargoItemNode.path("weightUnit").asText("KGM");
+        if (weightUnit.equals("LBR")) {
+          weightInLBR += weight;
+        } else {
+          weightInKGM += weight;
+        }
+      }
+    }
+    if (weightInLBR > 0 && weightInKGM > 0) {
+      // Convert to KGM for simplicity. A real carrier had probably called a pending update requesting the
+      // shipper to use only one weight unit.
+      weightInKGM += weightInLBR * 0.45359237;
+      weightInLBR = -1;
+    }
+
+    if (weightInLBR > 0) {
+      ute.put("cargoGrossWeight", weightInLBR)
+        .put("cargoGrossWeightUnit", "LBR");
+    } else {
+      ute.put("cargoGrossWeight", weightInKGM)
+        .put("cargoGrossWeightUnit", "KGM");
+    }
+  }
+
+  private void fixupConsignmentItems(ObjectNode transportDocument, ScenarioType scenarioType) {
     for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
       for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
         var outerPackagingNode = cargoItemNode.path("outerPackaging");
@@ -426,27 +497,48 @@ public class CarrierShippingInstructions {
         //
         // The alternative is having a look-up table of all known packageCode's and their relevant
         // description.
-        outerPackaging.put("packageCode", "1A")
-          .put("description", "Drum, Steel");
-
+        switch (scenarioType) {
+          case REGULAR ->
+            outerPackaging.put("packageCode", "4G")
+              .put("description", "Fibreboard boxes");
+          case REEFER ->
+            outerPackaging.put("packageCode", "BQ")
+              .put("description", "Bottles");
+          case DG -> {
+            outerPackaging.put("description", "Jerrican, steel")
+              .put("imoPackagingCode", "3A1");
+            var dg = outerPackaging.putArray("dangerousGoods").addObject();
+            dg.put("unNumber", "3082")
+              .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
+              .put("imoClass", "9")
+              .put("packingGroup", 3)
+              .put("EMSNumber", "F-A S-F")
+             ;
+          }
+          default -> throw new AssertionError("Missing case for " + scenarioType.name());
+        }
       }
     }
   }
 
   private void fixupUtilizedTransportEquipments(ObjectNode transportDocument, ScenarioType scenarioType) {
+    // These code must be aligned with the equipment references.
     var containerISOEquipmentCode = switch (scenarioType) {
-      case REEFER -> "22RB";
+      case REEFER -> "45R1";
       case REGULAR -> "22G1";
+      case DG -> "22GP";
     };
+    var consignmentItemsNode = transportDocument.path("consignmentItems");
     for (JsonNode node : transportDocument.path("utilizedTransportEquipments")) {
       if (!node.isObject()) {
         continue;
       }
       ObjectNode ute = (ObjectNode)node;
-      var ref = ute.path("equipmentReference");
+      var ref = ute.path("equipmentReference").asText("");
+      computeWeightForUTE(ute, ref, consignmentItemsNode);
       ute.putObject("equipment")
         .put("ISOEquipmentCode", containerISOEquipmentCode)
-        .set("equipmentReference", ref);
+        .put("equipmentReference", ref);
       ute.remove("equipmentReference");
       if (scenarioType == ScenarioType.REEFER) {
         ute.put("isNonOperatingReefer", false)
@@ -464,7 +556,7 @@ public class CarrierShippingInstructions {
     copyFieldsWherePresent(siData, td, COPY_SI_INTO_TD_FIELDS);
     preserveOrGenerateCarrierFields(existingTd, td);
     fixupUtilizedTransportEquipments(td, scenarioType);
-    fixupConsignmentItems(td);
+    fixupConsignmentItems(td, scenarioType);
     state.set(TD_DATA_FIELD, td);
   }
 
@@ -615,4 +707,9 @@ public class CarrierShippingInstructions {
             possibility of such damages.
             """;
   }
+
+  private record VesselDetails(
+    String vesselIMONumber,
+    String vesselName
+  ) {}
 }

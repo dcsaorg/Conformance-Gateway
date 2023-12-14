@@ -95,18 +95,27 @@ public class EblCarrier extends ConformanceParty {
           "Some Commodity Subreference 123",
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
           "NARU3472484",
-          "DKCPH",
-          "851712",
-          "300 boxes of blue shoes size 47"
+          "DKAAR",
+          "640510",
+          "Shoes - black, 400 boxes"
         );
         case REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
           "Some reefer Commodity Subreference 123",
-          // A "22RB" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "BBCU5200220",
-          "DKCPH",
+          // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "KKFU6671914",
+          "DKAAR",
           "04052090",
           "Dairy products"
+        );
+        case DG -> new CarrierScenarioParameters(
+          "RTM1234567",
+          "Some DG Commodity Subreference 123",
+          // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "HLXU1234567",
+          "DKAAR",
+          "293499",
+          "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
         );
     };
     asyncOrchestratorPostPartyInput(

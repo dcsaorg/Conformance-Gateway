@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import lombok.NonNull;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends EblAction {
   private CarrierScenarioParameters carrierScenarioParameters = null;
@@ -23,6 +21,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
       switch (scenarioType) {
         case REGULAR -> "SupplyCSP";
         case REEFER -> "SupplyCSP-AR";
+        case DG -> "SupplyCSP-DG";
       },
       -1);
     this.scenarioType = scenarioType;
@@ -73,18 +72,27 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
-        "DKCPH",
-        "851712",
-        "300 boxes of blue shoes size 47"
+        "DKAAR",
+        "640510",
+        "Shoes - black, 400 boxes"
       );
       case REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for cargo requiring an *active* reefer",
         // Any valid reefer equipment reference will do as an example.
-        "BBCU5200220",
-        "DKCPH",
+        "KKFU6671914",
+        "DKAAR",
         "04052090",
         "Dairy products"
+      );
+      case DG -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity subreference for dangerous goods cargo",
+        // Any valid regular equipment reference will do as an example.
+        "NARU3472484",
+        "DKAAR",
+        "293499",
+        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
       );
     };
     return csp.toJson();

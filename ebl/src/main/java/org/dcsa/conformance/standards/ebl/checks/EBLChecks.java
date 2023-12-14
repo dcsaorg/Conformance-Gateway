@@ -3,8 +3,8 @@ package org.dcsa.conformance.standards.ebl.checks;
 import com.fasterxml.jackson.core.JsonPointer;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.JsonAttributePresenceCheck;
 import org.dcsa.conformance.core.check.JsonAttributeCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
@@ -29,10 +29,12 @@ public class EBLChecks {
   private static final JsonPointer TD_NOTIFICATION_TDR_PTR = JsonPointer.compile("/data/transportDocumentReference");
   private static final JsonPointer TD_NOTIFICATION_TD_STATUS_PTR = JsonPointer.compile("/data/transportDocumentStatus");
 
+  private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
+  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/sendToPlatform");
 
   public static Stream<ActionCheck> siRefSIRIsPresent(UUID matched) {
     return Stream.of(
-      JsonAttributePresenceCheck.jsonAttributeMustBePresent(
+      JsonAttribute.mustBePresent(
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,
@@ -43,7 +45,7 @@ public class EBLChecks {
 
   public static Stream<ActionCheck> siRefSIR(UUID matched, String reference) {
     return Stream.of(
-      new JsonAttributeCheck(
+      JsonAttribute.mustEqual(
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,
@@ -55,6 +57,24 @@ public class EBLChecks {
     );
   }
 
+  public static Stream<ActionCheck> siRequestContentChecks(UUID matched) {
+    return Stream.of(
+      JsonAttribute.mustBeDatasetKeyword(
+        EblRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
+        EblDatasets.UN_LOCODE_DATASET
+      ),
+      JsonAttribute.mustBeDatasetKeyword(
+        EblRole::isShipper,
+        matched,
+        HttpMessageType.REQUEST,
+        SI_REQUEST_SEND_TO_PLATFORM,
+        EblDatasets.EBL_PLATFORMS_DATASET
+      )
+    );
+  }
 
   public static Stream<ActionCheck> siRefStatusChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus) {
     return siRefStatusChecks(matched, shippingInstructionsStatus, null);
@@ -62,19 +82,19 @@ public class EBLChecks {
 
   public static Stream<ActionCheck> siRefStatusChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
-      ? new JsonAttributeCheck(
+      ? JsonAttribute.mustEqual(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
       SI_REF_UPDATED_SI_STATUS_PTR,
       updatedShippingInstructionsStatus.wireName())
-      : JsonAttributePresenceCheck.jsonAttributeMustBeAbsent(
+      : JsonAttribute.mustBeAbsent(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
       SI_REF_UPDATED_SI_STATUS_PTR);
     return Stream.of(
-      new JsonAttributeCheck(
+      JsonAttribute.mustEqual(
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,
@@ -99,7 +119,7 @@ public class EBLChecks {
       HttpMessageType.REQUEST,
       SI_NOTIFICATION_UPDATED_SI_STATUS_PTR,
       updatedShippingInstructionsStatus.wireName())
-      : JsonAttributePresenceCheck.jsonAttributeMustBeAbsent(
+      : JsonAttribute.mustBeAbsent(
       titlePrefix,
       EblRole::isCarrier,
       matched,
@@ -121,7 +141,7 @@ public class EBLChecks {
   public static Stream<ActionCheck> siNotificationSIRIsPresent(UUID matched) {
     String titlePrefix = "[Notification]";
     return Stream.of(
-      JsonAttributePresenceCheck.jsonAttributeMustBePresent(
+      JsonAttribute.mustBePresent(
         titlePrefix,
         EblRole::isCarrier,
         matched,
@@ -150,7 +170,7 @@ public class EBLChecks {
 
   public static Stream<ActionCheck> tdRefStatusChecks(UUID matched, TransportDocumentStatus transportDocumentStatus) {
     return Stream.of(
-      new JsonAttributeCheck(
+      JsonAttribute.mustEqual(
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,
@@ -163,7 +183,7 @@ public class EBLChecks {
   public static Stream<ActionCheck> tdNotificationTDRIsPresent(UUID matched) {
     String titlePrefix = "[Notification]";
     return Stream.of(
-      JsonAttributePresenceCheck.jsonAttributeMustBePresent(
+      JsonAttribute.mustBePresent(
         titlePrefix,
         EblRole::isCarrier,
         matched,
@@ -176,7 +196,7 @@ public class EBLChecks {
 
   public static Stream<ActionCheck> tdRefTDR(UUID matched, String reference) {
     return Stream.of(
-      new JsonAttributeCheck(
+      JsonAttribute.mustEqual(
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,

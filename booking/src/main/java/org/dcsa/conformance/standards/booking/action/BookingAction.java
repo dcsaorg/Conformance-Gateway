@@ -140,13 +140,13 @@ public abstract class BookingAction extends ConformanceAction {
                 titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedNotificationExchangeUuid(), bookingState, amendedBookingState),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 BookingRole::isCarrier,
                 getMatchedNotificationExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 BookingRole::isShipper,
                 getMatchedNotificationExchangeUuid(),

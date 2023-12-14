@@ -314,7 +314,7 @@ public class Carrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPost("/v2/booking-notifications", notification);
+      asyncCounterpartPostNotification("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
@@ -440,7 +440,7 @@ public class Carrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
           () ->
-              asyncCounterpartPost(
+              asyncCounterpartPostNotification(
                   "/v2/booking-notifications",
                   BookingNotification.builder()
                       .apiVersion(apiVersion)
@@ -571,7 +571,7 @@ public class Carrier extends ConformanceParty {
     if (isShipperNotificationEnabled) {
       executor.schedule(
           () ->
-              asyncCounterpartPost(
+              asyncCounterpartPostNotification(
                   "/v2/booking-notifications",
                   BookingNotification.builder()
                       .apiVersion(apiVersion)

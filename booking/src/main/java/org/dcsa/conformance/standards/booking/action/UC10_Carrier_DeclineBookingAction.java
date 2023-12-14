@@ -52,12 +52,12 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
                 BookingState.DECLINED,
                 dsp.amendedBookingStatus() != null ? BookingState.AMENDMENT_DECLINED : null
             ),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+          ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,

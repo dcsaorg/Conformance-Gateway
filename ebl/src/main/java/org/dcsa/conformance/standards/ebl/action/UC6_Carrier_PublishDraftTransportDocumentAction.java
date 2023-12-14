@@ -28,8 +28,10 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
 
   @Override
   public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
+      .put("documentReference", dsp.shippingInstructionsReference())
+      .put("scenarioType", dsp.scenarioType().name());
   }
 
   @Override

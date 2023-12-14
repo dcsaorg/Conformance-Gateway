@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.action;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -69,13 +68,6 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            new JsonAttributeCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              JsonPointer.compile("/shippingInstructionsStatus"),
-              ShippingInstructionsStatus.SI_RECEIVED.wireName()
-            ),
             // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
@@ -90,17 +82,19 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()),
             Stream.concat(
-              EBLChecks.siRefSIRIsPresent(getMatchedExchangeUuid()),
-              EBLChecks.siRefStatusChecks(
-                getMatchedExchangeUuid(),
-                ShippingInstructionsStatus.SI_RECEIVED
-            )),
-            getSINotificationChecks(
-              expectedApiVersion,
-              notificationSchemaValidator,
-              ShippingInstructionsStatus.SI_RECEIVED))
-        );
+              Stream.concat(
+                EBLChecks.siRefSIRIsPresent(getMatchedExchangeUuid()),
+                EBLChecks.siRefStatusChecks(
+                  getMatchedExchangeUuid(),
+                  ShippingInstructionsStatus.SI_RECEIVED
+                )),
+              getSINotificationChecks(
+                expectedApiVersion,
+                notificationSchemaValidator,
+                ShippingInstructionsStatus.SI_RECEIVED))
+          ));
       }
     };
   }

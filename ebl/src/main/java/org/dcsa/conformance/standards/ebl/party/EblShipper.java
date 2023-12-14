@@ -95,10 +95,8 @@ public class EblShipper extends ConformanceParty {
       conformanceResponse -> {
         JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
         String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
-        String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
         ObjectNode updatedShippingInstructions =
           ((ObjectNode) jsonRequestBody)
-            .put("shippingInstructionsStatus", shippingInstructionsStatus)
             .put("shippingInstructionsReference", shippingInstructionsReference);
         persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
       });
@@ -136,7 +134,7 @@ public class EblShipper extends ConformanceParty {
 
     var documentReference = actionPrompt.required("documentReference").asText();
     var approvePayload = new ObjectMapper().createObjectNode()
-      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_CANCELLED.wireName());
+      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
     asyncCounterpartPatch(
       "/v3/shipping-instructions/%s".formatted(documentReference),

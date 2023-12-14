@@ -28,8 +28,10 @@ public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChan
 
   @Override
   public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().transportDocumentReference());
+      .put("documentReference", dsp.transportDocumentReference())
+      .put("scenarioType", dsp.scenarioType().name());
   }
 
   @Override

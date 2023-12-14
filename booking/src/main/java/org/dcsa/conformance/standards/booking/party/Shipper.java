@@ -93,10 +93,8 @@ public class Shipper extends ConformanceParty {
         conformanceResponse -> {
           JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
           String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
-          String bookingStatus = jsonBody.path("bookingStatus").asText();
           ObjectNode updatedBooking =
                 ((ObjectNode) jsonRequestBody)
-                  .put("bookingStatus", bookingStatus)
                   .put("carrierBookingRequestReference", cbrr);
           persistentMap.save(cbrr, updatedBooking);
         });

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -38,7 +39,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    return carrier_SupplyScenarioParameters().thenAllPathsFrom(SI_START);
+    return noAction().thenEither(
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR).thenAllPathsFrom(SI_START),
+      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START)
+    );
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
@@ -79,15 +83,15 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                         .thenHappyPathFrom(SI_PENDING_UPDATE)),
             uc4a_carrier_acceptUpdatedShippingInstructions()
                 .then(
-                    shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
                         .thenHappyPathFrom(SI_RECEIVED)),
             uc4d_carrier_declineUpdatedShippingInstructions()
                 .then(
-                    shipper_GetShippingInstructions(memoryState, SI_DECLINED, TD_START)
+                    shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, TD_START)
                         .thenHappyPathFrom(memoryState)),
             uc5_shipper_cancelUpdateToShippingInstructions()
               .then(
-                shipper_GetShippingInstructions(memoryState, SI_CANCELLED, TD_START)
+                shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, TD_START)
                   .thenHappyPathFrom(memoryState)));
       }
       case SI_PENDING_UPDATE -> then(
@@ -104,13 +108,24 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                       // are considered happy paths.
                       uc5_shipper_cancelUpdateToShippingInstructions()
                         .then(
-                          shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_CANCELLED, TD_START)
+                          shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, TD_START)
                             .thenEither(
                               noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
                               uc3_shipper_submitUpdatedShippingInstructions().then(
                                 shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
                                   .thenHappyPathFrom(SI_UPDATE_RECEIVED)))))));
-      case SI_CANCELLED, SI_DECLINED -> throw new AssertionError("Please use the black state rather than " + shippingInstructionsStatus.name());
+      case SI_UPDATE_CONFIRMED -> thenEither(
+        noAction().thenHappyPathFrom(SI_UPDATE_CONFIRMED),
+        // Just to validate that the "Carrier" does not get "stuck"
+        uc2_carrier_requestUpdateToShippingInstruction()
+          .then(
+            shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
+              .thenHappyPathFrom(SI_PENDING_UPDATE)),
+        uc3_shipper_submitUpdatedShippingInstructions()
+          .then(
+            shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
+              .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
+      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError("Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
       case SI_COMPLETED -> then(noAction());
     };
@@ -119,7 +134,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private EblScenarioListBuilder thenHappyPathFrom(
       ShippingInstructionsStatus shippingInstructionsStatus) {
     return switch (shippingInstructionsStatus) {
-      case SI_RECEIVED -> then(uc6_carrier_publishDraftTransportDocument()
+      case SI_START -> then(
+        uc1_shipper_submitShippingInstructions()
+          .then(
+            shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+              .thenHappyPathFrom(SI_RECEIVED)));
+      case SI_UPDATE_CONFIRMED, SI_RECEIVED -> then(uc6_carrier_publishDraftTransportDocument()
         .then(
           shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
             .then(shipper_GetTransportDocument(TD_DRAFT)
@@ -129,12 +149,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
             .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
       case SI_UPDATE_RECEIVED -> then(uc4a_carrier_acceptUpdatedShippingInstructions()
-        .then(shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
-          .thenHappyPathFrom(SI_RECEIVED))
+        .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
+          .thenHappyPathFrom(SI_UPDATE_CONFIRMED))
       );
       case SI_COMPLETED -> then(noAction());
-      case SI_CANCELLED, SI_DECLINED -> throw new AssertionError("Please use the black state rather than DECLINED");
-      case SI_START, SI_ANY -> throw new AssertionError("Not a real/reachable state");
+      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError("Please use the black state rather than DECLINED");
+      case SI_ANY -> throw new AssertionError("Not a real/reachable state");
     };
   }
 
@@ -255,10 +275,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return new EblScenarioListBuilder(null);
   }
 
-  private static EblScenarioListBuilder carrier_SupplyScenarioParameters() {
+  private static EblScenarioListBuilder carrier_SupplyScenarioParameters(ScenarioType scenarioType) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName));
+        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
   }
 
 

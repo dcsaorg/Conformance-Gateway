@@ -74,7 +74,6 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Carrier Ref Status Payload response check
             // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
@@ -89,19 +88,21 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()),
             Stream.concat(
-              EBLChecks.siRefSIR(getMatchedExchangeUuid(), dsp.shippingInstructionsReference()),
-              EBLChecks.siRefStatusChecks(
-                getMatchedExchangeUuid(),
+              Stream.concat(
+                EBLChecks.siRefSIR(getMatchedExchangeUuid(), dsp.shippingInstructionsReference()),
+                EBLChecks.siRefStatusChecks(
+                  getMatchedExchangeUuid(),
+                  currentState,
+                  ShippingInstructionsStatus.SI_UPDATE_RECEIVED
+                )),
+              getSINotificationChecks(
+                expectedApiVersion,
+                notificationSchemaValidator,
                 currentState,
-                ShippingInstructionsStatus.SI_UPDATE_RECEIVED
-            )),
-            getSINotificationChecks(
-              expectedApiVersion,
-              notificationSchemaValidator,
-              currentState,
-              ShippingInstructionsStatus.SI_UPDATE_RECEIVED))
-        );
+                ShippingInstructionsStatus.SI_UPDATE_RECEIVED))
+          ));
       }
     };
   }

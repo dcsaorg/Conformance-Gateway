@@ -8,6 +8,7 @@ import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 import java.util.UUID;
@@ -31,7 +32,7 @@ public abstract class EblAction extends ConformanceAction {
     this.dspReference =
         previousAction == null
             ? new OverwritingReference<>(
-                null, new DynamicScenarioParameters(null, null, null, null, null))
+                null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -186,13 +187,13 @@ public abstract class EblAction extends ConformanceAction {
                 "/v3/shipping-instructions-notifications"),
             new ResponseStatusCheck(
                 titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 EblRole::isCarrier,
                 notificationExchangeUuid,
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 EblRole::isShipper,
                 notificationExchangeUuid,
@@ -240,13 +241,13 @@ public abstract class EblAction extends ConformanceAction {
         "/v3/transport-document-notifications"),
       new ResponseStatusCheck(
         titlePrefix, EblRole::isShipper, notificationExchangeUuid, 204),
-      new ApiHeaderCheck(
+      ApiHeaderCheck.createNotificationCheck(
         titlePrefix,
         EblRole::isCarrier,
         notificationExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion),
-      new ApiHeaderCheck(
+      ApiHeaderCheck.createNotificationCheck(
         titlePrefix,
         EblRole::isShipper,
         notificationExchangeUuid,

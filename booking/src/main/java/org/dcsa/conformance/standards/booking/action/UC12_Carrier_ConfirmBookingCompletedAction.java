@@ -52,12 +52,12 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
               BookingState.COMPLETED,
               dsp.amendedBookingStatus() != null ? BookingState.AMENDMENT_CONFIRMED : null
             ),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-            new ApiHeaderCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,

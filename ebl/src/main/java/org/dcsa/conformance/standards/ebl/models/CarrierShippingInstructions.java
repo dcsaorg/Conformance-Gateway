@@ -270,7 +270,7 @@ public class CarrierShippingInstructions {
 
   public void cancelShippingInstructionsUpdate(String shippingInstructionsReference) {
     checkState(shippingInstructionsReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
-    changeSIState(UPDATED_SI_STATUS, SI_CANCELLED);
+    changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CANCELLED);
     setReason(null);
   }
 
@@ -286,10 +286,10 @@ public class CarrierShippingInstructions {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     var updated = getUpdatedShippingInstructions().orElseThrow();
     setShippingInstructions(updated);
-    clearUpdatedShippingInstructions();
     setReason(null);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
     changeSIState(SI_STATUS, SI_RECEIVED);
+    changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CONFIRMED);
   }
 
   public void declineUpdatedShippingInstructions(String documentReference, String reason) {
@@ -299,7 +299,7 @@ public class CarrierShippingInstructions {
     clearUpdatedShippingInstructions();
     setReason(reason);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
-    changeSIState(UPDATED_SI_STATUS, SI_DECLINED);
+    changeSIState(UPDATED_SI_STATUS, SI_UPDATE_DECLINED);
   }
 
   public void confirmShippingInstructionsComplete(String documentReference) {

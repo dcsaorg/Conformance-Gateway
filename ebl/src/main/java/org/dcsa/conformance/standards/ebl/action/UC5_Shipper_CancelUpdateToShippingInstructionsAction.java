@@ -94,13 +94,13 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
               EBLChecks.siRefStatusChecks(
                 getMatchedExchangeUuid(),
                 siStatus,
-                ShippingInstructionsStatus.SI_CANCELLED
+                ShippingInstructionsStatus.SI_UPDATE_CANCELLED
               )),
             getSINotificationChecks(
               expectedApiVersion,
               notificationSchemaValidator,
               siStatus,
-              ShippingInstructionsStatus.SI_CANCELLED)));
+              ShippingInstructionsStatus.SI_UPDATE_CANCELLED)));
       }
     };
   }

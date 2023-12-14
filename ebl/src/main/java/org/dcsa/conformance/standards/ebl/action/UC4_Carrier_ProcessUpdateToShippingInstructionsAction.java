@@ -62,7 +62,7 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
             expectedApiVersion,
             requestSchemaValidator,
             acceptChanges ? ShippingInstructionsStatus.SI_RECEIVED : currentState,
-            acceptChanges ? null : ShippingInstructionsStatus.SI_DECLINED
+            acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED
           ));
       }
     };

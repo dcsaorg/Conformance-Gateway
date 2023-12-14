@@ -134,7 +134,7 @@ public class EblShipper extends ConformanceParty {
 
     var documentReference = actionPrompt.required("documentReference").asText();
     var approvePayload = new ObjectMapper().createObjectNode()
-      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_CANCELLED.wireName());
+      .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
     asyncCounterpartPatch(
       "/v3/shipping-instructions/%s".formatted(documentReference),

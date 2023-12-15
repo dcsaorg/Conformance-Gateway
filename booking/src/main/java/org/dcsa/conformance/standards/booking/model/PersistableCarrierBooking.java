@@ -98,25 +98,13 @@ public class PersistableCarrierBooking {
     state.set(AMENDED_BOOKING_DATA_FIELD, node);
   }
 
-  public void performSimpleStatusChange(String reference, BookingState newState) {
-    performSimpleStatusChange(reference, newState, null);
-  }
-
-  public void performSimpleStatusChange(String reference, BookingState newState, boolean resetAmendedBookingState) {
-    if(resetAmendedBookingState) {
-      resetAmendedBookingState();
-    }
-    performSimpleStatusChange(reference, newState, null);
-  }
-
   public void confirmBookingAmendment(String reference, String reason) {
-    checkState(reference, getBookingAmendedState(), s -> s!=null && s == AMENDMENT_RECEIVED);
+    checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     setReason(reason);
   }
-
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CONFIRMED);
@@ -130,7 +118,8 @@ public class PersistableCarrierBooking {
     setReason(reason);
   }
 
-  public void resetAmendedBookingState() {
+  private void resetAmendedBookingState() {
+    state.remove(AMENDED_BOOKING_DATA_FIELD);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
   }
 
@@ -170,22 +159,41 @@ public class PersistableCarrierBooking {
     }
   }
 
-  /**
-   * Replace this with a more concrete call (like confirmBooking()) when needed
-   */
-  @Deprecated
-  public void performSimpleStatusChange(String reference, BookingState newState, String reason) {
-    // FIXME: Have logic for amendment vs. non-amendment states
-    if (NOT_APPLICABLE_FOR_SIMPLE_STATE_CHANGE.contains(newState)) {
-      throw new IllegalArgumentException("This state cannot be set via setCarrierStatus");
+  public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator) {
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_UPDATE);
+    checkState(reference, getOriginalBookingState(), prerequisites);
+    changeState(BOOKING_STATUS, PENDING_UPDATE);
+    mutateBookingAndAmendment(bookingMutator);
+  }
+
+  public void rejectBooking(String reference, String rejectReason) {
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(REJECTED);
+    checkState(reference, getOriginalBookingState(), prerequisites);
+    changeState(BOOKING_STATUS, REJECTED);
+    if (rejectReason == null || rejectReason.isBlank()) {
+      rejectReason = "default message of rejection(reason not provided by carrier)";
     }
-    var prerequisiteState = PREREQUISITE_STATE_FOR_TARGET_STATE.get(newState);
-    if (prerequisiteState == null) {
-      throw new IllegalArgumentException("Missing dependency check for state " + newState.wireName());
+    final var reason = rejectReason;
+    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> {
+      bookingContent.put("reason", reason);
+    });
+  }
+
+  public void confirmBookingCompleted(String reference) {
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(COMPLETED);
+    checkState(reference, getOriginalBookingState(), prerequisites);
+    changeState(BOOKING_STATUS, COMPLETED);
+  }
+
+  public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking) {
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_AMENDMENT);
+    checkState(reference, getOriginalBookingState(), prerequisites);
+    changeState(BOOKING_STATUS, PENDING_AMENDMENT);
+    mutateBookingAndAmendment(bookingMutator);
+    if (resetAmendedBooking) {
+      resetAmendedBookingState();
     }
-    checkState(reference, getOriginalBookingState(), prerequisiteState);
-    changeState(BOOKING_STATUS, newState);
-    setReason(reason);
+    setReason(null);
   }
 
   public void cancelEntireBooking(String bookingReference, String reason) {
@@ -272,7 +280,7 @@ public class PersistableCarrierBooking {
   public BookingState getBookingAmendedState() {
     var booking = getBooking();
     var s = booking.path(AMENDED_BOOKING_STATUS);
-    return !s.asText().isEmpty()? BookingState.fromWireName(s.asText()) : null;
+    return !s.asText("").isEmpty()? BookingState.fromWireName(s.asText()) : null;
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {

@@ -29,16 +29,6 @@ public class PersistableCarrierBooking {
     Map.entry(COMPLETED, Set.of(CONFIRMED)::contains)
   );
 
-  private static final Set<BookingState> NOT_APPLICABLE_FOR_SIMPLE_STATE_CHANGE = Set.of(
-    START,
-    RECEIVED,
-    UPDATE_RECEIVED,
-    AMENDMENT_RECEIVED,
-    CANCELLED,
-    CONFIRMED,
-    DECLINED
-  );
-
   private static final Set<BookingState> MAY_AMEND_STATES = Set.of(
     CONFIRMED,
     PENDING_AMENDMENT

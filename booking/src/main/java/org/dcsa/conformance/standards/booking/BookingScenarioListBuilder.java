@@ -103,15 +103,13 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case AMENDMENT_CONFIRMED -> then(
         shipper_GetBooking(CONFIRMED,bookingState)
           .thenEither(
-            uc12_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED),
-            uc6_carrier_requestUpdateToConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT)
+            noAction().thenHappyPathFrom(CONFIRMED),
+            noAction().thenHappyPathFrom(PENDING_AMENDMENT)
           )
       );
       case AMENDMENT_CANCELLED, AMENDMENT_DECLINED -> then(
         shipper_GetBooking(originalBookingState,bookingState)
-          .then(
-            uc6_carrier_requestUpdateToConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT)
-          )
+          .thenHappyPathFrom(originalBookingState)
       );
     };
   }

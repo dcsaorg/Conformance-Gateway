@@ -169,10 +169,14 @@ public class PersistableCarrierBooking {
     });
   }
 
-  public void confirmBookingCompleted(String reference) {
+  public void confirmBookingCompleted(String reference, boolean resetAmendedBooking) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(COMPLETED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, COMPLETED);
+    if (resetAmendedBooking) {
+      resetAmendedBookingState();
+    }
+    setReason(null);
   }
 
   public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking) {
@@ -239,6 +243,7 @@ public class PersistableCarrierBooking {
 
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
     var currentState = getOriginalBookingState();
+    var amendedBookingState = getBookingAmendedState();
     boolean isAmendment =
       currentState.equals(BookingState.CONFIRMED)
         || currentState.equals(BookingState.PENDING_AMENDMENT);
@@ -248,6 +253,12 @@ public class PersistableCarrierBooking {
       currentState,
       (isAmendment ? MAY_AMEND_STATES : MAY_UPDATE_REQUEST_STATES)::contains
     );
+
+    if(amendedBookingState != null && amendedBookingState.equals(AMENDMENT_RECEIVED))  {
+      throw new IllegalStateException(
+        "Booking '%s' is in Amendment state '%s'".formatted(bookingReference, amendedBookingState));
+    }
+
     if (isAmendment) {
       changeState(AMENDED_BOOKING_STATUS, BookingState.AMENDMENT_RECEIVED);
     } else {
@@ -260,6 +271,7 @@ public class PersistableCarrierBooking {
       setBooking(newBookingData);
     }
     removeRequestedChanges();
+    setReason(null);
   }
 
   public BookingState getOriginalBookingState() {

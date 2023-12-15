@@ -150,8 +150,8 @@ public class Carrier extends ConformanceParty {
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.get("cbr").asText();
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
     addOperatorLogEntry(
       "Confirmed the booking amendment for booking with CBR '%s'".formatted(cbr));
@@ -169,7 +169,7 @@ public class Carrier extends ConformanceParty {
   private void confirmBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     addOperatorLogEntry(
       "Confirmed the booking request with CBRR '%s'".formatted(cbrr));
 
@@ -191,7 +191,7 @@ public class Carrier extends ConformanceParty {
   private void rejectBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     persistableCarrierBooking.rejectBooking(cbrr,"Rejected as required by the conformance scenario");
     persistableCarrierBooking.save(persistentMap);
@@ -202,8 +202,8 @@ public class Carrier extends ConformanceParty {
   private void declineBooking(JsonNode actionPrompt) {
     log.info("Carrier.declineBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.get("cbr").asText();
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     addOperatorLogEntry(
       "Confirmed the booking request with CBR '%s'".formatted(cbr));
 
@@ -221,7 +221,7 @@ public class Carrier extends ConformanceParty {
       .put(
         "message",
         "Please perform the changes requested by the Conformance orchestrator");
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
     persistableCarrierBooking.requestUpdateToBooking(cbrr,bookingMutator);
@@ -234,11 +234,11 @@ public class Carrier extends ConformanceParty {
   private void confirmBookingCompleted(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
 
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.confirmBookingCompleted(cbrr);
+    persistableCarrierBooking.confirmBookingCompleted(cbrr, true);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
 
@@ -249,8 +249,8 @@ public class Carrier extends ConformanceParty {
     log.info(
         "Carrier.requestUpdateToConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
-    String cbr = actionPrompt.get("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
 
     Consumer<ObjectNode> bookingMutator = booking -> booking.putArray("requestedChanges")
       .addObject()
@@ -286,7 +286,7 @@ public class Carrier extends ConformanceParty {
       asyncCounterpartPostNotification("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
     }
   }
 

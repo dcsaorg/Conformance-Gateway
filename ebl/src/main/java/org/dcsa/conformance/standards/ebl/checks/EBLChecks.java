@@ -32,6 +32,18 @@ public class EBLChecks {
   private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
   private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/sendToPlatform");
 
+  private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
+  private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
+  private static final JsonPointer[] TD_UN_LOCATION_CODES = {
+    JsonPointer.compile("/invoicePayableAt/UNLocationCode"),
+    JsonPointer.compile("/transports/placeOfReceipt/UNLocationCode"),
+    JsonPointer.compile("/transports/portOfLoading/UNLocationCode"),
+    JsonPointer.compile("/transports/portOfDischarge/UNLocationCode"),
+    JsonPointer.compile("/transports/placeOfDelivery/UNLocationCode"),
+    JsonPointer.compile("/transports/onwardInlandRouting/UNLocationCode"),
+  };
+
+
   public static JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
   public static JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
   public static JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
@@ -54,11 +66,11 @@ public class EBLChecks {
       EblRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
-      JsonAttribute.mustBeDatasetKeyword(
+      JsonAttribute.mustBeDatasetKeywordIfPresent(
         SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
         EblDatasets.UN_LOCODE_DATASET
       ),
-      JsonAttribute.mustBeDatasetKeyword(
+      JsonAttribute.mustBeDatasetKeywordIfPresent(
         SI_REQUEST_SEND_TO_PLATFORM,
         EblDatasets.EBL_PLATFORMS_DATASET
       )
@@ -142,6 +154,28 @@ public class EBLChecks {
       matched,
       HttpMessageType.REQUEST,
       jsonContentChecks
+    );
+  }
+
+  public static ActionCheck tdContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<DynamicScenarioParameters> dspSupplier) {
+    List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+    jsonContentChecks.add(JsonAttribute.mustEqual(
+      TD_TDR,
+      () -> dspSupplier.get().transportDocumentReference()
+    ));
+    jsonContentChecks.add(JsonAttribute.mustEqual(
+      TD_TRANSPORT_DOCUMENT_STATUS,
+      transportDocumentStatus.wireName()
+    ));
+    for (var ptr : TD_UN_LOCATION_CODES) {
+      jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
+    }
+    return JsonAttribute.contentChecks(
+      EblRole::isCarrier,
+      matched,
+      HttpMessageType.RESPONSE,
+      jsonContentChecks
+
     );
   }
 }

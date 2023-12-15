@@ -2,7 +2,6 @@ package org.dcsa.conformance.core.check;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
@@ -133,7 +132,7 @@ public class JsonAttribute {
         }));
   }
 
-  public static JsonContentCheck mustBeDatasetKeyword(
+  public static JsonContentCheck mustBeDatasetKeywordIfPresent(
     JsonPointer jsonPointer,
     KeywordDataset dataset
   ) {
@@ -141,7 +140,8 @@ public class JsonAttribute {
       jsonCheckName(jsonPointer),
       at(jsonPointer, node -> {
         var text = node.asText();
-        if (!dataset.contains(text)) {
+        // We rely on schema validation (or mustBePresent) for required check.
+        if (!node.isMissingNode() && !dataset.contains(text)) {
           return Set.of(
             "The attribute '%s' had value '%s' which was not a valid keyword here."
               .formatted(renderJsonPointer(jsonPointer), renderValue(node.asText(null))));

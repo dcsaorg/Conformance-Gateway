@@ -26,6 +26,9 @@ class JsonAttributeBasedCheck extends ActionCheck {
     @NonNull
     List<@NonNull JsonContentCheck> validators) {
     super(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+    if (validators.isEmpty()) {
+      throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
+    }
     this.validators = validators;
   }
 

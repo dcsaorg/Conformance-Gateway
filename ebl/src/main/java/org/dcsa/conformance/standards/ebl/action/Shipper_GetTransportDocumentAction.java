@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 public class Shipper_GetTransportDocumentAction extends EblAction {
@@ -63,7 +64,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
               EblRole::isCarrier,
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
-              responseSchemaValidator));
+              responseSchemaValidator),
+            EBLChecks.tdContentChecks(getMatchedExchangeUuid(), expectedTdStatus, getDspSupplier()));
       }
     };
   }

@@ -413,6 +413,12 @@ public class PersistableCarrierBooking {
         if (unitsNode.canConvertToLong()) {
           units = Math.min(unitsNode.longValue(), 1L);
         }
+        var commoditiesNode = (ArrayNode) requestedEquipment.get("commodities");
+        if (commoditiesNode.isArray()) {
+          for(var commodity: commoditiesNode) {
+            ((ObjectNode)commodity).put("commoditySubreference", "COM-001");
+          }
+        }
         confirmedEquipments.addObject().put("ISOEquipmentCode", equipmentCode).put("units", units);
       }
     } else {

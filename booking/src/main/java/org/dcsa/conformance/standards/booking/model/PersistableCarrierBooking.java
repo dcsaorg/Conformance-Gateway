@@ -422,6 +422,7 @@ public class PersistableCarrierBooking {
   private void replaceConfirmedEquipments(ObjectNode booking) {
     if (booking.get("requestedEquipments") instanceof ArrayNode requestedEquipments
       && !requestedEquipments.isEmpty()) {
+      var commoditySubReferenceSequence = 1;
       var confirmedEquipments = booking.putArray("confirmedEquipments");
       for (var requestedEquipment : requestedEquipments) {
         var equipmentCodeNode = requestedEquipment.get("ISOEquipmentCode");
@@ -433,6 +434,12 @@ public class PersistableCarrierBooking {
         }
         if (unitsNode.canConvertToLong()) {
           units = Math.min(unitsNode.longValue(), 1L);
+        }
+        var commoditiesNode = (ArrayNode) requestedEquipment.get("commodities");
+        if (commoditiesNode != null && commoditiesNode.isArray()) {
+          for(var commodity: commoditiesNode) {
+            ((ObjectNode)commodity).put("commoditySubreference", "COM"+commoditySubReferenceSequence++);
+          }
         }
         confirmedEquipments.addObject().put("ISOEquipmentCode", equipmentCode).put("units", units);
       }

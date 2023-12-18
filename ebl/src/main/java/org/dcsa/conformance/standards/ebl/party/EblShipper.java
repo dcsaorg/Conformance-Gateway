@@ -112,8 +112,13 @@ public class EblShipper extends ConformanceParty {
     var sir = actionPrompt.required("sir").asText();
     var si = (ObjectNode) persistentMap.load(sir);
 
-    // TODO: Make a repeatable change (like change the weight)
-    si.put("transportDocumentTypeCode", "SWB");
+    var pcd = si.required("partyContactDetails").required(0);
+    var newName = "DCSA test person2";
+    if (pcd.required("name").asText("").equals(newName)) {
+      newName = "DCSA test person";
+    }
+    ((ObjectNode)pcd).put("name", newName);
+
     asyncCounterpartPut(
       "/v3/shipping-instructions/%s".formatted(sir),
       si,

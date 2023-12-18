@@ -15,6 +15,8 @@ public class EblDatasets {
   public static final KeywordDataset UN_LOCODE_DATASET = KeywordDataset.lazyLoaded(EblDatasets::loadUNLocationCodeDataset);
   public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset("WAVE", "CARX", "ESSD", "BOLE", "EDOX", "IQAX", "SECR", "TRGO");
 
+  public static final KeywordDataset CARGO_MOVEMENT_TYPE = KeywordDataset.staticDataset("FCL", "LCL");
+
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {
     var validCodes = new HashSet<>();

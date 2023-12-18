@@ -34,6 +34,7 @@ public class EBLChecks {
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
+
   private static final JsonPointer[] TD_UN_LOCATION_CODES = {
     JsonPointer.compile("/invoicePayableAt/UNLocationCode"),
     JsonPointer.compile("/transports/placeOfReceipt/UNLocationCode"),
@@ -43,10 +44,47 @@ public class EBLChecks {
     JsonPointer.compile("/transports/onwardInlandRouting/UNLocationCode"),
   };
 
+  private static final JsonContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
+    "Validate transportDocumentTypeCode vs. isToOrder",
+    JsonAttribute.isTrue(JsonPointer.compile("/isToOrder")),
+    JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
+  );
 
-  public static JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
-  public static JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
-  public static JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
+
+  private static final List<JsonContentCheck> STATIC_TD_CHECKS = Arrays.asList(
+    ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    JsonAttribute.ifThenElse(
+      "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
+      JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),
+      JsonAttribute.mustBePresent(JsonPointer.compile("/shippedOnBoardDate")),
+      JsonAttribute.mustBePresent(JsonPointer.compile("/receivedForShipmentDate"))
+    ),
+    JsonAttribute.mutuallyExclusive(
+      JsonPointer.compile("/shippedOnBoardDate"),
+      JsonPointer.compile("/receivedForShipmentDate")
+    ),
+    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), EblDatasets.CARGO_MOVEMENT_TYPE),
+    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), EblDatasets.CARGO_MOVEMENT_TYPE),
+    // receiptTypeAtOrigin + deliveryTypeAtDestination are schema validated
+    JsonAttribute.allOrNoneArePresent(
+      JsonPointer.compile("/declaredValue"),
+      JsonPointer.compile("/declaredValueCurrency")
+    ),
+    JsonAttribute.ifThen(
+      "Pre-Carriage By implies Place of Receipt",
+      JsonAttribute.isNotNull(JsonPointer.compile("/transports/preCarriageBy")),
+      JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfReceipt"), "'preCarriageBy' is present")
+    ),
+    JsonAttribute.ifThen(
+      "On Carriage By implies Place of Delivery",
+      JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
+      JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
+    )
+  );
+
+  public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
+  public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
+  public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
 
   public static JsonContentCheck sirInRefStatusMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
@@ -73,6 +111,12 @@ public class EBLChecks {
       JsonAttribute.mustBeDatasetKeywordIfPresent(
         SI_REQUEST_SEND_TO_PLATFORM,
         EblDatasets.EBL_PLATFORMS_DATASET
+      ),
+      ONLY_EBLS_CAN_BE_NEGOTIABLE,
+      JsonAttribute.ifThen(
+        "'isElectronic' implies 'sendToPlatform'",
+        JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
+        JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform"))
       )
     );
   }
@@ -167,15 +211,16 @@ public class EBLChecks {
       TD_TRANSPORT_DOCUMENT_STATUS,
       transportDocumentStatus.wireName()
     ));
+    jsonContentChecks.addAll(STATIC_TD_CHECKS);
     for (var ptr : TD_UN_LOCATION_CODES) {
       jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
     }
+
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
       jsonContentChecks
-
     );
   }
 }

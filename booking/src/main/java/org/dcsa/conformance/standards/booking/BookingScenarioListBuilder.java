@@ -103,8 +103,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
       case AMENDMENT_CONFIRMED -> then(
         shipper_GetBooking(CONFIRMED,bookingState)
           .thenEither(
-            noAction().thenHappyPathFrom(CONFIRMED),
-            noAction().thenHappyPathFrom(PENDING_AMENDMENT)
+            noAction().thenHappyPathFrom(CONFIRMED)
           )
       );
       case AMENDMENT_CANCELLED, AMENDMENT_DECLINED -> then(

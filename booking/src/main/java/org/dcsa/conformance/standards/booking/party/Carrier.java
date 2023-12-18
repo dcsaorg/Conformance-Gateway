@@ -84,7 +84,7 @@ public class Carrier extends ConformanceParty {
             this::requestUpdateToConfirmedBooking),
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
-        Map.entry(UC11_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
+        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
   private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
@@ -150,8 +150,8 @@ public class Carrier extends ConformanceParty {
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.get("cbr").asText();
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
     addOperatorLogEntry(
       "Confirmed the booking amendment for booking with CBR '%s'".formatted(cbr));
@@ -169,7 +169,7 @@ public class Carrier extends ConformanceParty {
   private void confirmBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     addOperatorLogEntry(
       "Confirmed the booking request with CBRR '%s'".formatted(cbrr));
 
@@ -191,22 +191,19 @@ public class Carrier extends ConformanceParty {
   private void rejectBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
-
-    processAndEmitNotificationForStateTransition(
-        actionPrompt,
-        BookingState.REJECTED,
-        true,
-        booking -> booking.put("reason", "Rejected as required by the conformance scenario")
-    );
+    String cbrr = actionPrompt.required("cbrr").asText();
+    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.rejectBooking(cbrr,"Rejected as required by the conformance scenario");
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
   }
 
   private void declineBooking(JsonNode actionPrompt) {
     log.info("Carrier.declineBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.get("cbr").asText();
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     addOperatorLogEntry(
       "Confirmed the booking request with CBR '%s'".formatted(cbr));
 
@@ -219,33 +216,32 @@ public class Carrier extends ConformanceParty {
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    Consumer<ObjectNode> bookingMutator = booking -> booking.putArray("requestedChanges")
+      .addObject()
+      .put(
+        "message",
+        "Please perform the changes requested by the Conformance orchestrator");
+    String cbrr = actionPrompt.required("cbrr").asText();
+    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    persistableCarrierBooking.requestUpdateToBooking(cbrr,bookingMutator);
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    processAndEmitNotificationForStateTransition(
-        actionPrompt,
-        BookingState.PENDING_UPDATE,
-        true,
-        booking ->
-            booking
-                .putArray("requestedChanges")
-                .addObject()
-                .put(
-                    "message",
-                    "Please perform the changes requested by the Conformance orchestrator"));
     addOperatorLogEntry("Requested update to the booking request with CBRR '%s'".formatted(cbrr));
   }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
     log.info("Carrier.confirmBookingCompleted(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
 
+    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.confirmBookingCompleted(cbrr, true);
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
 
-    processAndEmitNotificationForStateTransition(
-        actionPrompt,
-        BookingState.COMPLETED);
     addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
@@ -253,27 +249,21 @@ public class Carrier extends ConformanceParty {
     log.info(
         "Carrier.requestUpdateToConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
-    String cbr = actionPrompt.get("cbr").asText();
+    String cbrr = actionPrompt.required("cbrr").asText();
+    String cbr = actionPrompt.required("cbr").asText();
 
-    processAndEmitNotificationForStateTransition(
-        actionPrompt,
-        BookingState.PENDING_AMENDMENT,
-        true,
-        booking ->
-            booking
-                .putArray("requestedChanges")
-                .addObject()
-                .put(
-                    "message",
-                    "Please perform the changes requested by the Conformance orchestrator"));
+    Consumer<ObjectNode> bookingMutator = booking -> booking.putArray("requestedChanges")
+      .addObject()
+      .put(
+        "message",
+        "Please perform the changes requested by the Conformance orchestrator");
+
+    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.updateConfirmedBooking(cbrr,bookingMutator,true);
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
+
     addOperatorLogEntry("Requested update to the booking with CBR '%s'".formatted(cbr));
-  }
-
-  private void processAndEmitNotificationForStateTransition(
-      JsonNode actionPrompt,
-      BookingState targetState) {
-    processAndEmitNotificationForStateTransition(
-        actionPrompt, targetState, false, null);
   }
 
   private String generateAndAssociateCBR(String cbrr) {
@@ -282,22 +272,6 @@ public class Carrier extends ConformanceParty {
     cbrrToCbr.put(cbrr, cbr);
     cbrToCbrr.put(cbr, cbrr);
     return cbr;
-  }
-
-  private void processAndEmitNotificationForStateTransition(
-      JsonNode actionPrompt,
-      BookingState targetState,
-      boolean includeCbrr,
-      Consumer<ObjectNode> bookingMutator) {
-    String cbrr = actionPrompt.get("cbrr").asText();
-    var peristableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    peristableCarrierBooking.performSimpleStatusChange(cbrr, targetState);
-    var booking = peristableCarrierBooking.getBooking();
-    if (bookingMutator != null) {
-      bookingMutator.accept(booking);
-    }
-    peristableCarrierBooking.save(persistentMap);
-    generateAndEmitNotificationFromBooking(actionPrompt, peristableCarrierBooking, includeCbrr);
   }
 
   private void generateAndEmitNotificationFromBooking(JsonNode actionPrompt, PersistableCarrierBooking persistableCarrierBooking, boolean includeCbrr) {
@@ -312,7 +286,7 @@ public class Carrier extends ConformanceParty {
       asyncCounterpartPostNotification("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
     }
   }
 
@@ -551,7 +525,7 @@ public class Carrier extends ConformanceParty {
             new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
-              .formatted(bookingReference, persistableCarrierBooking.getBookingState().wireName()));
+              .formatted(bookingReference, persistableCarrierBooking.getOriginalBookingState().wireName()));
       return response;
     }
     return return404(request);

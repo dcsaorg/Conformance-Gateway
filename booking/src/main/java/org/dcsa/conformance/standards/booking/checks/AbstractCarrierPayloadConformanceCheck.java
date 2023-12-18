@@ -28,14 +28,16 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected static final Set<BookingState> REASON_STATES = Set.of(
     BookingState.DECLINED,
     BookingState.REJECTED,
-    BookingState.CANCELLED
+    BookingState.CANCELLED,
+    BookingState.AMENDMENT_CANCELLED,
+    BookingState.AMENDMENT_DECLINED
   );
 
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
     BookingState.RECEIVED,
     BookingState.REJECTED,
     BookingState.PENDING_UPDATE,
-    BookingState.PENDING_UPDATE_CONFIRMATION,
+    BookingState.UPDATE_RECEIVED,
     /* CANCELLED depends on whether cancel happens before CONFIRMED, but the logic does not track prior
      * states. Therefore, we just assume it is optional in CANCELLED here.
      */

@@ -90,15 +90,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       .formatted(expectedState, Objects.requireNonNullElse(actualState, UNSET_MARKER)));
   }
 
-  protected Set<String> ensureShipmentLocationsArePresent(JsonNode responsePayload) {
-    var field = responsePayload.get("shipmentLocations");
-    if (isNonEmptyNode(field)) {
-      return Collections.emptySet();
-    }
-    return Set.of("The field '%s' must be a present and non-empty for a booking".formatted(
-      "shipmentLocations"));
-  }
-
   protected Set<String> ensureAmendedBookingStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("amendedBookingStatus").asText(null);
     String expectedState = expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.wireName() : null;

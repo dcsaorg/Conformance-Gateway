@@ -28,8 +28,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
-      createSubCheck("Reefer Container checks", this::reeferChecks),
-      createSubCheck("ShipmentLocations checks", this::shipmentLocationChecks)
+      createSubCheck("Reefer Container checks", this::reeferChecks)
     );
   }
 
@@ -97,18 +96,6 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
         );
       }
     }
-    return issues;
-  }
-
-  protected Set<String> shipmentLocationChecks(JsonNode payload) {
-    var issues = new LinkedHashSet<String>();
-    fieldRequired(
-      payload,
-      SHIPMENT_LOCATIONS_FIELD,
-      issues,
-      null,
-      "shipmentLocations is mandatory"
-    );
     return issues;
   }
 

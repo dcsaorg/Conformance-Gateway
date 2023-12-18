@@ -74,6 +74,11 @@ public class CarrierGetBookingPayloadResponseConformanceCheck extends AbstractCa
         checks::add
       );
     }
+    addSubCheck(
+      "Validate 'shipmentLocations' is present",
+      this::ensureShipmentLocationsArePresent,
+      checks::add
+    );
     return checks.stream();
   }
 }

@@ -13,6 +13,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   private static final String IS_NOR_FIELD = "isNonOperatingReefer";
   private static final String ACTIVE_REEFER_SETTINGS_FIELD = "activeReeferSettings";
 
+  private static final String SHIPMENT_LOCATIONS_FIELD = "shipmentLocations";
   public ShipperBookingContentConformanceCheck(
     UUID matchedExchangeUuid
   ) {
@@ -27,7 +28,8 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return Stream.of(
-      createSubCheck("Reefer Container checks", this::reeferChecks)
+      createSubCheck("Reefer Container checks", this::reeferChecks),
+      createSubCheck("ShipmentLocations checks", this::shipmentLocationChecks)
     );
   }
 
@@ -98,6 +100,17 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
     return issues;
   }
 
+  protected Set<String> shipmentLocationChecks(JsonNode payload) {
+    var issues = new LinkedHashSet<String>();
+    fieldRequired(
+      payload,
+      SHIPMENT_LOCATIONS_FIELD,
+      issues,
+      null,
+      "shipmentLocations is mandatory"
+    );
+    return issues;
+  }
 
   private void fieldOmitted(JsonNode object, String attributeName, Set<String> issues, String prefix, String reason) {
     if (object.has(attributeName)) {

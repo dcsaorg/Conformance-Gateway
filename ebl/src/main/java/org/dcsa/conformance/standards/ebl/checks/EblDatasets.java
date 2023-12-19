@@ -15,6 +15,25 @@ public class EblDatasets {
   public static final KeywordDataset UN_LOCODE_DATASET = KeywordDataset.lazyLoaded(EblDatasets::loadUNLocationCodeDataset);
   public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset("WAVE", "CARX", "ESSD", "BOLE", "EDOX", "IQAX", "SECR", "TRGO");
 
+  public static final KeywordDataset CARGO_MOVEMENT_TYPE = KeywordDataset.staticDataset("FCL", "LCL");
+  public static final KeywordDataset REFERENCE_TYPE = KeywordDataset.staticDataset(
+    "FF",
+    "SI",
+    "SPO",
+    "CPO",
+    "CR",
+    "AAO",
+    "ECR",
+    "CSI",
+    "BPR",
+    "BID",
+    "SAC"
+  );
+
+  public static final KeywordDataset DG_IMO_CLASSES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/imoclasses.csv");
+  public static final KeywordDataset DG_INHALATIONZONES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/inhalationzones.csv");
+  public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/segregationgroups.csv");
+
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {
     var validCodes = new HashSet<>();

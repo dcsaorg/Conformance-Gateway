@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -121,9 +122,105 @@ public class EBLChecks {
     )
   );
 
+  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.path("advanceManifestFilings").all().submitPath();
+  private static final JsonContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate conditionally mandatory 'selfFilerCode' in 'advanceManifestFilings'",
+    ALL_AMF,
+    (nodeToValidate, contextPath) -> {
+      if (!nodeToValidate.path("advanceManifestFilingsHouseBLPerformedBy").asText("").equals("SHIPPER")
+      || nodeToValidate.path("selfFilerCode").isTextual()) {
+        return Set.of();
+      }
+      var country = nodeToValidate.path("countryCode").asText("");
+      var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
+      var combined = country + "/" + manifestTypeCode;
+      if (EblDatasets.AMF_CC_MTC_REQUIRES_SELF_FILER_CODE.contains(combined)) {
+        return Set.of(
+          "The 'selfFilerCode' must be provided in '%s' due to the combination of 'advanceManifestFilingsHouseBLPerformedBy', 'countryCode' and 'manifestTypeCode'.".formatted(contextPath)
+        );
+      }
+      return Set.of();
+  });
+
+  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
+    ALL_AMF,
+    (nodeToValidate, contextPath) -> {
+      var country = nodeToValidate.path("countryCode").asText("");
+      var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
+      var combined = country + "/" + manifestTypeCode;
+      // This check doubles as a check of country being a valid country (DT-612) as the combination only
+      // includes a very small subset of valid countries.  If you find yourself adding a "this manifestTypeCode
+      // applies to *all* countries", then you need to add a separate validation that the country code is in
+      // valid (in https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+      if (!EblDatasets.AMF_CC_MTC_COMBINATIONS.contains(combined)) {
+        return Set.of(
+          "The combination of '%s' ('countryCounty') and '%s' ('manifestTypeCode') used in '%s' is not known to be a valid combination.".
+            formatted(country, manifestTypeCode, contextPath)
+        );
+      }
+      return Set.of();
+    });
+
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
+
+  private static final JsonContentCheck CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT = JsonAttribute.customValidator(
+    "Equipment References in 'cargoItems' must be present in 'utilizedTransportEquipments'",
+    (body) -> {
+      var knownEquipmentReferences = allEquipmentReferences(body);
+      var missing = new LinkedHashSet<String>();
+      for (var consignmentItem : body.path("consignmentItems")) {
+        for (var cargoItem : consignmentItem.path("cargoItems")) {
+          var ref = cargoItem.path("equipmentReference").asText(null);
+          if (ref == null) {
+            // Schema validated
+            continue;
+          }
+          if (!knownEquipmentReferences.contains(ref)) {
+            missing.add(ref);
+          }
+        }
+      }
+      return missing.stream()
+        .map("The equipment reference '%s' was used in a cargoItem but was not present in 'utilizedTransportEquipments'"::formatted)
+        .collect(Collectors.toSet());
+    }
+  );
+
+  private static final JsonContentCheck UTE_EQUIPMENT_REFERENCE_UNIQUE = JsonAttribute.customValidator(
+    "Equipment References in 'utilizedTransportEquipments' must be unique",
+    (body) -> {
+      var duplicates = new LinkedHashSet<String>();
+      allEquipmentReferences(body, duplicates);
+      return duplicates.stream()
+        .map("The equipment reference '%s' was used more than once in 'utilizedTransportEquipments'"::formatted)
+        .collect(Collectors.toSet());
+    }
+  );
+
+  private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
+    "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
+    (body) -> {
+      var seen = new HashSet<String>();
+      var duplicates = new LinkedHashSet<String>();
+      for (var amf : body.path("advanceManifestFilings")) {
+        var cc = amf.path("countryCode").asText(null);
+        var mtc = amf.path("manifestTypeCode").asText(null);
+        if (cc == null || mtc == null) {
+          continue;
+        }
+        var combined = cc + "/" + mtc;
+        if (!seen.add(combined)) {
+          duplicates.add(combined);
+        }
+      }
+      return duplicates.stream()
+        .map("The countryCode/manifestTypeCode combination '%s' was used more than once in 'advanceManifestFilings'"::formatted)
+        .collect(Collectors.toSet());
+    }
+  );
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
@@ -141,7 +238,12 @@ public class EBLChecks {
       JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform"))
     ),
     VALID_REFERENCE_TYPES,
-    ISO_EQUIPMENT_CODE_IMPLIES_REEFER
+    ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
+    UTE_EQUIPMENT_REFERENCE_UNIQUE,
+    CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
+    ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY
   );
 
   private static final List<JsonContentCheck> STATIC_TD_CHECKS = Arrays.asList(
@@ -185,13 +287,18 @@ public class EBLChecks {
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'inhalationZone' values must be from dataset",
       allDg((dg) -> dg.path("inhalationZone").submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_INHALATIONZONES)
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_INHALATION_ZONES)
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'segregationGroups' values must be from dataset",
       allDg((dg) -> dg.path("segregationGroups").all().submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_SEGREGATION_GROUPS)
-    )
+    ),
+    UTE_EQUIPMENT_REFERENCE_UNIQUE,
+    CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
+    ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY
   );
 
   public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
@@ -350,6 +457,29 @@ public class EBLChecks {
     );
   }
 
+  private static Set<String> allEquipmentReferences(JsonNode body) {
+    return allEquipmentReferences(body, null);
+  }
+
+
+  private static Set<String> allEquipmentReferences(JsonNode body, Set<String> duplicates) {
+    var seen = new HashSet<String>();
+    for (var ute : body.path("utilizedTransportEquipments")) {
+      // TD or SI with SOC
+      var ref = ute.path("equipment").path("equipmentReference").asText(null);
+      if (ref == null) {
+        // SI with COC
+        ref = ute.path("equipmentReference").asText(null);
+      }
+      if (ref == null) {
+        continue;
+      }
+      if (!seen.add(ref) && duplicates != null) {
+        duplicates.add(ref);
+      }
+    }
+    return seen;
+  }
 
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {
     // DT-437

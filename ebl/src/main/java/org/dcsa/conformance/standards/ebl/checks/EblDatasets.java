@@ -31,8 +31,14 @@ public class EblDatasets {
   );
 
   public static final KeywordDataset DG_IMO_CLASSES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/imoclasses.csv");
-  public static final KeywordDataset DG_INHALATIONZONES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/inhalationzones.csv");
+  public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/inhalationzones.csv");
   public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/segregationgroups.csv");
+
+  public static final KeywordDataset AMF_CC_MTC_REQUIRES_SELF_FILER_CODE = KeywordDataset.staticDataset(
+    "US/ACE",
+    "CA/ACI"
+  );
+  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombingColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v300.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

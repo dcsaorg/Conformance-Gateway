@@ -401,6 +401,13 @@ public class JsonAttribute {
       };
   }
 
+  public static JsonContentCheck customValidator(
+    @NonNull String description,
+    @NonNull Function<JsonNode, Set<String>> validator
+  ) {
+    return JsonContentCheckImpl.of(description, validator);
+  }
+
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
     return (refNode) -> refNode.at(jsonPointer);
   }

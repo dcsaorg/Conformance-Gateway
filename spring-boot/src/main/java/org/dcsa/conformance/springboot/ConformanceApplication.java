@@ -1,7 +1,6 @@
 package org.dcsa.conformance.springboot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -34,7 +33,6 @@ import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -50,8 +48,8 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 @SpringBootApplication
 @ConfigurationPropertiesScan("org.dcsa.conformance.springboot")
 public class ConformanceApplication {
-  @Autowired ConformanceConfiguration conformanceConfiguration;
-  private ConformancePersistenceProvider persistenceProvider;
+  private final ConformanceConfiguration conformanceConfiguration;
+  private final ConformancePersistenceProvider persistenceProvider;
 
   private final Consumer<ConformanceWebRequest> asyncWebClient =
       conformanceWebRequest ->
@@ -98,17 +96,17 @@ public class ConformanceApplication {
 
   private final LinkedList<String> homepageSandboxIds = new LinkedList<>();
 
-  @PostConstruct
-  public void postConstruct() {
+  public ConformanceApplication(ConformanceConfiguration conformanceConfiguration) {
+    this.conformanceConfiguration = conformanceConfiguration;
     log.info(
-        "ConformanceApplication.postConstruct(%s)"
+        "new ConformanceApplication(%s)"
             .formatted(
                 new ObjectMapper()
-                    .valueToTree(Objects.requireNonNull(conformanceConfiguration))
+                    .valueToTree(Objects.requireNonNull(this.conformanceConfiguration))
                     .toPrettyString()));
 
     DynamoDbClient dynamoDbClient;
-    if (conformanceConfiguration.useDynamoDb) {
+    if (this.conformanceConfiguration.useDynamoDb) {
       log.info("Using DynamoDB persistence provider");
       // docker run -p 127.0.0.1:8000:8000 amazon/dynamodb-local
       // aws dynamodb list-tables --endpoint-url http://localhost:8000
@@ -174,7 +172,7 @@ public class ConformanceApplication {
           String roleOne = roleNames.get(0);
           String roleTwo = roleNames.get(1);
           Stream.concat(
-                  conformanceConfiguration.createAutoTestingSandboxes
+                  this.conformanceConfiguration.createAutoTestingSandboxes
                       ? Stream.of(
                           componentFactory.getJsonSandboxConfigurationTemplate(null, false, false),
                           componentFactory.getJsonSandboxConfigurationTemplate(
@@ -186,7 +184,7 @@ public class ConformanceApplication {
                           componentFactory.getJsonSandboxConfigurationTemplate(
                               roleTwo, false, true))
                       : Stream.of(),
-                  conformanceConfiguration.createManualTestingSandboxes
+                  this.conformanceConfiguration.createManualTestingSandboxes
                       ? Stream.of(
                           componentFactory.getJsonSandboxConfigurationTemplate(
                               roleOne, true, false),
@@ -207,8 +205,6 @@ public class ConformanceApplication {
                         persistenceProvider,
                         asyncWebClient,
                         "spring-boot-env",
-                        sandboxId,
-                        jsonSandboxConfigurationTemplate.get("name").asText(),
                         SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
                   });
         });
@@ -226,7 +222,7 @@ public class ConformanceApplication {
         new ConformanceWebuiHandler(
                 accessChecker, "http://localhost:8080", persistenceProvider, asyncWebClient)
             .handleRequest(
-                "local-user", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
+                "spring-boot-env", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
   }
 

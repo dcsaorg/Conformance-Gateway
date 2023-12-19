@@ -131,13 +131,13 @@ public class ConformanceSandbox {
                                 persistenceProvider.getNonLockingMap(),
                                 "session#" + currentSessionId,
                                 "map#party#" + partyName),
-                          (conformanceRequest, requestCallback) ->
+                            (conformanceRequest, requestCallback) ->
                                 _handlePartyOutboundConformanceRequest(
                                     persistenceProvider,
                                     asyncWebClient,
                                     sandboxId,
                                     conformanceRequest,
-                                  requestCallback),
+                                    requestCallback),
                             orchestratorAuthHeader)
                         .stream()
                         .filter(createdParty -> partyName.equals(createdParty.getName()))
@@ -173,24 +173,14 @@ public class ConformanceSandbox {
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       String environmentId,
-      String sandboxId,
-      String sandboxName,
       SandboxConfiguration sandboxConfiguration) {
-    persistenceProvider
-        .getNonLockingMap()
-        .setItemValue(
-            "environment#" + environmentId,
-            "sandbox#" + sandboxId,
-            new ObjectMapper().createObjectNode().put("id", sandboxId).put("name", sandboxName));
-    persistenceProvider
-        .getNonLockingMap()
-        .setItemValue("sandbox#" + sandboxId, "config", sandboxConfiguration.toJsonNode());
+    saveSandboxConfiguration(persistenceProvider, environmentId, sandboxConfiguration);
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
-      _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+      _handleReset(persistenceProvider, asyncWebClient, sandboxConfiguration.getId());
     } else {
       if (Arrays.stream(sandboxConfiguration.getCounterparts())
           .anyMatch(CounterpartConfiguration::isInManualMode)) {
-        _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+        _handleReset(persistenceProvider, asyncWebClient, sandboxConfiguration.getId());
       }
     }
   }
@@ -635,7 +625,17 @@ public class ConformanceSandbox {
 
   public static void saveSandboxConfiguration(
       ConformancePersistenceProvider persistenceProvider,
+      String environmentId,
       SandboxConfiguration sandboxConfiguration) {
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "environment#" + environmentId,
+            "sandbox#" + sandboxConfiguration.getId(),
+            new ObjectMapper()
+                .createObjectNode()
+                .put("id", sandboxConfiguration.getId())
+                .put("name", sandboxConfiguration.getName()));
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(

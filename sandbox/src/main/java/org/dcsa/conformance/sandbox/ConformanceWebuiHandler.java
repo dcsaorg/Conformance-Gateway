@@ -182,8 +182,6 @@ public class ConformanceWebuiHandler {
         persistenceProvider,
         asyncWebClient,
         accessChecker.getUserEnvironmentId(userId),
-        sandboxId,
-        sandboxName,
         sandboxConfiguration);
 
     log.info("Created sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
@@ -266,7 +264,7 @@ public class ConformanceWebuiHandler {
                               .length()));
     }
 
-    ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, sandboxConfiguration);
+    ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
 
     log.info("Updated sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
 

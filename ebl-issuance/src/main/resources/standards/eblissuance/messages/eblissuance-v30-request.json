@@ -1,53 +1,55 @@
 {
   "document": {
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
-    "transportDocumentTypeCode": "BOL",
-    "transportDocumentStatus": "ISSUED",
     "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
-    "carrierCode": "ASDF",
-    "carrierCodeListProvider": "SMDG",
-    "issuingParty": {
-      "eblPlatformIdentifier": "epi@example.com",
-      "legalName": "legal name",
-      "partyName": "issuing party",
-      "partyContactDetails": [
-        {
-          "name": "issuing party",
-          "phone": "+1234567890",
-          "email": "someone@example.com"
-        }
-      ]
-    },
-    "termsAndConditions": "terms and conditions",
-    "isShippedOnBoardType": true,
+    "transportDocumentTypeCode": "SWB",
     "freightPaymentTermCode": "PRE",
-    "receiptTypeAtOrigin": "CY",
-    "deliveryTypeAtDestination": "CY",
-    "cargoMovementTypeAtOrigin": "FCL",
-    "cargoMovementTypeAtDestination": "FCL",
-    "invoicePayableAt": {
-      "locationType": "UNLO",
-      "UNLocationCode": "FRPAR"
-    },
     "isElectronic": true,
-    "isToOrder": false,
+    "isToOrder": true,
+    "invoicePayableAt": {
+      "locationType": "UNCO",
+      "UNLocationCode": "DKAAR"
+    },
+    "partyContactDetails": [
+      {
+        "name": "DCSA test person",
+        "email": "no-reply@dcsa.example.org"
+      }
+    ],
+    "documentParties": [
+      {
+        "party": {
+          "partyName": "DCSA CTK",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
+        },
+        "partyFunction": "OS",
+        "isToBeNotified": false
+      }
+    ],
     "consignmentItems": [
       {
         "carrierBookingReference": "BOOKING_REFERENCE_PLACEHOLDER",
-        "weight": 123.45,
+        "weight": 12000,
         "weightUnit": "KGM",
-        "descriptionOfGoods": "description of goods",
+        "descriptionOfGoods": "Shoes - black, 400 boxes",
         "HSCodes": [
-          "123456"
+          "640510"
         ],
+        "commoditySubreference": "Some Commodity Subreference 123",
         "cargoItems": [
           {
-            "equipmentReference": "C1234567890",
-            "weight": 123.45,
+            "equipmentReference": "NARU3472484",
+            "weight": 12000,
             "weightUnit": "KGM",
             "outerPackaging": {
-              "numberOfPackages": 1,
-              "description": "outer packaging description"
+              "numberOfPackages": 400,
+              "packageCode": "4G",
+              "description": "Fibreboard boxes"
             }
           }
         ]
@@ -55,59 +57,75 @@
     ],
     "utilizedTransportEquipments": [
       {
-        "equipment": {
-          "equipmentReference": "C1234567890"
-        },
-        "cargoGrossWeight": 123.45,
-        "cargoGrossWeightUnit": "KGM",
-        "isShipperOwned": true,
+        "isShipperOwned": false,
         "seals": [
           {
-            "number": "seal number"
+            "number": "DCSA-CTK-1234"
           }
-        ]
+        ],
+        "cargoGrossWeight": 12000.0,
+        "cargoGrossWeightUnit": "KGM",
+        "equipment": {
+          "ISOEquipmentCode": "22G1",
+          "equipmentReference": "NARU3472484"
+        }
       }
     ],
-    "documentParties": [
+    "isShippedOnBoardType": true,
+    "transportDocumentStatus": "DRAFT",
+    "cargoMovementTypeAtOrigin": "FCL",
+    "cargoMovementTypeAtDestination": "FCL",
+    "receiptTypeAtOrigin": "CY",
+    "deliveryTypeAtDestination": "CY",
+    "shippedOnBoardDate": "2023-12-19",
+    "termsAndConditions": "You agree that this transport document exist is name only for the sake of\ntesting your conformance with the DCSA EBL API. This transport document is NOT backed\nby a real shipment with ANY carrier and NONE of the requested services will be\ncarried out in real life.\n\nUnless required by applicable law or agreed to in writing, DCSA provides\nthis JSON data on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF\nANY KIND, either express or implied, including, without limitation, any\nwarranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,\nor FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for\ndetermining the appropriateness of using or redistributing this JSON\ndata and assume any risks associated with Your usage of this data.\n\nIn no event and under no legal theory, whether in tort (including negligence),\ncontract, or otherwise, unless required by applicable law (such as deliberate\nand grossly negligent acts) or agreed to in writing, shall DCSA be liable to\nYou for damages, including any direct, indirect, special, incidental, or\nconsequential damages of any character arising as a result of this terms or conditions\nor out of the use or inability to use the provided JSON data (including but not limited\nto damages for loss of goodwill, work stoppage, computer failure or malfunction, or any\nand all other commercial damages or losses), even if DCSA has been advised of the\npossibility of such damages.\n",
+    "issuingParty": {
+      "partyName": "Hyundai",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyCode": "HMM"
+        }
+      ]
+    },
+    "carrierCode": "HMM",
+    "carrierCodeListProvider": "SMDG",
+    "charges": [
       {
-        "party": {
-          "eblPlatformIdentifier": "epi@example.com",
-          "legalName": "legal name",
-          "partyName": "party name",
-          "partyContactDetails": [
-            {
-              "name": "party name",
-              "phone": "+1234567890"
-            }
-          ]
-        },
-        "partyFunction": "OS",
-        "isToBeNotified": true
-      }
-    ],
-    "partyContactDetails": [
-      {
-        "name": "party name",
-        "email": "someone@example.com"
+        "chargeName": "Fictive transport document fee",
+        "currencyAmount": 1.0,
+        "currencyCode": "EUR",
+        "paymentTermCode": "COL",
+        "calculationBasis": "Per transport document",
+        "unitPrice": 1.0,
+        "quantity": 1
       }
     ],
     "transports": {
-      "plannedArrivalDate": "2023-01-23",
-      "plannedDepartureDate": "2023-01-23",
+      "plannedDepartureDate": "2023-12-19",
+      "plannedArrivalDate": "2023-12-21",
       "portOfLoading": {
-        "locationType": "UNLO",
-        "UNLocationCode": "DEHAM"
+        "locationType": "UNCO",
+        "UNLocationCode": "DKAAR"
       },
       "portOfDischarge": {
         "locationType": "UNLO",
-        "UNLocationCode": "FRPAR"
+        "UNLocationCode": "DEBRV"
       },
-      "vesselName": "vessel name",
-      "carrierExportVoyageNumber": "1234E"
+      "vesselName": "HMM Algeciras",
+      "carrierExportVoyageNumber": "402E"
     }
   },
   "issueTo": {
-    "sendToPlatform": "ASDF",
-    "legalName": "legal name"
+    "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
+    "legalName": "legal name",
+    "partyCodes": [
+      {
+        "partyCode": "PARTY_CODE_PLACEHOLDER",
+        "partyCodeListProvider": "EPUI",
+        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+      }
+    ]
   }
 }

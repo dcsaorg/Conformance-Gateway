@@ -40,12 +40,16 @@ public class IssuanceRequestAction extends IssuanceAction {
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.transportDocumentReference = previousAction != null ? null : new AtomicReference<>();
+    this.transportDocumentReference =
+        previousAction != null && !(this.previousAction instanceof SupplyScenarioParametersAction)
+            ? null
+            : new AtomicReference<>();
   }
 
   @Override
   protected Supplier<String> getTdrSupplier() {
     return this.previousAction != null
+            && !(this.previousAction instanceof SupplyScenarioParametersAction)
         ? ((IssuanceAction) this.previousAction).getTdrSupplier()
         : this.transportDocumentReference::get;
   }
@@ -88,6 +92,7 @@ public class IssuanceRequestAction extends IssuanceAction {
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("isCorrect", isCorrect);
+    jsonNode.set("ssp", getSspSupplier().get().toJson());
     String tdr = getTdrSupplier().get();
     if (tdr != null) {
       jsonNode.put("tdr", tdr);

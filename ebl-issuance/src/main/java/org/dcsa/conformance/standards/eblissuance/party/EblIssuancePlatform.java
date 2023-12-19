@@ -19,6 +19,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
+import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
@@ -73,7 +74,9 @@ public class EblIssuancePlatform extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(IssuanceResponseAction.class, this::sendIssuanceResponse));
+    return Map.ofEntries(
+        Map.entry(IssuanceResponseAction.class, this::sendIssuanceResponse),
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void sendIssuanceResponse(JsonNode actionPrompt) {
@@ -100,6 +103,22 @@ public class EblIssuancePlatform extends ConformanceParty {
     addOperatorLogEntry(
         "Sending issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
             .formatted(irc, tdr));
+  }
+
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info(
+        "EblIssuancePlatform.supplyScenarioParameters(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters suppliedScenarioParameters =
+        new SuppliedScenarioParameters("XMPL", "Example party code", "Example code list");
+    asyncOrchestratorPostPartyInput(
+        objectMapper
+            .createObjectNode()
+            .put("actionId", actionPrompt.required("actionId").asText())
+            .set("input", suppliedScenarioParameters.toJson()));
+    addOperatorLogEntry(
+        "Submitting SuppliedScenarioParameters: %s"
+            .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
   @Override

@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for responding to an issuance request. \n",
-    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA_EBL_ISS](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1).\n\nAPI specification issued by DCSA.org.\n",
+    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA_EBL_ISS](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1).\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",

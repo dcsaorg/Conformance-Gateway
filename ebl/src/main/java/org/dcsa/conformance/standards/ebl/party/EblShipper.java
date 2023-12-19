@@ -170,7 +170,11 @@ public class EblShipper extends ConformanceParty {
       ? Map.of("amendedContent", List.of("true"))
       : Collections.emptyMap();
 
-    asyncCounterpartGet("/v3/shipping-instructions/" + sir, queryParams);
+    asyncCounterpartGet(
+        "/v3/shipping-instructions/" + sir,
+        queryParams,
+        conformanceResponse ->
+            log.info("GET SI returned: " + conformanceResponse.toJson().toPrettyString()));
 
     addOperatorLogEntry("Sent a GET request for shipping instructions with SIR: %s".formatted(sir));
   }
@@ -179,7 +183,10 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
 
-    asyncCounterpartGet("/v3/transport-documents/" + tdr);
+    asyncCounterpartGet(
+        "/v3/transport-documents/" + tdr,
+        conformanceResponse ->
+            log.info("GET TD returned: " + conformanceResponse.toJson().toPrettyString()));
 
     addOperatorLogEntry("Sent a GET request for transport document with TDR: %s".formatted(tdr));
   }

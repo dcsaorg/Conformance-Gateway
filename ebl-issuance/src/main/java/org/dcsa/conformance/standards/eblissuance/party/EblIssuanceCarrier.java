@@ -45,14 +45,17 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("eblStatesByTdr", StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
+    targetObjectNode.set(
+        "eblStatesByTdr",
+        StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
     targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(objectMapper, sirsByTdr));
     targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(objectMapper, brsByTdr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StateManagementUtil.restoreIntoMap(eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
+    StateManagementUtil.restoreIntoMap(
+        eblStatesByTdr, sourceObjectNode.get("eblStatesByTdr"), EblIssuanceState::valueOf);
     StateManagementUtil.restoreIntoMap(sirsByTdr, sourceObjectNode.get("sirsByTdr"));
     StateManagementUtil.restoreIntoMap(brsByTdr, sourceObjectNode.get("brsByTdr"));
   }
@@ -71,6 +74,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblIssuanceCarrier.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("ssp"));
     String tdr =
         actionPrompt.has("tdr")
             ? actionPrompt.get("tdr").asText()
@@ -91,7 +95,10 @@ public class EblIssuanceCarrier extends ConformanceParty {
             Map.ofEntries(
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
-                Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br)));
+                Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
+                Map.entry("SEND_TO_PLATFORM_PLACEHOLDER", ssp.sendToPlatform()),
+                Map.entry("PARTY_CODE_PLACEHOLDER", ssp.partyCode()),
+                Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName())));
     if (!isCorrect) {
       ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
     }

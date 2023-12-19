@@ -47,7 +47,14 @@
     }
   },
   "issueTo": {
-    "sendToPlatform": "ASDF",
-    "legalName": "legal name"
+    "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
+    "legalName": "legal name",
+    "partyCodes": [
+      {
+        "partyCode": "PARTY_CODE_PLACEHOLDER",
+        "partyCodeListProvider": "EPUI",
+        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+      }
+    ]
   }
 }

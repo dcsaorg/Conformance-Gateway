@@ -4,10 +4,7 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
+import org.dcsa.conformance.standards.eblissuance.action.*;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 @Slf4j
@@ -25,7 +22,7 @@ public class EblIssuanceScenarioListBuilder
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
-    return noAction()
+    return supplyScenarioParameters()
         .thenEither(
             correctIssuanceRequest()
                 .thenEither(
@@ -48,6 +45,14 @@ public class EblIssuanceScenarioListBuilder
 
   private static EblIssuanceScenarioListBuilder noAction() {
     return new EblIssuanceScenarioListBuilder(null);
+  }
+
+  private static EblIssuanceScenarioListBuilder supplyScenarioParameters() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
+    return new EblIssuanceScenarioListBuilder(
+        previousAction ->
+            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, null));
   }
 
   private static EblIssuanceScenarioListBuilder correctIssuanceRequest() {

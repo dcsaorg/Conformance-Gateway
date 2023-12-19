@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Issuance an EBL to an EBL platform.\n",
-    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/2.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/2.0-beta1).\n\nAPI specification issued by DCSA.org.\n",
+    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/2.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/2.0-beta1).\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -172,7 +172,7 @@
             "maxLength": 4,
             "pattern": "\\S+",
             "type": "string",
-            "description": "The sendToPlatform is the EBL platform the eBL is issued to/the eBL platform of the shipper. Should be a code from https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv.",
+            "description": "The sendToPlatform is the EBL platform the eBL is issued to/the eBL platform of the shipper. Must be a code from https://github.com/dcsaorg/DCSA-Information-Model/blob/master/datamodel/referencedata.d/eblsolutionproviders.csv.",
             "example": "BOLE"
           },
           "legalName": {

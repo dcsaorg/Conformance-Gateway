@@ -70,7 +70,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                       .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED)),
           uc6_carrier_publishDraftTransportDocument()
               .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
+                  shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, TD_DRAFT, true)
                       .then(shipper_GetTransportDocument(TD_DRAFT).thenAllPathsFrom(TD_DRAFT))));
       case SI_UPDATE_RECEIVED -> {
         if (memoryState == null) {
@@ -114,7 +114,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                               noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
                               uc3_shipper_submitUpdatedShippingInstructions().then(
                                 shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-                                  .thenHappyPathFrom(SI_UPDATE_RECEIVED)))))));
+                                  .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)))))));
       case SI_UPDATE_CONFIRMED -> thenEither(
         noAction().thenHappyPathFrom(SI_UPDATE_CONFIRMED),
         // Just to validate that the "Carrier" does not get "stuck"
@@ -125,7 +125,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         uc3_shipper_submitUpdatedShippingInstructions()
           .then(
             shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-              .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
+              .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)));
       case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError("Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
       case SI_COMPLETED -> then(noAction());
@@ -133,28 +133,36 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(
-      ShippingInstructionsStatus shippingInstructionsStatus) {
+    ShippingInstructionsStatus shippingInstructionsStatus) {
+    return thenHappyPathFrom(shippingInstructionsStatus, null);
+  }
+
+  private EblScenarioListBuilder thenHappyPathFrom(
+      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState) {
     return switch (shippingInstructionsStatus) {
       case SI_START -> then(
-        uc1_shipper_submitShippingInstructions()
+          uc1_shipper_submitShippingInstructions()
+              .then(
+                  shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
+                      .thenHappyPathFrom(SI_RECEIVED)));
+      case SI_UPDATE_CONFIRMED, SI_RECEIVED -> then(
+          uc6_carrier_publishDraftTransportDocument()
+              .then(
+                  shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, TD_DRAFT, true)
+                      .then(shipper_GetTransportDocument(TD_DRAFT).thenHappyPathFrom(TD_DRAFT))));
+      case SI_PENDING_UPDATE -> then(
+            uc3_shipper_submitUpdatedShippingInstructions()
+                .then(
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
+                        .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)));
+      case SI_UPDATE_RECEIVED -> then(
+        uc4a_carrier_acceptUpdatedShippingInstructions()
           .then(
-            shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
-              .thenHappyPathFrom(SI_RECEIVED)));
-      case SI_UPDATE_CONFIRMED, SI_RECEIVED -> then(uc6_carrier_publishDraftTransportDocument()
-        .then(
-          shipper_GetShippingInstructions(SI_RECEIVED, TD_DRAFT, true)
-            .then(shipper_GetTransportDocument(TD_DRAFT)
-              .thenHappyPathFrom(TD_DRAFT))));
-      case SI_PENDING_UPDATE -> then(uc3_shipper_submitUpdatedShippingInstructions()
-        .then(
-          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-            .thenHappyPathFrom(SI_UPDATE_RECEIVED)));
-      case SI_UPDATE_RECEIVED -> then(uc4a_carrier_acceptUpdatedShippingInstructions()
-        .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
-          .thenHappyPathFrom(SI_UPDATE_CONFIRMED))
-      );
+            shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
+              .thenHappyPathFrom(SI_UPDATE_CONFIRMED)));
       case SI_COMPLETED -> then(noAction());
-      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError("Please use the black state rather than DECLINED");
+      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError(
+          "Please use the black state rather than DECLINED");
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
     };
   }
@@ -264,7 +272,6 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       );
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
       case TD_VOIDED -> then(noAction());
-      default -> throw new AssertionError("Not implemented: " + transportDocumentStatus.name());
     };
   }
 
@@ -289,8 +296,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
   private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus, boolean recordTDR) {
-    return shipper_GetShippingInstructions(expectedSiStatus, null, expectedTdStatus, false, recordTDR);
+    ShippingInstructionsStatus expectedSiStatus, ShippingInstructionsStatus expectedUpdatedSiStatus, TransportDocumentStatus expectedTdStatus, boolean recordTDR) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, expectedTdStatus, false, recordTDR);
   }
 
   private static EblScenarioListBuilder shipper_GetShippingInstructions(

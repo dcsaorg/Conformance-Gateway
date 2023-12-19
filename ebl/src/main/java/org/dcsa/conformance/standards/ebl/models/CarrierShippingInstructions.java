@@ -536,9 +536,14 @@ public class CarrierShippingInstructions {
       ObjectNode ute = (ObjectNode)node;
       var ref = ute.path("equipmentReference").asText("");
       computeWeightForUTE(ute, ref, consignmentItemsNode);
-      ute.putObject("equipment")
-        .put("ISOEquipmentCode", containerISOEquipmentCode)
-        .put("equipmentReference", ref);
+      // Shipper could provide a SOC, which is done via the equipment node.
+      // If they do, we assume the information in there is correct and just copy
+      // it into the TD.
+      if (ute.path("equipment").isMissingNode()) {
+        ute.putObject("equipment")
+            .put("ISOEquipmentCode", containerISOEquipmentCode)
+            .put("equipmentReference", ref);
+      }
       ute.remove("equipmentReference");
       if (scenarioType == ScenarioType.REEFER) {
         ute.put("isNonOperatingReefer", false)

@@ -78,12 +78,13 @@ public class EBLChecks {
   };
 
   private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = (uteNode) -> {
-    if (uteNode.path("isNonOperatingReefer").asBoolean(false)) {
-      return false;
+    var norNode = uteNode.path("isNonOperatingReefer");
+    if (norNode.isMissingNode() || !norNode.isBoolean()) {
+      // Only require the reefer if there is no equipment code or the equipment code is clearly a reefer.
+      // Otherwise, we give conflicting results in some scenarios.
+      return !HAS_ISO_EQUIPMENT_CODE.test(uteNode) || IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(uteNode);
     }
-    // Only require the reefer if there is no equipment code or the equipment code is clearly a reefer.
-    // Otherwise, we give conflicting results in some scenarios.
-    return !HAS_ISO_EQUIPMENT_CODE.test(uteNode) || IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(uteNode);
+    return norNode.asBoolean(false);
   };
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(

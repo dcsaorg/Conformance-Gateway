@@ -1,14 +1,15 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -162,6 +163,43 @@ public class EBLChecks {
       return Set.of();
     });
 
+
+  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
+    "Validate documentParties",
+    body -> {
+      var issues = new LinkedHashSet<String>();
+      var documentParties = body.path("documentParties");
+      var isToOrder = body.path("isToOrder").asBoolean(false);
+      var partyFunctions = StreamSupport.stream(documentParties.spliterator(), false)
+        .map(p -> p.path("partyFunction"))
+        .filter(JsonNode::isTextual)
+        .map(n -> n.asText(""))
+        .collect(Collectors.toSet());
+
+      if (!partyFunctions.contains("OS")) {
+        issues.add("The 'OS' party is mandatory in the eBL phase (SI/TD)");
+      }
+
+      if (isToOrder) {
+        if (partyFunctions.contains("CN")) {
+          issues.add("The 'CN' party cannot be used when 'isToOrder' is true (use 'END' instead)");
+        }
+      } else {
+        if (!partyFunctions.contains("CN")) {
+          issues.add("The 'CN' party is mandatory when 'isToOrder' is false");
+        }
+        if (partyFunctions.contains("END")) {
+          issues.add("The 'END' party cannot be used when 'isToOrder' is false");
+        }
+      }
+
+      if (!partyFunctions.contains("SCO") && !body.path("serviceContractReference").isTextual()) {
+        issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
+      }
+      return issues;
+    }
+  );
+
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
@@ -243,7 +281,8 @@ public class EBLChecks {
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY
+    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    VALIDATE_DOCUMENT_PARTIES
   );
 
   private static final List<JsonContentCheck> STATIC_TD_CHECKS = Arrays.asList(
@@ -280,6 +319,21 @@ public class EBLChecks {
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
     JsonAttribute.allIndividualMatchesMustBeValid(
+      "DangerousGoods implies packagingCode or imoPackagingCode",
+      mav -> mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").submitPath(),
+      (nodeToValidate, contextPath) -> {
+        var dg = nodeToValidate.path("dangerousGoods");
+        if (!dg.isArray() || dg.isEmpty()) {
+          return Set.of();
+        }
+        if (nodeToValidate.path("packageCode").isMissingNode() && nodeToValidate.path("imoPackagingCode").isMissingNode()) {
+          return Set.of("The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
+            .formatted(contextPath));
+        }
+        return Set.of();
+      }
+    ),
+    JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'imoClass' values must be from dataset",
       allDg((dg) -> dg.path("imoClass").submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_IMO_CLASSES)
@@ -298,7 +352,8 @@ public class EBLChecks {
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY
+    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    VALIDATE_DOCUMENT_PARTIES
   );
 
   public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
@@ -448,7 +503,40 @@ public class EBLChecks {
     for (var ptr : TD_UN_LOCATION_CODES) {
       jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
     }
-
+    jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Whether the containers should have active reefer",
+      mav-> mav.path("utilizedTransportEquipments").all().path("activeReeferSettings").submitPath(),
+      (nodeToValidate, contextPath) -> {
+        var scenario = dspSupplier.get().scenarioType();
+        if (scenario == ScenarioType.REEFER) {
+          if (!nodeToValidate.isObject()) {
+            return Set.of("The scenario requires '%s' to have an active reefer".formatted(contextPath));
+          }
+        } else {
+          if (!nodeToValidate.isMissingNode()) {
+            return Set.of("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
+          }
+        }
+        return Set.of();
+      }
+    ));
+    jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Whether the cargo should be DG",
+      mav-> mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").submitPath(),
+      (nodeToValidate, contextPath) -> {
+        var scenario = dspSupplier.get().scenarioType();
+        if (scenario == ScenarioType.DG) {
+          if (!nodeToValidate.isArray() || nodeToValidate.isEmpty()) {
+            return Set.of("The scenario requires '%s' to contain dangerous goods".formatted(contextPath));
+          }
+        } else {
+          if (!nodeToValidate.isMissingNode() || !nodeToValidate.isEmpty()) {
+            return Set.of("The scenario requires '%s' to NOT contain any dangerous goods".formatted(contextPath));
+          }
+        }
+        return Set.of();
+      }
+    ));
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,

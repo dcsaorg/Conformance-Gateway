@@ -9,6 +9,7 @@
     "locationType": "UNCO",
     "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
   },
+  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
   "partyContactDetails": [
     {
       "name": "DCSA test person",

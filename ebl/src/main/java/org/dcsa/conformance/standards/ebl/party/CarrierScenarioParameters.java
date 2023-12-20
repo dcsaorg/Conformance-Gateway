@@ -4,7 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record CarrierScenarioParameters(String carrierBookingReference, String commoditySubreference, String equipmentReference, String invoicePayableAtUNLocationCode, String consignmentItemHSCode, String descriptionOfGoods) {
+public record CarrierScenarioParameters(
+  String carrierBookingReference,
+  String commoditySubreference,
+  String equipmentReference,
+  String invoicePayableAtUNLocationCode,
+  String consignmentItemHSCode,
+  String descriptionOfGoods,
+  String serviceContractReference
+  ) {
   public ObjectNode toJson() {
     return new ObjectMapper()
         .createObjectNode()
@@ -13,7 +21,8 @@ public record CarrierScenarioParameters(String carrierBookingReference, String c
         .put("equipmentReference", equipmentReference)
         .put("invoicePayableAtUNLocationCode", invoicePayableAtUNLocationCode)
         .put("consignmentItemHSCode", consignmentItemHSCode)
-        .put("descriptionOfGoods", descriptionOfGoods);
+        .put("descriptionOfGoods", descriptionOfGoods)
+        .put("serviceContractReference", serviceContractReference);
   }
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
@@ -23,7 +32,8 @@ public record CarrierScenarioParameters(String carrierBookingReference, String c
       jsonNode.required("equipmentReference").asText(),
       jsonNode.required("invoicePayableAtUNLocationCode").asText(),
       jsonNode.required("consignmentItemHSCode").asText(),
-      jsonNode.required("descriptionOfGoods").asText()
+      jsonNode.required("descriptionOfGoods").asText(),
+      jsonNode.required("serviceContractReference").asText()
     );
   }
 }

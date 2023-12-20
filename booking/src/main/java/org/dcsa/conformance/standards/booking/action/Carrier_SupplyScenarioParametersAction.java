@@ -67,23 +67,23 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
         "1234567",
         "service Name",
         "411510",
-        "commodity Type",
+        "Iron or steel",
         "DKCPH",
         "FRPAR");
       case REEFER -> new CarrierScenarioParameters("Example Carrier Service",
         "1234567",
         "service Name",
-        "411510",
-        "commodity Type",
-        "DKCPH",
-        "FRPAR");
+        "721911",
+        "Stainless steel",
+        "DEBRV",
+        "USORF");
       case DG -> new CarrierScenarioParameters("Example Carrier Service",
-        "1234567",
-        "service Name",
-        "411510",
-        "commodity Type",
-        "DKCPH",
-        "FRPAR");
+        "403W",
+        "TA1",
+        "293499",
+        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        "DEBRV",
+        "USORF");
     };
 
     return csp.toJson();

@@ -4,19 +4,16 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
-import org.dcsa.conformance.standards.ebl.party.EblRole;
-import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
-import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+import org.dcsa.conformance.standards.ebl.party.*;
 
 @UtilityClass
 public class EBLChecks {
@@ -372,17 +369,75 @@ public class EBLChecks {
     return JsonAttribute.mustEqual(TD_NOTIFICATION_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
 
+  private static <T> Supplier<T> cspValue(Supplier<CarrierScenarioParameters> cspSupplier, Function<CarrierScenarioParameters, T> field) {
+    return () -> {
+      var csp = cspSupplier.get();
+      if (csp == null) {
+        return null;
+      }
+      return field.apply(csp);
+    };
+  }
 
-  public static ActionCheck siRequestContentChecks(UUID matched) {
+  private static void generateCSPRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier) {
+    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Verify that the correct 'carrierBookingReference' is used",
+      mav -> mav.path("consignmentItems").all().path("carrierBookingReference").submitPath(),
+      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
+    ));
+    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Verify that the correct 'commoditySubreference' is used",
+      mav -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
+      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))
+    ));
+    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Verify that the correct 'equipmentReference' is used",
+      mav -> {
+        mav.path("consignmentItems").all().path("cargoItems").all().path("equipmentReference").submitPath();
+        var utes = mav.path("utilizedTransportEquipments").all();
+        // SI vs. TD path is not exactly the same in all cases
+        utes.path("equipmentReference").submitPath();
+        utes.path("equipment").path("equipmentReference").submitPath();
+      },
+      JsonAttribute.matchedMustEqualIfPresent(cspValue(cspSupplier, CarrierScenarioParameters::equipmentReference))
+    ));
+    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Verify that the correct 'HSCodes' are used",
+      mav -> mav.path("consignmentItems").all().path("HSCodes").all().submitPath(),
+      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::consignmentItemHSCode))
+    ));
+    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+      "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
+      mav -> mav.path("consignmentItems").all().path("descriptionOfGoods").submitPath(),
+      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::descriptionOfGoods))
+    ));
+
+    checks.add(JsonAttribute.mustEqual(
+      "[Scenario] Verify that the correct 'serviceContractReference' is used",
+      "serviceContractReference",
+      cspValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
+    ));
+
+    checks.add(JsonAttribute.mustEqual(
+      "[Scenario] Verify that the correct 'invoicePayableAt' location is used",
+      SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
+      cspValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
+    ));
+  }
+
+
+  public static ActionCheck siRequestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier) {
+    var checks = new ArrayList<>(STATIC_SI_CHECKS);
+    generateCSPRelatedChecks(checks, cspSupplier);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
-      STATIC_SI_CHECKS
+      checks
     );
   }
 
-  public static ActionCheck siResponseContentChecks(UUID matched, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
+  public static ActionCheck siResponseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       SI_REF_SIR_PTR,
@@ -401,6 +456,7 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
+    generateCSPRelatedChecks(checks, cspSupplier);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,

@@ -174,13 +174,26 @@ public class JsonAttribute {
     JsonPointer jsonPointer,
     @NonNull
     Supplier<String> expectedValueSupplier) {
+    return mustEqual(
+      jsonCheckName(jsonPointer),
+      jsonPointer,
+      expectedValueSupplier
+    );
+  }
+
+
+  public static JsonContentCheck mustEqual(
+    String name,
+    JsonPointer jsonPointer,
+    @NonNull
+    Supplier<String> expectedValueSupplier) {
     var v = expectedValueSupplier.get();
     var context = "";
     if (v != null) {
-      context = ": Must equal '%s'".formatted(context);
+      context = ": Must equal '%s'".formatted(v);
     }
     return new JsonContentCheckImpl(
-      jsonCheckName(jsonPointer) + context,
+      name + context,
       at(jsonPointer, node -> {
           var actualValue = node.asText(null);
           var expectedValue = expectedValueSupplier.get();
@@ -199,6 +212,37 @@ public class JsonAttribute {
       ));
   }
 
+
+  public static JsonContentCheck mustEqual(
+    String name,
+    String path,
+    @NonNull
+    Supplier<String> expectedValueSupplier) {
+    var v = expectedValueSupplier.get();
+    var context = "";
+    if (v != null) {
+      context = ": Must equal '%s'".formatted(v);
+    }
+    return new JsonContentCheckImpl(
+      name + context,
+      path(path, node -> {
+          var actualValue = node.asText(null);
+          var expectedValue = expectedValueSupplier.get();
+          if (expectedValue == null) {
+            throw new IllegalStateException("The supplier of the expected value for " + path
+              + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
+              + " scenario property was not properly recorded at this stage.");
+          }
+          if (!Objects.equals(expectedValue, actualValue)) {
+            return Set.of(
+              "The value of '%s' was '%s' instead of '%s'"
+                .formatted(path, renderValue(node), renderValue(expectedValue)));
+          }
+          return Collections.emptySet();
+        }
+      ));
+  }
+
   public static JsonContentMatchedValidation matchedMustBePresent() {
     return (node, context) -> {
         if (node.isMissingNode()) {
@@ -208,6 +252,45 @@ public class JsonAttribute {
         }
         return Collections.emptySet();
       };
+  }
+
+  public static JsonContentMatchedValidation matchedMustEqual(Supplier<String> expectedValueSupplier) {
+    return (nodeToValidate, contextPath) -> {
+      var actualValue = nodeToValidate.asText(null);
+      var expectedValue = expectedValueSupplier.get();
+      if (expectedValue == null) {
+        throw new IllegalStateException("The supplier of the expected value for " + contextPath
+          + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
+          + " scenario property was not properly recorded at this stage.");
+      }
+      if (!Objects.equals(expectedValue, actualValue)) {
+        return Set.of(
+          "The value of '%s' was '%s' instead of '%s'"
+            .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
+      }
+      return Collections.emptySet();
+    };
+  }
+
+  public static JsonContentMatchedValidation matchedMustEqualIfPresent(Supplier<String> expectedValueSupplier) {
+    return (nodeToValidate, contextPath) -> {
+      if (isJsonNodeAbsent(nodeToValidate)) {
+        return Set.of();
+      }
+      var actualValue = nodeToValidate.asText(null);
+      var expectedValue = expectedValueSupplier.get();
+      if (expectedValue == null) {
+        throw new IllegalStateException("The supplier of the expected value for " + contextPath
+          + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
+          + " scenario property was not properly recorded at this stage.");
+      }
+      if (!Objects.equals(expectedValue, actualValue)) {
+        return Set.of(
+          "The value of '%s' was '%s' instead of '%s'"
+            .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
+      }
+      return Collections.emptySet();
+    };
   }
 
   public static JsonContentCheck mustBePresent(JsonPointer jsonPointer) {
@@ -412,8 +495,16 @@ public class JsonAttribute {
     return (refNode) -> refNode.at(jsonPointer);
   }
 
+  private static Function<JsonNode, JsonNode> path(String path) {
+    return (refNode) -> refNode.path(path);
+  }
+
   private static Function<JsonNode, Set<String>> at(JsonPointer jsonPointer, Function<JsonNode, Set<String>> validator) {
     return at(jsonPointer).andThen(validator);
+  }
+
+  private static Function<JsonNode, Set<String>> path(String path, Function<JsonNode, Set<String>> validator) {
+    return path(path).andThen(validator);
   }
 
   private static Function<JsonNode, Set<String>> atMatched(JsonPointer jsonPointer, JsonContentMatchedValidation validator) {

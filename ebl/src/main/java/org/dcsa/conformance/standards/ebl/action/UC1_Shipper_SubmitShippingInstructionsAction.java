@@ -78,7 +78,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid()));
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier()));
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(

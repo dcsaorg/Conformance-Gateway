@@ -97,7 +97,8 @@ public class EblCarrier extends ConformanceParty {
           "NARU3472484",
           "DKAAR",
           "640510",
-          "Shoes - black, 400 boxes"
+          "Shoes - black, 400 boxes",
+          "SCR-1234-REGULAR"
         );
         case REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
@@ -106,7 +107,8 @@ public class EblCarrier extends ConformanceParty {
           "KKFU6671914",
           "DKAAR",
           "04052090",
-          "Dairy products"
+          "Dairy products",
+          "SCR-1234-REEFER"
         );
         case DG -> new CarrierScenarioParameters(
           "RTM1234567",
@@ -115,7 +117,8 @@ public class EblCarrier extends ConformanceParty {
           "HLXU1234567",
           "DKAAR",
           "293499",
-          "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
+          "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+          "SCR-1234-DG"
         );
     };
     asyncOrchestratorPostPartyInput(

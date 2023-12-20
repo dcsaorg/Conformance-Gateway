@@ -42,6 +42,8 @@ public class CarrierShippingInstructions {
     "destinationChargesPaymentTermCode",
     "isElectronic",
     "isToOrder",
+    "serviceContractReference",
+    "contractQuotationReference",
     "numberOfCopiesWithCharges",
     "numberOfCopiesWithoutCharges",
     "numberOfOriginalsWithCharges",
@@ -177,8 +179,6 @@ public class CarrierShippingInstructions {
     preserveIfPresent("issueDate"),
     preserveIfPresent("declaredValue"),
     preserveIfPresent("declaredValueCurrency"),
-    preserveIfPresent("serviceContractReference"),
-    preserveIfPresent("contractQuotationReference"),
     issuingParty(),
     initialFieldValue(
         "carrierCode",

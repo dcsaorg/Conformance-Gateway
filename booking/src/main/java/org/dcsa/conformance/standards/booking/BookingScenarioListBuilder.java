@@ -8,8 +8,8 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.BookingVariant;
 
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
@@ -32,7 +32,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    return carrier_SupplyScenarioParameters().thenAllPathsFrom(START);
+    return noAction().thenEither(
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR).thenAllPathsFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.DG).thenHappyPathFrom(START)
+    );
   }
 
   private BookingScenarioListBuilder thenAllPathsFrom(BookingState bookingState) {
@@ -80,8 +84,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                   uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
                   uc11_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
       case START -> thenEither(
-        uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenAllPathsFrom(RECEIVED),
-        uc1_shipper_SubmitBookingRequest(BookingVariant.REEFER).thenHappyPathFrom(RECEIVED));
+        uc1_shipper_SubmitBookingRequest(ScenarioType.REGULAR).thenAllPathsFrom(RECEIVED),
+        uc1_shipper_SubmitBookingRequest(ScenarioType.REEFER).thenHappyPathFrom(RECEIVED),
+        uc1_shipper_SubmitBookingRequest(ScenarioType.DG).thenHappyPathFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
@@ -127,7 +132,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           uc3_shipper_submitUpdatedBookingRequest().thenHappyPathFrom(UPDATE_RECEIVED));
       case UPDATE_RECEIVED, RECEIVED -> then(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED));
-      case START -> then(uc1_shipper_SubmitBookingRequest(BookingVariant.REGULAR).thenHappyPathFrom(RECEIVED));
+      case START -> then(uc1_shipper_SubmitBookingRequest(ScenarioType.REGULAR).thenHappyPathFrom(RECEIVED));
       case AMENDMENT_DECLINED, AMENDMENT_CANCELLED -> throw new AssertionError(
         "This happyPath from this state requires a context state");
     };
@@ -141,10 +146,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return new BookingScenarioListBuilder(null);
   }
 
-  private static BookingScenarioListBuilder carrier_SupplyScenarioParameters() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
+  private static BookingScenarioListBuilder carrier_SupplyScenarioParameters(String carrierPartyName, ScenarioType scenarioType) {
     return new BookingScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName));
+        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
   }
 
   private static BookingScenarioListBuilder shipper_GetBooking(BookingState expectedBookingStatus) {
@@ -184,7 +188,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction));
   }
 
-  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(BookingVariant variant) {
+  private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -198,7 +202,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
           componentFactory.getMessageSchemaValidator(
             BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          variant));
+          scenarioType));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(

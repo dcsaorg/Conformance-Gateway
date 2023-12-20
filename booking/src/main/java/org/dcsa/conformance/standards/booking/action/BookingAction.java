@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
@@ -34,7 +35,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -78,6 +79,10 @@ public abstract class BookingAction extends ConformanceAction {
 
   protected Supplier<DynamicScenarioParameters> getDspSupplier() {
     return dspReference::get;
+  }
+
+  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
+    return dspReference::set;
   }
 
   private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {

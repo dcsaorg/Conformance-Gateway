@@ -108,9 +108,9 @@ public class Shipper extends ConformanceParty {
 
     CarrierScenarioParameters carrierScenarioParameters =
       CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
-    String bookingVariant = actionPrompt.get("bookingVariant").asText();
+    String scenarioType = actionPrompt.get("scenarioType").asText();
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/booking-api-v20-%s-request.json".formatted(bookingVariant),
+        "/standards/booking/messages/booking-api-v20-%s-request.json".formatted(scenarioType),
         Map.ofEntries(
           Map.entry(
             "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",

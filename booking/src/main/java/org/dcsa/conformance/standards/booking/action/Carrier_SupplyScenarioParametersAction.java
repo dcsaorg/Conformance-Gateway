@@ -4,13 +4,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import lombok.NonNull;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
-  public Carrier_SupplyScenarioParametersAction(String carrierPartyName) {
-    super(carrierPartyName, null, null, "SupplyCSP", -1);
+  private ScenarioType scenarioType;
+  public Carrier_SupplyScenarioParametersAction(String carrierPartyName, @NonNull ScenarioType scenarioType) {
+    super(carrierPartyName, null, null,
+      switch (scenarioType) {
+      case REGULAR -> "SupplyCSP";
+      case REEFER -> "SupplyCSP-AR";
+      case DG -> "SupplyCSP-DG";
+    }, -1);
+    this.scenarioType = scenarioType;
+    this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
 
   @Override
@@ -20,12 +31,18 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   }
 
   @Override
+  public ObjectNode asJsonNode() {
+    return super.asJsonNode()
+      .put("scenarioType", scenarioType.name());
+  }
+
+  @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (carrierScenarioParameters != null) {
       jsonState.set("carrierScenarioParameters", carrierScenarioParameters.toJson());
     }
-    return jsonState;
+    return jsonState.put("scenarioType", scenarioType.name());
   }
 
   @Override
@@ -35,6 +52,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
     if (cspNode != null) {
       carrierScenarioParameters = CarrierScenarioParameters.fromJson(cspNode);
     }
+    this.scenarioType = ScenarioType.valueOf(jsonState.required("scenarioType").asText());
   }
 
   @Override
@@ -44,13 +62,31 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new CarrierScenarioParameters("Example Carrier Service",
-      "1234567",
-      "service Name",
-      "411510",
-      "commodity Type",
-      "DKCPH",
-      "FRPAR").toJson();
+    var csp = switch (scenarioType) {
+      case REGULAR -> new CarrierScenarioParameters("Example Carrier Service",
+        "1234567",
+        "service Name",
+        "411510",
+        "commodity Type",
+        "DKCPH",
+        "FRPAR");
+      case REEFER -> new CarrierScenarioParameters("Example Carrier Service",
+        "1234567",
+        "service Name",
+        "411510",
+        "commodity Type",
+        "DKCPH",
+        "FRPAR");
+      case DG -> new CarrierScenarioParameters("Example Carrier Service",
+        "1234567",
+        "service Name",
+        "411510",
+        "commodity Type",
+        "DKCPH",
+        "FRPAR");
+    };
+
+    return csp.toJson();
   }
 
   @Override

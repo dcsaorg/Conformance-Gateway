@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
 @Slf4j
@@ -107,7 +108,8 @@ public class Carrier extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
-    List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes();
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes(scenarioType);
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
@@ -137,14 +139,16 @@ public class Carrier extends ConformanceParty {
     return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
   }
 
-  private List<String> generateValidCommodityTypeAndHSCodes()  {
+  private List<String> generateValidCommodityTypeAndHSCodes(ScenarioType scenarioType)  {
     Map<Integer, List<String>>  mapHSCodesAndCommodityType = Map.of(
       0,Arrays.asList("411510", "Leather"),
       1,Arrays.asList("843420", "Dairy machinery"),
       2,Arrays.asList("721911", "Stainless steel"),
       3,Arrays.asList("730110", "Iron or steel")
     );
-    return mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
+    return scenarioType.equals(ScenarioType.DG) ?
+      Arrays.asList("293499", "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"):
+      mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {

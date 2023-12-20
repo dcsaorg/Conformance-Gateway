@@ -38,7 +38,7 @@ public class EblDatasets {
     "US/ACE",
     "CA/ACI"
   );
-  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombingColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v300.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v300.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

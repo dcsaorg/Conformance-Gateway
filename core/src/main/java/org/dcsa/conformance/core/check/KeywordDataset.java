@@ -31,7 +31,7 @@ public interface KeywordDataset {
     return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SelectColumn.withName(columnName)));
   }
 
-  static KeywordDataset fromCSVCombingColumns(Class<?> resourceClass, String resourceName, String delimiter, String ... columnNames) {
+  static KeywordDataset fromCSVCombiningColumns(Class<?> resourceClass, String resourceName, String delimiter, String ... columnNames) {
     checkResource(resourceClass, resourceName);
     return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, new CombineColumnSelector(delimiter, columnNames)));
   }

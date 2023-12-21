@@ -11,10 +11,10 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 import java.util.stream.Stream;
 
 @Getter
-public class UC6_Carrier_RequestAmendToConfirmedBookingAction extends StateChangingBookingAction {
+public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC6_Carrier_RequestAmendToConfirmedBookingAction(
+  public UC6_Carrier_RequestToAmendConfirmedBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
@@ -25,7 +25,7 @@ public class UC6_Carrier_RequestAmendToConfirmedBookingAction extends StateChang
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC6: Request amend to the confirmed booking with CBR %s"
+    return ("UC6: Request to amend the confirmed booking with CBR %s"
         .formatted(getDspSupplier().get().carrierBookingReference()));
   }
 

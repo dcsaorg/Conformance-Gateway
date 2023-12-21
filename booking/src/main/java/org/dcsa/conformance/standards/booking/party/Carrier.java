@@ -81,8 +81,8 @@ public class Carrier extends ConformanceParty {
         Map.entry(UC4_Carrier_RejectBookingRequestAction.class, this::rejectBookingRequest),
         Map.entry(UC5_Carrier_ConfirmBookingRequestAction.class, this::confirmBookingRequest),
         Map.entry(
-            UC6_Carrier_RequestAmendToConfirmedBookingAction.class,
-            this::requestAmendToConfirmedBooking),
+            UC6_Carrier_RequestToAmendConfirmedBookingAction.class,
+            this::requestToAmendConfirmedBooking),
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
         Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
@@ -249,9 +249,9 @@ public class Carrier extends ConformanceParty {
     addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
   }
 
-  private void requestAmendToConfirmedBooking(JsonNode actionPrompt) {
+  private void requestToAmendConfirmedBooking(JsonNode actionPrompt) {
     log.info(
-        "Carrier.requestAmendToConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+        "Carrier.requestToAmendConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = actionPrompt.required("cbr").asText();
@@ -267,7 +267,7 @@ public class Carrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry("Requested amend to the booking with CBR '%s'".formatted(cbr));
+    addOperatorLogEntry("Requested to amend the booking with CBR '%s'".formatted(cbr));
   }
 
   private String generateAndAssociateCBR(String cbrr) {

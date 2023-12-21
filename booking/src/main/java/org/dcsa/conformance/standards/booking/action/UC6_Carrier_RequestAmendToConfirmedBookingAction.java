@@ -5,17 +5,16 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
-import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.stream.Stream;
 
 @Getter
-public class UC6_Carrier_RequestUpdateToConfirmedBookingAction extends StateChangingBookingAction {
+public class UC6_Carrier_RequestAmendToConfirmedBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
 
-  public UC6_Carrier_RequestUpdateToConfirmedBookingAction(
+  public UC6_Carrier_RequestAmendToConfirmedBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
@@ -26,7 +25,7 @@ public class UC6_Carrier_RequestUpdateToConfirmedBookingAction extends StateChan
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC6: Request update to the confirmed booking with CBR %s"
+    return ("UC6: Request amend to the confirmed booking with CBR %s"
         .formatted(getDspSupplier().get().carrierBookingReference()));
   }
 

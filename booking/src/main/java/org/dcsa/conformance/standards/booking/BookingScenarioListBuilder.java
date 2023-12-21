@@ -20,10 +20,10 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
   private static final String BOOKING_API = "api";
   private static final String BOOKING_NOTIFICATIONS_API = "notification";
-  private static final String POST_SCHEMA_NAME = "postBooking";
-  private static final String GET_BOOKING_SCHEMA_NAME = "getBooking";
-  private static final String PUT_SCHEMA_NAME = "putBooking";
-  private static final String BOOKING_REF_STATUS_SCHEMA = "bookingRefStatus";
+  private static final String CREATE_BOOKING_SCHEMA_NAME = "CreateBooking";
+  private static final String GET_BOOKING_SCHEMA_NAME = "Booking";
+  private static final String UPDATE_BOOKING_SCHEMA_NAME = "UpdateBooking";
+  private static final String BOOKING_REF_STATUS_SCHEMA = "BookingRefStatus";
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
@@ -198,7 +198,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           carrierPartyName,
           shipperPartyName,
           (BookingAction) previousAction,
-          componentFactory.getMessageSchemaValidator(BOOKING_API, POST_SCHEMA_NAME),
+          componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
           componentFactory.getMessageSchemaValidator(
             BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
@@ -234,7 +234,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(BOOKING_API, PUT_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
@@ -262,7 +262,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,
-                componentFactory.getMessageSchemaValidator(BOOKING_API, PUT_SCHEMA_NAME),
+                componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));

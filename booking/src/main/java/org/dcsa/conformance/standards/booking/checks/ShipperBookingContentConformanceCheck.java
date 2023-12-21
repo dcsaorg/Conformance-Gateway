@@ -13,6 +13,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   private static final String IS_NOR_FIELD = "isNonOperatingReefer";
   private static final String ACTIVE_REEFER_SETTINGS_FIELD = "activeReeferSettings";
 
+  private static final String SHIPMENT_LOCATIONS_FIELD = "shipmentLocations";
   public ShipperBookingContentConformanceCheck(
     UUID matchedExchangeUuid
   ) {
@@ -97,7 +98,6 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
     }
     return issues;
   }
-
 
   private void fieldOmitted(JsonNode object, String attributeName, Set<String> issues, String prefix, String reason) {
     if (object.has(attributeName)) {

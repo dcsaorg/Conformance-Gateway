@@ -1,11 +1,9 @@
 package org.dcsa.conformance.core.check;
 
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static org.dcsa.conformance.core.check.KeywordDatasets.checkResource;
-import static org.dcsa.conformance.core.check.KeywordDatasets.loadCsvDataset;
+import static org.dcsa.conformance.core.check.KeywordDatasets.*;
 
 @FunctionalInterface
 public interface KeywordDataset {
@@ -25,11 +23,16 @@ public interface KeywordDataset {
 
   static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName) {
     checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, null));
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SELECT_FIRST_COLUMN));
   }
 
   static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName, String columnName) {
     checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, columnName));
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SelectColumn.withName(columnName)));
+  }
+
+  static KeywordDataset fromCSVCombiningColumns(Class<?> resourceClass, String resourceName, String delimiter, String ... columnNames) {
+    checkResource(resourceClass, resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, new CombineColumnSelector(delimiter, columnNames)));
   }
 }

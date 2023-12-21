@@ -74,7 +74,8 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "NARU3472484",
         "DKAAR",
         "640510",
-        "Shoes - black, 400 boxes"
+        "Shoes - black, 400 boxes",
+        "ServiceContractReference-1234"
       );
       case REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -83,7 +84,8 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "KKFU6671914",
         "DKAAR",
         "04052090",
-        "Dairy products"
+        "Dairy products",
+        "ServiceContractReference-1234"
       );
       case DG -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -92,7 +94,8 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "NARU3472484",
         "DKAAR",
         "293499",
-        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"
+        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        "ServiceContractReference-1234"
       );
     };
     return csp.toJson();

@@ -3,21 +3,14 @@
   "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
   "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
   "surrenderRequestedBy": {
-    "eblPlatform": "ASDF",
-    "legalName": "Legal Name"
-  },
-  "endorsementChain": [
-    {
-      "action": "ETOF",
-      "actionDateTime": "ACTION_DATE_TIME_PLACEHOLDER",
-      "actor": {
-        "eblPlatform": "ASDF",
-        "legalName": "Legal Name"
-      },
-      "recipient": {
-        "eblPlatform": "ASDF",
-        "legalName": "Legal Name"
+    "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+    "legalName": "legal name",
+    "partyCodes": [
+      {
+        "partyCode": "PARTY_CODE_PLACEHOLDER",
+        "partyCodeListProvider": "EPUI",
+        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
       }
-    }
-  ]
+    ]
+  }
 }

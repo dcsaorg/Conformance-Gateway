@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -18,7 +17,7 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Getter
 @Slf4j
-public class SurrenderRequestAction extends TdrAction {
+public class SurrenderRequestAction extends EblSurrenderAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean forAmendment;
@@ -69,7 +68,7 @@ public class SurrenderRequestAction extends TdrAction {
   public String getHumanReadablePrompt() {
     return ("Send a surrender request for %s "
             + "for the eBL with the transport document reference '%s'")
-        .formatted(forAmendment ? "amendment" : "delivery", tdrSupplier.get());
+        .formatted(forAmendment ? "amendment" : "delivery", sspSupplier.get());
   }
 
   @Override
@@ -132,7 +131,7 @@ public class SurrenderRequestAction extends TdrAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 JsonPointer.compile("/transportDocumentReference"),
-                tdrSupplier.get()));
+                sspSupplier.get().transportDocumentReference()));
       }
     };
   }

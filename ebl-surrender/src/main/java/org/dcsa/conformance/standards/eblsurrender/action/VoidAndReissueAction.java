@@ -9,11 +9,11 @@ import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 @Getter
-public class VoidAndReissueAction extends TdrAction {
+public class VoidAndReissueAction extends EblSurrenderAction {
 
   private final Consumer<String> tdrConsumer =
       tdr -> {
-        if (!Objects.equals(tdr, tdrSupplier.get())) {
+        if (!Objects.equals(tdr, sspSupplier.get().transportDocumentReference())) {
           throw new UnsupportedOperationException(
               "Changing the transportDocumentReference during void/reissue is currently not supported");
         }
@@ -36,7 +36,7 @@ public class VoidAndReissueAction extends TdrAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Void and reissue the eBL with transport document reference '%s'".formatted(tdrSupplier.get());
+    return "Void and reissue the eBL with transport document reference '%s'".formatted(sspSupplier.get());
   }
 
   @Override

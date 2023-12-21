@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -15,7 +14,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 @Getter
-public class SurrenderResponseAction extends TdrAction {
+public class SurrenderResponseAction extends EblSurrenderAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean accept;
   private Supplier<String> srrSupplier;
@@ -59,7 +58,7 @@ public class SurrenderResponseAction extends TdrAction {
     for (ConformanceAction action = this.previousAction;
         action != null;
         action = action.getPreviousAction()) {
-      if (action instanceof TdrAction tdrAction) {
+      if (action instanceof EblSurrenderAction tdrAction) {
         if ((srrSupplier = tdrAction.getSrrSupplier()) != null) {
           return srrSupplier;
         }

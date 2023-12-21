@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.eblsurrender;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.eblsurrender.action.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
@@ -96,7 +96,7 @@ public class EblSurrenderScenarioListBuilder
     log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-        noPreviousAction -> new SupplyAvailableTdrAction(carrierPartyName, null));
+        noPreviousAction -> new SupplyScenarioParametersAction(carrierPartyName, null));
   }
 
   private EblSurrenderScenarioListBuilder(

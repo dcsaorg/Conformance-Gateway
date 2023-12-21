@@ -17,7 +17,7 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.eblsurrender.action.SupplyAvailableTdrAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 
@@ -74,47 +74,53 @@ public class EblSurrenderCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyAvailableTdrAction.class, this::supplyAvailableTdr),
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(SurrenderResponseAction.class, this::sendSurrenderResponse),
         Map.entry(VoidAndReissueAction.class, this::voidAndReissue));
   }
 
-  private void supplyAvailableTdr(JsonNode actionPrompt) {
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-        "EblSurrenderCarrier.supplyAvailableTdr(%s)".formatted(actionPrompt.toPrettyString()));
+        "EblSurrenderPlatform.supplyScenarioParameters(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+
     String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
+
+    SuppliedScenarioParameters suppliedScenarioParameters =
+        new SuppliedScenarioParameters(tdr, "XMPL", "Example party code", "Example code list");
+
     asyncOrchestratorPostPartyInput(
-          objectMapper
+        objectMapper
             .createObjectNode()
-            .put("actionId", actionPrompt.get("actionId").asText())
-            .put("input", tdr));
+            .put("actionId", actionPrompt.required("actionId").asText())
+            .set("input", suppliedScenarioParameters.toJson()));
+
     addOperatorLogEntry(
-        "Created an eBL with transportDocumentReference '%s' available for surrender"
-            .formatted(tdr));
+        "Submitting SuppliedScenarioParameters: %s"
+            .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
   private void voidAndReissue(JsonNode actionPrompt) {
     log.info("EblSurrenderCarrier.voidAndReissue(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+    String tdr = ssp.transportDocumentReference();
     if (!Objects.equals(eblStatesById.get(tdr), EblSurrenderState.SURRENDERED_FOR_AMENDMENT)) {
       throw new IllegalStateException(
           "Cannot void and reissue in state: " + eblStatesById.get(tdr));
     }
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
-        objectMapper
-            .createObjectNode()
-            .put("actionId", actionPrompt.get("actionId").asText()));
+        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     addOperatorLogEntry(
         "Voided and reissued the eBL with transportDocumentReference '%s'".formatted(tdr));
   }
 
   private void sendSurrenderResponse(JsonNode actionPrompt) {
     log.info(
-        "EblSurrenderCarrier.sendSurrenderResponse(%s)"
-            .formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
+        "EblSurrenderCarrier.sendSurrenderResponse(%s)".formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+    String tdr = ssp.transportDocumentReference();
     boolean accept = actionPrompt.get("accept").asBoolean();
     switch (eblStatesById.get(tdr)) {
       case AMENDMENT_SURRENDER_REQUESTED -> eblStatesById.put(

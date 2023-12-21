@@ -2,22 +2,19 @@ package org.dcsa.conformance.standards.eblsurrender.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.Instant;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -47,13 +44,16 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("eblStatesById", StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
+    targetObjectNode.set(
+        "eblStatesById",
+        StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
     targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(objectMapper, tdrsBySrr));
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    StateManagementUtil.restoreIntoMap(eblStatesById, sourceObjectNode.get("eblStatesById"), EblSurrenderState::valueOf);
+    StateManagementUtil.restoreIntoMap(
+        eblStatesById, sourceObjectNode.get("eblStatesById"), EblSurrenderState::valueOf);
     StateManagementUtil.restoreIntoMap(tdrsBySrr, sourceObjectNode.get("tdrsBySrr"));
   }
 
@@ -70,8 +70,10 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
   private void requestSurrender(JsonNode actionPrompt) {
     log.info("EblSurrenderPlatform.requestSurrender(%s)".formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
     String srr = UUID.randomUUID().toString();
-    String tdr = actionPrompt.get("tdr").asText();
+    String tdr = ssp.transportDocumentReference();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
     String src = forAmendment ? "AREQ" : "SREQ";
     tdrsBySrr.put(srr, tdr);
@@ -89,6 +91,9 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
+                Map.entry("EBL_PLATFORM_PLACEHOLDER", ssp.eblPlatform()),
+                Map.entry("PARTY_CODE_PLACEHOLDER", ssp.partyCode()),
+                Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName()),
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
     asyncCounterpartPost(

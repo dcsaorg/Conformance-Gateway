@@ -64,26 +64,26 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
       case REGULAR -> new CarrierScenarioParameters("Example Carrier Service",
-        "1234567",
+        "402E",
         "service Name",
-        "411510",
-        "Iron or steel",
-        "DKCPH",
-        "FRPAR");
+        "640510",
+        "Shoes - black, 400 boxes",
+        "DKAAR",
+        "DEBRV");
       case REEFER -> new CarrierScenarioParameters("Example Carrier Service",
-        "1234567",
+        "402E",
         "service Name",
-        "721911",
-        "Stainless steel",
-        "DEBRV",
-        "USORF");
+        "04052090",
+        "Dairy products",
+        "DKAAR",
+        "DEBRV");
       case DG -> new CarrierScenarioParameters("Example Carrier Service",
         "403W",
         "TA1",
         "293499",
         "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
-        "DEBRV",
-        "USORF");
+        "DKAAR",
+        "DEBRV");
     };
 
     return csp.toJson();

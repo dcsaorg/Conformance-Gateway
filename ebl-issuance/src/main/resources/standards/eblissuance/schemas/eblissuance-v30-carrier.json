@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Issuance an EBL to an EBL platform.\n",
-    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS_RSP/3.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0-beta1). \n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
+    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is a counter part to the [DCSA_EBL_ISS_RSP](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_ISS_RSP/3.0.0-Beta-1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-1). \n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,11 +12,11 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "3.0-beta1"
+    "version": "3.0.0-Beta-1"
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS/3.0-beta1",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS/3.0.0-Beta-1",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
@@ -193,12 +193,6 @@
           "partyCodes": {
             "$ref": "#/components/schemas/partyCodes"
           }
-        }
-      },
-      "partyCodes": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/partyCodes_inner"
         }
       },
       "error": {
@@ -2626,6 +2620,12 @@
         "description": "The type of seal. This attribute links to the Seal Type ID defined in the Seal Type reference data entity. Possible values are:\n- KLP (Keyless padlock)\n- BLT (Bolt)\n- WIR (Wire)\n",
         "example": "WIR"
       },
+      "partyCodes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/partyCodes_inner"
+        }
+      },
       "unNumber": {
         "pattern": "^\\d{4}$",
         "type": "string",
@@ -2637,36 +2637,6 @@
         "type": "string",
         "description": "Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.\n",
         "example": "9037"
-      },
-      "partyCodes_inner": {
-        "required": [
-          "partyCode",
-          "partyCodeListProvider"
-        ],
-        "type": "object",
-        "properties": {
-          "partyCode": {
-            "maxLength": 100,
-            "minLength": 1,
-            "pattern": "^\\S+(\\s+\\S+)*$",
-            "type": "string"
-          },
-          "partyCodeListProvider": {
-            "type": "string",
-            "description": "Describes the organisation that provides the party code.\n\n - `EPUI`:The party code is an EBL Platform User Identifier (that is, an identifier provided by a platform, used to transfer eBLs). EPIU should be combined with the `codeListName`, to identify the platform that issued the identifier.\n - `GLEIF`: The party code is issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en. The `codeNameList` (if omitted) defaults to `LEI`.\n - `W3C`: The party code is issued by a standard created by World Wide Web Consortium (W3C). See https://www.w3.org/. The `codeNameList` (if omitted) defaults to `DID`.\n",
-            "enum": [
-              "GLEIF",
-              "W3C",
-              "EPUI"
-            ]
-          },
-          "codeListName": {
-            "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
-            "type": "string",
-            "description": "The name of the code list / code generation mechanism / code authority for the party code.\n\nFor `EPUI`:\n * `Wave`: An identifier provided by Wave BL.\n * `CargoX`: An identifier provided by CargoX\n * `EdoxOnline`: An identifier provided by EdoxOnline\n * `IQAX`: An identifier provided by IQAX\n * `EssDOCS`: An identifier provided by essDOCS\n * `Bolero`: An identifier provided by Bolero\n * `TradeGO`: An identifierprovided by TradeGo\n * `Secro`: An identifier provided by Secro\n * `GSBN`: An identifier provided by GSBN\n * `WiseTech`: An identifier provided by WiseTech\n\nFor `W3C`:\n * `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n\nFor `GLEIF`:\n * `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n"
-          }
-        }
       },
       "DangerousGoods_grossWeight": {
         "required": [
@@ -2727,6 +2697,40 @@
           }
         },
         "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
+      },
+      "partyCodes_inner": {
+        "required": [
+          "partyCode",
+          "partyCodeListProvider"
+        ],
+        "type": "object",
+        "properties": {
+          "partyCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "Code to identify the party as provided by the `partyCodeListProvider` and `codeListName`\n",
+            "example": "529900T8BM49AURSDO55"
+          },
+          "partyCodeListProvider": {
+            "type": "string",
+            "description": "Describes the organisation that provides the party code.\n\n - `EPUI`:The party code is an EBL Platform User Identifier (that is, an identifier provided by a platform, used to transfer eBLs). EPIU should be combined with the `codeListName`, to identify the platform that issued the identifier.\n - `GLEIF`: The party code is issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en. The `codeNameList` (if omitted) defaults to `LEI`.\n - `W3C`: The party code is issued by a standard created by World Wide Web Consortium (W3C). See https://www.w3.org/. The `codeNameList` (if omitted) defaults to `DID`.\n",
+            "example": "EPIU",
+            "enum": [
+              "GLEIF",
+              "W3C",
+              "EPUI"
+            ]
+          },
+          "codeListName": {
+            "maxLength": 100,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The name of the code list / code generation mechanism / code authority for the party code.\n\nFor `EPUI`:\n * `Wave`: An identifier provided by Wave BL.\n * `CargoX`: An identifier provided by CargoX\n * `EdoxOnline`: An identifier provided by EdoxOnline\n * `IQAX`: An identifier provided by IQAX\n * `EssDOCS`: An identifier provided by essDOCS\n * `Bolero`: An identifier provided by Bolero\n * `TradeGO`: An identifierprovided by TradeGo\n * `Secro`: An identifier provided by Secro\n * `GSBN`: An identifier provided by GSBN\n * `WiseTech`: An identifier provided by WiseTech\n\nFor `W3C`:\n * `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n\nFor `GLEIF`:\n * `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n",
+            "example": "Bolero"
+          }
+        }
       }
     },
     "responses": {

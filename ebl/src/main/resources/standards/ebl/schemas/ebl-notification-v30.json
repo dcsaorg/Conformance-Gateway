@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Electronic Bill of Lading Notifications",
-    "description": "API specification issued by DCSA.org.\n\nElectronic Bill of Lading Notifications for [DCSA OpenAPI specification for Electronic Bill of Lading](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL/3.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Shipping Instructions` or a `Transport Document` that is being subscribed to changes state.\n\nSubscribing to notification is done outside scope of this API.\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/notification/v3#v300B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nElectronic Bill of Lading Notifications for [DCSA OpenAPI specification for Electronic Bill of Lading](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL/3.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Shipping Instructions` or a `Transport Document` that is being subscribed to changes state.\n\nSubscribing to notification is done outside scope of this API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading Notification API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/notification/v3#v300B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -28,7 +28,7 @@
           "Notifications"
         ],
         "summary": "Send a new Shipping Instructions Notification",
-        "description": "Creates a new `Shipping Instructions Notification`. This endPoint is called whenever a `Shipping Instructions` that a cosumer has subscribed to changes state or is updated.\n",
+        "description": "Creates a new [`Shipping Instructions Notification`](#/ShippingInstructionsNotification). This endPoint is called whenever a `Shipping Instructions` that a cosumer has subscribed to changes state or is updated.\n",
         "operationId": "shipping-instructions-notifications",
         "parameters": [
           {
@@ -45,7 +45,7 @@
           }
         ],
         "requestBody": {
-          "description": "The payload used to create a `Shipping Instructions Notification`\n",
+          "description": "The payload used to create a [`Shipping Instructions Notification`](#/ShippingInstructionsNotification)\n",
           "content": {
             "application/json": {
               "schema": {
@@ -113,7 +113,7 @@
           "Notifications"
         ],
         "summary": "Send a new Transport Document Notification",
-        "description": "Creates a new `Transport Document Notification`. This endPoint is called whenever a `Transport Document` that a cosumer has subscribed to changes state or is updated.\n",
+        "description": "Creates a new [`Transport Document Notification`](#/TransportDocumentNotification). This endPoint is called whenever a `Transport Document` that a cosumer has subscribed to changes state or is updated.\n",
         "operationId": "transport-document-notifications",
         "parameters": [
           {
@@ -130,7 +130,7 @@
           }
         ],
         "requestBody": {
-          "description": "The payload used to create a `Transport Document Notification`\n",
+          "description": "The payload used to create a [`Transport Document Notification`](#/TransportDocumentNotification)\n",
           "content": {
             "application/json": {
               "schema": {
@@ -253,7 +253,6 @@
             "$ref": "#/components/schemas/ShippingInstructionsNotification_data"
           }
         },
-        "additionalProperties": false,
         "description": "`CloudEvent` specific properties for the `Notification`.\n"
       },
       "TransportDocumentNotification": {
@@ -315,7 +314,6 @@
             "$ref": "#/components/schemas/TransportDocumentNotification_data"
           }
         },
-        "additionalProperties": false,
         "description": "`CloudEvent` specific properties for the `Notification`.\n"
       },
       "ShippingInstructionsNotification_data": {
@@ -333,14 +331,14 @@
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions has been recieved and is awaiting to be processed)\n- `UPDATE CONFIRMED` (Update is confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "description": "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this property is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions has been recieved and is awaiting to be processed)\n- `UPDATE CONFIRMED` (Update is confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
             "example": "UPDATE RECEIVED"
           },
           "shippingInstructionsReference": {
             "maxLength": 100,
             "pattern": "^\\S+(\\s+\\S+)*$",
             "type": "string",
-            "description": "The identifier for a `Shipping Istruction` provided by the carrier for system purposes.\n\n**Conditional:** `shippingInstructionReference` and/or `transportDocumentReference` is required to provide\n",
+            "description": "The identifier for a `Shipping Instruction` provided by the carrier for system purposes.\n\n**Conditional:** `shippingInstructionReference` and/or `transportDocumentReference` is required to provide\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
@@ -353,11 +351,10 @@
           "reason": {
             "maxLength": 5000,
             "type": "string",
-            "description": "This field can be used to explain `shippingInstructionStatus`.\n",
+            "description": "This property can be used to explain `shippingInstructionStatus`.\n",
             "example": "Selected vessel is overbooked - please update VesselName"
           }
         },
-        "additionalProperties": false,
         "description": "`Shipping Instructions` specific properties for the `Notification`\n"
       },
       "TransportDocumentNotification_data": {
@@ -377,7 +374,7 @@
             "maxLength": 100,
             "pattern": "^\\S+(\\s+\\S+)*$",
             "type": "string",
-            "description": "The identifier for a `Shipping Istruction` provided by the carrier for system purposes.\n",
+            "description": "The identifier for a `Shipping Instruction` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
@@ -390,11 +387,10 @@
           "reason": {
             "maxLength": 5000,
             "type": "string",
-            "description": "This field can be used to explain Transport Document Status.\n",
+            "description": "This property can be used to explain Transport Document Status.\n",
             "example": "Voided because a new Transport Document has been issued"
           }
         },
-        "additionalProperties": false,
         "description": "`Transport Document` specific properties for the `Notification`\n"
       }
     }

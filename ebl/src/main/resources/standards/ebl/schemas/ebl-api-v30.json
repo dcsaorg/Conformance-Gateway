@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Electronic Bill of Lading",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2023.Q3]() *** _Will be updated_ ***. This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [Electronic Bill of Lading IFS]() *** _Will be updated_ *** to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://knowledge.dcsa.org/s/publication?publicationId=a0r7T000000L8lPQAS)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Electronic Bill of Lading Notification API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300B1). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2023.Q4](https://dcsa.org/wp-content/uploads/2024/01/DCSA-Information-Model-2023.Q4.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0 Beta 1](https://dcsa.atlassian.net/wiki/external/Y2MwYmRiMmE4MTc2NGJmOGI3ZDczZTQ1ZTM0NzQxYWY) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here **TO BE UPDATED**](https://dcsa.org)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Electronic Bill of Lading Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300B1). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -36,7 +36,7 @@
           "Shipping Instructions"
         ],
         "summary": "Creates a Shipping Instructions\n",
-        "description": "Creates a new `Shipping Instructions`. This endPoint corresponds with **UseCase 1 - Submit Shipping Instructions**.\n\n## Precondition\nThe consumer has information for a `Shipping Instructions`. The empty equipment has been released to the shipper. The `Booking` is in state `CONFIRMED`.\n\n## Postcondition\nThe provider has received the `Shipping Instructions`.\n\nThe consumer will receive a `201` (Created) if the payload schema validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a `Shipping Instructions`:\n1. The payload (`Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n\n   A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and stored along with the payload in the provider system.\n  \n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. A `201` (Created) response is returned with the following payload:\n    ```\n    {\n      shippingInstructionsReference: 'si-123',\n      shippingInstructionsStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `POST` `Shipping Instructions` the process ends here. The `Shipping Instructions`\n\n  - is now stored in the provider system\n  - has status `RECEIVED`\n  - awaits further processing by the provider\n  - a `201` (Created) response is sent to the consumer with a payload containing `documentStatus=RECEIVED`\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.\n",
+        "description": "Creates a new `Shipping Instructions`. This endPoint corresponds with **UseCase 1 - Submit Shipping Instructions**.\n\n## Precondition\nThe consumer has information for a `Shipping Instructions`. The empty equipment has been released to the shipper. The `Booking` is in state `CONFIRMED`.\n\n## Postcondition\nThe provider has received the `Shipping Instructions`.\n\nThe consumer will receive a `201` (Created) if the payload schema validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a `Shipping Instructions`:\n1. The payload (`Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n\n   A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and stored along with the payload in the provider system.\n  \n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. A `201` (Created) response is returned with the following payload:\n    ```\n    {\n      shippingInstructionsReference: 'si-123',\n      shippingInstructionsStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `POST` `Shipping Instructions` the process ends here. The `Shipping Instructions`\n\n  - is now stored in the provider system\n  - has status `RECEIVED`\n  - awaits further processing by the provider\n  - a `201` (Created) response is sent to the consumer with a payload containing `documentStatus=RECEIVED`\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.\n",
         "operationId": "create-shipping-instructions",
         "parameters": [
           {
@@ -383,7 +383,7 @@
           "Shipping Instructions"
         ],
         "summary": "Updates the Shipping Instructions\n",
-        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`.\n      \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updateShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `PUT` `Shipping Instructions` the process ends here. The `Updated Shipping Instructions`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updateShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \n  It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
+        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`.\n      \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updateShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n\nFor `PUT` `Shipping Instructions` the process ends here. The `Updated Shipping Instructions`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updateShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \n  It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
         "operationId": "update-shipping-instructions",
         "parameters": [
           {
@@ -624,7 +624,7 @@
           "Shipping Instructions"
         ],
         "summary": "Cancels an update to a Shipping Instructions\n",
-        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n",
+        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_NTF/3.0.0-Beta-1#/Notifications/shipping-instructions-notifications).\n",
         "operationId": "patch-shipping-instructions",
         "parameters": [
           {
@@ -923,6 +923,257 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TransportDocument"
+                },
+                "examples": {
+                  "regularSTDExample": {
+                    "summary": "Draft Transport Document with regular Dry cargo\n",
+                    "description": "A `DRAFT` Transport Document waiting for consumer approval.\n",
+                    "value": {
+                      "transportDocumentReference": "62CD536BA8D34C469AFD",
+                      "shippingInstructionsReference": "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9",
+                      "transportDocumentStatus": "DRAFT",
+                      "transportDocumentTypeCode": "BOL",
+                      "isShippedOnBoardType": true,
+                      "freightPaymentTermCode": "PRE",
+                      "isElectronic": true,
+                      "isToOrder": true,
+                      "shippedOnBoardDate": "2023-12-20",
+                      "termsAndConditions": "You agree that this transport document exist is name only for the sake of\ntesting your conformance with the DCSA EBL API. This transport document is NOT backed\nby a real shipment with ANY carrier and NONE of the requested services will be\ncarried out in real life.\n\nUnless required by applicable law or agreed to in writing, DCSA provides\nthis JSON data on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF\nANY KIND, either express or implied, including, without limitation, any\nwarranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,\nor FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for\ndetermining the appropriateness of using or redistributing this JSON\ndata and assume any risks associated with Your usage of this data.\n\nIn no event and under no legal theory, whether in tort (including negligence),\ncontract, or otherwise, unless required by applicable law (such as deliberate\nand grossly negligent acts) or agreed to in writing, shall DCSA be liable to\nYou for damages, including any direct, indirect, special, incidental, or\nconsequential damages of any character arising as a result of this terms or conditions\nor out of the use or inability to use the provided JSON data (including but not limited\nto damages for loss of goodwill, work stoppage, computer failure or malfunction, or any\nand all other commercial damages or losses), even if DCSA has been advised of the\npossibility of such damages.\n",
+                      "receiptTypeAtOrigin": "CY",
+                      "deliveryTypeAtDestination": "CY",
+                      "cargoMovementTypeAtOrigin": "FCL",
+                      "cargoMovementTypeAtDestination": "FCL",
+                      "serviceContractReference": "SCR-1234-REGULAR",
+                      "carrierCode": "MSC",
+                      "carrierCodeListProvider": "SMDG",
+                      "issuingParty": {
+                        "partyName": "Mediterranean Shipping Company",
+                        "identifyingCodes": [
+                          {
+                            "codeListProvider": "SMDG",
+                            "codeListName": "LCL",
+                            "partyCode": "MSC"
+                          }
+                        ]
+                      },
+                      "transports": {
+                        "plannedDepartureDate": "2023-12-20",
+                        "plannedArrivalDate": "2023-12-22",
+                        "portOfLoading": {
+                          "locationType": "UNCO",
+                          "UNLocationCode": "DKAAR"
+                        },
+                        "portOfDischarge": {
+                          "locationType": "UNLO",
+                          "UNLocationCode": "DEBRV"
+                        },
+                        "vesselName": "MSC Gülsün",
+                        "carrierExportVoyageNumber": "402E"
+                      },
+                      "charges": [
+                        {
+                          "chargeName": "Fictive transport document fee",
+                          "currencyAmount": 1,
+                          "currencyCode": "EUR",
+                          "paymentTermCode": "COL",
+                          "calculationBasis": "Per transport document",
+                          "unitPrice": 1,
+                          "quantity": 1
+                        }
+                      ],
+                      "invoicePayableAt": {
+                        "locationType": "UNCO",
+                        "UNLocationCode": "DKAAR"
+                      },
+                      "partyContactDetails": [
+                        {
+                          "name": "DCSA test person",
+                          "email": "no-reply@dcsa.example.org"
+                        }
+                      ],
+                      "documentParties": [
+                        {
+                          "party": {
+                            "partyName": "DCSA CTK",
+                            "partyContactDetails": [
+                              {
+                                "name": "DCSA test person",
+                                "email": "no-reply@dcsa.example.org"
+                              }
+                            ]
+                          },
+                          "partyFunction": "OS",
+                          "isToBeNotified": false
+                        }
+                      ],
+                      "consignmentItems": [
+                        {
+                          "carrierBookingReference": "CBR_123_REGULAR",
+                          "weight": 12000,
+                          "weightUnit": "KGM",
+                          "descriptionOfGoods": "Shoes - black, 400 boxes",
+                          "HSCodes": [
+                            "640510"
+                          ],
+                          "cargoItems": [
+                            {
+                              "equipmentReference": "NARU3472484",
+                              "weight": 12000,
+                              "weightUnit": "KGM",
+                              "outerPackaging": {
+                                "numberOfPackages": 400,
+                                "packageCode": "4G",
+                                "description": "Fibreboard boxes"
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "utilizedTransportEquipments": [
+                        {
+                          "isShipperOwned": false,
+                          "seals": [
+                            {
+                              "number": "DCSA-CTK-1234"
+                            }
+                          ],
+                          "cargoGrossWeight": 12000,
+                          "cargoGrossWeightUnit": "KGM",
+                          "equipment": {
+                            "ISOEquipmentCode": "22G1",
+                            "equipmentReference": "NARU3472484"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "reeferExample": {
+                    "summary": "Approved Transport Document with reefer cargo\n",
+                    "description": "An `APPROVED` Transport Document by the consumer waiting to be Issued by the provider.\n",
+                    "value": {
+                      "transportDocumentReference": "62CD536BA8D34C469AFD",
+                      "shippingInstructionsReference": "9051da7d-4099-4930-af35-7add4e68c635",
+                      "transportDocumentStatus": "DRAFT",
+                      "transportDocumentTypeCode": "BOL",
+                      "isShippedOnBoardType": true,
+                      "freightPaymentTermCode": "PRE",
+                      "isElectronic": true,
+                      "isToOrder": true,
+                      "shippedOnBoardDate": "2023-12-20",
+                      "termsAndConditions": "You agree that this transport document exist is name only for the sake of\ntesting your conformance with the DCSA EBL API. This transport document is NOT backed\nby a real shipment with ANY carrier and NONE of the requested services will be\ncarried out in real life.\n\nUnless required by applicable law or agreed to in writing, DCSA provides\nthis JSON data on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF\nANY KIND, either express or implied, including, without limitation, any\nwarranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,\nor FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for\ndetermining the appropriateness of using or redistributing this JSON\ndata and assume any risks associated with Your usage of this data.\n\nIn no event and under no legal theory, whether in tort (including negligence),\ncontract, or otherwise, unless required by applicable law (such as deliberate\nand grossly negligent acts) or agreed to in writing, shall DCSA be liable to\nYou for damages, including any direct, indirect, special, incidental, or\nconsequential damages of any character arising as a result of this terms or conditions\nor out of the use or inability to use the provided JSON data (including but not limited\nto damages for loss of goodwill, work stoppage, computer failure or malfunction, or any\nand all other commercial damages or losses), even if DCSA has been advised of the\npossibility of such damages.\n",
+                      "receiptTypeAtOrigin": "CY",
+                      "deliveryTypeAtDestination": "CY",
+                      "cargoMovementTypeAtOrigin": "FCL",
+                      "cargoMovementTypeAtDestination": "FCL",
+                      "serviceContractReference": "SCR-1234-REEFER",
+                      "carrierCode": "MSC",
+                      "carrierCodeListProvider": "SMDG",
+                      "issuingParty": {
+                        "partyName": "Mediterranean Shipping Company",
+                        "identifyingCodes": [
+                          {
+                            "codeListProvider": "SMDG",
+                            "codeListName": "LCL",
+                            "partyCode": "MSC"
+                          }
+                        ]
+                      },
+                      "transports": {
+                        "plannedDepartureDate": "2023-12-20",
+                        "plannedArrivalDate": "2023-12-22",
+                        "portOfLoading": {
+                          "locationType": "UNCO",
+                          "UNLocationCode": "DKAAR"
+                        },
+                        "portOfDischarge": {
+                          "locationType": "UNLO",
+                          "UNLocationCode": "DEBRV"
+                        },
+                        "vesselName": "MSC Gülsün",
+                        "carrierExportVoyageNumber": "402E"
+                      },
+                      "charges": [
+                        {
+                          "chargeName": "Fictive transport document fee",
+                          "currencyAmount": 1,
+                          "currencyCode": "EUR",
+                          "paymentTermCode": "COL",
+                          "calculationBasis": "Per transport document",
+                          "unitPrice": 1,
+                          "quantity": 1
+                        }
+                      ],
+                      "invoicePayableAt": {
+                        "locationType": "UNCO",
+                        "UNLocationCode": "DKAAR"
+                      },
+                      "partyContactDetails": [
+                        {
+                          "name": "DCSA test person",
+                          "email": "no-reply@dcsa.example.org"
+                        }
+                      ],
+                      "documentParties": [
+                        {
+                          "party": {
+                            "partyName": "DCSA CTK",
+                            "partyContactDetails": [
+                              {
+                                "name": "DCSA test person",
+                                "email": "no-reply@dcsa.example.org"
+                              }
+                            ]
+                          },
+                          "partyFunction": "OS",
+                          "isToBeNotified": false
+                        }
+                      ],
+                      "consignmentItems": [
+                        {
+                          "carrierBookingReference": "CBR_123_REEFER",
+                          "weight": 12000,
+                          "weightUnit": "KGM",
+                          "descriptionOfGoods": "Dairy products",
+                          "HSCodes": [
+                            "04052090"
+                          ],
+                          "cargoItems": [
+                            {
+                              "equipmentReference": "KKFU6671914",
+                              "weight": 12000,
+                              "weightUnit": "KGM",
+                              "outerPackaging": {
+                                "numberOfPackages": 400,
+                                "packageCode": "BQ",
+                                "description": "Bottles"
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "utilizedTransportEquipments": [
+                        {
+                          "isShipperOwned": false,
+                          "seals": [
+                            {
+                              "number": "DCSA-CTK-1234"
+                            }
+                          ],
+                          "cargoGrossWeight": 12000,
+                          "cargoGrossWeightUnit": "KGM",
+                          "equipment": {
+                            "ISOEquipmentCode": "45R1",
+                            "equipmentReference": "KKFU6671914"
+                          },
+                          "isNonOperatingReefer": false,
+                          "activeReeferSettings": {
+                            "temperatureSetpoint\"": -18,
+                            "temperatureUnit\"": "CEL"
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -1447,7 +1698,7 @@
       },
       "isToOrder": {
         "type": "boolean",
-        "description": "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n",
+        "description": "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n\n`isToOrder` must be `false` if `transportDocumentTypeCode='SWB'` (Sea Waybill).\n",
         "example": false
       },
       "numberOfCopiesWithCharges": {
@@ -1999,8 +2250,8 @@
         "minLength": 6,
         "pattern": "^\\d{6,10}$",
         "type": "string",
-        "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [Harmonized Commodity Description and Coding Systems (HS)](https://unstats.un.org/wiki/pages/viewpage.action?pageId=87426301) or here: [Harmonized System Codes](https://www.foreign-trade.com/reference/hscode.htm).\n\nThis standard is based on the 2017 revision\n",
-        "example": "851712"
+        "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+        "example": "851713"
       },
       "Reference": {
         "required": [
@@ -2455,7 +2706,7 @@
             }
           },
           "reason": {
-            "$ref": "#/components/schemas/reason"
+            "$ref": "#/components/schemas/reason_EBL"
           }
         },
         "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus`, an optional list of `requestedChanges` to be applied to the `Shipping Instructions` and and optional `reason`field is returned.\n"
@@ -2508,11 +2759,12 @@
         },
         "description": "A change required to the document in order for the carrier to accepted it\n"
       },
-      "reason": {
+      "reason_EBL": {
+        "title": "reason",
         "maxLength": 5000,
         "type": "string",
-        "description": "This field can be used to explain bookingStatus.\n",
-        "example": "Rejected because of strike..."
+        "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
+        "example": "Rejected because of of wrong equipmentReference"
       },
       "Error": {
         "required": [
@@ -2587,8 +2839,8 @@
       "DetailedError": {
         "title": "Detailed Error",
         "required": [
-          "message",
-          "reason"
+          "errorCodeText",
+          "message"
         ],
         "type": "object",
         "properties": {
@@ -2853,6 +3105,9 @@
             "items": {
               "$ref": "#/components/schemas/RequestedChange"
             }
+          },
+          "reason": {
+            "$ref": "#/components/schemas/reason_EBL"
           }
         },
         "description": "The `Shipping Instructions` as provided by the Shipper.\n"
@@ -3099,7 +3354,7 @@
             "$ref": "#/components/schemas/shippingInstructionsUpdateCancelledStatus"
           },
           "reason": {
-            "$ref": "#/components/schemas/reason"
+            "$ref": "#/components/schemas/reason_EBL"
           }
         },
         "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` and and optional `reason`field is returned.\n"
@@ -3419,13 +3674,13 @@
       "cargoMovementTypeAtOrigin": {
         "maxLength": 3,
         "type": "string",
-        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n",
+        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
         "example": "FCL"
       },
       "cargoMovementTypeAtDestination": {
         "maxLength": 3,
         "type": "string",
-        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- FCL (Full Container Load)\n- LCL (Less than Container Load)\n",
+        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
         "example": "FCL"
       },
       "issueDate": {
@@ -4496,7 +4751,7 @@
             }
           }
         },
-        "description": "Specifies the container (`equipment`), the total `weight`, total `volume`, `numberOfPacakges`, possible `ActiveReeferSettings`, `seals` and `references`\n"
+        "description": "Specifies the container (`equipment`), the total `weight`, total `volume`, possible `ActiveReeferSettings`, `seals` and `references`\n"
       },
       "isNonOperatingReefer": {
         "type": "boolean",

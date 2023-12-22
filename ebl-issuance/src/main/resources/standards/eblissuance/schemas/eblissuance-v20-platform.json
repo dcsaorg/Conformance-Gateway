@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for responding to an issuance request. \n",
-    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA_EBL_ISS](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_ISS/2.0-beta1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/2.0-beta1).\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
+    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA_EBL_ISS](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_ISS/2.0.0-Beta-1) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA_EBL_SUR](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/2.0.0-Beta-1) API.\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,11 +12,11 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "2.0-beta1"
+    "version": "2.0.0-Beta-1"
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS_RSP/2.0-beta1",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS_RSP/2.0.0-Beta-1",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],

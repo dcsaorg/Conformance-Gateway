@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA EBL Surrender API",
-    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is used to respond to requests that were submitted via the [DCSA_EBL_SUR](https://app.swaggerhub.com/apis/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-1) API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
+    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is used to respond to requests that were submitted via the [DCSA_EBL_SUR](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-1) API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",

@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DCSA OpenAPI specification for Booking Notifications",
-    "description": "API specification issued by DCSA.org.\n\nBooking Notifications for [DCSA OpenAPI specification for Booking](https://app.swaggerhub.com/apis/dcsaorg/DCSA_BKG/2.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a Booking that is being subscribed to changes state.\n\nSubscribing to notification is done outside scope of this API.\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/notification/v2#v200B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nBooking Notifications for [DCSA OpenAPI specification for Booking](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG/2.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Booking` that is being subscribed to changes state or is updated.\n\nSubscribing to notification is done outside scope of this API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking Notification API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/notification/v2#v200B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -28,24 +28,24 @@
           "Notifications"
         ],
         "summary": "Send a new Booking Notification",
-        "description": "Creates a new `Booking Notification`. This endPoint is called whenever a Booking that a cosumer has subscribed to changes state.\n",
-        "operationId": "postBookingNotifications",
+        "description": "Creates a new [`Booking Notification`](#/BookingNotification). This endPoint is called whenever a `Booking` that a cosumer has subscribed to changes state or is updated.\n",
+        "operationId": "booking-notifications",
         "parameters": [
           {
             "name": "API-Version",
             "in": "header",
-            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.",
-            "required": false,
+            "description": "An API-Version header **MUST** be provided to the request (mandatory). The header **MUST** be a [SemVer](https://semver.org/) specifying the provider (the calling party) API version.\n",
+            "required": true,
             "style": "simple",
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2"
+              "example": "2.0.0-Beta-1"
             }
           }
         ],
         "requestBody": {
-          "description": "The payload used to create a `Booking Notification`\n",
+          "description": "The payload used to create a [`Booking Notification`](#/BookingNotification)\n",
           "content": {
             "application/json": {
               "schema": {
@@ -54,7 +54,7 @@
               "examples": {
                 "receivedExample": {
                   "summary": "Booking request received\n",
-                  "description": "A `Booking Request` received and stored in provider system (`bookingStatus='RECEIVED'`).\n",
+                  "description": "A notification explaining that a `Booking Request` has been received and stored in provider system (`bookingStatus='RECEIVED'`).\n",
                   "value": {
                     "specversion": "1.0",
                     "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
@@ -70,7 +70,7 @@
                 },
                 "declinedExample": {
                   "summary": "Booking amendment declined\n",
-                  "description": "An amendment to a Booking has been declined (`amendedBookingStatus='DECLINED'`)\n",
+                  "description": "A notification explaining that an amendment to a `Booking` has been declined (`amendedBookingStatus='AMENDMENT DECLINED'`)\n",
                   "value": {
                     "specversion": "1.0",
                     "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
@@ -80,7 +80,7 @@
                     "datacontenttype": "application/json",
                     "data": {
                       "bookingStatus": "CONFIRMED",
-                      "amendedBookingStatus": "DECLINED",
+                      "amendedBookingStatus": "AMENDMENT DECLINED",
                       "carrierBookingRequestReference": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa",
                       "carrierBookingReference": "ABC709951",
                       "reason": "Declined because of no equipment availability"
@@ -96,7 +96,13 @@
             "description": "No Content\n",
             "headers": {
               "API-Version": {
-                "$ref": "#/components/headers/API-Version"
+                "description": "[SemVer](https://semver.org/) used to indicate the version of the consumer (the responding party). This is optional to provide.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "2.0.0-Beta-1"
+                }
               }
             }
           }
@@ -112,7 +118,7 @@
   "components": {
     "schemas": {
       "BookingNotification": {
-        "title": "BookingNotification",
+        "title": "Booking Notification",
         "required": [
           "data",
           "datacontenttype",
@@ -147,9 +153,9 @@
           "type": {
             "type": "string",
             "description": "This attribute contains a value describing the type of event related to the originating occurrence. Often this attribute is used for routing, observability, policy enforcement, etc. The format of this is producer defined and might include information such as the version of the type - see [Versioning of CloudEvents in the Primer](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/primer.md#versioning-of-cloudevents) for more information.\n",
-            "example": "org.dcsa.bookingnotification.v2",
+            "example": "org.dcsa.booking-notification.v2",
             "enum": [
-              "org.dcsa.bookingnotification.v2"
+              "org.dcsa.booking-notification.v2"
             ]
           },
           "time": {
@@ -169,7 +175,8 @@
           "data": {
             "$ref": "#/components/schemas/BookingNotification_data"
           }
-        }
+        },
+        "description": "`CloudEvent` specific properties for the `Notification`.\n"
       },
       "BookingNotification_data": {
         "required": [
@@ -186,8 +193,8 @@
           "amendedBookingStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `CONFIRMED` (Amendment is confirmed)\n- `DECLINED` (Amendment discontinued by provider)\n- `CANCELLED` (Amendment discontinued by consumer)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/bookingstatuses.csv).\n",
-            "example": "PENDING AMENDMENT APPROVAL"
+            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this property is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/bookingstatuses.csv).\n",
+            "example": "AMENDMENT RECEIVED"
           },
           "carrierBookingRequestReference": {
             "maxLength": 100,
@@ -206,35 +213,11 @@
           "reason": {
             "maxLength": 5000,
             "type": "string",
-            "description": "This field can be used to explain `bookingStatus`.\n",
+            "description": "This property can be used to explain `bookingStatus`.\n",
             "example": "Rejected because of strike..."
           }
-        }
-      }
-    },
-    "parameters": {
-      "Api-Version-Major": {
-        "name": "API-Version",
-        "in": "header",
-        "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.",
-        "required": false,
-        "style": "simple",
-        "explode": false,
-        "schema": {
-          "type": "string",
-          "example": "2"
-        }
-      }
-    },
-    "headers": {
-      "API-Version": {
-        "description": "SemVer used to indicate the version of the contract (API version) returned.\n",
-        "style": "simple",
-        "explode": false,
-        "schema": {
-          "type": "string",
-          "example": "2.0.0-Beta-1"
-        }
+        },
+        "description": "`Booking` specific properties for the `Notification`\n"
       }
     }
   }

@@ -43,6 +43,7 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
                         Map.ofEntries(
                             Map.entry("PK", AttributeValue.fromS(partitionKey)),
                             Map.entry("SK", AttributeValue.fromS(sortKey))))
+                    .consistentRead(true)
                     .build())
             .item()
             .getOrDefault("value", AttributeValue.fromS(""))
@@ -70,7 +71,8 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
               .tableName(tableName)
               .keyConditionExpression("#k = :v")
               .expressionAttributeNames(Map.of("#k", "PK"))
-              .expressionAttributeValues(Map.of(":v", AttributeValue.fromS(partitionKey)));
+              .expressionAttributeValues(Map.of(":v", AttributeValue.fromS(partitionKey)))
+              .consistentRead(true);
       if (!lastEvaluatedKey.isEmpty()) {
         queryRequestBuilder.exclusiveStartKey(lastEvaluatedKey);
       }

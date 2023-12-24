@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -29,7 +33,7 @@ import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
 @Slf4j
 public class ConformanceSandbox {
-  public record OrchestratorTask(
+  private record OrchestratorTask(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
       String sandboxId,
@@ -67,10 +71,9 @@ public class ConformanceSandbox {
     }
   }
 
-  public record PartyTask(
+  private record PartyTask(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName,
       String description,
@@ -130,9 +133,7 @@ public class ConformanceSandbox {
                                 "map#party#" + partyName),
                             conformanceRequest ->
                                 _asyncHandleOutboundRequest(
-                                    asyncSandboxOutboundRequestHandler,
-                                    sandboxId,
-                                    conformanceRequest),
+                                    deferredSandboxTaskConsumer, sandboxId, conformanceRequest),
                             orchestratorAuthHeader)
                         .stream()
                         .filter(createdParty -> partyName.equals(createdParty.getName()))
@@ -166,16 +167,16 @@ public class ConformanceSandbox {
 
   public static void create(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String environmentId,
       SandboxConfiguration sandboxConfiguration) {
     saveSandboxConfiguration(persistenceProvider, environmentId, sandboxConfiguration);
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
-      _handleReset(persistenceProvider, asyncWebClient, sandboxConfiguration.getId());
+      _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxConfiguration.getId());
     } else {
       if (Arrays.stream(sandboxConfiguration.getCounterparts())
           .anyMatch(CounterpartConfiguration::isInManualMode)) {
-        _handleReset(persistenceProvider, asyncWebClient, sandboxConfiguration.getId());
+        _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxConfiguration.getId());
       }
     }
   }
@@ -183,8 +184,7 @@ public class ConformanceSandbox {
   public static ConformanceWebResponse handleRequest(
       ConformancePersistenceProvider persistenceProvider,
       ConformanceWebRequest webRequest,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler) {
+      Consumer<JsonNode> deferredSandboxTaskConsumer) {
     log.info(
         "ConformanceSandbox.handleRequest() "
             + new ObjectMapper().valueToTree(webRequest).toPrettyString());
@@ -237,33 +237,28 @@ public class ConformanceSandbox {
 
       if (remainingUri.equals("/api/conformance/notification")) {
         return _handlePartyNotification(
-            persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
-            sandboxId,
-            partyName);
+            persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);
       } else if (remainingUri.equals("/prompt/json")) {
-        return _handleGetPartyPrompt(persistenceProvider, asyncWebClient, sandboxId, partyName);
+        return _handleGetPartyPrompt(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName);
       } else if (remainingUri.equals("/input")) {
         return _handlePostPartyInput(
-            persistenceProvider, asyncWebClient, sandboxId, partyName, webRequest.body());
+            persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName, webRequest.body());
       } else if (remainingUri.startsWith("/api")) {
         return _handlePartyInboundConformanceRequest(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             webRequest);
       }
     } else if (remainingUri.equals("/status")) {
-      return _handleGetStatus(persistenceProvider, asyncWebClient, sandboxId);
+      return _handleGetStatus(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     } else if (remainingUri.equals("/report")) {
-      return _handleGenerateReport(persistenceProvider, asyncWebClient, sandboxId, false);
+      return _handleGenerateReport(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, false);
     } else if (remainingUri.equals("/printableReport")) {
-      return _handleGenerateReport(persistenceProvider, asyncWebClient, sandboxId, true);
+      return _handleGenerateReport(persistenceProvider, deferredSandboxTaskConsumer, sandboxId, true);
     } else if (remainingUri.equals("/reset")) {
-      return _handleReset(persistenceProvider, asyncWebClient, sandboxId);
+      return _handleReset(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     }
     throw new IllegalArgumentException("Unhandled URI: " + webRequest.url());
   }
@@ -283,8 +278,7 @@ public class ConformanceSandbox {
 
   public static ArrayNode getOperatorLog(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -294,8 +288,7 @@ public class ConformanceSandbox {
     ArrayNode operatorLogNode = new ObjectMapper().createArrayNode();
     new PartyTask(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             "getting operator log for party " + partyName,
@@ -306,8 +299,7 @@ public class ConformanceSandbox {
 
   public static void notifyParty(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -316,8 +308,7 @@ public class ConformanceSandbox {
     String partyName = sandboxConfiguration.getParties()[0].getName();
     new PartyTask(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             "handling notification for party " + partyName,
@@ -327,8 +318,7 @@ public class ConformanceSandbox {
 
   public static void resetParty(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -337,8 +327,7 @@ public class ConformanceSandbox {
     String partyName = sandboxConfiguration.getParties()[0].getName();
     new PartyTask(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             "resetting party " + partyName,
@@ -374,7 +363,7 @@ public class ConformanceSandbox {
 
   public static ObjectNode handleActionInput(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String actionId,
       JsonNode actionInputOrNull) {
@@ -384,7 +373,9 @@ public class ConformanceSandbox {
     }
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+            conformanceWebRequest ->
+                ConformanceSandbox._asyncSendOutboundWebRequest(
+                    deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "handling in sandbox %s the input for action %s".formatted(sandboxId, actionId),
             orchestrator -> orchestrator.handlePartyInput(partyInput))
@@ -394,12 +385,14 @@ public class ConformanceSandbox {
 
   public static JsonNode startOrStopScenario(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String scenarioId) {
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+            conformanceWebRequest ->
+                ConformanceSandbox._asyncSendOutboundWebRequest(
+                    deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
             orchestrator -> orchestrator.startOrStopScenario(scenarioId))
@@ -409,14 +402,12 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handlePartyNotification(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName) {
     new PartyTask(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             "handling notification for party " + partyName,
@@ -427,8 +418,7 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handlePartyInboundConformanceRequest(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName,
       ConformanceWebRequest webRequest) {
@@ -436,8 +426,7 @@ public class ConformanceSandbox {
     AtomicReference<ConformanceResponse> conformanceResponseReference = new AtomicReference<>();
     new PartyTask(
             persistenceProvider,
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler,
+            deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
             "get prompt for party " + partyName,
@@ -465,7 +454,9 @@ public class ConformanceSandbox {
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
-              asyncWebClient,
+              conformanceWebRequest ->
+                  ConformanceSandbox._asyncSendOutboundWebRequest(
+                      deferredSandboxTaskConsumer, conformanceWebRequest),
               sandboxId,
               "handling inbound conformance request",
               orchestrator ->
@@ -482,15 +473,61 @@ public class ConformanceSandbox {
   }
 
   private static void _asyncHandleOutboundRequest(
-      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       ConformanceRequest conformanceRequest) {
-    asyncSandboxOutboundRequestHandler.accept(sandboxId, conformanceRequest);
+    JsonNode deferredTask =
+        new ObjectMapper()
+            .createObjectNode()
+            .put("handler", "_syncHandleOutboundRequest")
+            .put("sandboxId", sandboxId)
+            .set("conformanceRequest", conformanceRequest.toJson());
+    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    deferredSandboxTaskConsumer.accept(deferredTask);
   }
 
-  public static void syncHandleOutboundRequest(
+  private static void _asyncSendOutboundWebRequest(
+      Consumer<JsonNode> deferredSandboxTaskConsumer, ConformanceWebRequest conformanceWebRequest) {
+    JsonNode deferredTask =
+        new ObjectMapper()
+            .createObjectNode()
+            .put("handler", "_syncSendOutboundWebRequest")
+            .set("conformanceWebRequest", conformanceWebRequest.toJson());
+    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    deferredSandboxTaskConsumer.accept(deferredTask);
+  }
+
+  public static void executeDeferredTask(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      JsonNode jsonNode) {
+    try {
+      log.debug("ConformanceSandbox.executeDeferredTask(%s)".formatted(jsonNode.toPrettyString()));
+      switch (jsonNode.path("handler").asText()) {
+        case "_syncHandleOutboundRequest":
+          _syncHandleOutboundRequest(
+              persistenceProvider,
+              deferredSandboxTaskConsumer,
+              jsonNode.path("sandboxId").asText(),
+              ConformanceRequest.fromJson((ObjectNode) jsonNode.get("conformanceRequest")));
+          return;
+        case "_syncSendOutboundWebRequest":
+          _syncSendOutboundWebRequest(
+              ConformanceWebRequest.fromJson((ObjectNode) jsonNode.get("conformanceWebRequest")));
+          return;
+        default:
+          log.error("Unsupported deferred task: " + jsonNode.toPrettyString());
+      }
+    } catch (Exception e) {
+      log.error(
+          "Deferred task execution failed: %s"
+              .formatted(jsonNode == null ? null : jsonNode.toPrettyString()));
+    }
+  }
+
+  private static void _syncHandleOutboundRequest(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       ConformanceRequest conformanceRequest) {
     try {
@@ -507,7 +544,9 @@ public class ConformanceSandbox {
         if (sandboxConfiguration.getOrchestrator().isActive()) {
           new OrchestratorTask(
                   persistenceProvider,
-                  asyncWebClient,
+                  conformanceWebRequest ->
+                      ConformanceSandbox._asyncSendOutboundWebRequest(
+                          deferredSandboxTaskConsumer, conformanceWebRequest),
                   sandboxId,
                   "handling outbound conformance request",
                   orchestrator ->
@@ -521,15 +560,38 @@ public class ConformanceSandbox {
     }
   }
 
+  private static void _syncSendOutboundWebRequest(ConformanceWebRequest conformanceWebRequest) {
+    try {
+      HttpRequest.Builder httpRequestBuilder =
+          HttpRequest.newBuilder()
+              .uri(URI.create(conformanceWebRequest.url()))
+              .timeout(Duration.ofHours(1))
+              .GET();
+      conformanceWebRequest
+          .headers()
+          .forEach(
+              (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
+      HttpClient.newHttpClient()
+          .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    } catch (Exception e) {
+      log.error(
+          "Failed to send outbound request: %s"
+              .formatted(conformanceWebRequest.toJson().toPrettyString()),
+          e);
+    }
+  }
+
   private static ConformanceWebResponse _handleGetPartyPrompt(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName) {
     AtomicReference<JsonNode> partyPromptReference = new AtomicReference<>();
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+      conformanceWebRequest ->
+        ConformanceSandbox._asyncSendOutboundWebRequest(
+          deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "get prompt for party " + partyName,
             orchestrator -> partyPromptReference.set(orchestrator.handleGetPartyPrompt(partyName)))
@@ -546,12 +608,14 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handleGetStatus(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
     AtomicReference<JsonNode> statusReference = new AtomicReference<>();
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+      conformanceWebRequest ->
+        ConformanceSandbox._asyncSendOutboundWebRequest(
+          deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "get status",
             orchestrator -> statusReference.set(orchestrator.getStatus()))
@@ -562,13 +626,15 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handlePostPartyInput(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName,
       String input) {
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+      conformanceWebRequest ->
+        ConformanceSandbox._asyncSendOutboundWebRequest(
+          deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "handling input from party " + partyName,
             orchestrator ->
@@ -579,7 +645,7 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handleGenerateReport(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       boolean printable) {
     SandboxConfiguration sandboxConfiguration =
@@ -593,7 +659,9 @@ public class ConformanceSandbox {
     AtomicReference<String> reportReference = new AtomicReference<>();
     new OrchestratorTask(
             persistenceProvider,
-            asyncWebClient,
+      conformanceWebRequest ->
+        ConformanceSandbox._asyncSendOutboundWebRequest(
+          deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
             "generating report for roles: " + reportRoleNames,
             orchestrator ->
@@ -605,7 +673,7 @@ public class ConformanceSandbox {
 
   private static ConformanceWebResponse _handleReset(
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId) {
     String newSessionId = UUID.randomUUID().toString();
     persistenceProvider
@@ -628,7 +696,9 @@ public class ConformanceSandbox {
     if (sandboxConfiguration.getOrchestrator().isActive()) {
       new OrchestratorTask(
               persistenceProvider,
-              asyncWebClient,
+        conformanceWebRequest ->
+          ConformanceSandbox._asyncSendOutboundWebRequest(
+            deferredSandboxTaskConsumer, conformanceWebRequest),
               sandboxId,
               "starting session",
               ConformanceOrchestrator::notifyNextActionParty)

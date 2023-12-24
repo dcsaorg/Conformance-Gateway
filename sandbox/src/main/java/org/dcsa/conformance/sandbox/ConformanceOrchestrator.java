@@ -159,11 +159,10 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    String url = counterpartConfiguration.getUrl() + "/conformance/notification";
     asyncWebClient.accept(
         new ConformanceWebRequest(
             "GET",
-            url,
+            counterpartConfiguration.getUrl() + "/conformance/notification",
             Collections.emptyMap(),
             counterpartConfiguration.getAuthHeaderName().isBlank()
                 ? Collections.emptyMap()

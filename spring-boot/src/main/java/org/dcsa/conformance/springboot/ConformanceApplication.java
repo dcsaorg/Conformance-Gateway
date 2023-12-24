@@ -1,32 +1,26 @@
 package org.dcsa.conformance.springboot;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.sandbox.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
@@ -56,36 +50,9 @@ public class ConformanceApplication {
   private final ConformanceConfiguration conformanceConfiguration;
   private final ConformancePersistenceProvider persistenceProvider;
 
-  private final Consumer<ConformanceWebRequest> asyncWebClient =
-      conformanceWebRequest ->
-          CompletableFuture.runAsync(
-                  () -> {
-                    try {
-                      HttpRequest.Builder httpRequestBuilder =
-                          HttpRequest.newBuilder()
-                              .uri(URI.create(conformanceWebRequest.url()))
-                              .timeout(Duration.ofHours(1))
-                              .GET();
-                      conformanceWebRequest
-                          .headers()
-                          .forEach(
-                              (name, values) ->
-                                  values.forEach(value -> httpRequestBuilder.header(name, value)));
-                      HttpClient.newHttpClient()
-                          .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-                    } catch (IOException | InterruptedException e) {
-                      throw new RuntimeException(e);
-                    }
-                  })
-              .exceptionally(
-                  e -> {
-                    log.error(
-                        "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
-                    return null;
-                  });
-
   ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-  private final BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler;
+  @Getter
+  private final Consumer<JsonNode> deferredSandboxTaskConsumer;
 
   private final ConformanceAccessChecker accessChecker =
       new ConformanceAccessChecker() {
@@ -161,13 +128,14 @@ public class ConformanceApplication {
           new ConformancePersistenceProvider(
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
-    asyncSandboxOutboundRequestHandler =
-        (sandboxId, conformanceRequest) -> executor.schedule(
-            () ->
-                ConformanceSandbox.syncHandleOutboundRequest(
-                    persistenceProvider, asyncWebClient, sandboxId, conformanceRequest),
-            100,
-            TimeUnit.MILLISECONDS);
+    deferredSandboxTaskConsumer =
+        jsonNode ->
+            executor.schedule(
+                () ->
+                    ConformanceSandbox.executeDeferredTask(
+                        persistenceProvider, getDeferredSandboxTaskConsumer(), jsonNode),
+                100,
+                TimeUnit.MILLISECONDS);
 
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
@@ -218,7 +186,7 @@ public class ConformanceApplication {
                     }
                     ConformanceSandbox.create(
                         persistenceProvider,
-                        asyncWebClient,
+                        deferredSandboxTaskConsumer,
                         "spring-boot-env",
                         SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
                   });
@@ -238,8 +206,7 @@ public class ConformanceApplication {
                 accessChecker,
                 "http://localhost:8080",
                 persistenceProvider,
-                asyncWebClient,
-                asyncSandboxOutboundRequestHandler)
+                deferredSandboxTaskConsumer)
             .handleRequest(
                 "spring-boot-env", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
@@ -278,8 +245,7 @@ public class ConformanceApplication {
                 _getQueryParameters(servletRequest),
                 requestHeaders,
                 _getRequestBody(servletRequest)),
-            asyncWebClient,
-            asyncSandboxOutboundRequestHandler);
+            deferredSandboxTaskConsumer);
 
     _writeResponse(
         servletResponse,

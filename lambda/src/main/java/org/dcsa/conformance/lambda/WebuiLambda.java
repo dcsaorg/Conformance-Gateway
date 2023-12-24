@@ -45,8 +45,7 @@ public class WebuiLambda
               new WebuiAccessChecker(persistenceProvider),
               LambdaToolkit.getDbConfigValue(persistenceProvider, "environmentBaseUrl"),
               persistenceProvider,
-              LambdaToolkit.createAsyncWebClient(persistenceProvider),
-              LambdaToolkit.createAsyncSandboxOutboundRequestHandler(persistenceProvider));
+              LambdaToolkit.createDeferredSandboxTaskConsumer(persistenceProvider));
 
       String responseBody;
       try {

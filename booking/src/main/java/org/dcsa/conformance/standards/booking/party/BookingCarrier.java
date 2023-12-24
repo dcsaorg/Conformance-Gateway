@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
@@ -37,14 +38,14 @@ public class BookingCarrier extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
         partyConfiguration,
         counterpartConfiguration,
         persistentMap,
-        asyncWebClient,
+        webClient,
         orchestratorAuthHeader);
   }
 
@@ -109,11 +110,11 @@ public class BookingCarrier extends ConformanceParty {
         new CarrierScenarioParameters(
             "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
             generateSchemaValidVesselIMONumber(),
-          "service name",
-          validHsCodeAndCommodityType.get(0),
-          validHsCodeAndCommodityType.get(1),
-          generateValidPolUNLocationCode(),
-          generateValidPodUNLocationCode());
+            "service name",
+            validHsCodeAndCommodityType.get(0),
+            validHsCodeAndCommodityType.get(1),
+            generateValidPolUNLocationCode(),
+            generateValidPodUNLocationCode());
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -123,27 +124,29 @@ public class BookingCarrier extends ConformanceParty {
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
 
-
-  private String generateValidPolUNLocationCode()  {
-    List<String> validUnLocationCode = Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
+  private String generateValidPolUNLocationCode() {
+    List<String> validUnLocationCode =
+        Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
     return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
   }
 
-  private String generateValidPodUNLocationCode()  {
-    List<String> validUnLocationCode = Arrays.asList("DEBRV", "CNSGH", "JPTYO", "AEAUH", "AEJEA", "AEKHL", "AEKLF");
+  private String generateValidPodUNLocationCode() {
+    List<String> validUnLocationCode =
+        Arrays.asList("DEBRV", "CNSGH", "JPTYO", "AEAUH", "AEJEA", "AEKHL", "AEKLF");
     return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
   }
 
-  private List<String> generateValidCommodityTypeAndHSCodes(ScenarioType scenarioType)  {
-    Map<Integer, List<String>>  mapHSCodesAndCommodityType = Map.of(
-      0,Arrays.asList("411510", "Leather"),
-      1,Arrays.asList("843420", "Dairy machinery"),
-      2,Arrays.asList("721911", "Stainless steel"),
-      3,Arrays.asList("730110", "Iron or steel")
-    );
-    return scenarioType.equals(ScenarioType.DG) ?
-      Arrays.asList("293499", "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)"):
-      mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
+  private List<String> generateValidCommodityTypeAndHSCodes(ScenarioType scenarioType) {
+    Map<Integer, List<String>> mapHSCodesAndCommodityType =
+        Map.of(
+            0, Arrays.asList("411510", "Leather"),
+            1, Arrays.asList("843420", "Dairy machinery"),
+            2, Arrays.asList("721911", "Stainless steel"),
+            3, Arrays.asList("730110", "Iron or steel"));
+    return scenarioType.equals(ScenarioType.DG)
+        ? Arrays.asList(
+            "293499", "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)")
+        : mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
   }
 
   private void processBookingAmendment(JsonNode actionPrompt) {
@@ -153,13 +156,16 @@ public class BookingCarrier extends ConformanceParty {
     String cbrr = actionPrompt.required("cbrr").asText();
     boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
     addOperatorLogEntry(
-      "Confirmed the booking amendment for booking with CBR '%s'".formatted(cbr));
+        "Confirmed the booking amendment for booking with CBR '%s' and CBRR '%s'"
+            .formatted(cbr, cbrr));
 
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     if (acceptAmendment) {
       persistableCarrierBooking.confirmBookingAmendment(cbr, null);
     } else {
-      persistableCarrierBooking.declineBookingAmendment(cbr, "Declined as required by the conformance scenario");
+      persistableCarrierBooking.declineBookingAmendment(
+          cbr, "Declined as required by the conformance scenario");
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -169,13 +175,15 @@ public class BookingCarrier extends ConformanceParty {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.required("cbrr").asText();
-    addOperatorLogEntry(
-      "Confirmed the booking request with CBRR '%s'".formatted(cbrr));
+    addOperatorLogEntry("Confirmed the booking request with CBRR '%s'".formatted(cbrr));
 
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     var bookingStatus = persistableCarrierBooking.getBooking().get("bookingStatus").asText();
     if (bookingStatus.equals(BookingState.CONFIRMED.wireName())) {
-      persistableCarrierBooking.getBooking().put("importLicenseReference","importLicenseRefUpdate");
+      persistableCarrierBooking
+          .getBooking()
+          .put("importLicenseReference", "importLicenseRefUpdate");
     }
     persistableCarrierBooking.confirmBooking(cbrr, () -> generateAndAssociateCBR(cbrr), null);
     persistableCarrierBooking.save(persistentMap);
@@ -184,18 +192,22 @@ public class BookingCarrier extends ConformanceParty {
     assert cbr != null;
 
     addOperatorLogEntry(
-        "Confirmed the booking request with CBRR '%s' with CBR '%s'".formatted(cbrr, cbr));
+        "Confirmed the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void rejectBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.rejectBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
+    String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.required("cbrr").asText();
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.rejectBooking(cbrr,"Rejected as required by the conformance scenario");
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.rejectBooking(
+        cbrr, "Rejected as required by the conformance scenario");
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-    addOperatorLogEntry("Rejected the booking request with CBRR '%s'".formatted(cbrr));
+    addOperatorLogEntry(
+        "Rejected the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void declineBooking(JsonNode actionPrompt) {
@@ -203,31 +215,36 @@ public class BookingCarrier extends ConformanceParty {
 
     String cbr = actionPrompt.required("cbr").asText();
     String cbrr = actionPrompt.required("cbrr").asText();
-    addOperatorLogEntry(
-      "Confirmed the booking request with CBR '%s'".formatted(cbr));
 
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.declineBooking(cbr, "Declined as required by the conformance scenario");
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.declineBooking(
+        cbr, "Declined as required by the conformance scenario");
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-    addOperatorLogEntry("Declined the booking with CBR '%s'".formatted(cbr));
+    addOperatorLogEntry("Declined the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
-    Consumer<ObjectNode> bookingMutator = booking -> booking.putArray("requestedChanges")
-      .addObject()
-      .put(
-        "message",
-        "Please perform the changes requested by the Conformance orchestrator");
+    Consumer<ObjectNode> bookingMutator =
+        booking ->
+            booking
+                .putArray("requestedChanges")
+                .addObject()
+                .put(
+                    "message",
+                    "Please perform the changes requested by the Conformance orchestrator");
+    String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.required("cbrr").asText();
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
-    persistableCarrierBooking.requestUpdateToBooking(cbrr,bookingMutator);
+    persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry("Requested update to the booking request with CBRR '%s'".formatted(cbrr));
+    addOperatorLogEntry("Requested update to the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
@@ -236,33 +253,37 @@ public class BookingCarrier extends ConformanceParty {
     String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = cbrrToCbr.get(cbrr);
 
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     persistableCarrierBooking.confirmBookingCompleted(cbrr, true);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
 
-    addOperatorLogEntry("Completed the booking request with CBR '%s'".formatted(cbr));
+    addOperatorLogEntry("Completed the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void requestToAmendConfirmedBooking(JsonNode actionPrompt) {
-    log.info(
-        "Carrier.requestToAmendConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("Carrier.requestToAmendConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = actionPrompt.required("cbr").asText();
 
-    Consumer<ObjectNode> bookingMutator = booking -> booking.putArray("requestedChanges")
-      .addObject()
-      .put(
-        "message",
-        "Please perform the changes requested by the Conformance orchestrator");
+    Consumer<ObjectNode> bookingMutator =
+        booking ->
+            booking
+                .putArray("requestedChanges")
+                .addObject()
+                .put(
+                    "message",
+                    "Please perform the changes requested by the Conformance orchestrator");
 
-    var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.updateConfirmedBooking(cbrr,bookingMutator,true);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.updateConfirmedBooking(cbrr, bookingMutator, true);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry("Requested to amend the booking with CBR '%s'".formatted(cbr));
+    addOperatorLogEntry("Requested to amend the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private String generateAndAssociateCBR(String cbrr) {
@@ -273,19 +294,24 @@ public class BookingCarrier extends ConformanceParty {
     return cbr;
   }
 
-  private void generateAndEmitNotificationFromBooking(JsonNode actionPrompt, PersistableCarrierBooking persistableCarrierBooking, boolean includeCbrr) {
+  private void generateAndEmitNotificationFromBooking(
+      JsonNode actionPrompt,
+      PersistableCarrierBooking persistableCarrierBooking,
+      boolean includeCbrr) {
     var notification =
-      BookingNotification.builder()
-        .apiVersion(apiVersion)
-        .booking(persistableCarrierBooking.getBooking())
-        .includeCarrierBookingRequestReference(includeCbrr)
-        .build()
-        .asJsonNode();
+        BookingNotification.builder()
+            .apiVersion(apiVersion)
+            .booking(persistableCarrierBooking.getBooking())
+            .includeCarrierBookingRequestReference(includeCbrr)
+            .build()
+            .asJsonNode();
     if (isShipperNotificationEnabled) {
       asyncCounterpartNotification("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
+          OBJECT_MAPPER
+              .createObjectNode()
+              .put("actionId", actionPrompt.required("actionId").asText()));
     }
   }
 
@@ -310,14 +336,12 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request) {
     return return404(request, "Returning 404 since the request did not match any known URL");
   }
+
   private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
         404,
         Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(
-            OBJECT_MAPPER
-                .createObjectNode()
-                .put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
@@ -376,13 +400,11 @@ public class BookingCarrier extends ConformanceParty {
       return "false";
     }
     var operation = operationParams.iterator().next();
-    if (operationParams.size() > 1
-      || !(operation.equals("true") || operation.equals("false"))) {
+    if (operationParams.size() > 1 || !(operation.equals("true") || operation.equals("false"))) {
       return "!INVALID-VALUE!";
     }
     return operation;
   }
-
 
   @SneakyThrows
   private ConformanceResponse _handlePutBookingRequest(ConformanceRequest request) {
@@ -394,7 +416,7 @@ public class BookingCarrier extends ConformanceParty {
       return return404(request);
     }
     ObjectNode updatedBookingRequest =
-      (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
+        (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(bookingData);
     try {
       persistableCarrierBooking.putBooking(bookingReference, updatedBookingRequest);
@@ -449,11 +471,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
 
     return returnBookingStatusResponse(
-      200,
-      request,
-      persistableCarrierBooking.getBooking(),
-      bookingReference
-    );
+        200, request, persistableCarrierBooking.getBooking(), bookingReference);
   }
 
   private ConformanceResponse returnBookingStatusResponse(
@@ -494,34 +512,37 @@ public class BookingCarrier extends ConformanceParty {
     if (amendedContentRaw.equals("true") || amendedContentRaw.equals("false")) {
       amendedContent = amendedContentRaw.equals("true");
     } else {
-      return return400(request, "The amendedContent queryParam must be used at most once and" +
-        " must be one of true or false");
+      return return400(
+          request,
+          "The amendedContent queryParam must be used at most once and"
+              + " must be one of true or false");
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var persistedBookingData = persistentMap.load(cbrr);
 
-
     if (persistedBookingData != null) {
-      var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(persistedBookingData);
+      var persistableCarrierBooking =
+          PersistableCarrierBooking.fromPersistentStore(persistedBookingData);
       JsonNode body;
       if (amendedContent) {
         body = persistableCarrierBooking.getAmendedBooking().orElse(null);
         if (body == null) {
-          return return404(request, "No amended version of booking with reference: " + bookingReference);
+          return return404(
+              request, "No amended version of booking with reference: " + bookingReference);
         }
       } else {
         body = persistableCarrierBooking.getBooking();
       }
       ConformanceResponse response =
           request.createResponse(
-              200,
-            Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(body));
+              200, Map.of("Api-Version", List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
-              .formatted(bookingReference, persistableCarrierBooking.getOriginalBookingState().wireName()));
+              .formatted(
+                  bookingReference,
+                  persistableCarrierBooking.getOriginalBookingState().wireName()));
       return response;
     }
     return return404(request);
@@ -531,7 +552,8 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
     ObjectNode bookingRequestPayload =
         (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
-    var persistableCarrierBooking = PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
+    var persistableCarrierBooking =
+        PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
     persistableCarrierBooking.save(persistentMap);
     if (isShipperNotificationEnabled) {
       asyncCounterpartNotification(
@@ -543,11 +565,10 @@ public class BookingCarrier extends ConformanceParty {
               .asJsonNode());
     }
     return returnBookingStatusResponse(
-      201,
-      request,
-      bookingRequestPayload,
-      persistableCarrierBooking.getCarrierBookingRequestReference()
-    );
+        201,
+        request,
+        bookingRequestPayload,
+        persistableCarrierBooking.getCarrierBookingRequestReference());
   }
 
   @Builder
@@ -564,8 +585,7 @@ public class BookingCarrier extends ConformanceParty {
     private String reason;
 
     private JsonNode booking;
-    @Builder.Default
-    private boolean includeCarrierBookingRequestReference = true;
+    @Builder.Default private boolean includeCarrierBookingRequestReference = true;
 
     private String computedType() {
       if (type != null) {

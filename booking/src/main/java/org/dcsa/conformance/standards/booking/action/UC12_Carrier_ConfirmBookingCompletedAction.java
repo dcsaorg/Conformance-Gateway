@@ -24,16 +24,19 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC12: Complete the booking request with CBR %s"
-        .formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC12: Complete the booking request with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbrr", dsp.carrierBookingRequestReference())
-      .put("cbr", dsp.carrierBookingReference());
+    return jsonNode
+        .put("cbrr", dsp.carrierBookingRequestReference())
+        .put("cbr", dsp.carrierBookingReference());
   }
 
   @Override
@@ -41,16 +44,13 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-              getMatchedExchangeUuid(),
-              BookingState.COMPLETED
-            ),
+                getMatchedExchangeUuid(), BookingState.COMPLETED),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

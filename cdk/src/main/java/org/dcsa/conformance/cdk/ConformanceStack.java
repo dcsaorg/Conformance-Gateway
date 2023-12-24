@@ -129,15 +129,15 @@ public class ConformanceStack extends Stack {
                         .build())
                 .build());
 
-    Function httpClientLambda =
+    Function sandboxTaskLambda =
         new Function(
             this,
-            prefix + "HttpClientLambda",
+            prefix + "SandboxTaskLambda",
             FunctionProps.builder()
-                .functionName(prefix + "HttpClientLambda")
+                .functionName(prefix + "SandboxTaskLambda")
                 .runtime(Runtime.JAVA_17)
                 .code(assetCode)
-                .handler("org.dcsa.conformance.lambda.HttpClientLambda")
+                .handler("org.dcsa.conformance.lambda.SandboxTaskLambda")
                 .memorySize(1024)
                 .timeout(Duration.minutes(1))
                 .reservedConcurrentExecutions(16)
@@ -176,25 +176,25 @@ public class ConformanceStack extends Stack {
                 .build());
     table.grantReadWriteData(webuiLambda);
 
-    Policy invokeHttpClientLambdaPolicy =
+    Policy invokeSandboxTaskLambdaPolicy =
         new Policy(
             this,
-            prefix + "InvokeHttpClientLambdaPolicy",
+            prefix + "InvokeSandboxTaskLambdaPolicy",
             PolicyProps.builder()
                 .statements(
                     List.of(
                         PolicyStatement.Builder.create()
                             .actions(List.of("lambda:InvokeFunction"))
-                            .resources(List.of(httpClientLambda.getFunctionArn()))
+                            .resources(List.of(sandboxTaskLambda.getFunctionArn()))
                             .build()))
                 .build());
     Stream.of(apiLambda, webuiLambda)
         .forEach(
             lambda ->
                 Objects.requireNonNull(lambda.getRole())
-                    .attachInlinePolicy(invokeHttpClientLambdaPolicy));
+                    .attachInlinePolicy(invokeSandboxTaskLambdaPolicy));
 
-    Stream.of(httpClientLambda, apiLambda, webuiLambda)
+    Stream.of(sandboxTaskLambda, apiLambda, webuiLambda)
         .forEach(
             lambda -> {
               Objects.requireNonNull(lambda.getRole())

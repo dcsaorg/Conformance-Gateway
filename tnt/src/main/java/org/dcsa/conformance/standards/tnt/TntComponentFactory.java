@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.tnt;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -11,10 +10,10 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.standards.tnt.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.party.TntPublisher;
 import org.dcsa.conformance.standards.tnt.party.TntRole;
@@ -41,7 +40,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
@@ -61,7 +60,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
               publisherConfiguration,
               counterpartConfigurationsByRoleName.get(TntRole.SUBSCRIBER.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 
@@ -74,7 +73,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
               subscriberConfiguration,
               counterpartConfigurationsByRoleName.get(TntRole.PUBLISHER.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 
@@ -126,16 +125,6 @@ public class TntComponentFactory extends AbstractComponentFactory {
         Map.entry(
             TntEventType.TRANSPORT,
           JsonSchemaValidator.getInstance(schemaFilePath, "transportEvent")));
-  }
-
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
-    String schemaFilePath =
-        "/standards/tnt/schemas/tnt-%s-%s.json"
-            .formatted(
-                standardVersion.startsWith("2") ? "v22" : "v30", apiProviderRole.toLowerCase());
-    String schemaName =
-        TntRole.isPublisher(apiProviderRole) ? (forRequest ? null : "events") : null;
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 
   @SneakyThrows

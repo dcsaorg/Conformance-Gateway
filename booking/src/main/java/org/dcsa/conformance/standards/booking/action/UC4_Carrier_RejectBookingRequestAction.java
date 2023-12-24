@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
-import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -26,8 +25,10 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC4: Reject the booking request with CBRR %s"
-        .formatted(getDspSupplier().get().carrierBookingRequestReference()));
+    return ("UC4: Reject the booking request with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override
@@ -48,9 +49,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-              getMatchedExchangeUuid(),
-              BookingState.REJECTED
-            ),
+                getMatchedExchangeUuid(), BookingState.REJECTED),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

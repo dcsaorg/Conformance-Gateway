@@ -131,9 +131,14 @@ public class ConformanceApplication {
     deferredSandboxTaskConsumer =
         jsonNode ->
             executor.schedule(
-                () ->
+                () -> {
+                  try {
                     ConformanceSandbox.executeDeferredTask(
-                        persistenceProvider, getDeferredSandboxTaskConsumer(), jsonNode),
+                        persistenceProvider, getDeferredSandboxTaskConsumer(), jsonNode);
+                  } catch (Exception e) {
+                    log.error("Deferred sandbox task execution failed", e);
+                  }
+                },
                 100,
                 TimeUnit.MILLISECONDS);
 

@@ -1,37 +1,36 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.checks.CarrierGetBookingPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class Shipper_GetAmendedBooking404Action extends BookingAction {
 
   public Shipper_GetAmendedBooking404Action(
-      String carrierPartyName,
-      String shipperPartyName,
-      BookingAction previousAction) {
-    super(shipperPartyName, carrierPartyName, previousAction, "GET (amended content, non-existing)", 404);
+      String carrierPartyName, String shipperPartyName, BookingAction previousAction) {
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        "GET (amended content, non-existing)",
+        404);
   }
 
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
-      .put("amendedContent", true);
+        .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+        .put("amendedContent", true);
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the (non-existing) amendment to the booking with CBR '%s'"
-        .formatted(getDspSupplier().get().carrierBookingReference());
+    return "GET the (non-existing) amendment to the booking with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override
@@ -45,11 +44,7 @@ public class Shipper_GetAmendedBooking404Action extends BookingAction {
                 getMatchedExchangeUuid(),
                 "/v2/bookings/" + getDspSupplier().get().carrierBookingRequestReference()),
             new QueryParamCheck(
-              BookingRole::isShipper,
-              getMatchedExchangeUuid(),
-              "amendedContent",
-              "true"
-            ),
+                BookingRole::isShipper, getMatchedExchangeUuid(), "amendedContent", "true"),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

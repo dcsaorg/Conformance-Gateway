@@ -25,7 +25,7 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
         carrierPartyName,
         shipperPartyName,
         previousAction,
-        "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D") ,
+        "UC8%s [%s]".formatted(acceptAmendment ? "a" : "b", acceptAmendment ? "A" : "D"),
         204);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptAmendment = acceptAmendment;
@@ -33,14 +33,18 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC8: Process the booking amendment with CBR %s".formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC8: Process the booking amendment with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbrr", dsp.carrierBookingRequestReference())
+    return jsonNode
+        .put("cbrr", dsp.carrierBookingRequestReference())
         .put("cbr", dsp.carrierBookingReference())
         .put("acceptAmendment", acceptAmendment);
   }
@@ -58,10 +62,11 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-              getMatchedExchangeUuid(),
-              acceptAmendment ? BookingState.CONFIRMED : bookingStatus,
-              acceptAmendment ? BookingState.AMENDMENT_CONFIRMED : BookingState.AMENDMENT_DECLINED
-            ),
+                getMatchedExchangeUuid(),
+                acceptAmendment ? BookingState.CONFIRMED : bookingStatus,
+                acceptAmendment
+                    ? BookingState.AMENDMENT_CONFIRMED
+                    : BookingState.AMENDMENT_DECLINED),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

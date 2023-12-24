@@ -24,16 +24,19 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC10: Decline the booking request with CBR %s"
-        .formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC10: Decline the booking request with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbr", dsp.carrierBookingReference())
-      .put("cbrr", dsp.carrierBookingRequestReference() );
+    return jsonNode
+        .put("cbr", dsp.carrierBookingReference())
+        .put("cbrr", dsp.carrierBookingRequestReference());
   }
 
   @Override
@@ -50,14 +53,13 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.DECLINED,
-                dsp.amendedBookingStatus() != null ? BookingState.AMENDMENT_DECLINED : null
-            ),
+                dsp.amendedBookingStatus() != null ? BookingState.AMENDMENT_DECLINED : null),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
-          ApiHeaderCheck.createNotificationCheck(
+            ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,

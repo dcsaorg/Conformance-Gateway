@@ -28,7 +28,12 @@ public class Shipper_GetBookingAction extends BookingAction {
       BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus) {
-    super(shipperPartyName, carrierPartyName, previousAction, requestAmendedStatus ? "GET (amended content)" : "GET", 200);
+    super(
+        shipperPartyName,
+        carrierPartyName,
+        previousAction,
+        requestAmendedStatus ? "GET (amended content)" : "GET",
+        200);
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
     this.responseSchemaValidator = responseSchemaValidator;
@@ -38,14 +43,16 @@ public class Shipper_GetBookingAction extends BookingAction {
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
-      .put("amendedContent", requestAmendedContent);
+        .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+        .put("amendedContent", requestAmendedContent);
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the booking with CBR '%s'"
-        .formatted(getDspSupplier().get().carrierBookingReference());
+    return "GET the booking with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override
@@ -71,17 +78,15 @@ public class Shipper_GetBookingAction extends BookingAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              BookingRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator
-            ),
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
             new CarrierGetBookingPayloadResponseConformanceCheck(
-              getMatchedExchangeUuid(),
-              expectedBookingStatus,
-              expectedAmendedBookingStatus,
-              requestAmendedContent
-            ),
+                getMatchedExchangeUuid(),
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
+                requestAmendedContent),
             new ActionCheck(
                 "GET returns the expected Booking data",
                 BookingRole::isCarrier,

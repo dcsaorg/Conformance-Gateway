@@ -25,16 +25,19 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC6: Request to amend the confirmed booking with CBR %s"
-        .formatted(getDspSupplier().get().carrierBookingReference()));
+    return ("UC6: Request to amend the confirmed booking with CBR '%s' and CBRR '%s'"
+        .formatted(
+            getDspSupplier().get().carrierBookingReference(),
+            getDspSupplier().get().carrierBookingRequestReference()));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
-    return jsonNode.put("cbr", dsp.carrierBookingReference())
-      .put("cbrr", dsp.carrierBookingRequestReference() );
+    return jsonNode
+        .put("cbr", dsp.carrierBookingReference())
+        .put("cbrr", dsp.carrierBookingRequestReference());
   }
 
   @Override
@@ -48,9 +51,7 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-              getMatchedExchangeUuid(),
-              BookingState.PENDING_AMENDMENT
-            ),
+                getMatchedExchangeUuid(), BookingState.PENDING_AMENDMENT),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

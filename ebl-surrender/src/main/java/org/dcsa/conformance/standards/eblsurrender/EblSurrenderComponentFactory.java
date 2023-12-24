@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.eblsurrender;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -11,10 +10,10 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderCarrier;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderPlatform;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
@@ -40,7 +39,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
@@ -60,7 +59,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
               carrierConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderRole.PLATFORM.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 
@@ -73,7 +72,7 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
               platformConfiguration,
               counterpartConfigurationsByRoleName.get(EblSurrenderRole.CARRIER.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 

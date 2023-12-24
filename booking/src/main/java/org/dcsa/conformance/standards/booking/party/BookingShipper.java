@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -27,14 +28,14 @@ public class BookingShipper extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
         partyConfiguration,
         counterpartConfiguration,
         persistentMap,
-        asyncWebClient,
+        webClient,
         orchestratorAuthHeader);
   }
 
@@ -67,6 +68,7 @@ public class BookingShipper extends ConformanceParty {
 
   private void getBookingRequest(JsonNode actionPrompt) {
     log.info("Shipper.getBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.get("cbrr").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     Map<String, List<String>> queryParams = requestAmendment
@@ -75,7 +77,7 @@ public class BookingShipper extends ConformanceParty {
 
     syncCounterpartGet("/v2/bookings/" + cbrr, queryParams);
 
-    addOperatorLogEntry("Sent a GET request for booking with CBRR: %s".formatted(cbrr));
+    addOperatorLogEntry("Sent a GET request for booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void sendBookingRequest(JsonNode actionPrompt) {

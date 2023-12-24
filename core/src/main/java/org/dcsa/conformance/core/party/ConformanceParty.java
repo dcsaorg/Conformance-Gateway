@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
-import org.dcsa.conformance.core.toolkit.HttpToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -38,25 +37,25 @@ public abstract class ConformanceParty implements StatefulEntity {
    */
   protected final JsonNodeMap persistentMap;
 
-  private final Consumer<ConformanceRequest> asyncWebClient;
+  private final PartyWebClient webClient;
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
   private static final int MAX_OPERATOR_LOG_RECORDS = 100;
   private final LinkedList<String> operatorLog = new LinkedList<>();
 
-  public ConformanceParty(
+  protected ConformanceParty(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     this.apiVersion = apiVersion;
     this.partyConfiguration = partyConfiguration;
     this.counterpartConfiguration = counterpartConfiguration;
     this.persistentMap = persistentMap;
-    this.asyncWebClient = asyncWebClient;
+    this.webClient = webClient;
     this.orchestratorAuthHeader =
         orchestratorAuthHeader.isEmpty()
             ? counterpartConfiguration.getAuthHeaderName().isBlank()
@@ -128,7 +127,7 @@ public abstract class ConformanceParty implements StatefulEntity {
               .formatted(partyConfiguration.getName(), jsonPartyInput.toPrettyString()));
       return;
     }
-    asyncWebClient.accept(
+    webClient.asyncRequest(
         new ConformanceRequest(
             "POST",
             partyConfiguration.getOrchestratorUrl()
@@ -146,27 +145,27 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected void syncCounterpartGet(
       String path, Map<String, ? extends Collection<String>> queryParams) {
-    HttpToolkit.syncHttpRequest(_createConformanceRequest(false, "GET", path, queryParams, null));
+    webClient.syncRequest(_createConformanceRequest(false, "GET", path, queryParams, null));
   }
 
   protected void syncCounterpartPatch(
       String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
-    HttpToolkit.syncHttpRequest(
+    webClient.syncRequest(
         _createConformanceRequest(false, "PATCH", path, queryParams, jsonBody));
   }
 
   protected ConformanceResponse syncCounterpartPost(String path, JsonNode jsonBody) {
-    return HttpToolkit.syncHttpRequest(
+    return webClient.syncRequest(
         _createConformanceRequest(false, "POST", path, Collections.emptyMap(), jsonBody));
   }
 
   protected ConformanceResponse syncCounterpartPut(String path, JsonNode jsonBody) {
-    return HttpToolkit.syncHttpRequest(
+    return webClient.syncRequest(
         _createConformanceRequest(false, "PUT", path, Collections.emptyMap(), jsonBody));
   }
 
   protected void asyncCounterpartNotification(String path, JsonNode jsonBody) {
-    asyncWebClient.accept(
+    webClient.asyncRequest(
         _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
   }
 

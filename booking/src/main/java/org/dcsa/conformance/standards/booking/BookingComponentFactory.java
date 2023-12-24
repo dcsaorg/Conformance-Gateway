@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.booking;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
@@ -11,12 +10,12 @@ import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
+import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingShipper;
 
 public class BookingComponentFactory extends AbstractComponentFactory {
@@ -40,7 +39,7 @@ public class BookingComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       JsonNodeMap persistentMap,
-      Consumer<ConformanceRequest> asyncWebClient,
+      PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)
@@ -60,7 +59,7 @@ public class BookingComponentFactory extends AbstractComponentFactory {
               carrierConfiguration,
               counterpartConfigurationsByRoleName.get(BookingRole.SHIPPER.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 
@@ -73,7 +72,7 @@ public class BookingComponentFactory extends AbstractComponentFactory {
               shipperConfiguration,
               counterpartConfigurationsByRoleName.get(BookingRole.CARRIER.getConfigName()),
               persistentMap,
-              asyncWebClient,
+              webClient,
               orchestratorAuthHeader));
     }
 

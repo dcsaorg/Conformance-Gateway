@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -31,7 +30,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -96,12 +95,12 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName()),
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
-    asyncCounterpartPost(
+    syncCounterpartPost(
         "/%s/ebl-surrender-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         jsonRequestBody);
 
     addOperatorLogEntry(
-        "Sending surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s'"
+        "Sent surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s'"
             .formatted(src, srr, tdr));
   }
 

@@ -5,10 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -32,8 +28,6 @@ public class EblCarrier extends ConformanceParty {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Map<String, String> tdrToSir = new HashMap<>();
 
-  ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
   protected boolean isShipperNotificationEnabled = true;
 
   public EblCarrier(
@@ -41,7 +35,7 @@ public class EblCarrier extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -315,7 +309,7 @@ public class EblCarrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPostNotification("/v3/shipping-instructions-notifications", notification);
+      asyncCounterpartNotification("/v3/shipping-instructions-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
@@ -332,7 +326,7 @@ public class EblCarrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPostNotification("/v3/transport-document-notifications", notification);
+      asyncCounterpartNotification("/v3/transport-document-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
@@ -464,17 +458,13 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     var siData = si.getShippingInstructions();
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-        () ->
-          asyncCounterpartPostNotification(
-            "/v3/shipping-instructions-notifications",
-            ShippingInstructionsNotification.builder()
+      asyncCounterpartNotification(
+          "/v3/shipping-instructions-notifications",
+          ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(siData)
               .build()
-              .asJsonNode()),
-        100,
-        TimeUnit.MILLISECONDS);
+              .asJsonNode());
     }
     return returnShippingInstructionsRefStatusResponse(
       200,
@@ -498,17 +488,13 @@ public class EblCarrier extends ConformanceParty {
     si.save(persistentMap);
     var td = si.getTransportDocument().orElseThrow();
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-        () ->
-          asyncCounterpartPostNotification(
-            "/v3/transport-document-notifications",
-            TransportDocumentNotification.builder()
+      asyncCounterpartNotification(
+          "/v3/transport-document-notifications",
+          TransportDocumentNotification.builder()
               .apiVersion(apiVersion)
               .transportDocument(td)
               .build()
-              .asJsonNode()),
-        100,
-        TimeUnit.MILLISECONDS);
+              .asJsonNode());
     }
     return returnTransportDocumentRefStatusResponse(
       200,
@@ -578,17 +564,13 @@ public class EblCarrier extends ConformanceParty {
     var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload);
     si.save(persistentMap);
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-        () ->
-          asyncCounterpartPostNotification(
-            "/v3/shipping-instructions-notifications",
-            ShippingInstructionsNotification.builder()
+      asyncCounterpartNotification(
+          "/v3/shipping-instructions-notifications",
+          ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(si.getShippingInstructions())
               .build()
-              .asJsonNode()),
-        100,
-        TimeUnit.MILLISECONDS);
+              .asJsonNode());
     }
     return returnShippingInstructionsRefStatusResponse(
       201,
@@ -612,18 +594,15 @@ public class EblCarrier extends ConformanceParty {
       (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var si = CarrierShippingInstructions.fromPersistentStore(siData);
     si.putShippingInstructions(sir, updatedShippingInstructions);
+    si.save(persistentMap);
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-        () ->
-          asyncCounterpartPostNotification(
-            "/v3/shipping-instructions-notifications",
-            ShippingInstructionsNotification.builder()
+      asyncCounterpartNotification(
+          "/v3/shipping-instructions-notifications",
+          ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(si.getShippingInstructions())
               .build()
-              .asJsonNode()),
-        100,
-        TimeUnit.MILLISECONDS);
+              .asJsonNode());
     }
     return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
   }

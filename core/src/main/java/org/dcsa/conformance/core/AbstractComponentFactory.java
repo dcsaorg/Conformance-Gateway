@@ -2,7 +2,6 @@ package org.dcsa.conformance.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -12,14 +11,13 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
 public abstract class AbstractComponentFactory {
   public abstract List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader);
 
   public abstract ScenarioListBuilder<?> createScenarioListBuilder(

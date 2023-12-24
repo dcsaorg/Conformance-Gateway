@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -19,16 +18,16 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 
 @Slf4j
-public class Shipper extends ConformanceParty {
+public class BookingShipper extends ConformanceParty {
 
   private static final String SERVICE_CONTRACT_REF = "serviceContractReference";
   private static final String SERVICE_REF_PUT = "serviceRefPut";
-  public Shipper(
+  public BookingShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -74,7 +73,7 @@ public class Shipper extends ConformanceParty {
       ? Map.of("amendedContent", List.of("true"))
       : Collections.emptyMap();
 
-    asyncCounterpartGet("/v2/bookings/" + cbrr, queryParams);
+    syncCounterpartGet("/v2/bookings/" + cbrr, queryParams);
 
     addOperatorLogEntry("Sent a GET request for booking with CBRR: %s".formatted(cbrr));
   }
@@ -87,17 +86,14 @@ public class Shipper extends ConformanceParty {
 
     JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
 
-    asyncCounterpartPost(
-        "/v2/bookings",
-        jsonRequestBody,
-        conformanceResponse -> {
-          JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
-          String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
-          ObjectNode updatedBooking =
-                ((ObjectNode) jsonRequestBody)
-                  .put("carrierBookingRequestReference", cbrr);
-          persistentMap.save(cbrr, updatedBooking);
-        });
+    ConformanceResponse conformanceResponse = syncCounterpartPost("/v2/bookings", jsonRequestBody);
+
+    JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+    String cbrr = jsonBody.path("carrierBookingRequestReference").asText();
+    ObjectNode updatedBooking =
+      ((ObjectNode) jsonRequestBody)
+        .put("carrierBookingRequestReference", cbrr);
+    persistentMap.save(cbrr, updatedBooking);
 
     addOperatorLogEntry(
         "Sent a booking request with the parameters: %s"
@@ -133,7 +129,7 @@ public class Shipper extends ConformanceParty {
     log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
     Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelBooking"));
-    asyncCounterpartPatch(
+    syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
         queryParams,
         new ObjectMapper()
@@ -147,7 +143,7 @@ public class Shipper extends ConformanceParty {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
     Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelAmendment"));
-    asyncCounterpartPatch(
+    syncCounterpartPatch(
       "/v2/bookings/%s".formatted(cbrr),
       queryParams,
       new ObjectMapper()
@@ -163,7 +159,7 @@ public class Shipper extends ConformanceParty {
 
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
-    asyncCounterpartPut(
+    syncCounterpartPut(
       "/v2/bookings/%s".formatted(cbrr),bookingData);
 
     addOperatorLogEntry(
@@ -177,7 +173,7 @@ public class Shipper extends ConformanceParty {
 
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
-    asyncCounterpartPut(
+    syncCounterpartPut(
       "/v2/bookings/%s".formatted(cbrr),bookingData);
 
     addOperatorLogEntry(

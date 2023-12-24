@@ -5,12 +5,14 @@ import com.amazonaws.services.lambda.model.InvocationType;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class LambdaToolkit {
@@ -47,6 +49,13 @@ public class LambdaToolkit {
                   .withInvocationType(InvocationType.Event)
                   .withFunctionName(getDbConfigValue(persistenceProvider, "httpClientLambdaArn"))
                   .withPayload(httpClientLambdaEvent.toPrettyString()));
+    };
+  }
+
+  public static BiConsumer<String, ConformanceRequest> createAsyncSandboxOutboundRequestHandler(
+      ConformancePersistenceProvider persistenceProvider) {
+    return (sandboxId, conformanceRequest) -> {
+      throw new UnsupportedOperationException("TODO");
     };
   }
 }

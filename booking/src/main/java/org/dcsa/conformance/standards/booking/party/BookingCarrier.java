@@ -5,10 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -27,22 +23,21 @@ import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
 @Slf4j
-public class Carrier extends ConformanceParty {
+public class BookingCarrier extends ConformanceParty {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
   private static final Random RANDOM = new Random();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
   protected boolean isShipperNotificationEnabled = true;
 
-  public Carrier(
+  public BookingCarrier(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -287,7 +282,7 @@ public class Carrier extends ConformanceParty {
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
-      asyncCounterpartPostNotification("/v2/booking-notifications", notification);
+      asyncCounterpartNotification("/v2/booking-notifications", notification);
     } else {
       asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
@@ -411,17 +406,13 @@ public class Carrier extends ConformanceParty {
     var booking = persistableCarrierBooking.getBooking();
 
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-          () ->
-              asyncCounterpartPostNotification(
-                  "/v2/booking-notifications",
-                  BookingNotification.builder()
-                      .apiVersion(apiVersion)
-                      .booking(booking)
-                      .build()
-                      .asJsonNode()),
-          100,
-          TimeUnit.MILLISECONDS);
+      asyncCounterpartNotification(
+          "/v2/booking-notifications",
+          BookingNotification.builder()
+              .apiVersion(apiVersion)
+              .booking(booking)
+              .build()
+              .asJsonNode());
     }
     return returnBookingStatusResponse(200, request, booking, cbrr);
   }
@@ -455,6 +446,7 @@ public class Carrier extends ConformanceParty {
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
     }
+    persistableCarrierBooking.save(persistentMap);
 
     return returnBookingStatusResponse(
       200,
@@ -542,17 +534,13 @@ public class Carrier extends ConformanceParty {
     var persistableCarrierBooking = PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
     persistableCarrierBooking.save(persistentMap);
     if (isShipperNotificationEnabled) {
-      executor.schedule(
-          () ->
-              asyncCounterpartPostNotification(
-                  "/v2/booking-notifications",
-                  BookingNotification.builder()
-                      .apiVersion(apiVersion)
-                      .booking(persistableCarrierBooking.getBooking())
-                      .build()
-                      .asJsonNode()),
-          100,
-          TimeUnit.MILLISECONDS);
+      asyncCounterpartNotification(
+          "/v2/booking-notifications",
+          BookingNotification.builder()
+              .apiVersion(apiVersion)
+              .booking(persistableCarrierBooking.getBooking())
+              .build()
+              .asJsonNode());
     }
     return returnBookingStatusResponse(
       201,

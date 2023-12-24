@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ovs.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -23,7 +22,7 @@ public class OvsSubscriber extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -51,10 +50,10 @@ public class OvsSubscriber extends ConformanceParty {
   private void getSchedules(JsonNode actionPrompt) {
     log.info("OvsSubscriber.getSchedules(%s)".formatted(actionPrompt.toPrettyString()));
 
-    asyncCounterpartGet(
+    syncCounterpartGet(
         "/%s/service-schedules".formatted(apiVersion.startsWith("2") ? "v2" : "v3"), Map.ofEntries());
 
-    addOperatorLogEntry("Sending GET schedules request");
+    addOperatorLogEntry("Sent GET schedules request");
   }
 
   @Override

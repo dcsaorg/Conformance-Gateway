@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.tnt.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -23,7 +22,7 @@ public class TntSubscriber extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -51,10 +50,10 @@ public class TntSubscriber extends ConformanceParty {
   private void getEvents(JsonNode actionPrompt) {
     log.info("TntSubscriber.getEvents(%s)".formatted(actionPrompt.toPrettyString()));
 
-    asyncCounterpartGet(
+    syncCounterpartGet(
         "/%s/events".formatted(apiVersion.startsWith("2") ? "v2" : "v3"), Map.ofEntries());
 
-    addOperatorLogEntry("Sending GET events request");
+    addOperatorLogEntry("Sent GET events request");
   }
 
   @Override

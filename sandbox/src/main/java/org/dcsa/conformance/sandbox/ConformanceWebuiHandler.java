@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
@@ -28,6 +30,7 @@ public class ConformanceWebuiHandler {
   private final String environmentBaseUrl;
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<ConformanceWebRequest> asyncWebClient;
+  private final BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler;
 
   private final SortedMap<String, SortedMap<String, AbstractComponentFactory>> componentFactories =
       new TreeMap<>(
@@ -76,11 +79,13 @@ public class ConformanceWebuiHandler {
       ConformanceAccessChecker accessChecker,
       String environmentBaseUrl,
       ConformancePersistenceProvider persistenceProvider,
-      Consumer<ConformanceWebRequest> asyncWebClient) {
+      Consumer<ConformanceWebRequest> asyncWebClient,
+      BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler) {
     this.accessChecker = accessChecker;
     this.environmentBaseUrl = environmentBaseUrl;
     this.persistenceProvider = persistenceProvider;
     this.asyncWebClient = asyncWebClient;
+    this.asyncSandboxOutboundRequestHandler = asyncSandboxOutboundRequestHandler;
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
@@ -276,34 +281,33 @@ public class ConformanceWebuiHandler {
     ArrayNode standardsNode = objectMapper.createArrayNode();
     TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
     sortedStandardNames.addAll(componentFactories.keySet());
-    sortedStandardNames
-        .forEach(
-            standardName -> {
-              ObjectNode standardNode = objectMapper.createObjectNode().put("name", standardName);
-              {
-                ArrayNode versionsNode = objectMapper.createArrayNode();
-                standardNode.set("versions", versionsNode);
-                componentFactories
-                    .get(standardName)
-                    .keySet()
-                    .forEach(
-                        standardVersion -> {
-                          ObjectNode versionNode =
-                              objectMapper.createObjectNode().put("number", standardVersion);
-                          {
-                            ArrayNode rolesNode = objectMapper.createArrayNode();
-                            componentFactories
-                                .get(standardName)
-                                .get(standardVersion)
-                                .getRoleNames()
-                                .forEach(rolesNode::add);
-                            versionNode.set("roles", rolesNode);
-                          }
-                          versionsNode.add(versionNode);
-                        });
-              }
-              standardsNode.add(standardNode);
-            });
+    sortedStandardNames.forEach(
+        standardName -> {
+          ObjectNode standardNode = objectMapper.createObjectNode().put("name", standardName);
+          {
+            ArrayNode versionsNode = objectMapper.createArrayNode();
+            standardNode.set("versions", versionsNode);
+            componentFactories
+                .get(standardName)
+                .keySet()
+                .forEach(
+                    standardVersion -> {
+                      ObjectNode versionNode =
+                          objectMapper.createObjectNode().put("number", standardVersion);
+                      {
+                        ArrayNode rolesNode = objectMapper.createArrayNode();
+                        componentFactories
+                            .get(standardName)
+                            .get(standardVersion)
+                            .getRoleNames()
+                            .forEach(rolesNode::add);
+                        versionNode.set("roles", rolesNode);
+                      }
+                      versionsNode.add(versionNode);
+                    });
+          }
+          standardsNode.add(standardNode);
+        });
     return standardsNode;
   }
 
@@ -335,7 +339,8 @@ public class ConformanceWebuiHandler {
     boolean includeOperatorLog = requestNode.get("includeOperatorLog").asBoolean();
     if (includeOperatorLog) {
       ArrayNode operatorLog =
-          ConformanceSandbox.getOperatorLog(persistenceProvider, asyncWebClient, sandboxId);
+          ConformanceSandbox.getOperatorLog(
+              persistenceProvider, asyncWebClient, asyncSandboxOutboundRequestHandler, sandboxId);
       sandboxNode.set("operatorLog", operatorLog);
       sandboxNode.put("canNotifyParty", operatorLog != null);
     }
@@ -345,14 +350,16 @@ public class ConformanceWebuiHandler {
   private JsonNode _notifyParty(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
-    ConformanceSandbox.notifyParty(persistenceProvider, asyncWebClient, sandboxId);
+    ConformanceSandbox.notifyParty(
+        persistenceProvider, asyncWebClient, asyncSandboxOutboundRequestHandler, sandboxId);
     return new ObjectMapper().createObjectNode();
   }
 
   private JsonNode _resetParty(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
-    ConformanceSandbox.resetParty(persistenceProvider, asyncWebClient, sandboxId);
+    ConformanceSandbox.resetParty(
+        persistenceProvider, asyncWebClient, asyncSandboxOutboundRequestHandler, sandboxId);
     return new ObjectMapper().createObjectNode();
   }
 

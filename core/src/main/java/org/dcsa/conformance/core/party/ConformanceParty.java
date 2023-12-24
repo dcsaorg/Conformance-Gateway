@@ -10,7 +10,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
@@ -18,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
+import org.dcsa.conformance.core.toolkit.HttpToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -38,7 +38,7 @@ public abstract class ConformanceParty implements StatefulEntity {
    */
   protected final JsonNodeMap persistentMap;
 
-  private final BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient;
+  private final Consumer<ConformanceRequest> asyncWebClient;
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
@@ -50,7 +50,7 @@ public abstract class ConformanceParty implements StatefulEntity {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     this.apiVersion = apiVersion;
     this.partyConfiguration = partyConfiguration;
@@ -141,135 +141,66 @@ public abstract class ConformanceParty implements StatefulEntity {
                 "orchestrator",
                 orchestratorAuthHeader,
                 new ConformanceMessageBody(jsonPartyInput),
-                System.currentTimeMillis())),
-        conformanceResponse -> {});
+                System.currentTimeMillis())));
   }
 
-  protected void asyncCounterpartGet(String path) {
-    asyncCounterpartGet(path, conformanceResponse -> {});
-  }
-
-  protected void asyncCounterpartGet(
+  protected void syncCounterpartGet(
       String path, Map<String, ? extends Collection<String>> queryParams) {
-    asyncCounterpartGet(path, queryParams, conformanceResponse -> {});
+    HttpToolkit.syncHttpRequest(_createConformanceRequest(false, "GET", path, queryParams, null));
   }
 
-  protected void asyncCounterpartGet(String path, Consumer<ConformanceResponse> responseCallback) {
-    asyncCounterpartGet(path, Collections.emptyMap(), responseCallback);
-  }
-
-  protected void asyncCounterpartGet(
-      String path,
-      Map<String, ? extends Collection<String>> queryParams,
-      Consumer<ConformanceResponse> responseCallback) {
-    String apiVersionHeaderValue = apiVersion.split("\\.")[0];
-    asyncWebClient.accept(
-        new ConformanceRequest(
-            "GET",
-            counterpartConfiguration.getUrl() + path,
-            queryParams,
-            new ConformanceMessage(
-                partyConfiguration.getName(),
-                partyConfiguration.getRole(),
-                counterpartConfiguration.getName(),
-                counterpartConfiguration.getRole(),
-                counterpartConfiguration.getAuthHeaderName().isBlank()
-                    ? Map.of("Api-Version", List.of(apiVersionHeaderValue))
-                    : Map.of(
-                        "Api-Version",
-                        List.of(apiVersionHeaderValue),
-                        counterpartConfiguration.getAuthHeaderName(),
-                        List.of(counterpartConfiguration.getAuthHeaderValue())),
-                new ConformanceMessageBody(""),
-                System.currentTimeMillis())),
-        responseCallback);
-  }
-
-  protected void asyncCounterpartPatch(String path, JsonNode jsonBody) {
-    asyncCounterpartPatch(path, jsonBody, conformanceResponse -> {});
-  }
-
-  protected void asyncCounterpartPatch(
+  protected void syncCounterpartPatch(
       String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
-    asyncCounterpartPatch(path, queryParams, jsonBody, conformanceResponse -> {});
+    HttpToolkit.syncHttpRequest(
+        _createConformanceRequest(false, "PATCH", path, queryParams, jsonBody));
   }
 
-  protected void asyncCounterpartPost(String path, JsonNode jsonBody) {
-    asyncCounterpartPost(path, jsonBody, conformanceResponse -> {});
+  protected ConformanceResponse syncCounterpartPost(String path, JsonNode jsonBody) {
+    return HttpToolkit.syncHttpRequest(
+        _createConformanceRequest(false, "POST", path, Collections.emptyMap(), jsonBody));
   }
 
-  protected void asyncCounterpartPostNotification(String path, JsonNode jsonBody) {
-    asyncCounterpartPostNotification(path, jsonBody, conformanceResponse -> {});
+  protected ConformanceResponse syncCounterpartPut(String path, JsonNode jsonBody) {
+    return HttpToolkit.syncHttpRequest(
+        _createConformanceRequest(false, "PUT", path, Collections.emptyMap(), jsonBody));
   }
 
-  protected void asyncCounterpartPut(String path, JsonNode jsonBody) {
-    asyncCounterpartPut(path, jsonBody, conformanceResponse -> {});
+  protected void asyncCounterpartNotification(String path, JsonNode jsonBody) {
+    asyncWebClient.accept(
+        _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
   }
 
-  protected void asyncCounterpartPatch(
-      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut(
-        "PATCH", path, Collections.emptyMap(), jsonBody, responseCallback, false);
-  }
-
-  protected void asyncCounterpartPatch(
-      String path,
-      Map<String, ? extends Collection<String>> queryParams,
-      JsonNode jsonBody,
-      Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut("PATCH", path, queryParams, jsonBody, responseCallback, false);
-  }
-
-  protected void asyncCounterpartPost(
-      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut(
-        "POST", path, Collections.emptyMap(), jsonBody, responseCallback, false);
-  }
-
-  protected void asyncCounterpartPostNotification(
-      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut(
-        "POST", path, Collections.emptyMap(), jsonBody, responseCallback, true);
-  }
-
-  protected void asyncCounterpartPut(
-      String path, JsonNode jsonBody, Consumer<ConformanceResponse> responseCallback) {
-    _asyncCounterpartPatchPostOrPut(
-        "PUT", path, Collections.emptyMap(), jsonBody, responseCallback, false);
-  }
-
-  private void _asyncCounterpartPatchPostOrPut(
+  private ConformanceRequest _createConformanceRequest(
+      boolean withFullApiVersionHeader,
       String method,
       String path,
       Map<String, ? extends Collection<String>> queryParams,
-      JsonNode jsonBody,
-      Consumer<ConformanceResponse> responseCallback,
-      boolean withFullApiVersionHeader) {
+      JsonNode jsonBody) {
     String apiVersionHeaderValue =
         withFullApiVersionHeader ? apiVersion : apiVersion.split("\\.")[0];
-    asyncWebClient.accept(
-        new ConformanceRequest(
-            method,
-            counterpartConfiguration.getUrl() + path,
-            queryParams,
-            new ConformanceMessage(
-                partyConfiguration.getName(),
-                partyConfiguration.getRole(),
-                counterpartConfiguration.getName(),
-                counterpartConfiguration.getRole(),
-                counterpartConfiguration.getAuthHeaderName().isBlank()
-                    ? Map.ofEntries(
-                        Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
-                        Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
-                    : Map.ofEntries(
-                        Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
-                        Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
-                        Map.entry(
-                            counterpartConfiguration.getAuthHeaderName(),
-                            List.of(counterpartConfiguration.getAuthHeaderValue()))),
-                new ConformanceMessageBody(jsonBody),
-                System.currentTimeMillis())),
-        responseCallback);
+    return new ConformanceRequest(
+        method,
+        counterpartConfiguration.getUrl() + path,
+        queryParams,
+        new ConformanceMessage(
+            partyConfiguration.getName(),
+            partyConfiguration.getRole(),
+            counterpartConfiguration.getName(),
+            counterpartConfiguration.getRole(),
+            counterpartConfiguration.getAuthHeaderName().isBlank()
+                ? Map.ofEntries(
+                    Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
+                    Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
+                : Map.ofEntries(
+                    Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
+                    Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
+                    Map.entry(
+                        counterpartConfiguration.getAuthHeaderName(),
+                        List.of(counterpartConfiguration.getAuthHeaderValue()))),
+            jsonBody == null
+                ? new ConformanceMessageBody("")
+                : new ConformanceMessageBody(jsonBody),
+            System.currentTimeMillis()));
   }
 
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);

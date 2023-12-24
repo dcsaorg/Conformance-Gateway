@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -26,7 +25,7 @@ public class EblShipper extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -90,17 +89,14 @@ public class EblShipper extends ConformanceParty {
               Map.entry("SERVICE_CONTRACT_REFERENCE_PLACEHOLDER", carrierScenarioParameters.serviceContractReference())
               ));
 
-    asyncCounterpartPost(
-      "/v3/shipping-instructions",
-      jsonRequestBody,
-      conformanceResponse -> {
-        JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
-        String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
-        ObjectNode updatedShippingInstructions =
-          ((ObjectNode) jsonRequestBody)
-            .put("shippingInstructionsReference", shippingInstructionsReference);
-        persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
-      });
+    ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", jsonRequestBody);
+
+    JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+    String shippingInstructionsReference = jsonBody.path("shippingInstructionsReference").asText();
+    ObjectNode updatedShippingInstructions =
+      ((ObjectNode) jsonRequestBody)
+        .put("shippingInstructionsReference", shippingInstructionsReference);
+    persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
 
     addOperatorLogEntry(
       "Sent a booking request with the parameters: %s"
@@ -120,15 +116,12 @@ public class EblShipper extends ConformanceParty {
     }
     ((ObjectNode)pcd).put("name", newName);
 
-    asyncCounterpartPut(
-      "/v3/shipping-instructions/%s".formatted(sir),
-      si,
-      conformanceResponse -> {
-        JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
-        String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
-        ObjectNode updatedBooking = si.put("shippingInstructionsStatus", shippingInstructionsStatus);
-        persistentMap.save(sir, updatedBooking);
-      });
+    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(sir), si);
+
+    JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
+    String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
+    ObjectNode updatedBooking = si.put("shippingInstructionsStatus", shippingInstructionsStatus);
+    persistentMap.save(sir, updatedBooking);
 
     addOperatorLogEntry(
       "Sent a shipping instructions update with the parameters: %s"
@@ -142,8 +135,9 @@ public class EblShipper extends ConformanceParty {
     var approvePayload = new ObjectMapper().createObjectNode()
       .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
-    asyncCounterpartPatch(
+    syncCounterpartPatch(
       "/v3/shipping-instructions/%s".formatted(documentReference),
+      Collections.emptyMap(),
       approvePayload);
 
     addOperatorLogEntry(
@@ -158,8 +152,9 @@ public class EblShipper extends ConformanceParty {
     var approvePayload = new ObjectMapper().createObjectNode()
       .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
-    asyncCounterpartPatch(
+    syncCounterpartPatch(
       "/v3/transport-documents/%s".formatted(documentReference),
+      Collections.emptyMap(),
       approvePayload);
 
     addOperatorLogEntry(
@@ -176,11 +171,7 @@ public class EblShipper extends ConformanceParty {
       ? Map.of("amendedContent", List.of("true"))
       : Collections.emptyMap();
 
-    asyncCounterpartGet(
-        "/v3/shipping-instructions/" + sir,
-        queryParams,
-        conformanceResponse ->
-            log.info("GET SI returned: " + conformanceResponse.toJson().toPrettyString()));
+    syncCounterpartGet("/v3/shipping-instructions/" + sir, queryParams);
 
     addOperatorLogEntry("Sent a GET request for shipping instructions with SIR: %s".formatted(sir));
   }
@@ -189,10 +180,7 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
 
-    asyncCounterpartGet(
-        "/v3/transport-documents/" + tdr,
-        conformanceResponse ->
-            log.info("GET TD returned: " + conformanceResponse.toJson().toPrettyString()));
+    syncCounterpartGet("/v3/transport-documents/" + tdr, Collections.emptyMap());
 
     addOperatorLogEntry("Sent a GET request for transport document with TDR: %s".formatted(tdr));
   }

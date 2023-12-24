@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class EblIssuancePlatform extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -93,7 +92,7 @@ public class EblIssuancePlatform extends ConformanceParty {
       }
     }
 
-    asyncCounterpartPost(
+    syncCounterpartPost(
         "/%s/ebl-issuance-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         objectMapper
             .createObjectNode()
@@ -101,7 +100,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             .put("issuanceResponseCode", irc));
 
     addOperatorLogEntry(
-        "Sending issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
+        "Sent issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
             .formatted(irc, tdr));
   }
 

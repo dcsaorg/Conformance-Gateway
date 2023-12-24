@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
@@ -139,7 +138,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     if ("*".equals(srr)) {
       srr = UUID.randomUUID().toString();
     }
-    asyncCounterpartPost(
+    syncCounterpartPost(
         "/%s/ebl-surrender-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
         objectMapper
             .createObjectNode()
@@ -148,7 +147,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
     addOperatorLogEntry(
         "%s surrender request with surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(accept ? "Accepting" : "Rejecting", srr, tdr, eblStatesById.get(tdr)));
+            .formatted(accept ? "Accepted" : "Rejected", srr, tdr, eblStatesById.get(tdr)));
   }
 
   @Override

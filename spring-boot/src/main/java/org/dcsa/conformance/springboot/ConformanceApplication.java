@@ -12,6 +12,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.sandbox.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
@@ -78,6 +83,9 @@ public class ConformanceApplication {
                         "ConformanceApplication.asyncWebClient() exception: %s".formatted(e), e);
                     return null;
                   });
+
+  ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+  private final BiConsumer<String, ConformanceRequest> asyncSandboxOutboundRequestHandler;
 
   private final ConformanceAccessChecker accessChecker =
       new ConformanceAccessChecker() {
@@ -153,6 +161,13 @@ public class ConformanceApplication {
           new ConformancePersistenceProvider(
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
+    asyncSandboxOutboundRequestHandler =
+        (sandboxId, conformanceRequest) -> executor.schedule(
+            () ->
+                ConformanceSandbox.syncHandleOutboundRequest(
+                    persistenceProvider, asyncWebClient, sandboxId, conformanceRequest),
+            100,
+            TimeUnit.MILLISECONDS);
 
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
@@ -220,7 +235,11 @@ public class ConformanceApplication {
         "application/json;charset=utf-8",
         Collections.emptyMap(),
         new ConformanceWebuiHandler(
-                accessChecker, "http://localhost:8080", persistenceProvider, asyncWebClient)
+                accessChecker,
+                "http://localhost:8080",
+                persistenceProvider,
+                asyncWebClient,
+                asyncSandboxOutboundRequestHandler)
             .handleRequest(
                 "spring-boot-env", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
             .toPrettyString());
@@ -259,7 +278,8 @@ public class ConformanceApplication {
                 _getQueryParameters(servletRequest),
                 requestHeaders,
                 _getRequestBody(servletRequest)),
-            asyncWebClient);
+            asyncWebClient,
+            asyncSandboxOutboundRequestHandler);
 
     _writeResponse(
         servletResponse,

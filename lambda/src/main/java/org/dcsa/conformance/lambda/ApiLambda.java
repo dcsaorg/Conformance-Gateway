@@ -42,7 +42,8 @@ public class ApiLambda
                       event.getMultiValueQueryStringParameters(), Collections.emptyMap()),
                   event.getMultiValueHeaders(),
                   event.getBody()),
-              LambdaToolkit.createAsyncWebClient(persistenceProvider));
+              LambdaToolkit.createAsyncWebClient(persistenceProvider),
+              LambdaToolkit.createAsyncSandboxOutboundRequestHandler(persistenceProvider));
 
       Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();
       responseHeaders.put("Content-Type", List.of(conformanceWebResponse.contentType()));

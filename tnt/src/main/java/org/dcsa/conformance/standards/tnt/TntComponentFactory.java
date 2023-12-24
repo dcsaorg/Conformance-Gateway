@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.tnt;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,7 +15,6 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
-import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.party.TntPublisher;
 import org.dcsa.conformance.standards.tnt.party.TntRole;
@@ -43,7 +41,7 @@ public class TntComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
       JsonNodeMap persistentMap,
-      BiConsumer<ConformanceRequest, Consumer<ConformanceResponse>> asyncWebClient,
+      Consumer<ConformanceRequest> asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     Map<String, PartyConfiguration> partyConfigurationsByRoleName =
         Arrays.stream(partyConfigurations)

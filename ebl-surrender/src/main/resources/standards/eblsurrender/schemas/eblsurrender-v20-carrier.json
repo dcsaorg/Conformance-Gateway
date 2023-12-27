@@ -366,8 +366,8 @@
       },
       "partyCodes_inner": {
         "required": [
-          "partyCode",
-          "partyCodeListProvider"
+          "codeListProvider",
+          "partyCode"
         ],
         "type": "object",
         "properties": {
@@ -379,7 +379,7 @@
             "description": "Code to identify the party as provided by the `partyCodeListProvider` and `codeListName`\n",
             "example": "529900T8BM49AURSDO55"
           },
-          "partyCodeListProvider": {
+          "codeListProvider": {
             "type": "string",
             "description": "Describes the organisation that provides the party code.\n\n - `EPUI`:The party code is an EBL Platform User Identifier (that is, an identifier provided by a platform, used to transfer eBLs). EPIU should be combined with the `codeListName`, to identify the platform that issued the identifier.\n - `GLEIF`: The party code is issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en. The `codeNameList` (if omitted) defaults to `LEI`.\n - `W3C`: The party code is issued by a standard created by World Wide Web Consortium (W3C). See https://www.w3.org/. The `codeNameList` (if omitted) defaults to `DID`.\n",
             "example": "EPIU",

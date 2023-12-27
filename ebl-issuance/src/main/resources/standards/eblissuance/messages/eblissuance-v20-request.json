@@ -52,7 +52,7 @@
     "partyCodes": [
       {
         "partyCode": "PARTY_CODE_PLACEHOLDER",
-        "partyCodeListProvider": "EPUI",
+        "codeListProvider": "EPUI",
         "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
       }
     ]

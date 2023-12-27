@@ -131,7 +131,7 @@ public class SurrenderRequestAction extends EblSurrenderAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 JsonPointer.compile("/transportDocumentReference"),
-                sspSupplier.get().transportDocumentReference()));
+                sspSupplier.get() == null ? null : sspSupplier.get().transportDocumentReference()));
       }
     };
   }

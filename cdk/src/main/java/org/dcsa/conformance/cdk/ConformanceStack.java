@@ -158,7 +158,6 @@ public class ConformanceStack extends Stack {
                 .reservedConcurrentExecutions(16)
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());
-    table.grantReadWriteData(apiLambda);
 
     Function webuiLambda =
         new Function(
@@ -174,7 +173,6 @@ public class ConformanceStack extends Stack {
                 .reservedConcurrentExecutions(16)
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());
-    table.grantReadWriteData(webuiLambda);
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(
@@ -188,15 +186,16 @@ public class ConformanceStack extends Stack {
                             .resources(List.of(sandboxTaskLambda.getFunctionArn()))
                             .build()))
                 .build());
-    Stream.of(apiLambda, webuiLambda)
-        .forEach(
-            lambda ->
-                Objects.requireNonNull(lambda.getRole())
-                    .attachInlinePolicy(invokeSandboxTaskLambdaPolicy));
 
     Stream.of(sandboxTaskLambda, apiLambda, webuiLambda)
         .forEach(
             lambda -> {
+              table.grantReadWriteData(lambda);
+              lambda.addEnvironment("TABLE_NAME", tableName);
+
+              Objects.requireNonNull(lambda.getRole())
+                  .attachInlinePolicy(invokeSandboxTaskLambdaPolicy);
+
               Objects.requireNonNull(lambda.getRole())
                   .addManagedPolicy(
                       ManagedPolicy.fromAwsManagedPolicyName(
@@ -205,8 +204,6 @@ public class ConformanceStack extends Stack {
                   LayerVersion.fromLayerVersionArn(
                       this, lambda.getFunctionName() + "-insights-layer", lambdaInsightsArn));
             });
-    Stream.of(apiLambda, webuiLambda)
-        .forEach(lambda -> lambda.addEnvironment("TABLE_NAME", tableName));
 
     String lambdaRestApiUrl = "%s-api.%s".formatted(prefix, hostedZoneName);
     LambdaRestApi lambdaRestApi =

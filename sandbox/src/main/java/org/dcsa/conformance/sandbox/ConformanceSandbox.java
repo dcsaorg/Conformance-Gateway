@@ -543,7 +543,7 @@ public class ConformanceSandbox {
     } catch (Exception e) {
       log.error(
           "Deferred task execution failed: %s"
-              .formatted(jsonNode == null ? null : jsonNode.toPrettyString()));
+              .formatted(jsonNode == null ? null : jsonNode.toPrettyString()), e);
     }
   }
 

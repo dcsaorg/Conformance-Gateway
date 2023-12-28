@@ -6,11 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
+@Slf4j
 public abstract class ConformanceAction implements StatefulEntity {
   private final String sourcePartyName;
   private final String targetPartyName;
@@ -88,14 +90,45 @@ public abstract class ConformanceAction implements StatefulEntity {
   public final boolean handleExchange(ConformanceExchange exchange) {
     String exchangeSourcePartyName = exchange.getRequest().message().sourcePartyName();
     if (Objects.equals(exchangeSourcePartyName, sourcePartyName)) {
+      log.info(
+          "ConformanceAction.handleExchange() %s '%s' handling regular exchange: %s"
+              .formatted(
+                  getClass().getSimpleName(),
+                  getActionTitle(),
+                  exchange.toJson().toPrettyString()));
       matchedExchangeUuid = exchange.getUuid();
       doHandleExchange(exchange);
     } else if (Objects.equals(exchangeSourcePartyName, targetPartyName)) {
+      log.info(
+          "ConformanceAction.handleExchange() %s '%s' handling notification exchange: %s"
+              .formatted(
+                  getClass().getSimpleName(),
+                  getActionTitle(),
+                  exchange.toJson().toPrettyString()));
       matchedNotificationExchangeUuid = exchange.getUuid();
       doHandleNotificationExchange(exchange);
+    } else {
+      log.info(
+          "ConformanceAction.handleExchange() %s '%s' ignoring exchange: %s"
+              .formatted(
+                  getClass().getSimpleName(),
+                  getActionTitle(),
+                  exchange.toJson().toPrettyString()));
     }
-    return matchedExchangeUuid != null
-        && (matchedNotificationExchangeUuid != null || !expectsNotificationExchange());
+
+    boolean allHandled =
+        matchedExchangeUuid != null
+            && (matchedNotificationExchangeUuid != null || !expectsNotificationExchange());
+    log.info(
+      "ConformanceAction.handleExchange() %s '%s' matchedExchangeUuid='%s' matchedNotificationExchangeUuid='%s' expectsNotificationExchange='%s' allHandled='%s'"
+        .formatted(
+          getClass().getSimpleName(),
+          getActionTitle(),
+          matchedExchangeUuid,
+          matchedNotificationExchangeUuid,
+          expectsNotificationExchange(),
+          allHandled));
+    return allHandled;
   }
 
   protected void doHandleExchange(ConformanceExchange exchange) {}

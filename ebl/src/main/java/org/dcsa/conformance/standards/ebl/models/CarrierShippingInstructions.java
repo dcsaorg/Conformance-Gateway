@@ -76,7 +76,6 @@ public class CarrierShippingInstructions {
     Map.entry("ONE", new VesselDetails("9865879", "CONFIDENCE")),
     Map.entry("YML", new VesselDetails("9757228", "YM WARRANTY")),
     Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON"))
-
   );
 
   private static JsonNode issuingCarrier(String name, String smdgCode) {
@@ -485,6 +484,9 @@ public class CarrierShippingInstructions {
 
   private void fixupConsignmentItems(ObjectNode transportDocument, ScenarioType scenarioType) {
     for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
+      if (consignmentItemNode instanceof ObjectNode consignmentItem) {
+        consignmentItem.remove("commoditySubreference");
+      }
       for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
         var outerPackagingNode = cargoItemNode.path("outerPackaging");
         if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {

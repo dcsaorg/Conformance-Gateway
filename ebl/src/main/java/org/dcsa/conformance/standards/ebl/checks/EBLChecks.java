@@ -316,6 +316,11 @@ public class EBLChecks {
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
     JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'commoditySubreference' must not be present in the transport document",
+      (mav) -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
+      JsonAttribute.matchedMustBeAbsent()
+    ),
+    JsonAttribute.allIndividualMatchesMustBeValid(
       "DangerousGoods implies packagingCode or imoPackagingCode",
       mav -> mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").submitPath(),
       (nodeToValidate, contextPath) -> {

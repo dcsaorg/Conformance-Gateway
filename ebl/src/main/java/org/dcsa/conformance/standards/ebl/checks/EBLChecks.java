@@ -384,17 +384,20 @@ public class EBLChecks {
     };
   }
 
-  private static void generateCSPRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier) {
+  private static void generateCSPRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, boolean isTD) {
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'carrierBookingReference' is used",
       mav -> mav.path("consignmentItems").all().path("carrierBookingReference").submitPath(),
       JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
-    checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-      "[Scenario] Verify that the correct 'commoditySubreference' is used",
-      mav -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
-      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))
-    ));
+    if (!isTD) {
+      checks.add(
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "[Scenario] Verify that the correct 'commoditySubreference' is used",
+              mav -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
+              JsonAttribute.matchedMustEqual(
+                  cspValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))));
+    }
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'equipmentReference' is used",
       mav -> {
@@ -433,7 +436,7 @@ public class EBLChecks {
 
   public static ActionCheck siRequestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
-    generateCSPRelatedChecks(checks, cspSupplier);
+    generateCSPRelatedChecks(checks, cspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -461,7 +464,7 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
-    generateCSPRelatedChecks(checks, cspSupplier);
+    generateCSPRelatedChecks(checks, cspSupplier, true);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,

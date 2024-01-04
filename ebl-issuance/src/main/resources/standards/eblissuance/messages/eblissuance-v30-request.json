@@ -40,7 +40,6 @@
         "HSCodes": [
           "640510"
         ],
-        "commoditySubreference": "Some Commodity Subreference 123",
         "cargoItems": [
           {
             "equipmentReference": "NARU3472484",

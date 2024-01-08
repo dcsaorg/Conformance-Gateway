@@ -11,7 +11,8 @@ public record CarrierScenarioParameters(
   String invoicePayableAtUNLocationCode,
   String consignmentItemHSCode,
   String descriptionOfGoods,
-  String serviceContractReference
+  String serviceContractReference,
+  String contractQuotationReference
   ) {
   public ObjectNode toJson() {
     return new ObjectMapper()
@@ -22,7 +23,8 @@ public record CarrierScenarioParameters(
         .put("invoicePayableAtUNLocationCode", invoicePayableAtUNLocationCode)
         .put("consignmentItemHSCode", consignmentItemHSCode)
         .put("descriptionOfGoods", descriptionOfGoods)
-        .put("serviceContractReference", serviceContractReference);
+        .put("serviceContractReference", serviceContractReference)
+        .put("contractQuotationReference", contractQuotationReference);
   }
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
@@ -33,7 +35,8 @@ public record CarrierScenarioParameters(
       jsonNode.required("invoicePayableAtUNLocationCode").asText(),
       jsonNode.required("consignmentItemHSCode").asText(),
       jsonNode.required("descriptionOfGoods").asText(),
-      jsonNode.required("serviceContractReference").asText()
+      jsonNode.required("serviceContractReference").asText(),
+      jsonNode.required("contractQuotationReference").asText()
     );
   }
 }

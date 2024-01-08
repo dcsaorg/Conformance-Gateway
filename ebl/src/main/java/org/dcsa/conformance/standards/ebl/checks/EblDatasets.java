@@ -41,6 +41,7 @@ public class EblDatasets {
     "CA/ACI"
   );
   public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v3.0.0-b1.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/taxandlegalreferences-v3.0.0-b1.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
   public static final KeywordDataset CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/customsreferences-v3.0.0-b1.csv", "/", "Customs Reference Country Code", "Customs Reference Type Code");
 
   public static final KeywordDataset OUTER_PACKAGING_CODE = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/rec21_Rev12e_Annex-V-VI_2021.csv", "Code");

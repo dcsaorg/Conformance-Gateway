@@ -98,6 +98,27 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation presenceImpliesOtherField(
+    @NonNull
+    String sourceFieldName,
+    @NonNull
+    String impliedFieldName
+  ) {
+    return (JsonNode nodeToValidate, String contextPath) -> {
+      var sourceField = nodeToValidate.path(sourceFieldName);
+      var impliedField = nodeToValidate.path(impliedFieldName);
+      if (sourceField.isMissingNode() || !impliedField.isMissingNode()) {
+        return Set.of();
+      }
+
+      return Set.of("The field '%s.%s' being present makes '%s.%s' mandatory".formatted(
+        contextPath,
+        sourceFieldName,
+        contextPath,
+        impliedFieldName
+      ));
+    };
+  }
   public static JsonContentCheck allIndividualMatchesMustBeValid(
     @NonNull
     String name,

@@ -34,11 +34,16 @@ public class EblDatasets {
   public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/inhalationzones.csv");
   public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/segregationgroups.csv");
 
+  public static final KeywordDataset ISO_3166_ALPHA2_COUNTRY_CODES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/country-codes-iso3166-alpha2.csv", "Code");
+
   public static final KeywordDataset AMF_CC_MTC_REQUIRES_SELF_FILER_CODE = KeywordDataset.staticDataset(
     "US/ACE",
     "CA/ACI"
   );
-  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v300.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v3.0.0-b1.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/customsreferences-v3.0.0-b1.csv", "/", "Customs Reference Country Code", "Customs Reference Type Code");
+
+  public static final KeywordDataset OUTER_PACKAGING_CODE = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/rec21_Rev12e_Annex-V-VI_2021.csv", "Code");
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

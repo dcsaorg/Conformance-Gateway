@@ -60,6 +60,43 @@ public class EBLChecks {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
+  private static JsonContentMatchedValidation combineAndValidateAgainstDataset(
+    KeywordDataset dataset,
+    String nameA,
+    String nameB
+  ) {
+    return (nodeToValidate, contextPath) -> {
+      var codeA = nodeToValidate.path(nameA).asText("");
+      var codeB = nodeToValidate.path(nameB).asText("");
+      var combined = codeA + "/" + codeB;
+      if (!dataset.contains(combined)) {
+        return Set.of(
+          "The combination of '%s' ('%s') and '%s' ('%s') used in '%s' is not known to be a valid combination.".
+            formatted(codeA, nameA, codeB, nameB, contextPath)
+        );
+      }
+      return Set.of();
+    };
+  }
+
+  private static final JsonContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
+    (mav) -> {
+      mav.submitAllMatching("issuingParty.taxLegalReferences.*");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
+    },
+    combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+   );
+
+  private static final JsonContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Each document party can be used at most once",
+    (mav) -> {
+      mav.submitAllMatching("issuingParty.taxLegalReferences");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences");
+    },
+    JsonAttribute.unique("countryCode", "type")
+  );
+
 
   private static final Consumer<MultiAttributeValidator> ALL_UTE = (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
@@ -140,18 +177,8 @@ public class EBLChecks {
   private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     ALL_AMF,
-    (nodeToValidate, contextPath) -> {
-      var country = nodeToValidate.path("countryCode").asText("");
-      var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
-      var combined = country + "/" + manifestTypeCode;
-      if (!EblDatasets.AMF_CC_MTC_COMBINATIONS.contains(combined)) {
-        return Set.of(
-          "The combination of '%s' ('countryCounty') and '%s' ('manifestTypeCode') used in '%s' is not known to be a valid combination.".
-            formatted(country, manifestTypeCode, contextPath)
-        );
-      }
-      return Set.of();
-    });
+    combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  );
 
   private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
     mav.submitAllMatching("customsReferences.*");
@@ -163,18 +190,8 @@ public class EBLChecks {
   private static final JsonContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
     ALL_CUSTOMS_REFERENCES,
-    (nodeToValidate, contextPath) -> {
-      var country = nodeToValidate.path("countryCode").asText("");
-      var type = nodeToValidate.path("type").asText("");
-      var combined = country + "/" + type;
-      if (!EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS.contains(combined)) {
-        return Set.of(
-          "The combination of '%s' ('countryCounty') and '%s' ('type') used in '%s' is not known to be a valid combination.".
-            formatted(country, type, contextPath)
-        );
-      }
-      return Set.of();
-    });
+    combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
+  );
 
   private static final JsonContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
@@ -184,25 +201,7 @@ public class EBLChecks {
       mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences");
       mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences");
     },
-    (nodeToValidate, contextPath) -> {
-       var seen = new HashSet<String>();
-      var duplicates = new LinkedHashSet<String>();
-
-      for (var cr : nodeToValidate) {
-        var cc = cr.path("countryCode").asText(null);
-        var type = cr.path("type").asText(null);
-        if (cc == null || type == null) {
-          continue;
-        }
-        var combined = cc + "/" + type;
-        if (!seen.add(combined)) {
-          duplicates.add(combined);
-        }
-      }
-      return duplicates.stream()
-        .map("The countryCode/type combination '%s' was used more than once in 'customsReferences'"::formatted)
-        .collect(Collectors.toSet());
-    }
+    JsonAttribute.unique("countryCode", "type")
   );
 
   private static final JsonContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -224,6 +223,13 @@ public class EBLChecks {
     (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.packageCode"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.OUTER_PACKAGING_CODE)
   );
+
+  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+    "Each document party can be used at most once",
+    JsonAttribute.path(
+      "documentParties",
+      JsonAttribute.unique("partyFunction")
+    ));
 
   private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
     "Validate documentParties",
@@ -254,12 +260,16 @@ public class EBLChecks {
         }
       }
 
-      if (!partyFunctions.contains("SCO") && !body.path("serviceContractReference").isTextual()) {
-        issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
+      if (!partyFunctions.contains("SCO")) {
+        if (!body.path("serviceContractReference").isTextual()) {
+          issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
+        }
+        if (!body.path("contractQuotationReference").isTextual()) {
+          issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
+        }
       }
       return issues;
-    }
-  );
+  });
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
@@ -482,27 +492,9 @@ public class EBLChecks {
       RATIO_VOLUME
     ));
 
-
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
-    (body) -> {
-      var seen = new HashSet<String>();
-      var duplicates = new LinkedHashSet<String>();
-      for (var amf : body.path("advanceManifestFilings")) {
-        var cc = amf.path("countryCode").asText(null);
-        var mtc = amf.path("manifestTypeCode").asText(null);
-        if (cc == null || mtc == null) {
-          continue;
-        }
-        var combined = cc + "/" + mtc;
-        if (!seen.add(combined)) {
-          duplicates.add(combined);
-        }
-      }
-      return duplicates.stream()
-        .map("The countryCode/manifestTypeCode combination '%s' was used more than once in 'advanceManifestFilings'"::formatted)
-        .collect(Collectors.toSet());
-    }
+    JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
@@ -534,6 +526,9 @@ public class EBLChecks {
     VOLUME_IMPLIES_VOLUME_UNIT,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
+    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_CC_T_COMBINATION_UNIQUE,
+    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     VALIDATE_DOCUMENT_PARTIES
   );
 
@@ -651,6 +646,9 @@ public class EBLChecks {
         RATIO_VOLUME
       )
     ),
+    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_CC_T_COMBINATION_UNIQUE,
+    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     VALIDATE_DOCUMENT_PARTIES
   );
 
@@ -719,6 +717,11 @@ public class EBLChecks {
       "[Scenario] Verify that the correct 'serviceContractReference' is used",
       "serviceContractReference",
       cspValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
+    ));
+    checks.add(JsonAttribute.mustEqual(
+      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
+      "contractQuotationReference",
+      cspValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
     ));
 
     checks.add(JsonAttribute.mustEqual(

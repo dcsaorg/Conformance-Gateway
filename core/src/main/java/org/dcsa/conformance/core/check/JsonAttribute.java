@@ -10,6 +10,8 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class JsonAttribute {
 
+  private static final JsonPointer ROOT_PTR = JsonPointer.compile("/");
+
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -135,6 +137,54 @@ public class JsonAttribute {
         return v.getValidationIssues();
       }
     );
+  }
+
+  public static JsonContentMatchedValidation unique(
+    String field
+  ) {
+    return unique(
+      "field %s with value".formatted(field),
+      (node) -> node.path(field).asText(null)
+    );
+  }
+
+  public static JsonContentMatchedValidation unique(
+    String fieldA,
+    String fieldB
+  ) {
+    return unique(
+      "combination of %s/%s with value".formatted(fieldA, fieldB),
+      (node) -> {
+        var valueA = node.path(fieldA).asText(null);
+        var valueB = node.path(fieldB).asText(null);
+        if (valueA == null || valueB == null) {
+          return null;
+        }
+        return valueA + "/" + valueB;
+      }
+    );
+  }
+
+  public static JsonContentMatchedValidation unique(
+    String keyDescription,
+    Function<JsonNode, String> keyFunction
+  ) {
+    return (array, contextPath) -> {
+      var seen = new HashSet<String>();
+      var duplicates = new LinkedHashSet<String>();
+      for (var node : array) {
+        var key = keyFunction.apply(node);
+        if (key == null) {
+          continue;
+        }
+        if (!seen.add(key)) {
+          duplicates.add(key);
+        }
+      }
+      return duplicates.stream()
+        .map(dup -> "The %s '%s' must be unique but was used more than once in '%s'".formatted(keyDescription, dup, contextPath))
+        .collect(Collectors.toSet());
+    };
   }
 
   public static JsonContentMatchedValidation path(String path, JsonContentMatchedValidation delegate) {
@@ -510,6 +560,13 @@ public class JsonAttribute {
     @NonNull Function<JsonNode, Set<String>> validator
   ) {
     return JsonContentCheckImpl.of(description, validator);
+  }
+
+  public static JsonContentCheck customValidator(
+    @NonNull String description,
+    @NonNull JsonContentMatchedValidation validator
+  ) {
+    return JsonContentCheckImpl.of(description, ROOT_PTR, validator);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {

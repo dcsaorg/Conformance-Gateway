@@ -3,10 +3,7 @@ package org.dcsa.conformance.standards.ebl.checks;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -52,9 +49,9 @@ public class EBLChecks {
   );
 
   private static final Consumer<MultiAttributeValidator> ALL_REFERENCE_TYPES = (mav) -> {
-    mav.path("references").all().path("type").submitPath();
-    mav.path("utilizedTransportEquipments").all().path("references").all().path("type").submitPath();
-    mav.path("consignmentItems").all().path("references").all().path("type").submitPath();
+    mav.submitAllMatching("references.*.type");
+    mav.submitAllMatching("utilizedTransportEquipments.*.references.*.type");
+    mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
   private static final JsonContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -64,7 +61,7 @@ public class EBLChecks {
   );
 
 
-  private static final Consumer<MultiAttributeValidator> ALL_UTE = (mav) -> mav.path("utilizedTransportEquipments").all().submitPath();
+  private static final Consumer<MultiAttributeValidator> ALL_UTE = (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
   private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = (uteNode) -> {
     var isoEquipmentNode = uteNode.path("equipment").path("ISOEquipmentCode");
@@ -120,7 +117,7 @@ public class EBLChecks {
     )
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.path("advanceManifestFilings").all().submitPath();
+  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
   private static final JsonContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate conditionally mandatory 'selfFilerCode' in 'advanceManifestFilings'",
     ALL_AMF,
@@ -147,10 +144,6 @@ public class EBLChecks {
       var country = nodeToValidate.path("countryCode").asText("");
       var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
       var combined = country + "/" + manifestTypeCode;
-      // This check doubles as a check of country being a valid country (DT-612) as the combination only
-      // includes a very small subset of valid countries.  If you find yourself adding a "this manifestTypeCode
-      // applies to *all* countries", then you need to add a separate validation that the country code is in
-      // valid (in https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
       if (!EblDatasets.AMF_CC_MTC_COMBINATIONS.contains(combined)) {
         return Set.of(
           "The combination of '%s' ('countryCounty') and '%s' ('manifestTypeCode') used in '%s' is not known to be a valid combination.".
@@ -160,6 +153,77 @@ public class EBLChecks {
       return Set.of();
     });
 
+  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
+    mav.submitAllMatching("customsReferences.*");
+    mav.submitAllMatching("consignmentItems.*.customsReferences.*");
+    mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*");
+    mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*");
+  };
+
+  private static final JsonContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
+    ALL_CUSTOMS_REFERENCES,
+    (nodeToValidate, contextPath) -> {
+      var country = nodeToValidate.path("countryCode").asText("");
+      var type = nodeToValidate.path("type").asText("");
+      var combined = country + "/" + type;
+      if (!EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS.contains(combined)) {
+        return Set.of(
+          "The combination of '%s' ('countryCounty') and '%s' ('type') used in '%s' is not known to be a valid combination.".
+            formatted(country, type, contextPath)
+        );
+      }
+      return Set.of();
+    });
+
+  private static final JsonContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
+    (mav) -> {
+      mav.submitAllMatching("customsReferences");
+      mav.submitAllMatching("consignmentItems.*.customsReferences");
+      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences");
+      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences");
+    },
+    (nodeToValidate, contextPath) -> {
+       var seen = new HashSet<String>();
+      var duplicates = new LinkedHashSet<String>();
+
+      for (var cr : nodeToValidate) {
+        var cc = cr.path("countryCode").asText(null);
+        var type = cr.path("type").asText(null);
+        if (cc == null || type == null) {
+          continue;
+        }
+        var combined = cc + "/" + type;
+        if (!seen.add(combined)) {
+          duplicates.add(combined);
+        }
+      }
+      return duplicates.stream()
+        .map("The countryCode/type combination '%s' was used more than once in 'customsReferences'"::formatted)
+        .collect(Collectors.toSet());
+    }
+  );
+
+  private static final JsonContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate field is a known ISO 3166 alpha 2 code",
+    (mav) -> {
+      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
+      mav.submitAllMatching("customsReferences.*.countryCode");
+      mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
+      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.countryCode");
+      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
+      mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
+  );
+
+  private static final JsonContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'packagingCode' is a known code",
+    (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.packageCode"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.OUTER_PACKAGING_CODE)
+  );
 
   private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
     "Validate documentParties",
@@ -235,6 +299,190 @@ public class EBLChecks {
     }
   );
 
+  private static final JsonContentCheck VOLUME_IMPLIES_VOLUME_UNIT = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The use of 'volume' implies 'volumeUnit'",
+    (mav) -> {
+      mav.submitAllMatching("consignmentItems.*");
+      mav.submitAllMatching("consignmentItems.*.cargoItems.*");
+    },
+    JsonAttribute.presenceImpliesOtherField(
+      "volume",
+      "volumeUnit"
+    )
+  );
+
+  private static void utilizedTransportEquipmentCargoItemAlignment(
+    JsonNode consignmentItems,
+    String equipmentReference,
+    String uteContextPath,
+    double uteNumber,
+    String uteUnit,
+    String numberFieldName,
+    String numberUnitFieldName,
+    Map<String, Double> conversionTable,
+    Set<String> issues
+  ) {
+    boolean converted = false;
+    var sum = 0.0;
+    boolean matchedEquipmentReference = false;
+    for (var consignmentItem : consignmentItems) {
+      for (var cargoItem : consignmentItem.path("cargoItems")) {
+        var cargoItemEquipmentReference = cargoItem.path("equipmentReference").asText(null);
+        if (!Objects.equals(equipmentReference, cargoItemEquipmentReference)) {
+          continue;
+        }
+        matchedEquipmentReference = true;
+        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
+        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
+        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(uteUnit)) {
+          var conversionFactor = conversionTable.get(uteUnit + "->" + cargoItemWeightUnit);
+          if (conversionFactor != null) {
+            converted = true;
+            cargoItemWeight *= conversionFactor;
+          }
+        }
+        sum += cargoItemWeight;
+      }
+    }
+    if (!matchedEquipmentReference) {
+      // Another validation gets to complain about this
+      return;
+    }
+    var delta = Math.abs(sum - uteNumber);
+    // Give some leeway when converting.
+    var e = converted ? 0.99 : 0.0001;
+    if (delta < e) {
+      return;
+    }
+    issues.add(
+      "The utilizedTransportEquipment at '%s' had '%s' of %.2f %s but the cargoItems '%s' for it sums to %.2f %s%s"
+        .formatted(
+          uteContextPath,
+          numberFieldName,
+          uteNumber,
+          uteUnit,
+          numberFieldName,
+          sum,
+          uteUnit,
+          converted
+            ? " ('cargoItems' values were normalized to the utilizedTransportEquipment unit)"
+            : ""));
+  }
+
+  private static Function<JsonNode, Set<String>> allUtilizedTransportEquipmentCargoItemAreAligned(
+    String uteNumberFieldName,
+    String uteNumberUnitFieldName,
+    String cargoItemNumberFieldName,
+    String cargoItemNumberUnitFieldName,
+    Map<String, Double> conversionTable
+  ) {
+    return (documentRoot) -> {
+      var consignmentItems = documentRoot.path("consignmentItems");
+      var issues = new LinkedHashSet<String>();
+      var index = 0;
+      var key = "utilizedTransportEquipments";
+      for (var ute : documentRoot.path(key)) {
+        var uteContextPath = key + "[" + index + "]";
+        ++index;
+        var equipmentReference = ute.path("equipment").path("equipmentReference").asText(null);
+        var uteNumberNode = ute.path(uteNumberFieldName);
+        var uteUnit = ute.path(uteNumberUnitFieldName).asText("");
+        if (equipmentReference == null || uteNumberNode.isMissingNode() || !uteNumberNode.isNumber()) {
+          // Another validation will complain if applicable
+          continue;
+        }
+        utilizedTransportEquipmentCargoItemAlignment(
+          consignmentItems,
+          equipmentReference,
+          uteContextPath,
+          uteNumberNode.asDouble(),
+          uteUnit,
+          cargoItemNumberFieldName,
+          cargoItemNumberUnitFieldName,
+          conversionTable,
+          issues
+        );
+      }
+      return issues;
+    };
+  }
+
+
+  private static JsonContentMatchedValidation consignmentItemCargoItemAlignment(
+    String numberFieldName,
+    String numberUnitFieldName,
+    Map<String, Double> conversionTable
+  ) {
+    return (consignmentItem, contextPath) -> {
+      boolean converted = false;
+      var sum = 0.0;
+      var unit = consignmentItem.path(numberUnitFieldName).asText(null);
+      if (unit == null) {
+        // Some other validation will complain about this if relevant.
+        return Set.of();
+      }
+      for (var cargoItem : consignmentItem.path("cargoItems")) {
+        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
+        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
+        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(unit)) {
+          var conversionFactor = conversionTable.get(unit + "->" + cargoItemWeightUnit);
+          if (conversionFactor != null) {
+            converted = true;
+            cargoItemWeight *= conversionFactor;
+          }
+        }
+        sum += cargoItemWeight;
+      }
+      var expected = consignmentItem.path(numberFieldName).asDouble(0.0);
+      var delta = Math.abs(sum - expected);
+      // Give some leeway when converting.
+      var e = converted ? 0.99 : 0.0001;
+      if (delta < e) {
+        return Set.of();
+      }
+      return Set.of(
+          "The consignmentItem at '%s' had '%s' of %.2f %s but the cargoItem '%s' sums to %.2f %s%s"
+              .formatted(
+                  contextPath,
+                  numberFieldName,
+                  expected,
+                  unit,
+                  numberFieldName,
+                  sum,
+                  unit,
+                  converted
+                      ? " ('cargoItems' values were normalized to the consignmentItem unit)"
+                      : ""));
+    };
+  }
+
+  private static final Map<String, Double> RATIO_WEIGHT = Map.of(
+    "KGM->LBR", 0.45359237,
+    "LBR->KGM", 2.2046226218
+  );
+
+  private static final Map<String, Double> RATIO_VOLUME = Map.of(
+    "MTQ->FTQ", 0.02831685,
+    "FTQ->MTQ",  35.3146667
+  );
+
+  private static final JsonContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'consignmentItem' weight is aligned with its 'cargoItems'",
+    (mav) -> mav.submitAllMatching("consignmentItems.*"),
+    consignmentItemCargoItemAlignment("weight",
+      "weightUnit",
+      RATIO_WEIGHT
+  ));
+
+  private static final JsonContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'consignmentItem' volume is aligned with its 'cargoItems'",
+    (mav) -> mav.submitAllMatching("consignmentItems.*"),
+    consignmentItemCargoItemAlignment("volume",
+      "volumeUnit",
+      RATIO_VOLUME
+    ));
+
+
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     (body) -> {
@@ -277,8 +525,15 @@ public class EBLChecks {
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+    COUNTRY_CODE_VALIDATIONS,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
     AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    CR_CC_T_COMBINATION_KNOWN,
+    CR_CC_T_CODES_UNIQUE,
+    OUTER_PACKAGING_CODE_IS_VALID,
+    VOLUME_IMPLIES_VOLUME_UNIT,
+    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
+    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
     VALIDATE_DOCUMENT_PARTIES
   );
 
@@ -317,12 +572,12 @@ public class EBLChecks {
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'commoditySubreference' must not be present in the transport document",
-      (mav) -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
+      (mav) -> mav.submitAllMatching("consignmentItems.*.commoditySubreference"),
       JsonAttribute.matchedMustBeAbsent()
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "DangerousGoods implies packagingCode or imoPackagingCode",
-      mav -> mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").submitPath(),
+      mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging"),
       (nodeToValidate, contextPath) -> {
         var dg = nodeToValidate.path("dangerousGoods");
         if (!dg.isArray() || dg.isEmpty()) {
@@ -351,10 +606,51 @@ public class EBLChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_SEGREGATION_GROUPS)
     ),
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'temperatureSetpoint' implies 'temperatureUnit'",
+      (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+      JsonAttribute.presenceImpliesOtherField(
+        "temperatureSetpoint",
+        "temperatureUnit"
+    )),
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'airExchangeSetpoint' implies 'airExchangeUnit'",
+      (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*.activeReeferSettings"),
+      JsonAttribute.presenceImpliesOtherField(
+        "airExchangeSetpoint",
+        "airExchangeUnit"
+      )),
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+    COUNTRY_CODE_VALIDATIONS,
+    CR_CC_T_COMBINATION_KNOWN,
+    CR_CC_T_CODES_UNIQUE,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
     AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    VOLUME_IMPLIES_VOLUME_UNIT,
+    OUTER_PACKAGING_CODE_IS_VALID,
+    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
+    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
+    JsonAttribute.customValidator(
+      "Validate that 'utilizedTransportEquipment' weight is aligned with its 'cargoItems'",
+      allUtilizedTransportEquipmentCargoItemAreAligned(
+        "cargoGrossWeight",
+        "cargoGrossWeightUnit",
+        "weight",
+        "weightUnit",
+        RATIO_WEIGHT
+      )
+    ),
+    JsonAttribute.customValidator(
+      "Validate that 'utilizedTransportEquipment' volume is aligned with its 'cargoItems'",
+      allUtilizedTransportEquipmentCargoItemAreAligned(
+        "cargoGrossVolume",
+        "cargoGrossVolumeUnit",
+        "volume",
+        "volumeUnit",
+        RATIO_VOLUME
+      )
+    ),
     VALIDATE_DOCUMENT_PARTIES
   );
 
@@ -387,36 +683,35 @@ public class EBLChecks {
   private static void generateCSPRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, boolean isTD) {
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'carrierBookingReference' is used",
-      mav -> mav.path("consignmentItems").all().path("carrierBookingReference").submitPath(),
+      mav -> mav.submitAllMatching("consignmentItems.*.carrierBookingReference"),
       JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
     if (!isTD) {
       checks.add(
           JsonAttribute.allIndividualMatchesMustBeValid(
               "[Scenario] Verify that the correct 'commoditySubreference' is used",
-              mav -> mav.path("consignmentItems").all().path("commoditySubreference").submitPath(),
+              mav -> mav.submitAllMatching("consignmentItems.*.commoditySubreference"),
               JsonAttribute.matchedMustEqual(
                   cspValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))));
     }
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'equipmentReference' is used",
       mav -> {
-        mav.path("consignmentItems").all().path("cargoItems").all().path("equipmentReference").submitPath();
-        var utes = mav.path("utilizedTransportEquipments").all();
+        mav.submitAllMatching("consignmentItems.*.cargoItems.*.equipmentReference");
         // SI vs. TD path is not exactly the same in all cases
-        utes.path("equipmentReference").submitPath();
-        utes.path("equipment").path("equipmentReference").submitPath();
+        mav.submitAllMatching("utilizedTransportEquipments.*.equipmentReference");
+        mav.submitAllMatching("utilizedTransportEquipments.*.equipment.equipmentReference");
       },
       JsonAttribute.matchedMustEqualIfPresent(cspValue(cspSupplier, CarrierScenarioParameters::equipmentReference))
     ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'HSCodes' are used",
-      mav -> mav.path("consignmentItems").all().path("HSCodes").all().submitPath(),
+      mav -> mav.submitAllMatching("consignmentItems.*.HSCodes.*"),
       JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::consignmentItemHSCode))
     ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
-      mav -> mav.path("consignmentItems").all().path("descriptionOfGoods").submitPath(),
+      mav -> mav.submitAllMatching("consignmentItems.*.descriptionOfGoods"),
       JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::descriptionOfGoods))
     ));
 

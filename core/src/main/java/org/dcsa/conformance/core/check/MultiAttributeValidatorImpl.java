@@ -35,6 +35,9 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
 
   @Override
   public AttributePathBuilder path(String path) {
+    if (path.contains("*")) {
+      throw new IllegalArgumentException("Segments cannot contain wildcards (a.foo*.c is not supported)");
+    }
     return new AttributePathBuilderImpl(List.of(new Match(
       null,
       body.path(path),

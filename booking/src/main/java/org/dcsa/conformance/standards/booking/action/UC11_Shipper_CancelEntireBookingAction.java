@@ -61,12 +61,6 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
               getMatchedExchangeUuid(),
               BookingState.CANCELLED
             ),
-            new QueryParamCheck(
-              BookingRole::isShipper,
-              getMatchedExchangeUuid(),
-              "operation",
-              "cancelBooking"
-            ),
             new ApiHeaderCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

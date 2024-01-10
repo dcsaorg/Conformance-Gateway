@@ -380,17 +380,14 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private String readCancelOperation(ConformanceRequest request) {
-    var queryParams = request.queryParams();
-    var operationParams = queryParams.get("operation");
-    if (operationParams == null || operationParams.isEmpty()) {
+    var requestPayload = request.message();
+    if (requestPayload == null || requestPayload.body() == null ) {
       return null;
     }
-    var operation = operationParams.iterator().next();
-    if (operationParams.size() > 1
-        || !(operation.equals("cancelBooking") || operation.equals("cancelAmendment"))) {
-      return "!INVALID-VALUE!";
-    }
-    return operation;
+    var cancelJsonBody = requestPayload.body().getJsonBody();
+    return cancelJsonBody.get("bookingStatus") != null ?
+      "cancelBooking" : cancelJsonBody.get("amendedBookingStatus") != null ?
+        "cancelAmendment" : "#INVALID";
   }
 
   private String readAmendedContent(ConformanceRequest request) {
@@ -441,9 +438,6 @@ public class BookingCarrier extends ConformanceParty {
 
   private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
-    if (cancelOperation == null) {
-      return return400(request, "Missing mandatory 'operation' query parameter");
-    }
     if (!cancelOperation.equals("cancelBooking") && !cancelOperation.equals("cancelAmendment")) {
       return return400(
           request,

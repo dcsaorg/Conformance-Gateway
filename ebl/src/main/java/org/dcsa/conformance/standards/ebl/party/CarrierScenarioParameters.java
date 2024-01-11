@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public record CarrierScenarioParameters(
   String carrierBookingReference,
   String commoditySubreference,
@@ -15,7 +17,7 @@ public record CarrierScenarioParameters(
   String contractQuotationReference
   ) {
   public ObjectNode toJson() {
-    return new ObjectMapper()
+    return STATE_OBJECT_MAPPER
         .createObjectNode()
         .put("carrierBookingReference", carrierBookingReference())
         .put("commoditySubreference", commoditySubreference())

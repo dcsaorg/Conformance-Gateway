@@ -1,10 +1,10 @@
 package org.dcsa.conformance.standards.ebl.models;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.*;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDate;
@@ -16,7 +16,6 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 public class CarrierShippingInstructions {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Random RANDOM = new Random();
 
   private static final String SI_STATUS = "shippingInstructionsStatus";

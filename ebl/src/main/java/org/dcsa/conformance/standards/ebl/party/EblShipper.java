@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -155,7 +156,7 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required("documentReference").asText();
-    var approvePayload = new ObjectMapper().createObjectNode()
+    var approvePayload = OBJECT_MAPPER.createObjectNode()
       .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
     syncCounterpartPatch(
@@ -172,7 +173,7 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.approveDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
     var documentReference = actionPrompt.required("documentReference").asText();
-    var approvePayload = new ObjectMapper().createObjectNode()
+    var approvePayload = OBJECT_MAPPER.createObjectNode()
       .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
     syncCounterpartPatch(
@@ -217,7 +218,7 @@ public class EblShipper extends ConformanceParty {
         request.createResponse(
             204,
             Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+            new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));

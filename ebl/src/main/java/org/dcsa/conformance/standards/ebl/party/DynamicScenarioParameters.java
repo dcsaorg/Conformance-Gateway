@@ -1,13 +1,13 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.With;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
-
-import java.util.function.Function;
 
 @With
 public record DynamicScenarioParameters(
@@ -19,7 +19,7 @@ public record DynamicScenarioParameters(
     ShippingInstructionsStatus updatedShippingInstructionsStatus,
     TransportDocumentStatus transportDocumentStatus) {
   public ObjectNode toJson() {
-    return new ObjectMapper().createObjectNode()
+    return OBJECT_MAPPER.createObjectNode()
       .put("scenarioType", scenarioType.name())
       .put("shippingInstructionsReference", shippingInstructionsReference)
       .put("transportDocumentReference", transportDocumentReference)

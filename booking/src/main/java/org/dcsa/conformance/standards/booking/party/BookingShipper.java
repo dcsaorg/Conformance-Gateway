@@ -130,10 +130,9 @@ public class BookingShipper extends ConformanceParty {
   private void sendCancelEntireBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
-    Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelBooking"));
     syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
-        queryParams,
+      Collections.emptyMap(),
         new ObjectMapper()
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.wireName()));
@@ -144,13 +143,12 @@ public class BookingShipper extends ConformanceParty {
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
     String cbrr = actionPrompt.get("cbrr").asText();
-    Map<String, List<String>> queryParams =  Map.of("operation", List.of("cancelAmendment"));
     syncCounterpartPatch(
       "/v2/bookings/%s".formatted(cbrr),
-      queryParams,
+      Collections.emptyMap(),
       new ObjectMapper()
         .createObjectNode()
-        .put("bookingStatus", BookingState.CANCELLED.wireName()));
+        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.wireName()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(cbrr));
   }

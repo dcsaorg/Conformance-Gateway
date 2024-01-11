@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
   @Getter private final String title;
@@ -40,14 +42,13 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectNode jsonState = new ObjectMapper().createObjectNode();
+    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
     jsonState.put("id", id.toString());
 
     jsonState.put("nextActionsSize", nextActions.size());
 
-    ArrayNode actionsArrayNode = new ObjectMapper().createArrayNode();
+    ArrayNode actionsArrayNode = jsonState.putArray("allActions");
     allActions.forEach(action -> actionsArrayNode.add(action.exportJsonState()));
-    jsonState.set("allActions", actionsArrayNode);
 
     return jsonState;
   }

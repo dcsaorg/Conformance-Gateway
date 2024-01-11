@@ -23,6 +23,8 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
   protected final String apiVersion;
@@ -68,10 +70,10 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectNode jsonPartyState = new ObjectMapper().createObjectNode();
+    ObjectNode jsonPartyState = STATE_OBJECT_MAPPER.createObjectNode();
     jsonPartyState.set("actionPromptsQueue", actionPromptsQueue.exportJsonState());
 
-    ArrayNode operatorLogNode = new ObjectMapper().createArrayNode();
+    ArrayNode operatorLogNode = jsonPartyState.putArray("operatorLog");
     operatorLog.forEach(operatorLogNode::add);
     jsonPartyState.set("operatorLog", operatorLogNode);
 

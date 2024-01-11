@@ -39,7 +39,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());
-    return jsonNode;
+    return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
   }
 
   @Override
@@ -78,7 +78,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier()));
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(

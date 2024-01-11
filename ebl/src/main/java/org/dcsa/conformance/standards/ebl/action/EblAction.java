@@ -31,7 +31,7 @@ public abstract class EblAction extends ConformanceAction {
     this.dspReference =
         previousAction == null
             ? new OverwritingReference<>(
-                null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null, null))
+                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 

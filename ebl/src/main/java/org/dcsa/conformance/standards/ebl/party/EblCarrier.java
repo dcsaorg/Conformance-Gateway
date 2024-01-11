@@ -85,7 +85,7 @@ public class EblCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
       switch (scenarioType) {
-        case REGULAR -> new CarrierScenarioParameters(
+        case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
           "CBR_123_REGULAR",
           "Some Commodity Subreference 123",
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()

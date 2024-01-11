@@ -65,7 +65,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               responseSchemaValidator),
-            EBLChecks.tdContentChecks(getMatchedExchangeUuid(), expectedTdStatus, getDspSupplier()));
+            EBLChecks.tdContentChecks(getMatchedExchangeUuid(), expectedTdStatus, getCspSupplier(), getDspSupplier()));
       }
     };
   }

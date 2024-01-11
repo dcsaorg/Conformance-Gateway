@@ -2,15 +2,17 @@ package org.dcsa.conformance.standards.ebl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
-import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
+import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -24,6 +26,8 @@ public class EblComponentFactory extends AbstractComponentFactory {
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+
+  private static final ConcurrentHashMap<String, List<ConformanceScenario>> SCENARIO_CACHE = new ConcurrentHashMap<>();
 
   private final String standardVersion;
 
@@ -82,12 +86,36 @@ public class EblComponentFactory extends AbstractComponentFactory {
   public ScenarioListBuilder<?> createScenarioListBuilder(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return EblScenarioListBuilder.buildTree(
-        this,
+    return new CachedEblScenarioListBuilder<>(standardVersion, () -> EblScenarioListBuilder.buildTree(
+        this.standardVersion,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblRole::isShipper));
+            partyConfigurations, counterpartConfigurations, EblRole::isShipper)));
+  }
+
+
+  private static class CachedEblScenarioListBuilder<T extends ScenarioListBuilder<T>> extends ScenarioListBuilder<T> {
+
+    private final Supplier<EblScenarioListBuilder> realScenarioBuilder;
+    private final String standardVersion;
+
+    protected CachedEblScenarioListBuilder(String standardVersion, Supplier<EblScenarioListBuilder> realScenarioBuilder) {
+      super(Function.identity());
+      this.standardVersion = standardVersion;
+      this.realScenarioBuilder = realScenarioBuilder;
+    }
+
+    @Override
+    protected List<ConformanceScenario> _buildScenarioList() {
+      var scenarioList = SCENARIO_CACHE.get(standardVersion);
+      if (scenarioList != null) {
+        return scenarioList;
+      }
+      scenarioList = Collections.unmodifiableList(realScenarioBuilder.get().buildScenarioList());
+      SCENARIO_CACHE.put(standardVersion, scenarioList);
+      return scenarioList;
+    }
   }
 
   @Override
@@ -110,13 +138,6 @@ public class EblComponentFactory extends AbstractComponentFactory {
                             .map(PartyConfiguration::getRole)
                             .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
         .collect(Collectors.toSet());
-  }
-
-  public JsonSchemaValidator getMessageSchemaValidator(String apiName, String jsonSchema) {
-    String schemaFilePath = "/standards/ebl/schemas/ebl-%s-v%s0.json"
-      .formatted(apiName, standardVersion.charAt(0));
-
-    return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 
   @SneakyThrows

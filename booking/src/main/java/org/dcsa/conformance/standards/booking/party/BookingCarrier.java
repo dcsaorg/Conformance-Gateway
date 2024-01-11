@@ -385,9 +385,17 @@ public class BookingCarrier extends ConformanceParty {
       return null;
     }
     var cancelJsonBody = requestPayload.body().getJsonBody();
-    return cancelJsonBody.get("bookingStatus") != null ?
-      "cancelBooking" : cancelJsonBody.get("amendedBookingStatus") != null ?
-        "cancelAmendment" : "#INVALID";
+
+    if (cancelJsonBody.get("bookingStatus") != null && cancelJsonBody.get("amendedBookingStatus") != null) {
+      return "#INVALID";
+    }
+    if (cancelJsonBody.get("bookingStatus") != null) {
+      return "cancelBooking";
+    }
+    if(cancelJsonBody.get("amendedBookingStatus") != null ) {
+      return "cancelAmendment";
+    }
+    return "#INVALID";
   }
 
   private String readAmendedContent(ConformanceRequest request) {

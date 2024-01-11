@@ -42,6 +42,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Slf4j
 @RestController
 @SpringBootApplication
@@ -76,7 +78,7 @@ public class ConformanceApplication {
     log.info(
         "new ConformanceApplication(%s)"
             .formatted(
-                new ObjectMapper()
+              STATE_OBJECT_MAPPER
                     .valueToTree(Objects.requireNonNull(this.conformanceConfiguration))
                     .toPrettyString()));
 

@@ -19,6 +19,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Getter
 public class ConformanceReport {
   private final ConformanceCheck conformanceCheck;
@@ -90,19 +92,16 @@ public class ConformanceReport {
   }
 
   public JsonNode toJsonReport() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode reportNode = objectMapper.createObjectNode();
+    ObjectNode reportNode = STATE_OBJECT_MAPPER.createObjectNode();
 
     reportNode.put("title", title);
     reportNode.put("status", conformanceStatus.name());
 
-    ArrayNode subReportsNode = objectMapper.createArrayNode();
+    ArrayNode subReportsNode = reportNode.putArray("subReports");
     subReports.forEach(subReport -> subReportsNode.add(subReport.toJsonReport()));
-    reportNode.set("subReports", subReportsNode);
 
-    ArrayNode errorsNode = objectMapper.createArrayNode();
+    ArrayNode errorsNode = reportNode.putArray("errorMessages");
     errorMessages.forEach(errorsNode::add);
-    reportNode.set("errorMessages", errorsNode);
 
     return reportNode;
   }

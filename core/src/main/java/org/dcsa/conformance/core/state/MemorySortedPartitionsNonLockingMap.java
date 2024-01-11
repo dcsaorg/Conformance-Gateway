@@ -8,26 +8,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
 
+public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
 
 
   @SneakyThrows
   @Override
   public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
-    JsonNode valueCopy = OBJECT_MAPPER.readTree(value.toString());
+    JsonNode valueCopy = STATE_OBJECT_MAPPER.readTree(value.toString());
     memoryMap
         .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .put(sortKey, OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
+        .put(sortKey, STATE_OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
   }
 
   @Override
   public synchronized JsonNode getItemValue(String partitionKey, String sortKey) {
     return memoryMap
         .getOrDefault(partitionKey, new TreeMap<>())
-        .getOrDefault(sortKey, OBJECT_MAPPER.createObjectNode())
+        .getOrDefault(sortKey, STATE_OBJECT_MAPPER.createObjectNode())
         .get("value");
   }
 

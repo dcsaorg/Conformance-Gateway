@@ -9,6 +9,8 @@ import lombok.ToString;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Getter
 @Setter
 @ToString
@@ -23,11 +25,11 @@ public class SandboxConfiguration {
   private CounterpartConfiguration[] counterparts;
 
   public JsonNode toJsonNode() {
-    return new ObjectMapper().valueToTree(this);
+    return STATE_OBJECT_MAPPER.valueToTree(this);
   }
 
   @SneakyThrows
   public static SandboxConfiguration fromJsonNode(JsonNode jsonNode) {
-    return new ObjectMapper().treeToValue(jsonNode, SandboxConfiguration.class);
+    return STATE_OBJECT_MAPPER.treeToValue(jsonNode, SandboxConfiguration.class);
   }
 }

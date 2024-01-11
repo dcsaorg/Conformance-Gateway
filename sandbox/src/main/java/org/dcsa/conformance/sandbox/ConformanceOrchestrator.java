@@ -23,6 +23,8 @@ import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Slf4j
 public class ConformanceOrchestrator implements StatefulEntity {
   private final SandboxConfiguration sandboxConfiguration;
@@ -50,25 +52,20 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode jsonState = objectMapper.createObjectNode();
+    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
 
     { // scoped
-      ArrayNode arrayNode = objectMapper.createArrayNode();
+      ArrayNode arrayNode = jsonState.putArray("scenarios");
       scenariosById.values().forEach(scenario -> arrayNode.add(scenario.exportJsonState()));
-      jsonState.set("scenarios", arrayNode);
     }
 
     { // scoped
-      ArrayNode arrayNode = objectMapper.createArrayNode();
+      ArrayNode arrayNode = jsonState.putArray("latestRunIdsByScenarioId");
       latestRunIdsByScenarioId.forEach(
           (key, value) ->
-              arrayNode.add(
-                  objectMapper
-                      .createObjectNode()
+              arrayNode.addObject()
                       .put("scenarioId", key.toString())
-                      .put("latestRunId", value.toString())));
-      jsonState.set("latestRunIdsByScenarioId", arrayNode);
+                      .put("latestRunId", value.toString()));
     }
 
     if (currentScenarioId != null) {
@@ -103,7 +100,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public JsonNode getStatus() {
-    ObjectNode statusNode = new ObjectMapper().createObjectNode();
+    ObjectNode statusNode = STATE_OBJECT_MAPPER.createObjectNode();
     statusNode.put(
         "scenariosLeft",
         scenariosById.values().stream().filter(ConformanceScenario::hasNextAction).count());
@@ -174,9 +171,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public JsonNode handleGetPartyPrompt(String partyName) {
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
-    ObjectMapper objectMapper = new ObjectMapper();
 
-    ArrayNode partyPrompt = objectMapper.createArrayNode();
+    ArrayNode partyPrompt = STATE_OBJECT_MAPPER.createArrayNode();
     if (currentScenarioId == null) return partyPrompt;
 
     ConformanceAction nextAction = scenariosById.get(currentScenarioId).peekNextAction();
@@ -276,8 +272,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public ArrayNode getScenarioDigests() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode arrayNode = objectMapper.createArrayNode();
+    ArrayNode arrayNode = STATE_OBJECT_MAPPER.createArrayNode();
     if (!sandboxConfiguration.getOrchestrator().isActive()) return arrayNode;
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
@@ -300,7 +295,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
               log.info(
                   "Scenario description: '%s'".formatted(scenario.getReportTitleDescription()));
               ObjectNode scenarioNode =
-                  objectMapper
+                STATE_OBJECT_MAPPER
                       .createObjectNode()
                       .put("id", scenario.getId().toString())
                       .put("name", scenario.getTitle())
@@ -325,7 +320,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public ObjectNode getScenarioDigest(String scenarioId) {
     ConformanceScenario scenario = this.scenariosById.get(UUID.fromString(scenarioId));
-    return new ObjectMapper()
+    return STATE_OBJECT_MAPPER
         .createObjectNode()
         .put("id", scenario.getId().toString())
         .put("name", scenario.getTitle())
@@ -335,8 +330,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public ObjectNode getScenarioStatus(String scenarioId) {
     UUID scenarioUuid = UUID.fromString(scenarioId);
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode scenarioNode = objectMapper.createObjectNode();
+    ObjectNode scenarioNode = STATE_OBJECT_MAPPER.createObjectNode();
     UUID runUuid = latestRunIdsByScenarioId.get(scenarioUuid);
     if (runUuid == null) return scenarioNode;
 

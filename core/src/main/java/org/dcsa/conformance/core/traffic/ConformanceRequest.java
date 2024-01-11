@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Map;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public record ConformanceRequest(
     String method,
     String url,
@@ -33,8 +35,7 @@ public record ConformanceRequest(
   }
 
   public ObjectNode toJson() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode objectNode = objectMapper.createObjectNode();
+    ObjectNode objectNode = STATE_OBJECT_MAPPER.createObjectNode();
     objectNode.put("method", method);
     objectNode.put("url", url);
     objectNode.set("queryParams", JsonToolkit.mapOfStringToStringCollectionToJson(queryParams));

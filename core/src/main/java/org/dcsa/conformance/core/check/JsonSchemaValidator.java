@@ -11,8 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
+  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER = new ObjectMapper(new JsonFactory());
 
   public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
@@ -28,7 +31,7 @@ public class JsonSchemaValidator {
     InputStream schemaFileInputStream = JsonSchemaValidator.class.getResourceAsStream(filePath);
     JsonSchemaFactory jsonSchemaFactory =
         JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-            .objectMapper(new ObjectMapper(new JsonFactory()))
+            .objectMapper(JSON_FACTORY_OBJECT_MAPPER)
             .build();
     SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
     schemaValidatorsConfig.setTypeLoose(false);
@@ -52,7 +55,7 @@ public class JsonSchemaValidator {
 
   @SneakyThrows
   public Set<String> validate(String jsonString) {
-    return validate(new ObjectMapper().readTree(jsonString));
+    return validate(STATE_OBJECT_MAPPER.readTree(jsonString));
   }
 
   public Set<String> validate(JsonNode jsonNode) {

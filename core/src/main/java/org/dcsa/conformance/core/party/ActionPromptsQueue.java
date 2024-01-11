@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.state.StatefulEntity;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public class ActionPromptsQueue implements StatefulEntity {
   private final Set<String> allActionIds = new HashSet<>();
   private final LinkedList<JsonNode> pendingActions = new LinkedList<>();
@@ -38,14 +40,12 @@ public class ActionPromptsQueue implements StatefulEntity {
 
   @Override
   synchronized public JsonNode exportJsonState() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ObjectNode stateNode = objectMapper.createObjectNode();
+    ObjectNode stateNode = STATE_OBJECT_MAPPER.createObjectNode();
 
-    ArrayNode allActionIdsNode = objectMapper.createArrayNode();
+    ArrayNode allActionIdsNode = stateNode.putArray("allActionIds");
     allActionIds.forEach(allActionIdsNode::add);
-    stateNode.set("allActionIds", allActionIdsNode);
 
-    ArrayNode pendingActionsNode = objectMapper.createArrayNode();
+    ArrayNode pendingActionsNode = stateNode.putArray("pendingActions");
     pendingActions.forEach(pendingActionsNode::add);
     stateNode.set("pendingActions", pendingActionsNode);
 

@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.*;
 import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public class TrafficRecorder {
   private final SortedPartitionsNonLockingMap nonLockingMap;
   private final String partitionKey;
@@ -33,7 +35,7 @@ public class TrafficRecorder {
     nonLockingMap.setItemValue(
         partitionKey,
         Instant.now().toString(),
-        new ObjectMapper()
+      STATE_OBJECT_MAPPER
             .createObjectNode()
             .put("scenarioRun", scenarioRun)
             .set("exchange", conformanceExchange.toJson()));

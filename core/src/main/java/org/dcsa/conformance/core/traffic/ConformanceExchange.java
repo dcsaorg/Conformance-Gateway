@@ -6,6 +6,8 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.ToString;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @ToString
 @Getter
 public class ConformanceExchange {
@@ -24,7 +26,7 @@ public class ConformanceExchange {
   }
 
   public ObjectNode toJson() {
-    ObjectNode jsonState = new ObjectMapper().createObjectNode();
+    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
     jsonState.put("uuid", uuid.toString());
     jsonState.set("request", request.toJson());
     jsonState.set("response", response.toJson());

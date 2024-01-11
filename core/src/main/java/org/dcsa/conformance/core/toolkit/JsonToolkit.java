@@ -1,9 +1,9 @@
 package org.dcsa.conformance.core.toolkit;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -19,12 +19,12 @@ public enum JsonToolkit {
 
   @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {
-    return new ObjectMapper().readTree(string);
+    return STATE_OBJECT_MAPPER.readTree(string);
   }
 
   @SneakyThrows
   public static JsonNode inputStreamToJsonNode(InputStream inputStream) {
-    return new ObjectMapper().readTree(inputStream);
+    return STATE_OBJECT_MAPPER.readTree(inputStream);
   }
 
   @SneakyThrows
@@ -36,7 +36,7 @@ public enum JsonToolkit {
           new String(Objects.requireNonNull(inputStream).readAllBytes(), StandardCharsets.UTF_8));
     }
     replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
-    return new ObjectMapper().readTree(jsonString.get());
+    return STATE_OBJECT_MAPPER.readTree(jsonString.get());
   }
 
   public static boolean stringAttributeEquals(JsonNode jsonNode, String name, String value) {
@@ -49,7 +49,7 @@ public enum JsonToolkit {
   }
 
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
-    ArrayNode arrayNode = new ObjectMapper().createArrayNode();
+    ArrayNode arrayNode = STATE_OBJECT_MAPPER.createArrayNode();
     strings.forEach(arrayNode::add);
     return arrayNode;
   }
@@ -62,14 +62,12 @@ public enum JsonToolkit {
 
   public static ArrayNode mapOfStringToStringCollectionToJson(
       Map<String, ? extends Collection<String>> map) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode queryParamsNode = objectMapper.createArrayNode();
+    ArrayNode queryParamsNode = STATE_OBJECT_MAPPER.createArrayNode();
     map.forEach(
         (key, values) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
-          entryNode.put("key", key);
-          entryNode.set("values", JsonToolkit.stringCollectionToArrayNode(values));
-          queryParamsNode.add(entryNode);
+          queryParamsNode.addObject()
+            .put("key", key)
+            .set("values", JsonToolkit.stringCollectionToArrayNode(values));;
         });
     return queryParamsNode;
   }

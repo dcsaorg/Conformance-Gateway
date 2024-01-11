@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Map;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 public record ConformanceWebRequest(
     String method,
     String url,
@@ -16,7 +18,7 @@ public record ConformanceWebRequest(
 
   public ObjectNode toJson() {
     ObjectNode objectNode =
-        new ObjectMapper()
+      STATE_OBJECT_MAPPER
             .createObjectNode()
             .put("method", method)
             .put("url", url)

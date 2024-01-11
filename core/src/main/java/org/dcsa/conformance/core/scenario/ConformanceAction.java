@@ -11,9 +11,12 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
+import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+
 @Getter
 @Slf4j
 public abstract class ConformanceAction implements StatefulEntity {
+
   private final String sourcePartyName;
   private final String targetPartyName;
   protected final ConformanceAction previousAction;
@@ -44,7 +47,7 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   @Override
   public ObjectNode exportJsonState() {
-    ObjectNode jsonState = new ObjectMapper().createObjectNode();
+    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
     jsonState.put("id", id.toString());
     if (matchedExchangeUuid != null) {
       jsonState.put("matchedExchangeUuid", matchedExchangeUuid.toString());
@@ -146,7 +149,7 @@ public abstract class ConformanceAction implements StatefulEntity {
   public void handlePartyInput(JsonNode partyInput) {}
 
   public ObjectNode asJsonNode() {
-    return new ObjectMapper()
+    return STATE_OBJECT_MAPPER
         .createObjectNode()
         .put("actionId", id.toString())
         .put("actionType", getClass().getCanonicalName())

@@ -18,11 +18,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
       carrierPartyName,
       null,
       null,
-      switch (scenarioType) {
-        case REGULAR -> "SupplyCSP";
-        case REEFER -> "SupplyCSP-AR";
-        case DG -> "SupplyCSP-DG";
-      },
+      "SupplyCSP [%s]".formatted(scenarioType.name()),
       -1);
     this.scenarioType = scenarioType;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
@@ -67,7 +63,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
-      case REGULAR -> new CarrierScenarioParameters(
+      case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
         // Any valid regular equipment reference will do as an example.

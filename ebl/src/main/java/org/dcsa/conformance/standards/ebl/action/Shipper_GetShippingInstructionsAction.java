@@ -16,6 +16,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedStatus;
   private final boolean recordTDR;
+  private final boolean useTDRef;
 
   public Shipper_GetShippingInstructionsAction(
       String carrierPartyName,
@@ -25,25 +26,41 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       ShippingInstructionsStatus expectedAmendedSiStatus,
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus,
-      boolean recordTDR) {
+      boolean recordTDR,
+      boolean useTDRef) {
     super(shipperPartyName, carrierPartyName, previousAction, requestAmendedStatus ? "GET aSI" : "GET SI", 200);
     this.expectedSiStatus = expectedSiStatus;
     this.expectedAmendedSiStatus = expectedAmendedSiStatus;
+    this.useTDRef = useTDRef;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedStatus = requestAmendedStatus;
     this.recordTDR = recordTDR;
+
+    if (useTDRef && recordTDR) {
+      throw new IllegalArgumentException("Cannot use recordTDR with useTDRef");
+    }
   }
 
   @Override
   public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
+    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    if (documentReference == null) {
+      throw new IllegalStateException("Missing document reference for use-case 3");
+    }
     return super.asJsonNode()
-      .put("sir", getDspSupplier().get().shippingInstructionsReference());
+      .put("documentReference", documentReference);
   }
 
   @Override
   public String getHumanReadablePrompt() {
+    var dsp = getDspSupplier().get();
+    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    if (documentReference == null) {
+      throw new IllegalStateException("Missing document reference for get SI");
+    }
     return "GET the SI with reference '%s'"
-        .formatted(getDspSupplier().get().shippingInstructionsReference());
+        .formatted(documentReference);
   }
 
   protected void doHandleExchange(ConformanceExchange exchange) {
@@ -62,11 +79,13 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var dsp = getDspSupplier().get();
+        var documentReference = useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
         return Stream.of(
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v3/shipping-instructions/" + getDspSupplier().get().shippingInstructionsReference()),
+                "/v3/shipping-instructions/" + documentReference),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

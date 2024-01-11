@@ -40,38 +40,55 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
     return noAction().thenEither(
-      carrier_SupplyScenarioParameters(ScenarioType.REGULAR).thenAllPathsFrom(SI_START),
-      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START),
-      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START)
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB).thenAllPathsFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START, TD_START, false)
     );
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
-    ShippingInstructionsStatus shippingInstructionsStatus) {
-    return thenAllPathsFrom(shippingInstructionsStatus, null);
+    ShippingInstructionsStatus shippingInstructionsStatus, TransportDocumentStatus transportDocumentStatus, boolean useTDRef) {
+    return thenAllPathsFrom(shippingInstructionsStatus, null, transportDocumentStatus, useTDRef);
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
-      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState) {
+      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState, TransportDocumentStatus transportDocumentStatus, boolean useTDRef) {
     return switch (shippingInstructionsStatus) {
-      case SI_START -> then(
-          uc1_shipper_submitShippingInstructions()
-              .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
-                      .thenAllPathsFrom(SI_RECEIVED)));
+      case SI_START -> {
+        if (useTDRef) {
+          throw new IllegalStateException("Cannot use transport document reference when submitting a TD");
+        }
+        if (transportDocumentStatus != TD_START) {
+          throw new IllegalStateException("Cannot use transport document reference when submitting a TD");
+        }
+        yield then(
+            uc1_shipper_submitShippingInstructions()
+                .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, false)
+                        .thenAllPathsFrom(SI_RECEIVED, transportDocumentStatus, false)));
+      }
       case SI_RECEIVED -> thenEither(
           uc2_carrier_requestUpdateToShippingInstruction()
               .then(
-                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-                      .thenAllPathsFrom(SI_PENDING_UPDATE)),
-          uc3_shipper_submitUpdatedShippingInstructions()
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, useTDRef)
+                      .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)),
+          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
               .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, TD_START)
-                      .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED)),
-          uc6_carrier_publishDraftTransportDocument()
-              .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, TD_DRAFT, true)
-                      .then(shipper_GetTransportDocument(TD_DRAFT).thenAllPathsFrom(TD_DRAFT))));
+                  shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, useTDRef)
+                      .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED, transportDocumentStatus, useTDRef)),
+        switch (transportDocumentStatus) {
+          case TD_START -> uc6_carrier_publishDraftTransportDocument().then(
+            shipper_GetShippingInstructionsRecordTDRef()
+              .then(shipper_GetTransportDocument(TD_DRAFT).thenAllPathsFrom(TD_DRAFT)));
+          case TD_DRAFT -> uc6_carrier_publishDraftTransportDocument().then(
+            shipper_GetShippingInstructionsRecordTDRef()
+              .then(shipper_GetTransportDocument(TD_DRAFT).thenHappyPathFrom(TD_DRAFT)));
+          case TD_ISSUED -> uc9_carrier_awaitSurrenderRequestForAmendment().then(
+            shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
+          ).thenHappyPathFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT);
+          default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
+        });
       case SI_UPDATE_RECEIVED -> {
         if (memoryState == null) {
           throw new IllegalArgumentException(
@@ -80,89 +97,105 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         yield thenEither(
             uc2_carrier_requestUpdateToShippingInstruction()
                 .then(
-                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-                        .thenHappyPathFrom(SI_PENDING_UPDATE)),
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, useTDRef)
+                        .thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)),
             uc4a_carrier_acceptUpdatedShippingInstructions()
                 .then(
-                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
-                        .thenHappyPathFrom(SI_RECEIVED)),
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef)
+                        .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef)),
             uc4d_carrier_declineUpdatedShippingInstructions()
                 .then(
-                    shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, TD_START)
-                        .thenHappyPathFrom(memoryState)),
+                    shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
+                        .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)),
             uc5_shipper_cancelUpdateToShippingInstructions()
-              .then(
-                shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, TD_START)
-                  .thenHappyPathFrom(memoryState)));
+                .then(
+                    shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, useTDRef)
+                        .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)));
       }
       case SI_PENDING_UPDATE -> then(
-          uc3_shipper_submitUpdatedShippingInstructions()
+          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
               .then(
-                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-                    .thenEither(
-                      noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
-                      // Special-case: UC2 -> UC3 -> UC5 -> ...
-                      // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 -> UC2 -> UC3 -> ...
-                      //   patterns (it eventually resolves, but it is unhelpful many cases)
-                      // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually the subtree here.
-                      // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow because neither UC2 and UC5
-                      // are considered happy paths.
-                      uc5_shipper_cancelUpdateToShippingInstructions()
-                        .then(
-                          shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, TD_START)
-                            .thenEither(
-                              noAction().thenHappyPathFrom(SI_PENDING_UPDATE),
-                              uc3_shipper_submitUpdatedShippingInstructions().then(
-                                shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-                                  .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)))))));
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                      .thenEither(
+                          noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                          // Special-case: UC2 -> UC3 -> UC5 -> ...
+                          // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 ->
+                          // UC2 -> UC3 -> ...
+                          //   patterns (it eventually resolves, but it is unhelpful many cases)
+                          // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually do
+                          // the subtree here.
+                          // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
+                          // because neither UC2 and UC3
+                          // are considered happy paths.
+                          uc5_shipper_cancelUpdateToShippingInstructions()
+                              .then(
+                                  shipper_GetShippingInstructions(
+                                          SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
+                                      .thenEither(
+                                          noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                                          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+                                              .then(
+                                                  shipper_GetShippingInstructions(
+                                                          SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                                                      .thenHappyPathFrom(
+                                                          SI_UPDATE_RECEIVED,
+                                                          SI_PENDING_UPDATE,
+                                                          transportDocumentStatus,
+                                                          useTDRef)))))));
       case SI_UPDATE_CONFIRMED -> thenEither(
-        noAction().thenHappyPathFrom(SI_UPDATE_CONFIRMED),
-        // Just to validate that the "Carrier" does not get "stuck"
-        uc2_carrier_requestUpdateToShippingInstruction()
-          .then(
-            shipper_GetShippingInstructions(SI_PENDING_UPDATE, TD_START)
-              .thenHappyPathFrom(SI_PENDING_UPDATE)),
-        uc3_shipper_submitUpdatedShippingInstructions()
-          .then(
-            shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-              .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)));
-      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError("Please use the black state rather than " + shippingInstructionsStatus.name());
+          noAction().thenHappyPathFrom(SI_UPDATE_CONFIRMED, transportDocumentStatus, useTDRef),
+          // Just to validate that the "Carrier" does not get "stuck"
+          uc2_carrier_requestUpdateToShippingInstruction()
+              .then(
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, useTDRef)
+                      .thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)),
+          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+              .then(
+                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                      .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus,  useTDRef)));
+      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError(
+          "Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
       case SI_COMPLETED -> then(noAction());
     };
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(
-    ShippingInstructionsStatus shippingInstructionsStatus) {
-    return thenHappyPathFrom(shippingInstructionsStatus, null);
+    ShippingInstructionsStatus shippingInstructionsStatus, TransportDocumentStatus transportDocumentStatus, boolean useTDRef) {
+    return thenHappyPathFrom(shippingInstructionsStatus, null, transportDocumentStatus, useTDRef);
   }
 
   private EblScenarioListBuilder thenHappyPathFrom(
-      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState) {
+      ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus memoryState, TransportDocumentStatus transportDocumentStatus, boolean useTDRef) {
     return switch (shippingInstructionsStatus) {
       case SI_START -> then(
           uc1_shipper_submitShippingInstructions()
               .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, TD_START)
-                      .thenHappyPathFrom(SI_RECEIVED)));
+                  shipper_GetShippingInstructions(SI_RECEIVED, useTDRef)
+                      .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef)));
       case SI_UPDATE_CONFIRMED, SI_RECEIVED -> then(
-          uc6_carrier_publishDraftTransportDocument()
-              .then(
-                  shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, TD_DRAFT, true)
-                      .then(shipper_GetTransportDocument(TD_DRAFT).thenHappyPathFrom(TD_DRAFT))));
+        switch (transportDocumentStatus) {
+          case TD_START, TD_DRAFT -> uc6_carrier_publishDraftTransportDocument().then(
+            shipper_GetShippingInstructionsRecordTDRef()
+              .then(shipper_GetTransportDocument(TD_DRAFT).thenHappyPathFrom(TD_DRAFT)));
+          case TD_ISSUED -> uc9_carrier_awaitSurrenderRequestForAmendment().then(
+            shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
+              .thenHappyPathFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT));
+          default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
+        });
       case SI_PENDING_UPDATE -> then(
-            uc3_shipper_submitUpdatedShippingInstructions()
+            uc3_shipper_submitUpdatedShippingInstructions(false)
                 .then(
-                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, TD_START)
-                        .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE)));
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                        .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)));
       case SI_UPDATE_RECEIVED -> then(
         uc4a_carrier_acceptUpdatedShippingInstructions()
           .then(
-            shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, TD_START)
-              .thenHappyPathFrom(SI_UPDATE_CONFIRMED)));
+            shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef)
+              .thenHappyPathFrom(SI_UPDATE_CONFIRMED, transportDocumentStatus, useTDRef)));
       case SI_COMPLETED -> then(noAction());
       case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError(
-          "Please use the black state rather than DECLINED");
+          "Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
     };
   }
@@ -170,16 +203,20 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private EblScenarioListBuilder thenAllPathsFrom(TransportDocumentStatus transportDocumentStatus) {
     return switch (transportDocumentStatus) {
       case TD_DRAFT -> thenEither(
+        uc7_shipper_approveDraftTransportDocument()
+          .then(shipper_GetTransportDocument(TD_APPROVED)
+            .thenAllPathsFrom(TD_APPROVED)),
           uc8_carrier_issueTransportDocument()
               .then(
                   shipper_GetTransportDocument(TD_ISSUED)
                     // Using happy path here as requested in
                     // https://github.com/dcsaorg/Conformance-Gateway/pull/29#discussion_r1421732797
                     .thenHappyPathFrom(TD_ISSUED)),
-          uc7_shipper_approveDraftTransportDocument()
-            .then(shipper_GetTransportDocument(TD_APPROVED)
-              .thenAllPathsFrom(TD_APPROVED))
-        );
+          uc3_shipper_submitUpdatedShippingInstructions(true)
+            .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_DRAFT, true),
+        uc3_shipper_submitUpdatedShippingInstructions(false)
+          .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_DRAFT, false)
+      );
       case TD_APPROVED -> then(
         uc8_carrier_issueTransportDocument()
           .then(
@@ -187,8 +224,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               .thenAllPathsFrom(TD_ISSUED))
       );
       case TD_ISSUED -> thenEither(
-        // TODO: We should have uc3 + uc4a + uc9 for an SI based amendment in parallel with UC9
-        //  (without uc3 + uc4a, which is basically a booking based amendment)
+        uc3_shipper_submitUpdatedShippingInstructions(true)
+          .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_ISSUED, true),
+        uc3_shipper_submitUpdatedShippingInstructions(false)
+          .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_ISSUED, false),
         uc9_carrier_awaitSurrenderRequestForAmendment()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
             .thenAllPathsFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT)),
@@ -266,8 +305,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         )
       );
       case TD_SURRENDERED_FOR_DELIVERY -> then(
-        uc14_carrier_confirmShippingInstructionsComplete().then(
-          shipper_GetShippingInstructions(SI_COMPLETED, TD_SURRENDERED_FOR_DELIVERY)
+        uc14_carrier_confirmShippingInstructionsComplete().thenEither(
+          shipper_GetShippingInstructions(SI_COMPLETED, false),
+          shipper_GetShippingInstructions(SI_COMPLETED, true)
         )
       );
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
@@ -290,29 +330,30 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   }
 
 
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus, TransportDocumentStatus expectedTdStatus) {
-    return shipper_GetShippingInstructions(expectedSiStatus, null, expectedTdStatus);
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
+                                                                        boolean useTDRef) {
+    return shipper_GetShippingInstructions(expectedSiStatus, null, useTDRef);
   }
 
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus, ShippingInstructionsStatus expectedUpdatedSiStatus, TransportDocumentStatus expectedTdStatus, boolean recordTDR) {
-    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, expectedTdStatus, false, recordTDR);
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus,
-    ShippingInstructionsStatus expectedUpdatedSiStatus,
-    TransportDocumentStatus expectedTdStatus) {
-    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, expectedTdStatus, false, false);
+  private static EblScenarioListBuilder shipper_GetShippingInstructionsRecordTDRef() {
+    return shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, false, true, false);
   }
 
   private static EblScenarioListBuilder shipper_GetShippingInstructions(
     ShippingInstructionsStatus expectedSiStatus,
     ShippingInstructionsStatus expectedUpdatedSiStatus,
-    TransportDocumentStatus expectedTdStatus,
+    boolean useTDRef
+  ) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, false, false, useTDRef);
+  }
+
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    ShippingInstructionsStatus expectedUpdatedSiStatus,
     boolean requestAmendedSI,
-    boolean recordTDR) {
+    boolean recordTDR,
+    boolean useTDRef) {
     EblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -326,7 +367,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           expectedUpdatedSiStatus,
           componentFactory.getMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
           requestAmendedSI,
-          recordTDR));
+          recordTDR,
+          useTDRef));
   }
 
   private static EblScenarioListBuilder shipper_GetTransportDocument(
@@ -359,7 +401,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           componentFactory.getMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static EblScenarioListBuilder uc3_shipper_submitUpdatedShippingInstructions() {
+  private static EblScenarioListBuilder uc3_shipper_submitUpdatedShippingInstructions(boolean useTDRef) {
     EblComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -369,6 +411,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
+                useTDRef,
                 componentFactory.getMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(

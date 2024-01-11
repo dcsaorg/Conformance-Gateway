@@ -17,15 +17,18 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final boolean useTDRef;
 
   public UC3_Shipper_SubmitUpdatedShippingInstructionsAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
+      boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), 200);
+    this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -38,8 +41,14 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
 
   @Override
   public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
+    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+    if (documentReference == null) {
+      throw new IllegalStateException("Missing document reference for use-case 3");
+    }
     return super.asJsonNode()
-      .put("sir", getDspSupplier().get().shippingInstructionsReference());
+      .put("sir", dsp.shippingInstructionsReference())
+      .put("documentReference", documentReference);
   }
 
   @Override
@@ -60,7 +69,7 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(dsp.shippingInstructionsReference())),
+            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference())),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
@@ -83,7 +92,7 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier())
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier())
         );
         return Stream.concat(
           primaryExchangeChecks,

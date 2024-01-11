@@ -1,7 +1,7 @@
 {
-  "transportDocumentTypeCode": "BOL",
+  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
-  "isToOrder": true,
+  "isToOrder": false,
   "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,

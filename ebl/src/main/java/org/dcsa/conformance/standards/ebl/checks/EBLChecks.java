@@ -668,7 +668,7 @@ public class EBLChecks {
     return JsonAttribute.mustEqual(TD_NOTIFICATION_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
 
-  private static <T> Supplier<T> cspValue(Supplier<CarrierScenarioParameters> cspSupplier, Function<CarrierScenarioParameters, T> field) {
+  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
     return () -> {
       var csp = cspSupplier.get();
       if (csp == null) {
@@ -678,11 +678,16 @@ public class EBLChecks {
     };
   }
 
-  private static void generateCSPRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, boolean isTD) {
+  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+    checks.add(JsonAttribute.mustEqual(
+      "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
+      "transportDocumentTypeCode",
+      delayedValue(dspSupplier, dsp -> dsp.scenarioType().transportDocumentTypeCode())
+    ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'carrierBookingReference' is used",
       mav -> mav.submitAllMatching("consignmentItems.*.carrierBookingReference"),
-      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
+      JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
     if (!isTD) {
       checks.add(
@@ -690,7 +695,7 @@ public class EBLChecks {
               "[Scenario] Verify that the correct 'commoditySubreference' is used",
               mav -> mav.submitAllMatching("consignmentItems.*.commoditySubreference"),
               JsonAttribute.matchedMustEqual(
-                  cspValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))));
+                  delayedValue(cspSupplier, CarrierScenarioParameters::commoditySubreference))));
     }
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'equipmentReference' is used",
@@ -700,41 +705,41 @@ public class EBLChecks {
         mav.submitAllMatching("utilizedTransportEquipments.*.equipmentReference");
         mav.submitAllMatching("utilizedTransportEquipments.*.equipment.equipmentReference");
       },
-      JsonAttribute.matchedMustEqualIfPresent(cspValue(cspSupplier, CarrierScenarioParameters::equipmentReference))
+      JsonAttribute.matchedMustEqualIfPresent(delayedValue(cspSupplier, CarrierScenarioParameters::equipmentReference))
     ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'HSCodes' are used",
       mav -> mav.submitAllMatching("consignmentItems.*.HSCodes.*"),
-      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::consignmentItemHSCode))
+      JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::consignmentItemHSCode))
     ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
       mav -> mav.submitAllMatching("consignmentItems.*.descriptionOfGoods"),
-      JsonAttribute.matchedMustEqual(cspValue(cspSupplier, CarrierScenarioParameters::descriptionOfGoods))
+      JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::descriptionOfGoods))
     ));
 
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'serviceContractReference' is used",
       "serviceContractReference",
-      cspValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
+      delayedValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
     ));
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'contractQuotationReference' is used",
       "contractQuotationReference",
-      cspValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
+      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
     ));
 
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'invoicePayableAt' location is used",
       SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
-      cspValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
+      delayedValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
     ));
   }
 
 
-  public static ActionCheck siRequestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier) {
+  public static ActionCheck siRequestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
-    generateCSPRelatedChecks(checks, cspSupplier, false);
+    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
@@ -762,7 +767,7 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
-    generateCSPRelatedChecks(checks, cspSupplier, true);
+    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
@@ -851,7 +856,7 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck tdContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck tdContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     jsonContentChecks.add(JsonAttribute.mustEqual(
       TD_TDR,
@@ -899,6 +904,7 @@ public class EBLChecks {
         return Set.of();
       }
     ));
+    generateScenarioRelatedChecks(jsonContentChecks, cspSupplier, dspSupplier, true);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.scenario;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -16,7 +15,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
@@ -42,7 +41,7 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode jsonState = OBJECT_MAPPER.createObjectNode();
     jsonState.put("id", id.toString());
 
     jsonState.put("nextActionsSize", nextActions.size());

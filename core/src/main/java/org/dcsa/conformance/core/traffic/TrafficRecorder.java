@@ -1,12 +1,11 @@
 package org.dcsa.conformance.core.traffic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
 import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public class TrafficRecorder {
   private final SortedPartitionsNonLockingMap nonLockingMap;
@@ -35,7 +34,7 @@ public class TrafficRecorder {
     nonLockingMap.setItemValue(
         partitionKey,
         Instant.now().toString(),
-      STATE_OBJECT_MAPPER
+      OBJECT_MAPPER
             .createObjectNode()
             .put("scenarioRun", scenarioRun)
             .set("exchange", conformanceExchange.toJson()));

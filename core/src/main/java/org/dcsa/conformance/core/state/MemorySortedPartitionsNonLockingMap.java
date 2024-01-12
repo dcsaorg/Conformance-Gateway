@@ -1,14 +1,13 @@
 package org.dcsa.conformance.core.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
@@ -17,17 +16,17 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
   @SneakyThrows
   @Override
   public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
-    JsonNode valueCopy = STATE_OBJECT_MAPPER.readTree(value.toString());
+    JsonNode valueCopy = OBJECT_MAPPER.readTree(value.toString());
     memoryMap
         .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .put(sortKey, STATE_OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
+        .put(sortKey, OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
   }
 
   @Override
   public synchronized JsonNode getItemValue(String partitionKey, String sortKey) {
     return memoryMap
         .getOrDefault(partitionKey, new TreeMap<>())
-        .getOrDefault(sortKey, STATE_OBJECT_MAPPER.createObjectNode())
+        .getOrDefault(sortKey, OBJECT_MAPPER.createObjectNode())
         .get("value");
   }
 

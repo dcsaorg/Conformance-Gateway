@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
@@ -55,7 +55,7 @@ public class JsonSchemaValidator {
 
   @SneakyThrows
   public Set<String> validate(String jsonString) {
-    return validate(STATE_OBJECT_MAPPER.readTree(jsonString));
+    return validate(OBJECT_MAPPER.readTree(jsonString));
   }
 
   public Set<String> validate(JsonNode jsonNode) {

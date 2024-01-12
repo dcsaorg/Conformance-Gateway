@@ -1,7 +1,6 @@
 package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -23,7 +22,7 @@ import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ConformanceOrchestrator implements StatefulEntity {
@@ -52,7 +51,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode jsonState = OBJECT_MAPPER.createObjectNode();
 
     { // scoped
       ArrayNode arrayNode = jsonState.putArray("scenarios");
@@ -100,7 +99,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public JsonNode getStatus() {
-    ObjectNode statusNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode statusNode = OBJECT_MAPPER.createObjectNode();
     statusNode.put(
         "scenariosLeft",
         scenariosById.values().stream().filter(ConformanceScenario::hasNextAction).count());
@@ -172,7 +171,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public JsonNode handleGetPartyPrompt(String partyName) {
     log.info("ConformanceOrchestrator.handleGetPartyPrompt(%s)".formatted(partyName));
 
-    ArrayNode partyPrompt = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode partyPrompt = OBJECT_MAPPER.createArrayNode();
     if (currentScenarioId == null) return partyPrompt;
 
     ConformanceAction nextAction = scenariosById.get(currentScenarioId).peekNextAction();
@@ -272,7 +271,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public ArrayNode getScenarioDigests() {
-    ArrayNode arrayNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
     if (!sandboxConfiguration.getOrchestrator().isActive()) return arrayNode;
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
@@ -295,7 +294,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
               log.info(
                   "Scenario description: '%s'".formatted(scenario.getReportTitleDescription()));
               ObjectNode scenarioNode =
-                STATE_OBJECT_MAPPER
+                OBJECT_MAPPER
                       .createObjectNode()
                       .put("id", scenario.getId().toString())
                       .put("name", scenario.getTitle())
@@ -320,7 +319,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
   public ObjectNode getScenarioDigest(String scenarioId) {
     ConformanceScenario scenario = this.scenariosById.get(UUID.fromString(scenarioId));
-    return STATE_OBJECT_MAPPER
+    return OBJECT_MAPPER
         .createObjectNode()
         .put("id", scenario.getId().toString())
         .put("name", scenario.getTitle())
@@ -330,7 +329,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public ObjectNode getScenarioStatus(String scenarioId) {
     UUID scenarioUuid = UUID.fromString(scenarioId);
 
-    ObjectNode scenarioNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode scenarioNode = OBJECT_MAPPER.createObjectNode();
     UUID runUuid = latestRunIdsByScenarioId.get(scenarioUuid);
     if (runUuid == null) return scenarioNode;
 

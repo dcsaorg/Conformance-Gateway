@@ -1,7 +1,6 @@
 package org.dcsa.conformance.springboot;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -42,7 +41,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 @RestController
@@ -78,7 +77,7 @@ public class ConformanceApplication {
     log.info(
         "new ConformanceApplication(%s)"
             .formatted(
-              STATE_OBJECT_MAPPER
+              OBJECT_MAPPER
                     .valueToTree(Objects.requireNonNull(this.conformanceConfiguration))
                     .toPrettyString()));
 

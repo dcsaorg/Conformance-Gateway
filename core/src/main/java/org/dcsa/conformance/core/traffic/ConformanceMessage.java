@@ -1,6 +1,5 @@
 package org.dcsa.conformance.core.traffic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -8,7 +7,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public record ConformanceMessage(
     String sourcePartyName,
@@ -20,7 +19,7 @@ public record ConformanceMessage(
     long timestamp) {
 
   public ObjectNode toJson() {
-    ObjectNode objectNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     objectNode.put("sourcePartyName", sourcePartyName);
     objectNode.put("sourcePartyRole", sourcePartyRole);
     objectNode.put("targetPartyName", targetPartyName);

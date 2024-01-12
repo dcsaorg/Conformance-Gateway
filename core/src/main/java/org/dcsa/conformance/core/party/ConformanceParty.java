@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
@@ -23,7 +22,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
@@ -70,7 +69,7 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   @Override
   public JsonNode exportJsonState() {
-    ObjectNode jsonPartyState = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode jsonPartyState = OBJECT_MAPPER.createObjectNode();
     jsonPartyState.set("actionPromptsQueue", actionPromptsQueue.exportJsonState());
 
     ArrayNode operatorLogNode = jsonPartyState.putArray("operatorLog");

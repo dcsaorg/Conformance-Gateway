@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.scenario;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.UUID;
@@ -11,7 +10,7 @@ import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 @Slf4j
@@ -47,7 +46,7 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   @Override
   public ObjectNode exportJsonState() {
-    ObjectNode jsonState = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode jsonState = OBJECT_MAPPER.createObjectNode();
     jsonState.put("id", id.toString());
     if (matchedExchangeUuid != null) {
       jsonState.put("matchedExchangeUuid", matchedExchangeUuid.toString());
@@ -149,7 +148,7 @@ public abstract class ConformanceAction implements StatefulEntity {
   public void handlePartyInput(JsonNode partyInput) {}
 
   public ObjectNode asJsonNode() {
-    return STATE_OBJECT_MAPPER
+    return OBJECT_MAPPER
         .createObjectNode()
         .put("actionId", id.toString())
         .put("actionType", getClass().getCanonicalName())

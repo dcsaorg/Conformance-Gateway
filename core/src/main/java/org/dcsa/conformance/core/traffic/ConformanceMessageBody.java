@@ -2,12 +2,11 @@ package org.dcsa.conformance.core.traffic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.ToString;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 @ToString
@@ -21,10 +20,10 @@ public class ConformanceMessageBody {
     boolean isCorrectJson;
     JsonNode jsonBody;
     try {
-      jsonBody = STATE_OBJECT_MAPPER.readTree(this.stringBody);
+      jsonBody = OBJECT_MAPPER.readTree(this.stringBody);
       isCorrectJson = true;
     } catch (JsonProcessingException e) {
-      jsonBody = STATE_OBJECT_MAPPER.createObjectNode();
+      jsonBody = OBJECT_MAPPER.createObjectNode();
       isCorrectJson = false;
     }
     this.isCorrectJson = isCorrectJson;
@@ -38,7 +37,7 @@ public class ConformanceMessageBody {
   }
 
   public ObjectNode toJson() {
-    ObjectNode objectNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     objectNode.put("isCorrectJson", isCorrectJson);
     if (isCorrectJson) {
       objectNode.set("jsonBody", jsonBody);

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
@@ -32,7 +31,7 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ConformanceSandbox {
@@ -208,7 +207,7 @@ public class ConformanceSandbox {
       Consumer<JsonNode> deferredSandboxTaskConsumer) {
     log.info(
         "ConformanceSandbox.handleRequest() "
-            + STATE_OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
+            + OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
 
     String expectedPrefix = "/conformance/sandbox/";
     int expectedPrefixStart = webRequest.url().indexOf(expectedPrefix);
@@ -309,7 +308,7 @@ public class ConformanceSandbox {
     if (sandboxConfiguration.getOrchestrator().isActive()) return null;
 
     String partyName = sandboxConfiguration.getParties()[0].getName();
-    ArrayNode operatorLogNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode operatorLogNode = OBJECT_MAPPER.createArrayNode();
     new PartyTask(
             persistenceProvider,
             deferredSandboxTaskConsumer,
@@ -391,7 +390,7 @@ public class ConformanceSandbox {
       String sandboxId,
       String actionId,
       JsonNode actionInputOrNull) {
-    ObjectNode partyInput = STATE_OBJECT_MAPPER.createObjectNode().put("actionId", actionId);
+    ObjectNode partyInput = OBJECT_MAPPER.createObjectNode().put("actionId", actionId);
     if (actionInputOrNull != null) {
       partyInput.set("input", actionInputOrNull);
     }
@@ -404,7 +403,7 @@ public class ConformanceSandbox {
             "handling in sandbox %s the input for action %s".formatted(sandboxId, actionId),
             orchestrator -> orchestrator.handlePartyInput(partyInput))
         .run();
-    return STATE_OBJECT_MAPPER.createObjectNode();
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   public static JsonNode startOrStopScenario(
@@ -421,7 +420,7 @@ public class ConformanceSandbox {
             "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
             orchestrator -> orchestrator.startOrStopScenario(scenarioId))
         .run();
-    return STATE_OBJECT_MAPPER.createObjectNode();
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   private static ConformanceWebResponse _handlePartyNotification(
@@ -501,7 +500,7 @@ public class ConformanceSandbox {
       String sandboxId,
       ConformanceRequest conformanceRequest) {
     JsonNode deferredTask =
-      STATE_OBJECT_MAPPER
+      OBJECT_MAPPER
             .createObjectNode()
             .put("handler", "_syncHandleOutboundRequest")
             .put("sandboxId", sandboxId)
@@ -513,7 +512,7 @@ public class ConformanceSandbox {
   private static void _asyncSendOutboundWebRequest(
       Consumer<JsonNode> deferredSandboxTaskConsumer, ConformanceWebRequest conformanceWebRequest) {
     JsonNode deferredTask =
-      STATE_OBJECT_MAPPER
+      OBJECT_MAPPER
             .createObjectNode()
             .put("handler", "_syncSendOutboundWebRequest")
             .set("conformanceWebRequest", conformanceWebRequest.toJson());
@@ -736,13 +735,13 @@ public class ConformanceSandbox {
             "sandbox#" + sandboxId,
             "state",
             originalSandboxState ->
-              STATE_OBJECT_MAPPER.createObjectNode().put("currentSessionId", newSessionId));
+              OBJECT_MAPPER.createObjectNode().put("currentSessionId", newSessionId));
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(
             "sandbox#" + sandboxId,
             "SK=session#%s#%s".formatted(Instant.now().toString(), newSessionId),
-          STATE_OBJECT_MAPPER.createObjectNode());
+          OBJECT_MAPPER.createObjectNode());
 
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -776,7 +775,7 @@ public class ConformanceSandbox {
         .setItemValue(
             "environment#" + environmentId,
             "sandbox#" + sandboxConfiguration.getId(),
-          STATE_OBJECT_MAPPER
+          OBJECT_MAPPER
                 .createObjectNode()
                 .put("id", sandboxConfiguration.getId())
                 .put("name", sandboxConfiguration.getName()));

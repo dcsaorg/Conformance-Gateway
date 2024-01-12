@@ -1,8 +1,7 @@
 package org.dcsa.conformance.core.toolkit;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,15 +15,16 @@ public enum JsonToolkit {
   ; // no instances
 
   public static final String JSON_UTF_8 = "application/json";
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {
-    return STATE_OBJECT_MAPPER.readTree(string);
+    return OBJECT_MAPPER.readTree(string);
   }
 
   @SneakyThrows
   public static JsonNode inputStreamToJsonNode(InputStream inputStream) {
-    return STATE_OBJECT_MAPPER.readTree(inputStream);
+    return OBJECT_MAPPER.readTree(inputStream);
   }
 
   @SneakyThrows
@@ -36,7 +36,7 @@ public enum JsonToolkit {
           new String(Objects.requireNonNull(inputStream).readAllBytes(), StandardCharsets.UTF_8));
     }
     replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
-    return STATE_OBJECT_MAPPER.readTree(jsonString.get());
+    return OBJECT_MAPPER.readTree(jsonString.get());
   }
 
   public static boolean stringAttributeEquals(JsonNode jsonNode, String name, String value) {
@@ -49,7 +49,7 @@ public enum JsonToolkit {
   }
 
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
-    ArrayNode arrayNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
     strings.forEach(arrayNode::add);
     return arrayNode;
   }
@@ -62,7 +62,7 @@ public enum JsonToolkit {
 
   public static ArrayNode mapOfStringToStringCollectionToJson(
       Map<String, ? extends Collection<String>> map) {
-    ArrayNode queryParamsNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode queryParamsNode = OBJECT_MAPPER.createArrayNode();
     map.forEach(
         (key, values) -> {
           queryParamsNode.addObject()

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.report;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
@@ -13,13 +12,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 public class ConformanceReport {
@@ -92,7 +85,7 @@ public class ConformanceReport {
   }
 
   public JsonNode toJsonReport() {
-    ObjectNode reportNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode reportNode = OBJECT_MAPPER.createObjectNode();
 
     reportNode.put("title", title);
     reportNode.put("status", conformanceStatus.name());

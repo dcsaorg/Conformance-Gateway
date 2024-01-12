@@ -1,7 +1,6 @@
 package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -22,7 +21,7 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ConformanceWebuiHandler {
@@ -188,7 +187,7 @@ public class ConformanceWebuiHandler {
 
     log.info("Created sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
 
-    return STATE_OBJECT_MAPPER.createObjectNode().put("sandboxId", sandboxId);
+    return OBJECT_MAPPER.createObjectNode().put("sandboxId", sandboxId);
   }
 
   private JsonNode _getSandboxConfig(String userId, JsonNode requestNode) {
@@ -215,7 +214,7 @@ public class ConformanceWebuiHandler {
             .findFirst()
             .orElseThrow();
 
-    return STATE_OBJECT_MAPPER
+    return OBJECT_MAPPER
         .createObjectNode()
         .put("sandboxId", sandboxConfiguration.getId())
         .put("sandboxName", sandboxConfiguration.getName())
@@ -270,18 +269,18 @@ public class ConformanceWebuiHandler {
 
     log.info("Updated sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
 
-    return STATE_OBJECT_MAPPER.createObjectNode();
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _getAvailableStandards(String ignoredUserId) {
-    ArrayNode standardsNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode standardsNode = OBJECT_MAPPER.createArrayNode();
     TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
     sortedStandardNames.addAll(componentFactories.keySet());
     sortedStandardNames.forEach(
         standardName -> {
-          ObjectNode standardNode = STATE_OBJECT_MAPPER.createObjectNode().put("name", standardName);
+          ObjectNode standardNode = OBJECT_MAPPER.createObjectNode().put("name", standardName);
           {
-            ArrayNode versionsNode = STATE_OBJECT_MAPPER.createArrayNode();
+            ArrayNode versionsNode = OBJECT_MAPPER.createArrayNode();
             standardNode.set("versions", versionsNode);
             componentFactories
                 .get(standardName)
@@ -289,9 +288,9 @@ public class ConformanceWebuiHandler {
                 .forEach(
                     standardVersion -> {
                       ObjectNode versionNode =
-                        STATE_OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
+                        OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
                       {
-                        ArrayNode rolesNode = STATE_OBJECT_MAPPER.createArrayNode();
+                        ArrayNode rolesNode = OBJECT_MAPPER.createArrayNode();
                         componentFactories
                             .get(standardName)
                             .get(standardVersion)
@@ -316,7 +315,7 @@ public class ConformanceWebuiHandler {
             sandboxNode ->
                 sortedSandboxesByLowercaseName.put(
                     sandboxNode.get("name").asText().toLowerCase(), sandboxNode));
-    ArrayNode sandboxesNode = STATE_OBJECT_MAPPER.createArrayNode();
+    ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
     sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
     return sandboxesNode;
   }
@@ -347,14 +346,14 @@ public class ConformanceWebuiHandler {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
-    return STATE_OBJECT_MAPPER.createObjectNode();
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _resetParty(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
-    return STATE_OBJECT_MAPPER.createObjectNode();
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _getScenarioDigests(String userId, JsonNode requestNode) {

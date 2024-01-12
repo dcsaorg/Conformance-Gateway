@@ -1,6 +1,5 @@
 package org.dcsa.conformance.core.traffic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -10,7 +9,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
-import static org.dcsa.conformance.core.Util.STATE_OBJECT_MAPPER;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public record ConformanceRequest(
     String method,
@@ -35,7 +34,7 @@ public record ConformanceRequest(
   }
 
   public ObjectNode toJson() {
-    ObjectNode objectNode = STATE_OBJECT_MAPPER.createObjectNode();
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     objectNode.put("method", method);
     objectNode.put("url", url);
     objectNode.set("queryParams", JsonToolkit.mapOfStringToStringCollectionToJson(queryParams));

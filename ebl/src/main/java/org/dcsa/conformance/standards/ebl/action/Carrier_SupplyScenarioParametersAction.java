@@ -66,35 +66,77 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
       case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
+        null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
+        null,
         "DKAAR",
         "640510",
+        null,
         "Shoes - black, 400 boxes",
+        null,
         "ServiceContractReference-1234",
         "QuotationReference-1234"
       );
       case REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for cargo requiring an *active* reefer",
+        null,
         // Any valid reefer equipment reference will do as an example.
         "KKFU6671914",
+        null,
         "DKAAR",
         "04052090",
+        null,
         "Dairy products",
+        null,
         "ServiceContractReference-1234AR",
         "QuotationReference-1234AR"
       );
       case DG -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for dangerous goods cargo",
+        null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
+        null,
         "DKAAR",
         "293499",
+        null,
         "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        null,
         "ServiceContractReference-1234DG",
         "QuotationReference-1234DG"
+      );
+      case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity Subreference for regular cargo 1",
+        "Commodity Subreference for regular cargo 2",
+        // Any valid reefer equipment reference will do as an example.
+        "MSKU3963442",
+        "MSKU7895860",
+        "DKAAR",
+        "691110",
+        "732391",
+        "Tableware and kitchenware",
+        "Kitchen pots and pans",
+        "SCR-1234-RG2C2U1E",
+        "QR-1234-RG2C2U1E"
+      );
+      case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity Subreference for regular cargo 1",
+        "Commodity Subreference for regular cargo 2",
+        // Any valid reefer equipment reference will do as an example.
+        "MSKU3963442",
+        "MSKU7895860",
+        "DKAAR",
+        "691110",
+        "732391",
+        "Tableware and kitchenware",
+        "Kitchen pots and pans",
+        "SCR-1234-RG2C2U2E",
+        "QR-1234-RG2C2U2E"
       );
     };
     return csp.toJson();

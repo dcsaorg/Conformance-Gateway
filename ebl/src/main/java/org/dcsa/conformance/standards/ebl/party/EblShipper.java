@@ -77,7 +77,7 @@ public class EblShipper extends ConformanceParty {
 
     var jsonRequestBody = (ObjectNode)
         JsonToolkit.templateFileToJsonNode(
-            "/standards/ebl/messages/ebl-api-v30-request.json",
+            "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
             Map.ofEntries(
                 Map.entry(
                     "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
@@ -85,12 +85,20 @@ public class EblShipper extends ConformanceParty {
                 Map.entry(
                     "COMMODITY_SUBREFERENCE_PLACEHOLDER",
                     carrierScenarioParameters.commoditySubreference()),
+              Map.entry(
+                "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+                Objects.requireNonNullElse(carrierScenarioParameters.commoditySubreference2(), "")),
                 Map.entry(
                     "EQUIPMENT_REFERENCE_PLACEHOLDER",
                     carrierScenarioParameters.equipmentReference()),
+              Map.entry(
+                "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+                Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference2(), "")),
               Map.entry("INVOICE_PAYABLE_AT_UNLOCATION_CODE", carrierScenarioParameters.invoicePayableAtUNLocationCode()),
               Map.entry("CONSIGNMENT_ITEM_HS_CODE", carrierScenarioParameters.consignmentItemHSCode()),
+              Map.entry("CONSIGNMENT_ITEM_2_HS_CODE", Objects.requireNonNullElse(carrierScenarioParameters.consignmentItem2HSCode(), "")),
               Map.entry("DESCRIPTION_OF_GOODS_PLACEHOLDER", carrierScenarioParameters.descriptionOfGoods()),
+              Map.entry("DESCRIPTION_OF_GOODS_2_PLACEHOLDER", Objects.requireNonNullElse(carrierScenarioParameters.descriptionOfGoods2(), "")),
               Map.entry("SERVICE_CONTRACT_REFERENCE_PLACEHOLDER", carrierScenarioParameters.serviceContractReference()),
               Map.entry("CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER", carrierScenarioParameters.contractQuotationReference()),
               Map.entry("TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER", scenarioType.transportDocumentTypeCode())
@@ -131,14 +139,13 @@ public class EblShipper extends ConformanceParty {
     var sir = actionPrompt.required("sir").asText();
     var documentReference = actionPrompt.required("documentReference").asText();
     var si = (ObjectNode) persistentMap.load(sir);
-
-    // FIXME: We should be changing the seal number
-    var pcd = si.required("partyContactDetails").required(0);
-    var newName = "DCSA test person2";
-    if (pcd.required("name").asText("").equals(newName)) {
-      newName = "DCSA test person";
+    var seal = si.required("utilizedTransportEquipments").required(0).required("seals").path(0);
+    var newSealNumber = "NSL13388";
+    if (newSealNumber.equals(seal.required("number").asText())) {
+      // Ensure we do a change in case we do multiple UC3 in the same run
+      newSealNumber = "NSL13386";
     }
-    ((ObjectNode)pcd).put("name", newName);
+    ((ObjectNode)seal).put("number", newSealNumber);
 
     ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(documentReference), si);
 

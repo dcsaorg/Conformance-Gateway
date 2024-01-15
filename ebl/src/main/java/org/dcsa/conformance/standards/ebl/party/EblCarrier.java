@@ -88,35 +88,78 @@ public class EblCarrier extends ConformanceParty {
         case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
           "CBR_123_REGULAR",
           "Some Commodity Subreference 123",
+          null,
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
           "NARU3472484",
+          null,
           "DKAAR",
           "640510",
+          null,
           "Shoes - black, 400 boxes",
+          null,
           "SCR-1234-REGULAR",
           "QR-1234-REGULAR"
         );
         case REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
           "Some reefer Commodity Subreference 123",
+          null,
           // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
           "KKFU6671914",
+          null,
           "DKAAR",
           "04052090",
+          null,
           "Dairy products",
+          null,
           "SCR-1234-REEFER",
           "QR-1234-REEFER"
         );
         case DG -> new CarrierScenarioParameters(
           "RTM1234567",
           "Some DG Commodity Subreference 123",
+          null,
           // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
           "HLXU1234567",
+          null,
           "DKAAR",
           "293499",
+          null,
           "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+          null,
           "SCR-1234-DG",
+
           "QR-1234-DG"
+        );
+        case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
+          "RG-2C-2U-1E",
+          "Commodity Subreference 123",
+          "Commodity Subreference 456",
+          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "MSKU3963442",
+          "MSKU7895860",
+          "DKAAR",
+          "691110",
+          "732391",
+          "Tableware and kitchenware",
+          "Kitchen pots and pans",
+          "SCR-1234-RG2C2U1E",
+          "QR-1234-RG2C2U1E"
+        );
+        case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
+          "RG-2C-2U-1E",
+          "Commodity Subreference 123",
+          "Commodity Subreference 456",
+          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "MSKU3963442",
+          "MSKU7895860",
+          "DKAAR",
+          "691110",
+          "732391",
+          "Tableware and kitchenware",
+          "Kitchen pots and pans",
+          "SCR-1234-RG2C2U2E",
+          "QR-1234-RG2C2U2E"
         );
     };
     asyncOrchestratorPostPartyInput(

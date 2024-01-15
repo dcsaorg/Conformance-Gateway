@@ -1,0 +1,97 @@
+{
+  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "isElectronic": true,
+  "isToOrder": false,
+  "sendToPlatform": "BOLE",
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "locationType": "UNCO",
+    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+  },
+  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
+  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+  "partyContactDetails": [
+    {
+      "name": "DCSA test person",
+      "email": "no-reply@dcsa.example.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+      "weight": 15000,
+      "weightUnit": "KGM",
+      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "HSCodes": [
+        "CONSIGNMENT_ITEM_HS_CODE"
+      ],
+      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "cargoItems": [
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "weight": 15000,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "numberOfPackages": 600
+          }
+        }
+      ]
+    },
+    {
+      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+      "weight": 20000,
+      "weightUnit": "KGM",
+      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_2_PLACEHOLDER",
+      "HSCodes": [
+        "CONSIGNMENT_ITEM_2_HS_CODE"
+      ],
+      "commoditySubreference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+      "cargoItems": [
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "weight": 20000,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "numberOfPackages": 400
+          }
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "seals": [
+        {
+          "number": "NSL13386"
+        }
+      ]
+    },
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+      "seals": [
+        {
+          "number": "NSL13387"
+        }
+      ]
+    }
+  ],
+  "documentParties": [
+    {
+      "party": {
+        "partyName": "DCSA CTK",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "OS",
+      "isToBeNotified": false
+    }
+  ]
+}

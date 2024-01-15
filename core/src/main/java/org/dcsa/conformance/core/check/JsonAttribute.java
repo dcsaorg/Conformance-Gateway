@@ -10,8 +10,6 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class JsonAttribute {
 
-  private static final JsonPointer ROOT_PTR = JsonPointer.compile("/");
-
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -566,7 +564,7 @@ public class JsonAttribute {
     @NonNull String description,
     @NonNull JsonContentMatchedValidation validator
   ) {
-    return JsonContentCheckImpl.of(description, ROOT_PTR, validator);
+    return JsonContentCheckImpl.of(description, atRoot(validator));
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
@@ -587,6 +585,10 @@ public class JsonAttribute {
 
   private static Function<JsonNode, Set<String>> atMatched(JsonPointer jsonPointer, JsonContentMatchedValidation validator) {
     return (refNode) -> validator.validate(refNode.at(jsonPointer), renderJsonPointer(jsonPointer));
+  }
+
+  private static Function<JsonNode, Set<String>> atRoot(JsonContentMatchedValidation validator) {
+    return (refNode) -> validator.validate(refNode, "");
   }
 
   static String renderValue(JsonNode node) {

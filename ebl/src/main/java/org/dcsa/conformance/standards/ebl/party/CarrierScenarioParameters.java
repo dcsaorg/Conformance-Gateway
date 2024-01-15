@@ -34,6 +34,9 @@ public record CarrierScenarioParameters(
     if (commoditySubreference2 != null) {
       node.put("commoditySubreference2", commoditySubreference2);
     }
+    if (equipmentReference != null) {
+      node.put("equipmentReference", equipmentReference);
+    }
     if (equipmentReference2 != null) {
       node.put("equipmentReference2", equipmentReference2);
     }
@@ -51,7 +54,7 @@ public record CarrierScenarioParameters(
       jsonNode.required("carrierBookingReference").asText(),
       jsonNode.required("commoditySubreference").asText(),
       jsonNode.path("commoditySubreference2").asText(null),
-      jsonNode.required("equipmentReference").asText(),
+      jsonNode.path("equipmentReference").asText(null),
       jsonNode.path("equipmentReference2").asText(null),
       jsonNode.required("invoicePayableAtUNLocationCode").asText(),
       jsonNode.required("consignmentItemHSCode").asText(),

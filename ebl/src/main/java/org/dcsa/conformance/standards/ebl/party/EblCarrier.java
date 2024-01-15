@@ -85,8 +85,8 @@ public class EblCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
       switch (scenarioType) {
-        case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
-          "CBR_123_REGULAR",
+        case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF -> new CarrierScenarioParameters(
+          "CBR_123_" + scenarioType.name(),
           "Some Commodity Subreference 123",
           null,
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
@@ -100,7 +100,7 @@ public class EblCarrier extends ConformanceParty {
           "SCR-1234-REGULAR",
           "QR-1234-REGULAR"
         );
-        case REEFER -> new CarrierScenarioParameters(
+        case ACTIVE_REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
           "Some reefer Commodity Subreference 123",
           null,
@@ -114,6 +114,21 @@ public class EblCarrier extends ConformanceParty {
           null,
           "SCR-1234-REEFER",
           "QR-1234-REEFER"
+        );
+        case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
+          "CBR_123_NON_OPERATING_REEFER",
+          "Some reefer Commodity Subreference 123",
+          null,
+          // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "KKFU6671914",
+          null,
+          "DKAAR",
+          "220299",
+          null,
+          "Non alcoholic beverages, 40,000 cans",
+          null,
+          "SCR-1234-NON_OPERATING_REEFER",
+          "QR-1234-NON_OPERATING_REEFER"
         );
         case DG -> new CarrierScenarioParameters(
           "RTM1234567",
@@ -160,6 +175,20 @@ public class EblCarrier extends ConformanceParty {
           "Kitchen pots and pans",
           "SCR-1234-RG2C2U2E",
           "QR-1234-RG2C2U2E"
+        );
+        case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
+          "RG-SOC-REFERENCES",
+          "Commodity Subreference 123",
+          null,
+          null,
+          null,
+          "DKAAR",
+          "691110",
+          null,
+          "Tableware and kitchenware",
+          null,
+          "SCR-1234-RG-SOC-REFERENCES",
+          "QR-1234-RG-SOC-REFERENCES"
         );
     };
     asyncOrchestratorPostPartyInput(

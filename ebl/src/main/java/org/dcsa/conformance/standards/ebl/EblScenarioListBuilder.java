@@ -45,10 +45,13 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     return noAction().thenEither(
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB).thenAllPathsFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL).thenHappyPathFrom(SI_START, TD_START, false),
-      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.ACTIVE_REEFER).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.NON_OPERATING_REEFER).thenHappyPathFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_1E).thenHappyPathFrom(SI_START, TD_START, false),
-      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_2E).thenHappyPathFrom(SI_START, TD_START, false)
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_2E).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_AMF).thenHappyPathFrom(SI_START, TD_START, false)
     );
   }
 

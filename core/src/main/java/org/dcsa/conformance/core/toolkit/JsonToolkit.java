@@ -32,8 +32,11 @@ public enum JsonToolkit {
       String templatePath, Map<String, String> replacements) {
     AtomicReference<String> jsonString = new AtomicReference<>();
     try (InputStream inputStream = JsonToolkit.class.getResourceAsStream(templatePath)) {
+      if (inputStream == null) {
+        throw new IllegalArgumentException("Could not resolve " + templatePath);
+      }
       jsonString.set(
-          new String(Objects.requireNonNull(inputStream).readAllBytes(), StandardCharsets.UTF_8));
+          new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
     }
     replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
     return OBJECT_MAPPER.readTree(jsonString.get());

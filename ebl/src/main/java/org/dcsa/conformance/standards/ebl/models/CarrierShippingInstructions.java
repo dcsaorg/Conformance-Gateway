@@ -499,7 +499,7 @@ public class CarrierShippingInstructions {
         // The alternative is having a look-up table of all known packageCode's and their relevant
         // description.
         switch (scenarioType) {
-          case REGULAR_SWB, REGULAR_BOL ->
+          case REGULAR_SWB, REGULAR_BOL, REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
             outerPackaging.put("packageCode", "4G")
               .put("description", "Fibreboard boxes");
           case REEFER ->
@@ -526,8 +526,8 @@ public class CarrierShippingInstructions {
     // These code must be aligned with the equipment references.
     var containerISOEquipmentCode = switch (scenarioType) {
       case REEFER -> "45R1";
-      case REGULAR_SWB, REGULAR_BOL -> "22G1";
       case DG -> "22GP";
+      default -> "22G1";
     };
     var consignmentItemsNode = transportDocument.path("consignmentItems");
     for (JsonNode node : transportDocument.path("utilizedTransportEquipments")) {

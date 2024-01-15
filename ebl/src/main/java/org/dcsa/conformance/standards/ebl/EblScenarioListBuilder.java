@@ -46,7 +46,9 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB).thenAllPathsFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL).thenHappyPathFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START, TD_START, false),
-      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START, TD_START, false)
+      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_1E).thenHappyPathFrom(SI_START, TD_START, false),
+      carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_2E).thenHappyPathFrom(SI_START, TD_START, false)
     );
   }
 
@@ -649,8 +651,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
     if (schemaValidator != null) {
       return schemaValidator;
     }
-    String schemaFilePath = "/standards/ebl/schemas/ebl-%s-v%s0.json"
-      .formatted(apiName, standardVersion.charAt(0));
+    String schemaFilePath = "/standards/ebl/schemas/ebl-%s-%s.json"
+      .formatted(apiName, standardVersion.toLowerCase());
 
     schemaValidator = JsonSchemaValidator.getInstance(schemaFilePath, schema);
     SCHEMA_CACHE.put(schemaKey, schemaValidator);

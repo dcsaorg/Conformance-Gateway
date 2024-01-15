@@ -117,7 +117,7 @@ public class EBLChecks {
       // Otherwise, we give conflicting results in some scenarios.
       return !HAS_ISO_EQUIPMENT_CODE.test(uteNode) || IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(uteNode);
     }
-    return norNode.asBoolean(false);
+    return !norNode.asBoolean(false);
   };
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -724,6 +724,60 @@ public class EBLChecks {
       SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
       delayedValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
     ));
+
+    checks.add(JsonAttribute.customValidator(
+      "[Scenario] Verify that 'references' is used when the scenario requires it",
+      scenarioReferencesCheck(dspSupplier)
+    ));
+    checks.add(JsonAttribute.customValidator(
+      "[Scenario] Verify that 'customsReferences' is used when the scenario requires it",
+      scenarioCustomsReferencesCheck(dspSupplier)
+    ));
+  }
+
+  private static JsonContentMatchedValidation scenarioCustomsReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (nodeToValidate,contextPath) -> {
+      var dsp = dspSupplier.get();
+      var scenarioType = dsp.scenarioType();
+      if (!scenarioType.isCustomsReferencesRequired()) {
+        return Set.of();
+      }
+      var allReferencesParents = nodeToValidate.findParents("customsReferences");
+      for (var referencesParent : allReferencesParents) {
+        if (isNonEmptyNode(referencesParent.path("customsReferences"))) {
+          return Set.of();
+        }
+      }
+      return Set.of("Expected 'customsReferences' to be used somewhere.");
+    };
+  }
+
+  private static JsonContentMatchedValidation scenarioReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (nodeToValidate,contextPath) -> {
+      var dsp = dspSupplier.get();
+      var scenarioType = dsp.scenarioType();
+      if (!scenarioType.isReferencesRequired()) {
+        return Set.of();
+      }
+      var allReferencesParents = nodeToValidate.findParents("references");
+      for (var referencesParent : allReferencesParents) {
+        if (isNonEmptyNode(referencesParent.path("references"))) {
+          return Set.of();
+        }
+      }
+      return Set.of("Expected 'references' to be used somewhere.");
+    };
+  }
+
+
+  private static boolean isNonEmptyNode(JsonNode field) {
+    if (field == null || field.isMissingNode()) {
+      return false;
+    }
+    if (field.isTextual()) {
+      return !field.asText().isBlank();
+    }
+    return !field.isEmpty() || field.isValueNode();
   }
 
   private static <T> Set<T> setOf(T v1, T v2) {
@@ -873,12 +927,32 @@ public class EBLChecks {
       }
       return equipmentReferenceNode;
     };
-    return checkCSPAllUsedAtLeastOnce(
-      "equipmentReference",
-      expectedValueSupplier,
-      resolver
-    );
-  }
+    return (nodes, contextPath) -> {
+      var csp = cspSupplier.get();
+      var expectedReferences = setOf(csp.equipmentReference(), csp.equipmentReference2());
+      if (expectedReferences.isEmpty()) {
+        // SOC-case
+        var issues = new LinkedHashSet<String>();
+        int index = 0;
+        var pathBuilder = new StringBuilder(contextPath);
+        for (var node : nodes) {
+          pathBuilder.setLength(contextPath.length());
+          pathBuilder.append('[').append(index).append("].isShipperOwned");
+          var isSoc = node.path("isShipperOwned").asBoolean(false);
+          if (isSoc) {
+            continue;
+          }
+          issues.add(
+            "Expected %s to be true".formatted(pathBuilder.toString())
+          );
+        }
+
+        return issues;
+      }
+      return checkCSPAllUsedAtLeastOnce("equipmentReference", () -> expectedReferences, resolver)
+          .validate(nodes, contextPath);
+    };
+   }
 
   private static JsonContentMatchedValidation checkCommoditySubreference(Supplier<CarrierScenarioParameters> cspSupplier) {
     Supplier<Set<String>> expectedValueSupplier = () -> {
@@ -1073,20 +1147,34 @@ public class EBLChecks {
       jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
     }
     jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-      "[Scenario] Whether the containers should have active reefer",
-      mav-> mav.path("utilizedTransportEquipments").all().path("activeReeferSettings").submitPath(),
+      "[Scenario] Validate the containers reefer settings",
+      mav-> mav.submitAllMatching("utilizedTransportEquipments.*"),
       (nodeToValidate, contextPath) -> {
         var scenario = dspSupplier.get().scenarioType();
-        if (scenario == ScenarioType.REEFER) {
-          if (!nodeToValidate.isObject()) {
-            return Set.of("The scenario requires '%s' to have an active reefer".formatted(contextPath));
+        var activeReeferNode = nodeToValidate.path("activeReeferSettings");
+        var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+        var issues = new LinkedHashSet<String>();
+        switch (scenario) {
+          case ACTIVE_REEFER -> {
+            if (!activeReeferNode.isObject()) {
+              issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
+            }
           }
-        } else {
-          if (!nodeToValidate.isMissingNode()) {
-            return Set.of("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
+          case NON_OPERATING_REEFER -> {
+            if (!nonOperatingReeferNode.asBoolean(false)) {
+              issues.add("The scenario requires '%s.isNonOperatingReefer' to be true".formatted(contextPath));
+            }
+          }
+          default -> {
+            if (!activeReeferNode.isMissingNode()) {
+              issues.add("The scenario requires '%s' to NOT have an active reefer".formatted(contextPath));
+            }
+            if (nonOperatingReeferNode.asBoolean(false)) {
+              issues.add("The scenario requires '%s.isNonOperatingReefer' to be omitted or false (depending on the container ISO code)".formatted(contextPath));
+            }
           }
         }
-        return Set.of();
+        return issues;
       }
     ));
     jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(

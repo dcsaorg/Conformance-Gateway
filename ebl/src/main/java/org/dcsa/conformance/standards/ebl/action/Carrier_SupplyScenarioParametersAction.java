@@ -63,7 +63,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
-      case REGULAR_SWB, REGULAR_BOL -> new CarrierScenarioParameters(
+      case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
         null,
@@ -78,7 +78,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "ServiceContractReference-1234",
         "QuotationReference-1234"
       );
-      case REEFER -> new CarrierScenarioParameters(
+      case ACTIVE_REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for cargo requiring an *active* reefer",
         null,
@@ -92,6 +92,21 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "ServiceContractReference-1234AR",
         "QuotationReference-1234AR"
+      );
+      case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity subreference for cargo requiring an non-operating reefer",
+        null,
+        // Any valid reefer equipment reference will do as an example.
+        "KKFU6671914",
+        null,
+        "DKAAR",
+        "220299",
+        null,
+        "Non alcoholic beverages, 40,000 cans",
+        null,
+        "ServiceContractReference-1234NOR",
+        "QuotationReference-1234NOR"
       );
       case DG -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -137,6 +152,20 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Kitchen pots and pans",
         "SCR-1234-RG2C2U2E",
         "QR-1234-RG2C2U2E"
+      );
+      case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
+        "Booking Reference",
+        "Commodity Subreference for regular cargo",
+        null,
+        null,
+        null,
+        "DKAAR",
+        "691110",
+        null,
+        "Tableware and kitchenware",
+        null,
+        "SCR-1234-RG-SOC-REFERENCES",
+        "QR-1234-RG-SOC-REFERENCES"
       );
     };
     return csp.toJson();

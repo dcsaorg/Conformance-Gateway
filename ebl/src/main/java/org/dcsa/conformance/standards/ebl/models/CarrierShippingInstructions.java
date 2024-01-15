@@ -499,13 +499,21 @@ public class CarrierShippingInstructions {
         // The alternative is having a look-up table of all known packageCode's and their relevant
         // description.
         switch (scenarioType) {
-          case REGULAR_SWB, REGULAR_BOL, REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
+          case REGULAR_SWB:
+          case REGULAR_BOL:
+          case REGULAR_2C_2U_1E:
+          case REGULAR_2C_2U_2E:
+          case REGULAR_SWB_SOC_AND_REFERENCES:
+          case REGULAR_SWB_AMF:
             outerPackaging.put("packageCode", "4G")
               .put("description", "Fibreboard boxes");
-          case REEFER ->
+            break;
+          case NON_OPERATING_REEFER:
+          case ACTIVE_REEFER:
             outerPackaging.put("packageCode", "BQ")
               .put("description", "Bottles");
-          case DG -> {
+            break;
+          case DG: {
             outerPackaging.put("description", "Jerrican, steel")
               .put("imoPackagingCode", "3A1");
             var dg = outerPackaging.putArray("dangerousGoods").addObject();
@@ -513,10 +521,11 @@ public class CarrierShippingInstructions {
               .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
               .put("imoClass", "9")
               .put("packingGroup", 3)
-              .put("EMSNumber", "F-A S-F")
-             ;
+              .put("EMSNumber", "F-A S-F");
+             break;
           }
-          default -> throw new AssertionError("Missing case for " + scenarioType.name());
+          default:
+            throw new AssertionError("Missing case for " + scenarioType.name());
         }
       }
     }
@@ -525,7 +534,7 @@ public class CarrierShippingInstructions {
   private void fixupUtilizedTransportEquipments(ObjectNode transportDocument, ScenarioType scenarioType) {
     // These code must be aligned with the equipment references.
     var containerISOEquipmentCode = switch (scenarioType) {
-      case REEFER -> "45R1";
+      case ACTIVE_REEFER, NON_OPERATING_REEFER -> "45R1";
       case DG -> "22GP";
       default -> "22G1";
     };
@@ -536,7 +545,6 @@ public class CarrierShippingInstructions {
       }
       ObjectNode ute = (ObjectNode)node;
       var ref = ute.path("equipmentReference").asText("");
-      computeWeightForUTE(ute, ref, consignmentItemsNode);
       // Shipper could provide a SOC, which is done via the equipment node.
       // If they do, we assume the information in there is correct and just copy
       // it into the TD.
@@ -544,13 +552,19 @@ public class CarrierShippingInstructions {
         ute.putObject("equipment")
             .put("ISOEquipmentCode", containerISOEquipmentCode)
             .put("equipmentReference", ref);
+      } else {
+        ref = ute.path("equipment").path("equipmentReference").asText("");
       }
+
+      computeWeightForUTE(ute, ref, consignmentItemsNode);
       ute.remove("equipmentReference");
-      if (scenarioType == ScenarioType.REEFER) {
+      if (scenarioType == ScenarioType.ACTIVE_REEFER) {
         ute.put("isNonOperatingReefer", false)
           .putObject("activeReeferSettings")
           .put("temperatureSetpoint", -18)
           .put("temperatureUnit", "CEL");
+      } else if (scenarioType == ScenarioType.NON_OPERATING_REEFER) {
+        ute.put("isNonOperatingReefer", true);
       }
     }
   }

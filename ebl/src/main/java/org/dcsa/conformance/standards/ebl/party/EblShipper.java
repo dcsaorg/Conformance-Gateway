@@ -90,7 +90,7 @@ public class EblShipper extends ConformanceParty {
                 Objects.requireNonNullElse(carrierScenarioParameters.commoditySubreference2(), "")),
                 Map.entry(
                     "EQUIPMENT_REFERENCE_PLACEHOLDER",
-                    carrierScenarioParameters.equipmentReference()),
+                  Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference(), "")),
               Map.entry(
                 "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
                 Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference2(), "")),

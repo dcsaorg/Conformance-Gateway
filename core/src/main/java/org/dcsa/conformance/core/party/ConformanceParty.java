@@ -1,10 +1,12 @@
 package org.dcsa.conformance.core.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.HTTP_CLIENT;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -22,10 +24,9 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
+
   protected final String apiVersion;
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
@@ -240,7 +241,7 @@ public abstract class ConformanceParty implements StatefulEntity {
     orchestratorAuthHeader.forEach(
         (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     String stringResponseBody =
-        HttpClient.newHttpClient()
+      HTTP_CLIENT
             .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString())
             .body();
     return new ConformanceMessageBody(stringResponseBody).getJsonBody();

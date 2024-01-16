@@ -1,10 +1,12 @@
 package org.dcsa.conformance.sandbox;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.HTTP_CLIENT;
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -31,10 +33,9 @@ import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Slf4j
 public class ConformanceSandbox {
+
   private record OrchestratorTask(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
@@ -567,7 +568,7 @@ public class ConformanceSandbox {
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     HttpResponse<String> httpResponse =
-        HttpClient.newHttpClient()
+      HTTP_CLIENT
             .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
@@ -623,7 +624,7 @@ public class ConformanceSandbox {
           .headers()
           .forEach(
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-      HttpClient.newHttpClient()
+      HTTP_CLIENT
           .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (Exception e) {
       log.error(

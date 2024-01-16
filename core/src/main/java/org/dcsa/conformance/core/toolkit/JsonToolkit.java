@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.InputStream;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,6 +17,7 @@ public enum JsonToolkit {
 
   public static final String JSON_UTF_8 = "application/json";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
   @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {

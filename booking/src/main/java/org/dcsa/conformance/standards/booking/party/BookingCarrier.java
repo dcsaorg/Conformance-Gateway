@@ -105,6 +105,8 @@ public class BookingCarrier extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
+    var assignCbr = actionPrompt.required("assignCbr");
+    persistentMap.save("assignCbr",assignCbr);
     List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes(scenarioType);
     CarrierScenarioParameters carrierScenarioParameters =
         new CarrierScenarioParameters(
@@ -548,6 +550,18 @@ public class BookingCarrier extends ConformanceParty {
     return return404(request);
   }
 
+  private void assignCBRToBookingRequest(ObjectNode bookingRequestPayload, String cbrr) {
+    var persistableCarrierBooking =
+      PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    persistableCarrierBooking.assignCBRToBooking(() -> generateAndAssociateCBR(cbrr));
+    persistableCarrierBooking.save(persistentMap);
+    var cbr = persistableCarrierBooking.getCarrierBookingReference();
+    bookingRequestPayload.put("carrierBookingReference",cbr);
+    assert cbr != null;
+    addOperatorLogEntry(
+      "Assigned CBR '%s' to the booking request CBRR '%s'".formatted(cbr, cbrr));
+  }
+
   @SneakyThrows
   private ConformanceResponse _handlePostBookingRequest(ConformanceRequest request) {
     ObjectNode bookingRequestPayload =
@@ -555,6 +569,12 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
     persistableCarrierBooking.save(persistentMap);
+
+    var assignCbr = persistentMap.load("assignCbr").asBoolean(false);
+    if (assignCbr) {
+      assignCBRToBookingRequest(bookingRequestPayload,
+        persistableCarrierBooking.getCarrierBookingRequestReference());
+    }
     if (isShipperNotificationEnabled) {
       asyncCounterpartNotification(
           "/v2/booking-notifications",

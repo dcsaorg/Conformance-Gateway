@@ -33,9 +33,10 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
     return noAction().thenEither(
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR).thenAllPathsFrom(START),
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER).thenHappyPathFrom(START),
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.DG).thenHappyPathFrom(START)
+      //carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR,false).thenAllPathsFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR, true).thenHappyPathFrom(START)//,
+      //carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER,false).thenHappyPathFrom(START),
+     // carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.DG,false).thenHappyPathFrom(START)
     );
   }
 
@@ -146,9 +147,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return new BookingScenarioListBuilder(null);
   }
 
-  private static BookingScenarioListBuilder carrier_SupplyScenarioParameters(String carrierPartyName, ScenarioType scenarioType) {
+  private static BookingScenarioListBuilder carrier_SupplyScenarioParameters(String carrierPartyName, ScenarioType scenarioType, boolean assignCbr) {
     return new BookingScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
+        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType, assignCbr));
   }
 
   private static BookingScenarioListBuilder shipper_GetBooking(BookingState expectedBookingStatus) {

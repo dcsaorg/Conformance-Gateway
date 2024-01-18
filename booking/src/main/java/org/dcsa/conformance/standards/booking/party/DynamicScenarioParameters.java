@@ -16,10 +16,12 @@ public record DynamicScenarioParameters(
     String carrierBookingRequestReference,
     String carrierBookingReference,
     BookingState bookingStatus,
-    BookingState amendedBookingStatus) {
+    BookingState amendedBookingStatus,
+    boolean assignCbr ) {
   public ObjectNode toJson() {
     ObjectNode dspNode = new ObjectMapper().createObjectNode();
     dspNode.put("scenarioType", scenarioType.name());
+    dspNode.put("useCbr", assignCbr);
     if (carrierBookingRequestReference != null) {
       dspNode.put("carrierBookingRequestReference", carrierBookingRequestReference);
     }
@@ -56,7 +58,8 @@ public record DynamicScenarioParameters(
         dspNode.path("carrierBookingRequestReference").asText(null),
         dspNode.path("carrierBookingReference").asText(null),
         bookingState(dspNode.path("bookingStatus").asText(null)),
-        bookingState(dspNode.path("amendedBookingStatus").asText(null))
+        bookingState(dspNode.path("amendedBookingStatus").asText(null)),
+        dspNode.path("assignCbr").asBoolean(false)
       );
   }
 }

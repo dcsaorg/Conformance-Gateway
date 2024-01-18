@@ -314,6 +314,14 @@ public class PersistableCarrierBooking {
     jsonNodeMap.save(getCarrierBookingRequestReference(), asPersistentState());
   }
 
+  public void assignCBRToBooking(Supplier<String> cbrGenerator) {
+    if (this.getCarrierBookingReference() == null) {
+      var newCbr = cbrGenerator.get();
+      mutateBookingAndAmendment(b -> b.put(CARRIER_BOOKING_REFERENCE, newCbr));
+    }
+  }
+
+
   private void copyMetadataFields(JsonNode originalBooking, ObjectNode updatedBooking) {
     for (String field : METADATA_FIELDS_TO_PRESERVE) {
       var previousValue = originalBooking.path(field);

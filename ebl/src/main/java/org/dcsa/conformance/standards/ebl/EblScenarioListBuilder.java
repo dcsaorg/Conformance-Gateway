@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
@@ -84,7 +85,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, useTDRef)
-                      .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED, transportDocumentStatus, useTDRef)),
+                      .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, useTDRef)
+                      .thenAllPathsFrom(SI_UPDATE_RECEIVED, SI_RECEIVED, transportDocumentStatus, useTDRef))),
         switch (transportDocumentStatus) {
           case TD_START -> uc6_carrier_publishDraftTransportDocument().then(
             shipper_GetShippingInstructionsRecordTDRef()
@@ -96,7 +98,11 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
           ).thenHappyPathFrom(TD_PENDING_SURRENDER_FOR_AMENDMENT);
           default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
-        });
+        },
+        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef).then(
+          shipper_GetShippingInstructions(shippingInstructionsStatus, useTDRef)
+            .thenHappyPathFrom(shippingInstructionsStatus, memoryState, transportDocumentStatus, useTDRef)
+        ));
       case SI_UPDATE_RECEIVED -> {
         if (memoryState == null) {
           throw new IllegalArgumentException(
@@ -110,46 +116,102 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             uc4a_carrier_acceptUpdatedShippingInstructions()
                 .then(
                     shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef)
-                        .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef)),
+                      .thenEither(
+                        noAction().thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef),
+                        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef)
+                          .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef)
+                            .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef))
+                      )),
             uc4d_carrier_declineUpdatedShippingInstructions()
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
                         .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)),
-            uc5_shipper_cancelUpdateToShippingInstructions()
+            uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, useTDRef)
                         .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)));
       }
-      case SI_PENDING_UPDATE -> then(
-          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+      case SI_PENDING_UPDATE -> {
+        if (transportDocumentStatus != TD_START) {
+          yield thenEither(
+            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
               .then(
-                  shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
-                      .thenEither(
-                          noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
-                          // Special-case: UC2 -> UC3 -> UC5 -> ...
-                          // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 ->
-                          // UC2 -> UC3 -> ...
-                          //   patterns (it eventually resolves, but it is unhelpful many cases)
-                          // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually do
-                          // the subtree here.
-                          // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
-                          // because neither UC2 and UC3
-                          // are considered happy paths.
-                          uc5_shipper_cancelUpdateToShippingInstructions()
+                shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                  .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                  .thenEither(
+                    noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                    // Special-case: UC2 -> UC3 -> UC5 -> ...
+                    // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 ->
+                    // UC2 -> UC3 -> ...
+                    //   patterns (it eventually resolves, but it is unhelpful many cases)
+                    // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually do
+                    // the subtree here.
+                    // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
+                    // because neither UC2 and UC3
+                    // are considered happy paths.
+                    uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
+                      .then(
+                        shipper_GetShippingInstructions(
+                          SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
+                          .thenEither(
+                            noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
                               .then(
-                                  shipper_GetShippingInstructions(
-                                          SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
-                                      .thenEither(
-                                          noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
-                                          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
-                                              .then(
-                                                  shipper_GetShippingInstructions(
-                                                          SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
-                                                      .thenHappyPathFrom(
-                                                          SI_UPDATE_RECEIVED,
-                                                          SI_PENDING_UPDATE,
-                                                          transportDocumentStatus,
-                                                          useTDRef)))))));
+                                shipper_GetShippingInstructions(
+                                  SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                                  .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                                  .thenHappyPathFrom(
+                                    SI_UPDATE_RECEIVED,
+                                    SI_PENDING_UPDATE,
+                                    transportDocumentStatus,
+                                    useTDRef)))))))),
+            auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef).then(
+              shipper_GetShippingInstructions(shippingInstructionsStatus, useTDRef)
+                .thenHappyPathFrom(shippingInstructionsStatus, memoryState, transportDocumentStatus, useTDRef)
+            ),
+            auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.APPROVE_TD, true).then(
+              shipper_GetShippingInstructions(shippingInstructionsStatus, useTDRef)
+                .thenHappyPathFrom(shippingInstructionsStatus, memoryState, transportDocumentStatus, useTDRef)
+            )
+          );
+        }
+        yield thenEither(
+          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+            .then(
+              shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                .thenEither(
+                  noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                  // Special-case: UC2 -> UC3 -> UC5 -> ...
+                  // - Doing thenAllPathsFrom(...) from UC2 would cause UC3 -> UC2 -> UC3 ->
+                  // UC2 -> UC3 -> ...
+                  //   patterns (it eventually resolves, but it is unhelpful many cases)
+                  // To ensure that UC2 -> UC3 -> UC5 -> ... works properly we manually do
+                  // the subtree here.
+                  // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
+                  // because neither UC2 and UC3
+                  // are considered happy paths.
+                  uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
+                    .then(
+                      shipper_GetShippingInstructions(
+                        SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
+                        .thenEither(
+                          noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
+                          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+                            .then(
+                              shipper_GetShippingInstructions(
+                                SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
+                                .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                                .thenHappyPathFrom(
+                                  SI_UPDATE_RECEIVED,
+                                  SI_PENDING_UPDATE,
+                                  transportDocumentStatus,
+                                  useTDRef)))))))),
+          auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef).then(
+            shipper_GetShippingInstructions(shippingInstructionsStatus, useTDRef)
+              .thenHappyPathFrom(shippingInstructionsStatus, memoryState, transportDocumentStatus, useTDRef)
+          ));
+      }
       case SI_UPDATE_CONFIRMED -> thenEither(
           noAction().thenHappyPathFrom(SI_UPDATE_CONFIRMED, transportDocumentStatus, useTDRef),
           // Just to validate that the "Carrier" does not get "stuck"
@@ -160,11 +222,23 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
               .then(
                   shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
-                      .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus,  useTDRef)));
+                    .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                      .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus,  useTDRef))));
       case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED -> throw new AssertionError(
           "Please use the black state rather than " + shippingInstructionsStatus.name());
       case SI_ANY -> throw new AssertionError("Not a real/reachable state");
-      case SI_COMPLETED -> then(noAction());
+      case SI_COMPLETED -> thenEither(
+        useTDRef
+          ? auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.APPROVE_TD, true).then(
+          shipper_GetShippingInstructions(SI_COMPLETED, true)
+        ) : noAction(),
+        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.SUBMIT_SI_UPDATE, useTDRef).then(
+          shipper_GetShippingInstructions(SI_COMPLETED, useTDRef)
+        ),
+        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef).then(
+          shipper_GetShippingInstructions(SI_COMPLETED, useTDRef)
+        )
+      );
     };
   }
 
@@ -195,7 +269,8 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             uc3_shipper_submitUpdatedShippingInstructions(false)
                 .then(
                     shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
-                        .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)));
+                      .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
+                        .thenHappyPathFrom(SI_UPDATE_RECEIVED, SI_PENDING_UPDATE, transportDocumentStatus, useTDRef))));
       case SI_UPDATE_RECEIVED -> then(
         uc4a_carrier_acceptUpdatedShippingInstructions()
           .then(
@@ -220,10 +295,58 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
                     // Using happy path here as requested in
                     // https://github.com/dcsaorg/Conformance-Gateway/pull/29#discussion_r1421732797
                     .thenHappyPathFrom(TD_ISSUED)),
-          uc3_shipper_submitUpdatedShippingInstructions(true)
-            .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_DRAFT, true),
-        uc3_shipper_submitUpdatedShippingInstructions(false)
-          .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_DRAFT, false)
+
+        uc3_shipper_submitUpdatedShippingInstructions(true).then(
+          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true).then(
+            shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, true)
+              .thenEither(
+                uc4a_carrier_acceptUpdatedShippingInstructions()
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, true)
+                      .thenEither(
+                        noAction().thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, true),
+                        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, true)
+                          .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, true)
+                            .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, true))
+                      )),
+                uc2_carrier_requestUpdateToShippingInstruction()
+                  .then(
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, true)
+                      .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, true)),
+                uc5_shipper_cancelUpdateToShippingInstructions(true)
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CANCELLED, true)
+                      .thenHappyPathFrom(transportDocumentStatus))
+              )
+          )),
+        uc3_shipper_submitUpdatedShippingInstructions(false).then(
+          shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, false).then(
+            shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, false)
+              .thenEither(
+                uc4a_carrier_acceptUpdatedShippingInstructions()
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, false)
+                      .thenEither(
+                        noAction().thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, false),
+                        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, false)
+                          .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, false)
+                            .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, false))
+                      )),
+                uc2_carrier_requestUpdateToShippingInstruction()
+                  .then(
+                    shipper_GetShippingInstructions(SI_PENDING_UPDATE, false)
+                      .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, false)),
+                uc4d_carrier_declineUpdatedShippingInstructions()
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_DECLINED, false)
+                      .thenHappyPathFrom(transportDocumentStatus)),
+                uc5_shipper_cancelUpdateToShippingInstructions(false)
+                  .then(
+                    shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CANCELLED, false)
+                      .thenHappyPathFrom(transportDocumentStatus))
+              )
+          )
+        )
       );
       case TD_APPROVED -> then(
         uc8_carrier_issueTransportDocument()
@@ -266,9 +389,21 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
         uc13r_carrier_rejectSurrenderRequestForDelivery().then(
           shipper_GetTransportDocument(TD_ISSUED)
             .thenHappyPathFrom(TD_ISSUED)
+        ),
+        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.APPROVE_TD, true).then(
+          shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_DELIVERY)
+            .thenHappyPathFrom(TD_PENDING_SURRENDER_FOR_DELIVERY)
+        )
+        // TODO: Should UC3 be allowed here or not?
+      );
+      case TD_SURRENDERED_FOR_DELIVERY -> then(
+        uc14_carrier_confirmShippingInstructionsComplete().thenEither(
+          shipper_GetShippingInstructions(SI_COMPLETED, false)
+            .thenAllPathsFrom(SI_COMPLETED, null, false),
+          shipper_GetShippingInstructions(SI_COMPLETED, true)
+            .thenAllPathsFrom(SI_COMPLETED, null, true)
         )
       );
-      case TD_SURRENDERED_FOR_DELIVERY -> thenHappyPathFrom(transportDocumentStatus);
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
       case TD_VOIDED -> then(noAction());
     };
@@ -314,8 +449,10 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       );
       case TD_SURRENDERED_FOR_DELIVERY -> then(
         uc14_carrier_confirmShippingInstructionsComplete().thenEither(
-          shipper_GetShippingInstructions(SI_COMPLETED, false),
+          shipper_GetShippingInstructions(SI_COMPLETED, false)
+            .thenHappyPathFrom(SI_COMPLETED, null, false),
           shipper_GetShippingInstructions(SI_COMPLETED, true)
+            .thenHappyPathFrom(SI_COMPLETED, null, true)
         )
       );
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
@@ -341,6 +478,12 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
                                                                         boolean useTDRef) {
     return shipper_GetShippingInstructions(expectedSiStatus, null, useTDRef);
+  }
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
+                                                                        ShippingInstructionsStatus expectedUpdatedSiStatus,
+                                                                        boolean requestAmendedSI,
+                                                                        boolean useTDRef) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useTDRef);
   }
 
   private static EblScenarioListBuilder shipper_GetShippingInstructionsRecordTDRef() {
@@ -463,7 +606,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
               false));
   }
 
-  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions() {
+  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions(boolean useTDRef) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -472,6 +615,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           carrierPartyName,
           shipperPartyName,
           (EblAction) previousAction,
+          useTDRef,
           resolveMessageSchemaValidator(
             EBL_API, PATCH_SI_SCHEMA_NAME),
           resolveMessageSchemaValidator(
@@ -645,6 +789,27 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           (EblAction) previousAction,
           resolveMessageSchemaValidator(
             EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType outOfOrderMessageType, boolean useTDRef) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction -> {
+        var schema = switch (outOfOrderMessageType) {
+          case SUBMIT_SI_UPDATE -> PUT_EBL_SCHEMA_NAME;
+          case CANCEL_SI_UPDATE -> PATCH_SI_SCHEMA_NAME;
+          case APPROVE_TD -> PATCH_TD_SCHEMA_NAME;
+        };
+        return new AUC_Shipper_SendOutOfOrderSIMessageAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          outOfOrderMessageType,
+          useTDRef,
+          resolveMessageSchemaValidator(
+            EBL_API, schema));
+      });
   }
 
   private static JsonSchemaValidator resolveMessageSchemaValidator(String apiName, String schema) {

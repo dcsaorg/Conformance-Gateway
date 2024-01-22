@@ -686,46 +686,53 @@ public class EblCarrier extends ConformanceParty {
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Carrier.handleRequest(%s)".formatted(request));
-    var result =
-      switch (request.method()) {
-        case "GET" -> {
-          var url = request.url().replaceAll("/++$", "");
-          var lastSegment = lastUrlSegment(url);
-          var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
-          if (urlStem.endsWith("/v3/shipping-instructions")) {
-            yield _handleGetShippingInstructionsRequest(request, lastSegment);
+    try {
+      var result =
+        switch (request.method()) {
+          case "GET" -> {
+            var url = request.url().replaceAll("/++$", "");
+            var lastSegment = lastUrlSegment(url);
+            var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+            if (urlStem.endsWith("/v3/shipping-instructions")) {
+              yield _handleGetShippingInstructionsRequest(request, lastSegment);
+            }
+            if (urlStem.endsWith("/v3/transport-documents")) {
+              yield _handleGetTransportDocument(request, lastSegment);
+            }
+            yield return404(request);
           }
-          if (urlStem.endsWith("/v3/transport-documents")) {
-            yield _handleGetTransportDocument(request, lastSegment);
+          case "POST" -> {
+            var url = request.url();
+            if (url.endsWith("/v3/shipping-instructions") || url.endsWith("/v3/shipping-instructions/")) {
+              yield _handlePostShippingInstructions(request);
+            }
+            yield return404(request);
           }
-          yield return404(request);
-        }
-        case "POST" -> {
-          var url = request.url();
-          if (url.endsWith("/v3/shipping-instructions") || url.endsWith("/v3/shipping-instructions/")) {
-            yield _handlePostShippingInstructions(request);
+          case "PATCH" -> {
+            var url = request.url().replaceAll("/++$", "");
+            var lastSegment = lastUrlSegment(url);
+            var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
+            if (urlStem.endsWith("/v3/shipping-instructions")) {
+              yield _handlePatchShippingInstructions(request, lastSegment);
+            }
+            if (urlStem.endsWith("/v3/transport-documents")) {
+              yield _handlePatchTransportDocument(request, lastSegment);
+            }
+            yield return404(request);
           }
-          yield return404(request);
-        }
-        case "PATCH" -> {
-          var url = request.url().replaceAll("/++$", "");
-          var lastSegment = lastUrlSegment(url);
-          var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
-          if (urlStem.endsWith("/v3/shipping-instructions")) {
-            yield _handlePatchShippingInstructions(request, lastSegment);
-          }
-          if (urlStem.endsWith("/v3/transport-documents")) {
-            yield _handlePatchTransportDocument(request, lastSegment);
-          }
-          yield return404(request);
-        }
-        case "PUT" -> _handlePutShippingInstructions(request);
-        default -> return405(request, "GET", "POST", "PUT", "PATCH");
-      };
-    addOperatorLogEntry(
-      "Responded to request '%s %s' with '%d'"
-        .formatted(request.method(), request.url(), result.statusCode()));
-    return result;
+          case "PUT" -> _handlePutShippingInstructions(request);
+          default -> return405(request, "GET", "POST", "PUT", "PATCH");
+        };
+      addOperatorLogEntry(
+        "Responded to request '%s %s' with '%d'"
+          .formatted(request.method(), request.url(), result.statusCode()));
+      return result;
+    } catch (IllegalStateException e) {
+      addOperatorLogEntry(
+        "Responded to request '%s %s' with '%d'"
+          .formatted(request.method(), request.url(), 409));
+      return return409(request, e.getMessage());
+    }
   }
 
   private String lastUrlSegment(String url) {

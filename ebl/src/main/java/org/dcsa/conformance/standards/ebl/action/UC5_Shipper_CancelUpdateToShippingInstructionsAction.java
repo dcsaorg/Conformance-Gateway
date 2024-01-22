@@ -15,6 +15,7 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 @Getter
 @Slf4j
 public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateChangingSIAction {
+  private final boolean useTDRef;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
@@ -23,10 +24,12 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
+      boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC5", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 200);
+    this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -34,15 +37,17 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
 
   @Override
   public String getHumanReadablePrompt() {
+    var dsp = getDspSupplier().get();
     return ("UC5: Cancel update to shipping instructions the document reference %s".formatted(
-      getDspSupplier().get().shippingInstructionsReference()
+      useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()
     ));
   }
 
   @Override
   public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
+      .put("documentReference", useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference());
   }
 
   @Override
@@ -56,12 +61,14 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var sir = dsp.shippingInstructionsReference() != null ? dsp.shippingInstructionsReference() : "<DSP MISSING SI REFERENCE>";
+        var documentReference = useTDRef
+          ? Objects.requireNonNullElse(dsp.transportDocumentReference(), "<DSP MISSING TD REFERENCE>")
+          : Objects.requireNonNullElse(dsp.shippingInstructionsReference(), "<DSP MISSING SI REFERENCE>");
         var siStatus = Objects.requireNonNullElse(dsp.shippingInstructionsStatus(), ShippingInstructionsStatus.SI_RECEIVED);
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
-            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(sir)),
+            new UrlPathCheck(EblRole::isShipper, getMatchedExchangeUuid(), "/v3/shipping-instructions/%s".formatted(documentReference)),
             new ResponseStatusCheck(
                 EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

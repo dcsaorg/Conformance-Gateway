@@ -11,12 +11,30 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 public class Shipper_GetShippingInstructionsAction extends EblAction {
 
+  private static final int FLAG_NONE = 0;
+  private static final int FLAG_REQUEST_AMENDMENT = 1;
+  private static final int FLAG_USE_TD_REF = 2;
+
   private final ShippingInstructionsStatus expectedSiStatus;
   private final ShippingInstructionsStatus expectedAmendedSiStatus;
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedStatus;
   private final boolean recordTDR;
   private final boolean useTDRef;
+
+  private static String name(boolean requestAmendedStatus, boolean useTDRef) {
+    var flag =
+        (requestAmendedStatus ? FLAG_REQUEST_AMENDMENT : FLAG_NONE)
+      | (useTDRef ? FLAG_USE_TD_REF : FLAG_NONE)
+      ;
+    return switch (flag) {
+      case FLAG_NONE -> "GET SI";
+      case FLAG_NONE|FLAG_USE_TD_REF -> "GET SI (TDR)";
+      case FLAG_REQUEST_AMENDMENT|FLAG_NONE -> "GET aSI";
+      case FLAG_REQUEST_AMENDMENT|FLAG_USE_TD_REF -> "GET aSI (TDR)";
+      default -> throw new AssertionError("Missing case for 0x" + Integer.toHexString(flag));
+    };
+  }
 
   public Shipper_GetShippingInstructionsAction(
       String carrierPartyName,
@@ -28,7 +46,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       boolean requestAmendedStatus,
       boolean recordTDR,
       boolean useTDRef) {
-    super(shipperPartyName, carrierPartyName, previousAction, requestAmendedStatus ? "GET aSI" : "GET SI", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, name(requestAmendedStatus, useTDRef), 200);
     this.expectedSiStatus = expectedSiStatus;
     this.expectedAmendedSiStatus = expectedAmendedSiStatus;
     this.useTDRef = useTDRef;

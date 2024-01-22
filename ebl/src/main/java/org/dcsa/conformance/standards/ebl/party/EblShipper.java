@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
@@ -61,6 +62,7 @@ public class EblShipper extends ConformanceParty {
       Map.entry(UC1_Shipper_SubmitShippingInstructionsAction.class, this::sendShippingInstructionsRequest),
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
       Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
+      Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
       Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
       Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
@@ -135,9 +137,16 @@ public class EblShipper extends ConformanceParty {
 
   private void sendUpdatedShippingInstructionsRequest(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedShippingInstructionsRequest(%s)".formatted(actionPrompt.toPrettyString()));
-
     var sir = actionPrompt.required("sir").asText();
     var documentReference = actionPrompt.required("documentReference").asText();
+    var updatedSI = sendUpdatedShippingInstructions(sir, documentReference);
+    persistentMap.save(documentReference, updatedSI);
+    addOperatorLogEntry(
+      "Sent a shipping instructions update with the parameters: %s"
+        .formatted(actionPrompt.toPrettyString()));
+  }
+
+  private ObjectNode sendUpdatedShippingInstructions(String sir, String documentReference) {
     var si = (ObjectNode) persistentMap.load(sir);
     var seal = si.required("utilizedTransportEquipments").required(0).required("seals").path(0);
     var newSealNumber = "NSL13388";
@@ -146,23 +155,17 @@ public class EblShipper extends ConformanceParty {
       newSealNumber = "NSL13386";
     }
     ((ObjectNode)seal).put("number", newSealNumber);
+    var siWithoutStatus = si.deepCopy();
+    siWithoutStatus.remove("shippingInstructionsStatus");
 
-    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(documentReference), si);
+    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(documentReference), siWithoutStatus);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
-    ObjectNode updatedBooking = si.put("shippingInstructionsStatus", shippingInstructionsStatus);
-    persistentMap.save(documentReference, updatedBooking);
-
-    addOperatorLogEntry(
-      "Sent a shipping instructions update with the parameters: %s"
-        .formatted(actionPrompt.toPrettyString()));
+    return si.put("shippingInstructionsStatus", shippingInstructionsStatus);
   }
 
-  private void cancelUpdateToShippingInstructions(JsonNode actionPrompt) {
-    log.info("Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
-
-    var documentReference = actionPrompt.required("documentReference").asText();
+  private void sendCancellationToUpdatedShippingInstructions(String documentReference) {
     var approvePayload = OBJECT_MAPPER.createObjectNode()
       .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
@@ -171,15 +174,33 @@ public class EblShipper extends ConformanceParty {
       Collections.emptyMap(),
       approvePayload);
 
+  }
+
+  private void cancelUpdateToShippingInstructions(JsonNode actionPrompt) {
+    log.info("Shipper.cancelUpdateToShippingInstructions(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    sendCancellationToUpdatedShippingInstructions(documentReference);
     addOperatorLogEntry(
-      "Approved transport document the parameters: %s"
+      "Cancelled update to shipping instructions the parameters: %s"
         .formatted(actionPrompt.toPrettyString()));
   }
 
-  private void approveDraftTransportDocument(JsonNode actionPrompt) {
-    log.info("Shipper.approveDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
-
+  private void sendOutOfOrderMessage(JsonNode actionPrompt) {
+    var outOfOrderMessageType = OutOfOrderMessageType.valueOf(actionPrompt.required("outOfOrderMessageType").asText("<?>"));
     var documentReference = actionPrompt.required("documentReference").asText();
+    switch (outOfOrderMessageType) {
+      case CANCEL_SI_UPDATE -> sendCancellationToUpdatedShippingInstructions(documentReference);
+      case SUBMIT_SI_UPDATE -> sendUpdatedShippingInstructions(
+        actionPrompt.required("sir").asText("<?>"),
+        documentReference
+      );
+      case APPROVE_TD -> sendApproveDraftTransportDocument(documentReference);
+      default -> throw new AssertionError("Missing case for " + outOfOrderMessageType.name());
+    }
+  }
+
+  private void sendApproveDraftTransportDocument(String documentReference) {
     var approvePayload = OBJECT_MAPPER.createObjectNode()
       .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
@@ -187,6 +208,13 @@ public class EblShipper extends ConformanceParty {
       "/v3/transport-documents/%s".formatted(documentReference),
       Collections.emptyMap(),
       approvePayload);
+  }
+
+  private void approveDraftTransportDocument(JsonNode actionPrompt) {
+    log.info("Shipper.approveDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    sendApproveDraftTransportDocument(documentReference);
 
     addOperatorLogEntry(
       "Approved transport document the parameters: %s"

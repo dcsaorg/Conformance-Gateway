@@ -347,6 +347,7 @@ public class CarrierShippingInstructions {
 
   public void approveDraftTransportDocument(String documentReference) {
     checkState(documentReference, getTransportDocumentState(), s -> s == TD_DRAFT);
+    checkState(documentReference, getShippingInstructionsState(), s -> s != SI_PENDING_UPDATE);
     var td = getTransportDocument().orElseThrow();
     td.put(TRANSPORT_DOCUMENT_STATUS, TD_APPROVED.wireName());
   }

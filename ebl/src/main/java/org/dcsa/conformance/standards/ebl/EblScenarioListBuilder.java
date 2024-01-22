@@ -125,11 +125,21 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
             uc4d_carrier_declineUpdatedShippingInstructions()
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
-                        .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)),
+                      .thenEither(
+                        noAction().thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef),
+                        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef)
+                          .then(shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
+                            .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef))
+                      )),
             uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, useTDRef)
-                        .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef)));
+                      .thenEither(
+                        noAction().thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef),
+                        auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType.CANCEL_SI_UPDATE, useTDRef)
+                          .then(shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, useTDRef)
+                            .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef))
+                        )));
       }
       case SI_PENDING_UPDATE -> {
         if (transportDocumentStatus != TD_START) {
@@ -266,7 +276,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
           default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
         });
       case SI_PENDING_UPDATE -> then(
-            uc3_shipper_submitUpdatedShippingInstructions(false)
+            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
                 .then(
                     shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
                       .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)

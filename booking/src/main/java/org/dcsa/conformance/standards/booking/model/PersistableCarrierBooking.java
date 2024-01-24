@@ -381,7 +381,7 @@ public class PersistableCarrierBooking {
 
   private void replaceShipmentCutOffTimes(ObjectNode booking) {
     var shipmentCutOffTimes = booking.putArray("shipmentCutOffTimes");
-    var receiptTypeAtOrigin = booking.get("receiptTypeAtOrigin").asText(null);
+    var receiptTypeAtOrigin = booking.path("receiptTypeAtOrigin").asText("");
     var firstTransportActionByCarrier = OffsetDateTime.now().plusMonths(1);
     if (booking.get("transportPlan") instanceof ArrayNode transportPlan
       && !transportPlan.isEmpty()) {

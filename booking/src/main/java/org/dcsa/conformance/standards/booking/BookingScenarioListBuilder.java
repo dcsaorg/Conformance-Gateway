@@ -290,7 +290,10 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           (BookingAction) previousAction,
           componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(
-            BOOKING_API, BOOKING_REF_STATUS_SCHEMA)));
+            BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
+          componentFactory.getMessageSchemaValidator(
+            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME))
+      );
   }
 
   private static BookingScenarioListBuilder uc10_carrier_declineBooking() {
@@ -313,7 +316,9 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 (BookingAction) previousAction,
                 componentFactory.getMessageSchemaValidator(BOOKING_API, CANCEL_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_API, BOOKING_REF_STATUS_SCHEMA)));
+                    BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
+              componentFactory.getMessageSchemaValidator(
+                BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder tbdCarrierAction() {

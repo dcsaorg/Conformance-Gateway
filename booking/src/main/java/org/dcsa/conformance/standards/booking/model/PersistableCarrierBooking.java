@@ -381,6 +381,7 @@ public class PersistableCarrierBooking {
 
   private void replaceShipmentCutOffTimes(ObjectNode booking) {
     var shipmentCutOffTimes = booking.putArray("shipmentCutOffTimes");
+    var receiptTypeAtOrigin = booking.path("receiptTypeAtOrigin").asText("");
     var firstTransportActionByCarrier = OffsetDateTime.now().plusMonths(1);
     if (booking.get("transportPlan") instanceof ArrayNode transportPlan
       && !transportPlan.isEmpty()) {
@@ -403,9 +404,11 @@ public class PersistableCarrierBooking {
     addShipmentCutOff(shipmentCutOffTimes, "DCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "VCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "FCO", oneWeekPrior);
-    addShipmentCutOff(shipmentCutOffTimes, "LCO", oneWeekPrior);
     addShipmentCutOff(shipmentCutOffTimes, "EFC", oneWeekPrior);
 
+    if("CFS".equals(receiptTypeAtOrigin)) {
+      addShipmentCutOff(shipmentCutOffTimes, "LCO", oneWeekPrior);
+    }
     // It would be impossible if ECP was the same time as the others, so we give another
     // week for that one.
     addShipmentCutOff(shipmentCutOffTimes, "ECP", twoWeeksPrior);

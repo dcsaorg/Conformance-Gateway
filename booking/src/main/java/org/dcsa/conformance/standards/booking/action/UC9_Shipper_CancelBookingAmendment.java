@@ -18,20 +18,29 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
 
+  private final JsonSchemaValidator notificationSchemaValidator;
+
   public UC9_Shipper_CancelBookingAmendment(
     String carrierPartyName,
     String shipperPartyName,
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
-    JsonSchemaValidator responseSchemaValidator) {
+    JsonSchemaValidator responseSchemaValidator,
+    JsonSchemaValidator notificationSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC9", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
+    this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return ("UC9: Cancel Amendment to confirmed booking");
+  }
+
+  @Override
+  protected boolean expectsNotificationExchange() {
+    return true;
   }
 
   @Override
@@ -47,7 +56,9 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var cbrr = getDspSupplier().get().carrierBookingRequestReference();
-        return Stream.of(
+        var expectedBookingStatus = getDspSupplier().get().bookingStatus();
+        Stream<ActionCheck> primaryExchangeChecks =
+        Stream.of(
           new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
           new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
           new ResponseStatusCheck(
@@ -71,9 +82,19 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             BookingRole::isCarrier,
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
-            responseSchemaValidator))
-          // .filter(Objects::nonNull)
-          ;
+            responseSchemaValidator));
+        return Stream.concat(
+          Stream.concat(primaryExchangeChecks,
+            Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
+              getMatchedExchangeUuid(),
+              expectedBookingStatus,
+              BookingState.AMENDMENT_CANCELLED
+            ))),
+          getNotificationChecks(
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedBookingStatus,
+            BookingState.AMENDMENT_CANCELLED));
       }
     };
   }

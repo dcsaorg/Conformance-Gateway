@@ -471,7 +471,15 @@ public class BookingCarrier extends ConformanceParty {
       return return409(request, "Booking was not in the correct state");
     }
     persistableCarrierBooking.save(persistentMap);
-
+    if (isShipperNotificationEnabled) {
+      asyncCounterpartNotification(
+        "/v2/booking-notifications",
+        BookingNotification.builder()
+          .apiVersion(apiVersion)
+          .booking(persistableCarrierBooking.getBooking())
+          .build()
+          .asJsonNode());
+    }
     return returnBookingStatusResponse(
         200, request, persistableCarrierBooking.getBooking(), bookingReference);
   }

@@ -40,10 +40,12 @@ public class StatefulExecutor {
 
     if (modifiedState != null) {
       sortedPartitionsLockingMap.saveItem(lockedBy, partitionKey, sortKey, modifiedState);
-      int stateLength = modifiedState.toString().getBytes(StandardCharsets.UTF_8).length;
-      log.info(
-          "Max saved state length is now: %d"
-              .formatted(maxStateLength.accumulateAndGet(stateLength, Math::max)));
+      if (log.isInfoEnabled()) {
+        int stateLength = modifiedState.toString().getBytes(StandardCharsets.UTF_8).length;
+        log.info(
+            "Max saved state length is now: %d"
+                .formatted(maxStateLength.accumulateAndGet(stateLength, Math::max)));
+      }
     } else {
       sortedPartitionsLockingMap.unlockItem(lockedBy, partitionKey, sortKey);
     }

@@ -7,8 +7,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public record CarrierScenarioParameters(String contractQuotationReference,
                                         String carrierExportVoyageNumber,
                                         String carrierServiceName,
-                                        String  hsCodes,
-                                        String commodityType,
+                                        String  hsCodes1,
+                                        String commodityType1,
+                                        String  hsCodes2,
+                                        String commodityType2,
                                         String polUNLocationCode,
                                         String podUNLocationCode
                                         ) {
@@ -18,8 +20,10 @@ public record CarrierScenarioParameters(String contractQuotationReference,
         .put("contractQuotationReference", contractQuotationReference())
         .put("carrierExportVoyageNumber", carrierExportVoyageNumber())
         .put("carrierServiceName", carrierServiceName())
-        .put("hsCodes", hsCodes() )
-        .put("commodityType", commodityType() )
+        .put("hsCodes1", hsCodes1() )
+        .put("commodityType1", commodityType1() )
+        .put("hsCodes2", hsCodes2() )
+        .put("commodityType2", commodityType2() )
         .put("polUNLocationCode", polUNLocationCode() )
         .put("podUNLocationCode", podUNLocationCode() );
   }
@@ -31,8 +35,10 @@ public record CarrierScenarioParameters(String contractQuotationReference,
         cspNode.required("contractQuotationReference").asText(),
         cspNode.required("carrierExportVoyageNumber").asText(),
         cspNode.required("carrierServiceName").asText(),
-        cspNode.required("hsCodes").asText(),
-        cspNode.required("commodityType").asText(),
+        cspNode.required("hsCodes1").asText(),
+        cspNode.required("commodityType1").asText(),
+        cspNode.required("hsCodes2").asText(),
+        cspNode.required("commodityType2").asText(),
         cspNode.required("polUNLocationCode").asText(),
         cspNode.required("podUNLocationCode").asText());
   }

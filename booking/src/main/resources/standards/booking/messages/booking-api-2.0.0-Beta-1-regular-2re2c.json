@@ -13,22 +13,42 @@
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "42R0",
+      "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [
         {
-          "HSCodes": ["COMMODITY_HS_CODE"],
-          "commodityType": "COMMODITY_TYPE_PLACEHOLDER",
-          "cargoGrossWeight": 323.32,
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 5000,
+          "cargoGrossWeightUnit": "KGM"
+        },
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_2"],
+          "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
+          "cargoGrossWeight": 10000 ,
           "cargoGrossWeightUnit": "KGM"
         }
-      ],
-      "isNonOperatingReefer": false,
-      "activeReeferSettings": {
-        "temperatureSetpoint": -18,
-        "temperatureUnit": "CEL"
-      }
+      ]
+    },
+    {
+      "ISOEquipmentCode": "22GP",
+      "units": 1,
+      "isShipperOwned": false,
+      "commodities": [
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 5000,
+          "cargoGrossWeightUnit": "KGM"
+        },
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_2"],
+          "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
+          "cargoGrossWeight": 10000,
+          "cargoGrossWeightUnit": "KGM"
+        }
+      ]
     }
   ],
   "documentParties": [

@@ -15,11 +15,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   private ScenarioType scenarioType;
   public Carrier_SupplyScenarioParametersAction(String carrierPartyName, @NonNull ScenarioType scenarioType) {
     super(carrierPartyName, null, null,
-      switch (scenarioType) {
-      case REGULAR -> "SupplyCSP";
-      case REEFER -> "SupplyCSP-AR";
-      case DG -> "SupplyCSP-DG";
-    }, -1);
+      "SupplyCSP [%s]".formatted(scenarioType.name()),
+      -1);
     this.scenarioType = scenarioType;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
   }
@@ -63,18 +60,58 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
-      case REGULAR -> new CarrierScenarioParameters("Example Carrier Service",
+      case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("Example Carrier Service",
         "402E",
         "service Name",
         "640510",
         "Shoes - black, 400 boxes",
+        null,
+        null,
         "DKAAR",
         "DEBRV");
-      case REEFER -> new CarrierScenarioParameters("Example Carrier Service",
+      case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("Example Carrier Service",
+        "402E",
+        "service Name",
+        "630260",
+        "Tableware and kitchenware",
+        "691010",
+        "Kitchen pots and pans",
+        "DKAAR",
+        "DEBRV");
+      case REGULAR_CHO_DEST -> new CarrierScenarioParameters("Example Carrier Service",
+        "402E",
+        "service Name",
+        "640510",
+        "Shoes - black, 400 boxes",
+        null,
+        null,
+        "DKAAR",
+        "USGBO");
+      case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("Example Carrier Service",
+        "402E",
+        "service Name",
+        "640510",
+        "Shoes - black, 400 boxes",
+        null,
+        null,
+        "DKAAR",
+        "DKAAR");
+      case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("Example Carrier Service",
+        "402E",
+        "service Name",
+        "220291",
+        "Non alcoholic beverages",
+        null,
+        null,
+        "DKAAR",
+        "DEBRV");
+      case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("Example Carrier Service",
         "402E",
         "service Name",
         "04052090",
         "Dairy products",
+        null,
+        null,
         "DKAAR",
         "DEBRV");
       case DG -> new CarrierScenarioParameters("Example Carrier Service",
@@ -82,6 +119,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
         "TA1",
         "293499",
         "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        null,
+        null,
         "DKAAR",
         "DEBRV");
     };

@@ -25,9 +25,7 @@ import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
-
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
   private static final Random RANDOM = new Random();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
@@ -105,16 +103,72 @@ public class BookingCarrier extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    List<String> validHsCodeAndCommodityType = generateValidCommodityTypeAndHSCodes(scenarioType);
-    CarrierScenarioParameters carrierScenarioParameters =
-        new CarrierScenarioParameters(
-            "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-            generateSchemaValidVesselIMONumber(),
-            "service name",
-            validHsCodeAndCommodityType.get(0),
-            validHsCodeAndCommodityType.get(1),
-            generateValidPolUNLocationCode(),
-            generateValidPodUNLocationCode());
+    CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
+    case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "640510",
+      "Shoes - black, 400 boxes",
+      null,
+      null,
+      "DKAAR",
+      "DEBRV");
+    case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "630260",
+      "Tableware and kitchenware",
+      "691010",
+      "Kitchen pots and pans",
+      "DKAAR",
+      "DEBRV");
+    case REGULAR_CHO_DEST -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "640510",
+      "Shoes - black, 400 boxes",
+      null,
+      null,
+      "DKAAR",
+      "USGBO");
+    case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "640510",
+      "Shoes - black, 400 boxes",
+      null,
+      null,
+      "DKAAR",
+      "DKAAR");
+    case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "220291",
+      "Non alcoholic beverages",
+      null,
+      null,
+      "DKAAR",
+      "DEBRV");
+    case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("Example Carrier Service",
+      "402E",
+      "service Name",
+      "04052090",
+      "Dairy products",
+      null,
+      null,
+      "DKAAR",
+      "DEBRV");
+    case DG -> new CarrierScenarioParameters("Example Carrier Service",
+      "403W",
+      "TA1",
+      "293499",
+      "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+      null,
+      null,
+      "DKAAR",
+      "DEBRV");
+  };
+
     asyncOrchestratorPostPartyInput(
         OBJECT_MAPPER
             .createObjectNode()
@@ -123,32 +177,6 @@ public class BookingCarrier extends ConformanceParty {
     addOperatorLogEntry(
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
-
-  private String generateValidPolUNLocationCode() {
-    List<String> validUnLocationCode =
-        Arrays.asList("DEHAM", "BEANR", "NLRTM", "ESVLC", "ESALG", "SGSIN", "HKHKG");
-    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
-  }
-
-  private String generateValidPodUNLocationCode() {
-    List<String> validUnLocationCode =
-        Arrays.asList("DEBRV", "CNSGH", "JPTYO", "AEAUH", "AEJEA", "AEKHL", "AEKLF");
-    return validUnLocationCode.get(RANDOM.nextInt(validUnLocationCode.size()));
-  }
-
-  private List<String> generateValidCommodityTypeAndHSCodes(ScenarioType scenarioType) {
-    Map<Integer, List<String>> mapHSCodesAndCommodityType =
-        Map.of(
-            0, Arrays.asList("411510", "Leather"),
-            1, Arrays.asList("843420", "Dairy machinery"),
-            2, Arrays.asList("721911", "Stainless steel"),
-            3, Arrays.asList("730110", "Iron or steel"));
-    return scenarioType.equals(ScenarioType.DG)
-        ? Arrays.asList(
-            "293499", "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)")
-        : mapHSCodesAndCommodityType.get(RANDOM.nextInt(mapHSCodesAndCommodityType.size()));
-  }
-
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
 

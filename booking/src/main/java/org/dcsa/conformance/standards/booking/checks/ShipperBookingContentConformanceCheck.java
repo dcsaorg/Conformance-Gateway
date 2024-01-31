@@ -12,10 +12,11 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
 
   private static final String IS_NOR_FIELD = "isNonOperatingReefer";
   private static final String ACTIVE_REEFER_SETTINGS_FIELD = "activeReeferSettings";
-
+  private final ScenarioType scenarioType;
   private static final String SHIPMENT_LOCATIONS_FIELD = "shipmentLocations";
   public ShipperBookingContentConformanceCheck(
-    UUID matchedExchangeUuid
+    UUID matchedExchangeUuid,
+    ScenarioType scenarioType
   ) {
     super(
       "Validate the shipper request",
@@ -23,6 +24,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
       matchedExchangeUuid,
       HttpMessageType.REQUEST
     );
+    this.scenarioType = scenarioType;
   }
 
   @Override
@@ -39,61 +41,63 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   }
 
   protected Set<String> reeferChecks(JsonNode payload) {
-    var requestedEquipments = payload.path("requestedEquipments");
     var issues = new LinkedHashSet<String>();
-    int index = -1;
-    for (var requestedEquipment : requestedEquipments) {
-      var code = requestedEquipment.path("ISOEquipmentCode").asText(null);
-      index++;
-      var prefix = "requestedEquipments[" + index + "].";
-      if (code == null || code.length() < 4) {
-        // Schema validation should catch this case.
-        continue;
-      }
-      if (isReeferContainerSizeTypeCode(code)) {
-        var node = fieldRequired(
-          requestedEquipment,
-          IS_NOR_FIELD,
-          issues,
-          prefix,
-          "the ISOEquipmentCode implies that the container is a reefer container"
-        );
-        if (node != null && node.isBoolean()) {
-          var isNOR = node.booleanValue();
-          if (!isNOR) {
-            fieldRequired(
-              requestedEquipment,
-              ACTIVE_REEFER_SETTINGS_FIELD,
-              issues,
-              prefix,
-              "the ISOEquipmentCode implies that the container is a reefer container" +
-                " and isNonOperatingReefer was false"
-            );
-          } else {
-            fieldOmitted(
-              requestedEquipment,
-              ACTIVE_REEFER_SETTINGS_FIELD,
-              issues,
-              prefix,
-              "the isNonOperatingReefer was true"
-            );
-          }
+    if (!scenarioType.equals(ScenarioType.REGULAR_NON_OPERATING_REEFER)) {
+      var requestedEquipments = payload.path("requestedEquipments");
+      int index = -1;
+      for (var requestedEquipment : requestedEquipments) {
+        var code = requestedEquipment.path("ISOEquipmentCode").asText(null);
+        index++;
+        var prefix = "requestedEquipments[" + index + "].";
+        if (code == null || code.length() < 4) {
+          // Schema validation should catch this case.
+          continue;
         }
-      } else {
-        fieldOmitted(
-          requestedEquipment,
-          IS_NOR_FIELD,
-          issues,
-          prefix,
-          "the ISOEquipmentCode implies that the container is not a reefer container"
-        );
-        fieldOmitted(
-          requestedEquipment,
-          ACTIVE_REEFER_SETTINGS_FIELD,
-          issues,
-          prefix,
-          "the ISOEquipmentCode implies that the container is not a reefer container"
-        );
+        if (isReeferContainerSizeTypeCode(code) ) {
+          var node = fieldRequired(
+            requestedEquipment,
+            IS_NOR_FIELD,
+            issues,
+            prefix,
+            "the ISOEquipmentCode implies that the container is a reefer container"
+          );
+          if (node != null && node.isBoolean()) {
+            var isNOR = node.booleanValue();
+            if (!isNOR) {
+              fieldRequired(
+                requestedEquipment,
+                ACTIVE_REEFER_SETTINGS_FIELD,
+                issues,
+                prefix,
+                "the ISOEquipmentCode implies that the container is a reefer container" +
+                  " and isNonOperatingReefer was false"
+              );
+            } else {
+              fieldOmitted(
+                requestedEquipment,
+                ACTIVE_REEFER_SETTINGS_FIELD,
+                issues,
+                prefix,
+                "the isNonOperatingReefer was true"
+              );
+            }
+          }
+        } else {
+          fieldOmitted(
+            requestedEquipment,
+            IS_NOR_FIELD,
+            issues,
+            prefix,
+            "the ISOEquipmentCode implies that the container is not a reefer container"
+          );
+          fieldOmitted(
+            requestedEquipment,
+            ACTIVE_REEFER_SETTINGS_FIELD,
+            issues,
+            prefix,
+            "the ISOEquipmentCode implies that the container is not a reefer container"
+          );
+        }
       }
     }
     return issues;

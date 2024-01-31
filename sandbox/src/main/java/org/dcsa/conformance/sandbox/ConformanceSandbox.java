@@ -63,6 +63,10 @@ public class ConformanceSandbox {
                         componentFactory,
                         new TrafficRecorder(
                             persistenceProvider.getNonLockingMap(), "session#" + currentSessionId),
+                        new JsonNodeMap(
+                            persistenceProvider.getNonLockingMap(),
+                            "session#" + currentSessionId,
+                            "map#orchestrator#"),
                         asyncWebClient);
                 if (originalOrchestratorState != null && !originalOrchestratorState.isEmpty()) {
                   orchestrator.importJsonState(originalOrchestratorState);
@@ -500,7 +504,7 @@ public class ConformanceSandbox {
       String sandboxId,
       ConformanceRequest conformanceRequest) {
     JsonNode deferredTask =
-      OBJECT_MAPPER
+        OBJECT_MAPPER
             .createObjectNode()
             .put("handler", "_syncHandleOutboundRequest")
             .put("sandboxId", sandboxId)
@@ -512,7 +516,7 @@ public class ConformanceSandbox {
   private static void _asyncSendOutboundWebRequest(
       Consumer<JsonNode> deferredSandboxTaskConsumer, ConformanceWebRequest conformanceWebRequest) {
     JsonNode deferredTask =
-      OBJECT_MAPPER
+        OBJECT_MAPPER
             .createObjectNode()
             .put("handler", "_syncSendOutboundWebRequest")
             .set("conformanceWebRequest", conformanceWebRequest.toJson());
@@ -544,7 +548,8 @@ public class ConformanceSandbox {
     } catch (Exception e) {
       log.error(
           "Deferred task execution failed: %s"
-              .formatted(jsonNode == null ? null : jsonNode.toPrettyString()), e);
+              .formatted(jsonNode == null ? null : jsonNode.toPrettyString()),
+          e);
     }
   }
 
@@ -735,13 +740,13 @@ public class ConformanceSandbox {
             "sandbox#" + sandboxId,
             "state",
             originalSandboxState ->
-              OBJECT_MAPPER.createObjectNode().put("currentSessionId", newSessionId));
+                OBJECT_MAPPER.createObjectNode().put("currentSessionId", newSessionId));
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(
             "sandbox#" + sandboxId,
             "SK=session#%s#%s".formatted(Instant.now().toString(), newSessionId),
-          OBJECT_MAPPER.createObjectNode());
+            OBJECT_MAPPER.createObjectNode());
 
     SandboxConfiguration sandboxConfiguration =
         loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -775,7 +780,7 @@ public class ConformanceSandbox {
         .setItemValue(
             "environment#" + environmentId,
             "sandbox#" + sandboxConfiguration.getId(),
-          OBJECT_MAPPER
+            OBJECT_MAPPER
                 .createObjectNode()
                 .put("id", sandboxConfiguration.getId())
                 .put("name", sandboxConfiguration.getName()));

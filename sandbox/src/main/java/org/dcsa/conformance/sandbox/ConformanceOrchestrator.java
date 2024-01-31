@@ -1,10 +1,11 @@
 package org.dcsa.conformance.sandbox;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,18 +19,18 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class ConformanceOrchestrator implements StatefulEntity {
   private final SandboxConfiguration sandboxConfiguration;
   private final TrafficRecorder trafficRecorder;
+  private final JsonNodeMap persistentMap;
   private final Consumer<ConformanceWebRequest> asyncWebClient;
-  private final LinkedHashMap<UUID, ConformanceScenario> scenariosById = new LinkedHashMap<>();
+  private final LinkedHashMap<UUID, ConformanceScenario> _scenariosById = new LinkedHashMap<>();
   private final Map<UUID, UUID> latestRunIdsByScenarioId = new HashMap<>();
   private UUID currentScenarioId;
 
@@ -37,55 +38,41 @@ public class ConformanceOrchestrator implements StatefulEntity {
       SandboxConfiguration sandboxConfiguration,
       AbstractComponentFactory componentFactory,
       TrafficRecorder trafficRecorder,
+      JsonNodeMap persistentMap,
       Consumer<ConformanceWebRequest> asyncWebClient) {
     this.sandboxConfiguration = sandboxConfiguration;
     this.trafficRecorder = trafficRecorder;
+    this.persistentMap = persistentMap;
     this.asyncWebClient = asyncWebClient;
 
     componentFactory
         .createScenarioListBuilder(
             sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts())
         .buildScenarioList()
-        .forEach(scenario -> this.scenariosById.put(scenario.getId(), scenario));
+        .forEach(scenario -> this._scenariosById.put(scenario.getId(), scenario));
   }
 
   @Override
   public JsonNode exportJsonState() {
     ObjectNode jsonState = OBJECT_MAPPER.createObjectNode();
 
-    { // scoped
-      ArrayNode arrayNode = jsonState.putArray("scenarios");
-      scenariosById.values().forEach(scenario -> arrayNode.add(scenario.exportJsonState()));
-    }
-
-    { // scoped
-      ArrayNode arrayNode = jsonState.putArray("latestRunIdsByScenarioId");
-      latestRunIdsByScenarioId.forEach(
-          (key, value) ->
-              arrayNode.addObject()
-                      .put("scenarioId", key.toString())
-                      .put("latestRunId", value.toString()));
-    }
+    ArrayNode arrayNode = jsonState.putArray("latestRunIdsByScenarioId");
+    latestRunIdsByScenarioId.forEach(
+        (key, value) ->
+            arrayNode
+                .addObject()
+                .put("scenarioId", key.toString())
+                .put("latestRunId", value.toString()));
 
     if (currentScenarioId != null) {
       jsonState.put("currentScenarioId", currentScenarioId.toString());
+      jsonState.set("currentScenario", _getCurrentScenario().exportJsonState());
     }
-
     return jsonState;
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
-    ArrayNode scenariosNode = (ArrayNode) jsonState.get("scenarios");
-    AtomicInteger index = new AtomicInteger(0);
-    ArrayList<ConformanceScenario> scenariosList = new ArrayList<>(scenariosById.values());
-    scenariosById.clear();
-    scenariosList.forEach(
-        scenario -> {
-          scenario.importJsonState(scenariosNode.get(index.getAndIncrement()));
-          scenariosById.put(scenario.getId(), scenario);
-        });
-
     StreamSupport.stream(jsonState.get("latestRunIdsByScenarioId").spliterator(), false)
         .forEach(
             pairNode ->
@@ -95,14 +82,56 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     if (jsonState.has("currentScenarioId")) {
       currentScenarioId = UUID.fromString(jsonState.get("currentScenarioId").asText());
+      _getCurrentScenario().importJsonState(jsonState.get("currentScenario"));
     }
+  }
+
+  private void _saveInactiveScenario(ConformanceScenario scenario) {
+    UUID scenarioId = scenario.getId();
+    JsonNode scenarioState = scenario.exportJsonState();
+    persistentMap.save("scenario#%s".formatted(scenarioId), scenarioState);
+  }
+
+  private void _loadInactiveScenario(ConformanceScenario scenario) {
+    UUID scenarioId = scenario.getId();
+    JsonNode scenarioState = persistentMap.load("scenario#%s".formatted(scenarioId));
+    if (scenarioState != null) {
+      scenario.importJsonState(scenarioState);
+    }
+  }
+
+  private void _loadAllInactiveScenarios() {
+    _scenariosById.values().stream()
+        .filter(scenario -> scenario.getId() != currentScenarioId)
+        .forEach(this::_loadInactiveScenario);
+  }
+
+  private Stream<ConformanceScenario> _allScenariosStream() {
+    _loadAllInactiveScenarios();
+    return _scenariosById.values().stream();
+  }
+
+  private Stream<UUID> _allScenarioIdsStream() {
+    return _scenariosById.keySet().stream();
+  }
+
+  private ConformanceScenario _getCurrentScenario() {
+    return _scenariosById.get(currentScenarioId);
+  }
+
+  private ConformanceScenario _getScenario(UUID scenarioId) {
+    if (Objects.equals(scenarioId, currentScenarioId)) {
+      return _getCurrentScenario();
+    }
+    ConformanceScenario scenario = _scenariosById.get(scenarioId);
+    _loadInactiveScenario(scenario);
+    return scenario;
   }
 
   public JsonNode getStatus() {
     ObjectNode statusNode = OBJECT_MAPPER.createObjectNode();
     statusNode.put(
-        "scenariosLeft",
-        scenariosById.values().stream().filter(ConformanceScenario::hasNextAction).count());
+        "scenariosLeft", _allScenariosStream().filter(ConformanceScenario::hasNextAction).count());
     return statusNode;
   }
 
@@ -113,7 +142,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .noneMatch(CounterpartConfiguration::isInManualMode);
     if (currentScenarioId == null) {
       if (autoAdvance) {
-        currentScenarioId = scenariosById.keySet().stream().findFirst().orElseThrow();
+        currentScenarioId = _allScenarioIdsStream().findFirst().orElseThrow();
         latestRunIdsByScenarioId.put(currentScenarioId, UUID.randomUUID());
       } else {
         log.info("Skipping party notification: no current scenario");
@@ -121,18 +150,19 @@ public class ConformanceOrchestrator implements StatefulEntity {
       }
     }
 
-    ConformanceAction nextAction = scenariosById.get(currentScenarioId).peekNextAction();
+    ConformanceAction nextAction = _getCurrentScenario().peekNextAction();
     if (nextAction == null) {
+      _saveInactiveScenario(_getCurrentScenario());
       if (autoAdvance) {
         currentScenarioId =
-            scenariosById.keySet().stream()
+            _allScenarioIdsStream()
                 .dropWhile(scenarioId -> !scenarioId.equals(currentScenarioId))
                 .skip(1)
                 .findFirst()
                 .orElse(null);
         if (currentScenarioId != null) {
           latestRunIdsByScenarioId.put(currentScenarioId, UUID.randomUUID());
-          nextAction = scenariosById.get(currentScenarioId).peekNextAction();
+          nextAction = _getCurrentScenario().peekNextAction();
         } else {
           log.info("Skipping party notification: no more scenarios to run");
           return;
@@ -174,7 +204,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     ArrayNode partyPrompt = OBJECT_MAPPER.createArrayNode();
     if (currentScenarioId == null) return partyPrompt;
 
-    ConformanceAction nextAction = scenariosById.get(currentScenarioId).peekNextAction();
+    ConformanceAction nextAction = _getCurrentScenario().peekNextAction();
     if (nextAction == null) return partyPrompt;
 
     if (partyName.equals(nextAction.getSourcePartyName())) {
@@ -192,7 +222,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    ConformanceScenario currentScenario = scenariosById.get(currentScenarioId);
+    ConformanceScenario currentScenario = _getCurrentScenario();
     ConformanceAction nextAction = currentScenario.peekNextAction();
     if (nextAction == null) {
       log.info(
@@ -237,7 +267,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    ConformanceScenario currentScenario = scenariosById.get(currentScenarioId);
+    ConformanceScenario currentScenario = _getCurrentScenario();
     ConformanceAction nextAction = currentScenario.peekNextAction();
     if (nextAction == null) {
       log.info(
@@ -287,14 +317,13 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
 
-    this.scenariosById
-        .values()
+    _allScenariosStream()
         .forEach(
             scenario -> {
               log.info(
                   "Scenario description: '%s'".formatted(scenario.getReportTitleDescription()));
               ObjectNode scenarioNode =
-                OBJECT_MAPPER
+                  OBJECT_MAPPER
                       .createObjectNode()
                       .put("id", scenario.getId().toString())
                       .put("name", scenario.getTitle())
@@ -309,7 +338,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
     return new ConformanceCheck("Scenario conformance") {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return scenariosById.values().stream()
+        return _allScenariosStream()
             .map(
                 scenario ->
                     new ScenarioCheck(scenario, sandboxConfiguration.getStandard().getVersion()));
@@ -318,7 +347,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   }
 
   public ObjectNode getScenarioDigest(String scenarioId) {
-    ConformanceScenario scenario = this.scenariosById.get(UUID.fromString(scenarioId));
+    ConformanceScenario scenario = _getScenario(UUID.fromString(scenarioId));
     return OBJECT_MAPPER
         .createObjectNode()
         .put("id", scenario.getId().toString())
@@ -333,8 +362,12 @@ public class ConformanceOrchestrator implements StatefulEntity {
     UUID runUuid = latestRunIdsByScenarioId.get(scenarioUuid);
     if (runUuid == null) return scenarioNode;
 
-    ConformanceScenario scenario = this.scenariosById.get(scenarioUuid);
-    scenarioNode.put("isRunning", scenario.getId().equals(currentScenarioId));
+    ConformanceScenario scenario = _getScenario(scenarioUuid);
+    boolean isActive = scenario.getId().equals(currentScenarioId);
+    if (!isActive) {
+      _loadInactiveScenario(scenario);
+    }
+    scenarioNode.put("isRunning", isActive);
     scenarioNode.put("nextActions", scenario.getNextActionsDescription());
 
     ConformanceAction nextAction = scenario.peekNextAction();
@@ -377,7 +410,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
     if (currentScenarioId != null) {
       if (currentScenarioId.equals(scenarioUuid)) {
         // stop
-        scenariosById.get(currentScenarioId).reset();
+        ConformanceScenario currentScenario = _getCurrentScenario();
+        currentScenario.reset();
+        _saveInactiveScenario(currentScenario);
         latestRunIdsByScenarioId.remove(currentScenarioId);
         currentScenarioId = null;
       } else {
@@ -385,15 +420,16 @@ public class ConformanceOrchestrator implements StatefulEntity {
       }
     } else {
       // start or restart
-      ConformanceScenario scenario = scenariosById.get(scenarioUuid);
-      if (scenario == null)
+      ConformanceScenario inactiveScenario = _getScenario(scenarioUuid);
+      if (inactiveScenario == null)
         throw new IllegalArgumentException(
             "There is no scenario with id '%s'".formatted(scenarioId));
-      if (latestRunIdsByScenarioId.containsKey(scenario.getId())) {
-        scenario.reset();
+      if (latestRunIdsByScenarioId.containsKey(inactiveScenario.getId())) {
+        inactiveScenario.reset();
+        _saveInactiveScenario(inactiveScenario);
       }
-      currentScenarioId = scenario.getId();
-      latestRunIdsByScenarioId.put(scenario.getId(), UUID.randomUUID());
+      currentScenarioId = inactiveScenario.getId();
+      latestRunIdsByScenarioId.put(inactiveScenario.getId(), UUID.randomUUID());
       notifyNextActionParty();
     }
   }

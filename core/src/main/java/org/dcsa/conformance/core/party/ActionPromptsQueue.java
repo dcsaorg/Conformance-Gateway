@@ -34,7 +34,12 @@ public class ActionPromptsQueue implements StatefulEntity {
   }
 
   synchronized JsonNode removeFirst() {
-    return pendingActions.isEmpty() ? null : pendingActions.removeFirst();
+    if (pendingActions.isEmpty()) {
+      return null;
+    }
+    JsonNode actionPrompt = pendingActions.removeFirst();
+    allActionIds.remove(actionPrompt.get("actionId").asText());
+    return actionPrompt;
   }
 
   @Override

@@ -20,13 +20,14 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 @Slf4j
 public class ConformanceScenario implements StatefulEntity {
   @Getter private final String title;
-  @Getter protected UUID id = UUID.randomUUID();
+  @Getter protected UUID id;
   protected final LinkedList<ConformanceAction> allActions = new LinkedList<>();
   protected final LinkedList<ConformanceAction> nextActions = new LinkedList<>();
 
   @Getter private ConformanceStatus latestComputedStatus = ConformanceStatus.NO_TRAFFIC;
 
-  public ConformanceScenario(Collection<ConformanceAction> actions) {
+  public ConformanceScenario(UUID id, Collection<ConformanceAction> actions) {
+    this.id = id;
     this.allActions.addAll(actions);
     this.nextActions.addAll(actions);
     this.title = allActions.isEmpty() ? "" : allActions.peekLast().getActionPath();

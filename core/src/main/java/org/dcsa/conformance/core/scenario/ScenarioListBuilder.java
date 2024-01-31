@@ -3,6 +3,8 @@ package org.dcsa.conformance.core.scenario;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   protected List<ConformanceScenario> _buildScenarioList() {
+    AtomicInteger nextScenarioIndex = new AtomicInteger();
     return parent != null
         ? parent._buildScenarioList()
         : asBuilderListList().stream()
@@ -39,7 +42,8 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
                           builder ->
                               actionList.addLast(
                                   builder.actionBuilder.apply(actionList.peekLast())));
-                  return new ConformanceScenario(actionList);
+                  return new ConformanceScenario(
+                      new UUID(0, nextScenarioIndex.getAndIncrement()), actionList);
                 })
             .toList();
   }

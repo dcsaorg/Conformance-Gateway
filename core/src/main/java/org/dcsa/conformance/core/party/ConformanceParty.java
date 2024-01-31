@@ -42,7 +42,7 @@ public abstract class ConformanceParty implements StatefulEntity {
   private final Map<String, ? extends Collection<String>> orchestratorAuthHeader;
   private final ActionPromptsQueue actionPromptsQueue = new ActionPromptsQueue();
 
-  private static final int MAX_OPERATOR_LOG_RECORDS = 100;
+  private static final int MAX_OPERATOR_LOG_RECORDS = 10;
   private final LinkedList<String> operatorLog = new LinkedList<>();
 
   protected ConformanceParty(

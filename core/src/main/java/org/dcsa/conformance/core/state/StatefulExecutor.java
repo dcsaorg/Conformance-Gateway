@@ -45,6 +45,12 @@ public class StatefulExecutor {
         log.info(
             "Max saved state length is now: %d"
                 .formatted(maxStateLength.accumulateAndGet(stateLength, Math::max)));
+        if (stateLength > 100 * 1000) {
+          log.error(
+              "A saved state of size '%d' is too large: %s"
+                  .formatted(stateLength, modifiedState.toPrettyString()));
+          throw new IllegalArgumentException("Saved state is too large");
+        }
       }
     } else {
       sortedPartitionsLockingMap.unlockItem(lockedBy, partitionKey, sortKey);

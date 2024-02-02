@@ -105,6 +105,7 @@ public class PersistableCarrierBooking {
     }
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
+    mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
     setReason(reason);
   }
 

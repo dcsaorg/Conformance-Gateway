@@ -106,7 +106,7 @@ public class BookingCarrier extends ConformanceParty {
     CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
     case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
       "Shoes - black, 400 boxes",
       null,
@@ -115,7 +115,7 @@ public class BookingCarrier extends ConformanceParty {
       "DEBRV");
     case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "630260",
       "Tableware and kitchenware",
       "691010",
@@ -124,7 +124,7 @@ public class BookingCarrier extends ConformanceParty {
       "DEBRV");
     case REGULAR_CHO_DEST -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
       "Shoes - black, 400 boxes",
       null,
@@ -133,7 +133,7 @@ public class BookingCarrier extends ConformanceParty {
       "USGBO");
     case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
       "Shoes - black, 400 boxes",
       null,
@@ -142,7 +142,7 @@ public class BookingCarrier extends ConformanceParty {
       "DKAAR");
     case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "220291",
       "Non alcoholic beverages",
       null,
@@ -151,7 +151,7 @@ public class BookingCarrier extends ConformanceParty {
       "DEBRV");
     case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("Example Carrier Service",
       "402E",
-      "service Name",
+      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "04052090",
       "Dairy products",
       null,

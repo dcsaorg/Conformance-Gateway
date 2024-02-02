@@ -42,64 +42,63 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
 
   protected Set<String> reeferChecks(JsonNode payload) {
     var issues = new LinkedHashSet<String>();
-    if (!scenarioType.equals(ScenarioType.REGULAR_NON_OPERATING_REEFER)) {
-      var requestedEquipments = payload.path("requestedEquipments");
-      int index = -1;
-      for (var requestedEquipment : requestedEquipments) {
-        var code = requestedEquipment.path("ISOEquipmentCode").asText(null);
-        index++;
-        var prefix = "requestedEquipments[" + index + "].";
-        if (code == null || code.length() < 4) {
-          // Schema validation should catch this case.
-          continue;
-        }
-        if (isReeferContainerSizeTypeCode(code) ) {
-          var node = fieldRequired(
-            requestedEquipment,
-            IS_NOR_FIELD,
-            issues,
-            prefix,
-            "the ISOEquipmentCode implies that the container is a reefer container"
-          );
-          if (node != null && node.isBoolean()) {
-            var isNOR = node.booleanValue();
-            if (!isNOR) {
-              fieldRequired(
-                requestedEquipment,
-                ACTIVE_REEFER_SETTINGS_FIELD,
-                issues,
-                prefix,
-                "the ISOEquipmentCode implies that the container is a reefer container" +
-                  " and isNonOperatingReefer was false"
-              );
-            } else {
-              fieldOmitted(
-                requestedEquipment,
-                ACTIVE_REEFER_SETTINGS_FIELD,
-                issues,
-                prefix,
-                "the isNonOperatingReefer was true"
-              );
-            }
+    var requestedEquipments = payload.path("requestedEquipments");
+    int index = -1;
+    for (var requestedEquipment : requestedEquipments) {
+      var code = requestedEquipment.path("ISOEquipmentCode").asText(null);
+      index++;
+      var prefix = "requestedEquipments[" + index + "].";
+      if (code == null || code.length() < 4) {
+        // Schema validation should catch this case.
+        continue;
+      }
+      if (isReeferContainerSizeTypeCode(code) ) {
+        var node = fieldRequired(
+          requestedEquipment,
+          IS_NOR_FIELD,
+          issues,
+          prefix,
+          "the ISOEquipmentCode implies that the container is a reefer container"
+        );
+        if (node != null && node.isBoolean()) {
+          var isNOR = node.booleanValue();
+          if (!isNOR) {
+            fieldRequired(
+              requestedEquipment,
+              ACTIVE_REEFER_SETTINGS_FIELD,
+              issues,
+              prefix,
+              "the ISOEquipmentCode implies that the container is a reefer container" +
+                " and isNonOperatingReefer was false"
+            );
+          } else {
+            fieldOmitted(
+              requestedEquipment,
+              ACTIVE_REEFER_SETTINGS_FIELD,
+              issues,
+              prefix,
+              "the isNonOperatingReefer was true"
+            );
           }
-        } else {
-          fieldOmitted(
-            requestedEquipment,
-            IS_NOR_FIELD,
-            issues,
-            prefix,
-            "the ISOEquipmentCode implies that the container is not a reefer container"
-          );
-          fieldOmitted(
-            requestedEquipment,
-            ACTIVE_REEFER_SETTINGS_FIELD,
-            issues,
-            prefix,
-            "the ISOEquipmentCode implies that the container is not a reefer container"
-          );
         }
+      } else {
+        fieldOmitted(
+          requestedEquipment,
+          IS_NOR_FIELD,
+          issues,
+          prefix,
+          "the ISOEquipmentCode implies that the container is not a reefer container"
+        );
+        fieldOmitted(
+          requestedEquipment,
+          ACTIVE_REEFER_SETTINGS_FIELD,
+          issues,
+          prefix,
+          "the ISOEquipmentCode implies that the container is not a reefer container"
+        );
       }
     }
+
     return issues;
   }
 

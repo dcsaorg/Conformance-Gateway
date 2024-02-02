@@ -24,11 +24,7 @@
           "cargoGrossWeightUnit": "KGM"
         }
       ],
-      "isNonOperatingReefer": true,
-      "activeReeferSettings": {
-        "temperatureSetpoint": -18,
-        "temperatureUnit": "CEL"
-      }
+      "isNonOperatingReefer": true
     }
   ],
   "documentParties": [

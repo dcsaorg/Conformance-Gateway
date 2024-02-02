@@ -17,6 +17,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
+import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 
 @Slf4j
 public class BookingShipper extends ConformanceParty {
@@ -106,9 +107,9 @@ public class BookingShipper extends ConformanceParty {
 
     CarrierScenarioParameters carrierScenarioParameters =
       CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
-    String scenarioType = actionPrompt.get("scenarioType").asText();
+    var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/booking-api-v20-%s-request.json".formatted(scenarioType.toLowerCase()),
+        "/standards/booking/messages/"+ scenarioType.bookingTemplate(apiVersion),
         Map.ofEntries(
           Map.entry(
             "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
@@ -118,9 +119,13 @@ public class BookingShipper extends ConformanceParty {
           Map.entry(
             "CARRIER_SERVICE_NAME_PLACEHOLDER", carrierScenarioParameters.carrierServiceName()),
           Map.entry(
-            "COMMODITY_HS_CODE", carrierScenarioParameters.hsCodes()),
+            "COMMODITY_HS_CODE_1", carrierScenarioParameters.hsCodes1()),
           Map.entry(
-            "COMMODITY_TYPE_PLACEHOLDER", carrierScenarioParameters.commodityType() ),
+            "COMMODITY_HS_CODE_2", carrierScenarioParameters.hsCodes1()),
+          Map.entry(
+            "COMMODITY_TYPE_1_PLACEHOLDER", carrierScenarioParameters.commodityType1() ),
+          Map.entry(
+            "COMMODITY_TYPE_2_PLACEHOLDER", carrierScenarioParameters.commodityType2() ),
           Map.entry(
             "POL_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.polUNLocationCode()),
           Map.entry(

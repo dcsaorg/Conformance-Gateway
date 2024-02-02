@@ -12,10 +12,11 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
 
   private static final String IS_NOR_FIELD = "isNonOperatingReefer";
   private static final String ACTIVE_REEFER_SETTINGS_FIELD = "activeReeferSettings";
-
+  private final ScenarioType scenarioType;
   private static final String SHIPMENT_LOCATIONS_FIELD = "shipmentLocations";
   public ShipperBookingContentConformanceCheck(
-    UUID matchedExchangeUuid
+    UUID matchedExchangeUuid,
+    ScenarioType scenarioType
   ) {
     super(
       "Validate the shipper request",
@@ -23,6 +24,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
       matchedExchangeUuid,
       HttpMessageType.REQUEST
     );
+    this.scenarioType = scenarioType;
   }
 
   @Override
@@ -39,8 +41,8 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
   }
 
   protected Set<String> reeferChecks(JsonNode payload) {
-    var requestedEquipments = payload.path("requestedEquipments");
     var issues = new LinkedHashSet<String>();
+    var requestedEquipments = payload.path("requestedEquipments");
     int index = -1;
     for (var requestedEquipment : requestedEquipments) {
       var code = requestedEquipment.path("ISOEquipmentCode").asText(null);
@@ -50,7 +52,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
         // Schema validation should catch this case.
         continue;
       }
-      if (isReeferContainerSizeTypeCode(code)) {
+      if (isReeferContainerSizeTypeCode(code) ) {
         var node = fieldRequired(
           requestedEquipment,
           IS_NOR_FIELD,
@@ -96,6 +98,7 @@ public class ShipperBookingContentConformanceCheck extends PayloadContentConform
         );
       }
     }
+
     return issues;
   }
 

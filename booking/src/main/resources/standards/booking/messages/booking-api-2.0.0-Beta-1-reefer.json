@@ -13,48 +13,22 @@
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "22GP",
+      "ISOEquipmentCode": "42R0",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [
         {
-          "HSCodes": ["COMMODITY_HS_CODE"],
-          "commodityType": "COMMODITY_TYPE_PLACEHOLDER",
-          "cargoGrossWeight": 12000,
-          "cargoGrossWeightUnit": "KGM",
-          "outerPackaging": {
-            "imoPackagingCode": "3A1",
-            "numberOfPackages": 5,
-            "description": "Jerrican, steel",
-            "dangerousGoods": [
-              {
-                "unNumber": "3082",
-                "imoClass": "9",
-                "packingGroup": 3,
-                "EMSNumber": "F-A S-F",
-                "properShippingName": "Environmentally hazardous substance, liquid, N.O.S",
-                "emergencyContactDetails" :  {
-                  "contact": "DCSA test person",
-                  "phone": "+41 23456789"
-                },
-                "grossWeight" : {
-                  "value": 12000,
-                  "unit": "KGM"
-                },
-                "isCompetentAuthorityApprovalProvided" : false,
-                "isEmptyUncleanedResidue":  false,
-                "isExceptedQuantity":  false,
-                "isHot":  false,
-                "isLimitedQuantity":  false,
-                "isMarinePollutant": false,
-                "isReportableQuantity":  false,
-                "isSalvagePackings":  false,
-                "isWaste":  false
-              }
-            ]
-          }
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 323.32,
+          "cargoGrossWeightUnit": "KGM"
         }
-      ]
+      ],
+      "isNonOperatingReefer": false,
+      "activeReeferSettings": {
+        "temperatureSetpoint": -18,
+        "temperatureUnit": "CEL"
+      }
     }
   ],
   "documentParties": [

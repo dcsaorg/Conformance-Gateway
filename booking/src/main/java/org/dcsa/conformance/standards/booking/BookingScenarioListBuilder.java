@@ -34,7 +34,13 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalShipperPartyName.set(shipperPartyName);
     return noAction().thenEither(
       carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR).thenAllPathsFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR_2RE1C).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR_2RE2C).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR_CHO_DEST).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR_CHO_ORIG).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR_NON_OPERATING_REEFER).thenHappyPathFrom(START),
       carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER).thenHappyPathFrom(START),
+      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER_TEMP_CHANGE).thenHappyPathFrom(START),
       carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.DG).thenHappyPathFrom(START)
     );
   }
@@ -209,8 +215,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           componentFactory.getMessageSchemaValidator(BOOKING_API, CREATE_BOOKING_SCHEMA_NAME),
           componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
           componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          scenarioType));
+            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder carrierStateChange(

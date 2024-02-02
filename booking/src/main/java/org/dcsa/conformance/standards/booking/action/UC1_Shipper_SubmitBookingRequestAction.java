@@ -26,9 +26,8 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      ScenarioType scenarioType) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1(%s)".formatted( scenarioType.name()), 201,scenarioType);
+      JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -36,14 +35,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a booking %s request using the following parameters:".formatted(scenarioType.name()));
+    return ("UC1: Submit a booking request ");
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.set("csp", getCspSupplier().get().toJson());
-    jsonNode.put("scenarioType", scenarioType.name());
+    jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
     return jsonNode;
   }
 
@@ -57,6 +56,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var scenarioType = getDspSupplier().get().scenarioType();
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "POST"),
@@ -77,7 +77,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
               getMatchedExchangeUuid(),
               BookingState.RECEIVED
             ),
-            new ShipperBookingContentConformanceCheck(getMatchedExchangeUuid()),
+            new ShipperBookingContentConformanceCheck(getMatchedExchangeUuid(),scenarioType),
             new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

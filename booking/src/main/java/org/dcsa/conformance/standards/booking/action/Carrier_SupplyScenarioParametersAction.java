@@ -13,7 +13,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
   private ScenarioType scenarioType;
-  public Carrier_SupplyScenarioParametersAction(String carrierPartyName, @NonNull ScenarioType scenarioType) {
+  public Carrier_SupplyScenarioParametersAction(String carrierPartyName, @NonNull ScenarioType scenarioType, boolean assignCbr) {
     super(carrierPartyName, null, null,
       switch (scenarioType) {
       case REGULAR -> "SupplyCSP";
@@ -21,7 +21,9 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
       case DG -> "SupplyCSP-DG";
     }, -1);
     this.scenarioType = scenarioType;
+    this.assignCbr = assignCbr;
     this.getDspConsumer().accept(getDspSupplier().get().withScenarioType(scenarioType));
+    this.getDspConsumer().accept(getDspSupplier().get().withAssignCbr(assignCbr));
   }
 
   @Override
@@ -33,7 +35,8 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("scenarioType", scenarioType.name());
+      .put("scenarioType", scenarioType.name())
+      .put("assignCbr", assignCbr);
   }
 
   @Override
@@ -42,7 +45,9 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
     if (carrierScenarioParameters != null) {
       jsonState.set("carrierScenarioParameters", carrierScenarioParameters.toJson());
     }
-    return jsonState.put("scenarioType", scenarioType.name());
+    jsonState.put("scenarioType", scenarioType.name());
+    jsonState.put("assignCbr", assignCbr);
+    return jsonState;
   }
 
   @Override
@@ -53,6 +58,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
       carrierScenarioParameters = CarrierScenarioParameters.fromJson(cspNode);
     }
     this.scenarioType = ScenarioType.valueOf(jsonState.required("scenarioType").asText());
+    this.assignCbr = jsonState.required("assignCbr").asBoolean(false);
   }
 
   @Override

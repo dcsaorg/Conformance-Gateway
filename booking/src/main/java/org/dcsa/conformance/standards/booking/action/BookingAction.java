@@ -24,7 +24,7 @@ import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 public abstract class BookingAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
-
+  protected boolean assignCbr;
   public BookingAction(
       String sourcePartyName,
       String targetPartyName,
@@ -35,7 +35,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null,false))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 

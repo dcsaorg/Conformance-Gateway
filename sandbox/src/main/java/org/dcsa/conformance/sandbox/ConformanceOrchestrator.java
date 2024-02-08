@@ -195,7 +195,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
                 : Map.of(
                     counterpartConfiguration.getAuthHeaderName(),
                     List.of(counterpartConfiguration.getAuthHeaderValue())),
-            ""));
+            new byte[]{}));
   }
 
   public JsonNode handleGetPartyPrompt(String partyName) {

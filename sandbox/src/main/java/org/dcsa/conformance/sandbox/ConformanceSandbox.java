@@ -271,7 +271,7 @@ public class ConformanceSandbox {
             deferredSandboxTaskConsumer,
             sandboxId,
             partyName,
-            webRequest.body());
+            webRequest.bodyBytes());
       } else if (remainingUri.startsWith("/api")) {
         return _handlePartyInboundConformanceRequest(
             persistenceProvider, deferredSandboxTaskConsumer, sandboxId, partyName, webRequest);
@@ -469,7 +469,7 @@ public class ConformanceSandbox {
                           party.getName(),
                           party.getRole(),
                           webRequest.headers(),
-                          new ConformanceMessageBody(webRequest.body()),
+                          new ConformanceMessageBody(webRequest.bodyBytes()),
                           System.currentTimeMillis()));
               conformanceRequestReference.set(conformanceRequest);
               conformanceResponseReference.set(party.handleRequest(conformanceRequest));
@@ -571,9 +571,9 @@ public class ConformanceSandbox {
         .message()
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-    HttpResponse<String> httpResponse =
+    HttpResponse<byte[]> httpResponse =
         HttpClient.newHttpClient()
-            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
             httpResponse.statusCode(),
@@ -686,7 +686,7 @@ public class ConformanceSandbox {
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String partyName,
-      String input) {
+      byte[] inputBytes) {
     new OrchestratorTask(
             persistenceProvider,
             conformanceWebRequest ->
@@ -695,7 +695,7 @@ public class ConformanceSandbox {
             sandboxId,
             "handling input from party " + partyName,
             orchestrator ->
-                orchestrator.handlePartyInput(new ConformanceMessageBody(input).getJsonBody()))
+                orchestrator.handlePartyInput(new ConformanceMessageBody(inputBytes).getJsonBody()))
         .run();
     return new ConformanceWebResponse(200, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
   }

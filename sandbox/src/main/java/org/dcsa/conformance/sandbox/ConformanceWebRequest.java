@@ -2,6 +2,8 @@ package org.dcsa.conformance.sandbox;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -13,7 +15,7 @@ public record ConformanceWebRequest(
     String url,
     Map<String, ? extends Collection<String>> queryParameters,
     Map<String, ? extends Collection<String>> headers,
-    String body) {
+    byte[] bodyBytes) {
 
   public ObjectNode toJson() {
     ObjectNode objectNode =
@@ -21,7 +23,7 @@ public record ConformanceWebRequest(
             .createObjectNode()
             .put("method", method)
             .put("url", url)
-            .put("body", body);
+            .put("bodyBytes", Base64.getEncoder().encodeToString(bodyBytes));
     objectNode.set(
         "queryParameters", JsonToolkit.mapOfStringToStringCollectionToJson(queryParameters));
     objectNode.set("headers", JsonToolkit.mapOfStringToStringCollectionToJson(headers));
@@ -35,6 +37,6 @@ public record ConformanceWebRequest(
         JsonToolkit.mapOfStringToStringCollectionFromJson(
             (ArrayNode) objectNode.get("queryParameters")),
         JsonToolkit.mapOfStringToStringCollectionFromJson((ArrayNode) objectNode.get("headers")),
-        objectNode.get("url").asText());
+        Base64.getDecoder().decode(objectNode.get("bodyBytes").asText()));
   }
 }

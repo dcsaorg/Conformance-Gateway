@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,7 @@ public class ApiLambda
                   Objects.requireNonNullElse(
                       event.getMultiValueQueryStringParameters(), Collections.emptyMap()),
                   event.getMultiValueHeaders(),
-                  event.getBody()),
+                  event.getBody().getBytes(StandardCharsets.UTF_8)),
               LambdaToolkit.createDeferredSandboxTaskConsumer(persistenceProvider));
 
       Map<String, List<String>> responseHeaders = conformanceWebResponse.getValueListHeaders();

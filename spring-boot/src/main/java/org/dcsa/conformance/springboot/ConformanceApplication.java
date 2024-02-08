@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -214,7 +215,9 @@ public class ConformanceApplication {
                 persistenceProvider,
                 deferredSandboxTaskConsumer)
             .handleRequest(
-                "spring-boot-env", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
+                "spring-boot-env",
+                JsonToolkit.stringToJsonNode(
+                    new String(_getRequestBodyBytes(servletRequest), StandardCharsets.UTF_8)))
             .toPrettyString());
   }
 
@@ -250,7 +253,7 @@ public class ConformanceApplication {
                 requestUrl,
                 _getQueryParameters(servletRequest),
                 requestHeaders,
-                _getRequestBody(servletRequest)),
+                _getRequestBodyBytes(servletRequest)),
             deferredSandboxTaskConsumer);
 
     _writeResponse(
@@ -294,8 +297,8 @@ public class ConformanceApplication {
   }
 
   @SneakyThrows
-  private static String _getRequestBody(HttpServletRequest request) {
-    return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+  private static byte[] _getRequestBodyBytes(HttpServletRequest request) {
+    return request.getInputStream().readAllBytes();
   }
 
   @GetMapping(value = "/")

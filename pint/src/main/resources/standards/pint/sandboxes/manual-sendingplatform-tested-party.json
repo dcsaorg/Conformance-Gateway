@@ -1,0 +1,27 @@
+{
+  "id": "SANDBOX_ID_PREFIX-manual-carrier-tested-party",
+  "name": "Manual carrier tested party",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": false
+  },
+  "parties" : [ {
+    "inManualMode": true,
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-tested-party/party/SendingPlatform1/api"
+  }, {
+    "name" : "ReceivingPlatform1",
+    "role" : "ReceivingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts/party/ReceivingPlatform1/api"
+  } ]
+}

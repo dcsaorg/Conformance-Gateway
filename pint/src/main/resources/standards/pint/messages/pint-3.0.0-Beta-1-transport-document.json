@@ -1,0 +1,91 @@
+{
+  "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
+
+  "termsAndConditions": "There would normally be a long legal text here.",
+  "isToOrder": false,
+  "isElectronic": true,
+  "invoicePayableAt": {
+    "locationType": "UNCO",
+    "UNLocationCode": "DKCPH"
+  },
+  "cargoMovementTypeAtOrigin": "CY",
+  "cargoMovementTypeAtDestination": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "receiptTypeAtOrigin": "CY",
+  "transportDocumentTypeCode": "SWB",
+  "isShippedOnBoardType": true,
+  "freightPaymentTermCode": "PRE",
+  "transportDocumentStatus": "ISSU",
+  "utilizedTransportEquipments": [],
+  "transports": {
+    "vesselName": "Emma Maersk",
+    "vesselIMONumber": "1234567",
+    "plannedDepartureDate": "2024-02-02",
+    "plannedArrivalDate": "2124-02-02",
+    "carrierExportVoyageNumber": "2433W",
+    "portOfLoading": {
+      "locationType": "UNCO",
+      "UNLocationCode": "DKCPH"
+    },
+    "portOfDischarge": {
+      "locationType": "UNCO",
+      "UNLocationCode": "NLRTM"
+    }
+  },
+  "partyContactDetails": [
+    {
+      "name": "Nobody",
+      "phone": "+1234567890"
+    }
+  ],
+  "consignmentItems": [],
+  "documentParties": [
+
+  ],
+  "carrierCode": "ASDF",
+  "carrierCodeListProvider": "NMFTA",
+  "issuingParty": {
+    "partyName": "issuing party",
+    "partyContactDetails": [
+      {
+        "name": "issuing party",
+        "phone": "+01234567890"
+      }
+    ]
+  },
+  "shippingInstruction": {
+    "shippingInstructionReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
+    "documentStatus": "RECE",
+    "shippingInstructionCreatedDateTime": "2019-11-12T07:41:00+08:30",
+    "shippingInstructionUpdatedDateTime": "2019-11-12T07:41:00+08:30",
+    "isShippedOnBoardType": true,
+    "isElectronic": true,
+    "isToOrder": false,
+    "consignmentItems": [
+      {
+        "descriptionOfGoods": "string",
+        "HSCode": "string",
+        "cargoItems": [
+          {
+            "equipmentReference": "C1234567890",
+            "weight": 123.45,
+            "weightUnit": "KGM",
+            "numberOfPackages": 123,
+            "packageCode": "ABC"
+          }
+        ]
+      }
+    ],
+    "utilizedTransportEquipments": [
+      {
+        "equipment": {
+          "equipmentReference": "C1234567890"
+        },
+        "cargoGrossWeight": 123.45,
+        "cargoGrossWeightUnit": "KGM",
+        "isShipperOwned": true
+      }
+    ]
+  }
+}
+

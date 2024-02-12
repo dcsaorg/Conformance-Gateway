@@ -1,0 +1,3539 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DCSA eBL PINT API",
+    "description": "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support non-repudiable transfer of eBL document and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transfering the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). IMPORTANT: To-order eBL workflows are still not fully supported in this version of PINT API.\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2>\n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n",
+    "contact": {
+      "name": "Digital Container Shipping Association (DCSA)",
+      "url": "https://dcsa.org",
+      "email": "info@dcsa.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "3.0.0-Beta-1"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/v3/envelopes": {
+      "post": {
+        "tags": [
+          "Start envelope transfer"
+        ],
+        "summary": "Start the eBL envelope transfer",
+        "description": "Start the eBL envelope transfer.\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain the **MAJOR** version number. The API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EblEnvelope"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The Receiving platform either accepts the envelope transfer immedidately (if there are no additional documents to be transferred, or if it concludes that it is already in the possesion of all the additional documents mentioned in the [`EnvelopeManifest`](#/EnvelopeManifest)), or concludes that in has previously accepted the envelope transfer with the same contents.\n\nThe signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) that signals the accepted envelope transfer (`RECE` or `DUPE`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The Receiving platform acknowledges that the envelope transfer is now active for this envelope transfer request.\n\nThe sending platform should transfer all supporting documents listed in the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest.supportingDocuments`](#/EnvelopeManifest) list, as well as eBLVisualisationByCarrier document if attribute [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) was defined, prior to sending request to finish the envelope transfer.\n\nIf the sending platform attempts to start a new envelope transfer for an eBL that already has the active envelope transfer that is not yet completed, the receiving platform should assume that the sending platform is retrying the envelope transfer. The receiving platform should assume that the sending platform is aware that the previous envelope transfer failed or that the sending platform is not aware that the previous envelope transfer started.\n\nThe [`EnvelopeTransferStartedResponse`](#/EnvelopeTransferStartedResponse) response is unsigned. The sending platform is required to finish the envelope transfer via [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint in order to get a signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) with the JWS-signed payload `EnvelopeTransferFinishedResponse` carrying the information whether the receiving platform has accepted or rejected the envelope transfer.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferStartedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Receiving platform rejects the envelope transfer.\n\nThe signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the rejected envelope transfer (`BENV`, `BETR` or `BSIG`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request failed for the unexpected reason. The unsigned response [`error`](https://app.swaggerhub.com/domains/dcsaorg/ERROR_DOMAIN/2.0.1#/components/schemas/error) contains all the error details.\n\nThe sending platform is required to retry the envelope transfer until they get a signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) with the JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value providing the information whether the receiving platform has accepted or rejected the envelope transfer.  \n\nIn the rare corner cases, the unsigned `error` response could come from middleware and hide a true envelope transfer acceptance/rejection message. The sending platform will be liable if they act on an unsigned reponse that does *not* match the actions of the receiving platform.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/envelopes/{envelopeReference}/additional-documents/{documentChecksum}": {
+      "put": {
+        "tags": [
+          "Transfer additional document"
+        ],
+        "summary": "Transfer additional document associated with the eBL envelope transfer",
+        "description": "Transfer **additional document** associated with an eBL envelope transfer. The transfered document should be either one of the **supporting documents** from the [`EnvelopeManifest.supportingDocuments`](#/EnvelopeManifest) list, or **eBLVisualisationByCarrier document** if attribute [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) was defined.\n\nThe `requestBody` should contain the document being transferred. It is recommended to use the `application/octet-stream` media type for the `requestBody`. The media type provided in the initial `ISSU` (Issuance) transaction is the one that will be associated with the transferred additional document in the end.\n\nThe receiving platform should check that the transferred document has been declared at the start of the eBL envelope transfer.\nThis should be done by verifying that the `documentChecksum` URL path parameter matches either [`EnvelopeManifest.eBLVisualisationByCarrier.documentChecksum`](#/EnvelopeManifest) attribute value (in which case the receiving platform can conclude that the sending platform has transferred the **eBLVisualisationByCarrier document**), or one of the [`DocumentMetadata.documentChecksum`](#/DocumentMetadata) values from the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list (in which case the receiving platform can conclude that the sending platform has transferred the **supporting document**)\n \nFurthermore, the receiving platform should compute the SHA-256 checksum of the transferred additional document, and verify that it matches the value of `documentChecksum` URL path parameter. \n\nIf all the abovementioned verifications have been successfull, the receiving platform can conclude that the additional document was transferred successfully.\n",
+        "parameters": [
+          {
+            "name": "envelopeReference",
+            "in": "path",
+            "description": "The receiving platform-provided unique identifier for the given eBL envelope.\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/EnvelopeReference"
+            },
+            "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+          },
+          {
+            "name": "documentChecksum",
+            "in": "path",
+            "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/DocumentChecksum"
+            },
+            "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
+          },
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain the **MAJOR** version number. The API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "The receiving platform acknowledges that the additional document was transferred successfully.\n\nIf the envelope transfer eventually gets accepted,the receiving platform will acknowledge the additional document transfer with a JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) containing JWS-signed payload [`EnvelopeTransferFinishedResponse.receivedAdditionalDocumentChecksums[]`](#/EnvelopeTransferFinishedResponse) list containing the additional document checksum. Therefore, this is unsigned response.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "409": {
+            "description": "The Receiving platform has discovered conflict between the request and the current state of the envelope transfer.\nE.g. the checksum or the size of the transferred additional document does not match the data provided in the URL path or in the request at the start of the envelope transfer.\n\nThe signed response `EnvelopeTransferFinishedResponseSignedContent` JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the issue with the envelope transfer that does *not* reject the envelope transfer (`INCD`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The Receiving platform rejects the envelope transfer.\n\nThe signed response `EnvelopeTransferFinishedResponseSignedContent` JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the rejected envelope transfer (`BENV`, `BETR` or `BSIG`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request failed for the unexpected reason. The unsigned response [`error`](https://app.swaggerhub.com/domains/dcsaorg/ERROR_DOMAIN/2.0.1#/components/schemas/error) contains all the error details.\n\nThe sending platform is required to retry the additional document transfer until they get a signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) with the JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value providing the information whether the receiving platform has accepted or rejected the envelope transfer.  \n\nIn the rare corner cases, the unsigned `error` response could come from middleware and hide a true envelope transfer acceptance/rejection message. The sending platform will be liable if they act on an unsigned reponse that does *not* match the actions of the receiving platform.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/envelopes/{envelopeReference}/finish-transfer": {
+      "put": {
+        "tags": [
+          "Finish envelope transfer"
+        ],
+        "summary": "Finish the eBL envelope transfer",
+        "description": "Finish the eBL envelope transfer.\n\nThe sending platform believes all additional documents have been transferred and the envelope transfer can now be completed. \n\nPrior to acepting envelope transfer, the receiving platform should ensure that all supporting documents listed in the [`EnvelopeManifest.supportingDocument`](#/EnvelopeManifest) list have been successfully transferred, as well as eBLVisualisationByCarrier document if attribute [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) was defined. Otherwise, The receiving platform should reject the envelope transfer.\n",
+        "parameters": [
+          {
+            "name": "envelopeReference",
+            "in": "path",
+            "description": "The receiving platform-provided unique identifier for the given eBL envelope.\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/EnvelopeReference"
+            },
+            "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+          },
+          {
+            "name": "documentChecksum",
+            "in": "path",
+            "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/DocumentChecksum"
+            },
+            "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
+          },
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain the **MAJOR** version number. The API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Receiving platform accepts the envelope transfer.\n\nThe signed response `EnvelopeTransferFinishedResponseSignedContent` JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the accepted envelope transfer (`RECE` or `DUPE`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The Receiving platform has discovered conflict between the request and the current state of the envelope transfer.\n\nThe signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the issue with the envelope transfer that does *not* reject the envelope transfer (`DISE` or `MDOC`).\n\nIn the case of `MDOC` [`responseCode`](#/EnvelopeTransferFinishedResponse), the receiving platform cannot accept the envelope transfer due to one or more missing additional documents. In this case, the sending platform should (re)send the missing documents (provided in [`EnvelopeTransferFinishedResponse.missingAdditionalDocumentChecksums[]`](#/EnvelopeTransferFinishedResponse) list)  and then retry to finish the envelope transfer.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The Receiving platform rejects the envelope transfer.\n\nThe signed response `EnvelopeTransferFinishedResponseSignedContent` JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value that signals the rejected envelope transfer (`BENV`, `BETR` or `BSIG`).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTransferFinishedResponseSignedContent"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request failed for the unexpected reason. The unsigned response [`error`](https://app.swaggerhub.com/domains/dcsaorg/ERROR_DOMAIN/2.0.1#/components/schemas/error) contains all the error details.\n\nThe sending platform shoud retry to finish the envelope transfer until it gets the signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) with the JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) attribute value providing the information whether the receiving platform has accepted or rejected the envelope transfer.  \n\nIn the rare corner cases, the unsigned `error` response could come from middleware and hide a true envelope transfer acceptance/rejection message. The sending platform will be liable if they act on an unsigned reponse that does *not* match the actions of the receiving platform.       \n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/.well-known/jwks.json": {
+      "get": {
+        "tags": [
+          "Get JWKS (JSON Web Key Set)"
+        ],
+        "summary": "Get the public key(s) of the platform, which match the private key(s) used for the signing of the various JWS-signed content exchanged during the envelope transfer process",
+        "description": "Before attempting the envelope transfer, the sending platform and the receiving platform should exchange public keys that need to be used in order to confirm the integrity of the JWS-signed content for non-repudiation purposes. \n\nUpon receiving start envelope transfer request, the receiving platform needs the sending platform's public key(s) in order to be able to confirm the integrity of the contents of the [`EblEnvelope`](#/EblEnvelope).\n\nUpon receiving ['EnvelopeTransferFinishedResponseSignedContent'](#/EnvelopeTransferFinishedResponseSignedContent) response, the sending platform needs the receiving platform's public key(s) in order to be able to confirm the integrity of the response message.\n\nThis endpoint can be used to provide the JWKS containing public keys of the receiving/sending platform to the counterparty sending/receiving platform. Alternatively, the sending platform and the receiving platform can exchange public keys used for signing of the various JWS-signed content in envelope transfer process out-of-band.\n",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain the **MAJOR** version number. The API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "1"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request successful",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JWKS"
+                },
+                "example": [
+                  {
+                    "kty": "RSA",
+                    "x5t#S256": "exa8R4v9nLwglTQn1FKvLdUDYdPGs2Ftp-RezKSTM2A",
+                    "e": "AQAB",
+                    "kid": "dcsa-kid",
+                    "x5c": [
+                      "MIIDfDCCAmSgAwIBAgIJAM6iTZvk8egFMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNVBAYTAk5MMRYwFAYDVQQIEw1Ob29yZC1Ib2xsYW5kMRIwEAYDVQQHEwlBbXN0ZXJkYW0xDTALBgNVBAoTBERDU0ExCzAJBgNVBAsTAklUMRUwEwYDVQQDEwxlYmwtZW52ZWxvcGUwHhcNMjIwNzI5MTAwNjQzWhcNMjIxMDI3MTAwNjQzWjBsMQswCQYDVQQGEwJOTDEWMBQGA1UECBMNTm9vcmQtSG9sbGFuZDESMBAGA1UEBxMJQW1zdGVyZGFtMQ0wCwYDVQQKEwREQ1NBMQswCQYDVQQLEwJJVDEVMBMGA1UEAxMMZWJsLWVudmVsb3BlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4wwZAmx07g7+rSvacPE60UvZyF02i1fTB/eg2Eu6zIuSr+np+IsEDPa5PdT4XYDSSbwa1gs1HUs7r8JY3OjUQdiXl0IgYj/YWsFJeokfne9kkSfDmFdTeiYzA+mcj68MF3wwK8UR72vprp8nWJeDxGXLjMCECr9vDGozaZ6+U15yVnAUVymBtbDlaNb2qT/OS0Nmls6pUdHfy7VM6QnYy58nBAH/PS4kdxThd1kauAN1+mUaVMYJNCbTlBSew/Y2cvC3Oh6iwe1lYkBIHMvkytGT3lbssX2mIwbht2O5EKg6b6YG2iii732w7i264i2OEKK2/+lR837Y2Es5zFR3vQIDAQABoyEwHzAdBgNVHQ4EFgQUOBRI3iOZCILGWS6ku4cdwLnyxc8wDQYJKoZIhvcNAQELBQADggEBAGIP6bQwA6FxUIJavCvmC/dLbrpkZn2b77QS9xNmDlIdtxgWHsIOK2KwOri2XqEvKhxWQ+xyEXk0F7tLmgA3soV8xDpQL32qc4/RWl3QS2dsXoRPPgMFAxY1Hu4ZAdiN8rdnWylvm7FNvTbE57PpQQXlaEF1dHR6fzBylET35W29pAuNZwdwcOyj0XzXqLHqpd87zluTq5k5JKIjjRAU2YMivLTt0986Q/ihEThVdcX00T3HiLUjRy3hE9HdbJgcdmSo094+T/sJ+rZ79SyNCnXeUYaUzFP6ZibBdf3jZhmolfqnAyJy3qHcQA61Rvn3C76bskxCG8ccspEM3VSJBzM="
+                    ],
+                    "n": "4wwZAmx07g7-rSvacPE60UvZyF02i1fTB_eg2Eu6zIuSr-np-IsEDPa5PdT4XYDSSbwa1gs1HUs7r8JY3OjUQdiXl0IgYj_YWsFJeokfne9kkSfDmFdTeiYzA-mcj68MF3wwK8UR72vprp8nWJeDxGXLjMCECr9vDGozaZ6-U15yVnAUVymBtbDlaNb2qT_OS0Nmls6pUdHfy7VM6QnYy58nBAH_PS4kdxThd1kauAN1-mUaVMYJNCbTlBSew_Y2cvC3Oh6iwe1lYkBIHMvkytGT3lbssX2mIwbht2O5EKg6b6YG2iii732w7i264i2OEKK2_-lR837Y2Es5zFR3vQ"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EnvelopeReference": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "Opaque receiving platform-provided identifier for a given eBL envelope.\n",
+        "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+      },
+      "DocumentChecksum": {
+        "maxLength": 64,
+        "minLength": 64,
+        "type": "string",
+        "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+        "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
+      },
+      "EblPlatform": {
+        "maxLength": 4,
+        "pattern": "\\S+",
+        "type": "string",
+        "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDocs)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n",
+        "example": "BOLE"
+      },
+      "LegalName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Legal name of the party/user as shown on the envelope transfer chain.",
+        "example": "Digital Container Shipping Association"
+      },
+      "RegistrationNumber": {
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Company registration number of this party. E.g. the registration number on the local chamber of commerse.",
+        "example": "74567837"
+      },
+      "LocationOfRegistration": {
+        "maxLength": 2,
+        "minLength": 2,
+        "pattern": "^[A-Z]+$",
+        "type": "string",
+        "description": "country code of the location of registration according to ISO 3166-1 alpha-2.",
+        "example": "NL"
+      },
+      "EnvelopeTransferChainEntrySignedContentChecksum": {
+        "maxLength": 64,
+        "minLength": 64,
+        "pattern": "^[0-9a-f]+$",
+        "type": "string",
+        "description": "The checksum of the [EnvelopeTransferChainEntrySignedContent](#/EnvelopeTransferChainEntrySignedContent). The Checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+        "example": "20a0257b313ae08417e07f6555c4ec829a512c083f3ead16b41158018a22abe9"
+      },
+      "TransportDocumentChecksum": {
+        "maxLength": 64,
+        "minLength": 64,
+        "type": "string",
+        "description": "The checksum of the **eBL document** a.k.a. **transport document** computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234). \n",
+        "example": "583c29ab3e47f2d80899993200d3fbadb9f8a367f3a39f715935c46d7a283006"
+      },
+      "EblEnvelope": {
+        "required": [
+          "envelopeManifestSignedContent",
+          "envelopeTransferChain",
+          "transportDocument"
+        ],
+        "type": "object",
+        "properties": {
+          "transportDocument": {
+            "description": "The receiving platform is required to validate the eBL document (a.k.a. transport document) by computing the SHA-256 checksum of the `transportDocument` attribute value, and and confirming it's equal to received 'EblEnvelope.envelopeManifestSignedContent' JWS-signed payload [`EnvelopeManifest.transportDocumentChecksum`](#/EnvelopeManifest) attribute value.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransportDocument"
+              }
+            ]
+          },
+          "envelopeManifestSignedContent": {
+            "$ref": "#/components/schemas/EnvelopeManifestSignedContent"
+          },
+          "envelopeTransferChain": {
+            "type": "array",
+            "description": "The ordered list of [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entries associated with the eBL document.\n\nThe receiving platform is required to validate that all the list entries are present, valid, and they are correctly ordered by:\n1. Computing the SHA-256 checksum of the last [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the `envelopeTransferChain[]` list, and confirming it's equal to received `EblEnvelope.envelopeManifestSignedContent` JWS-signed payload [`EnvelopeManifest.lastEnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeManifest) attribute value. \n2. Walking back through the `envelopeTransferChain[]` list from the last entry, for each previous [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the list, computing the SHA-256 checksum and confirming it's equal to the current [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry JWT-signed payload [`EnvelopeTransferChainEntry.previousEnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeTransferChainEntry) attribute value.\n\nThe receiving platform can reject the envelope with `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse) if it concludes that the list entries are not correctly ordered by the sending platform, or discovers any other validity-related issue in the list.\n\nThe first [`EnvelopeTransferChainEntry`](#/EnvelopeTransferChainEntry) in the `envelopeTransferChain[]` list should contain the ISSU (issuance) transaction as the first transaction in the [`EnvelopeTransferChainEntry.transactions[]`](#/EnvelopeTransferChainEntry) list. \n",
+            "items": {
+              "$ref": "#/components/schemas/EnvelopeTransferChainEntrySignedContent"
+            }
+          }
+        }
+      },
+      "EnvelopeManifest": {
+        "required": [
+          "lastEnvelopeTransferChainEntrySignedContentChecksum",
+          "supportingDocuments",
+          "transportDocumentChecksum"
+        ],
+        "type": "object",
+        "properties": {
+          "transportDocumentChecksum": {
+            "description": "actual type: [`TransportDocumentChecksum`](#/TransportDocumentChecksum)\n\nThe checksum of the eBL document (a.k.a. transport document) computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n\nIn order to guard itself against different types of MITM attacks (e.g. 'replay attack' where last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list is replaced with the similar entry extracted from the another envelope transfer previously sent by the same sending platform), upon start of the envelope transfer the receiving platform should validate that the [`EnvelopeManifest.transportDocumentChecksum`](#/EnvelopeManifest) attribute and the [`EnvelopeTransferChainEntry.transportDocumentChecksum`](#/EnvelopeTransferChainEntry) attribute of the last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list have the same value. \n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransportDocumentChecksum"
+              }
+            ]
+          },
+          "lastEnvelopeTransferChainEntrySignedContentChecksum": {
+            "description": "actual type: [`EnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeTransferChainEntrySignedContentChecksum)\n      \nThis attribute should contain the checksum of the last [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvelopeTransferChainEntrySignedContentChecksum"
+              }
+            ]
+          },
+          "eBLVisualisationByCarrier": {
+            "description": "actual type: [`DocumentMetadata`](#\\DocumentMetadata)\n\nThis attribute is used to simplify validation of the document metadata of the **'Digital copy of the original physical B/L document' document** a.k.a. **eBLVisualisationByCarrier document**. If this attribute is defined, for each [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, JWS-signed payload [`EnvelopeTransferChainEntry.eBLVisualisationByCarrier`](#/EnvelopeTransferChainEntry) attribute value should be identical to the value of this attribute.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ]
+          },
+          "supportingDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentMetadata"
+            }
+          }
+        }
+      },
+      "EnvelopeManifestSignedContent": {
+        "pattern": "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]+)$",
+        "type": "string",
+        "description": "JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [EnvelopeManifest](#/EnvelopeManifest).\n",
+        "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
+      },
+      "EnvelopeTransferChainEntry": {
+        "required": [
+          "eblPlatform",
+          "transactions",
+          "transportDocumentChecksum"
+        ],
+        "type": "object",
+        "properties": {
+          "eblPlatform": {
+            "$ref": "#/components/schemas/EblPlatform"
+          },
+          "transportDocumentChecksum": {
+            "$ref": "#/components/schemas/TransportDocumentChecksum"
+          },
+          "previousEnvelopeTransferChainEntrySignedContentChecksum": {
+            "maxLength": 64,
+            "minLength": 64,
+            "type": "string",
+            "description": "actual type: [`EnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeTransferChainEntrySignedContentChecksum)\n\nThis attribute should *not* be defined for the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. For all other entries after the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, this attribute **must** be defined and contain the checksum of the previous [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. This attribute can be used to track signed envelope transfers between platforms (for details check description of [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope)).\n\nThe checksum is computed over the entire [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry (JWS-signed payload is described in the `EnvelopeTransferChainEntry` schema). The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "nullable": true
+          },
+          "eBLVisualisationByCarrier": {
+            "description": "actual type: [`DocumentMetadata`](#\\DocumentMetadata)\n\nThis attribute is used to transfer metadata of the **'Digital copy of the original physical B/L document' document** a.k.a. **eBLVisualisationByCarrier document**. If this attribute is defined with the initial eBL envelope transfer(in the first `EnvelopeTransferChainEntrySignedContent` entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list), eBLVisualisationByCarrier document **must** be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document (in other words, for each `EnvelopeTransferChainEntrySignedContent` entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, JWS-signed payload `EnvelopeTransferChainEntry.eBLVisualisationByCarrier` attribute must have the identical value).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentMetadata"
+              }
+            ]
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        }
+      },
+      "EnvelopeTransferChainEntrySignedContent": {
+        "pattern": "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]+)$",
+        "type": "string",
+        "description": "JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [EnvelopeTransferChainEntry](#/EnvelopeTransferChainEntry).\n",
+        "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
+      },
+      "EnvelopeTransferStartedResponse": {
+        "required": [
+          "envelopeReference",
+          "lastEnvelopeTransferChainEntrySignedContentChecksum",
+          "missingAdditionalDocumentChecksums",
+          "transportDocumentChecksum"
+        ],
+        "type": "object",
+        "properties": {
+          "envelopeReference": {
+            "$ref": "#/components/schemas/EnvelopeReference"
+          },
+          "transportDocumentChecksum": {
+            "$ref": "#/components/schemas/TransportDocumentChecksum"
+          },
+          "lastEnvelopeTransferChainEntrySignedContentChecksum": {
+            "description": "actual type: [`EnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeTransferChainEntrySignedContentChecksum)\n\nThis attribute should contain the checksum of the last [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list received. The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvelopeTransferChainEntrySignedContentChecksum"
+              }
+            ]
+          },
+          "missingAdditionalDocumentChecksums": {
+            "type": "array",
+            "description": "The list of the checksums of the additional documents that the receiving platform expect to receive in good order before it can accept the envelope transfer.\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChecksum"
+            }
+          }
+        }
+      },
+      "EnvelopeTransferFinishedResponse": {
+        "required": [
+          "lastEnvelopeTransferChainEntrySignedContentChecksum",
+          "responseCode"
+        ],
+        "type": "object",
+        "properties": {
+          "lastEnvelopeTransferChainEntrySignedContentChecksum": {
+            "description": "actual type: [`EnvelopeTransferChainEntrySignedContentChecksum`](#/EnvelopeTransferChainEntrySignedContentChecksum)\n\nThis attribute should contain the checksum of the last [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list received. The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvelopeTransferChainEntrySignedContentChecksum"
+              }
+            ]
+          },
+          "responseCode": {
+            "type": "string",
+            "description": "The response code can have one of the following values:\n- `RECE` (Received)\n- `DUPE` (Duplicated Envelope)\n- `BSIG` (Bad Signature)\n- `BETR` (Bad Envelope Transfer)\n- `BENV` (Bad Envelope)\n- `INCD` (Inconclusive Document)\n- `MDOC` (Missing Document)\n- `DISE` (Disputed Envelope)\n\nThe `RECE` `responseCode` is used when the receiving platform acknowledges that the envelope transfer is accepted. \nThis response code can also be used when replying to [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request if and only if the receiving platform is already in possesion of all the additional documents listed in the `EnvelopeManifest`, and is ready to commit to accepting the envelope transfer.  This should only happen in special cases (e.g. Platform A which has performed the intial envelope transfer with additional documents to platform B later during the lifetime of the same eBL receives [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request from some other Platform C with `EnvelopeManifest` listing additional documents, for which it concludes (based on checksum comparison) that they are identical to the addition documents from the intial envelope transfer). The `RECE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `DUPE` `responseCode` is used in place of `RECE` `responseCode` when the receiving platform has already previously acknowledged and accepted the transfer of this envelope. In this case, the receiving platform asserts that this envelope transfer request is invalid but the prior envelope transfer was successful.  The receiving platform should include accepted version of last `EnvelopeTransferChainEntrySignedContent` entry in `EblEnvelope.envelopeTransferChain` list in the `duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent` field. The receiving platform is only required to detect DUPE `responseCode` if the EnvelopeTransferChainEntrySignedContentChecksum is the same between the two transfer attempt and the sending platform is expected to reuse the same envelope. The `DUPE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `BSIG` `responseCode` is used when the receiving platform could not process the envelope related to a signature and rejects the concrete transfer request. This response code should be used when the receiving platform decides to reject envelope transfer due to the issues with the signature used to create JWS content when starting envelope transfer (`EblEnvelope.envelopeManifestSignedContent`, and/or one or more `EnvelopeTransferChainEntrySignedContentChecksum` entries in the `EblEnvelope.envelopeTransferChain` list). Example use cases: the signature was made by an unknown key, the key or signature expired, the signed content does not match the EnvelopeTransferChainEntrySignedContentChecksum, etc. In this case, the receiving platform makes no assertions about the validity of the envelope contents. The sending platform may attempt to resolve the signature issue and retry with the same EnvelopeTransferChainEntrySignedContentChecksum. The `BSIG` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `BETR` `responseCode` is used when the receiving platform concludes that the envelopeReference parameter provided in the URL path does not match currently active envelope transfer, and therefore it decides to reject the envelope transfer. The sending platform should start a new envelope transfer to recover. The `BETR` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `BENV` `responseCode` is used when the receiving platform can not process the envelope and rejects the concrete envelope transfer request. This response code can be used when the receiving platform knows the transfer cannot succeed in the future and the sending platform should retain the eBL. Example use cases could be that the envelope does not list the receiving platform as the intended recipient, the transferee ID is unknown, an invalid action code was used in the transactions for this envelope transfer, etc. In this case, the receiving platform is asserting that the envelope itself is not acceptable. Basically any use case where the receiving platform decides to reject the envelope transfer for technical reasons that are not covered by either `BSIG` `responseCode` or `BETR` `responseCode`. The `BENV` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `INCD` `responseCode` is used when the receiving platform concludes that the transferred additional document's checksum or size does not match the document checksum or size provided either directly in URL path or in `EnvelopeManifest` sent in the start envelope transfer request. The `INCD` `responseCode` does *not* reject the envelope transfer. The sending platform should try to either resend the correct document, or attempt to start new envelope transfer request with changed `EnvelopeManifest` that will contain correct document checksum and/or size for the inconclusive document. The `INCD` `responseCode` is not valid as a response to the start of a envelope transfer.  The `INCD` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `MDOC` `responseCode` is used when the receiving platform cannot accept the envelope transfer due to a missing additional document.  The `MDOC` `responseCode` does *not* reject the envelope transfer. The sending platform should resend relevant documents (provided in `missingAdditionalDocumentChecksums`) and then retry finishing the envelope transfer. The `MDOC` `responseCode` is not valid as a response to the start of a envelope transfer.  The `MDOC` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `DISE` `responseCode` is used when the receiving platform has successfully parsed the envelope and validated the signatures.  However, the receiving platform believes the envelope contradicts its current knowledge of the envelope transfer chain for the eBL document and there is a risk of double spending. The concrete detection method is implementation-specific. However, a method would be for the receiving platform to confirm whether it has `EnvelopeTransferChainEntrySignedContentChecksum` for the document, which are not listed in the transferred eBL envelope. Dispute resolution is not covered in the API and must be handled in via out of band process. The `DISE` `responseCode` should be used together with the HTTP `409 Conflict` response status code.\n\nUnless otherwise stated for a given response code, receiving platform will reject the active envelope transfer (if any). Some failures that result in receiving platform rejecting the envelope transfer may be retriable, in which case the sending platform can attempt a new envelope transfer for the same envelope.\n\nThe sending platform must not rely on the HTTP response status code alone as it is not covered by the signature. When there is a mismatch between the HTTP response status code and the signed response `EnvelopeTransferFinishedResponseSignedResponse` JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse), [`responseCode`](#/EnvelopeTransferFinishedResponse) decides the outcome.\n",
+            "example": "RECE",
+            "enum": [
+              "RECE",
+              "DUPE",
+              "BSIG",
+              "BENV",
+              "MDOC",
+              "BETR",
+              "DISE"
+            ]
+          },
+          "duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent": {
+            "description": "actual type: [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) \n\nThis attribute should be defined only in the case that [`responseCode`](#/EnvelopeTransferFinishedResponse) attribute has `DUPE` value, indicating that receiving platform has already received and accepted envelope transfer for the eBL document that is the sending platform trying to resend in the duplicate envelope transfer.\nThis attribute should contain the last [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list received at the start of already received and accepted envelope transfer. \n\nThe provided entry might differ in the retry (e.g. due to signing with the private key that differs from the private key used to sign already received and accepted envelope transfer). \n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvelopeTransferChainEntrySignedContent"
+              }
+            ]
+          },
+          "reason": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Free text comment for clarifying the result or suggesting follow up actions. Should be null or omitted when [`responseCode`](#/EnvelopeTransferFinishedResponse) is `RECE`, where there is no additional information to be given.\n",
+            "nullable": true
+          },
+          "missingAdditionalDocumentChecksums": {
+            "type": "array",
+            "description": "Used with the `MDOC` [`responseCode`](#/EnvelopeTransferFinishedResponse) to signal which additional documents the receiving platform believes have not been transferred.\n\nFor other response codes, this attribute should be omitted.\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChecksum"
+            }
+          },
+          "receivedAdditionalDocumentChecksums": {
+            "type": "array",
+            "description": "The receiving platform includes this attribute with the `RECE` or `DUPE` [`responseCode`](#/EnvelopeTransferFinishedResponse) to confirm all additional documents it received during the envelope transfer. This attribute must include all the additional documents included in the envelope transfer request (including the ones the receiving platform already had). This attribute provides the sending platform with a signed receipt of the documents.\n\nFor other response codes, this attribute should be omitted.\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChecksum"
+            }
+          }
+        },
+        "example": {
+          "lastEnvelopeTransferChainEntrySignedContentChecksum": "d56a93a7e9f86a2d895df818e0440bdca6ffe03246e2fee14131f2e66c84c75a",
+          "responseCode": "RECE"
+        }
+      },
+      "EnvelopeTransferFinishedResponseSignedContent": {
+        "pattern": "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)$",
+        "type": "string",
+        "description": "JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [EnvelopeTransferFinishedResponse](#/EnvelopeTransferFinishedResponse).\n",
+        "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJyZXNwb25zZVRvRW52ZWxvcGVIYXNoIjoiZDU2YTkzYTdlOWY4NmEyZDg5NWRmODE4ZTA0NDBiZGNhNmZmZTAzMjQ2ZTJmZWUxNDEzMWYyZTY2Yzg0Yzc1YSIsInJlc3BvbnNlQ29kZSI6IlJFQ1YifQ.P2_evKyvHH25BrvW4eIxp7xo9S73oK90QomKEjZDrn3AX8drv7aeVrNYYPPh4vqK78fTVair-0Ww9G7czX9Q3xlATTPlTQrNPuThh_-nPOvNDqHBwZuq_nop6lQwIS210OQa__C4z-oGvO8m56pfXvpgfTIC9nesnIuNFtrdr1lU81q4ZQnnZI0GvWaB_4Q320PoAXmKN4EwjY5gTqdKMAvz9a5PNnWfGPkIrM-CBm_MNLpl9NAcpJONRdwI9i9zTi42NZCUnbowHuHnYNuz3WfWzVA43U4IdEBDU6XeIem0Zm331KlBAukOhZiyN8Bp7ZK7XGx50a6XcY3190lX5Q"
+      },
+      "DocumentMetadata": {
+        "required": [
+          "documentChecksum",
+          "mediaType",
+          "name",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Carrier rendered copy of the original B/L document.pdf"
+          },
+          "size": {
+            "minimum": 1,
+            "pattern": "^\\d+$",
+            "type": "number",
+            "description": "the Size of the document in bytes",
+            "example": 4194304
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "The Media Type (MIME type) of the document",
+            "example": "application/pdf"
+          },
+          "documentChecksum": {
+            "$ref": "#/components/schemas/DocumentChecksum"
+          }
+        },
+        "description": "The document metadata that describes the document.\n"
+      },
+      "Transaction": {
+        "required": [
+          "action",
+          "actor",
+          "recipient",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Action denotes the transaction type, which can have one of the following values:\n- `ISSU` (Issuance)\n- `TRNS` (Transfer of possession)\n- `ENDO` (Endorsement a.k.a. Transfer of title)\n- `RESD` (Request to surrender for delivery)\n- `RESA` (Request to surrender for amendment)\n- `SACC` (Surrender accepted)\n- `SREJ` (Surrender rejected)\n\nThe `ISSU` `action` is used for the eBL issuance transaction from the carrier party to the shipper party, and must appear exactly once in the first transaction of the first [`EnvelopeTransferChainEntry`](#/EnvelopeTransferChainEntry) entry (as JWS payload of [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry) in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list. If the eBL document is issued to the shipper party that resides on the different eBL Platform from the carrier's platform, initial envelope transfer should contain envelope transfer chain where first entry's first transaction has `ISSU` `action` type. \n\nThe `TRNS` `action` is used for the transfer of possession of the eBL from the current possessor party to the new possessor party.\n\nThe `ENDO` `action` is used for the endorsement (a.k.a. transfer of title, or the right to take the delivery of the goods) of To-order eBL documents, where the new endorsee party is not named in the eBL document. The endorsement should always happen on the platform of the user that is not only the current endorsee, but also the current possessor of the eBL document. If the new endorsee party resides on the different eBL Platform from the current endorsee's platform, the envelope transfer process is used to notify the new endorsee of the `ENDO` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. \n\nIf the party is the current possessor, and the party is the current consignee/endorsee/shipper (or eBL document is blank-endorsed), the party may request to surrender the eBL to the carrier. This is done by using one of the Request to surrender action types (`RESD` `action` or `RESA` `action`) and with the issuing carrier or the relevant carrier agent as the `recipient` of the action. \n \n The `RESD` `action` is used when the party wants to request the delivery of the goods. If the request is accepted (for details see `SACC` `action`), the carrier and the party submitting the surrender request will negotiate how the goods will be delivered (e.g. via DCSA shipment release API).\n \n The `RESA` `action` is used when the party wants to surrender the eBL document, so that the carrier can issue an amended eBL document. If the request is accepted (for details see `SACC` `action` resonse), the alignment on the exact change(s) that need to be made to the eBL document is done outside of the PINT API (e.g. via the DCSA EBL API). If the request is accepted, the existing eBL document is voided along with its envelope transfer chain, and the amended eBL document must be reissued with a new envelope transfer chain (for details see the `ISSU` `action` type description paragraph above). The `RESA` `action` is also used for switch to paper as the DCSA process flow for switching to paper is part of the amendment process (e.g. to note how many originals and copies with and without charges should be issued).\n\nIf a surrender request (`RESD` `action` or `RESA` `action`) is not addressed to the carrier that issued the eBL document or to their legal representative, then the receiving platform should reject the envelope transfer with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse).\n\nThe `SACC` `action` is used by the carrier to asynchronously accept the surrender request initiated via `RESD` `action` or `RESA` `action`. If the party that submitted the surrender request is on the different platform, the envelope transfer process is used to notify the (surrender request submitter) party of the `SACC` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. No transactions may occur after a `SACC` `action` transaction. Any envelope transfer chain changes with new transactions after a `SACC` `action` transaction are invalid and should be answered with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse). \n\nThe `SREJ` `action` is used by the carrier to asynchronously reject the surrender request initiated via `RESD` `action` or `RESA` `action`, and return the eBL document possession to the party that submitted the surrender request.\n\nWhen the transaction recipient is residing on the different platform from the transaction actor's platform, the transaction should be followed by the envelope transfer from the actor's (sending) platform to the recipient's (receiving) platform. If the envelope transfer is caused by either `ENDO` `action` or `SACC` `action` transaction (where the recipient is on the different platform), the envelope transfer process is NOT causing transfer of possession of the eBL document, but is merely used as notificaiton for the non-repudiation purposes.\n",
+            "enum": [
+              "ISSU",
+              "ENDO",
+              "TRNS",
+              "RESD",
+              "RESA",
+              "SACC",
+              "SREJ"
+            ]
+          },
+          "actor": {
+            "$ref": "#/components/schemas/TransactionParty"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/TransactionParty"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Unix epoch with millisecond precision of when the transaction was created.",
+            "example": 1658385166302442200
+          },
+          "comments": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Free text comment for the party receiving the transaction.",
+            "example": "The B/L has been issued."
+          }
+        }
+      },
+      "TransactionParty": {
+        "required": [
+          "eblPlatform",
+          "legalName"
+        ],
+        "type": "object",
+        "properties": {
+          "eblPlatform": {
+            "$ref": "#/components/schemas/EblPlatform"
+          },
+          "legalName": {
+            "$ref": "#/components/schemas/LegalName"
+          },
+          "registrationNumber": {
+            "$ref": "#/components/schemas/RegistrationNumber"
+          },
+          "locationOfRegistration": {
+            "$ref": "#/components/schemas/LocationOfRegistration"
+          },
+          "taxReference": {
+            "pattern": "^\\S+$",
+            "type": "string",
+            "description": "Tax reference used in the location of registration.",
+            "example": "NL859951480B01"
+          },
+          "partyCodes": {
+            "$ref": "#/components/schemas/partyCodes"
+          }
+        },
+        "description": "Refers to a company or a legal entity."
+      },
+      "JWKS": {
+        "required": [
+          "keys"
+        ],
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JWKS_keys"
+            }
+          }
+        },
+        "description": "JSON Web Key Set to validate JWS signatures, according to [RFC 7517](https://www.ietf.org/rfc/rfc7517.txt)"
+      },
+      "EcPublicKey": {
+        "type": "object",
+        "properties": {
+          "crv": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string",
+            "description": "The \"x\" (x coordinate) parameter contains the x coordinate for the\nElliptic Curve point.  It is represented as the base64url encoding of\nthe octet string representation of the coordinate, as defined in\nSection 2.3.5 of SEC1 [SEC1].  The length of this octet string MUST\nbe the full size of a coordinate for the curve specified in the \"crv\"\nparameter.  For example, if the value of \"crv\" is \"P-521\", the octet\nstring must be 66 octets long.\n",
+            "format": "byte"
+          },
+          "y": {
+            "maxLength": 66,
+            "minLength": 66,
+            "type": "string",
+            "description": "The \"y\" (y coordinate) parameter contains the y coordinate for the\nElliptic Curve point.  It is represented as the base64url encoding of\nthe octet string representation of the coordinate, as defined in\nSection 2.3.5 of SEC1 [SEC1].  The length of this octet string MUST\nbe the full size of a coordinate for the curve specified in the \"crv\"\nparameter.  For example, if the value of \"crv\" is \"P-521\", the octet\nstring must be 66 octets long.\n",
+            "format": "byte"
+          }
+        }
+      },
+      "EcPrivateKey": {
+        "type": "object",
+        "properties": {
+          "d": {
+            "type": "string",
+            "description": "The \"d\" (ECC private key) parameter contains the Elliptic Curve\nprivate key value.  It is represented as the base64url encoding of\nthe octet string representation of the private key value, as defined\nin Section 2.3.7 of SEC1 [SEC1].  The length of this octet string\nMUST be ceiling(log-base-2(n)/8) octets (where n is the order of the\ncurve).\n",
+            "format": "byte"
+          }
+        }
+      },
+      "RsaPublicKey": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "string",
+            "description": "The \"n\" (modulus) parameter contains the modulus value for the RSA\npublic key.  It is represented as a Base64urlUInt-encoded value.\n\nNote that implementers have found that some cryptographic libraries\nprefix an extra zero-valued octet to the modulus representations they\nreturn, for instance, returning 257 octets for a 2048-bit key, rather\nthan 256.  Implementations using such libraries will need to take\ncare to omit the extra octet from the base64url-encoded\nrepresentation.\n",
+            "format": "byte"
+          },
+          "e": {
+            "type": "string",
+            "description": "The \"e\" (exponent) parameter contains the exponent value for the RSA\npublic key.  It is represented as a Base64urlUInt-encoded value.\n\nFor instance, when representing the value 65537, the octet sequence\nto be base64url-encoded MUST consist of the three octets [1, 0, 1];\nthe resulting representation for this value is \"AQAB\".\n",
+            "format": "byte"
+          }
+        }
+      },
+      "RsaPrivateKey": {
+        "type": "object",
+        "properties": {
+          "d": {
+            "type": "string",
+            "description": "The \"d\" (private exponent) parameter contains the private exponent\nvalue for the RSA private key.  It is represented as a Base64urlUInt-\nencoded value.\n",
+            "format": "byte"
+          },
+          "p": {
+            "type": "string",
+            "description": "The \"p\" (first prime factor) parameter contains the first prime\nfactor.  It is represented as a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "q": {
+            "type": "string",
+            "description": "The \"q\" (second prime factor) parameter contains the second prime\nfactor.  It is represented as a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "dp": {
+            "type": "string",
+            "description": "The \"dp\" (first factor CRT exponent) parameter contains the Chinese\nRemainder Theorem (CRT) exponent of the first factor.  It is\nrepresented as a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "dq": {
+            "type": "string",
+            "description": "he \"dq\" (second factor CRT exponent) parameter contains the CRT\nexponent of the second factor.  It is represented as a Base64urlUInt-\nencoded value.\n",
+            "format": "byte"
+          },
+          "qi": {
+            "type": "string",
+            "description": "The \"qi\" (first CRT coefficient) parameter contains the CRT\ncoefficient of the second factor.  It is represented as a\nBase64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "oth": {
+            "type": "array",
+            "description": "The \"oth\" (other primes info) parameter contains an array of\ninformation about any third and subsequent primes, should they exist.\nWhen only two primes have been used (the normal case), this parameter\nMUST be omitted.  When three or more primes have been used, the\nnumber of array elements MUST be the number of primes used minus two.\nFor more information on this case, see the description of the\nOtherPrimeInfo parameters in Appendix A.1.2 of RFC 3447 [RFC3447],\nupon which the following parameters are modeled.  If the consumer of\na JWK does not support private keys with more than two primes and it\nencounters a private key that includes the \"oth\" parameter, then it\nMUST NOT use the key.  Each array element MUST be an object with the\nfollowing members.\n",
+            "items": {
+              "$ref": "#/components/schemas/RsaPrivateKey_oth"
+            }
+          }
+        }
+      },
+      "SymKey": {
+        "type": "object",
+        "properties": {
+          "k": {
+            "type": "string",
+            "description": "The \"k\" (key value) parameter contains the value of the symmetric (or\nother single-valued) key.  It is represented as the base64url\nencoding of the octet sequence containing the key value.\n",
+            "format": "byte"
+          }
+        }
+      },
+      "error": {
+        "required": [
+          "errorDateTime",
+          "errors",
+          "httpMethod",
+          "requestUri",
+          "statusCode",
+          "statusCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "httpMethod": {
+            "type": "string",
+            "description": "The http request method type e.g. GET, POST\n",
+            "example": "POST",
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "DELETE",
+              "OPTION",
+              "PATCH"
+            ]
+          },
+          "requestUri": {
+            "type": "string",
+            "description": "The request URI as it was sent\n",
+            "example": "/v1/events"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code\n",
+            "format": "int32",
+            "example": 400
+          },
+          "statusCodeText": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The textual representation of the status code\n",
+            "example": "Bad Request"
+          },
+          "errorMessage": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Other error information\n",
+            "example": "The supplied data could not be accepted"
+          },
+          "providerCorrelationID": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A unique identifier for the transaction, e.g. a UUID\n",
+            "example": "4426d965-0dd8-4005-8c63-dc68b01c4962"
+          },
+          "errorDateTime": {
+            "type": "string",
+            "description": "The date and time (in ISO 8601 format) the error occurred.\n",
+            "format": "date-time",
+            "example": "2019-11-12T07:41:00+08:30"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "description": "List of detailed errors, e.g. fields that could not pass validation\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/detailedError"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "detailedError": {
+        "required": [
+          "message",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "Standard error code see http://dcsa.org/error-codes (to be created). Examples: 7003 – out or range value, 7004 -  invalid type\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "field": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The field that caused the error, e.g. a failed validation. The field can be expressed as a [JSONpath](https://github.com/json-path/JsonPath)\n",
+            "example": "location.facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value of the field that caused the error\n",
+            "example": "SG SIN WHS"
+          },
+          "reason": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "High level error message\n",
+            "example": "invalidData"
+          },
+          "message": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Additional information as to why the error occured\n",
+            "example": "Spaces not allowed in facility code"
+          }
+        }
+      },
+      "TransportDocument": {
+        "title": "Transport Document",
+        "required": [
+          "cargoMovementTypeAtDestination",
+          "cargoMovementTypeAtOrigin",
+          "carrierCode",
+          "carrierCodeListProvider",
+          "consignmentItems",
+          "deliveryTypeAtDestination",
+          "documentParties",
+          "freightPaymentTermCode",
+          "invoicePayableAt",
+          "isElectronic",
+          "isShippedOnBoardType",
+          "isToOrder",
+          "issuingParty",
+          "partyContactDetails",
+          "receiptTypeAtOrigin",
+          "termsAndConditions",
+          "transportDocumentReference",
+          "transportDocumentStatus",
+          "transportDocumentTypeCode",
+          "transports",
+          "utilizedTransportEquipments"
+        ],
+        "type": "object",
+        "properties": {
+          "transportDocumentReference": {
+            "$ref": "#/components/schemas/transportDocumentReference"
+          },
+          "shippingInstructionsReference": {
+            "$ref": "#/components/schemas/shippingInstructionsReference"
+          },
+          "transportDocumentStatus": {
+            "$ref": "#/components/schemas/transportDocumentStatus"
+          },
+          "transportDocumentTypeCode": {
+            "$ref": "#/components/schemas/transportDocumentTypeCode"
+          },
+          "isShippedOnBoardType": {
+            "$ref": "#/components/schemas/isShippedOnBoardType"
+          },
+          "freightPaymentTermCode": {
+            "$ref": "#/components/schemas/freightPaymentTermCode"
+          },
+          "originChargesPaymentTermCode": {
+            "$ref": "#/components/schemas/originChargesPaymentTermCode"
+          },
+          "destinationChargesPaymentTermCode": {
+            "$ref": "#/components/schemas/destinationChargesPaymentTermCode"
+          },
+          "isElectronic": {
+            "$ref": "#/components/schemas/isElectronic"
+          },
+          "isToOrder": {
+            "$ref": "#/components/schemas/isToOrder"
+          },
+          "numberOfCopiesWithCharges": {
+            "$ref": "#/components/schemas/numberOfCopiesWithCharges"
+          },
+          "numberOfCopiesWithoutCharges": {
+            "$ref": "#/components/schemas/numberOfCopiesWithoutCharges"
+          },
+          "numberOfOriginalsWithCharges": {
+            "$ref": "#/components/schemas/numberOfOriginalsWithCharges"
+          },
+          "numberOfOriginalsWithoutCharges": {
+            "$ref": "#/components/schemas/numberOfOriginalsWithoutCharges"
+          },
+          "displayedNameForPlaceOfReceipt": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+            "items": {
+              "$ref": "#/components/schemas/displayedName"
+            }
+          },
+          "displayedNameForPortOfLoad": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+            "items": {
+              "$ref": "#/components/schemas/displayedName"
+            }
+          },
+          "displayedNameForPortOfDischarge": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+            "items": {
+              "$ref": "#/components/schemas/displayedName"
+            }
+          },
+          "displayedNameForPlaceOfDelivery": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+            "items": {
+              "$ref": "#/components/schemas/displayedName"
+            }
+          },
+          "shippedOnBoardDate": {
+            "$ref": "#/components/schemas/shippedOnBoardDate"
+          },
+          "termsAndConditions": {
+            "$ref": "#/components/schemas/termsAndConditions"
+          },
+          "receiptTypeAtOrigin": {
+            "$ref": "#/components/schemas/receiptTypeAtOrigin"
+          },
+          "deliveryTypeAtDestination": {
+            "$ref": "#/components/schemas/deliveryTypeAtDestination"
+          },
+          "cargoMovementTypeAtOrigin": {
+            "$ref": "#/components/schemas/cargoMovementTypeAtOrigin"
+          },
+          "cargoMovementTypeAtDestination": {
+            "$ref": "#/components/schemas/cargoMovementTypeAtDestination"
+          },
+          "issueDate": {
+            "$ref": "#/components/schemas/issueDate"
+          },
+          "receivedForShipmentDate": {
+            "$ref": "#/components/schemas/receivedForShipmentDate"
+          },
+          "serviceContractReference": {
+            "$ref": "#/components/schemas/serviceContractReference"
+          },
+          "contractQuotationReference": {
+            "$ref": "#/components/schemas/contractQuotationReference"
+          },
+          "declaredValue": {
+            "$ref": "#/components/schemas/declaredValue"
+          },
+          "declaredValueCurrency": {
+            "$ref": "#/components/schemas/declaredValueCurrency"
+          },
+          "carrierCode": {
+            "$ref": "#/components/schemas/carrierCode"
+          },
+          "carrierCodeListProvider": {
+            "$ref": "#/components/schemas/carrierCodeListProvider"
+          },
+          "issuingParty": {
+            "$ref": "#/components/schemas/Party"
+          },
+          "carrierClauses": {
+            "type": "array",
+            "description": "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
+            "items": {
+              "$ref": "#/components/schemas/clauseContent"
+            }
+          },
+          "numberOfRiderPages": {
+            "$ref": "#/components/schemas/numberOfRiderPages"
+          },
+          "transports": {
+            "$ref": "#/components/schemas/Transports"
+          },
+          "charges": {
+            "type": "array",
+            "description": "A list of `Charges`\n",
+            "items": {
+              "$ref": "#/components/schemas/Charge"
+            }
+          },
+          "placeOfIssue": {
+            "type": "object",
+            "description": "General purpose object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or an `Address`.\n",
+            "example": {
+              "locationName": "DCSA Headquarters",
+              "locationType": "UNLO",
+              "UNLocationCode": "NLAMS"
+            },
+            "discriminator": {
+              "propertyName": "locationType",
+              "mapping": {
+                "ADDR": "#/components/schemas/addressLocation",
+                "UNLO": "#/components/schemas/unLocationLocation"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/addressLocation"
+              },
+              {
+                "$ref": "#/components/schemas/unLocationLocation"
+              }
+            ]
+          },
+          "invoicePayableAt": {
+            "type": "object",
+            "description": "General purpose object to capture `Invoice Payable At` location specified as: location where payment by the customer will take place. Usually refers to Basic Ocean Freight alone.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or an `Address`.\n",
+            "example": {
+              "locationName": "Eiffel Tower",
+              "locationType": "UNLO",
+              "UNLocationCode": "FRPAR"
+            },
+            "discriminator": {
+              "propertyName": "locationType",
+              "mapping": {
+                "ADDR": "#/components/schemas/addressLocation",
+                "UNLO": "#/components/schemas/unLocationLocation"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/addressLocation"
+              },
+              {
+                "$ref": "#/components/schemas/unLocationLocation"
+              }
+            ]
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) \n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "documentParties": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Document Parties`\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentParty"
+            }
+          },
+          "consignmentItems": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `ConsignmentItems`\n",
+            "items": {
+              "$ref": "#/components/schemas/ConsignmentItem_CAR"
+            }
+          },
+          "utilizedTransportEquipments": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
+            "items": {
+              "$ref": "#/components/schemas/UtilizedTransportEquipment_CAR"
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            }
+          },
+          "customsReferences": {
+            "type": "array",
+            "description": "A list of `Customs references`\n",
+            "items": {
+              "$ref": "#/components/schemas/CustomsReference"
+            }
+          }
+        },
+        "description": "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill. \n"
+      },
+      "transportDocumentReference": {
+        "maxLength": 20,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+        "example": "HHL71800000"
+      },
+      "shippingInstructionsReference": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
+        "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+      },
+      "transportDocumentStatus": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+        "example": "DRAFT"
+      },
+      "transportDocumentTypeCode": {
+        "type": "string",
+        "description": "Specifies the type of the transport document\n- BOL (Bill of Lading)\n- SWB (Sea Waybill)\n",
+        "example": "SWB",
+        "enum": [
+          "BOL",
+          "SWB"
+        ]
+      },
+      "isShippedOnBoardType": {
+        "type": "boolean",
+        "description": "Specifies whether the Transport document is a received for shipment, or shipped on board.",
+        "example": true
+      },
+      "freightPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether freight and ancillary fees for the main transport are prepaid (PRE) or collect (COL). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "originChargesPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether origin charges are prepaid (PRE) or collect (COL). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided). Examples of origin charges are customs clearance fees, documentation fees, container packing and loading charges levied at the port of origin to cover the costs of preparing the cargo for shipment. They include the cost of inland transportation to the port, when applicable.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "destinationChargesPaymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether destination charges are prepaid (PRE) or collect (COL). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided). Examples of destination charges are customs clearance fees, documentation fees, terminal handling fees at the destination port and the costs of inland transportation from the port to the final delivery location, when applicable.\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "isElectronic": {
+        "type": "boolean",
+        "description": "An indicator whether the transport document is electronically transferred.\n",
+        "example": true,
+        "default": false
+      },
+      "isToOrder": {
+        "type": "boolean",
+        "description": "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n\n`isToOrder` must be `false` if `transportDocumentTypeCode='SWB'` (Sea Waybill).\n",
+        "example": false
+      },
+      "numberOfCopiesWithCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+        "format": "int32",
+        "example": 2
+      },
+      "numberOfCopiesWithoutCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+        "format": "int32",
+        "example": 2
+      },
+      "numberOfOriginalsWithCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+        "format": "int32",
+        "example": 1
+      },
+      "numberOfOriginalsWithoutCharges": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+        "format": "int32",
+        "example": 1
+      },
+      "displayedName": {
+        "maxLength": 35,
+        "type": "string",
+        "description": "A line of the address to be displayed on the transport document.\n"
+      },
+      "shippedOnBoardDate": {
+        "type": "string",
+        "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "termsAndConditions": {
+        "maxLength": 50000,
+        "type": "string",
+        "description": "Carrier terms and conditions of transport.\n"
+      },
+      "receiptTypeAtOrigin": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Indicates the type of service offered at Origin. Options are defined in the Receipt/Delivery entity.\n- CY (Container yard (incl. rail ramp))\n- SD (Store Door)\n- CFS (Container Freight Station)\n",
+        "example": "CY",
+        "enum": [
+          "CY",
+          "SD",
+          "CFS"
+        ]
+      },
+      "deliveryTypeAtDestination": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Indicates the type of service offered at Destination. Options are defined in the Receipt/Delivery entity.\n- CY (Container yard (incl. rail ramp))\n- SD (Store Door)\n- CFS (Container Freight Station)\n",
+        "example": "CY",
+        "enum": [
+          "CY",
+          "SD",
+          "CFS"
+        ]
+      },
+      "cargoMovementTypeAtOrigin": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Refers to the shipment term at the loading of the cargo into the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
+        "example": "FCL"
+      },
+      "cargoMovementTypeAtDestination": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Refers to the shipment term at the unloading of the cargo out of the container. Options are defined in the Cargo Movement Type entity. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
+        "example": "FCL"
+      },
+      "issueDate": {
+        "type": "string",
+        "description": "Local date when the transport document has been issued.\n\nCan be omitted on draft transport documents, but must be provided when the document has been issued.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "receivedForShipmentDate": {
+        "type": "string",
+        "description": "Date when the last container linked to the transport document is physically in the terminal (customers cleared against the intended vessel).\n\nWhen provided on a transport document, the transportDocument is a `Received For Shipment` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
+        "format": "date",
+        "example": "2020-12-12"
+      },
+      "serviceContractReference": {
+        "maxLength": 30,
+        "type": "string",
+        "description": "Reference number for agreement between shipper and carrier through which the shipper commits to provide a certain minimum quantity of cargo over a fixed period, and the carrier commits to a certain rate or rate schedule.",
+        "example": "HHL51800000"
+      },
+      "contractQuotationReference": {
+        "maxLength": 35,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
+        "example": "HHL1401"
+      },
+      "declaredValue": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+        "format": "float",
+        "example": 1231.1
+      },
+      "declaredValueCurrency": {
+        "maxLength": 3,
+        "pattern": "^[A-Z]{3}$",
+        "type": "string",
+        "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+        "example": "DKK"
+      },
+      "carrierCode": {
+        "maxLength": 4,
+        "pattern": "^\\S+$",
+        "type": "string",
+        "description": "The code containing the SCAC and/or the SMDG code to specify the issuing carrier.  Details about the issuer can be given in the Document Parties entity using the party function code MS.\n",
+        "example": "MMCU"
+      },
+      "carrierCodeListProvider": {
+        "type": "string",
+        "description": "The provider used for identifying the issuer Code. Possible values are:\n- SMDG (Ship Message Design Group)\n- NMFTA (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+        "example": "NMFTA",
+        "enum": [
+          "SMDG",
+          "NMFTA"
+        ]
+      },
+      "Party": {
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "$ref": "#/components/schemas/partyName"
+          },
+          "address": {
+            "$ref": "#/components/schemas/address"
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity.\n"
+      },
+      "partyName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the party.\n",
+        "example": "Asseco Denmark"
+      },
+      "address": {
+        "required": [
+          "country",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/addressName"
+          },
+          "street": {
+            "$ref": "#/components/schemas/streetName"
+          },
+          "streetNumber": {
+            "$ref": "#/components/schemas/streetNumber"
+          },
+          "floor": {
+            "$ref": "#/components/schemas/floor"
+          },
+          "postCode": {
+            "$ref": "#/components/schemas/postCode"
+          },
+          "city": {
+            "$ref": "#/components/schemas/cityName"
+          },
+          "stateRegion": {
+            "$ref": "#/components/schemas/stateRegion"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "description": "An object for storing address related information\n"
+      },
+      "addressName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the address\n",
+        "example": "Henrik"
+      },
+      "streetName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the street of the party’s address.",
+        "example": "Ruijggoordweg"
+      },
+      "streetNumber": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The number of the street of the party’s address.",
+        "example": "100"
+      },
+      "floor": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The floor of the party’s street number.\n",
+        "example": "N/A"
+      },
+      "postCode": {
+        "maxLength": 50,
+        "type": "string",
+        "description": "The post code of the party’s address.",
+        "example": "1047 HM"
+      },
+      "cityName": {
+        "maxLength": 65,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The city name of the party’s address.\n",
+        "example": "Amsterdam"
+      },
+      "stateRegion": {
+        "maxLength": 65,
+        "type": "string",
+        "description": "The state/region of the party’s address.",
+        "nullable": true,
+        "example": "North Holland"
+      },
+      "country": {
+        "maxLength": 75,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The country of the party’s address.\n",
+        "example": "The Netherlands"
+      },
+      "PartyContactDetail": {
+        "title": "Party Contact Detail",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/contactName"
+          }
+        },
+        "description": "The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`.\n",
+        "example": {
+          "name": "Henrik",
+          "phone": "+45 51801234"
+        },
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/PhoneRequired"
+          },
+          {
+            "$ref": "#/components/schemas/EmailRequired"
+          }
+        ]
+      },
+      "PhoneRequired": {
+        "title": "Phone required",
+        "required": [
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "phone": {
+            "$ref": "#/components/schemas/contactPhone"
+          }
+        },
+        "description": "`Phone` is mandatory to provide\n"
+      },
+      "contactPhone": {
+        "maxLength": 30,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Phone number for the contact\n",
+        "example": "+45 70262970"
+      },
+      "EmailRequired": {
+        "title": "Email required",
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/email"
+          }
+        },
+        "description": "`Email` is mandatory to provide\n"
+      },
+      "email": {
+        "maxLength": 100,
+        "pattern": "^.+@\\S+$",
+        "type": "string",
+        "description": "`E-mail` address to be used\n",
+        "example": "info@dcsa.org"
+      },
+      "contactName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name of the contact\n",
+        "example": "Henrik"
+      },
+      "IdentifyingCode": {
+        "title": "Identifying Code",
+        "required": [
+          "codeListProvider",
+          "partyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "codeListProvider": {
+            "$ref": "#/components/schemas/codeListProvider"
+          },
+          "partyCode": {
+            "$ref": "#/components/schemas/partyCode"
+          },
+          "codeListName": {
+            "$ref": "#/components/schemas/codeListName"
+          }
+        }
+      },
+      "codeListProvider": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- ISO (International Standards Organization)\n- UNECE (United Nations Economic Commission for Europe)\n- LLOYD (Lloyd's register of shipping)\n- BIC (Bureau International des Containeurs)\n- IMO (International Maritime Organization)\n- SCAC (Standard Carrier Alpha Code)\n- ITIGG (International Transport Implementation Guidelines Group)\n- ITU (International Telecommunication Union)\n- SMDG (Shipplanning Message Development Group)\n- NCBH (NCB Hazcheck)\n- FMC (Federal Maritime Commission)\n- CBSA (Canada Border Services Agency)\n- DCSA (Digitial Container Shipping Association)\n- W3C (World Wide Web Consortium)\n- GLEIF (Global Legal Entity Identifier Foundation)\n- EPI (EBL Platform Identifier)\n- ZZZ (Mutually defined)\n",
+        "example": "SMDG"
+      },
+      "partyCode": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "Code to identify the party as provided by the code list provider\n",
+        "example": "MSK"
+      },
+      "codeListName": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The name of the list, provided by the code list provider\n",
+        "example": "LCL"
+      },
+      "TaxLegalReference": {
+        "title": "Tax & Legal Reference",
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/taxLegalReferenceType"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "value": {
+            "$ref": "#/components/schemas/taxLegalReferenceValue"
+          }
+        },
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+      },
+      "taxLegalReferenceType": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The reference type code as defined by the relevant tax and/or legal authority.\n",
+        "example": "PAN"
+      },
+      "countryCode": {
+        "maxLength": 2,
+        "minLength": 2,
+        "pattern": "^[A-Z]{2}$",
+        "type": "string",
+        "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+        "example": "DK"
+      },
+      "taxLegalReferenceValue": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The value of the `taxLegalReference`\n",
+        "example": "AAAAA0000A"
+      },
+      "clauseContent": {
+        "maxLength": 20000,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The content of the clause.\n",
+        "example": "It is not allowed to..."
+      },
+      "numberOfRiderPages": {
+        "minimum": 0,
+        "type": "integer",
+        "description": "The number of additional pages required to contain the goods description on a transport document. Only applicable for physical transport documents.",
+        "format": "int32",
+        "example": 2
+      },
+      "Transports": {
+        "required": [
+          "carrierExportVoyageNumber",
+          "plannedArrivalDate",
+          "plannedDepartureDate",
+          "portOfDischarge",
+          "portOfLoading",
+          "vesselName"
+        ],
+        "type": "object",
+        "properties": {
+          "plannedArrivalDate": {
+            "$ref": "#/components/schemas/plannedArrivalDate"
+          },
+          "plannedDepartureDate": {
+            "$ref": "#/components/schemas/plannedDepartureDate"
+          },
+          "preCarriageBy": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n",
+            "example": "RAIL"
+          },
+          "onCarriageBy": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- VESSEL\n- RAIL\n- TRUCK\n- BARGE\n",
+            "example": "TRUCK"
+          },
+          "placeOfReceipt": {
+            "$ref": "#/components/schemas/PlaceOfReceipt"
+          },
+          "portOfLoading": {
+            "$ref": "#/components/schemas/PortOfLoading"
+          },
+          "portOfDischarge": {
+            "$ref": "#/components/schemas/PortOfDischarge"
+          },
+          "placeOfDelivery": {
+            "$ref": "#/components/schemas/PlaceOfDelivery"
+          },
+          "onwardInlandRouting": {
+            "$ref": "#/components/schemas/OnwardInlandRouting"
+          },
+          "vesselName": {
+            "maxLength": 35,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The name of the first sea going Vessel on board which the cargo is loaded or intended to be loaded\n",
+            "example": "King of the Seas"
+          },
+          "carrierExportVoyageNumber": {
+            "$ref": "#/components/schemas/carrierExportVoyageNumber"
+          },
+          "universalExportVoyageReference": {
+            "$ref": "#/components/schemas/universalExportVoyageReference"
+          }
+        }
+      },
+      "plannedArrivalDate": {
+        "type": "string",
+        "description": "The planned date of arrival.\n",
+        "format": "date"
+      },
+      "plannedDepartureDate": {
+        "type": "string",
+        "description": "The planned date of departure.\n",
+        "format": "date"
+      },
+      "PlaceOfReceipt": {
+        "description": "General purpose object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "addressLocation": {
+        "required": [
+          "address",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `Address Location` interface\n",
+            "example": "ADDR"
+          },
+          "address": {
+            "$ref": "#/components/schemas/address"
+          }
+        },
+        "description": "An interface used to express a location using an `Address` object\n"
+      },
+      "locationName": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The name of the location.\n",
+        "example": "Port of Amsterdam"
+      },
+      "facilityLocation": {
+        "required": [
+          "facilityCode",
+          "facilityCodeListProvider",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `Facility Location` interface\n",
+            "example": "FACI"
+          },
+          "UNLocationCode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UNLocationCode"
+              },
+              {
+                "description": "The UN Location code specifying where the place is located.\n\nThis field is **conditionally mandatory** depending on the value of the `facilityCodeListProvider` field.\n"
+              }
+            ]
+          },
+          "facilityCode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/facilityCode"
+              },
+              {
+                "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\n\nThe definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx) \n- for `BIC` - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)\n"
+              }
+            ]
+          },
+          "facilityCodeListProvider": {
+            "$ref": "#/components/schemas/facilityCodeListProvider"
+          }
+        },
+        "description": "An interface used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
+      },
+      "UNLocationCode": {
+        "maxLength": 5,
+        "minLength": 5,
+        "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+        "type": "string",
+        "description": "The UN Location code specifying where the place is located. The pattern used must be\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here:  [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+        "example": "FRPAR"
+      },
+      "facilityCode": {
+        "maxLength": 6,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The code used for identifying the specific facility. This code does <b>not</b> include the UN Location Code.\n",
+        "nullable": false,
+        "example": "ADT"
+      },
+      "facilityCodeListProvider": {
+        "type": "string",
+        "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- BIC (Requires a UN Location Code)\n- SMDG (Requires a UN Location Code)\n",
+        "example": "SMDG",
+        "enum": [
+          "BIC",
+          "SMDG"
+        ]
+      },
+      "unLocationLocation": {
+        "required": [
+          "UNLocationCode",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `UNLocation` location interface\n",
+            "example": "UNLO"
+          },
+          "UNLocationCode": {
+            "$ref": "#/components/schemas/UNLocationCode"
+          }
+        },
+        "description": "An interface used to express a location using a `Un Location Code`\n"
+      },
+      "PortOfLoading": {
+        "description": "General purpose object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "CITY": "#/components/schemas/cityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/cityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "cityLocation": {
+        "required": [
+          "city",
+          "locationType"
+        ],
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "$ref": "#/components/schemas/locationName"
+          },
+          "locationType": {
+            "type": "string",
+            "description": "Discriminator used to identify this as a `City Location` interface\n",
+            "example": "CITY"
+          },
+          "city": {
+            "$ref": "#/components/schemas/city"
+          }
+        },
+        "description": "An interface used to express a location using a `City`, `state/region` and `country`\n"
+      },
+      "city": {
+        "required": [
+          "city",
+          "country"
+        ],
+        "type": "object",
+        "properties": {
+          "city": {
+            "$ref": "#/components/schemas/cityName"
+          },
+          "stateRegion": {
+            "$ref": "#/components/schemas/stateRegion"
+          },
+          "country": {
+            "$ref": "#/components/schemas/country"
+          }
+        },
+        "description": "An object for storing city, state/region and coutry related information\n"
+      },
+      "PortOfDischarge": {
+        "description": "General purpose object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "CITY": "#/components/schemas/cityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/cityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "PlaceOfDelivery": {
+        "description": "General purpose object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "OnwardInlandRouting": {
+        "description": "General purpose object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "locationType": "UNLO",
+          "UNLocationCode": "DEHAM"
+        },
+        "discriminator": {
+          "propertyName": "locationType",
+          "mapping": {
+            "ADDR": "#/components/schemas/addressLocation",
+            "FACI": "#/components/schemas/facilityLocation",
+            "UNLO": "#/components/schemas/unLocationLocation"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/addressLocation"
+          },
+          {
+            "$ref": "#/components/schemas/facilityLocation"
+          },
+          {
+            "$ref": "#/components/schemas/unLocationLocation"
+          }
+        ]
+      },
+      "carrierExportVoyageNumber": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
+        "example": "2103S"
+      },
+      "universalExportVoyageReference": {
+        "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
+        "type": "string",
+        "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
+        "example": "2103N"
+      },
+      "Charge": {
+        "required": [
+          "calculationBasis",
+          "chargeName",
+          "currencyAmount",
+          "currencyCode",
+          "paymentTermCode",
+          "quantity",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "chargeName": {
+            "$ref": "#/components/schemas/chargeName"
+          },
+          "currencyAmount": {
+            "$ref": "#/components/schemas/currencyAmount"
+          },
+          "currencyCode": {
+            "$ref": "#/components/schemas/currencyCode"
+          },
+          "paymentTermCode": {
+            "$ref": "#/components/schemas/paymentTermCode"
+          },
+          "calculationBasis": {
+            "$ref": "#/components/schemas/calculationBasis"
+          },
+          "unitPrice": {
+            "$ref": "#/components/schemas/unitPrice"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/quantity"
+          }
+        },
+        "description": "addresses the monetary value of freight and other service charges for a `Transport Document`.\n"
+      },
+      "chargeName": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Free text field describing the charge to apply\n",
+        "example": "Documentation fee - Destination"
+      },
+      "currencyAmount": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The monetary value of all freight and other service charges for a transport document, with a maximum of 2-digit decimals.\n",
+        "format": "float",
+        "example": 1012.12
+      },
+      "currencyCode": {
+        "maxLength": 3,
+        "pattern": "^[A-Z]{3}$",
+        "type": "string",
+        "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)).\n",
+        "example": "DKK"
+      },
+      "paymentTermCode": {
+        "type": "string",
+        "description": "An indicator of whether a charge is prepaid (PRE) or collect (COL). When prepaid, the charge is the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charge is the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- PRE (Prepaid)\n- COL (Collect)\n",
+        "example": "PRE",
+        "enum": [
+          "PRE",
+          "COL"
+        ]
+      },
+      "calculationBasis": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+        "example": "Per day"
+      },
+      "unitPrice": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The unit price of this charge item in the currency of the charge.\n",
+        "format": "float",
+        "example": 3456.6
+      },
+      "quantity": {
+        "minimum": 0,
+        "type": "number",
+        "description": "The amount of unit for this charge item.\n",
+        "format": "float",
+        "example": 34.4
+      },
+      "DocumentParty": {
+        "title": "Document Party",
+        "required": [
+          "isToBeNotified",
+          "party",
+          "partyFunction"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "$ref": "#/components/schemas/Party"
+          },
+          "partyFunction": {
+            "$ref": "#/components/schemas/partyFunction"
+          },
+          "displayedAddress": {
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "The address to be displayed in the `Transport Document`. The displayed address may be used to match the address provided in the letter of credit. It is mandatory to provide a displayed address if the B/L needs to be switched to paper later in the process\n",
+            "items": {
+              "$ref": "#/components/schemas/addressLine"
+            }
+          },
+          "isToBeNotified": {
+            "$ref": "#/components/schemas/isToBeNotified"
+          }
+        },
+        "description": "Associates a Party with a role.\n"
+      },
+      "partyFunction": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "Specifies the role of the party in a given context. Possible values are:\n- `OS` (Original shipper)\n- `CN` (Consignee)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `MS` (Document/message issuer/sender)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `HE` (Carrier booking office (transportation office))\n- `SCO` (Service contract owner - Defined by DCSA)\n- `BA` (Booking Agency)\n- `END` (Endorsee Party)\n",
+        "example": "DDS"
+      },
+      "addressLine": {
+        "maxLength": 35,
+        "type": "string",
+        "description": "A single address line to be used when a B/L needs to be printed.\n",
+        "example": "Kronprincessegade 54"
+      },
+      "isToBeNotified": {
+        "type": "boolean",
+        "description": "Used to decide whether the party will be notified of the arrival of the cargo.",
+        "example": true
+      },
+      "ConsignmentItem_CAR": {
+        "title": "Consignment Item",
+        "required": [
+          "cargoItems"
+        ],
+        "type": "object",
+        "properties": {
+          "cargoItems": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of all `cargoItems`\n",
+            "items": {
+              "$ref": "#/components/schemas/CargoItem_CAR"
+            }
+          }
+        },
+        "description": "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers (`UtilizedTransportEquipment`) by referencing multiple `CargoItems`\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConsignmentItem"
+          }
+        ]
+      },
+      "ConsignmentItem": {
+        "title": "Consignment Item",
+        "required": [
+          "HSCodes",
+          "cargoItems",
+          "carrierBookingReference",
+          "descriptionOfGoods",
+          "weight",
+          "weightUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierBookingReference": {
+            "maxLength": 35,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The associated booking number provided by the carrier for this `Consignment Item`.\n\nWhen multiple `carrierBookingReferences` are used then the bookings referred to must all contain the same:\n- transportPlan\n- shipmentLocations\n- receiptTypeAtOrigin\n- deliveryTypeAtDestination\n- cargoMovementTypeAtOrigin\n- cargoMovementTypeAtDestination\n- serviceContractReference\n- termsAndConditions\n- Place of B/L Issue (if provided)\n",
+            "example": "ABC709951"
+          },
+          "weight": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The total weight of all the `CargoItems` listed in the `ConsignmentItem`. Excludes the tare weight of the container(s).\n",
+            "format": "float",
+            "example": 13000.3
+          },
+          "weightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "volume": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The total volume of all the `CargoItems` listed in the `ConsignmentItem`.\n",
+            "format": "float",
+            "example": 12
+          },
+          "volumeUnit": {
+            "$ref": "#/components/schemas/volumeUnit"
+          },
+          "descriptionOfGoods": {
+            "$ref": "#/components/schemas/descriptionOfGoods"
+          },
+          "HSCodes": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `HS Codes` that apply to this `consignmentItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/HSCode"
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            }
+          },
+          "customsReferences": {
+            "type": "array",
+            "description": "A list of `Customs references`\n",
+            "items": {
+              "$ref": "#/components/schemas/CustomsReference"
+            }
+          }
+        },
+        "description": "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers (`UtilizedTransportEquipment`) by referencing multiple `CargoItems`\n"
+      },
+      "weightUnit": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in imperial or metric terms\n- KGM (Kilograms)\n- LBR (Pounds)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "LBR"
+        ]
+      },
+      "volumeUnit": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n",
+        "example": "MTQ",
+        "enum": [
+          "MTQ",
+          "FTQ"
+        ]
+      },
+      "descriptionOfGoods": {
+        "maxLength": 5000,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
+        "example": "300 boxes of blue shoes size 47"
+      },
+      "HSCode": {
+        "maxLength": 10,
+        "minLength": 6,
+        "pattern": "^\\d{6,10}$",
+        "type": "string",
+        "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+        "example": "851713"
+      },
+      "Reference": {
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/referenceType"
+          },
+          "value": {
+            "$ref": "#/components/schemas/referenceValue"
+          }
+        },
+        "description": "References provided by the shipper or freight forwarder at the time of `Booking` or at the time of providing `Shipping Instructions`. Carriers share it back when providing track and trace event updates, some are also printed on the B/L. Customers can use these references to track shipments in their internal systems.\n"
+      },
+      "referenceType": {
+        "maxLength": 3,
+        "type": "string",
+        "description": "The reference type codes defined by DCSA. Possible values are:\n- FF (Freight Forwarder’s Reference)\n- SI (Shipper’s Reference)\n- SPO (Shippers Purchase Order Reference)\n- CPO (Consignees Purchase Order Reference)\n- CR (Customer’s Reference)\n- AAO (Consignee’s Reference)\n- ECR (Empty container release reference)\n- CSI (Customer shipment ID)\n- BPR (Booking party reference number)\n- BID (Booking Request ID)\n- SAC (Shipping Agency Code)\n",
+        "example": "FF"
+      },
+      "referenceValue": {
+        "maxLength": 100,
+        "type": "string",
+        "description": "The actual value of the reference. \n",
+        "example": "HHL00103004"
+      },
+      "CustomsReference": {
+        "title": "Custom Reference",
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/customsReferenceType"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "value": {
+            "$ref": "#/components/schemas/customsReferenceValue"
+          }
+        },
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
+      },
+      "customsReferenceType": {
+        "maxLength": 50,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The reference type code as defined in the relevant customs jurisdiction.\n",
+        "example": "ACID"
+      },
+      "customsReferenceValue": {
+        "maxLength": 100,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The value of the `customsReference`\n",
+        "example": "4988470982020120017"
+      },
+      "CargoItem_CAR": {
+        "title": "Cargo Item",
+        "required": [
+          "equipmentReference",
+          "outerPackaging",
+          "weight",
+          "weightUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "shippingMarks": {
+            "$ref": "#/components/schemas/ShippingMarks"
+          },
+          "equipmentReference": {
+            "$ref": "#/components/schemas/equipmentReference"
+          },
+          "weight": {
+            "$ref": "#/components/schemas/weight"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/volume"
+          },
+          "weightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "volumeUnit": {
+            "$ref": "#/components/schemas/volumeUnit"
+          },
+          "outerPackaging": {
+            "$ref": "#/components/schemas/OuterPackaging_CAR"
+          },
+          "customsReferences": {
+            "type": "array",
+            "description": "A list of `Customs references`\n",
+            "items": {
+              "$ref": "#/components/schemas/CustomsReference"
+            }
+          }
+        },
+        "description": "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n"
+      },
+      "ShippingMarks": {
+        "minItems": 1,
+        "type": "array",
+        "description": "A list of the `ShippingMarks` applicable to this `cargoItem`\n",
+        "items": {
+          "maxLength": 500,
+          "type": "string",
+          "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
+          "example": "Made in China"
+        }
+      },
+      "equipmentReference": {
+        "maxLength": 11,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
+        "example": "APZU4812090"
+      },
+      "weight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
+        "format": "float",
+        "example": 13000.3
+      },
+      "volume": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
+        "format": "float",
+        "example": 12
+      },
+      "OuterPackaging_CAR": {
+        "title": "Outer Packaging",
+        "required": [
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "imoPackagingCode": {
+            "pattern": "^[A-Z0-9]{1,5}$",
+            "type": "string",
+            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the IMO IMDG code amendment version 41-22. If not available, the package code as per UN recommendation 21 should be used.\n",
+            "example": "1A2"
+          },
+          "dangerousGoods": {
+            "type": "array",
+            "description": "A list of `Dangerous Goods`\n",
+            "items": {
+              "$ref": "#/components/schemas/DangerousGoods_CAR"
+            }
+          }
+        },
+        "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport. It is an array of the attributes below.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/OuterPackaging_SHI"
+          }
+        ]
+      },
+      "OuterPackaging_SHI": {
+        "title": "Outer Packaging",
+        "required": [
+          "numberOfPackages"
+        ],
+        "type": "object",
+        "properties": {
+          "packageCode": {
+            "$ref": "#/components/schemas/packageCode"
+          },
+          "numberOfPackages": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.\n",
+            "format": "int32",
+            "example": 18
+          },
+          "description": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Description of the outer packaging/overpack.\n",
+            "example": "Drum, steel"
+          }
+        },
+        "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport. It is an array of the attributes below.\n"
+      },
+      "packageCode": {
+        "pattern": "^[A-Z0-9]{2}$",
+        "type": "string",
+        "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+        "example": "5H"
+      },
+      "DangerousGoods_CAR": {
+        "title": "Dangerous Goods",
+        "required": [
+          "imoClass",
+          "properShippingName"
+        ],
+        "type": "object",
+        "description": "Specification for `Dangerous Goods`. It is mandatory to either provide the `unNumber` or the `naNumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DangerousGoods"
+          }
+        ]
+      },
+      "DangerousGoods": {
+        "title": "Dangerous Goods",
+        "type": "object",
+        "properties": {
+          "codedVariantList": {
+            "$ref": "#/components/schemas/codedVariantList"
+          },
+          "properShippingName": {
+            "$ref": "#/components/schemas/properShippingName"
+          },
+          "technicalName": {
+            "$ref": "#/components/schemas/technicalName"
+          },
+          "imoClass": {
+            "$ref": "#/components/schemas/imoClass"
+          },
+          "subsidiaryRisk1": {
+            "$ref": "#/components/schemas/subsidiaryRisk"
+          },
+          "subsidiaryRisk2": {
+            "$ref": "#/components/schemas/subsidiaryRisk"
+          },
+          "isMarinePollutant": {
+            "$ref": "#/components/schemas/isMarinePollutant"
+          },
+          "packingGroup": {
+            "$ref": "#/components/schemas/packingGroup"
+          },
+          "isLimitedQuantity": {
+            "$ref": "#/components/schemas/isLimitedQuantity"
+          },
+          "isExceptedQuantity": {
+            "$ref": "#/components/schemas/isExceptedQuantity"
+          },
+          "isSalvagePackings": {
+            "$ref": "#/components/schemas/isSalvagePackings"
+          },
+          "isEmptyUncleanedResidue": {
+            "$ref": "#/components/schemas/isEmptyUncleanedResidue"
+          },
+          "isWaste": {
+            "$ref": "#/components/schemas/isWaste"
+          },
+          "isHot": {
+            "$ref": "#/components/schemas/isHot"
+          },
+          "isCompetentAuthorityApprovalProvided": {
+            "$ref": "#/components/schemas/isCompetentAuthorityApprovalProvided"
+          },
+          "competentAuthorityApproval": {
+            "$ref": "#/components/schemas/competentAuthorityApproval"
+          },
+          "segregationGroups": {
+            "type": "array",
+            "description": "List of the segregation groups applicable to specific hazardous goods according to the IMO IMDG Code.\n\n**Condition:** only applicable to specific hazardous goods.\n",
+            "items": {
+              "maxLength": 2,
+              "type": "string",
+              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n",
+              "example": "12"
+            }
+          },
+          "innerPackagings": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Inner Packings` contained inside this `outer packaging/overpack`.\n",
+            "items": {
+              "$ref": "#/components/schemas/InnerPackaging"
+            }
+          },
+          "emergencyContactDetails": {
+            "$ref": "#/components/schemas/EmergencyContactDetails"
+          },
+          "EMSNumber": {
+            "$ref": "#/components/schemas/EMSNumber"
+          },
+          "endOfHoldingTime": {
+            "$ref": "#/components/schemas/endOfHoldingTime"
+          },
+          "fumigationDateTime": {
+            "$ref": "#/components/schemas/fumigationDateTime"
+          },
+          "isReportableQuantity": {
+            "$ref": "#/components/schemas/isReportableQuantity"
+          },
+          "inhalationZone": {
+            "$ref": "#/components/schemas/inhalationZone"
+          },
+          "grossWeight": {
+            "$ref": "#/components/schemas/DangerousGoods_grossWeight"
+          },
+          "netWeight": {
+            "$ref": "#/components/schemas/DangerousGoods_netWeight"
+          },
+          "netExplosiveContent": {
+            "$ref": "#/components/schemas/DangerousGoods_netExplosiveContent"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/DangerousGoods_volume"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits"
+          }
+        },
+        "oneOf": [
+          {
+            "title": "UN Number",
+            "required": [
+              "unNumber"
+            ],
+            "type": "object",
+            "properties": {
+              "unNumber": {
+                "$ref": "#/components/schemas/unNumber"
+              }
+            }
+          },
+          {
+            "title": "NA Number",
+            "required": [
+              "naNumber"
+            ],
+            "type": "object",
+            "properties": {
+              "naNumber": {
+                "$ref": "#/components/schemas/naNumber"
+              }
+            }
+          }
+        ]
+      },
+      "codedVariantList": {
+        "pattern": "^[0-3][0-9A-Z]{3}$",
+        "type": "string",
+        "description": "Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.\n\nCharacter | Valid Characters | Description\n:--------:|------------------|------------\n1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group\n2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs\n3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.\n",
+        "example": "2200"
+      },
+      "properShippingName": {
+        "maxLength": 250,
+        "type": "string",
+        "description": "The proper shipping name for goods under IMDG Code, or the product name for goods under IBC Code and IGC Code, or the bulk cargo shipping name for goods under IMSBC Code, or the name of oil for goods under Annex I to the MARPOL Convention.\n",
+        "example": "Chromium Trioxide, anhydrous"
+      },
+      "technicalName": {
+        "maxLength": 250,
+        "type": "string",
+        "description": "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.\n"
+      },
+      "imoClass": {
+        "maxLength": 4,
+        "type": "string",
+        "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n      \n      - `1.1A` (Substances and articles which have a mass explosion hazard)\n      - `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n      - `2.1` (Flammable gases)\n      - `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
+        "example": "1.4S"
+      },
+      "subsidiaryRisk": {
+        "pattern": "^[0-9](\\.[0-9])?$",
+        "type": "string",
+        "description": "Any risk in addition to the class of the referenced dangerous goods according to the IMO IMDG Code.\n",
+        "example": "1.2"
+      },
+      "isMarinePollutant": {
+        "type": "boolean",
+        "description": "Indicates if the goods belong to the classification of Marine Pollutant.\n",
+        "example": false
+      },
+      "packingGroup": {
+        "maximum": 3,
+        "minimum": 1,
+        "type": "integer",
+        "description": "The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.\n",
+        "format": "int32",
+        "example": 3
+      },
+      "isLimitedQuantity": {
+        "type": "boolean",
+        "description": "Indicates if the dangerous goods can be transported as limited quantity in accordance with Chapter 3.4 of the IMO IMDG Code.\n",
+        "example": false
+      },
+      "isExceptedQuantity": {
+        "type": "boolean",
+        "description": "Indicates if the dangerous goods can be transported as excepted quantity in accordance with Chapter 3.5 of the IMO IMDG Code.\n",
+        "example": false
+      },
+      "isSalvagePackings": {
+        "type": "boolean",
+        "description": "Indicates if the cargo has special packaging for the transport, recovery or disposal of damaged, defective, leaking or nonconforming hazardous materials packages, or hazardous materials that have spilled or leaked.\n",
+        "example": false
+      },
+      "isEmptyUncleanedResidue": {
+        "type": "boolean",
+        "description": "Indicates if the cargo is residue.\n",
+        "example": false
+      },
+      "isWaste": {
+        "type": "boolean",
+        "description": "Indicates if waste is being shipped\n",
+        "example": false
+      },
+      "isHot": {
+        "type": "boolean",
+        "description": "Indicates if high temperature cargo is shipped.\n",
+        "example": false
+      },
+      "isCompetentAuthorityApprovalProvided": {
+        "type": "boolean",
+        "description": "Indicates if the cargo require approval from authorities\n",
+        "example": false
+      },
+      "competentAuthorityApproval": {
+        "maxLength": 70,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Name and reference number of the competent authority providing the approval.\n",
+        "example": "{Name and reference...}"
+      },
+      "InnerPackaging": {
+        "title": "Inner Packaging",
+        "required": [
+          "description",
+          "material",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "description": "Count of `Inner Packagings` of the referenced `Dangerous Goods`.\n",
+            "format": "int32",
+            "example": 20
+          },
+          "material": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The `material` used for the `Inner Packaging` of the referenced `Dangerous Goods`.\n",
+            "example": "Plastic"
+          },
+          "description": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Description of the packaging.\n",
+            "example": "Wowen plastic water resistant Bag"
+          }
+        },
+        "description": "Object for inner packaging specification\n"
+      },
+      "EmergencyContactDetails": {
+        "title": "Emergency Contact Details",
+        "required": [
+          "contact",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "contact": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Name of the Contact person during an emergency.\n",
+            "example": "Henrik Larsen"
+          },
+          "provider": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Name of the third party vendor providing emergency support\n",
+            "example": "GlobeTeam"
+          },
+          "phone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "referenceNumber": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Contract reference for the emergency support provided by an external third party vendor.\n",
+            "example": "12234"
+          }
+        },
+        "description": "24 hr emergency contact details\n"
+      },
+      "EMSNumber": {
+        "maxLength": 7,
+        "type": "string",
+        "description": "The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.\n",
+        "example": "F-A S-Q"
+      },
+      "endOfHoldingTime": {
+        "type": "string",
+        "description": "Date by when the refrigerated liquid needs to be delivered.\n",
+        "format": "date",
+        "example": "2021-09-03"
+      },
+      "fumigationDateTime": {
+        "type": "string",
+        "description": "Date & time when the container was fumigated\n",
+        "format": "date-time",
+        "example": "2021-09-03T09:03:00-02:00"
+      },
+      "isReportableQuantity": {
+        "type": "boolean",
+        "description": "Indicates if a container of hazardous material is at the reportable quantity level. If `TRUE`, a report to the relevant authority must be made in case of spill.\n",
+        "example": false
+      },
+      "inhalationZone": {
+        "maxLength": 1,
+        "minLength": 1,
+        "type": "string",
+        "description": "The zone classification of the toxicity of the inhalant. Possible values are:\n- `A` (Hazard Zone A) can be asigned to specific gases and liquids\n- `B` (Hazard Zone B) can be asigned to specific gases and liquids\n- `C` (Hazard Zone C) can **only** be asigned to specific gases\n- `D` (Hazard Zone D) can **only** be asigned to specific gases\n",
+        "example": "A"
+      },
+      "dgGrossWeight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The grand total weight of the DG cargo and weight per UNNumber/NANumber including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+        "format": "float",
+        "example": 12000
+      },
+      "netWeight": {
+        "type": "number",
+        "description": "Total weight of the goods carried, excluding packaging.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "netWeightUnit": {
+        "type": "string",
+        "description": "Unit of measure used to describe the `netWeight`. Possible values are\n- KGM (Kilograms)\n- LBR (Pounds)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "LBR"
+        ]
+      },
+      "netExplosiveContent": {
+        "type": "number",
+        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "netExplosiveContentUnit": {
+        "type": "string",
+        "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n- KGM (Kilograms)\n- GRM (Grams)\n",
+        "example": "KGM",
+        "enum": [
+          "KGM",
+          "GRM"
+        ]
+      },
+      "dgVolume": {
+        "type": "number",
+        "description": "The volume of the referenced dangerous goods.\n",
+        "format": "float",
+        "example": 2.4
+      },
+      "volumeUnitDG": {
+        "type": "string",
+        "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n- LTR (Litre)\n",
+        "example": "MTQ",
+        "enum": [
+          "MTQ",
+          "FTQ",
+          "LTR"
+        ]
+      },
+      "Limits": {
+        "required": [
+          "temperatureUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "temperatureUnit": {
+            "type": "string",
+            "description": "The unit for **all attributes in the limits structure** in Celsius or Fahrenheit\n\n- CEL (Celsius)\n- FAH (Fahrenheit)\n",
+            "example": "CEL",
+            "enum": [
+              "CEL",
+              "FAH"
+            ]
+          },
+          "flashPoint": {
+            "$ref": "#/components/schemas/flashPoint"
+          },
+          "transportControlTemperature": {
+            "$ref": "#/components/schemas/transportControlTemperature"
+          },
+          "transportEmergencyTemperature": {
+            "$ref": "#/components/schemas/transportEmergencyTemperature"
+          },
+          "SADT": {
+            "$ref": "#/components/schemas/sadt"
+          },
+          "SAPT": {
+            "$ref": "#/components/schemas/sapt"
+          }
+        },
+        "description": "Limits for the `Dangerous Goods`. The same `Temperature Unit` needs to apply to all attributes in this structure.\n"
+      },
+      "flashPoint": {
+        "type": "number",
+        "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air. Condition: only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
+        "format": "float",
+        "example": 42
+      },
+      "transportControlTemperature": {
+        "type": "number",
+        "description": "Maximum temperature at which certain substance (such as organic peroxides and self-reactive and related substances) can be safely transported for a prolonged period.\n",
+        "format": "float",
+        "example": 24.1
+      },
+      "transportEmergencyTemperature": {
+        "type": "number",
+        "description": "Temperature at which emergency procedures shall be implemented\n",
+        "format": "float",
+        "example": 74.1
+      },
+      "sadt": {
+        "type": "number",
+        "description": "Lowest temperature in which self-accelerating decomposition may occur in a substance\n",
+        "format": "float",
+        "example": 54.1
+      },
+      "sapt": {
+        "type": "number",
+        "description": "Lowest temperature in which self-accelerating polymerization may occur in a substance\n",
+        "format": "float",
+        "example": 70
+      },
+      "UtilizedTransportEquipment_CAR": {
+        "title": "Utilized Transport Equipment",
+        "required": [
+          "cargoGrossWeight",
+          "cargoGrossWeightUnit",
+          "equipment",
+          "isShipperOwned",
+          "seals"
+        ],
+        "type": "object",
+        "properties": {
+          "equipment": {
+            "$ref": "#/components/schemas/Equipment"
+          },
+          "cargoGrossWeight": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total weight of the cargo and weight per container including packaging, which can be expressed in imperial or metric terms, as provided by the shipper. Excludes the tare weight of the container.\n",
+            "format": "float",
+            "example": 12000
+          },
+          "cargoGrossWeightUnit": {
+            "$ref": "#/components/schemas/weightUnit"
+          },
+          "cargoGrossVolume": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total volume of the cargo per container, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 120
+          },
+          "cargoGrossVolumeUnit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- FTQ (Cubic foot)\n- MTQ (Cubic meter)\n\n**Conditional:** if `cargoGrossVolume` is provided then `cargoGrossVolumeUnit` is required\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          },
+          "isShipperOwned": {
+            "$ref": "#/components/schemas/isShipperOwned"
+          },
+          "isNonOperatingReefer": {
+            "$ref": "#/components/schemas/isNonOperatingReefer"
+          },
+          "activeReeferSettings": {
+            "$ref": "#/components/schemas/ActiveReeferSettings"
+          },
+          "seals": {
+            "minLength": 1,
+            "type": "array",
+            "description": "A list of `Seals`\n",
+            "items": {
+              "$ref": "#/components/schemas/Seal"
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            }
+          },
+          "customsReferences": {
+            "type": "array",
+            "description": "A list of `Customs references`\n",
+            "items": {
+              "$ref": "#/components/schemas/CustomsReference"
+            }
+          }
+        },
+        "description": "Specifies the container (`equipment`), the total `weight`, total `volume`, possible `ActiveReeferSettings`, `seals` and `references`\n"
+      },
+      "Equipment": {
+        "required": [
+          "equipmentReference"
+        ],
+        "type": "object",
+        "properties": {
+          "equipmentReference": {
+            "$ref": "#/components/schemas/equipmentReference"
+          },
+          "ISOEquipmentCode": {
+            "$ref": "#/components/schemas/ISOEquipmentCode"
+          },
+          "tareWeight": {
+            "$ref": "#/components/schemas/tareWeight"
+          },
+          "weightUnit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- KGM (Kilograms)\n- LBR (Pounds)\n\n**Conditional:** Mandatory to provide if `tareWeight` is provided\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "Used for storing cargo in/on during transport. The equipment size/type is defined by the ISO 6346 code. The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.\n"
+      },
+      "ISOEquipmentCode": {
+        "maxLength": 4,
+        "pattern": "^\\S+(\\s+\\S+)*$",
+        "type": "string",
+        "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
+        "example": "22GP"
+      },
+      "tareWeight": {
+        "minimum": 0,
+        "exclusiveMinimum": true,
+        "type": "number",
+        "description": "The weight of an empty container (gross container weight).\n",
+        "format": "float",
+        "example": 4800
+      },
+      "isShipperOwned": {
+        "type": "boolean",
+        "description": "Indicates whether the container is shipper owned (SOC).",
+        "example": true
+      },
+      "isNonOperatingReefer": {
+        "type": "boolean",
+        "description": "If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.\n\n**Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.\n",
+        "example": false
+      },
+      "ActiveReeferSettings": {
+        "title": "Active Reefer Settings",
+        "type": "object",
+        "properties": {
+          "temperatureSetpoint": {
+            "$ref": "#/components/schemas/temperatureSetpoint"
+          },
+          "temperatureUnit": {
+            "type": "string",
+            "description": "The unit for temperature in Celsius or Fahrenheit\n\n- CEL (Celsius)\n- FAH (Fahrenheit)\n\n**Condition:** Mandatory to provide if `temperatureSetpoint` is provided\n",
+            "example": "CEL",
+            "enum": [
+              "CEL",
+              "FAH"
+            ]
+          },
+          "o2Setpoint": {
+            "$ref": "#/components/schemas/o2Setpoint"
+          },
+          "co2Setpoint": {
+            "$ref": "#/components/schemas/co2Setpoint"
+          },
+          "humiditySetpoint": {
+            "$ref": "#/components/schemas/humiditySetpoint"
+          },
+          "airExchangeSetpoint": {
+            "$ref": "#/components/schemas/airExchangeSetpoint"
+          },
+          "airExchangeUnit": {
+            "$ref": "#/components/schemas/airExchangeUnit"
+          },
+          "isVentilationOpen": {
+            "$ref": "#/components/schemas/isVentilationOpen"
+          },
+          "isDrainholesOpen": {
+            "$ref": "#/components/schemas/isDrainholesOpen"
+          },
+          "isBulbMode": {
+            "$ref": "#/components/schemas/isBulbMode"
+          },
+          "isColdTreatmentRequired": {
+            "$ref": "#/components/schemas/isColdTreatmentRequired"
+          },
+          "isControlledAtmosphereRequired": {
+            "$ref": "#/components/schemas/isControlledAtmosphereRequired"
+          }
+        },
+        "description": "The specifications for a Reefer equipment.\n\n**Condition:** Only applicable when`isNonOperatingReefer` is set to `false`\n"
+      },
+      "temperatureSetpoint": {
+        "type": "number",
+        "description": "Target value of the temperature for the Reefer based on the cargo requirement.\n",
+        "format": "float",
+        "example": -15
+      },
+      "o2Setpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere O<sub>2</sub> target value\n",
+        "format": "float",
+        "example": 75.3
+      },
+      "co2Setpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere CO<sub>2</sub> target value\n",
+        "format": "float",
+        "example": 25
+      },
+      "humiditySetpoint": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number",
+        "description": "The percentage of the controlled atmosphere humidity target value\n",
+        "format": "float",
+        "example": 95.6
+      },
+      "airExchangeSetpoint": {
+        "minimum": 0,
+        "type": "number",
+        "description": "Target value for the air exchange rate which is the rate at which outdoor air replaces indoor air within a Reefer container\n",
+        "format": "float",
+        "example": 15.4
+      },
+      "airExchangeUnit": {
+        "type": "string",
+        "description": "The unit for `airExchange` in metrics- or imperial- units per hour\n\n- MQH (Cubic metre per hour)\n- FQH (Cubic foot per hour)\n\n**NB:** This is a conditional field. If `airExchange` is specified then this field is required\n",
+        "example": "MQH",
+        "enum": [
+          "MQH",
+          "FQH"
+        ]
+      },
+      "isVentilationOpen": {
+        "type": "boolean",
+        "description": "If `true` the ventilation orifice is `Open` - if `false` the ventilation orifice is `closed`\n",
+        "example": true
+      },
+      "isDrainholesOpen": {
+        "type": "boolean",
+        "description": "Is drainholes open on the container\n",
+        "example": true
+      },
+      "isBulbMode": {
+        "type": "boolean",
+        "description": "Is special container setting for handling flower bulbs active\n",
+        "example": true
+      },
+      "isColdTreatmentRequired": {
+        "type": "boolean",
+        "description": "Indicator whether cargo requires cold treatment prior to loading at origin or during transit, but prior arrival at POD\n",
+        "example": true
+      },
+      "isControlledAtmosphereRequired": {
+        "type": "boolean",
+        "description": "Indicator of whether cargo requires Controlled Atmosphere.\n",
+        "example": true
+      },
+      "Seal": {
+        "required": [
+          "number"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "$ref": "#/components/schemas/sealNumber"
+          },
+          "source": {
+            "$ref": "#/components/schemas/sealSource"
+          },
+          "type": {
+            "$ref": "#/components/schemas/sealType"
+          }
+        },
+        "description": "Addresses the seal-related information associated with the shipment equipment. A seal is put on a shipment equipment once it is loaded. This `Seal` is meant to stay on until the shipment equipment reaches its final destination.\n"
+      },
+      "sealNumber": {
+        "maxLength": 15,
+        "type": "string",
+        "description": "Identifies a seal affixed to the container."
+      },
+      "sealSource": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity. Possible values are:\n- CAR (Carrier)\n- SHI (Shipper)\n- PHY (Phytosanitary)\n- VET (Veterinary)\n- CUS (Customs)\n\n**Condition:** Conditional on type of commodity\n",
+        "example": "CUS"
+      },
+      "sealType": {
+        "maxLength": 5,
+        "type": "string",
+        "description": "The type of seal. This attribute links to the Seal Type ID defined in the Seal Type reference data entity. Possible values are:\n- KLP (Keyless padlock)\n- BLT (Bolt)\n- WIR (Wire)\n",
+        "example": "WIR"
+      },
+      "partyCodes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/partyCodes_inner"
+        }
+      },
+      "unNumber": {
+        "pattern": "^\\d{4}$",
+        "type": "string",
+        "description": "United Nations Dangerous Goods Identifier (UNDG) assigned by the UN Sub-Committee of Experts on the Transport of Dangerous Goods and shown in the IMO IMDG.\n",
+        "example": "1463"
+      },
+      "naNumber": {
+        "pattern": "^\\d{4}$",
+        "type": "string",
+        "description": "Four-digit number that is assigned to dangerous, hazardous, and harmful substances by the United States Department of Transportation.\n",
+        "example": "9037"
+      },
+      "JWKS_keys": {
+        "required": [
+          "kty"
+        ],
+        "type": "object",
+        "properties": {
+          "kty": {
+            "type": "string",
+            "description": "The \"kty\" (key type) parameter identifies the cryptographic algorithm family used with the key, such as \"RSA\" or \"EC\".  \"kty\" values should either be registered in the IANA \"JSON Web Key Types\" registry established by [JWA] or be a value that contains a Collision- Resistant Name.  The \"kty\" value is a case-sensitive string.  This member MUST be present in a JWK."
+          },
+          "use": {
+            "type": "string",
+            "description": "The \"use\" (public key use) parameter identifies the intended use of\nthe public key.  The \"use\" parameter is employed to indicate whether\na public key is used for encrypting data or verifying the signature\non data.\nvalues defined are:\n * sig (signature)\n * enc (encryption)\n",
+            "enum": [
+              "sig",
+              "enc"
+            ]
+          },
+          "key_ops": {
+            "type": "string",
+            "description": "The \"key_ops\" (key operations) parameter identifies the operation(s)\nfor which the key is intended to be used.  The \"key_ops\" parameter is\nintended for use cases in which public, private, or symmetric keys\nmay be present.\n\nIts value is an array of key operation values.  Values defined by\nthis specification are:\n\n*  sign (compute digital signature or MAC)\n*  verify (verify digital signature or MAC)\n*  encrypt (encrypt content)\n*  decrypt (decrypt content and validate decryption, if applicable)\n*  wrapKey (encrypt key)\n*  unwrapKey (decrypt key and validate decryption, if applicable)\n*  deriveKey (derive key)\n*  deriveBits (derive bits not to be used as a key)\n",
+            "enum": [
+              "sign",
+              "verify",
+              "encrypt",
+              "decrypt",
+              "wrapKey",
+              "unwrapKey",
+              "deriveKey",
+              "deriveBits"
+            ]
+          },
+          "alg": {
+            "type": "string",
+            "description": "The \"alg\" (algorithm) parameter identifies the algorithm intended for use with the key.  The values used should either be registered in the IANA \"JSON Web Signature and Encryption Algorithms\" registry established by [JWA] or be a value that contains a Collision- Resistant Name.  The \"alg\" value is a case-sensitive ASCII string. Use of this member is OPTIONAL."
+          },
+          "kid": {
+            "type": "string",
+            "description": "The \"kid\" (key ID) parameter is used to match a specific key.  This is used, for instance, to choose among a set of keys within a JWK Set during key rollover.  The structure of the \"kid\" value is unspecified.  When \"kid\" values are used within a JWK Set, different keys within the JWK Set SHOULD use distinct \"kid\" values.  (One example in which different keys might use the same \"kid\" value is if they have different \"kty\" (key type) values but are considered to be equivalent alternatives by the application using them.)  The \"kid\" value is a case-sensitive string.  Use of this member is OPTIONAL. When used with JWS or JWE, the \"kid\" value is used to match a JWS or JWE \"kid\" Header Parameter value."
+          },
+          "x5u": {
+            "type": "string",
+            "description": "The \"x5u\" (X.509 URL) parameter is a URI [RFC3986] that refers to a resource for an X.509 public key certificate or certificate chain [RFC5280].  The identified resource MUST provide a representation of the certificate or certificate chain that conforms to RFC 5280 [RFC5280] in PEM-encoded form, with each certificate delimited as specified in Section 6.1 of RFC 4945 [RFC4945].  The key in the first certificate MUST match the public key represented by other members of the JWK.  The protocol used to acquire the resource MUST provide integrity protection; an HTTP GET request to retrieve the certificate MUST use TLS [RFC2818] [RFC5246]; the identity of the server MUST be validated, as per Section 6 of RFC 6125 [RFC6125].  Use of this member is OPTIONAL.",
+            "format": "url"
+          },
+          "x5c": {
+            "type": "array",
+            "description": "The \"x5c\" (X.509 certificate chain) parameter contains a chain of one\nor more PKIX certificates [RFC5280].  The certificate chain is\nrepresented as a JSON array of certificate value strings.  Each\nstring in the array is a base64-encoded (Section 4 of [RFC4648] --\nnot base64url-encoded) DER [ITU.X690.1994] PKIX certificate value.\nThe PKIX certificate containing the key value MUST be the first\ncertificate.  This MAY be followed by additional certificates, with\neach subsequent certificate being the one used to certify the\nprevious one.  The key in the first certificate MUST match the public\nkey represented by other members of the JWK.  Use of this member is\nOPTIONAL.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x5t": {
+            "type": "string",
+            "description": "The \"x5t\" (X.509 certificate SHA-1 thumbprint) parameter is a\nbase64url-encoded SHA-1 thumbprint (a.k.a. digest) of the DER\nencoding of an X.509 certificate [RFC5280].  Note that certificate\nthumbprints are also sometimes known as certificate fingerprints.\nThe key in the certificate MUST match the public key represented by\nother members of the JWK.  Use of this member is OPTIONAL.\n"
+          }
+        },
+        "description": "The value of the \"keys\" parameter is an array of JWK values. By default, the order of the JWK values within the array does not imply an order of preference among them, although applications of JWK Sets can choose to assign a meaning to the order for their purposes, if desired."
+      },
+      "RsaPrivateKey_oth": {
+        "type": "object",
+        "properties": {
+          "r": {
+            "type": "string",
+            "description": "The \"r\" (prime factor) parameter within an \"oth\" array member\nrepresents the value of a subsequent prime factor.  It is represented\nas a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "d": {
+            "type": "string",
+            "description": "The \"d\" (factor CRT exponent) parameter within an \"oth\" array member\nrepresents the CRT exponent of the corresponding prime factor.  It is\nrepresented as a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          },
+          "t": {
+            "type": "string",
+            "description": "The \"t\" (factor CRT coefficient) parameter within an \"oth\" array\nmember represents the CRT coefficient of the corresponding prime\nfactor.  It is represented as a Base64urlUInt-encoded value.\n",
+            "format": "byte"
+          }
+        }
+      },
+      "DangerousGoods_grossWeight": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/dgGrossWeight"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/weightUnit"
+          }
+        },
+        "description": "Total weight of the goods carried, including packaging.\n"
+      },
+      "DangerousGoods_netWeight": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/netWeight"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/netWeightUnit"
+          }
+        },
+        "description": "Total weight of the goods carried, excluding packaging.\n"
+      },
+      "DangerousGoods_netExplosiveContent": {
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/netExplosiveContent"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/netExplosiveContentUnit"
+          }
+        },
+        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
+      },
+      "DangerousGoods_volume": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/dgVolume"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/volumeUnitDG"
+          }
+        },
+        "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
+      },
+      "partyCodes_inner": {
+        "required": [
+          "codeListProvider",
+          "partyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "partyCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "Code to identify the party as provided by the `partyCodeListProvider` and `codeListName`\n",
+            "example": "529900T8BM49AURSDO55"
+          },
+          "codeListProvider": {
+            "type": "string",
+            "description": "Describes the organisation that provides the party code.\n\n - `EPUI`:The party code is an EBL Platform User Identifier (that is, an identifier provided by a platform, used to transfer eBLs). EPIU should be combined with the `codeListName`, to identify the platform that issued the identifier.\n - `GLEIF`: The party code is issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en. The `codeNameList` (if omitted) defaults to `LEI`.\n - `W3C`: The party code is issued by a standard created by World Wide Web Consortium (W3C). See https://www.w3.org/. The `codeNameList` (if omitted) defaults to `DID`.\n",
+            "example": "EPIU",
+            "enum": [
+              "GLEIF",
+              "W3C",
+              "EPUI"
+            ]
+          },
+          "codeListName": {
+            "maxLength": 100,
+            "pattern": "^\\S+(\\s+\\S+)*$",
+            "type": "string",
+            "description": "The name of the code list / code generation mechanism / code authority for the party code.\n\nFor `EPUI`:\n * `Wave`: An identifier provided by Wave BL.\n * `CargoX`: An identifier provided by CargoX\n * `EdoxOnline`: An identifier provided by EdoxOnline\n * `IQAX`: An identifier provided by IQAX\n * `EssDOCS`: An identifier provided by essDOCS\n * `Bolero`: An identifier provided by Bolero\n * `TradeGO`: An identifierprovided by TradeGo\n * `Secro`: An identifier provided by Secro\n * `GSBN`: An identifier provided by GSBN\n * `WiseTech`: An identifier provided by WiseTech\n\nFor `W3C`:\n * `DID`: The party code is a Decentralized Identifier (see https://www.w3.org/TR/did-core/).\n\nFor `GLEIF`:\n * `LEI`: The party code is a Legal Entity Identifier (LEI) as issued by Global Legal Entity Identifier Foundation (GLEIF). See https://www.gleif.org/en\n",
+            "example": "Bolero"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "envelopeReference": {
+        "name": "envelopeReference",
+        "in": "path",
+        "description": "The receiving platform-provided unique identifier for the given eBL envelope.\n",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/EnvelopeReference"
+        },
+        "example": "4TkP5nvgTly0MwFrDxfIkR2rvOjkUIgzibBoKABU"
+      },
+      "documentChecksum": {
+        "name": "documentChecksum",
+        "in": "path",
+        "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/DocumentChecksum"
+        },
+        "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
+      },
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain the **MAJOR** version number. The API-Version header **MUST** be aligned with the URI version.\n",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "1"
+        }
+      }
+    },
+    "headers": {
+      "API-Version": {
+        "description": "SemVer used to indicate the version of the contract (API version) returned.\n",
+        "schema": {
+          "type": "string",
+          "example": "1.0.0"
+        }
+      }
+    }
+  }
+}

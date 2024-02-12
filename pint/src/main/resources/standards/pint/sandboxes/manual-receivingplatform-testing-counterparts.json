@@ -1,0 +1,26 @@
+{
+  "id": "SANDBOX_ID_PREFIX-manual-platform-testing-counterparts",
+  "name": "Manual platform testing counterparts",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-platform-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "inManualMode": true,
+    "name" : "ReceivingPlatform1",
+    "role" : "ReceivingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-platform-tested-party/party/ReceivingPlatform1/api"
+  }, {
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-platform-testing-counterparts/party/SendingPlatform1/api"
+  } ]
+}

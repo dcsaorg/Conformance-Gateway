@@ -1,0 +1,31 @@
+{
+  "id": "SANDBOX_ID_PREFIX-auto-platform-testing-counterparts",
+  "name": "Auto platform testing counterparts",
+  "authHeaderName": "dcsa-conformance-api-key",
+  "authHeaderValue": "SENDING_PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-platform-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "ReceivingPlatform1",
+    "role" : "ReceivingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-platform-tested-party/party/ReceivingPlatform1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "RECEIVING_PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER"
+  }, {
+    "name" : "SendingPlatform1",
+    "role" : "SendingPlatform",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-platform-testing-counterparts/party/SendingPlatform1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "SENDING_PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER"
+  } ]
+}

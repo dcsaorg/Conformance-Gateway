@@ -11,6 +11,7 @@
         <module>core</module>
         <module>booking</module>
 				<module>ebl</module>
+				<module>pint</module>
         <module>ebl-issuance</module>
         <module>ebl-surrender</module>
         <module>ovs</module>

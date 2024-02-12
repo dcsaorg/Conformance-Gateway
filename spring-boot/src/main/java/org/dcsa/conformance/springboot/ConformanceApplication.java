@@ -27,6 +27,7 @@ import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
+import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
@@ -148,6 +149,7 @@ public class ConformanceApplication {
                 BookingComponentFactory.STANDARD_VERSIONS.stream()
                     .map(BookingComponentFactory::new),
                 EblComponentFactory.STANDARD_VERSIONS.stream().map(EblComponentFactory::new),
+                PintComponentFactory.STANDARD_VERSIONS.stream().map(PintComponentFactory::new),
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()

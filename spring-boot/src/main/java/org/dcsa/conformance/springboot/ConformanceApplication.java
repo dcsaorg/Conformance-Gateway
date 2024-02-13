@@ -3,8 +3,10 @@ package org.dcsa.conformance.springboot;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+
+import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -290,9 +292,10 @@ public class ConformanceApplication {
         (headerName, headerValues) ->
             headerValues.forEach(
                 headerValue -> servletResponse.setHeader(headerName, headerValue)));
-    PrintWriter writer = servletResponse.getWriter();
-    writer.write(stringBody);
-    writer.flush();
+    OutputStreamWriter outputStreamWriter =
+        new OutputStreamWriter(servletResponse.getOutputStream(), StandardCharsets.UTF_8);
+    outputStreamWriter.write(stringBody);
+    outputStreamWriter.flush();
   }
 
   @SneakyThrows

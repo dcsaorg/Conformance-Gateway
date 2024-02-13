@@ -799,9 +799,6 @@ public class ConformanceSandbox {
     if (EblComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblComponentFactory(standardConfiguration.getVersion());
     }
-    if (PintComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new PintComponentFactory(standardConfiguration.getVersion());
-    }
     if (EblIssuanceComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblIssuanceComponentFactory(standardConfiguration.getVersion());
     }
@@ -810,6 +807,9 @@ public class ConformanceSandbox {
     }
     if (OvsComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new OvsComponentFactory(standardConfiguration.getVersion());
+    }
+    if (PintComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new PintComponentFactory(standardConfiguration.getVersion());
     }
     if (TntComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new TntComponentFactory(standardConfiguration.getVersion());

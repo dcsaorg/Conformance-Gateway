@@ -239,11 +239,11 @@ public abstract class ConformanceParty implements StatefulEntity {
         HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET();
     orchestratorAuthHeader.forEach(
         (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-    String stringResponseBody =
+    byte[] byteArrayResponseBody =
         HttpClient.newHttpClient()
-            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString())
+            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofByteArray())
             .body();
-    return new ConformanceMessageBody(stringResponseBody).getJsonBody();
+    return new ConformanceMessageBody(byteArrayResponseBody).getJsonBody();
   }
 
   private void _handleNextActionPrompt() {

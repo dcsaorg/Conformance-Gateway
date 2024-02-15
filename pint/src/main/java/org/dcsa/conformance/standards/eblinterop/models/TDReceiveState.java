@@ -8,14 +8,21 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 
 import java.text.ParseException;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
 
 public class TDReceiveState {
 
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String TRANSFER_STATE = "transferState";
   private static final String EXPECTED_RECEIVER = "expectedReceiver";
+
+  private static final String MISSING_DOCUMENTS = "missingDocuments";
+  private static final String KNOWN_DOCUMENTS = "knownDocuments";
 
   private ObjectNode state;
 
@@ -38,7 +45,7 @@ public class TDReceiveState {
 
 
   public String getTransportDocumentReference() {
-    return state.path("transportDocumentReference").asText();
+    return state.path(TRANSPORT_DOCUMENT_REFERENCE).asText();
   }
 
   public void setExpectedReceiver(String receiverEPUI) {
@@ -46,13 +53,21 @@ public class TDReceiveState {
   }
 
 
+  public Set<String> getKnownDocumentHashes() {
+    return StreamSupport.stream(this.state.path(KNOWN_DOCUMENTS).spliterator(), false)
+      .map(JsonNode::asText)
+      .collect(Collectors.toUnmodifiableSet());
+  }
+
+
+
   public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest) {
     var etc = initiateRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
-    JsonNode etcEntryParsed;
+    JsonNode etcEntryParsed, envelopeParsed;
     try {
-      var jwsObject = JWSObject.parse(lastEtcEntry.asText());
-      etcEntryParsed = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
+      etcEntryParsed = parseSignedNode(lastEtcEntry);
+      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"));
     } catch (ParseException | JsonProcessingException e) {
         return PintResponseCode.BENV;
     }
@@ -66,7 +81,6 @@ public class TDReceiveState {
       if (!partyCodeNode.path("codeListProvider").asText("").equals("EPUI")) {
         continue;
       }
-
       if (partyCodeNode.path("partyCode").asText("").equals(expectedReceiver)) {
         hasExpectedCode = true;
         break;
@@ -75,6 +89,18 @@ public class TDReceiveState {
 
     if (!hasExpectedCode) {
       return PintResponseCode.BENV;
+    }
+    var missingDocuments = this.state.putArray(MISSING_DOCUMENTS);
+    var knownDocuments = getKnownDocumentHashes();
+    for (var supportingDocumentNode : envelopeParsed.path("supportingDocuments")) {
+      var checksum = supportingDocumentNode.path("documentChecksum").asText(null);
+      if (checksum == null || knownDocuments.contains(checksum)) {
+        continue;
+      }
+      missingDocuments.add(checksum);
+    }
+    if (!missingDocuments.isEmpty()) {
+      return null;
     }
     // TODO; Add check for missing documents here.
     var responseCode = PintResponseCode.RECE;

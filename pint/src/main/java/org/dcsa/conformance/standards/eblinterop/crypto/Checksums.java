@@ -20,8 +20,13 @@ public class Checksums {
 
   @SneakyThrows
   public static String sha256(String text) {
+    return sha256(text.getBytes(StandardCharsets.UTF_8));
+  }
+
+  @SneakyThrows
+  public static String sha256(byte[] data) {
     var digester = MessageDigest.getInstance("SHA256");
-    var digestBytes = digester.digest(text.getBytes(StandardCharsets.UTF_8));
+    var digestBytes = digester.digest(data);
     return HexFormat.of().formatHex(digestBytes);
   }
 

@@ -1,16 +1,11 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateUnsignedStartResponse;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateSignedFinishResponse;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
@@ -24,18 +19,18 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter
 @Slf4j
-public class PintInitiateTransferAction extends PintAction {
-  private final int expectedMissingDocCount;
+public class PintInitiateAndCloseTransferAction extends PintAction {
+  private final PintResponseCode pintResponseCode;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
 
-  public PintInitiateTransferAction(
+  public PintInitiateAndCloseTransferAction(
     String receivingPlatform,
     String sendingPlatform,
     PintAction previousAction,
-    int expectedMissingDocCount,
+    PintResponseCode pintResponseCode,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -45,10 +40,10 @@ public class PintInitiateTransferAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "StartTransfer(MD:%d)".formatted(expectedMissingDocCount),
-        201
+        "SingleRequestTransfer(%s)".formatted(pintResponseCode.name()),
+        200
     );
-    this.expectedMissingDocCount = expectedMissingDocCount;
+    this.pintResponseCode = pintResponseCode;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -74,34 +69,9 @@ public class PintInitiateTransferAction extends PintAction {
     super.doHandleExchange(exchange);
     var dsp = getDsp();
     var td = exchange.getRequest().message().body().getJsonBody().path("transportDocument");
-    boolean dspChanged = false;
     if (!td.isMissingNode() && dsp.transportDocumentChecksum() == null) {
       var checksum = Checksums.sha256CanonicalJson(td);
-      dsp = dsp.withTransportDocumentChecksum(checksum);
-      dspChanged = true;
-    }
-    var requestBody = exchange.getRequest().message().body().getJsonBody();
-    if (dsp.documentChecksums().isEmpty()) {
-      var envelopeNode = parseSignedNodeNoErrors(
-        requestBody.path("envelopeManifestSignedContent")
-      );
-      var supportingDocuments = envelopeNode.path("supportingDocuments");
-      var visualizationChecksum = envelopeNode.path("eBLVisualisationByCarrier").path("documentChecksum").asText(null);
-
-      var missingDocuments = StreamSupport.stream(supportingDocuments.spliterator(), false)
-        .map(n -> n.path("documentChecksum"))
-        .filter(JsonNode::isTextual)
-        .map(JsonNode::asText)
-        .collect(Collectors.toSet());
-
-      if (visualizationChecksum != null) {
-        missingDocuments.add(visualizationChecksum);
-      }
-      dsp = dsp.withDocumentChecksums(Set.copyOf(missingDocuments));
-      dspChanged = true;
-    }
-    if (dspChanged) {
-        setDsp(dsp);
+      setDsp(dsp.withTransportDocumentChecksum(checksum));
     }
   }
 
@@ -137,7 +107,7 @@ public class PintInitiateTransferAction extends PintAction {
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
                   JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
-                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
+                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
                 ),
                 JsonAttribute.contentChecks(
                   PintRole::isSendingPlatform,
@@ -158,10 +128,9 @@ public class PintInitiateTransferAction extends PintAction {
                   () -> getRsp(),
                   () -> getDsp()
                 ),
-                validateUnsignedStartResponse(
+                validateSignedFinishResponse(
                   getMatchedExchangeUuid(),
-                  expectedMissingDocCount,
-                  () -> getDsp()
+                  pintResponseCode
                 )
             );
       }

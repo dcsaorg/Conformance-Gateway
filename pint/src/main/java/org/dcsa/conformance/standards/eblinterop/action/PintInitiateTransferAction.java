@@ -63,7 +63,7 @@ public class PintInitiateTransferAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("transportDocumentReference", getSsp().transportDocumentReference());
+      .put("senderTransmissionClass", SenderTransmissionClass.VALID.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());

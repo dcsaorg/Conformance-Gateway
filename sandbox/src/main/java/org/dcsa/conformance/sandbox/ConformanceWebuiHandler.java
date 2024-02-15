@@ -16,6 +16,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
+import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
@@ -66,6 +67,12 @@ public class ConformanceWebuiHandler {
                       OvsComponentFactory.STANDARD_VERSIONS.stream()
                           .collect(
                               Collectors.toMap(Function.identity(), OvsComponentFactory::new)))),
+              Map.entry(
+                  PintComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                    PintComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), PintComponentFactory::new)))),
               Map.entry(
                   TntComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

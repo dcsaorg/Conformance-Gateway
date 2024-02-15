@@ -10,7 +10,7 @@
   },
   "parties" : [ {
     "inManualMode": true,
-    "name" : "ReceivingPlatform",
+    "name" : "ReceivingPlatform1",
     "role" : "ReceivingPlatform",
     "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-platform-testing-counterparts"
   } ],

@@ -151,12 +151,12 @@ public class ConformanceApplication {
                 BookingComponentFactory.STANDARD_VERSIONS.stream()
                     .map(BookingComponentFactory::new),
                 EblComponentFactory.STANDARD_VERSIONS.stream().map(EblComponentFactory::new),
-                PintComponentFactory.STANDARD_VERSIONS.stream().map(PintComponentFactory::new),
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblSurrenderComponentFactory::new),
                 OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
+                PintComponentFactory.STANDARD_VERSIONS.stream().map(PintComponentFactory::new),
                 TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());
     componentFactories.forEach(

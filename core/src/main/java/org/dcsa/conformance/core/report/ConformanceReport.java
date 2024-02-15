@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.text.StringEscapeUtils;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
@@ -147,7 +148,7 @@ public class ConformanceReport {
             level * 2,
             printable ? " open" : "",
             getConformanceIcon(report.conformanceStatus),
-            report.title,
+            StringEscapeUtils.escapeHtml4(report.title),
             getErrors(report),
             report.subReports.stream()
                 .map(subReport -> renderReport(subReport, level + 1, printable))
@@ -160,7 +161,7 @@ public class ConformanceReport {
           .formatted(
               level * 2,
               getConformanceIcon(report.conformanceStatus),
-              report.title.trim(),
+              StringEscapeUtils.escapeHtml4(report.title.trim()),
               getConformanceLabel(report.conformanceStatus));
     }
     return "<div style=\"margin-left: %dem\">%n<details%s><summary>%s %s</summary>%n<div>%s</div>%n%s%n</details></div>%n"
@@ -168,7 +169,7 @@ public class ConformanceReport {
             level * 2,
             printable ? " open" : "",
             getConformanceIcon(report.conformanceStatus),
-            report.title,
+            StringEscapeUtils.escapeHtml4(report.title),
             getErrors(report),
             report.subReports.stream()
                 .map(subReport -> renderReport(subReport, level + 1, printable))
@@ -179,7 +180,7 @@ public class ConformanceReport {
     return "<div style=\"margin-left: %dem\">%n<h4>%s</h4>%n<div>%s</div>%n</div>%n%s%n"
         .formatted(
             level * 2,
-            report.title,
+            StringEscapeUtils.escapeHtml4(report.title),
             getErrors(report),
             report.subReports.stream()
                 .map(subReport -> renderReport(subReport, level + 1, printable))
@@ -190,7 +191,7 @@ public class ConformanceReport {
     return "<div style=\"margin-left: %dem\">%n<h4>%s</h4>%n<div>%s %s %s</div>%n<div>%s</div>%n</div>%n%s%n"
         .formatted(
             level * 2,
-            report.title,
+            StringEscapeUtils.escapeHtml4(report.title),
             getConformanceIcon(report.conformanceStatus),
             getConformanceLabel(report.conformanceStatus),
             getExchangesDetails(report),
@@ -240,6 +241,7 @@ public class ConformanceReport {
 
   private static String getErrors(ConformanceReport report) {
     return report.errorMessages.stream()
+        .map(StringEscapeUtils::escapeHtml4)
         .map("\n<div>%s</div>"::formatted)
         .collect(Collectors.joining());
   }

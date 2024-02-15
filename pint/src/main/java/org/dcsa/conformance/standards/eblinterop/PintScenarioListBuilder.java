@@ -30,17 +30,23 @@ public class PintScenarioListBuilder
     STANDARD_VERSION.set(standardVersion);
     SENDING_PLATFORM_PARTY_NAME.set(sendingPlatformPartyName);
     RECEIVING_PLATFORM_PARTY_NAME.set(receivingPlatformPartyName);
-    return supplyScenarioParameters().thenEither(
-      receiverStateSetup(ScenarioClass.NO_ISSUES)
-        .then(initiateTransferRequest(PintResponseCode.RECE).thenEither(
-          noAction(),
-          initiateTransferRequest(PintResponseCode.DUPE)
-        )),
+    return noAction().thenEither(
+      /*
+      supplyScenarioParameters(0).thenEither(
+        receiverStateSetup(ScenarioClass.NO_ISSUES)
+          .then(
+            initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
+              noAction(),
+              initiateAndCloseTransferAction(PintResponseCode.DUPE))),
 
-      receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
-        initiateTransferRequest(PintResponseCode.BENV)
-      )/*,
-      scenarioType(ScenarioClass.FINISH_IMMEDIATELY, PintResponseCode.BENV)*/
+        receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
+          initiateAndCloseTransferAction(PintResponseCode.BENV)
+        )
+      ),*/
+      supplyScenarioParameters(2).thenEither(
+        receiverStateSetup(ScenarioClass.NO_ISSUES)
+          .then(
+            initiateTransfer(2)))
     );
   }
 
@@ -51,7 +57,7 @@ public class PintScenarioListBuilder
   }
 
 
-  private static PintScenarioListBuilder supplyScenarioParameters() {
+  private static PintScenarioListBuilder supplyScenarioParameters(int documentCount) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -59,7 +65,8 @@ public class PintScenarioListBuilder
             new SenderSupplyScenarioParametersAction(
                 receivingPlatform,
                 sendingPlatform,
-                (PintAction) previousAction
+                (PintAction) previousAction,
+                documentCount
             ));
   }
 
@@ -78,13 +85,8 @@ public class PintScenarioListBuilder
     return new PintScenarioListBuilder(null);
   }
 
-  private static PintScenarioListBuilder initiateTransferRequest(PintResponseCode signedResponseCode) {
-    return _issuanceRequest(signedResponseCode);
-  }
 
-  private static PintScenarioListBuilder _issuanceRequest(
-    PintResponseCode signedResponseCode
-  ) {
+  private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -93,11 +95,28 @@ public class PintScenarioListBuilder
                 receivingPlatform,
                 sendingPlatform,
                 (PintAction) previousAction,
+                expectedMissingDocumentCount,
+                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(TRANSFER_STARTED_UNSIGNED_RESPONSE_SCHEMA)
+                ));
+  }
+
+  private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintInitiateAndCloseTransferAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
                 signedResponseCode,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
-                resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
-                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA)
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)
               ));
   }
 

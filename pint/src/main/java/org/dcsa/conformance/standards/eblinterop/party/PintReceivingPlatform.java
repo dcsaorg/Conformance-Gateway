@@ -1,8 +1,11 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
@@ -20,6 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
+import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
@@ -92,30 +96,23 @@ public class PintReceivingPlatform extends ConformanceParty {
 
   public ConformanceResponse handleInitiateTransferRequest(ConformanceRequest request) {
     var transferRequest = request.message().body().getJsonBody();
-    var tdr = transferRequest.path("transportDocument").path("transportDocumentReference").asText();
+    var td = transferRequest.path("transportDocument");
+    var tdr = td.path("transportDocumentReference").asText();
     var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
-    var lastEnvelopeTransferChainEntrySignedContentChecksum = "...";
+    var etc = transferRequest.path("envelopeTransferChain");
+    var lastEtcEntry = etc.path(etc.size() - 1);
+    var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
     var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest);
+    var envelopeManifest = parseSignedNodeNoErrors(transferRequest.path("envelopeManifestSignedContent"));
+    var documentChecksums = createDocumentChecksumArray(envelopeManifest);
 
     if (responseCode != null) {
-      var visualizationChecksum = transferRequest.path("eBLVisualisationByCarrier")
-        .path("documentChecksum")
-        .asText(null);
-      var allSupportingDocuments = transferRequest.path("supportingDocuments");
       receiveState.updateTransferState(responseCode);
       unsignedPayload.put("responseCode", responseCode.name());
-      var receivedDocuments = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
-      if (visualizationChecksum != null) {
-        receivedDocuments.add(visualizationChecksum);
-      }
-      for (var documentNode : allSupportingDocuments) {
-        var documentChecksum = documentNode.path("documentChecksum").asText(null);
-        if (documentChecksum != null) {
-          receivedDocuments.add(documentChecksum);
-        }
-      }
+      unsignedPayload.set("receivedAdditionalDocumentChecksums", documentChecksums);
+
       var signedPayload = payloadSigner.sign(unsignedPayload.toString());
       var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
       receiveState.save(persistentMap);
@@ -126,17 +123,36 @@ public class PintReceivingPlatform extends ConformanceParty {
       );
     }
     var envelopeReference = "...";
-    var transportDocumentChecksum = "...";
+    var transportDocumentChecksum = Checksums.sha256CanonicalJson(td);
     unsignedPayload
       .put("envelopeReference", envelopeReference)
+      .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum)
       .put("transportDocumentChecksum", transportDocumentChecksum);
-    unsignedPayload.putArray("missingAdditionalDocumentChecksums");
+    unsignedPayload.set("missingAdditionalDocumentChecksums", documentChecksums);
     receiveState.save(persistentMap);
     return request.createResponse(
       201,
       Map.of("API-Version", List.of(apiVersion)),
       new ConformanceMessageBody(unsignedPayload)
     );
+  }
+
+  private static ArrayNode createDocumentChecksumArray(JsonNode envelopeManifest) {
+    var visualizationChecksum = envelopeManifest.path("eBLVisualisationByCarrier")
+      .path("documentChecksum")
+      .asText(null);
+    var allSupportingDocuments = envelopeManifest.path("supportingDocuments");
+    var receivedDocuments = OBJECT_MAPPER.createArrayNode();
+    if (visualizationChecksum != null) {
+      receivedDocuments.add(visualizationChecksum);
+    }
+    for (var documentNode : allSupportingDocuments) {
+      var documentChecksum = documentNode.path("documentChecksum").asText(null);
+      if (documentChecksum != null) {
+        receivedDocuments.add(documentChecksum);
+      }
+    }
+    return receivedDocuments;
   }
 
   @Override

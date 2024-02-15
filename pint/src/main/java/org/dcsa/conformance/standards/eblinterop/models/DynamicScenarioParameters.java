@@ -6,13 +6,34 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.With;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 @With
-public record DynamicScenarioParameters() {
+public record DynamicScenarioParameters(
+  String transportDocumentChecksum,
+  int documentCount,
+  Set<String> documentChecksums
+) {
   public ObjectNode toJson() {
-    return OBJECT_MAPPER.createObjectNode();
+    var node = OBJECT_MAPPER.createObjectNode()
+      .put("transportDocumentChecksum", transportDocumentChecksum)
+      .put("documentCount", documentCount);
+    var documentChecksums = node.putArray("documentChecksums");
+    for (var checksum : documentChecksums) {
+      documentChecksums.add(checksum);
+    }
+    return node;
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
-    return new DynamicScenarioParameters();
+    return new DynamicScenarioParameters(
+      jsonNode.required("transportDocumentChecksum").asText(null),
+      jsonNode.required("documentCount").asInt(),
+      StreamSupport.stream(jsonNode.required("documentChecksums").spliterator(), false)
+        .map(JsonNode::asText)
+        .collect(Collectors.toUnmodifiableSet())
+    );
   }
 }

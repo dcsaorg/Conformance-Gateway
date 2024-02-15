@@ -8,6 +8,8 @@ import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameter
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 
+import java.util.Set;
+
 public abstract class PintAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
@@ -25,8 +27,7 @@ public abstract class PintAction extends ConformanceAction {
     if (previousAction == null) {
 
       this.dspReference =
-        new OverwritingReference<>(
-          null, new DynamicScenarioParameters());
+          new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of()));
       this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", ""));
       this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null));
     } else {
@@ -36,6 +37,13 @@ public abstract class PintAction extends ConformanceAction {
     }
   }
 
+  @Override
+  public void reset() {
+    super.reset();
+    if (previousAction != null) {
+      this.dspReference.set(null);
+    }
+  }
 
   @Override
   public ObjectNode exportJsonState() {
@@ -71,20 +79,11 @@ public abstract class PintAction extends ConformanceAction {
 
 
   public DynamicScenarioParameters getDsp() {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      return previousAction.getDsp();
-    }
     return this.dspReference.get();
   }
 
   public void setDsp(DynamicScenarioParameters dsp) {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      previousAction.setDsp(dsp);
-    } else {
-      this.dspReference.set(dsp);
-    }
+    this.dspReference.set(dsp);
   }
 
   public SenderScenarioParameters getSsp() {

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -25,6 +26,8 @@ import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioPa
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
 
@@ -50,6 +53,10 @@ public class PintReceivingPlatform extends ConformanceParty {
         asyncWebClient,
         orchestratorAuthHeader);
     this.payloadSigner = payloadSigner;
+  }
+
+  protected SignatureVerifier getSignatureVerifer() {
+    return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
   @Override
@@ -104,7 +111,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
-    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest);
+    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifer());
     var envelopeManifest = parseSignedNodeNoErrors(transferRequest.path("envelopeManifestSignedContent"));
     var documentChecksums = createDocumentChecksumArray(envelopeManifest);
 
@@ -117,7 +124,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
       receiveState.save(persistentMap);
       return request.createResponse(
-        200,
+        responseCode.getHttpResponseCode(),
         Map.of("API-Version", List.of(apiVersion)),
         new ConformanceMessageBody(signedPayloadJsonNode)
       );

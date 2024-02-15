@@ -4,6 +4,8 @@ import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.valida
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateSignedFinishResponse;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -21,6 +23,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Slf4j
 public class PintInitiateAndCloseTransferAction extends PintAction {
   private final PintResponseCode pintResponseCode;
+  private final SenderTransmissionClass senderTransmissionClass;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
@@ -31,6 +34,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
     String sendingPlatform,
     PintAction previousAction,
     PintResponseCode pintResponseCode,
+    SenderTransmissionClass senderTransmissionClass,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -41,9 +45,10 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
         receivingPlatform,
         previousAction,
         "SingleRequestTransfer(%s)".formatted(pintResponseCode.name()),
-        200
+        pintResponseCode.getHttpResponseCode()
     );
     this.pintResponseCode = pintResponseCode;
+    this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -58,7 +63,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("transportDocumentReference", getSsp().transportDocumentReference());
+      .put("senderTransmissionClass", senderTransmissionClass.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());
@@ -81,6 +86,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> senderVerifierSupplier = () -> PayloadSignerFactory.testKeySignatureVerifier();
+
         return Stream.of(
                 new UrlPathCheck(
                     PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
@@ -102,13 +108,14 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                   HttpMessageType.RESPONSE,
                   responseSchemaValidator
                 ),
-                JsonAttribute.contentChecks(
-                  PintRole::isSendingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.REQUEST,
-                  JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
-                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
-                ),
+                senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
+                  ? JsonAttribute.contentChecks(
+                    PintRole::isSendingPlatform,
+                    getMatchedExchangeUuid(),
+                    HttpMessageType.REQUEST,
+                    JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
+                    JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier)))
+                  : null,
                 JsonAttribute.contentChecks(
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
@@ -132,7 +139,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                   getMatchedExchangeUuid(),
                   pintResponseCode
                 )
-            );
+            ).filter(Objects::nonNull);
       }
     };
   }

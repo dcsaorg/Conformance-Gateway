@@ -31,18 +31,19 @@ public class PintScenarioListBuilder
     SENDING_PLATFORM_PARTY_NAME.set(sendingPlatformPartyName);
     RECEIVING_PLATFORM_PARTY_NAME.set(receivingPlatformPartyName);
     return noAction().thenEither(
-      /*
       supplyScenarioParameters(0).thenEither(
         receiverStateSetup(ScenarioClass.NO_ISSUES)
-          .then(
+          .thenEither(
             initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
               noAction(),
-              initiateAndCloseTransferAction(PintResponseCode.DUPE))),
+              initiateAndCloseTransferAction(PintResponseCode.DUPE)),
+              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE)
+            ),
 
         receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
           initiateAndCloseTransferAction(PintResponseCode.BENV)
         )
-      ),*/
+      ),
       supplyScenarioParameters(2).thenEither(
         receiverStateSetup(ScenarioClass.NO_ISSUES)
           .then(
@@ -104,6 +105,10 @@ public class PintScenarioListBuilder
   }
 
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode) {
+    return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID);
+  }
+
+  private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode, SenderTransmissionClass senderTransmissionClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -113,6 +118,7 @@ public class PintScenarioListBuilder
                 sendingPlatform,
                 (PintAction) previousAction,
                 signedResponseCode,
+                senderTransmissionClass,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),

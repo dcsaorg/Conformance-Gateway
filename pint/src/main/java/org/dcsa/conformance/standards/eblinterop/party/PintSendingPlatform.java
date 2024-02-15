@@ -6,9 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
+
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.util.Base64URL;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -23,6 +28,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.PintInitiateAndCloseTransferAction;
 import org.dcsa.conformance.standards.eblinterop.action.PintInitiateTransferAction;
 import org.dcsa.conformance.standards.eblinterop.action.SenderSupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblinterop.action.SenderTransmissionClass;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
@@ -148,9 +154,10 @@ public class PintSendingPlatform extends ConformanceParty {
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.required("transportDocumentReference").asText();
     var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
+    var tdr = ssp.transportDocumentReference();
+    var senderTransmissionClass = SenderTransmissionClass.valueOf(actionPrompt.required("senderTransmissionClass").asText());
 
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
     if (isCorrect) {
@@ -211,7 +218,12 @@ public class PintSendingPlatform extends ConformanceParty {
 
     var latestEnvelopeTransferChainEntrySigned = payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
     var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(tdChecksum, Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
-    body.set("envelopeManifestSignedContent", TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString())));
+
+    var signedManifest = payloadSigner.sign(unsignedEnvelopeManifest.toString());
+    if (senderTransmissionClass == SenderTransmissionClass.SIGNATURE_ISSUE) {
+      signedManifest = mutatePayload(signedManifest);
+    }
+    body.set("envelopeManifestSignedContent", TextNode.valueOf(signedManifest));
     body.putArray("envelopeTransferChain")
       .add(latestEnvelopeTransferChainEntrySigned);
     sendingState.save(persistentMap);
@@ -223,6 +235,22 @@ public class PintSendingPlatform extends ConformanceParty {
     addOperatorLogEntry(
         "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
+  }
+
+  private String mutatePayload(String signedPayload) {
+    StringBuilder b = new StringBuilder(signedPayload.length());
+    int firstDot = signedPayload.indexOf('.');
+    int secondDot = signedPayload.indexOf('.', firstDot + 1);
+    if (firstDot == -1 || secondDot == -1) {
+      return signedPayload;
+    }
+
+    b.append(signedPayload, 0, firstDot + 1);
+    var payloadEncoded = signedPayload.substring(firstDot + 1, secondDot);
+    var decoded = Base64URL.from(payloadEncoded).decodeToString();
+    b.append(Base64URL.encode(decoded + " "));
+    b.append(signedPayload, secondDot, signedPayload.length());
+    return b.toString();
   }
 
   @Override

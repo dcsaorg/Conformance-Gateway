@@ -5,7 +5,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.util.RawValue;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
@@ -20,12 +20,15 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.eblinterop.action.PintInitiateAndCloseTransferAction;
 import org.dcsa.conformance.standards.eblinterop.action.PintInitiateTransferAction;
 import org.dcsa.conformance.standards.eblinterop.action.SenderSupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
+import org.dcsa.conformance.standards.eblinterop.models.TDSendingState;
 
 @Slf4j
 public class PintSendingPlatform extends ConformanceParty {
@@ -82,6 +85,7 @@ public class PintSendingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+      Map.entry(PintInitiateAndCloseTransferAction.class, this::sendIssuanceRequest),
       Map.entry(PintInitiateTransferAction.class, this::sendIssuanceRequest)
     );
   }
@@ -92,11 +96,10 @@ public class PintSendingPlatform extends ConformanceParty {
     + "0123456789"
     // spaces - cannot come first nor last
     + " "
-    // Symbols, also do not count as spaces. TODO, add <> when DT-902 is fixed
-    + "-_+!/\\`\"'*^~.:,;(){}[]@$¤&%¤&§½"
-    // Spec says "\S+(\s+\S+)*". Unicode smiley count as "not space".
-    // TODO: Add when DT-903 is fixed
-    //+ "✉\uD83D\uDEA2"
+    // ASCII symbols, also do not count as spaces. TODO, add <> when DT-902 is fixed
+    + "-_+!/\\`\"'*^~.:,;(){}[]@$&%"
+    // Spec says "\S+(\s+\S+)*". Unicode smiley and other non-ASCII symbols count as "not space".
+    + "✉½¤§"
   ).toCharArray();
 
   private String generateTDR() {
@@ -110,7 +113,7 @@ public class PintSendingPlatform extends ConformanceParty {
     int breakerLimit = 20;
     for (int i = 0 ; i < 19 ; i++) {
       var c = TDR_CHARS[RANDOM.nextInt(TDR_CHARS.length)];
-      if ((i < 1 || i > 18)) {
+      if ((i < 1 || i > 17)) {
         while (Character.isSpaceChar(c) && breakerLimit-- > 0) {
           c = TDR_CHARS[RANDOM.nextInt(TDR_CHARS.length)];
         }
@@ -146,11 +149,14 @@ public class PintSendingPlatform extends ConformanceParty {
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("transportDocumentReference").asText();
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
 
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
     if (isCorrect) {
       eblStatesByTdr.put(tdr, PintTransferState.ISSUANCE_REQUESTED);
     }
+    var sendingState = TDSendingState.newInstance(ssp.transportDocumentReference(), dsp.documentCount());
 
     var body = OBJECT_MAPPER.createObjectNode();
 
@@ -204,14 +210,11 @@ public class PintSendingPlatform extends ConformanceParty {
     transaction.set("recipient", issueToParty);
 
     var latestEnvelopeTransferChainEntrySigned = payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
-    var unsignedEnvelopeManifest = OBJECT_MAPPER.createObjectNode()
-      .put("transportDocumentChecksum", tdChecksum)
-      .put("lastEnvelopeTransferChainEntrySignedContentChecksum", Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
-    unsignedEnvelopeManifest.putArray("supportingDocuments");
+    var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(tdChecksum, Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
     body.set("envelopeManifestSignedContent", TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString())));
     body.putArray("envelopeTransferChain")
       .add(latestEnvelopeTransferChainEntrySigned);
-
+    sendingState.save(persistentMap);
     this.syncCounterpartPost(
       "/v" + apiVersion.charAt(0) + "/envelopes",
       body

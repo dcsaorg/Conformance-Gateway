@@ -1,19 +1,19 @@
 package org.dcsa.conformance.standards.eblinterop.models;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.nimbusds.jose.JWSObject;
-import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
-
 import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
+import org.dcsa.conformance.standards.eblinterop.crypto.CouldNotValidateSignatureException;
+import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 
 public class TDReceiveState {
 
@@ -24,7 +24,7 @@ public class TDReceiveState {
   private static final String MISSING_DOCUMENTS = "missingDocuments";
   private static final String KNOWN_DOCUMENTS = "knownDocuments";
 
-  private ObjectNode state;
+  private final ObjectNode state;
 
   private TDReceiveState(ObjectNode state) {
     this.state = state;
@@ -61,15 +61,17 @@ public class TDReceiveState {
 
 
 
-  public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest) {
+  public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifer) {
     var etc = initiateRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     JsonNode etcEntryParsed, envelopeParsed;
     try {
-      etcEntryParsed = parseSignedNode(lastEtcEntry);
-      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"));
+      etcEntryParsed = parseSignedNode(lastEtcEntry, signatureVerifer);
+      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"), signatureVerifer);
     } catch (ParseException | JsonProcessingException e) {
         return PintResponseCode.BENV;
+    } catch (CouldNotValidateSignatureException e) {
+        return PintResponseCode.BSIG;
     }
     var transactions = etcEntryParsed.path("transactions");
     var lastTransactionNode = transactions.path(transactions.size() - 1);
@@ -114,7 +116,7 @@ public class TDReceiveState {
     var state = switch (code){
       case RECE, DUPE -> TransferState.ACCEPTED;
       case BENV, BSIG, DISE -> TransferState.REJECTED;
-      case INCD, MDOC -> TransferState.INCOMPLETE;
+      case INCD, MDOC, BETR -> TransferState.INCOMPLETE;
     };
     this.setTransferState(state);
   }

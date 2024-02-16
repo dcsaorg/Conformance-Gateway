@@ -20,9 +20,9 @@ public record DynamicScenarioParameters(
     var node = OBJECT_MAPPER.createObjectNode()
       .put("transportDocumentChecksum", transportDocumentChecksum)
       .put("documentCount", documentCount);
-    var documentChecksums = node.putArray("documentChecksums");
+    var jsonDocumentChecksums = node.putArray("documentChecksums");
     for (var checksum : documentChecksums) {
-      documentChecksums.add(checksum);
+      jsonDocumentChecksums.add(checksum);
     }
     return node;
   }

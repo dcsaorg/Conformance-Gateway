@@ -37,12 +37,22 @@ public class PintScenarioListBuilder
             initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
               noAction(),
               initiateAndCloseTransferAction(PintResponseCode.DUPE)),
-              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE)
+              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
+                initiateAndCloseTransferAction(PintResponseCode.RECE)
+              )
             ),
 
         receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
           initiateAndCloseTransferAction(PintResponseCode.BENV)
-        )
+        ),
+        receiverStateSetup(ScenarioClass.FAIL_W_503).then(
+          initiateTransferUnsignedFailure(503).thenEither(
+            resetScenarioClass(ScenarioClass.NO_ISSUES).then(
+              initiateAndCloseTransferAction(PintResponseCode.RECE)),
+            initiateTransferUnsignedFailure(503).then(
+              resetScenarioClass(ScenarioClass.NO_ISSUES).then(
+                initiateAndCloseTransferAction(PintResponseCode.RECE)))
+        ))
       ),
       supplyScenarioParameters(2).thenEither(
         receiverStateSetup(ScenarioClass.NO_ISSUES)
@@ -82,10 +92,37 @@ public class PintScenarioListBuilder
             scenarioClass));
   }
 
+  private static PintScenarioListBuilder resetScenarioClass(ScenarioClass scenarioClass) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction -> new ResetScenarioClassAction(
+        receivingPlatform,
+        sendingPlatform,
+        (PintAction) previousAction,
+        scenarioClass));
+  }
+
+
   private static PintScenarioListBuilder noAction() {
     return new PintScenarioListBuilder(null);
   }
 
+
+  private static PintScenarioListBuilder initiateTransferUnsignedFailure(int expectedStatus) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintInitiateTransferUnsignedErrorAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
+                expectedStatus,
+                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA)));
+  }
 
   private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();

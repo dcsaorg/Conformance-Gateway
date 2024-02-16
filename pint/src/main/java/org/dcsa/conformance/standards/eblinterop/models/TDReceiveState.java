@@ -7,11 +7,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
+import org.dcsa.conformance.core.traffic.ConformanceRequest;
+import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
+import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
 import org.dcsa.conformance.standards.eblinterop.crypto.CouldNotValidateSignatureException;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 
@@ -23,6 +29,8 @@ public class TDReceiveState {
 
   private static final String MISSING_DOCUMENTS = "missingDocuments";
   private static final String KNOWN_DOCUMENTS = "knownDocuments";
+
+  private static final String SCENARIO_CLASS = "scenarioClass";
 
   private final ObjectNode state;
 
@@ -148,4 +156,18 @@ public class TDReceiveState {
     jsonNodeMap.save(getTransportDocumentReference(), asPersistentState());
   }
 
+  public void setScenarioClass(ScenarioClass scenarioClass) {
+    this.state.put(SCENARIO_CLASS, scenarioClass.name());
+  }
+
+  public ConformanceResponse cannedResponse(ConformanceRequest conformanceRequest) {
+    var scenarioClass = ScenarioClass.valueOf(this.state.path(SCENARIO_CLASS).asText(ScenarioClass.NO_ISSUES.name()));
+    if (scenarioClass == ScenarioClass.FAIL_W_503) {
+      return conformanceRequest.createResponse(503,
+        Map.of("Retry-after", List.of("10")),
+        new ConformanceMessageBody("Please")
+      );
+    }
+    return null;
+  }
 }

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
 import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,8 +9,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -23,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
+import org.dcsa.conformance.standards.eblinterop.action.ResetScenarioClassAction;
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
@@ -55,7 +53,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     this.payloadSigner = payloadSigner;
   }
 
-  protected SignatureVerifier getSignatureVerifer() {
+  protected SignatureVerifier getSignatureVerifier() {
     return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
@@ -67,10 +65,32 @@ public class PintReceivingPlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(ReceiverSupplyScenarioParametersAndStateSetupAction.class, this::initiateState)
+      Map.entry(ReceiverSupplyScenarioParametersAndStateSetupAction.class, this::initiateState),
+      Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass)
     );
   }
 
+
+  private void resetScenarioClass(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.resetScenarioClass(%s)".formatted(actionPrompt.toPrettyString()));
+    var tdr = actionPrompt.required("transportDocumentReference").asText();
+    var existing = persistentMap.load(tdr);
+    if (existing == null){
+      throw new IllegalStateException("TDR must be known for a resetScenarioClass");
+    }
+    var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
+
+    var tdState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+    tdState.setScenarioClass(scenarioClass);
+    tdState.save(persistentMap);
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText())
+        .putNull("input"));
+    addOperatorLogEntry(
+      "Finished resetScenarioClass");
+  }
 
   private void initiateState(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.handleScenarioTypeAction(%s)".formatted(actionPrompt.toPrettyString()));
@@ -90,6 +110,7 @@ public class PintReceivingPlatform extends ConformanceParty {
 
     var tdState = TDReceiveState.newInstance(tdr);
     tdState.setExpectedReceiver(expectedRecipient);
+    tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
@@ -106,12 +127,16 @@ public class PintReceivingPlatform extends ConformanceParty {
     var td = transferRequest.path("transportDocument");
     var tdr = td.path("transportDocumentReference").asText();
     var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+    var cannedResponse = receiveState.cannedResponse(request);
+    if (cannedResponse != null) {
+      return cannedResponse;
+    }
     var etc = transferRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
-    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifer());
+    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifier());
     var envelopeManifest = parseSignedNodeNoErrors(transferRequest.path("envelopeManifestSignedContent"));
     var documentChecksums = createDocumentChecksumArray(envelopeManifest);
 

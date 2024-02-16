@@ -5,15 +5,10 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-
-import java.text.ParseException;
+import com.nimbusds.jose.util.Base64URL;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
-
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.util.Base64URL;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -25,10 +20,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.eblinterop.action.PintInitiateAndCloseTransferAction;
-import org.dcsa.conformance.standards.eblinterop.action.PintInitiateTransferAction;
-import org.dcsa.conformance.standards.eblinterop.action.SenderSupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.eblinterop.action.SenderTransmissionClass;
+import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
@@ -92,7 +84,8 @@ public class PintSendingPlatform extends ConformanceParty {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
       Map.entry(PintInitiateAndCloseTransferAction.class, this::sendIssuanceRequest),
-      Map.entry(PintInitiateTransferAction.class, this::sendIssuanceRequest)
+      Map.entry(PintInitiateTransferAction.class, this::sendIssuanceRequest),
+      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::sendIssuanceRequest)
     );
   }
 

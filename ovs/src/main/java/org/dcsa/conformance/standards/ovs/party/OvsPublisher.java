@@ -27,6 +27,8 @@ import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 @Slf4j
 public class OvsPublisher extends ConformanceParty {
 
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
   public OvsPublisher(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -83,8 +85,7 @@ public class OvsPublisher extends ConformanceParty {
                               case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
                               case UN_LOCATION_CODE -> "NLAMS";
                               case FACILITY_SMDG_CODE -> "APM";
-                              case START_DATE, END_DATE ->
-                                  new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
                               case LIMIT -> "100";
                             })));
 

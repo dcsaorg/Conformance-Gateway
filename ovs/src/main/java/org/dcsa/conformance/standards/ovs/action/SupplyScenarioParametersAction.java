@@ -3,6 +3,10 @@ package org.dcsa.conformance.standards.ovs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,12 +18,22 @@ import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final LinkedHashSet<OvsFilterParameter> ovsFilterParameters;
 
   public SupplyScenarioParametersAction(
       String publisherPartyName, OvsFilterParameter... ovsFilterParameters) {
-    super(publisherPartyName, null, null, "SupplyScenarioParameters");
+    super(
+        publisherPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters(%s)"
+            .formatted(
+                Arrays.stream(ovsFilterParameters)
+                    .map(OvsFilterParameter::getQueryParamName)
+                    .collect(Collectors.joining(", "))));
     this.ovsFilterParameters =
         Stream.of(ovsFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
   }
@@ -67,7 +81,15 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     return SuppliedScenarioParameters.fromMap(
             ovsFilterParameters.stream()
-                .collect(Collectors.toMap(Function.identity(), ignoredKey -> "TODO")))
+                .collect(
+                    Collectors.toMap(
+                        Function.identity(),
+                        ovsFilterParameter ->
+                            switch (ovsFilterParameter) {
+                              case LIMIT -> "100";
+                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
+                              default -> "TODO";
+                            })))
         .toJson();
   }
 

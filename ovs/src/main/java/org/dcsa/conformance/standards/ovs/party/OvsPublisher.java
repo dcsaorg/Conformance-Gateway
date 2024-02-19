@@ -55,7 +55,9 @@ public class OvsPublisher extends ConformanceParty {
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-v30-response.json", Map.ofEntries());
+            "/standards/ovs/messages/ovs-%s-response.json"
+                .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
+            Map.ofEntries());
 
     return request.createResponse(
         200,

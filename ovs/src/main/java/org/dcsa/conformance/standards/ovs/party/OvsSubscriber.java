@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -50,11 +52,19 @@ public class OvsSubscriber extends ConformanceParty {
 
   private void getSchedules(JsonNode actionPrompt) {
     log.info("OvsSubscriber.getSchedules(%s)".formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     syncCounterpartGet(
-        "/%s/service-schedules".formatted(apiVersion.startsWith("2") ? "v2" : "v3"), Map.ofEntries());
+        "/v3/service-schedules",
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue()))));
 
-    addOperatorLogEntry("Sent GET schedules request");
+    addOperatorLogEntry(
+        "Sent GET schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

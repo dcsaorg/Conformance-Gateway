@@ -4,8 +4,9 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.ovs.action.OvsAction;
 import org.dcsa.conformance.standards.ovs.action.OvsGetSchedulesAction;
+import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 
 @Slf4j
@@ -20,7 +21,13 @@ public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListB
     threadLocalComponentFactory.set(componentFactory);
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
-    return noAction().then(getEventsRequest());
+    if ("3.0.0-Beta1".equals(componentFactory.getStandardVersion())) {
+      return noAction().then(getEventsRequest());
+    } else {
+      return supplyScenarioParameters(
+              OvsFilterParameter.LIMIT, OvsFilterParameter.CARRIER_VOYAGE_NUMBER)
+          .then(getEventsRequest());
+    }
   }
 
   private OvsScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
@@ -29,6 +36,14 @@ public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListB
 
   private static OvsScenarioListBuilder noAction() {
     return new OvsScenarioListBuilder(null);
+  }
+
+  private static OvsScenarioListBuilder supplyScenarioParameters(
+      OvsFilterParameter... ovsFilterParameters) {
+    String publisherPartyName = threadLocalPublisherPartyName.get();
+    return new OvsScenarioListBuilder(
+        previousAction ->
+            new SupplyScenarioParametersAction(publisherPartyName, ovsFilterParameters));
   }
 
   private static OvsScenarioListBuilder getEventsRequest() {
@@ -40,7 +55,7 @@ public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListB
             new OvsGetSchedulesAction(
                 subscriberPartyName,
                 publisherPartyName,
-                (OvsAction) previousAction,
+                previousAction,
                 componentFactory.getMessageSchemaValidator(
                     OvsRole.PUBLISHER.getConfigName(), false)));
   }

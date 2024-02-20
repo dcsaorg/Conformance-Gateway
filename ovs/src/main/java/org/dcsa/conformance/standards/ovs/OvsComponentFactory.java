@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
@@ -20,11 +22,12 @@ import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
 
 public class OvsComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "OVS";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0-Beta1");
+  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0-Beta1", "3.0.0-Beta2");
 
   private static final String PUBLISHER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SUBSCRIBER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
+  @Getter
   private final String standardVersion;
 
   public OvsComponentFactory(String standardVersion) {
@@ -116,7 +119,8 @@ public class OvsComponentFactory extends AbstractComponentFactory {
     String schemaFilePath =
         "/standards/ovs/schemas/ovs-%s-%s.json"
             .formatted(
-                standardVersion.startsWith("2") ? "v22" : "v30", apiProviderRole.toLowerCase());
+                standardVersion.toLowerCase().replaceAll("[.-]", ""),
+                apiProviderRole.toLowerCase());
     String schemaName =
         OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);

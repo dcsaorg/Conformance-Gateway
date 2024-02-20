@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Operational Vessel Schedules",
-    "description": "API specification issued by DCSA.org\r\n\r\nThis API supports <b>OVS</b> (Operational Vessel Schedules)\r\n\r\nThe Interface Standards for OVS and other documentation can be found on the [DCSA Website](https://dcsa.org/standards/operational-vessel-schedules/).\r\n\r\nFor explanation to specific values or objects please refer to the [Information Model](https://dcsa.org/wp-content/uploads/2024/01/DCSA-Information-Model-2023.Q4.pdf).\r\n\r\n### Stats API\r\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Operational Vessel Schedules API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\r\n\r\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/ovs/v3#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new)",
+    "description": "API specification issued by DCSA.org\r\n\r\nThis API supports <b>OVS</b> (Operational Vessel Schedules)\r\n\r\nThe Interface Standards for OVS and other documentation can be found on the [DCSA Website](https://dcsa.org/standards/operational-vessel-schedules/).\r\n\r\nFor explanation to specific values or objects please refer to the [Information Model](https://dcsa.org/wp-content/uploads/2024/01/DCSA-Information-Model-2023.Q4.pdf).\r\n\r\n### Stats API\r\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Operational Vessel Schedules API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\r\n\r\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/ovs/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new)",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,7 +12,7 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "3.0.0-Beta-2"
+    "version": "3.0.0"
   },
   "servers": [
     {
@@ -356,7 +356,7 @@
           "vesselOperatorSMDGLinerCode": {
             "maxLength": 10,
             "type": "string",
-            "description": "The carrier who is in charge of the vessel operation based on the SMDG code.\r\nIf not available at the moment of sharing the schedule, use TBD (To be defined).\r\nIn the case an operator is still using a code not from SMDG, use the available code.",
+            "description": "The carrier who is in charge of the vessel operation based on the SMDG code.\r\nIf not available at the moment of sharing the schedule, use `TBD` (To be defined).\r\nIn the case an operator is still using a code not from SMDG, use the available code.",
             "example": "HLC"
           },
           "vesselIMONumber": {

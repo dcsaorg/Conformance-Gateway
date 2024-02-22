@@ -22,7 +22,7 @@ import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
 
 public class OvsComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "OVS";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0", "3.0.0-Beta1");
+  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0");
 
   private static final String PUBLISHER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SUBSCRIBER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();

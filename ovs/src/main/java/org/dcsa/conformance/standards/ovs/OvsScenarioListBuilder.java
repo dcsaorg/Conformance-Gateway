@@ -23,33 +23,27 @@ public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListB
     threadLocalComponentFactory.set(componentFactory);
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
-    if ("3.0.0-Beta1".equals(componentFactory.getStandardVersion())) {
-      return noAction().then(getSchedules());
-    } else {
-      return noAction()
-          .thenEither(
-              scenarioWithFilterBy(CARRIER_SERVICE_NAME),
-              scenarioWithFilterByDatesAnd(CARRIER_SERVICE_NAME),
-              scenarioWithFilterBy(CARRIER_SERVICE_CODE),
-              scenarioWithFilterByDatesAnd(CARRIER_SERVICE_CODE),
-              scenarioWithFilterBy(UNIVERSAL_SERVICE_REFERENCE),
-              scenarioWithFilterByDatesAnd(UNIVERSAL_SERVICE_REFERENCE),
-              scenarioWithFilterBy(VESSEL_IMO_NUMBER),
-              scenarioWithFilterByDatesAnd(VESSEL_IMO_NUMBER),
-              scenarioWithFilterBy(VESSEL_NAME),
-              scenarioWithFilterByDatesAnd(VESSEL_NAME),
-              scenarioWithFilterBy(CARRIER_VOYAGE_NUMBER),
-              scenarioWithFilterByDatesAnd(CARRIER_VOYAGE_NUMBER),
-              scenarioWithFilterBy(UNIVERSAL_VOYAGE_REFERENCE),
-              scenarioWithFilterByDatesAnd(UNIVERSAL_VOYAGE_REFERENCE),
-              scenarioWithFilterBy(UN_LOCATION_CODE),
-              scenarioWithFilterByDatesAnd(UN_LOCATION_CODE),
-              scenarioWithFilterBy(FACILITY_SMDG_CODE),
-              scenarioWithFilterByDatesAnd(FACILITY_SMDG_CODE),
-              scenarioWithFilterBy(START_DATE),
-              scenarioWithFilterBy(END_DATE),
-              scenarioWithFilterBy(START_DATE, END_DATE));
-    }
+    return noAction()
+        .thenEither(
+          scenarioWithParameters(CARRIER_SERVICE_CODE),
+          scenarioWithParameters(CARRIER_SERVICE_CODE, LIMIT),
+          scenarioWithParameters(UNIVERSAL_SERVICE_REFERENCE),
+          scenarioWithParameters(UNIVERSAL_SERVICE_REFERENCE, LIMIT),
+          scenarioWithParameters(VESSEL_IMO_NUMBER),
+          scenarioWithParameters(VESSEL_IMO_NUMBER, LIMIT),
+          scenarioWithParameters(UN_LOCATION_CODE),
+          scenarioWithParameters(UN_LOCATION_CODE, LIMIT),
+          scenarioWithParameters(UN_LOCATION_CODE, FACILITY_SMDG_CODE),
+          scenarioWithParameters(UN_LOCATION_CODE, FACILITY_SMDG_CODE, LIMIT),
+          scenarioWithParameters(CARRIER_VOYAGE_NUMBER, CARRIER_SERVICE_CODE),
+          scenarioWithParameters(CARRIER_VOYAGE_NUMBER, CARRIER_SERVICE_CODE, LIMIT),
+          scenarioWithParameters(CARRIER_VOYAGE_NUMBER, UNIVERSAL_SERVICE_REFERENCE),
+          scenarioWithParameters(CARRIER_VOYAGE_NUMBER, UNIVERSAL_SERVICE_REFERENCE, LIMIT),
+          scenarioWithParameters(UNIVERSAL_VOYAGE_REFERENCE, CARRIER_SERVICE_CODE),
+          scenarioWithParameters(UNIVERSAL_VOYAGE_REFERENCE, CARRIER_SERVICE_CODE, LIMIT),
+          scenarioWithParameters(UNIVERSAL_VOYAGE_REFERENCE, UNIVERSAL_SERVICE_REFERENCE),
+          scenarioWithParameters(
+              UNIVERSAL_VOYAGE_REFERENCE, UNIVERSAL_SERVICE_REFERENCE, LIMIT));
   }
 
   private OvsScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
@@ -60,18 +54,9 @@ public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListB
     return new OvsScenarioListBuilder(null);
   }
 
-  private static OvsScenarioListBuilder scenarioWithFilterBy(OvsFilterParameter parameter1) {
-    return supplyScenarioParameters(LIMIT, parameter1).then(getSchedules());
-  }
-
-  private static OvsScenarioListBuilder scenarioWithFilterByDatesAnd(
-      OvsFilterParameter parameter1) {
-    return supplyScenarioParameters(LIMIT, START_DATE, END_DATE, parameter1).then(getSchedules());
-  }
-
-  private static OvsScenarioListBuilder scenarioWithFilterBy(
-      OvsFilterParameter parameter1, OvsFilterParameter parameter2) {
-    return supplyScenarioParameters(LIMIT, parameter1, parameter2).then(getSchedules());
+  private static OvsScenarioListBuilder scenarioWithParameters(
+    OvsFilterParameter... ovsFilterParameters) {
+    return supplyScenarioParameters(ovsFilterParameters).then(getSchedules());
   }
 
   private static OvsScenarioListBuilder supplyScenarioParameters(

@@ -345,6 +345,7 @@ public class ConformanceApplication {
   }
 
   public static void main(String[] args) {
+    // System.setProperty("javax.net.debug", "ssl:all");
     SpringApplication.run(ConformanceApplication.class, args);
   }
 }

@@ -21,7 +21,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
   private final String tableName;
 
   public DynamoDbSortedPartitionsLockingMap(DynamoDbClient dynamoDbClient, String tableName) {
-    super(5 * 1000, 500, 10 * 1000);
+    super(60 * 1000, 500, 60 * 1000);
     this.dynamoDbClient = dynamoDbClient;
     this.tableName = tableName;
   }
@@ -37,7 +37,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
             Map.entry("PK", AttributeValue.fromS(partitionKey)),
             Map.entry("SK", AttributeValue.fromS(sortKey)));
     try {
-      retryTransactWriteItems(
+      _retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -107,7 +107,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     try {
       String lockedUntil =
           Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
-      retryTransactWriteItems(
+      _retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -126,7 +126,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
               .build());
     } catch (TransactionCanceledException transactionCanceledException) {
       if ("ConditionalCheckFailed"
-          .equals(transactionCanceledException.cancellationReasons().get(0).code())) {
+          .equals(transactionCanceledException.cancellationReasons().getFirst().code())) {
         log.debug(
             "CCF _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
@@ -160,7 +160,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     String newLockedUntil =
         Instant.ofEpochMilli(Instant.now().toEpochMilli() + lockDurationMillis).toString();
     try {
-      retryTransactWriteItems(
+      _retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -185,7 +185,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
               .build());
     } catch (TransactionCanceledException transactionCanceledException) {
       if ("ConditionalCheckFailed"
-          .equals(transactionCanceledException.cancellationReasons().get(0).code())) {
+          .equals(transactionCanceledException.cancellationReasons().getFirst().code())) {
         log.warn(
             "CCF _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
@@ -226,7 +226,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                                           .build())
                                   .build())
                           .responses()
-                          .get(0)
+                          .getFirst()
                           .item()
                           .get("value"),
                       AttributeValue.fromS("{}"))
@@ -261,7 +261,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
             Map.entry("PK", AttributeValue.fromS(partitionKey)),
             Map.entry("SK", AttributeValue.fromS(sortKey)));
     try {
-      retryTransactWriteItems(
+      _retryTransactWriteItems(
           TransactWriteItemsRequest.builder()
               .transactItems(
                   TransactWriteItem.builder()
@@ -321,12 +321,12 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
         latestTransactionCanceledException);
   }
 
-  private TransactWriteItemsResponse retryTransactWriteItems(
-      TransactWriteItemsRequest transactWriteItemsRequest) {
+  private void _retryTransactWriteItems(TransactWriteItemsRequest transactWriteItemsRequest) {
     TransactionCanceledException latestTransactionCanceledException = null;
     for (int retriesLeft = MAX_TRANSACTION_RETRY_COUNT - 1; retriesLeft >= 0; --retriesLeft) {
       try {
-        return dynamoDbClient.transactWriteItems(transactWriteItemsRequest);
+        dynamoDbClient.transactWriteItems(transactWriteItemsRequest);
+        return;
       } catch (TransactionCanceledException transactionCanceledException) {
         if (transactionCanceledException.cancellationReasons().stream()
             .noneMatch(reason -> "TransactionConflict".equals(reason.code()))) {

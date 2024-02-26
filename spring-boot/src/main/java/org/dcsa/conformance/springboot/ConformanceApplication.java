@@ -35,7 +35,6 @@ import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -341,11 +340,6 @@ public class ConformanceApplication {
 
   public static void main(String[] args) {
     // System.setProperty("javax.net.debug", "ssl:all");
-    ConfigurableApplicationContext applicationContext =
-        SpringApplication.run(ConformanceApplication.class, args);
-    if (List.of(args).contains("ExitOnStartup")) {
-      System.out.println("ExitOnStartup requested; exiting...");
-      applicationContext.close();
-    }
+    SpringApplication.run(ConformanceApplication.class, args);
   }
 }

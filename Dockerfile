@@ -13,4 +13,4 @@ EXPOSE 8080
 VOLUME /tmp
 
 COPY --from=builder /build/spring-boot/target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar", "ExitOnStartup"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]

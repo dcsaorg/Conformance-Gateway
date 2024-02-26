@@ -19,7 +19,7 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
   private final HashMap<String, TreeMap<String, MemoryMapItem>> memoryMap = new HashMap<>();
 
   public MemorySortedPartitionsLockingMap() {
-    super(5 * 1000, 100, 10 * 1000);
+    super(60 * 1000, 100, 60 * 1000);
   }
 
   private MemoryMapItem _getOrCreateItem(String partitionKey, String sortKey) {

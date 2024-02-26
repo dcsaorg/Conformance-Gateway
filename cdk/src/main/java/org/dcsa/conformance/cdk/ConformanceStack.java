@@ -115,7 +115,7 @@ public class ConformanceStack extends Stack {
                                 "/bin/sh",
                                 "-c",
                                 "mvn clean install && cp /asset-input/target/conformance-lambda.jar /asset-output/"))
-                        .image(Runtime.JAVA_17.getBundlingImage())
+                        .image(Runtime.JAVA_21.getBundlingImage())
                         .volumes(
                             singletonList(
                                 // Mount local .m2 repo to avoid download all the
@@ -135,7 +135,7 @@ public class ConformanceStack extends Stack {
             prefix + "SandboxTaskLambda",
             FunctionProps.builder()
                 .functionName(prefix + "SandboxTaskLambda")
-                .runtime(Runtime.JAVA_17)
+                .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.SandboxTaskLambda")
                 .memorySize(1024)
@@ -150,7 +150,7 @@ public class ConformanceStack extends Stack {
             prefix + "ApiLambda",
             FunctionProps.builder()
                 .functionName(prefix + "ApiLambda")
-                .runtime(Runtime.JAVA_17)
+                .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.ApiLambda")
                 .memorySize(1024)
@@ -165,7 +165,7 @@ public class ConformanceStack extends Stack {
             prefix + "WebuiLambda",
             FunctionProps.builder()
                 .functionName(prefix + "WebuiLambda")
-                .runtime(Runtime.JAVA_17)
+                .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.WebuiLambda")
                 .memorySize(1024)

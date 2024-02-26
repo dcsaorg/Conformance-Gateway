@@ -1,4 +1,4 @@
-FROM maven:3.8.5-openjdk-17-slim as builder
+FROM maven:3.9.6-eclipse-temurin-21-alpine as builder
 
 WORKDIR /build
 
@@ -6,11 +6,11 @@ COPY . .
 
 RUN mvn install -DskipTests -U -B
 
-FROM openjdk:17-alpine3.14
+FROM eclipse-temurin:21
 
 EXPOSE 8080
 
 VOLUME /tmp
 
 COPY --from=builder /build/spring-boot/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar", "ExitOnStartup"]

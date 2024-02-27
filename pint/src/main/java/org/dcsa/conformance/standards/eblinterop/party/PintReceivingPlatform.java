@@ -1,14 +1,15 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.DUPE;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.RECE;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -16,12 +17,11 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
-import org.dcsa.conformance.standards.eblinterop.action.ResetScenarioClassAction;
-import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
+import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
@@ -31,7 +31,7 @@ import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
 
 @Slf4j
 public class PintReceivingPlatform extends ConformanceParty {
-  private final Map<String, PintTransferState> eblStatesByTdr = new HashMap<>();
+  private final Map<String, String> envelopeReferences = new HashMap<>();
 
   private final PayloadSigner payloadSigner;
 
@@ -59,7 +59,7 @@ public class PintReceivingPlatform extends ConformanceParty {
 
   @Override
   protected void doReset() {
-    eblStatesByTdr.clear();
+    envelopeReferences.clear();
   }
 
   @Override
@@ -69,7 +69,6 @@ public class PintReceivingPlatform extends ConformanceParty {
       Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass)
     );
   }
-
 
   private void resetScenarioClass(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.resetScenarioClass(%s)".formatted(actionPrompt.toPrettyString()));
@@ -137,13 +136,14 @@ public class PintReceivingPlatform extends ConformanceParty {
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
     var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifier());
-    var envelopeManifest = parseSignedNodeNoErrors(transferRequest.path("envelopeManifestSignedContent"));
-    var documentChecksums = createDocumentChecksumArray(envelopeManifest);
 
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);
       unsignedPayload.put("responseCode", responseCode.name());
-      unsignedPayload.set("receivedAdditionalDocumentChecksums", documentChecksums);
+      var receivedDocs = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
+      for (var checksum : receiveState.getKnownDocumentChecksums()) {
+        receivedDocs.add(checksum);
+      }
 
       var signedPayload = payloadSigner.sign(unsignedPayload.toString());
       var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
@@ -154,13 +154,17 @@ public class PintReceivingPlatform extends ConformanceParty {
         new ConformanceMessageBody(signedPayloadJsonNode)
       );
     }
-    var envelopeReference = "...";
+    var envelopeReference = receiveState.envelopeReference();
+    this.envelopeReferences.put(envelopeReference, tdr);
     var transportDocumentChecksum = Checksums.sha256CanonicalJson(td);
     unsignedPayload
       .put("envelopeReference", envelopeReference)
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum)
       .put("transportDocumentChecksum", transportDocumentChecksum);
-    unsignedPayload.set("missingAdditionalDocumentChecksums", documentChecksums);
+    var missingChecksums = unsignedPayload.putArray("missingAdditionalDocumentChecksums");
+    for (var checksum : receiveState.getMissingDocumentChecksums()) {
+      missingChecksums.add(checksum);
+    }
     receiveState.save(persistentMap);
     return request.createResponse(
       201,
@@ -169,77 +173,134 @@ public class PintReceivingPlatform extends ConformanceParty {
     );
   }
 
-  private static ArrayNode createDocumentChecksumArray(JsonNode envelopeManifest) {
-    var visualizationChecksum = envelopeManifest.path("eBLVisualisationByCarrier")
-      .path("documentChecksum")
-      .asText(null);
-    var allSupportingDocuments = envelopeManifest.path("supportingDocuments");
-    var receivedDocuments = OBJECT_MAPPER.createArrayNode();
-    if (visualizationChecksum != null) {
-      receivedDocuments.add(visualizationChecksum);
-    }
-    for (var documentNode : allSupportingDocuments) {
-      var documentChecksum = documentNode.path("documentChecksum").asText(null);
-      if (documentChecksum != null) {
-        receivedDocuments.add(documentChecksum);
-      }
-    }
-    return receivedDocuments;
+  @Override
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    targetObjectNode.set(
+      "envelopeReferences",
+      StateManagementUtil.storeMap(OBJECT_MAPPER, envelopeReferences));
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    StateManagementUtil.restoreIntoMap(
+      envelopeReferences, sourceObjectNode.get("envelopeReferences"));
+  }
 
-  @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  private static final Pattern ENVELOPE_ADDITIONAL_DOCUMENT_PATTERN = Pattern.compile(
+    "/envelopes/([^/]++)/additional-documents/([0-9a-fA-F]+)/?$"
+  );
+
+  private static final Pattern FINISH_TRANSFER_PATTERN = Pattern.compile(
+    "/envelopes/([^/]++)/finish-transfer/?$"
+  );
+
+  public ConformanceResponse handleEnvelopeRequest(ConformanceRequest request) {
+    var eadm = ENVELOPE_ADDITIONAL_DOCUMENT_PATTERN.matcher(request.url());
+
+    if (eadm.find()) {
+      var envelopeReference = eadm.group(1);
+      var checksum = eadm.group(2);
+      var tdr = this.envelopeReferences.get(envelopeReference);
+      if (tdr != null) {
+        var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+
+        String computedChecksum = "";
+        try {
+          computedChecksum = Checksums.sha256(request.message().body().getJsonBody().binaryValue());
+        } catch (Exception ignored) {
+          // Will just fail the checksum check below
+        }
+        if (!Objects.equals(checksum, computedChecksum)) {
+          return request.createResponse(
+            409,
+            Map.of("Api-Version", List.of(apiVersion)),
+            // TODO: Create correct rejection message
+            new ConformanceMessageBody("")
+          );
+        }
+        // TODO: Validate the content and switch to a different error code if not the right document
+        receiveState.receiveMissingDocument(checksum);
+        receiveState.save(persistentMap);
+        return request.createResponse(
+          204,
+          Map.of("Api-Version", List.of(apiVersion)),
+          new ConformanceMessageBody("")
+        );
+      }
+      return request.createResponse(404,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(
+          OBJECT_MAPPER
+            .createObjectNode()
+            .put(
+              "message",
+              "Unknown envelope reference")));
+    }
+    var ftpm = FINISH_TRANSFER_PATTERN.matcher(request.url());
+    if (ftpm.find()) {
+      var envelopeReference = ftpm.group(1);
+      var tdr = this.envelopeReferences.get(envelopeReference);
+      var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+      var cannedResponse = receiveState.cannedResponse(request);
+      if (cannedResponse != null) {
+        return cannedResponse;
+      }
+      var responseCode = receiveState.finishTransferCode();
+      var unsignedPayload = OBJECT_MAPPER.createObjectNode();
+        //.put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
+      receiveState.updateTransferState(responseCode);
+      unsignedPayload.put("responseCode", responseCode.name());
+      if (responseCode == RECE || responseCode == DUPE) {
+        var receivedDocuments = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
+        for (var checksum : receiveState.getKnownDocumentChecksums()) {
+          receivedDocuments.add(checksum);
+        }
+      }
+      //unsignedPayload.set("receivedAdditionalDocumentChecksums", documentChecksums);
+
+      var signedPayload = payloadSigner.sign(unsignedPayload.toString());
+      var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
+
+      receiveState.save(persistentMap);
+      return request.createResponse(
+        responseCode.getHttpResponseCode(),
+        Map.of("API-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(signedPayloadJsonNode)
+      );
+    }
+
+    return request.createResponse(404,
+      Map.of("Api-Version", List.of(apiVersion)),
+      new ConformanceMessageBody(
+        OBJECT_MAPPER
+          .createObjectNode()
+          .put(
+            "message",
+            "Unknown endpoint")));
+  }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblInteropPlatform.handleRequest(%s)".formatted(request));
 
     var url = request.url().replaceFirst("/++$", "");
-    if (url.endsWith("/envelopes")) {
-      return handleInitiateTransferRequest(request);
-    }
-    JsonNode jsonRequest = request.message().body().getJsonBody();
-
-    String tdr = jsonRequest.path("transportDocument").path("transportDocumentReference").asText(null);
-
     ConformanceResponse response;
-    if (tdr == null) {
-      response =
-          request.createResponse(
-              400,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(
-                  OBJECT_MAPPER
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting issuance request as it has no transport document reference")));
-    } else if (!eblStatesByTdr.containsKey(tdr)) {
-      eblStatesByTdr.put(tdr, PintTransferState.ISSUANCE_REQUESTED);
-      response =
-          request.createResponse(
-              204,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
+    if (url.endsWith("/envelopes")) {
+      response = handleInitiateTransferRequest(request);
+    } else if(url.contains("/envelopes/")) {
+      response = handleEnvelopeRequest(request);
     } else {
-      response =
-          request.createResponse(
-              409,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(
-                  OBJECT_MAPPER
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting issuance request for document '%s' because it is in state '%s'"
-                              .formatted(tdr, eblStatesByTdr.get(tdr)))));
+      response = request.createResponse(
+        404,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(
+          OBJECT_MAPPER
+            .createObjectNode()
+            .put(
+              "message",
+              "Unknown endpoint")));
     }
-    addOperatorLogEntry(
-        "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(tdr, eblStatesByTdr.get(tdr)));
+    addOperatorLogEntry("Handling a request");
     return response;
   }
 }

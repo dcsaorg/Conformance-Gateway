@@ -267,20 +267,10 @@ public class PintChecks {
     Supplier<DynamicScenarioParameters> dspSupplier
   ) {
     var jsonContentChecks = new ArrayList<JsonContentCheck>();
-    /*
-    jsonContentChecks.add(
-      JsonAttribute.customValidator(
-        "Validate that the response code was as expected",
-        signedContentValidation(
-          JsonAttribute.path("responseCode", JsonAttribute.matchedMustEqual(expectedResponseCode::name))
-        )
-      )
-    );
-    */
     jsonContentChecks.add(
       JsonAttribute.customValidator(
         "The number of missing documents is correct",
-        JsonAttribute.path("missingAdditionalDocumentChecksums", arraySizeMustEqual(delayedValue(dspSupplier, DynamicScenarioParameters::documentCount, -1)))
+        JsonAttribute.path("missingAdditionalDocumentChecksums", arraySizeMustEqual(() -> missingDocumentCount))
       )
     );
     jsonContentChecks.add(
@@ -369,7 +359,7 @@ public class PintChecks {
     );
   }
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
+  public static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
     return () -> {
       var csp = cspSupplier.get();
       if (csp == null) {

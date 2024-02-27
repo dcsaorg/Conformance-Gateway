@@ -29,6 +29,17 @@ public class JsonAttribute {
     return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
   }
 
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    JsonContentCheck ... checks
+  ) {
+    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
+  }
+
 
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
@@ -46,10 +57,28 @@ public class JsonAttribute {
     HttpMessageType httpMessageType,
     List<JsonContentCheck> checks
   ) {
-    return new JsonAttributeBasedCheck(
+    return contentChecks(
       titlePrefix,
       "The HTTP %s has valid content (conditional validation rules)"
         .formatted(httpMessageType.name().toLowerCase()),
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType,
+      checks
+    );
+  }
+
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    List<JsonContentCheck> checks
+  ) {
+    return new JsonAttributeBasedCheck(
+      titlePrefix,
+      title,
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,

@@ -41,7 +41,6 @@ public class PintScenarioListBuilder
                 initiateAndCloseTransferAction(PintResponseCode.RECE)
               )
             ),
-
         receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
           initiateAndCloseTransferAction(PintResponseCode.BENV)
         ),
@@ -57,7 +56,17 @@ public class PintScenarioListBuilder
       supplyScenarioParameters(2).thenEither(
         receiverStateSetup(ScenarioClass.NO_ISSUES)
           .then(
-            initiateTransfer(2)))
+            initiateTransfer(2).thenEither(
+              transferDocument().thenEither(
+                transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
+                retryTransfer(1).then(
+                  transferDocument().thenEither(
+                    closeTransferAction(PintResponseCode.RECE),
+                    retryTransfer(PintResponseCode.RECE)
+                  )
+                )
+              )
+            )))
     );
   }
 
@@ -104,6 +113,17 @@ public class PintScenarioListBuilder
   }
 
 
+  private static PintScenarioListBuilder transferDocument() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction -> new PintTransferAdditionalDocumentAction(
+        receivingPlatform,
+        sendingPlatform,
+        (PintAction) previousAction
+      ));
+  }
+
   private static PintScenarioListBuilder noAction() {
     return new PintScenarioListBuilder(null);
   }
@@ -141,6 +161,39 @@ public class PintScenarioListBuilder
                 ));
   }
 
+  private static PintScenarioListBuilder retryTransfer(int expectedMissingDocumentCount) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintRetryTransferAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
+                expectedMissingDocumentCount,
+                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(TRANSFER_STARTED_UNSIGNED_RESPONSE_SCHEMA)));
+  }
+
+  private static PintScenarioListBuilder retryTransfer(PintResponseCode pintResponseCode) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintRetryTransferAndCloseAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
+                pintResponseCode,
+                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)));
+  }
+
+
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode) {
     return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID);
   }
@@ -161,6 +214,20 @@ public class PintScenarioListBuilder
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
                 resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)
               ));
+  }
+
+
+  private static PintScenarioListBuilder closeTransferAction(PintResponseCode signedResponseCode) {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+        previousAction ->
+            new PintCloseTransferAction(
+                receivingPlatform,
+                sendingPlatform,
+                (PintAction) previousAction,
+                signedResponseCode,
+                resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)));
   }
 
 

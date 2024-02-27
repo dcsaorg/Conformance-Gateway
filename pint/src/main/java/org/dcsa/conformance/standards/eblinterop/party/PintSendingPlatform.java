@@ -47,8 +47,6 @@ public class PintSendingPlatform extends ConformanceParty {
     */
   );
 
-  private final Map<String, PintTransferState> eblStatesByTdr = new HashMap<>();
-
   private final PayloadSigner payloadSigner;
 
   public PintSendingPlatform(
@@ -85,7 +83,11 @@ public class PintSendingPlatform extends ConformanceParty {
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
       Map.entry(PintInitiateAndCloseTransferAction.class, this::sendIssuanceRequest),
       Map.entry(PintInitiateTransferAction.class, this::sendIssuanceRequest),
-      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::sendIssuanceRequest)
+      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::sendIssuanceRequest),
+      Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
+      Map.entry(PintRetryTransferAction.class, this::retryTransfer),
+      Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
+      Map.entry(PintCloseTransferAction.class, this::finishTransfer)
     );
   }
 
@@ -95,8 +97,8 @@ public class PintSendingPlatform extends ConformanceParty {
     + "0123456789"
     // spaces - cannot come first nor last
     + " "
-    // ASCII symbols, also do not count as spaces. TODO, add <> when DT-902 is fixed
-    + "-_+!/\\`\"'*^~.:,;(){}[]@$&%"
+    // ASCII symbols, also do not count as spaces.
+    + "-_+!/\\`\"'*^~.:,;(){}[]<>@$&%"
     // Spec says "\S+(\s+\S+)*". Unicode smiley and other non-ASCII symbols count as "not space".
     + "✉½¤§"
   ).toCharArray();
@@ -145,6 +147,76 @@ public class PintSendingPlatform extends ConformanceParty {
       "Provided ScenarioParameters: %s".formatted(scenarioParameters));
   }
 
+  private void transferActionDocument(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.transferActionDocument(%s)".formatted(actionPrompt.toPrettyString()));
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
+    var tdr = ssp.transportDocumentReference();
+    var sendingState = TDSendingState.load(persistentMap, tdr);
+    var envelopeReference = Objects.requireNonNull(dsp.envelopeReference());
+    var document = sendingState.pollPendingDocument();
+    var checksum = document.path("checksum").asText("?");
+    var response = this.syncCounterpartPut(
+      "/v" + apiVersion.charAt(0) + "/envelopes/" + envelopeReference + "/additional-documents/" + checksum,
+      document.path("content")
+    );
+    if (response.statusCode() == 204) {
+      sendingState.successfulTransferOfAdditionalDocument(checksum);
+      sendingState.save(persistentMap);
+    }
+    addOperatorLogEntry(
+      "Attempted transfer of document: %s".formatted(checksum));
+  }
+
+  private void finishTransfer(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.finishTransfer(%s)".formatted(actionPrompt.toPrettyString()));
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    var envelopeReference = Objects.requireNonNull(dsp.envelopeReference());
+    this.syncCounterpartPut(
+      "/v" + apiVersion.charAt(0) + "/envelopes/" + envelopeReference + "/finish-transfer",
+      null
+    );
+    addOperatorLogEntry(
+      "Finished transfer with reference: %s".formatted(envelopeReference));
+  }
+
+  private void retryTransfer(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.retryTransfer(%s)".formatted(actionPrompt.toPrettyString()));
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
+    var tdr = ssp.transportDocumentReference();
+    var sendingState = TDSendingState.load(persistentMap, tdr);
+
+    var body = OBJECT_MAPPER.createObjectNode();
+    var tdPayload = loadTDR(tdr);
+    body.set("transportDocument", tdPayload);
+    body.set("envelopeManifestSignedContent", sendingState.getSignedManifest());
+    body.set("envelopeTransferChain", sendingState.getSignedEnvelopeTransferChain());
+    var response = this.syncCounterpartPost(
+      "/v" + apiVersion.charAt(0) + "/envelopes",
+      body
+    );
+    var responseBody = response.message().body().getJsonBody();
+    sendingState.resetDocumentationState();
+    for (var checksumNode : responseBody.path("missingAdditionalDocumentChecksums")) {
+      sendingState.registerMissingAdditionalDocument(checksumNode.asText("").toLowerCase());
+    }
+    sendingState.save(persistentMap);
+    addOperatorLogEntry(
+      "Re-sent an eBL with transportDocumentReference '%s'".formatted(tdr));
+  }
+
+  private ObjectNode loadTDR(String tdr) {
+    var tdPayload = (ObjectNode)
+      JsonToolkit.templateFileToJsonNode(
+        "/standards/pint/messages/pint-%s-transport-document.json"
+          .formatted(apiVersion),
+        Map.of());
+    // Manually set TDR. The replacement does raw text subst, which
+    // is then parsed as JSON. Since the TDR reference can have any number
+    // of special characters, this can then break the parsing.
+    return tdPayload.put("transportDocumentReference", tdr);
+  }
+
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
@@ -153,21 +225,12 @@ public class PintSendingPlatform extends ConformanceParty {
     var senderTransmissionClass = SenderTransmissionClass.valueOf(actionPrompt.required("senderTransmissionClass").asText());
 
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
-    if (isCorrect) {
-      eblStatesByTdr.put(tdr, PintTransferState.ISSUANCE_REQUESTED);
-    }
+
     var sendingState = TDSendingState.newInstance(ssp.transportDocumentReference(), dsp.documentCount());
 
     var body = OBJECT_MAPPER.createObjectNode();
 
-    var tdPayload = (ObjectNode)
-        JsonToolkit.templateFileToJsonNode(
-            "/standards/pint/messages/pint-%s-transport-document.json"
-                .formatted(apiVersion),
-            Map.of());
-    // Manually set TDR. The replacement does raw text subst, which
-    // is then parsed as JSON.
-    tdPayload.put("transportDocumentReference", tdr);
+    var tdPayload = loadTDR(tdr);
     body.set("transportDocument", tdPayload);
     if (!isCorrect && tdPayload.path("transportDocument").has("issuingParty")) {
       ((ObjectNode) tdPayload.path("transportDocument")).remove("issuingParty");
@@ -212,30 +275,36 @@ public class PintSendingPlatform extends ConformanceParty {
     var latestEnvelopeTransferChainEntrySigned = payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
     var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(tdChecksum, Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
 
-    var signedManifest = payloadSigner.sign(unsignedEnvelopeManifest.toString());
+    JsonNode signedManifest = TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString()));
+    sendingState.setSignedManifest(signedManifest);
     if (senderTransmissionClass == SenderTransmissionClass.SIGNATURE_ISSUE) {
       signedManifest = mutatePayload(signedManifest);
     }
-    body.set("envelopeManifestSignedContent", TextNode.valueOf(signedManifest));
-    body.putArray("envelopeTransferChain")
+    body.set("envelopeManifestSignedContent", signedManifest);
+    var envelopeTransferChain = body.putArray("envelopeTransferChain")
       .add(latestEnvelopeTransferChainEntrySigned);
+    sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
     sendingState.save(persistentMap);
-    this.syncCounterpartPost(
+    var response = this.syncCounterpartPost(
       "/v" + apiVersion.charAt(0) + "/envelopes",
       body
     );
+    var responseBody = response.message().body().getJsonBody();
+    for (var checksumNode : responseBody.path("missingAdditionalDocumentChecksums")) {
+      sendingState.registerMissingAdditionalDocument(checksumNode.asText("").toLowerCase());
+    }
 
     addOperatorLogEntry(
-        "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
+        "Sent an eBL with transportDocumentReference '%s'".formatted(tdr));
   }
 
-  private String mutatePayload(String signedPayload) {
+  private JsonNode mutatePayload(JsonNode signedPayloadNode) {
+    var signedPayload = signedPayloadNode.asText("");
     StringBuilder b = new StringBuilder(signedPayload.length());
     int firstDot = signedPayload.indexOf('.');
     int secondDot = signedPayload.indexOf('.', firstDot + 1);
     if (firstDot == -1 || secondDot == -1) {
-      return signedPayload;
+      return signedPayloadNode;
     }
 
     b.append(signedPayload, 0, firstDot + 1);
@@ -243,7 +312,7 @@ public class PintSendingPlatform extends ConformanceParty {
     var decoded = Base64URL.from(payloadEncoded).decodeToString();
     b.append(Base64URL.encode(decoded + " "));
     b.append(signedPayload, secondDot, signedPayload.length());
-    return b.toString();
+    return TextNode.valueOf(b.toString());
   }
 
   @Override

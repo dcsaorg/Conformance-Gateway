@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.UUID;
 
 import org.dcsa.conformance.core.state.JsonNodeMap;
@@ -14,13 +16,16 @@ public class TDSendingState {
 
   private static final String TRANSPORT_DOCUMENT_REFERENCE = "transportDocumentReference";
   private static final String DOCUMENTS = "documents";
-  private static final String MISSING_DOCUMENTS = "missingDocuments";
-  private static final String REMAINING_DOCUMENTS = "remainingDocuments";
+  private static final String SIGNED_MANIFEST = "signedManifest";
+  private static final String ENVELOPE_TRANSFER_CHAIN = "envelopeTransferChain";
 
   private final ObjectNode state;
 
   private TDSendingState(ObjectNode state) {
     this.state = state;
+    if (state == null) {
+      throw new IllegalArgumentException();
+    }
   }
 
   public static TDSendingState newInstance(String transportDocumentReference, int documentCount) {
@@ -32,11 +37,63 @@ public class TDSendingState {
       var document = generateDocument();
       documents.addObject()
         .put("checksum", Checksums.sha256(document))
-        .put("content", document);
+        .put("content", document)
+        .put("pendingTransfer", Boolean.TRUE);
     }
     state.put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference);
     return new TDSendingState(state);
   }
+
+  public void resetDocumentationState() {
+    for (var doc : state.path(DOCUMENTS)) {
+      ((ObjectNode)doc).put("pendingTransfer", Boolean.FALSE);
+    }
+  }
+
+
+  public void registerMissingAdditionalDocument(String checksum) {
+    for (var doc : state.path(DOCUMENTS)) {
+      if ( Objects.equals(checksum, doc.path("checksum").asText(""))) {
+        ((ObjectNode)doc).put("pendingTransfer", Boolean.TRUE);
+      }
+    }
+  }
+
+
+  public void successfulTransferOfAdditionalDocument(String checksum) {
+    for (var doc : state.path(DOCUMENTS)) {
+      if ( Objects.equals(checksum, doc.path("checksum").asText(""))) {
+        ((ObjectNode)doc).put("pendingTransfer", Boolean.FALSE);
+      }
+    }
+  }
+
+  public JsonNode pollPendingDocument() {
+    for (var doc : state.path(DOCUMENTS)) {
+      if (doc.path("pendingTransfer").asBoolean(false)) {
+        return doc;
+      }
+    }
+    return OBJECT_MAPPER.missingNode();
+  }
+
+  public void setSignedManifest(JsonNode signedManifest) {
+    state.set(SIGNED_MANIFEST, signedManifest);
+  }
+
+  public JsonNode getSignedManifest() {
+    return state.path(SIGNED_MANIFEST);
+  }
+
+  public void setSignedEnvelopeTransferChain(JsonNode signedManifest) {
+    state.set(ENVELOPE_TRANSFER_CHAIN, signedManifest);
+  }
+
+  public JsonNode getSignedEnvelopeTransferChain() {
+    return state.path(ENVELOPE_TRANSFER_CHAIN);
+  }
+
+
 
   public ObjectNode generateEnvelopeManifest(String transportDocumentChecksum, String lastEnvelopeTransferChainEntrySignedContentChecksum) {
     var unsignedEnvelopeManifest = OBJECT_MAPPER.createObjectNode()
@@ -85,7 +142,12 @@ public class TDSendingState {
     return this.state;
   }
 
+  public static TDSendingState load(JsonNodeMap jsonNodeMap, String tdr) {
+    return new TDSendingState((ObjectNode) jsonNodeMap.load(tdr));
+  }
+
   public void save(JsonNodeMap jsonNodeMap) {
     jsonNodeMap.save(getTransportDocumentReference(), asPersistentState());
   }
+
 }

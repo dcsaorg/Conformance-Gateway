@@ -110,6 +110,8 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                 ),
                 senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
                   ? JsonAttribute.contentChecks(
+                    "",
+                    "The signatures of the signed content of the HTTP request can be validated",
                     PintRole::isSendingPlatform,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
@@ -117,6 +119,8 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                     JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier)))
                   : null,
                 JsonAttribute.contentChecks(
+                  "",
+                  "The signed payloads of the HTTP request matches the schema",
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,

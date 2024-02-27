@@ -2,14 +2,17 @@ package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
@@ -31,6 +34,7 @@ public class TDReceiveState {
   private static final String KNOWN_DOCUMENTS = "knownDocuments";
 
   private static final String SCENARIO_CLASS = "scenarioClass";
+  private static final String ENVELOPE_REFERENCE = "envelopeReference";
 
   private final ObjectNode state;
 
@@ -61,13 +65,52 @@ public class TDReceiveState {
   }
 
 
-  public Set<String> getKnownDocumentHashes() {
+  public Set<String> getKnownDocumentChecksums() {
     return StreamSupport.stream(this.state.path(KNOWN_DOCUMENTS).spliterator(), false)
       .map(JsonNode::asText)
       .collect(Collectors.toUnmodifiableSet());
   }
 
+  public Set<String> getMissingDocumentChecksums() {
+    return StreamSupport.stream(this.state.path(MISSING_DOCUMENTS).spliterator(), false)
+      .map(JsonNode::asText)
+      .collect(Collectors.toUnmodifiableSet());
+  }
 
+  public void receiveMissingDocument(String checksum) {
+    var missingDocumentsRaw = this.state.path(MISSING_DOCUMENTS);
+    if (missingDocumentsRaw.isArray()) {
+      var missingDocuments = (ArrayNode)missingDocumentsRaw;
+      int idx = -1;
+      for (int i = 0 ; i < missingDocuments.size() ; i++) {
+        if (missingDocuments.get(i).asText("").equals(checksum)) {
+          idx = i;
+          break;
+        }
+      }
+      if (idx > -1) {
+        var knownDocumentsRaw = this.state.path(KNOWN_DOCUMENTS);
+        ArrayNode knownDocuments;
+        if (knownDocumentsRaw.isArray()) {
+          knownDocuments = (ArrayNode) knownDocumentsRaw;
+        } else {
+          knownDocuments = this.state.putArray(KNOWN_DOCUMENTS);
+        }
+        missingDocuments.remove(idx);
+        knownDocuments.add(checksum);
+      }
+    }
+  }
+
+
+  public String envelopeReference() {
+    var envelopReference = this.state.path(ENVELOPE_REFERENCE).asText(null);
+    if (envelopReference == null) {
+      envelopReference = UUID.randomUUID().toString();
+      this.state.put(ENVELOPE_REFERENCE, envelopReference);
+    }
+    return envelopReference;
+  }
 
   public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifer) {
     var etc = initiateRequest.path("envelopeTransferChain");
@@ -101,7 +144,7 @@ public class TDReceiveState {
       return PintResponseCode.BENV;
     }
     var missingDocuments = this.state.putArray(MISSING_DOCUMENTS);
-    var knownDocuments = getKnownDocumentHashes();
+    var knownDocuments = getKnownDocumentChecksums();
     for (var supportingDocumentNode : envelopeParsed.path("supportingDocuments")) {
       var checksum = supportingDocumentNode.path("documentChecksum").asText(null);
       if (checksum == null || knownDocuments.contains(checksum)) {
@@ -112,8 +155,14 @@ public class TDReceiveState {
     if (!missingDocuments.isEmpty()) {
       return null;
     }
-    // TODO; Add check for missing documents here.
+    return finishTransferCode();
+  }
+
+  public PintResponseCode finishTransferCode() {
     var responseCode = PintResponseCode.RECE;
+    if (!getMissingDocumentChecksums().isEmpty()) {
+      return PintResponseCode.MDOC;
+    }
     if (this.getTransferState() == TransferState.ACCEPTED) {
       responseCode = PintResponseCode.DUPE;
     }
@@ -165,7 +214,7 @@ public class TDReceiveState {
     if (scenarioClass == ScenarioClass.FAIL_W_503) {
       return conformanceRequest.createResponse(503,
         Map.of("Retry-after", List.of("10")),
-        new ConformanceMessageBody("Please")
+        new ConformanceMessageBody("Please retry as directed by the scenario")
       );
     }
     return null;

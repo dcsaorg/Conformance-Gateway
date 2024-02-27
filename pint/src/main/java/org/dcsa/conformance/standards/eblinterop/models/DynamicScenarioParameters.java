@@ -14,12 +14,14 @@ import java.util.stream.StreamSupport;
 public record DynamicScenarioParameters(
   String transportDocumentChecksum,
   int documentCount,
-  Set<String> documentChecksums
+  Set<String> documentChecksums,
+  String envelopeReference
 ) {
   public ObjectNode toJson() {
     var node = OBJECT_MAPPER.createObjectNode()
       .put("transportDocumentChecksum", transportDocumentChecksum)
-      .put("documentCount", documentCount);
+      .put("documentCount", documentCount)
+      .put("envelopeReference", envelopeReference);
     var jsonDocumentChecksums = node.putArray("documentChecksums");
     for (var checksum : documentChecksums) {
       jsonDocumentChecksums.add(checksum);
@@ -33,7 +35,8 @@ public record DynamicScenarioParameters(
       jsonNode.required("documentCount").asInt(),
       StreamSupport.stream(jsonNode.required("documentChecksums").spliterator(), false)
         .map(JsonNode::asText)
-        .collect(Collectors.toUnmodifiableSet())
+        .collect(Collectors.toUnmodifiableSet()),
+      jsonNode.required("envelopeReference").asText()
     );
   }
 }

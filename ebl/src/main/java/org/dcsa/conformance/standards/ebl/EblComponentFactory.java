@@ -87,23 +87,23 @@ public class EblComponentFactory extends AbstractComponentFactory {
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
     return EblScenarioListBuilder.createModuleScenarioListBuilders(
-        this,
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblRole::isShipper)));
+            this.standardVersion,
+            _findPartyOrCounterpartName(
+                partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
+            _findPartyOrCounterpartName(
+                partyConfigurations, counterpartConfigurations, EblRole::isShipper))
+        .entrySet()
+        .stream()
+        .map(
+            moduleNameToBuilder ->
+                Map.entry(
+                    moduleNameToBuilder.getKey(),
+                    new CachedEblScenarioListBuilder<>(
+                        standardVersion, moduleNameToBuilder::getValue)))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
-  public ScenarioListBuilder<?> createScenarioListBuilder(
-    PartyConfiguration[] partyConfigurations,
-    CounterpartConfiguration[] counterpartConfigurations) {
-    return new CachedEblScenarioListBuilder<>(standardVersion, () -> EblScenarioListBuilder.buildTree(
-      this.standardVersion,
-      _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
-      _findPartyOrCounterpartName(
-        partyConfigurations, counterpartConfigurations, EblRole::isShipper)));
-  }
-
 
   private static class CachedEblScenarioListBuilder<T extends ScenarioListBuilder<T>> extends ScenarioListBuilder<T> {
 
@@ -117,12 +117,12 @@ public class EblComponentFactory extends AbstractComponentFactory {
     }
 
     @Override
-    protected List<ConformanceScenario> _buildScenarioList() {
+    protected List<ConformanceScenario> _buildScenarioList(long moduleIndex) {
       var scenarioList = SCENARIO_CACHE.get(standardVersion);
       if (scenarioList != null) {
         return scenarioList;
       }
-      scenarioList = Collections.unmodifiableList(realScenarioBuilder.get().buildScenarioList());
+      scenarioList = Collections.unmodifiableList(realScenarioBuilder.get().buildScenarioList(moduleIndex));
       SCENARIO_CACHE.put(standardVersion, scenarioList);
       return scenarioList;
     }

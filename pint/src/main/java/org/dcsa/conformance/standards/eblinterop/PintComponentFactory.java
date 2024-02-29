@@ -83,10 +83,10 @@ public class PintComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return PintScenarioListBuilder.buildTree(
+    return PintScenarioListBuilder.createModuleScenarioListBuilders(
         this.standardVersion,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, PintRole::isSendingPlatform),

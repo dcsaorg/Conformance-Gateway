@@ -1,6 +1,11 @@
 package org.dcsa.conformance.standards.eblinterop;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -23,51 +28,55 @@ public class PintScenarioListBuilder
   private static final String ENVELOPE_MANIFEST_SCHEMA = "EnvelopeManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA = "EnvelopeTransferChainEntry";
 
-  public static PintScenarioListBuilder buildTree(
-      String standardVersion,
-      String sendingPlatformPartyName,
-      String receivingPlatformPartyName) {
+  public static LinkedHashMap<String, PintScenarioListBuilder> createModuleScenarioListBuilders(
+    String standardVersion, String sendingPlatformPartyName, String receivingPlatformPartyName) {
     STANDARD_VERSION.set(standardVersion);
     SENDING_PLATFORM_PARTY_NAME.set(sendingPlatformPartyName);
     RECEIVING_PLATFORM_PARTY_NAME.set(receivingPlatformPartyName);
-    return noAction().thenEither(
-      supplyScenarioParameters(0).thenEither(
-        receiverStateSetup(ScenarioClass.NO_ISSUES)
-          .thenEither(
-            initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
-              noAction(),
-              initiateAndCloseTransferAction(PintResponseCode.DUPE)),
-              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
-                initiateAndCloseTransferAction(PintResponseCode.RECE)
-              )
-            ),
-        receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
-          initiateAndCloseTransferAction(PintResponseCode.BENV)
-        ),
-        receiverStateSetup(ScenarioClass.FAIL_W_503).then(
-          initiateTransferUnsignedFailure(503).thenEither(
-            resetScenarioClass(ScenarioClass.NO_ISSUES).then(
-              initiateAndCloseTransferAction(PintResponseCode.RECE)),
-            initiateTransferUnsignedFailure(503).then(
-              resetScenarioClass(ScenarioClass.NO_ISSUES).then(
-                initiateAndCloseTransferAction(PintResponseCode.RECE)))
-        ))
-      ),
-      supplyScenarioParameters(2).thenEither(
-        receiverStateSetup(ScenarioClass.NO_ISSUES)
-          .then(
-            initiateTransfer(2).thenEither(
-              transferDocument().thenEither(
-                transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
-                retryTransfer(1).then(
-                  transferDocument().thenEither(
-                    closeTransferAction(PintResponseCode.RECE),
-                    retryTransfer(PintResponseCode.RECE)
+    return Stream.of(
+        Map.entry(
+          "",
+          noAction().thenEither(
+            supplyScenarioParameters(0).thenEither(
+              receiverStateSetup(ScenarioClass.NO_ISSUES)
+                .thenEither(
+                  initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
+                    noAction(),
+                    initiateAndCloseTransferAction(PintResponseCode.DUPE)),
+                  initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
+                    initiateAndCloseTransferAction(PintResponseCode.RECE)
                   )
-                )
-              )
-            )))
-    );
+                ),
+              receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
+                initiateAndCloseTransferAction(PintResponseCode.BENV)
+              ),
+              receiverStateSetup(ScenarioClass.FAIL_W_503).then(
+                initiateTransferUnsignedFailure(503).thenEither(
+                  resetScenarioClass(ScenarioClass.NO_ISSUES).then(
+                    initiateAndCloseTransferAction(PintResponseCode.RECE)),
+                  initiateTransferUnsignedFailure(503).then(
+                    resetScenarioClass(ScenarioClass.NO_ISSUES).then(
+                      initiateAndCloseTransferAction(PintResponseCode.RECE)))
+                ))
+            ),
+            supplyScenarioParameters(2).thenEither(
+              receiverStateSetup(ScenarioClass.NO_ISSUES)
+                .then(
+                  initiateTransfer(2).thenEither(
+                    transferDocument().thenEither(
+                      transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
+                      retryTransfer(1).then(
+                        transferDocument().thenEither(
+                          closeTransferAction(PintResponseCode.RECE),
+                          retryTransfer(PintResponseCode.RECE)
+                        )
+                      )
+                    )
+                  )))
+          )))
+      .collect(
+        Collectors.toMap(
+          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
 

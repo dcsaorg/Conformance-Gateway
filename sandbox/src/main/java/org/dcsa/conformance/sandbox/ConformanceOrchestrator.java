@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,12 +52,13 @@ public class ConformanceOrchestrator implements StatefulEntity {
     LinkedHashMap<String, ? extends ScenarioListBuilder<?>> moduleScenarioListBuilders =
         componentFactory.createModuleScenarioListBuilders(
             sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts());
+    AtomicInteger nextModuleIndex = new AtomicInteger();
     moduleScenarioListBuilders.forEach(
         (moduleName, scenarioListBuilder) -> {
           ArrayList<ConformanceScenario> moduleScenarios = new ArrayList<>();
           scenariosByModuleName.put(moduleName, moduleScenarios);
           scenarioListBuilder
-              .buildScenarioList()
+              .buildScenarioList(nextModuleIndex.getAndIncrement())
               .forEach(
                   scenario -> {
                     moduleScenarios.add(scenario);
@@ -81,7 +83,6 @@ public class ConformanceOrchestrator implements StatefulEntity {
       jsonState.put("currentScenarioId", currentScenarioId.toString());
       jsonState.set("currentScenario", _getCurrentScenario().exportJsonState());
     }
-
     return jsonState;
   }
 
@@ -309,9 +310,10 @@ public class ConformanceOrchestrator implements StatefulEntity {
     ArrayNode allModulesNode = OBJECT_MAPPER.createArrayNode();
     if (!sandboxConfiguration.getOrchestrator().isActive()) return allModulesNode;
 
+    _loadAllInactiveScenarios();
+
     new ConformanceReport(_createScenarioConformanceCheck(), _getManualCounterpart().getRole());
 
-    _allScenariosStream().
     scenariosByModuleName.forEach(
       (moduleName, scenarios) -> {
         ObjectNode moduleNode = allModulesNode.addObject();
@@ -326,10 +328,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
             scenarioNode.put("conformanceStatus", scenario.getLatestComputedStatus().name());
           });
       });
-    return arrayNode;
+    return allModulesNode;
   }
 
   private ConformanceCheck _createScenarioConformanceCheck() {
+    _loadAllInactiveScenarios();
     ConformanceCheck conformanceCheck =
       new ConformanceCheck("Scenario conformance") { // standard check
         @Override

@@ -24,14 +24,14 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
     return (T) this;
   }
 
-  public List<ConformanceScenario> buildScenarioList() {
-    return _buildScenarioList();
+  public List<ConformanceScenario> buildScenarioList(long moduleIndex) {
+    return _buildScenarioList(moduleIndex);
   }
 
-  protected List<ConformanceScenario> _buildScenarioList() {
+  protected List<ConformanceScenario> _buildScenarioList(long moduleIndex) {
     AtomicInteger nextScenarioIndex = new AtomicInteger();
     return parent != null
-        ? parent._buildScenarioList()
+        ? parent._buildScenarioList(moduleIndex)
         : asBuilderListList().stream()
             .map(
                 builderList -> {
@@ -43,7 +43,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
                               actionList.addLast(
                                   builder.actionBuilder.apply(actionList.peekLast())));
                   return new ConformanceScenario(
-                      new UUID(0, nextScenarioIndex.getAndIncrement()), actionList);
+                      new UUID(moduleIndex, nextScenarioIndex.getAndIncrement()), actionList);
                 })
             .toList();
   }

@@ -51,7 +51,7 @@ public abstract class PintAction extends ConformanceAction {
     return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
-  public SignatureVerifier resolveSignatureVeriferForReceiverSignatures() {
+  public SignatureVerifier resolveSignatureVerifierForReceiverSignatures() {
     return PayloadSignerFactory.testKeySignatureVerifier();
   }
 

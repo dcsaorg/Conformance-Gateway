@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -50,11 +51,19 @@ public class TntSubscriber extends ConformanceParty {
 
   private void getEvents(JsonNode actionPrompt) {
     log.info("TntSubscriber.getEvents(%s)".formatted(actionPrompt.toPrettyString()));
+    SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     syncCounterpartGet(
-        "/%s/events".formatted(apiVersion.startsWith("2") ? "v2" : "v3"), Map.ofEntries());
+        "/v2/events",
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue()))));
 
-    addOperatorLogEntry("Sent GET events request");
+    addOperatorLogEntry(
+        "Sent GET events request with parameters %s".formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

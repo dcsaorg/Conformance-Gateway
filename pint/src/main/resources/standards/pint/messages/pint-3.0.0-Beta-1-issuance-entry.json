@@ -1,0 +1,19 @@
+{
+  "documentHash": "DOCUMENT_HASH",
+  "previousEndorsementChainEntryHash": null,
+  "transactions": [
+    {
+      "timestamp": 1658385166302442200,
+      "platformHost": "https://exampleblplatform.net",
+      "actor": {
+        "eBLPlatformIdentifier": "test1234@exampleblplatform.net",
+        "legalName": "Some carrier"
+      },
+      "recipient": {
+        "eBLPlatformIdentifier": "RECEIVER_PLATFORM_IDENTIFIER",
+        "legalName": "RECEIVER_LEGAL_NAME"
+      },
+      "action": "ISSU"
+    }
+  ]
+}

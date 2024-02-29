@@ -26,6 +26,7 @@ import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
+import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
@@ -559,21 +560,30 @@ public class ConformanceSandbox {
     log.info(
         "ConformanceSandbox.syncHttpRequest(%s) request: %s"
             .formatted(uri, conformanceRequest.toJson().toPrettyString()));
+
     HttpRequest.Builder httpRequestBuilder =
-        HttpRequest.newBuilder()
-            .uri(uri)
-            .method(
-                conformanceRequest.method(),
-                HttpRequest.BodyPublishers.ofString(
-                    conformanceRequest.message().body().getStringBody()))
-            .timeout(Duration.ofHours(1));
+        "GET".equals(conformanceRequest.method())
+            ? HttpRequest.newBuilder().uri(uri).GET()
+            : HttpRequest.newBuilder()
+                .uri(uri)
+                .method(
+                    conformanceRequest.method(),
+                    HttpRequest.BodyPublishers.ofString(
+                        conformanceRequest.message().body().getStringBody()));
+
+    httpRequestBuilder.timeout(Duration.ofHours(1));
+
     conformanceRequest
         .message()
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-    HttpResponse<String> httpResponse =
-        HttpClient.newHttpClient()
-            .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+
+    HttpResponse<String> httpResponse;
+    try (HttpClient httpClient =
+        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()) {
+      httpResponse =
+          httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    }
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
             httpResponse.statusCode(),
@@ -628,8 +638,9 @@ public class ConformanceSandbox {
           .headers()
           .forEach(
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-      HttpClient.newHttpClient()
-          .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+      try (HttpClient httpClient = HttpClient.newHttpClient()) {
+        httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+      }
     } catch (Exception e) {
       log.error(
           "Failed to send outbound request: %s"
@@ -806,6 +817,9 @@ public class ConformanceSandbox {
     }
     if (OvsComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new OvsComponentFactory(standardConfiguration.getVersion());
+    }
+    if (PintComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new PintComponentFactory(standardConfiguration.getVersion());
     }
     if (TntComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new TntComponentFactory(standardConfiguration.getVersion());

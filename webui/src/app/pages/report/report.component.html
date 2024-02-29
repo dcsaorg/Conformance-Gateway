@@ -3,8 +3,16 @@
     class="conformanceStatus"
     [title]="getConformanceStatusTitle(report.status)"
     >{{getConformanceStatusEmoji(report.status)}}</span>
-    
+
     <span>{{report.title}}</span>
+
+    <div *ngFor="let errorMessage of report.errorMessages.sort()" style="margin-left: 2em">
+      <span
+        class="conformanceStatus"
+        title="Non-conformant"
+      >🚫</span>
+      <span>{{errorMessage}}</span>
+    </div>
 
     <div style="margin-left: 2em">
         <app-report *ngFor="let subReport of report.subReports"

@@ -3,8 +3,10 @@ package org.dcsa.conformance.springboot;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+
+import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +29,7 @@ import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
+import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
@@ -153,6 +156,7 @@ public class ConformanceApplication {
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblSurrenderComponentFactory::new),
                 OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
+                PintComponentFactory.STANDARD_VERSIONS.stream().map(PintComponentFactory::new),
                 TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());
     componentFactories.forEach(
@@ -288,9 +292,10 @@ public class ConformanceApplication {
         (headerName, headerValues) ->
             headerValues.forEach(
                 headerValue -> servletResponse.setHeader(headerName, headerValue)));
-    PrintWriter writer = servletResponse.getWriter();
-    writer.write(stringBody);
-    writer.flush();
+    OutputStreamWriter outputStreamWriter =
+        new OutputStreamWriter(servletResponse.getOutputStream(), StandardCharsets.UTF_8);
+    outputStreamWriter.write(stringBody);
+    outputStreamWriter.flush();
   }
 
   @SneakyThrows
@@ -340,6 +345,7 @@ public class ConformanceApplication {
   }
 
   public static void main(String[] args) {
+    // System.setProperty("javax.net.debug", "ssl:all");
     SpringApplication.run(ConformanceApplication.class, args);
   }
 }

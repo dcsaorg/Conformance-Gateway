@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -42,6 +44,15 @@ public abstract class PintAction extends ConformanceAction {
     if (previousAction != null) {
       this.dspReference.set(null);
     }
+  }
+
+
+  public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
+    return PayloadSignerFactory.testKeySignatureVerifier();
+  }
+
+  public SignatureVerifier resolveSignatureVeriferForReceiverSignatures() {
+    return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
   @Override

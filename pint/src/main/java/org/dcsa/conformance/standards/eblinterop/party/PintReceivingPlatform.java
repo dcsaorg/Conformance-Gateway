@@ -53,7 +53,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     this.payloadSigner = payloadSigner;
   }
 
-  protected SignatureVerifier getSignatureVerifier() {
+  protected SignatureVerifier getSignatureVerifierForSenderSignatures() {
     return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
@@ -135,7 +135,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
-    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifier());
+    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifierForSenderSignatures());
 
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);

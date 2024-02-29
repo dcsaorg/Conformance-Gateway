@@ -17,7 +17,6 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
@@ -104,7 +103,8 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Supplier<SignatureVerifier> senderVerifierSupplier = () -> PayloadSignerFactory.testKeySignatureVerifier();
+        Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+
         return Stream.of(
                 new UrlPathCheck(
                     PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),

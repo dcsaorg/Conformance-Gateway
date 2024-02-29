@@ -16,7 +16,6 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
@@ -109,7 +108,9 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Supplier<SignatureVerifier> senderVerifierSupplier = () -> PayloadSignerFactory.testKeySignatureVerifier();
+        Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVeriferForReceiverSignatures();
+
         return Stream.of(
                 new UrlPathCheck(
                     PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
@@ -145,6 +146,17 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
+              JsonAttribute.contentChecks(
+                "",
+                "The signatures of the signed content of the HTTP response can be validated",
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                JsonAttribute.customValidator(
+                  "Response signature must be valid",
+                  PintChecks.signatureValidates(receiverVerifierSupplier)
+                )
+              ),
                 new JsonSchemaCheck(
                         PintRole::isSendingPlatform,
                         getMatchedExchangeUuid(),

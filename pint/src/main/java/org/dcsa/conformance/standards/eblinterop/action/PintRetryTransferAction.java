@@ -110,7 +110,8 @@ public class PintRetryTransferAction extends PintAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Supplier<SignatureVerifier> senderVerifierSupplier = () -> PayloadSignerFactory.testKeySignatureVerifier();
+        Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+
         return Stream.of(
                 new UrlPathCheck(
                     PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),

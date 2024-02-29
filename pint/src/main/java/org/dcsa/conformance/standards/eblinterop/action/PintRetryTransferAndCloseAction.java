@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateUnsignedStartResponse;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,24 +16,23 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter
 @Slf4j
-public class PintInitiateTransferAction extends PintAction {
-  private final int expectedMissingDocCount;
+public class PintRetryTransferAndCloseAction extends PintAction {
+  private final PintResponseCode responseCode;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
 
-  public PintInitiateTransferAction(
+  public PintRetryTransferAndCloseAction(
     String receivingPlatform,
     String sendingPlatform,
     PintAction previousAction,
-    int expectedMissingDocCount,
+    PintResponseCode responseCode,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -44,10 +42,10 @@ public class PintInitiateTransferAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "StartTransfer(MD:%d)".formatted(expectedMissingDocCount),
-        201
+        "RetryTransfer(%s)".formatted(responseCode.name()),
+        200
     );
-    this.expectedMissingDocCount = expectedMissingDocCount;
+    this.responseCode = responseCode;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -56,7 +54,7 @@ public class PintInitiateTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send transfer-transaction request");
+    return ("Retry transfer-transaction request");
   }
 
   @Override
@@ -72,13 +70,7 @@ public class PintInitiateTransferAction extends PintAction {
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDsp();
-    var td = exchange.getRequest().message().body().getJsonBody().path("transportDocument");
     boolean dspChanged = false;
-    if (!td.isMissingNode() && dsp.transportDocumentChecksum() == null) {
-      var checksum = Checksums.sha256CanonicalJson(td);
-      dsp = dsp.withTransportDocumentChecksum(checksum);
-      dspChanged = true;
-    }
     var requestBody = exchange.getRequest().message().body().getJsonBody();
     if (dsp.documentChecksums().isEmpty()) {
       var envelopeNode = parseSignedNodeNoErrors(
@@ -117,6 +109,7 @@ public class PintInitiateTransferAction extends PintAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
 
         return Stream.of(
                 new UrlPathCheck(
@@ -153,6 +146,17 @@ public class PintInitiateTransferAction extends PintAction {
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
+              JsonAttribute.contentChecks(
+                "",
+                "The signatures of the signed content of the HTTP response can be validated",
+                PintRole::isReceivingPlatform,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                JsonAttribute.customValidator(
+                  "Response signature must be valid",
+                  PintChecks.signatureValidates(receiverVerifierSupplier)
+                )
+              ),
                 new JsonSchemaCheck(
                         PintRole::isSendingPlatform,
                         getMatchedExchangeUuid(),
@@ -165,10 +169,9 @@ public class PintInitiateTransferAction extends PintAction {
                   () -> getRsp(),
                   () -> getDsp()
                 ),
-                validateUnsignedStartResponse(
+                validateSignedFinishResponse(
                   getMatchedExchangeUuid(),
-                  expectedMissingDocCount,
-                  () -> getDsp()
+                  responseCode
                 )
             );
       }

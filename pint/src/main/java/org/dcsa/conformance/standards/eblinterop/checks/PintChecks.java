@@ -4,12 +4,11 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
@@ -22,6 +21,38 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
+
+  public static JsonContentMatchedValidation arraySizeMustEqual(IntSupplier expectedSizeSupplier) {
+    return (nodeToValidate,contextPath) -> {
+      if (!nodeToValidate.isArray()) {
+        var expectedSize = expectedSizeSupplier.getAsInt();
+        if (expectedSize > 0) {
+          return Set.of(
+            "Expected '%s' to be an array with size %d, but it was not an array".formatted(
+              contextPath, expectedSize
+            )
+          );
+        }
+        // Schema validation error if anything
+        return Set.of();
+      }
+      var size = nodeToValidate.size();
+      var expectedSize = expectedSizeSupplier.getAsInt();
+      if (expectedSize == size) {
+        return Set.of();
+      }
+      if (expectedSize < 0) {
+        return Set.of("Error: Could not determine the expected size of the array at '%s'. This is a bug in the test".formatted(
+          contextPath
+        ));
+      }
+      return Set.of("The size of the array at '%s' was %d, but it should have been %d".formatted(
+        contextPath,
+        size,
+        expectedSize
+      ));
+    };
+  }
 
   public static JsonContentMatchedValidation anyArrayElementMatching(Predicate<JsonNode> matcher, JsonContentMatchedValidation delegate, boolean invalidIfNoMatch) {
     return (nodeToValidate,contextPath) -> {
@@ -43,6 +74,27 @@ public class PintChecks {
         }
       } else if (invalidIfNoMatch){
         issues.add("'" + contextPath + "' as not an array");
+      }
+      return issues;
+    };
+  }
+
+  public static JsonContentMatchedValidation missingDocumentChecksumsSubsetCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return (nodeToValidate, contextPath) -> {
+      if (!nodeToValidate.isArray()) {
+        // Schema validation will take care of this one.
+        return Set.of();
+      }
+      var checksums = dspSupplier.get().documentChecksums();
+      int idx = 0;
+      var issues = new LinkedHashSet<String>();
+      for (var checksumNode : nodeToValidate) {
+        var path = contextPath + "[" + idx + "]";
+        idx++;
+        var value = checksumNode.asText();
+        if (!checksums.contains(value)) {
+          issues.add("The checksum '%s' at '%s' was not listed in the initial transfer request".formatted(value, path));
+        }
       }
       return issues;
     };
@@ -80,6 +132,10 @@ public class PintChecks {
     return combined;
   }
 
+  public static JsonContentMatchedValidation expectedTDChecksum(Supplier<DynamicScenarioParameters> dynamicScenarioParametersSupplier) {
+    return JsonAttribute.matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
+  }
+
   public static JsonContentMatchedValidation signedContentValidation(
     JsonContentCheck delegate) {
     return (nodeToValidate,contextPath) -> delegate.validate(nodeToValidate);
@@ -106,8 +162,9 @@ public class PintChecks {
         jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
       } catch (Exception e) {
         return Set.of(
-            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: "
-                + e.toString());
+            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
+              contextPath, e.toString()
+            ));
       }
       return delegate.validate(jsonBody, contextPath + "!");
     };
@@ -118,22 +175,24 @@ public class PintChecks {
     return (nodeToValidate, contextPath) -> {
       var content = nodeToValidate.asText();
       if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not");
+        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
       }
-      JWSObject jwsObject = null;
+      JWSObject jwsObject;
       try {
         jwsObject = JWSObject.parse(content);
       } catch (ParseException e) {
         return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.");
+            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.".formatted(contextPath));
       }
       JsonNode jsonBody;
       try {
         jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
       } catch (Exception e) {
         return Set.of(
-            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: "
-                + e.toString());
+            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
+              contextPath,
+              e.toString()
+            ));
       }
       return schemaValidator.validate(jsonBody);
     };
@@ -145,21 +204,25 @@ public class PintChecks {
     return (nodeToValidate, contextPath) -> {
       var content = nodeToValidate.asText();
       if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not");
+        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
       }
       JWSObject jwsObject;
       try {
         jwsObject = JWSObject.parse(content);
       } catch (ParseException e) {
         return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.");
+            "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString()));
+      }
+      if (Algorithm.NONE.equals(jwsObject.getHeader().getAlgorithm())) {
+        return Set.of(
+          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath));
       }
       var signatureVerifier = signatureVerifierSupplier.get();
       if (signatureVerifier == null) {
         throw new AssertionError("Missing signatureVerifier");
       }
       if (!signatureVerifier.verifySignature(jwsObject)) {
-        return Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key");
+        return Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key".formatted(contextPath));
       }
       return Set.of();
     };
@@ -192,6 +255,52 @@ public class PintChecks {
           "envelopeTransferChain", -1
         )
       )
+    );
+    checks.add(
+      JsonAttribute.customValidator(
+        "[Scenario] Verify that the number of additional documents match the scenario",
+        JsonAttribute.path("envelopeManifestSignedContent", signedContentValidation(
+          JsonAttribute.path("supportingDocuments", arraySizeMustEqual(delayedValue(dspSupplier, DynamicScenarioParameters::documentCount, -1)))
+        ))
+      )
+    );
+  }
+
+  public static ActionCheck validateUnsignedStartResponse(
+    UUID matched,
+    int missingDocumentCount,
+    Supplier<DynamicScenarioParameters> dspSupplier
+  ) {
+    var jsonContentChecks = new ArrayList<JsonContentCheck>();
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "The number of missing documents is correct",
+        JsonAttribute.path("missingAdditionalDocumentChecksums", arraySizeMustEqual(() -> missingDocumentCount))
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "The checksums of additional documents are known",
+        JsonAttribute.path("missingAdditionalDocumentChecksums", missingDocumentChecksumsSubsetCheck(dspSupplier))
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate the missing documents checksum",
+        JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate the transportDocument checksum",
+        JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+      )
+    );
+    return JsonAttribute.contentChecks(
+      PintRole::isReceivingPlatform,
+      matched,
+      HttpMessageType.RESPONSE,
+      jsonContentChecks
     );
   }
 
@@ -227,6 +336,26 @@ public class PintChecks {
     var jsonContentChecks = new ArrayList<JsonContentCheck>();
 
     generateScenarioRelatedChecksForTransferRequest(jsonContentChecks, sspSupplier, rspSupplier, dspSupplier);
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate the transportDocument checksum in the envelopeManifestSignedContent",
+        JsonAttribute.path(
+          "envelopeManifestSignedContent",
+          signedContentValidation(
+            JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+          )
+        )
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.allIndividualMatchesMustBeValid(
+        "Validate the transportDocument checksum in the envelopeTransferChain",
+        (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
+        signedContentValidation(
+          JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+        )
+      )
+    );
     return JsonAttribute.contentChecks(
       PintRole::isSendingPlatform,
       matched,
@@ -235,13 +364,24 @@ public class PintChecks {
     );
   }
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
+  public static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
     return () -> {
       var csp = cspSupplier.get();
       if (csp == null) {
         return null;
       }
       return field.apply(csp);
+    };
+  }
+
+
+  private static <O> IntSupplier delayedValue(Supplier<O> cspSupplier, ToIntFunction<O> field, int placeholderValue) {
+    return () -> {
+      var csp = cspSupplier.get();
+      if (csp == null) {
+        return placeholderValue;
+      }
+      return field.applyAsInt(csp);
     };
   }
 

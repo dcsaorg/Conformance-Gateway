@@ -17,20 +17,20 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter
 @Slf4j
-public class PintInitiateTransferAction extends PintAction {
+public class PintRetryTransferAction extends PintAction {
   private final int expectedMissingDocCount;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
 
-  public PintInitiateTransferAction(
+  public PintRetryTransferAction(
     String receivingPlatform,
     String sendingPlatform,
     PintAction previousAction,
@@ -44,7 +44,7 @@ public class PintInitiateTransferAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "StartTransfer(MD:%d)".formatted(expectedMissingDocCount),
+        "RetryTransfer(MD:%d)".formatted(expectedMissingDocCount),
         201
     );
     this.expectedMissingDocCount = expectedMissingDocCount;
@@ -56,7 +56,7 @@ public class PintInitiateTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send transfer-transaction request");
+    return ("Retry transfer-transaction request");
   }
 
   @Override
@@ -72,13 +72,7 @@ public class PintInitiateTransferAction extends PintAction {
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDsp();
-    var td = exchange.getRequest().message().body().getJsonBody().path("transportDocument");
     boolean dspChanged = false;
-    if (!td.isMissingNode() && dsp.transportDocumentChecksum() == null) {
-      var checksum = Checksums.sha256CanonicalJson(td);
-      dsp = dsp.withTransportDocumentChecksum(checksum);
-      dspChanged = true;
-    }
     var requestBody = exchange.getRequest().message().body().getJsonBody();
     if (dsp.documentChecksums().isEmpty()) {
       var envelopeNode = parseSignedNodeNoErrors(

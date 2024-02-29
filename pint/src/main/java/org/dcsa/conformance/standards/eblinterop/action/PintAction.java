@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
+
+import java.util.Set;
 
 public abstract class PintAction extends ConformanceAction {
   protected final int expectedStatus;
@@ -23,10 +27,8 @@ public abstract class PintAction extends ConformanceAction {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     if (previousAction == null) {
-
       this.dspReference =
-        new OverwritingReference<>(
-          null, new DynamicScenarioParameters());
+          new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null));
       this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", ""));
       this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null));
     } else {
@@ -36,6 +38,22 @@ public abstract class PintAction extends ConformanceAction {
     }
   }
 
+  @Override
+  public void reset() {
+    super.reset();
+    if (previousAction != null) {
+      this.dspReference.set(null);
+    }
+  }
+
+
+  public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
+    return PayloadSignerFactory.testKeySignatureVerifier();
+  }
+
+  public SignatureVerifier resolveSignatureVerifierForReceiverSignatures() {
+    return PayloadSignerFactory.testKeySignatureVerifier();
+  }
 
   @Override
   public ObjectNode exportJsonState() {
@@ -71,20 +89,11 @@ public abstract class PintAction extends ConformanceAction {
 
 
   public DynamicScenarioParameters getDsp() {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      return previousAction.getDsp();
-    }
     return this.dspReference.get();
   }
 
   public void setDsp(DynamicScenarioParameters dsp) {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      previousAction.setDsp(dsp);
-    } else {
-      this.dspReference.set(dsp);
-    }
+    this.dspReference.set(dsp);
   }
 
   public SenderScenarioParameters getSsp() {

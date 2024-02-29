@@ -3,17 +3,22 @@ package org.dcsa.conformance.standards.eblinterop.crypto;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.standards.eblinterop.crypto.impl.DefaultPayloadSigner;
 
+import javax.swing.*;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class PayloadSignerFactory {
@@ -86,7 +91,7 @@ public class PayloadSignerFactory {
     private static final KeyPair TEST_INCORRECT_RSA_KEY_PAIR = parsePEMRSAKey(TEST_INCORRECT_RSA_PRIVATE_KEY_PEM);
     private static final PayloadSigner TEST_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(TEST_RSA_KEY_PAIR);
     private static final PayloadSigner TEST_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(TEST_INCORRECT_RSA_KEY_PAIR);
-    private static final SignatureVerifier TEST_KEY_SIGNATURE_VERIFIER = singleRSAKeySignatureVerifier(TEST_RSA_KEY_PAIR);
+    private static final SignatureVerifier TEST_KEY_SIGNATURE_VERIFIER = fromPublicKey(TEST_RSA_KEY_PAIR.getPublic());
 
     public static PayloadSigner testPayloadSigner() {
         return TEST_KEY_PAYLOAD_SIGNER;
@@ -113,10 +118,6 @@ public class PayloadSignerFactory {
       return new SingleKeySignatureVerifier(jwsVerifier);
     }
 
-    private static SignatureVerifier singleRSAKeySignatureVerifier(KeyPair keyPair) {
-        return new SingleKeySignatureVerifier(new RSASSAVerifier((RSAPublicKey) keyPair.getPublic()));
-    }
-
     @SneakyThrows
     private static KeyPair parsePEMRSAKey(String pem) {
         String privKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "")
@@ -130,6 +131,17 @@ public class PayloadSignerFactory {
         var privateKey = (RSAPrivateCrtKey)kf.generatePrivate(keySpec);
         var publicKey = kf.generatePublic(new RSAPublicKeySpec(privateKey.getModulus(), privateKey.getPublicExponent()));
         return new KeyPair(publicKey, privateKey);
+    }
+
+    @SneakyThrows
+    public static SignatureVerifier fromPublicKey(PublicKey publicKey) {
+      if (publicKey instanceof RSAPublicKey rsaPublicKey) {
+        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
+      }
+      if (publicKey instanceof ECPublicKey ecPublicKey) {
+        return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
+      }
+      throw new IllegalArgumentException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
     }
 
     private record SingleKeySignatureVerifier(JWSVerifier jwsVerifier) implements SignatureVerifier {

@@ -83,15 +83,25 @@ public class EblComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return new CachedEblScenarioListBuilder<>(standardVersion, () -> EblScenarioListBuilder.buildTree(
-        this.standardVersion,
+    return EblScenarioListBuilder.createModuleScenarioListBuilders(
+        this,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblRole::isShipper)));
+  }
+  public ScenarioListBuilder<?> createScenarioListBuilder(
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations) {
+    return new CachedEblScenarioListBuilder<>(standardVersion, () -> EblScenarioListBuilder.buildTree(
+      this.standardVersion,
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, EblRole::isShipper)));
   }
 
 

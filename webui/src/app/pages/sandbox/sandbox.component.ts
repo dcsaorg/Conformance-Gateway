@@ -12,6 +12,7 @@ import {
 } from "src/app/model/conformance-status";
 import { ConfirmationDialog } from "src/app/dialogs/confirmation/confirmation-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import {StandardModule} from "../../model/standard-module";
 
 @Component({
   selector: 'app-sandbox',
@@ -21,10 +22,10 @@ import { MatDialog } from "@angular/material/dialog";
 export class SandboxComponent {
   sandboxId: string = '';
   sandbox: Sandbox | undefined;
-  scenarios: ScenarioDigest[] = [];
+  standardModules: StandardModule[] = [];
   isAnyScenarioRunning: boolean = false;
   isLoading: boolean = false;
-  
+
   activatedRouteSubscription: Subscription | undefined;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
@@ -55,8 +56,12 @@ export class SandboxComponent {
   async _loadData() {
     this.isLoading = true;
     this.sandbox = await this.conformanceService.getSandbox(this.sandboxId, true);
-    this.scenarios = await this.conformanceService.getScenarioDigests(this.sandboxId);
-    this.isAnyScenarioRunning = this.scenarios.filter(scenario => scenario.isRunning).length > 0;
+    this.standardModules = await this.conformanceService.getScenarioDigests(this.sandboxId);
+    this.isAnyScenarioRunning = this.standardModules.filter(
+      module => module.scenarios.filter(
+        scenario => scenario.isRunning
+      ).length > 0
+    ).length > 0;
     this.isLoading = false;
   }
 
@@ -67,18 +72,18 @@ export class SandboxComponent {
   }
 
   getActionIconName(scenario: ScenarioDigest): string {
-    return scenario.isRunning 
-        ? "stop" 
-        : scenario.conformanceStatus === ConformanceStatus.NO_TRAFFIC 
-            ? "play_arrow" 
+    return scenario.isRunning
+        ? "stop"
+        : scenario.conformanceStatus === ConformanceStatus.NO_TRAFFIC
+            ? "play_arrow"
             : "replay";
   }
 
   getActionTitle(scenario: ScenarioDigest): string {
-    return scenario.isRunning 
-        ? "Stop" 
+    return scenario.isRunning
+        ? "Stop"
         : scenario.conformanceStatus === ConformanceStatus.NO_TRAFFIC
-            ? "Start" 
+            ? "Start"
             : "Restart";
   }
 

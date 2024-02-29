@@ -79,10 +79,10 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return EblSurrenderScenarioListBuilder.buildTree(
+    return EblSurrenderScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, EblSurrenderRole::isCarrier),

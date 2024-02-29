@@ -4,7 +4,12 @@ import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatu
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -19,6 +24,8 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
+  private static final ThreadLocal<EblComponentFactory> threadLocalComponentFactory =
+    new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
 
@@ -39,7 +46,7 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
   public static EblScenarioListBuilder buildTree(
-      String standardVersion, String carrierPartyName, String shipperPartyName) {
+    String standardVersion, String carrierPartyName, String shipperPartyName) {
     STANDARD_VERSION.set(standardVersion);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
@@ -54,6 +61,30 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES).thenHappyPathFrom(SI_START, TD_START, false),
       carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_AMF).thenHappyPathFrom(SI_START, TD_START, false)
     );
+  }
+  public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
+    EblComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
+    threadLocalComponentFactory.set(componentFactory);
+    threadLocalCarrierPartyName.set(carrierPartyName);
+    threadLocalShipperPartyName.set(shipperPartyName);
+    return Stream.of(
+        Map.entry(
+          "",
+          noAction()
+            .thenEither(
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB).thenAllPathsFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.ACTIVE_REEFER).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.NON_OPERATING_REEFER).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_1E).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_2E).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES).thenHappyPathFrom(SI_START, TD_START, false),
+              carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_AMF).thenHappyPathFrom(SI_START, TD_START, false)
+            )))
+      .collect(
+        Collectors.toMap(
+          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(

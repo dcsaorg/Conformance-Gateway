@@ -2,7 +2,12 @@ package org.dcsa.conformance.standards.tnt;
 
 import static org.dcsa.conformance.standards.tnt.party.TntFilterParameter.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -18,45 +23,55 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
   private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalSubscriberPartyName = new ThreadLocal<>();
 
-  public static TntScenarioListBuilder buildTree(
+  public static LinkedHashMap<String, TntScenarioListBuilder> createModuleScenarioListBuilders(
       TntComponentFactory componentFactory, String publisherPartyName, String subscriberPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
-    return noAction()
-        .thenEither(
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME),
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_EQ),
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_GT, EVENT_CREATED_DATE_TIME_LT),
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_GT, EVENT_CREATED_DATE_TIME_LTE),
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LT),
-            scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LTE),
-            scenarioWithFilterBy(EVENT_TYPE),
-            scenarioWithFilterByDateTimesAnd(EVENT_TYPE),
-            scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
-            scenarioWithFilterByDateTimesAnd(SHIPMENT_EVENT_TYPE_CODE),
-            scenarioWithFilterBy(DOCUMENT_TYPE_CODE),
-            scenarioWithFilterByDateTimesAnd(DOCUMENT_TYPE_CODE),
-            scenarioWithFilterBy(CARRIER_BOOKING_REFERENCE),
-            scenarioWithFilterByDateTimesAnd(CARRIER_BOOKING_REFERENCE),
-            scenarioWithFilterBy(TRANSPORT_DOCUMENT_REFERENCE),
-            scenarioWithFilterByDateTimesAnd(TRANSPORT_DOCUMENT_REFERENCE),
-            scenarioWithFilterBy(TRANSPORT_EVENT_TYPE_CODE),
-            scenarioWithFilterByDateTimesAnd(TRANSPORT_EVENT_TYPE_CODE),
-            scenarioWithFilterBy(TRANSPORT_CALL_ID),
-            scenarioWithFilterByDateTimesAnd(TRANSPORT_CALL_ID),
-            scenarioWithFilterBy(VESSEL_IMO_NUMBER),
-            scenarioWithFilterByDateTimesAnd(VESSEL_IMO_NUMBER),
-            scenarioWithFilterBy(EXPORT_VOYAGE_NUMBER),
-            scenarioWithFilterByDateTimesAnd(EXPORT_VOYAGE_NUMBER),
-            scenarioWithFilterBy(CARRIER_SERVICE_CODE),
-            scenarioWithFilterByDateTimesAnd(CARRIER_SERVICE_CODE),
-            scenarioWithFilterBy(UN_LOCATION_CODE),
-            scenarioWithFilterByDateTimesAnd(UN_LOCATION_CODE),
-            scenarioWithFilterBy(EQUIPMENT_EVENT_TYPE_CODE),
-            scenarioWithFilterByDateTimesAnd(EQUIPMENT_EVENT_TYPE_CODE),
-            scenarioWithFilterBy(EQUIPMENT_REFERENCE),
-            scenarioWithFilterByDateTimesAnd(EQUIPMENT_REFERENCE));
+    return Stream.of(
+            Map.entry(
+                "",
+                noAction()
+                    .thenEither(
+                        scenarioWithFilterBy(EVENT_CREATED_DATE_TIME),
+                        scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_EQ),
+                        scenarioWithFilterBy(
+                            EVENT_CREATED_DATE_TIME_GT, EVENT_CREATED_DATE_TIME_LT),
+                        scenarioWithFilterBy(
+                            EVENT_CREATED_DATE_TIME_GT, EVENT_CREATED_DATE_TIME_LTE),
+                        scenarioWithFilterBy(
+                            EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LT),
+                        scenarioWithFilterBy(
+                            EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LTE),
+                        scenarioWithFilterBy(EVENT_TYPE),
+                        scenarioWithFilterByDateTimesAnd(EVENT_TYPE),
+                        scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
+                        scenarioWithFilterByDateTimesAnd(SHIPMENT_EVENT_TYPE_CODE),
+                        scenarioWithFilterBy(DOCUMENT_TYPE_CODE),
+                        scenarioWithFilterByDateTimesAnd(DOCUMENT_TYPE_CODE),
+                        scenarioWithFilterBy(CARRIER_BOOKING_REFERENCE),
+                        scenarioWithFilterByDateTimesAnd(CARRIER_BOOKING_REFERENCE),
+                        scenarioWithFilterBy(TRANSPORT_DOCUMENT_REFERENCE),
+                        scenarioWithFilterByDateTimesAnd(TRANSPORT_DOCUMENT_REFERENCE),
+                        scenarioWithFilterBy(TRANSPORT_EVENT_TYPE_CODE),
+                        scenarioWithFilterByDateTimesAnd(TRANSPORT_EVENT_TYPE_CODE),
+                        scenarioWithFilterBy(TRANSPORT_CALL_ID),
+                        scenarioWithFilterByDateTimesAnd(TRANSPORT_CALL_ID),
+                        scenarioWithFilterBy(VESSEL_IMO_NUMBER),
+                        scenarioWithFilterByDateTimesAnd(VESSEL_IMO_NUMBER),
+                        scenarioWithFilterBy(EXPORT_VOYAGE_NUMBER),
+                        scenarioWithFilterByDateTimesAnd(EXPORT_VOYAGE_NUMBER),
+                        scenarioWithFilterBy(CARRIER_SERVICE_CODE),
+                        scenarioWithFilterByDateTimesAnd(CARRIER_SERVICE_CODE),
+                        scenarioWithFilterBy(UN_LOCATION_CODE),
+                        scenarioWithFilterByDateTimesAnd(UN_LOCATION_CODE),
+                        scenarioWithFilterBy(EQUIPMENT_EVENT_TYPE_CODE),
+                        scenarioWithFilterByDateTimesAnd(EQUIPMENT_EVENT_TYPE_CODE),
+                        scenarioWithFilterBy(EQUIPMENT_REFERENCE),
+                        scenarioWithFilterByDateTimesAnd(EQUIPMENT_REFERENCE))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private TntScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {

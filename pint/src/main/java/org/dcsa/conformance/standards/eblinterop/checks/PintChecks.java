@@ -4,6 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
@@ -211,6 +212,10 @@ public class PintChecks {
       } catch (ParseException e) {
         return Set.of(
             "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString()));
+      }
+      if (Algorithm.NONE.equals(jwsObject.getHeader().getAlgorithm())) {
+        return Set.of(
+          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath));
       }
       var signatureVerifier = signatureVerifierSupplier.get();
       if (signatureVerifier == null) {

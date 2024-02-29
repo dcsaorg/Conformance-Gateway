@@ -109,7 +109,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
-        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVeriferForReceiverSignatures();
+        Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
 
         return Stream.of(
                 new UrlPathCheck(

@@ -2,7 +2,12 @@ package org.dcsa.conformance.standards.booking;
 
 import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -27,16 +32,25 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
-  public static BookingScenarioListBuilder buildTree(
+  public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
       BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    return noAction().thenEither(
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REGULAR).thenAllPathsFrom(START),
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.REEFER).thenHappyPathFrom(START),
-      carrier_SupplyScenarioParameters(carrierPartyName,ScenarioType.DG).thenHappyPathFrom(START)
-    );
+    return Stream.of(
+            Map.entry(
+                "",
+                noAction()
+                    .thenEither(
+                        carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
+                            .thenAllPathsFrom(START),
+                        carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+                            .thenHappyPathFrom(START),
+                        carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.DG)
+                            .thenHappyPathFrom(START))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private BookingScenarioListBuilder thenAllPathsFrom(BookingState bookingState) {

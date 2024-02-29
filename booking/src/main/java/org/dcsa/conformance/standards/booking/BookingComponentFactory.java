@@ -79,10 +79,10 @@ public class BookingComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return BookingScenarioListBuilder.buildTree(
+    return BookingScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),

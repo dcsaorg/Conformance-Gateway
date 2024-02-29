@@ -82,10 +82,10 @@ public class OvsComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return OvsScenarioListBuilder.buildTree(
+    return OvsScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, OvsRole::isPublisher),

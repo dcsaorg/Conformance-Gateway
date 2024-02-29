@@ -19,6 +19,7 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
+import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
@@ -28,6 +29,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
   private final SandboxConfiguration sandboxConfiguration;
   private final TrafficRecorder trafficRecorder;
   private final Consumer<ConformanceWebRequest> asyncWebClient;
+  private final LinkedHashMap<String, ArrayList<ConformanceScenario>> scenariosByModuleName =
+      new LinkedHashMap<>();
   private final LinkedHashMap<UUID, ConformanceScenario> scenariosById = new LinkedHashMap<>();
   private final Map<UUID, UUID> latestRunIdsByScenarioId = new HashMap<>();
   private UUID currentScenarioId;
@@ -41,11 +44,21 @@ public class ConformanceOrchestrator implements StatefulEntity {
     this.trafficRecorder = trafficRecorder;
     this.asyncWebClient = asyncWebClient;
 
-    componentFactory
-        .createScenarioListBuilder(
-            sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts())
-        .buildScenarioList()
-        .forEach(scenario -> this.scenariosById.put(scenario.getId(), scenario));
+    LinkedHashMap<String, ? extends ScenarioListBuilder<?>> moduleScenarioListBuilders =
+        componentFactory.createModuleScenarioListBuilders(
+            sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts());
+    moduleScenarioListBuilders.forEach(
+        (moduleName, scenarioListBuilder) -> {
+          ArrayList<ConformanceScenario> moduleScenarios = new ArrayList<>();
+          scenariosByModuleName.put(moduleName, moduleScenarios);
+          scenarioListBuilder
+              .buildScenarioList()
+              .forEach(
+                  scenario -> {
+                    moduleScenarios.add(scenario);
+                    this.scenariosById.put(scenario.getId(), scenario);
+                  });
+        });
   }
 
   @Override
@@ -262,25 +275,59 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
 
-    Map<String, List<ConformanceExchange>> trafficByScenarioRun =
-        trafficRecorder.getTrafficByScenarioRun();
-    Map<UUID, ConformanceExchange> exchangesByUuid =
-        latestRunIdsByScenarioId.values().stream()
-            .filter(latestRunId -> trafficByScenarioRun.containsKey(latestRunId.toString()))
-            .flatMap(latestRunId -> trafficByScenarioRun.get(latestRunId.toString()).stream())
-            .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
-    conformanceCheck.check(exchangesByUuid::get);
-
     return ConformanceReport.toHtmlReport(
         ConformanceReport.createForRoles(conformanceCheck, roleNames), printable);
   }
 
   public ArrayNode getScenarioDigests() {
     ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode arrayNode = objectMapper.createArrayNode();
-    if (!sandboxConfiguration.getOrchestrator().isActive()) return arrayNode;
+    ArrayNode allModulesNode = objectMapper.createArrayNode();
+    if (!sandboxConfiguration.getOrchestrator().isActive()) return allModulesNode;
 
-    ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
+    new ConformanceReport(_createScenarioConformanceCheck(), _getManualCounterpart().getRole());
+
+    scenariosByModuleName.forEach(
+        (moduleName, scenarios) -> {
+          ObjectNode moduleNode = allModulesNode.addObject();
+          moduleNode.put("moduleName", moduleName);
+          ArrayNode allScenariosNode = moduleNode.putArray("scenarios");
+          scenarios.forEach(
+              scenario -> {
+                ObjectNode scenarioNode = allScenariosNode.addObject();
+                scenarioNode.put("id", scenario.getId().toString());
+                scenarioNode.put("name", scenario.getTitle());
+                scenarioNode.put("isRunning", scenario.getId().equals(currentScenarioId));
+                scenarioNode.put("conformanceStatus", scenario.getLatestComputedStatus().name());
+              });
+        });
+    return allModulesNode;
+  }
+
+  private ConformanceCheck _createScenarioConformanceCheck() {
+    ConformanceCheck conformanceCheck =
+        new ConformanceCheck("Scenario conformance") { // standard check
+          @Override
+          protected Stream<? extends ConformanceCheck> createSubChecks() {
+            return scenariosByModuleName.entrySet().stream()
+                .map(
+                    moduleNameAndScenarios -> {
+                      String moduleName = moduleNameAndScenarios.getKey();
+                      ArrayList<ConformanceScenario> scenarios = moduleNameAndScenarios.getValue();
+                      return new ConformanceCheck(
+                          moduleName.isBlank() ? "All scenarios" : moduleName) { // module check
+                        @Override
+                        protected Stream<? extends ConformanceCheck> createSubChecks() {
+                          return scenarios.stream()
+                              .map(
+                                  scenario ->
+                                      new ScenarioCheck( // scenario check
+                                          scenario,
+                                          sandboxConfiguration.getStandard().getVersion()));
+                        }
+                      };
+                    });
+          }
+        };
 
     Map<String, List<ConformanceExchange>> trafficByScenarioRun =
         trafficRecorder.getTrafficByScenarioRun();
@@ -291,36 +338,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
     conformanceCheck.check(exchangesByUuid::get);
 
-    new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
-
-    this.scenariosById
-        .values()
-        .forEach(
-            scenario -> {
-              log.info(
-                  "Scenario description: '%s'".formatted(scenario.getReportTitleDescription()));
-              ObjectNode scenarioNode =
-                  objectMapper
-                      .createObjectNode()
-                      .put("id", scenario.getId().toString())
-                      .put("name", scenario.getTitle())
-                      .put("isRunning", scenario.getId().equals(currentScenarioId))
-                      .put("conformanceStatus", scenario.getLatestComputedStatus().name());
-              arrayNode.add(scenarioNode);
-            });
-    return arrayNode;
-  }
-
-  private ConformanceCheck _createScenarioConformanceCheck() {
-    return new ConformanceCheck("Scenario conformance") {
-      @Override
-      protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return scenariosById.values().stream()
-            .map(
-                scenario ->
-                    new ScenarioCheck(scenario, sandboxConfiguration.getStandard().getVersion()));
-      }
-    };
+    return conformanceCheck;
   }
 
   public ObjectNode getScenarioDigest(String scenarioId) {
@@ -358,20 +376,13 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();
-    Map<String, List<ConformanceExchange>> trafficByScenarioRun =
-        trafficRecorder.getTrafficByScenarioRun();
-    List<ConformanceExchange> scenarioRunExchanges =
-        Objects.requireNonNullElse(
-            trafficByScenarioRun.get(runUuid.toString()), Collections.emptyList());
-    Map<UUID, ConformanceExchange> exchangesByUuid =
-        scenarioRunExchanges.stream()
-            .collect(Collectors.toMap(ConformanceExchange::getUuid, Function.identity()));
-    conformanceCheck.check(exchangesByUuid::get);
+
     ConformanceReport fullReport =
         new ConformanceReport(conformanceCheck, _getManualCounterpart().getRole());
     ConformanceReport scenarioSubReport =
         fullReport.getSubReports().stream()
-            .filter(subReport -> subReport.getTitle().equals(scenario.getTitle()))
+            .flatMap(subReport -> subReport.getSubReports().stream())
+            .filter(subSubReport -> subSubReport.getTitle().equals(scenario.getTitle()))
             .findFirst()
             .orElseThrow();
     scenarioNode.set("conformanceSubReport", scenarioSubReport.toJsonReport());

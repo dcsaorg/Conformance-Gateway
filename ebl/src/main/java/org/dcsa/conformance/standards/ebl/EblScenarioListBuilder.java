@@ -3,7 +3,12 @@ package org.dcsa.conformance.standards.ebl;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.*;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -34,16 +39,25 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
 
-  public static EblScenarioListBuilder buildTree(
+  public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
       EblComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    return noAction().thenEither(
-      carrier_SupplyScenarioParameters(ScenarioType.REGULAR).thenAllPathsFrom(SI_START),
-      carrier_SupplyScenarioParameters(ScenarioType.REEFER).thenHappyPathFrom(SI_START),
-      carrier_SupplyScenarioParameters(ScenarioType.DG).thenHappyPathFrom(SI_START)
-    );
+    return Stream.of(
+            Map.entry(
+                "",
+                noAction()
+                    .thenEither(
+                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR)
+                            .thenAllPathsFrom(SI_START),
+                        carrier_SupplyScenarioParameters(ScenarioType.REEFER)
+                            .thenHappyPathFrom(SI_START),
+                        carrier_SupplyScenarioParameters(ScenarioType.DG)
+                            .thenHappyPathFrom(SI_START))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(

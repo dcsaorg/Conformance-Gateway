@@ -79,10 +79,10 @@ public class TntComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return TntScenarioListBuilder.buildTree(
+    return TntScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, TntRole::isPublisher),

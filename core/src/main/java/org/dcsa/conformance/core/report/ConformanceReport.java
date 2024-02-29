@@ -13,12 +13,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Getter
 public class ConformanceReport {
   private final ConformanceCheck conformanceCheck;
@@ -137,13 +131,13 @@ public class ConformanceReport {
   }
 
   private static String renderReport(ConformanceReport report, int level, boolean printable) {
-    if (level == 0) {
+    if (level == 0 || level == 1) {
       return scenarioListAsHtmlBlock(report, level, printable);
     }
-    if (level == 1) {
+    if (level == 2) {
       return scenarioAsHtmlBlock(report, level, printable);
     }
-    if (level > 1) {
+    if (level > 2) {
       return scenarioDetailsAsHtmlBlock(report, level, printable);
     }
     return asHtmlBlock(report, level, printable);

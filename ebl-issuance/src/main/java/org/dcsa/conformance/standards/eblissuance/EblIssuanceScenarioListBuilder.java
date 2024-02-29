@@ -1,6 +1,11 @@
 package org.dcsa.conformance.standards.eblissuance;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -15,27 +20,38 @@ public class EblIssuanceScenarioListBuilder
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPlatformPartyName = new ThreadLocal<>();
 
-  public static EblIssuanceScenarioListBuilder buildTree(
-      EblIssuanceComponentFactory componentFactory,
-      String carrierPartyName,
-      String platformPartyName) {
+  public static LinkedHashMap<String, EblIssuanceScenarioListBuilder>
+      createModuleScenarioListBuilders(
+          EblIssuanceComponentFactory componentFactory,
+          String carrierPartyName,
+          String platformPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
-    return supplyScenarioParameters()
-        .thenEither(
-            correctIssuanceRequest()
-                .thenEither(
-                    issuanceResponseAccepted()
-                        .thenEither(
-                            noAction(), duplicateIssuanceRequest(), duplicateIssuanceResponse()),
-                    duplicateIssuanceRequest().then(issuanceResponseAccepted()),
-                    issuanceResponseBlocked()
-                        .then(correctIssuanceRequest().then(issuanceResponseAccepted())),
-                    issuanceResponseRefused()
-                        .then(correctIssuanceRequest().then(issuanceResponseAccepted()))),
-            incorrectIssuanceRequest()
-                .then(correctIssuanceRequest().then(issuanceResponseAccepted())));
+    return Stream.of(
+            Map.entry(
+                "",
+                supplyScenarioParameters()
+                    .thenEither(
+                        correctIssuanceRequest()
+                            .thenEither(
+                                issuanceResponseAccepted()
+                                    .thenEither(
+                                        noAction(),
+                                        duplicateIssuanceRequest(),
+                                        duplicateIssuanceResponse()),
+                                duplicateIssuanceRequest().then(issuanceResponseAccepted()),
+                                issuanceResponseBlocked()
+                                    .then(
+                                        correctIssuanceRequest().then(issuanceResponseAccepted())),
+                                issuanceResponseRefused()
+                                    .then(
+                                        correctIssuanceRequest().then(issuanceResponseAccepted()))),
+                        incorrectIssuanceRequest()
+                            .then(correctIssuanceRequest().then(issuanceResponseAccepted())))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private EblIssuanceScenarioListBuilder(

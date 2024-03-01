@@ -77,34 +77,38 @@ public class BookingChecks {
   private static final JsonContentCheck CHECK_EXPECTED_DEPARTURE_DATE = JsonAttribute.customValidator(
     "Check expected departure date can not be past date",
     (body) -> {
-      String providedLocalDate = body.path("expectedDepartureDate").asText("");
+      String expectedDepartureDate = body.path("expectedDepartureDate").asText("");
       var invalidDates = new LinkedHashSet<String>();
-      LocalDate providedExpectedDepartureDate = LocalDate.parse(providedLocalDate);
-      if (providedExpectedDepartureDate.isBefore(LocalDate.now())) {
-        invalidDates.add(providedLocalDate);
+      if(!expectedDepartureDate.isEmpty()) {
+        LocalDate expectedDepartureLocalDate = LocalDate.parse(expectedDepartureDate);
+        if (expectedDepartureLocalDate.isBefore(LocalDate.now())) {
+          invalidDates.add(expectedDepartureLocalDate.toString());
+        }
       }
       return invalidDates.stream()
-        .map("The expected departure date  '%s' can not be paste date"::formatted)
+        .map("The expected departure date '%s' can not be paste date"::formatted)
         .collect(Collectors.toSet());
     }
   );
 
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
-    "Check expected arrival dates can valid",
+    "Check expected arrival dates are valid",
     (body) -> {
       String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
       String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
       var invalidDates = new LinkedHashSet<String>();
-      LocalDate arrivalStartDate = LocalDate.parse(providedArrivalStartDate);
-      LocalDate arrivalEndDate = LocalDate.parse(providedArrivalEndDate);
-      if (arrivalStartDate.isAfter(arrivalEndDate)) {
-        invalidDates.add(arrivalStartDate.toString());
-      }
-      if (arrivalEndDate.isBefore(arrivalStartDate)) {
-        invalidDates.add(arrivalEndDate.toString());
+      if (!providedArrivalStartDate.isEmpty() && !providedArrivalEndDate.isEmpty()) {
+        LocalDate arrivalStartDate = LocalDate.parse(providedArrivalStartDate);
+        LocalDate arrivalEndDate = LocalDate.parse(providedArrivalEndDate);
+        if (arrivalStartDate.isAfter(arrivalEndDate)) {
+          invalidDates.add(arrivalStartDate.toString());
+        }
+        if (arrivalEndDate.isBefore(arrivalStartDate)) {
+          invalidDates.add(arrivalEndDate.toString());
+        }
       }
       return invalidDates.stream()
-        .map("The expected departure date  '%s' can not be past date"::formatted)
+        .map("The expected arrival dates  '%s' are valid"::formatted)
         .collect(Collectors.toSet());
     }
   );
@@ -459,8 +463,8 @@ public class BookingChecks {
 
   private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'serviceContractReference' is used",
-      "serviceContractReference",
+      "[Scenario] Verify that the correct 'carrierServiceName' is used",
+      "carrierServiceName",
       delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
     ));
     checks.add(JsonAttribute.mustEqual(
@@ -471,7 +475,7 @@ public class BookingChecks {
 
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-      "contractQuotationReference",
+      "carrierExportVoyageNumber",
       delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber)
     ));
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
@@ -483,7 +487,7 @@ public class BookingChecks {
         var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
         var issues = new LinkedHashSet<String>();
         switch (scenario) {
-          case REEFER -> {
+          case REEFER, REEFER_TEMP_CHANGE -> {
             if (!activeReeferNode.isObject()) {
               issues.add("The scenario requires '%s' to have an active reefer".formatted(contextPath));
             }
@@ -598,9 +602,9 @@ public class BookingChecks {
         var charges = body.path("charges");
         var issues = new LinkedHashSet<String>();
         for(JsonNode charge : charges) {
-          var chargeAmount = charge.get("chargeAmount").asDouble();
-          if (BigDecimal.valueOf(chargeAmount).scale() > 2) {
-            issues.add("Charge amount %s is expected to have 2 decimal precious ".formatted(chargeAmount));
+          var currencyAmount = charge.get("currencyAmount").asDouble();
+          if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
+            issues.add("Charge amount %s is expected to have 2 decimal precious ".formatted(currencyAmount));
           }
         }
         return issues;

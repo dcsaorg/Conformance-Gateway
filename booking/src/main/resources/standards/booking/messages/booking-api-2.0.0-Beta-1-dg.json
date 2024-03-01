@@ -3,6 +3,7 @@
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "SCR-1234-DG",
   "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
@@ -77,7 +78,7 @@
           }
         ]
       },
-      "partyFunction": "BA",
+      "partyFunction": "CN",
       "isToBeNotified": false
     }
   ],

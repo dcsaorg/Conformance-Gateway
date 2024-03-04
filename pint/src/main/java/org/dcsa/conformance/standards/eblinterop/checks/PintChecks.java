@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.checks;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +12,7 @@ import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
@@ -130,6 +132,18 @@ public class PintChecks {
       }
     }
     return combined;
+  }
+
+  public static ActionCheck tdContentChecks(UUID matched, Supplier<SenderScenarioParameters> senderScenarioParametersSupplier) {
+    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, delayedValue(senderScenarioParametersSupplier, SenderScenarioParameters::transportDocumentReference));
+    return JsonAttribute.contentChecks(
+      "Complex validations of transport document",
+      PintRole::isSendingPlatform,
+      matched,
+      HttpMessageType.REQUEST,
+      JsonContentCheckRebaser.of("transportDocument"),
+      checks
+    );
   }
 
   public static JsonContentMatchedValidation expectedTDChecksum(Supplier<DynamicScenarioParameters> dynamicScenarioParametersSupplier) {

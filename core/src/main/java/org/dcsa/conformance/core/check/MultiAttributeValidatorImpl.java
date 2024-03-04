@@ -1,5 +1,6 @@
 package org.dcsa.conformance.core.check;
 
+import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.core.check.JsonAttribute.renderJsonPointer;
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class MultiAttributeValidatorImpl implements MultiAttributeValidator {
 
+  private final String contextPath;
   private final JsonNode body;
   private final JsonContentMatchedValidation validation;
 
@@ -47,7 +49,7 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
   }
 
   private void validateAll(List<Match> matches) {
-    matches.stream().map(m -> validation.validate(m.node, m.render()))
+    matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
       .filter(s -> !s.isEmpty())
       .forEach(validationIssues::addAll);
   }

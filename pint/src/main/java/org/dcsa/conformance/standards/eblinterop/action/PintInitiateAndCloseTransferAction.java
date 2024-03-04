@@ -1,8 +1,5 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateSignedFinishResponse;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -16,6 +13,8 @@ import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
+
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 
 @Getter
 @Slf4j
@@ -142,6 +141,10 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
                         requestSchemaValidator
+                ),
+                tdContentChecks(
+                  getMatchedExchangeUuid(),
+                  () -> getSsp()
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),

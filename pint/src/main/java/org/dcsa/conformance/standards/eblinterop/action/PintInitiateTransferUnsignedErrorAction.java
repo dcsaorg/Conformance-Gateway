@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.tdContentChecks;
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
 import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
@@ -134,6 +135,10 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
                         requestSchemaValidator
+                ),
+                tdContentChecks(
+                  getMatchedExchangeUuid(),
+                  () -> getSsp()
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),

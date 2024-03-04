@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
+import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
@@ -42,7 +44,7 @@ public class EBLChecks {
     JsonPointer.compile("/transports/onwardInlandRouting/UNLocationCode"),
   };
 
-  private static final JsonContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
+  private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
     JsonAttribute.isTrue(JsonPointer.compile("/isToOrder")),
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
@@ -54,7 +56,7 @@ public class EBLChecks {
     mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
-  private static final JsonContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
     "All reference 'type' fields must be valid",
         ALL_REFERENCE_TYPES,
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
@@ -79,7 +81,7 @@ public class EBLChecks {
     };
   }
 
-  private static final JsonContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
     (mav) -> {
       mav.submitAllMatching("issuingParty.taxLegalReferences.*");
@@ -88,7 +90,7 @@ public class EBLChecks {
     combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
    );
 
-  private static final JsonContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each document party can be used at most once",
     (mav) -> {
       mav.submitAllMatching("issuingParty.taxLegalReferences");
@@ -120,7 +122,7 @@ public class EBLChecks {
     return !norNode.asBoolean(false);
   };
 
-  private static final JsonContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "All utilizedTransportEquipments with a reefer ISO Equipment Code must have at least isNonOperatingReefer",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
@@ -136,7 +138,7 @@ public class EBLChecks {
     )
   );
 
-  private static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
@@ -145,7 +147,7 @@ public class EBLChecks {
     )
   );
 
-  private static final JsonContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'true' cannot have 'activeReeferSettings'",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
@@ -155,7 +157,7 @@ public class EBLChecks {
   );
 
   private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
-  private static final JsonContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate conditionally mandatory 'selfFilerCode' in 'advanceManifestFilings'",
     ALL_AMF,
     (nodeToValidate, contextPath) -> {
@@ -174,7 +176,7 @@ public class EBLChecks {
       return Set.of();
   });
 
-  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     ALL_AMF,
     combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
@@ -187,13 +189,13 @@ public class EBLChecks {
     mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*");
   };
 
-  private static final JsonContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
     ALL_CUSTOMS_REFERENCES,
     combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
   );
 
-  private static final JsonContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
     (mav) -> {
       mav.submitAllMatching("customsReferences");
@@ -204,7 +206,7 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
-  private static final JsonContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate field is a known ISO 3166 alpha 2 code",
     (mav) -> {
       mav.submitAllMatching("advancedManifestFilings.*.countryCode");
@@ -218,22 +220,22 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
 
-  private static final JsonContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'packagingCode' is a known code",
     (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.packageCode"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.OUTER_PACKAGING_CODE)
   );
 
-  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       "documentParties",
       JsonAttribute.unique("partyFunction")
     ));
 
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
     "Validate documentParties",
-    body -> {
+    (body, contextPath) -> {
       var issues = new LinkedHashSet<String>();
       var documentParties = body.path("documentParties");
       var isToOrder = body.path("isToOrder").asBoolean(false);
@@ -244,28 +246,32 @@ public class EBLChecks {
         .collect(Collectors.toSet());
 
       if (!partyFunctions.contains("OS")) {
-        issues.add("The 'OS' party is mandatory in the eBL phase (SI/TD)");
+        var documentPartiesPath = concatContextPath(contextPath, "documentParties");
+        issues.add("The 'OS' party is mandatory in the eBL phase at '%s' (SI/TD)".formatted(documentPartiesPath));
       }
+      var isToOrderPath = concatContextPath(contextPath, "isToOrder");
 
       if (isToOrder) {
         if (partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party cannot be used when 'isToOrder' is true (use 'END' instead)");
+          issues.add("The 'CN' party cannot be used when '%s' is true (use 'END' instead)".formatted(isToOrderPath));
         }
       } else {
         if (!partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party is mandatory when 'isToOrder' is false");
+          issues.add("The 'CN' party is mandatory when '%s' is false".formatted(isToOrderPath));
         }
         if (partyFunctions.contains("END")) {
-          issues.add("The 'END' party cannot be used when 'isToOrder' is false");
+          issues.add("The 'END' party cannot be used when '%s' is false".formatted(isToOrderPath));
         }
       }
 
       if (!partyFunctions.contains("SCO")) {
         if (!body.path("serviceContractReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
+          var scrPath = concatContextPath(contextPath, "serviceContractReference");
+          issues.add("The 'SCO' party is mandatory when '%s' is absent".formatted(scrPath));
         }
         if (!body.path("contractQuotationReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
+          var cqrPath = concatContextPath(contextPath, "contractQuotationReference");
+          issues.add("The 'SCO' party is mandatory when '%s' is absent".formatted(cqrPath));
         }
       }
       return issues;
@@ -275,9 +281,9 @@ public class EBLChecks {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
 
-  private static final JsonContentCheck CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT = JsonAttribute.customValidator(
     "Equipment References in 'cargoItems' must be present in 'utilizedTransportEquipments'",
-    (body) -> {
+    (body, contextPath) -> {
       var knownEquipmentReferences = allEquipmentReferences(body);
       var missing = new LinkedHashSet<String>();
       for (var consignmentItem : body.path("consignmentItems")) {
@@ -292,24 +298,26 @@ public class EBLChecks {
           }
         }
       }
+      var path = concatContextPath(contextPath, "utilizedTransportEquipments");
       return missing.stream()
-        .map("The equipment reference '%s' was used in a cargoItem but was not present in 'utilizedTransportEquipments'"::formatted)
+        .map(ref -> "The equipment reference '%s' was used in a cargoItem but was not present in '%s'".formatted(ref, path))
         .collect(Collectors.toSet());
     }
   );
 
-  private static final JsonContentCheck UTE_EQUIPMENT_REFERENCE_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck UTE_EQUIPMENT_REFERENCE_UNIQUE = JsonAttribute.customValidator(
     "Equipment References in 'utilizedTransportEquipments' must be unique",
-    (body) -> {
+    (body, contextPath) -> {
       var duplicates = new LinkedHashSet<String>();
       allEquipmentReferences(body, duplicates);
+      var path = concatContextPath(contextPath, "utilizedTransportEquipments");
       return duplicates.stream()
-        .map("The equipment reference '%s' was used more than once in 'utilizedTransportEquipments'"::formatted)
+        .map(ref -> "The equipment reference '%s' was used more than once in '%s'".formatted(ref, path))
         .collect(Collectors.toSet());
     }
   );
 
-  private static final JsonContentCheck VOLUME_IMPLIES_VOLUME_UNIT = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck VOLUME_IMPLIES_VOLUME_UNIT = JsonAttribute.allIndividualMatchesMustBeValid(
     "The use of 'volume' implies 'volumeUnit'",
     (mav) -> {
       mav.submitAllMatching("consignmentItems.*");
@@ -379,20 +387,20 @@ public class EBLChecks {
             : ""));
   }
 
-  private static Function<JsonNode, Set<String>> allUtilizedTransportEquipmentCargoItemAreAligned(
+  private static JsonContentMatchedValidation allUtilizedTransportEquipmentCargoItemAreAligned(
     String uteNumberFieldName,
     String uteNumberUnitFieldName,
     String cargoItemNumberFieldName,
     String cargoItemNumberUnitFieldName,
     Map<String, Double> conversionTable
   ) {
-    return (documentRoot) -> {
-      var consignmentItems = documentRoot.path("consignmentItems");
+    return (tdRoot, contextPath) -> {
+      var consignmentItems = tdRoot.path("consignmentItems");
       var issues = new LinkedHashSet<String>();
       var index = 0;
       var key = "utilizedTransportEquipments";
-      for (var ute : documentRoot.path(key)) {
-        var uteContextPath = key + "[" + index + "]";
+      for (var ute : tdRoot.path(key)) {
+        var uteContextPath = concatContextPath(contextPath, key + "[" + index + "]");
         ++index;
         var equipmentReference = ute.path("equipment").path("equipmentReference").asText(null);
         var uteNumberNode = ute.path(uteNumberFieldName);
@@ -476,7 +484,7 @@ public class EBLChecks {
     "FTQ->MTQ",  35.3146667
   );
 
-  private static final JsonContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'consignmentItem' weight is aligned with its 'cargoItems'",
     (mav) -> mav.submitAllMatching("consignmentItems.*"),
     consignmentItemCargoItemAlignment("weight",
@@ -484,7 +492,7 @@ public class EBLChecks {
       RATIO_WEIGHT
   ));
 
-  private static final JsonContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
+  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'consignmentItem' volume is aligned with its 'cargoItems'",
     (mav) -> mav.submitAllMatching("consignmentItems.*"),
     consignmentItemCargoItemAlignment("volume",
@@ -492,7 +500,7 @@ public class EBLChecks {
       RATIO_VOLUME
     ));
 
-  private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
@@ -532,7 +540,7 @@ public class EBLChecks {
     VALIDATE_DOCUMENT_PARTIES
   );
 
-  private static final List<JsonContentCheck> STATIC_TD_CHECKS = Arrays.asList(
+  private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
@@ -913,10 +921,6 @@ public class EBLChecks {
   }
 
   private static JsonContentMatchedValidation checkEquipmentReference(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Set<String>> expectedValueSupplier = () -> {
-      var csp = cspSupplier.get();
-      return setOf(csp.equipmentReference(), csp.equipmentReference2());
-    };
     BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (ute, pathBuilder) -> {
       var equipmentReferenceNode = ute.get("equipmentReference");
       if (equipmentReferenceNode != null) {
@@ -1132,11 +1136,10 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck tdContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
-    List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+  public static void genericTdContentChecks(List<? super JsonRebaseableContentCheck> jsonContentChecks, Supplier<String> tdrSupplier, TransportDocumentStatus transportDocumentStatus) {
     jsonContentChecks.add(JsonAttribute.mustEqual(
       TD_TDR,
-      () -> dspSupplier.get().transportDocumentReference()
+      tdrSupplier
     ));
     jsonContentChecks.add(JsonAttribute.mustEqual(
       TD_TRANSPORT_DOCUMENT_STATUS,
@@ -1146,6 +1149,25 @@ public class EBLChecks {
     for (var ptr : TD_UN_LOCATION_CODES) {
       jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
     }
+  }
+
+  public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, Supplier<String> tdrReferenceSupplier) {
+    List<JsonRebaseableContentCheck> jsonContentChecks = new ArrayList<>();
+    genericTdContentChecks(
+      jsonContentChecks,
+      tdrReferenceSupplier,
+      transportDocumentStatus
+    );
+    return jsonContentChecks;
+  }
+
+  public static ActionCheck tdPlusScenarioContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+    List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
+    genericTdContentChecks(
+      jsonContentChecks,
+      () -> dspSupplier.get().transportDocumentReference(),
+      transportDocumentStatus
+    );
     jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Validate the containers reefer settings",
       mav-> mav.submitAllMatching("utilizedTransportEquipments.*"),
@@ -1179,7 +1201,7 @@ public class EBLChecks {
     ));
     jsonContentChecks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Whether the cargo should be DG",
-      mav-> mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").submitPath(),
+      mav-> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.*.dangerousGoods"),
       (nodeToValidate, contextPath) -> {
         var scenario = dspSupplier.get().scenarioType();
         if (scenario == ScenarioType.DG) {

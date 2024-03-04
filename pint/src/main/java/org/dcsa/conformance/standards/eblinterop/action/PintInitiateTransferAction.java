@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateUnsignedStartResponse;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -158,6 +157,10 @@ public class PintInitiateTransferAction extends PintAction {
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
                         requestSchemaValidator
+                ),
+                tdContentChecks(
+                  getMatchedExchangeUuid(),
+                  () -> getSsp()
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),

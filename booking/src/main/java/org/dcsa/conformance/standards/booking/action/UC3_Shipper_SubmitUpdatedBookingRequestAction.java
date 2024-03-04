@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -81,7 +82,8 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     BookingRole::isCarrier,
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
-                    responseSchemaValidator));
+                    responseSchemaValidator),
+                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
         return Stream.concat(
             primaryExchangeChecks,
             getNotificationChecks(

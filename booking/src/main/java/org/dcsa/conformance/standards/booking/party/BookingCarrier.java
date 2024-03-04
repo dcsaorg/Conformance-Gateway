@@ -104,7 +104,8 @@ public class BookingCarrier extends ConformanceParty {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
-    case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("Example Carrier Service",
+    case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("SCR-1234-REGULAR",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
@@ -113,7 +114,8 @@ public class BookingCarrier extends ConformanceParty {
       null,
       "DKAAR",
       "DEBRV");
-    case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("Example Carrier Service",
+    case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("SCR-1234-REGULAR-2REC",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "630260",
@@ -122,7 +124,8 @@ public class BookingCarrier extends ConformanceParty {
       "Kitchen pots and pans",
       "DKAAR",
       "DEBRV");
-    case REGULAR_CHO_DEST -> new CarrierScenarioParameters("Example Carrier Service",
+    case REGULAR_CHO_DEST -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-DEST",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
@@ -131,7 +134,8 @@ public class BookingCarrier extends ConformanceParty {
       null,
       "DKAAR",
       "USGBO");
-    case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("Example Carrier Service",
+    case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-ORIG",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "640510",
@@ -140,7 +144,8 @@ public class BookingCarrier extends ConformanceParty {
       null,
       "DKAAR",
       "DKAAR");
-    case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("Example Carrier Service",
+    case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("SCR-1234-NON-OPERATING-REEFER",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "220291",
@@ -149,7 +154,8 @@ public class BookingCarrier extends ConformanceParty {
       null,
       "DKAAR",
       "DEBRV");
-    case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("Example Carrier Service",
+    case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("SCR-1234-REEFER",
+      "Example Carrier Service",
       "402E",
       "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
       "04052090",
@@ -158,7 +164,8 @@ public class BookingCarrier extends ConformanceParty {
       null,
       "DKAAR",
       "DEBRV");
-    case DG -> new CarrierScenarioParameters("Example Carrier Service",
+    case DG -> new CarrierScenarioParameters("SCR-1234-DG",
+      "Example Carrier Service",
       "403W",
       "TA1",
       "293499",

@@ -294,43 +294,6 @@ public class BookingChecks {
     }
   );
 
-
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
-    "Validate documentParties",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var documentParties = body.path("documentParties");
-      var isToOrder = body.path("isToOrder").asBoolean(false);
-      var partyFunctions = StreamSupport.stream(documentParties.spliterator(), false)
-        .map(p -> p.path("partyFunction"))
-        .filter(JsonNode::isTextual)
-        .map(n -> n.asText(""))
-        .collect(Collectors.toSet());
-
-      if (isToOrder) {
-        if (partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party cannot be used when 'isToOrder' is true (use 'END' instead)");
-        }
-      } else {
-        if (!partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party is mandatory when 'isToOrder' is false");
-        }
-        if (partyFunctions.contains("END")) {
-          issues.add("The 'END' party cannot be used when 'isToOrder' is false");
-        }
-      }
-
-      if (!partyFunctions.contains("SCO")) {
-        if (!body.path("serviceContractReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
-        }
-        if (!body.path("contractQuotationReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
-        }
-      }
-      return issues;
-    });
-
   private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
 
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -461,23 +424,44 @@ public class BookingChecks {
     };
   }
 
+
   private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
-    checks.add(JsonAttribute.mustEqual(
+    checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'carrierServiceName' is used",
-      "carrierServiceName",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
-    ));
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
-      "contractQuotationReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
+      (body) -> {
+        var carrierServiceName = body.path("carrierServiceName");
+        var issues = new LinkedHashSet<String>();
+        if(carrierServiceName != null) {
+          delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName  );
+        }
+        return issues;
+      }
     ));
 
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-      "carrierExportVoyageNumber",
-      delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber)
+    checks.add(JsonAttribute.customValidator(
+      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
+      (body) -> {
+        var contractQuotationReference = body.path("contractQuotationReference");
+        var issues = new LinkedHashSet<String>();
+        if(contractQuotationReference != null) {
+          delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference);
+        }
+        return issues;
+      }
     ));
+
+    checks.add(JsonAttribute.customValidator(
+      "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
+      (body) -> {
+        var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber");
+        var issues = new LinkedHashSet<String>();
+        if(carrierExportVoyageNumber != null) {
+          delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber);
+        }
+        return issues;
+      }
+    ));
+
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Validate the containers reefer settings",
       mav-> mav.submitAllMatching("requestedEquipments.*"),
@@ -551,7 +535,6 @@ public class BookingChecks {
     COND_CARRIER_VOYAGE_NUMBER,
     TLR_CC_T_COMBINATION_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
-    VALIDATE_DOCUMENT_PARTIES,
     UNIVERSAL_SERVICE_REFERENCE,
     JsonAttribute.allIndividualMatchesMustBeValid(
       "DangerousGoods implies packagingCode or imoPackagingCode",
@@ -602,7 +585,7 @@ public class BookingChecks {
         var charges = body.path("charges");
         var issues = new LinkedHashSet<String>();
         for(JsonNode charge : charges) {
-          var currencyAmount = charge.get("currencyAmount").asDouble();
+          var currencyAmount = charge.path("currencyAmount").asDouble();
           if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
             issues.add("Charge amount %s is expected to have 2 decimal precious ".formatted(currencyAmount));
           }

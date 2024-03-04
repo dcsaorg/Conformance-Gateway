@@ -112,6 +112,9 @@ public class BookingShipper extends ConformanceParty {
         "/standards/booking/messages/"+ scenarioType.bookingTemplate(apiVersion),
         Map.ofEntries(
           Map.entry(
+            "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
+            carrierScenarioParameters.serviceContractReference()),
+          Map.entry(
             "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
             carrierScenarioParameters.contractQuotationReference()),
           Map.entry(

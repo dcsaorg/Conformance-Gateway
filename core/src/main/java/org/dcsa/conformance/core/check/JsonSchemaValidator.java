@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 
@@ -59,6 +60,6 @@ public class JsonSchemaValidator {
     Set<ValidationMessage> validationMessageSet = jsonSchema.validate(jsonNode);
     return validationMessageSet.stream()
         .map(ValidationMessage::toString)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(TreeSet::new));
   }
 }

@@ -2,10 +2,10 @@
   "document": {
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
     "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
-    "transportDocumentTypeCode": "SWB",
+    "transportDocumentTypeCode": "BOL",
     "freightPaymentTermCode": "PRE",
     "isElectronic": true,
-    "isToOrder": true,
+    "isToOrder": false,
     "invoicePayableAt": {
       "locationType": "UNCO",
       "UNLocationCode": "DKAAR"
@@ -28,6 +28,26 @@
           ]
         },
         "partyFunction": "OS",
+        "isToBeNotified": false
+      },
+      {
+        "party": {
+          "partyName": "CONSIGNEE_NAME_PLACEHOLDER",
+          "partyCodes": [
+            {
+              "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
+              "codeListProvider": "EPUI",
+              "codeListName": "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER"
+            }
+          ],
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
+        },
+        "partyFunction": "CN",
         "isToBeNotified": false
       }
     ],

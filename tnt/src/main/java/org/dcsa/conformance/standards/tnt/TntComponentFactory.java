@@ -14,6 +14,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.standards.tnt.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.party.TntPublisher;
 import org.dcsa.conformance.standards.tnt.party.TntRole;
 import org.dcsa.conformance.standards.tnt.party.TntSubscriber;
@@ -112,11 +113,18 @@ public class TntComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
+  public Map<TntEventType, JsonSchemaValidator> getEventSchemaValidators() {
     String schemaFilePath = "/standards/tnt/schemas/tnt-220-publisher.json";
-    String schemaName =
-        TntRole.isPublisher(apiProviderRole) ? (forRequest ? null : "events") : null;
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+    return Map.ofEntries(
+        Map.entry(
+            TntEventType.EQUIPMENT,
+            JsonSchemaValidator.getInstance(schemaFilePath, "equipmentEvent")),
+        Map.entry(
+            TntEventType.SHIPMENT,
+            JsonSchemaValidator.getInstance(schemaFilePath, "shipmentEvent")),
+        Map.entry(
+            TntEventType.TRANSPORT,
+            JsonSchemaValidator.getInstance(schemaFilePath, "transportEvent")));
   }
 
   @SneakyThrows

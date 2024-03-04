@@ -14,7 +14,6 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
-import org.dcsa.conformance.standards.tnt.party.TntRole;
 
 @Slf4j
 public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
@@ -116,7 +115,6 @@ public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListB
                 subscriberPartyName,
                 publisherPartyName,
                 previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    TntRole.PUBLISHER.getConfigName(), false)));
+                componentFactory.getEventSchemaValidators()));
   }
 }

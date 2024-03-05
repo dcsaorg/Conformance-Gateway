@@ -7,16 +7,18 @@ import lombok.With;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @With
-public record SenderScenarioParameters(String transportDocumentReference) {
+public record SenderScenarioParameters(String transportDocumentReference, String senderPublicKeyPEM) {
   public ObjectNode toJson() {
     return OBJECT_MAPPER
         .createObjectNode()
-        .put("transportDocumentReference", transportDocumentReference);
+        .put("transportDocumentReference", transportDocumentReference)
+        .put("senderPublicKeyPEM", senderPublicKeyPEM);
   }
 
   public static SenderScenarioParameters fromJson(JsonNode jsonNode) {
     return new SenderScenarioParameters(
-      jsonNode.required("transportDocumentReference").asText()
+      jsonNode.required("transportDocumentReference").asText(),
+      jsonNode.required("senderPublicKeyPEM").asText()
     );
   }
 }

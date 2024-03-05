@@ -23,6 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -137,7 +138,7 @@ public class PintSendingPlatform extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var tdr = generateTDR();
-    var scenarioParameters = new SenderScenarioParameters(tdr);
+    var scenarioParameters = new SenderScenarioParameters(tdr, PayloadSignerFactory.senderKeySignatureVerifier().getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()

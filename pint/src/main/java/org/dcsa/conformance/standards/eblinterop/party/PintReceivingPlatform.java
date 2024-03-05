@@ -25,8 +25,8 @@ import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
-import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
+import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
 
 @Slf4j
@@ -51,10 +51,6 @@ public class PintReceivingPlatform extends ConformanceParty {
         asyncWebClient,
         orchestratorAuthHeader);
     this.payloadSigner = payloadSigner;
-  }
-
-  protected SignatureVerifier getSignatureVerifierForSenderSignatures() {
-    return PayloadSignerFactory.testKeySignatureVerifier();
   }
 
   @Override
@@ -93,21 +89,24 @@ public class PintReceivingPlatform extends ConformanceParty {
 
   private void initiateState(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.handleScenarioTypeAction(%s)".formatted(actionPrompt.toPrettyString()));
-    var tdr = actionPrompt.required("transportDocumentReference").asText();
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.get("ssp"));
+    var tdr = ssp.transportDocumentReference();
     var existing = persistentMap.load(tdr);
     if (existing != null){
       throw new IllegalStateException("Please do not reuse TDRs between scenarios in the conformance test");
     }
+
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
     var expectedRecipient = "12345-jane-doe";
     var receivingParameters = new ReceiverScenarioParameters(
       "CARX",
       "Jane Doe",
       scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
-      "CargoX"
+      "CargoX",
+      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
     );
 
-    var tdState = TDReceiveState.newInstance(tdr);
+    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM());
     tdState.setExpectedReceiver(expectedRecipient);
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
@@ -135,7 +134,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
     var unsignedPayload = OBJECT_MAPPER.createObjectNode()
       .put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
-    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, getSignatureVerifierForSenderSignatures());
+    var responseCode = receiveState.recommendedFinishTransferResponse(transferRequest, receiveState.getSignatureVerifierForSenderSignatures());
 
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);

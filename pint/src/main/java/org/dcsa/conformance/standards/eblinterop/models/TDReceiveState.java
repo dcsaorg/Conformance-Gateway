@@ -21,6 +21,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
 import org.dcsa.conformance.standards.eblinterop.crypto.CouldNotValidateSignatureException;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 
 public class TDReceiveState {
@@ -34,6 +35,8 @@ public class TDReceiveState {
 
   private static final String SCENARIO_CLASS = "scenarioClass";
   private static final String ENVELOPE_REFERENCE = "envelopeReference";
+
+  private static final String EXPECTED_PUBLIC_KEY = "expectedSenderPublicKey";
 
   private final ObjectNode state;
 
@@ -177,14 +180,20 @@ public class TDReceiveState {
     this.setTransferState(state);
   }
 
+  public SignatureVerifier getSignatureVerifierForSenderSignatures() {
+    var pem = state.path(EXPECTED_PUBLIC_KEY).asText();
+    return PayloadSignerFactory.fromPemEncodedPublicKey(pem);
+  }
+
   public static TDReceiveState fromPersistentStore(JsonNode state) {
     return new TDReceiveState((ObjectNode) state);
   }
 
-  public static TDReceiveState newInstance(String transportDocumentReference) {
+  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM) {
     var state = OBJECT_MAPPER.createObjectNode()
       .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
-      .put(TRANSFER_STATE, TransferState.NOT_STARTED.name());
+      .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
+      .put(EXPECTED_PUBLIC_KEY, senderPublicKeyPEM);
     return new TDReceiveState(state);
   }
 

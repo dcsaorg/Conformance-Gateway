@@ -9,7 +9,6 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.standards.eblinterop.crypto.impl.DefaultPayloadSigner;
 
-import javax.swing.*;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -18,13 +17,14 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class PayloadSignerFactory {
 
     // Generated with `openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 4 -subj "/C=US/ST=Delaware/L=Delaware/O=SELFSIGNED/CN=foo" -nodes`
     // Contents in the `key.pem`
-    private static final String TEST_RSA_PRIVATE_KEY_PEM = """
+    private static final String CTK_SENDER_PRIVATE_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXTD3XOeBMYVZS
             Pd1LmImkCzAvCqTZ/YnMh0uhYW3HUOBOdRvE++BY5uny8EZvKI4onH10SI1Wm+oy
@@ -55,7 +55,7 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-    private static final String TEST_INCORRECT_RSA_PRIVATE_KEY_PEM = """
+    private static final String CTK_SENDER_INCORRECT_PRIVATE_RSA_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC588633cONawxd
             r7ynVvwmeRd2KVTpskYHxn51qYwUqK1jVPxGgDy1I8j+ImWbI1Q8ZaDbvWoIHcrv
@@ -86,23 +86,65 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-    private static final KeyPair TEST_RSA_KEY_PAIR = parsePEMRSAKey(TEST_RSA_PRIVATE_KEY_PEM);
-    private static final KeyPair TEST_INCORRECT_RSA_KEY_PAIR = parsePEMRSAKey(TEST_INCORRECT_RSA_PRIVATE_KEY_PEM);
-    private static final PayloadSigner TEST_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(TEST_RSA_KEY_PAIR);
-    private static final PayloadSigner TEST_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(TEST_INCORRECT_RSA_KEY_PAIR);
-    private static final SignatureVerifier TEST_KEY_SIGNATURE_VERIFIER = fromPublicKey(TEST_RSA_KEY_PAIR.getPublic());
+  private static final String CTK_RECEIVER_PRIVATE_KEY_PEM = """
+            -----BEGIN PRIVATE KEY-----
+            MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC/rvvQhg5xRz+u
+            92MsFlPac5TeheeoGREmi/KTT4V2TbhgdwZ3MnYt4/mp2G1DFf+nqVHOAKTpix91
+            saNAY5WE+gvxVyCWV3xXTfP35RsEmltJpqJ3DcPGYQiTm5EXnaDvplE9+yjSgXGg
+            S6QmjLNLMTLsg1vCYQGyulg6tJvNJajhVDVpQwDoH6X4h2vLBtT/tsXKhoqT3ZNI
+            XVjC9A7uS4pn59NiGbK/B9ulx0zUzCWS/D92laUdJ0fJYSAReERzENq5qbjUwmvL
+            oiz3vRsyRRZlKMLPV2hAGXCmFQz9iKdQrpqnfmM9suGrfrmI774xVFGfh9J6XV74
+            SLBexhYZAgMBAAECggEABrGFEJCF05XR1vnDiEgVUIUFt0mEv910OFzdsSAvQGTR
+            Yej2HFZyQwL5dmFc22Faxo+GkEN8fr1BcXotAbQYhga3QQuyUx2l9WR+9vKUoXIE
+            awt7E94yrmw4APOHOwRhmMy9fIUXNVaY0aiiiEgUgLUsmo6xtxVtGkEgkJg68oxl
+            HAf3UCQg6Bka1ZRNzu0ZRhEy2+AdF1L09HRiGdSsGOr/OKsTVk3fxGu1Uq0COjFc
+            6C3PrRQ0PcHFLHBNXOVnNjMIwyaICeONfkxL9ai/p1TStyfUgC7NW+7/aK4NJUBc
+            PFjsdtBJGSa2w1TV0Q8Vj5an0hJQIKcPot4HGLV6UwKBgQDrU0pcYa5bj/BwloI0
+            O3DCfIj563XI1ac2qDj84XMnlqTs42R+l6NR4/3ykqhu8jgLZtr7qt9xgd4mJxes
+            Inm+fE3ngOaJX1qqvKfBRR9/3jOaCo9yl1jc0IrGWY8YEBo8dc1x09Txw7/xj+du
+            uKNLtnlxyWtBhBtVmHKLl1Sf6wKBgQDQhiTEtuCm4p1KOZDyg+goa0yRMMjxrv5X
+            xPaZt7Ef/cIBnfwWYmfT/H0aTsNC4BuAheBJyvEsgfKAMPjD8yjLsw52XHhT0r7M
+            GAG4DLLTa0hZgsC6UemtanvHI88w6JCJidEEKjdoenkvFPrj6TMKbWg5aeyqlSOi
+            Idh/McLlCwKBgG/9unTOk+DFVqLuLdbXtukHxVRS50IF08ciNcS7MkdT3PdTnF7W
+            oYX2X8OSYhAyu9NJRsvgXOgy6trzXcOwwImTtKuI363esFJy588Fq2D6CUq03eGl
+            /0dPA8wzkPLdru65DWWvbzcDdpRqbLR3sFb250LsnVuXmD6bB2BBS6ezAoGBALYf
+            8408jQo1c1uY29h1DRgAX2eQTHGKfer6xMeNgM6IPCJdcge6+yRTqpCHqlOGmX6v
+            by4EapCNDtiX7S53+nGvejo2mYHc13g6n4W40ZeGZDKJ2PrjAE3Oaz2LMTNubI80
+            J7KTjMFb9uwATwEwdLvuwtEiiuqSSAUbupOdSrPxAoGBANtVFaBAvt6DwYm5TfPJ
+            TXoIcUmuf0FrqQg2CarBFTzgBV759c7Dk1P2TnWAeB+grh/AcU5WFBpJIrvenKrw
+            u1IYO4pbMvjwiL2yzMruF7/GcoFONaCy2TMKdzu7ftpiCvXOcU9pb3IO5vUPssZ2
+            5fqQLI2XCduGjbk9bpe+pwat
+            -----END PRIVATE KEY-----
+            """;
 
-    public static PayloadSigner testPayloadSigner() {
-        return TEST_KEY_PAYLOAD_SIGNER;
+    private static final KeyPair CTK_SENDER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_PRIVATE_KEY_PEM);
+    private static final KeyPair CTK_SENDER_INCORRECT_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_INCORRECT_PRIVATE_RSA_KEY_PEM);
+    private static final KeyPair CTK_RECEIVER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
+    private static final PayloadSigner CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
+    private static final PayloadSigner CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_INCORRECT_RSA_KEY_PAIR);
+    private static final PayloadSigner CTK_RECEIVER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_RECEIVER_RSA_KEY_PAIR);
+    private static final SignatureVerifierWithKey CTK_SENDER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey)fromPublicKey(CTK_SENDER_RSA_KEY_PAIR.getPublic());
+    private static final SignatureVerifierWithKey CTK_RECEIVER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey)fromPublicKey(CTK_RECEIVER_RSA_KEY_PAIR.getPublic());
+
+    public static PayloadSigner senderPayloadSigner() {
+        return CTK_SENDER_KEY_PAYLOAD_SIGNER;
+    }
+
+    public static PayloadSigner receiverPayloadSigner() {
+      return CTK_RECEIVER_KEY_PAYLOAD_SIGNER;
     }
 
     public static PayloadSigner testIncorrectPayloadSigner() {
-        return TEST_INCORRECT_KEY_PAYLOAD_SIGNER;
+        return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
     }
 
-    public static SignatureVerifier testKeySignatureVerifier() {
-        return TEST_KEY_SIGNATURE_VERIFIER;
+    public static SignatureVerifierWithKey senderKeySignatureVerifier() {
+        return CTK_SENDER_SIGNATURE_VERIFIER;
     }
+
+    public static SignatureVerifierWithKey receiverKeySignatureVerifier() {
+    return CTK_RECEIVER_SIGNATURE_VERIFIER;
+  }
 
     private static PayloadSigner rsaBasedPayloadSigner(KeyPair keyPair) {
         return new DefaultPayloadSigner(
@@ -118,7 +160,7 @@ public class PayloadSignerFactory {
     }
 
     @SneakyThrows
-    private static KeyPair parsePEMRSAKey(String pem) {
+    private static KeyPair parsePEMPrivateRSAKey(String pem) {
         String privKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s++", "");
@@ -135,12 +177,32 @@ public class PayloadSignerFactory {
     @SneakyThrows
     public static SignatureVerifier fromPublicKey(PublicKey publicKey) {
       if (publicKey instanceof RSAPublicKey rsaPublicKey) {
-        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
+        return new SingleExportableKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey), rsaPublicKey);
       }
       if (publicKey instanceof ECPublicKey ecPublicKey) {
         return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
       }
       throw new IllegalArgumentException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
+    }
+
+    @SneakyThrows
+    public static SignatureVerifier fromPemEncodedPublicKey(String publicKeyPem) {
+      if (publicKeyPem.contains("-----BEGIN RSA PUBLIC KEY-----")) {
+        String privKeyPEM = publicKeyPem.replace("-----BEGIN RSA PUBLIC KEY-----", "")
+          .replace("-----END RSA PUBLIC KEY-----", "")
+          .replaceAll("\\s++", "");
+
+        byte [] encoded = Base64.getDecoder().decode(privKeyPEM);
+
+        var keySpec = new X509EncodedKeySpec(encoded);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        var rsaPublicKey = (RSAPublicKey)kf.generatePublic(keySpec);
+        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
+      }
+      if (publicKeyPem.isEmpty()) {
+        throw new AssertionError("Missing key at the time where it was needed.");
+      }
+      throw new UnsupportedOperationException("Unsupported key format");
     }
 
     private record SingleKeySignatureVerifier(JWSVerifier jwsVerifier) implements SignatureVerifier {
@@ -150,5 +212,30 @@ public class PayloadSignerFactory {
         public boolean verifySignature(JWSObject jwsObject) {
             return jwsObject.verify(jwsVerifier);
         }
+    }
+
+    private record SingleExportableKeySignatureVerifier(JWSVerifier jwsVerifier, RSAPublicKey rsaPublicKey) implements SignatureVerifierWithKey {
+
+
+      @SneakyThrows
+      @Override
+      public boolean verifySignature(JWSObject jwsObject) {
+        return jwsObject.verify(jwsVerifier);
+      }
+
+      @Override
+      public String getPublicKeyInPemFormat() {
+        return pemEncodeKey(this.rsaPublicKey);
+      }
+    }
+
+    private static String pemEncodeKey(RSAPublicKey key) {
+      var base64 = Base64.getEncoder().encodeToString(key.getEncoded());
+      var result = new StringBuilder("-----BEGIN RSA PUBLIC KEY-----\n");
+      for (int i = 0; i < base64.length() ; i += 64) {
+        var limit = i + Math.min(64, base64.length() - i);
+        result.append(base64, i, limit);
+      }
+      return result.append("-----END RSA PUBLIC KEY-----").toString();
     }
 }

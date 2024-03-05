@@ -11,7 +11,8 @@ public record ReceiverScenarioParameters(
   String eblPlatform,
   String receiverLegalName,
   String receiverEPUI,
-  String receiverEPUICodeListName
+  String receiverEPUICodeListName,
+  String receiverPublicKeyPEM
 ) {
   public ObjectNode toJson() {
     return OBJECT_MAPPER
@@ -19,7 +20,8 @@ public record ReceiverScenarioParameters(
         .put("eblPlatform", eblPlatform)
         .put("receiverLegalName", receiverLegalName)
         .put("receiverEPUI", receiverEPUI)
-        .put("receiverEPUICodeListName", receiverEPUICodeListName);
+        .put("receiverEPUICodeListName", receiverEPUICodeListName)
+        .put("receiverPublicKeyPEM", receiverPublicKeyPEM);
   }
 
   public static ReceiverScenarioParameters fromJson(JsonNode jsonNode) {
@@ -27,7 +29,8 @@ public record ReceiverScenarioParameters(
       jsonNode.required("eblPlatform").asText(),
       jsonNode.required("receiverLegalName").asText(),
       jsonNode.required("receiverEPUI").asText(),
-      jsonNode.required("receiverEPUICodeListName").asText()
+      jsonNode.required("receiverEPUICodeListName").asText(),
+      jsonNode.required("receiverPublicKeyPEM").asText()
     );
   }
 }

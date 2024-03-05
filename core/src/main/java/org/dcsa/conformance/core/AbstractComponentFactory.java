@@ -19,9 +19,20 @@ public abstract class AbstractComponentFactory {
       PartyWebClient webClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader);
 
-  public abstract ScenarioListBuilder<?> createScenarioListBuilder(
-      PartyConfiguration[] partyConfigurations,
-      CounterpartConfiguration[] counterpartConfigurations);
+  /**
+   * Creates the ScenarioListBuilders of each standard module.
+   * <p>
+   * For a standard without modules, return a single-entry map with "" as key:
+   * <p>
+   * <code>
+   * return Stream.of(Map.entry("", yourRootScenarioListBuilder)).collect(Collectors.toMap(
+   *    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
+   * </code>
+   */
+  public abstract LinkedHashMap<String, ? extends ScenarioListBuilder<?>>
+      createModuleScenarioListBuilders(
+          PartyConfiguration[] partyConfigurations,
+          CounterpartConfiguration[] counterpartConfigurations);
 
   public abstract SortedSet<String> getRoleNames();
 

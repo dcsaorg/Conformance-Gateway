@@ -1,10 +1,11 @@
-import { Injectable } from "@angular/core";
-import { ApiService } from "./api.service";
-import { Sandbox } from "../model/sandbox";
-import { ScenarioDigest } from "../model/scenario";
-import { ScenarioStatus } from "../model/scenario-status";
-import { Standard } from "../model/standard";
-import { SandboxConfig } from "../model/sandbox-config";
+import {Injectable} from "@angular/core";
+import {ApiService} from "./api.service";
+import {Sandbox} from "../model/sandbox";
+import {ScenarioDigest} from "../model/scenario";
+import {ScenarioStatus} from "../model/scenario-status";
+import {Standard} from "../model/standard";
+import {SandboxConfig} from "../model/sandbox-config";
+import {StandardModule} from "../model/standard-module";
 
 @Injectable({
   providedIn: 'root'
@@ -54,12 +55,11 @@ export class ConformanceService {
     return sandbox;
   }
 
-  async getScenarioDigests(sandboxId: string): Promise<ScenarioDigest[]> {
-    const scenarios: ScenarioDigest[] = await this.apiService.call({
+  async getScenarioDigests(sandboxId: string): Promise<StandardModule[]> {
+    return await this.apiService.call({
       operation: "getScenarioDigests",
       sandboxId,
     });
-    return scenarios;
   }
 
   async getScenario(sandboxId: string, scenarioId: string): Promise<ScenarioDigest> {

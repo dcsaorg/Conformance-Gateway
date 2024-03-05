@@ -130,13 +130,13 @@ public class ConformanceReport {
   }
 
   private static String renderReport(ConformanceReport report, int level, boolean printable) {
-    if (level == 0) {
+    if (level == 0 || level == 1) {
       return scenarioListAsHtmlBlock(report, level, printable);
     }
-    if (level == 1) {
+    if (level == 2) {
       return scenarioAsHtmlBlock(report, level, printable);
     }
-    if (level > 1) {
+    if (level > 2) {
       return scenarioDetailsAsHtmlBlock(report, level, printable);
     }
     return asHtmlBlock(report, level, printable);

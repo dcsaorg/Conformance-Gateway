@@ -61,7 +61,7 @@ public class PintComponentFactory extends AbstractComponentFactory {
               persistentMap,
               asyncWebClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.testPayloadSigner()
+              PayloadSignerFactory.senderPayloadSigner()
           ));
     }
 
@@ -76,17 +76,17 @@ public class PintComponentFactory extends AbstractComponentFactory {
               persistentMap,
               asyncWebClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.testPayloadSigner()
+              PayloadSignerFactory.receiverPayloadSigner()
           ));
     }
 
     return parties;
   }
 
-  public ScenarioListBuilder<?> createScenarioListBuilder(
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return PintScenarioListBuilder.buildTree(
+    return PintScenarioListBuilder.createModuleScenarioListBuilders(
         this.standardVersion,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, PintRole::isSendingPlatform),

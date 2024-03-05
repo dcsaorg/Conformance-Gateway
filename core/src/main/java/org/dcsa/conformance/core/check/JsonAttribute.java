@@ -10,6 +10,8 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class JsonAttribute {
 
+  private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
+
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -29,6 +31,17 @@ public class JsonAttribute {
     return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
   }
 
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    JsonContentCheck ... checks
+  ) {
+    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
+  }
+
 
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
@@ -46,13 +59,70 @@ public class JsonAttribute {
     HttpMessageType httpMessageType,
     List<JsonContentCheck> checks
   ) {
-    return new JsonAttributeBasedCheck(
+    return contentChecks(
       titlePrefix,
       "The HTTP %s has valid content (conditional validation rules)"
         .formatted(httpMessageType.name().toLowerCase()),
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,
+      checks
+    );
+  }
+
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    List<JsonContentCheck> checks
+  ) {
+    return new JsonAttributeBasedCheck(
+      titlePrefix,
+      title,
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType,
+      checks
+    );
+  }
+
+  public static ActionCheck contentChecks(
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    JsonContentCheckRebaser rebaser,
+    List<JsonRebaseableContentCheck> checks
+  ) {
+    return contentChecks(
+      "",
+      title,
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType,
+      rebaser,
+      checks
+    );
+  }
+
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    JsonContentCheckRebaser rebaser,
+    List<JsonRebaseableContentCheck> checks
+  ) {
+    return new JsonRebaseableAttributeBasedCheck(
+      titlePrefix,
+      title,
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType,
+      rebaser,
       checks
     );
   }
@@ -107,19 +177,18 @@ public class JsonAttribute {
     return (JsonNode nodeToValidate, String contextPath) -> {
       var sourceField = nodeToValidate.path(sourceFieldName);
       var impliedField = nodeToValidate.path(impliedFieldName);
+
       if (sourceField.isMissingNode() || !impliedField.isMissingNode()) {
         return Set.of();
       }
 
-      return Set.of("The field '%s.%s' being present makes '%s.%s' mandatory".formatted(
-        contextPath,
-        sourceFieldName,
-        contextPath,
-        impliedFieldName
+      return Set.of("The field '%s' being present makes '%s' mandatory".formatted(
+        concatContextPath(contextPath, sourceFieldName),
+        concatContextPath(contextPath, impliedFieldName)
       ));
     };
   }
-  public static JsonContentCheck allIndividualMatchesMustBeValid(
+  public static JsonRebaseableContentCheck allIndividualMatchesMustBeValid(
     @NonNull
     String name,
     @NonNull
@@ -127,14 +196,13 @@ public class JsonAttribute {
     @NonNull
     JsonContentMatchedValidation subvalidation
   ) {
-    return JsonContentCheckImpl.of(
-      name,
-      (body) -> {
-        var v = new MultiAttributeValidatorImpl(body, subvalidation);
-        scanner.accept(v);
-        return v.getValidationIssues();
-      }
-    );
+    return new JsonRebaseableCheckImpl(
+        name,
+        (body, contextPath) -> {
+          var v = new MultiAttributeValidatorImpl(contextPath, body, subvalidation);
+          scanner.accept(v);
+          return v.getValidationIssues();
+        });
   }
 
   public static JsonContentMatchedValidation unique(
@@ -187,7 +255,7 @@ public class JsonAttribute {
 
   public static JsonContentMatchedValidation path(String path, JsonContentMatchedValidation delegate) {
     return (nodeToValidate, contextPath) -> {
-      var fullContext = contextPath.isEmpty() ? path : contextPath + "." + path;
+      var fullContext = concatContextPath(contextPath, path);
       return delegate.validate(nodeToValidate.path(path), fullContext);
     };
   }
@@ -200,46 +268,53 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonContentCheck mustBeNotNull(
+  public static String concatContextPath(String contextPath, String nextPathSegment) {
+    return contextPath.isEmpty() ? nextPathSegment : contextPath + "." + nextPathSegment;
+  }
+
+  public static JsonRebaseableContentCheck mustBeNotNull(
     JsonPointer jsonPointer,
     String reason
   ) {
-    return new JsonContentCheckImpl(
-      jsonCheckName(jsonPointer),
-      at(jsonPointer, node -> {
+    return new JsonRebaseableCheckImpl(
+        jsonCheckName(jsonPointer),
+        (body, contextPath) -> {
+          var node = body.at(jsonPointer);
           if (node.isMissingNode() || node.isNull()) {
             return Set.of(
-              "The value of '%s' must present and not null because %s"
-                .formatted(renderJsonPointer(jsonPointer), reason));
+                "The value of '%s' must present and not null because %s"
+                    .formatted(renderJsonPointer(jsonPointer, contextPath), reason));
           }
           return Collections.emptySet();
-        }
-      ));
+        });
   }
 
 
-  public static JsonContentCheck mustEqual(
+  public static JsonRebaseableContentCheck mustEqual(
       JsonPointer jsonPointer,
       String expectedValue) {
     Objects.requireNonNull(
       expectedValue,
       "expectedValue cannot be null; Note: Use `() -> getDspSupplier().get().foo()` (or similar) when testing a value against a dynamic scenario property"
     );
-    return new JsonContentCheckImpl(
-      "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
-      at(jsonPointer, node -> {
-        var actualValue = node.asText(null);
-        if (!Objects.equals(expectedValue, actualValue)) {
-          return Set.of(
-            "The value of '%s' was '%s' instead of '%s'"
-              .formatted(renderJsonPointer(jsonPointer), renderValue(node), renderValue(expectedValue)));
-        }
-        return Collections.emptySet();
-      }
-    ));
+    return new JsonRebaseableCheckImpl(
+        "%s: Must equal '%s'".formatted(jsonCheckName(jsonPointer), expectedValue),
+        (body, contextPath) -> {
+          var node = body.at(jsonPointer);
+          var actualValue = node.asText(null);
+          if (!Objects.equals(expectedValue, actualValue)) {
+            return Set.of(
+                "The value of '%s' was '%s' instead of '%s'"
+                    .formatted(
+                        renderJsonPointer(jsonPointer, contextPath),
+                        renderValue(node),
+                        renderValue(expectedValue)));
+          }
+          return Collections.emptySet();
+        });
   }
 
-  public static JsonContentCheck mustEqual(
+  public static JsonRebaseableContentCheck mustEqual(
     JsonPointer jsonPointer,
     @NonNull
     Supplier<String> expectedValueSupplier) {
@@ -251,7 +326,7 @@ public class JsonAttribute {
   }
 
 
-  public static JsonContentCheck mustEqual(
+  public static JsonRebaseableContentCheck mustEqual(
     String name,
     JsonPointer jsonPointer,
     @NonNull
@@ -261,9 +336,10 @@ public class JsonAttribute {
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);
     }
-    return new JsonContentCheckImpl(
+    return new JsonRebaseableCheckImpl(
       name + context,
-      at(jsonPointer, node -> {
+      (body, contextPath) -> {
+          var node = body.at(jsonPointer);
           var actualValue = node.asText(null);
           var expectedValue = expectedValueSupplier.get();
           if (expectedValue == null) {
@@ -274,15 +350,15 @@ public class JsonAttribute {
           if (!Objects.equals(expectedValue, actualValue)) {
             return Set.of(
               "The value of '%s' was '%s' instead of '%s'"
-                .formatted(renderJsonPointer(jsonPointer), renderValue(node), renderValue(expectedValue)));
+                .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue)));
           }
           return Collections.emptySet();
         }
-      ));
+      );
   }
 
 
-  public static JsonContentCheck mustEqual(
+  public static JsonRebaseableContentCheck mustEqual(
     String name,
     String path,
     @NonNull
@@ -292,24 +368,26 @@ public class JsonAttribute {
     if (v != null) {
       context = ": Must equal '%s'".formatted(v);
     }
-    return new JsonContentCheckImpl(
+    return new JsonRebaseableCheckImpl(
       name + context,
-      path(path, node -> {
-          var actualValue = node.asText(null);
-          var expectedValue = expectedValueSupplier.get();
-          if (expectedValue == null) {
-            throw new IllegalStateException("The supplier of the expected value for " + path
-              + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
-              + " scenario property was not properly recorded at this stage.");
-          }
-          if (!Objects.equals(expectedValue, actualValue)) {
-            return Set.of(
-              "The value of '%s' was '%s' instead of '%s'"
-                .formatted(path, renderValue(node), renderValue(expectedValue)));
-          }
-          return Collections.emptySet();
+      (body, contextPath) -> {
+        var node = body.path(path);
+        var actualValue = node.asText(null);
+        var nodePath = concatContextPath(contextPath, path);
+        var expectedValue = expectedValueSupplier.get();
+        if (expectedValue == null) {
+          throw new IllegalStateException("The supplier of the expected value for " + nodePath
+            + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
+            + " scenario property was not properly recorded at this stage.");
         }
-      ));
+        if (!Objects.equals(expectedValue, actualValue)) {
+          return Set.of(
+            "The value of '%s' was '%s' instead of '%s'"
+              .formatted(nodePath, renderValue(node), renderValue(expectedValue)));
+        }
+        return Collections.emptySet();
+      }
+    );
   }
 
   public static JsonContentMatchedValidation matchedMustBePresent() {
@@ -341,29 +419,8 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonContentMatchedValidation matchedMustEqualIfPresent(Supplier<String> expectedValueSupplier) {
-    return (nodeToValidate, contextPath) -> {
-      if (isJsonNodeAbsent(nodeToValidate)) {
-        return Set.of();
-      }
-      var actualValue = nodeToValidate.asText(null);
-      var expectedValue = expectedValueSupplier.get();
-      if (expectedValue == null) {
-        throw new IllegalStateException("The supplier of the expected value for " + contextPath
-          + " returned `null` and `null` is not supported for equals. Usually this indicates that the dynamic"
-          + " scenario property was not properly recorded at this stage.");
-      }
-      if (!Objects.equals(expectedValue, actualValue)) {
-        return Set.of(
-          "The value of '%s' was '%s' instead of '%s'"
-            .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
-      }
-      return Collections.emptySet();
-    };
-  }
-
-  public static JsonContentCheck mustBePresent(JsonPointer jsonPointer) {
-    return JsonContentCheckImpl.of(jsonPointer, matchedMustBePresent());
+  public static JsonRebaseableContentCheck mustBePresent(JsonPointer jsonPointer) {
+    return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
   }
 
   public static JsonContentMatchedValidation matchedMustBeAbsent() {
@@ -377,10 +434,10 @@ public class JsonAttribute {
       };
   }
 
-  public static JsonContentCheck mustBeAbsent(
+  public static JsonRebaseableContentCheck mustBeAbsent(
     JsonPointer jsonPointer
   ) {
-    return JsonContentCheckImpl.of(jsonPointer, matchedMustBeAbsent());
+    return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBeAbsent()::validate);
   }
 
   public static JsonContentMatchedValidation combine(
@@ -413,14 +470,18 @@ public class JsonAttribute {
     };
   }
 
-  public static JsonContentCheck mustBeDatasetKeywordIfPresent(
+  public static JsonRebaseableContentCheck mustBeDatasetKeywordIfPresent(
     JsonPointer jsonPointer,
     KeywordDataset dataset
   ) {
-    return JsonContentCheckImpl.of(jsonPointer, matchedMustBeDatasetKeywordIfPresent(dataset));
+    return JsonRebaseableCheckImpl.of(
+      renderJsonPointer(jsonPointer),
+      jsonPointer,
+      matchedMustBeDatasetKeywordIfPresent(dataset)::validate
+    );
   }
 
-  public static JsonContentCheck atMostOneOf(
+  public static JsonRebaseableContentCheck atMostOneOf(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -431,9 +492,9 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonContentCheckImpl(
+    return new JsonRebaseableCheckImpl(
       name,
-      (body) -> {
+      (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
           .filter(p -> isJsonNodePresent(body.at(p)))
           .toList();
@@ -443,14 +504,14 @@ public class JsonAttribute {
         return Set.of(
           "At most one of the following can be present: %s".formatted(
             present.stream()
-              .map(JsonAttribute::renderJsonPointer)
+              .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
               .collect(Collectors.joining(", "
               ))
         ));
       });
   }
 
-  public static JsonContentCheck allOrNoneArePresent(
+  public static JsonRebaseableContentCheck allOrNoneArePresent(
     @NonNull JsonPointer ... ptrs
   ) {
     if (ptrs.length < 2) {
@@ -461,30 +522,31 @@ public class JsonAttribute {
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
     );
-    return new JsonContentCheckImpl(
-      name,
-      (body) -> {
-        var firstPtr = ptrs[0];
-        var firstNode = body.at(firstPtr);
-        Predicate<JsonNode> check;
-        if (firstNode.isMissingNode() || firstNode.isNull()) {
-          check = JsonAttribute::isJsonNodePresent;
-        } else {
-          check = JsonAttribute::isJsonNodeAbsent;
-        }
-        var conflictingPtr = Arrays.stream(ptrs)
-          .filter(p -> check.test(body.at(p)))
-          .findAny()
-          .orElse(null);
-        if (conflictingPtr != null) {
-          return Set.of("'%s' and '%s' must both be present or absent".formatted(
-            renderJsonPointer(firstPtr), renderJsonPointer(conflictingPtr))
-          );
-        }
-        return Set.of();
-      });
+    return new JsonRebaseableCheckImpl(
+        name,
+        (body, contextPath) -> {
+          var firstPtr = ptrs[0];
+          var firstNode = body.at(firstPtr);
+          Predicate<JsonNode> check;
+          if (firstNode.isMissingNode() || firstNode.isNull()) {
+            check = JsonAttribute::isJsonNodePresent;
+          } else {
+            check = JsonAttribute::isJsonNodeAbsent;
+          }
+          var conflictingPtr =
+              Arrays.stream(ptrs).filter(p -> check.test(body.at(p))).findAny().orElse(null);
+          if (conflictingPtr != null) {
+            return Set.of(
+                "'%s' and '%s' must both be present or absent"
+                    .formatted(
+                        renderJsonPointer(firstPtr, contextPath),
+                        renderJsonPointer(conflictingPtr, contextPath)));
+          }
+          return Set.of();
+        });
   }
 
+  @Deprecated
   public static JsonContentCheck ifThen(
     @NonNull
     String name,
@@ -503,6 +565,7 @@ public class JsonAttribute {
       });
   }
 
+  @Deprecated
   public static JsonContentCheck ifThenElse(
     @NonNull
     String name,
@@ -521,6 +584,61 @@ public class JsonAttribute {
         }
         return elseCheck.validate(body);
       });
+  }
+
+  public static JsonRebaseableContentCheck ifThen(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    BiFunction<JsonNode, String, Set<String>> then
+  ) {
+    return ifThenElse(name, when, then, EMPTY_VALIDATOR);
+  }
+
+  public static JsonRebaseableContentCheck ifThen(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    JsonRebaseableContentCheck then
+  ) {
+    return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
+  }
+
+  public static JsonRebaseableContentCheck ifThenElse(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    BiFunction<JsonNode, String, Set<String>> then,
+    @NonNull
+    BiFunction<JsonNode, String, Set<String>> elseCheck
+  ) {
+    return new JsonRebaseableCheckImpl(
+        name,
+        (body, contextPath) -> {
+          if (when.test(body)) {
+            return then.apply(body, contextPath);
+          }
+          return elseCheck.apply(body, contextPath);
+        });
+  }
+
+  public static JsonRebaseableContentCheck ifThenElse(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    JsonRebaseableContentCheck then,
+    @NonNull
+    JsonRebaseableContentCheck elseCheck
+  ) {
+    return ifThenElse(name, when, (BiFunction<JsonNode, String, Set<String>>) then::validate, elseCheck::validate);
   }
 
   public static JsonContentMatchedValidation ifMatchedThen(
@@ -560,36 +678,25 @@ public class JsonAttribute {
     return JsonContentCheckImpl.of(description, validator);
   }
 
-  public static JsonContentCheck customValidator(
+  public static JsonRebaseableContentCheck customValidator(
     @NonNull String description,
     @NonNull JsonContentMatchedValidation validator
   ) {
-    return JsonContentCheckImpl.of(description, atRoot(validator));
+    return new JsonRebaseableCheckImpl(description, validator::validate);
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
     return (refNode) -> refNode.at(jsonPointer);
   }
 
-  private static Function<JsonNode, JsonNode> path(String path) {
-    return (refNode) -> refNode.path(path);
-  }
-
   private static Function<JsonNode, Set<String>> at(JsonPointer jsonPointer, Function<JsonNode, Set<String>> validator) {
     return at(jsonPointer).andThen(validator);
-  }
-
-  private static Function<JsonNode, Set<String>> path(String path, Function<JsonNode, Set<String>> validator) {
-    return path(path).andThen(validator);
   }
 
   private static Function<JsonNode, Set<String>> atMatched(JsonPointer jsonPointer, JsonContentMatchedValidation validator) {
     return (refNode) -> validator.validate(refNode.at(jsonPointer), renderJsonPointer(jsonPointer));
   }
 
-  private static Function<JsonNode, Set<String>> atRoot(JsonContentMatchedValidation validator) {
-    return (refNode) -> validator.validate(refNode, "");
-  }
 
   static String renderValue(JsonNode node) {
     if (node == null || node.isMissingNode()) {
@@ -609,8 +716,16 @@ public class JsonAttribute {
     return v == null ? "(null)" : v;
   }
 
+  static String renderJsonPointer(JsonPointer jsonPointer, String contextPath) {
+    var pointer = jsonPointer.toString().substring(1).replace("/", ".");
+    if (contextPath.isEmpty()) {
+      return pointer;
+    }
+    return contextPath + "." + pointer;
+  }
+
   static String renderJsonPointer(JsonPointer jsonPointer) {
-    return jsonPointer.toString().substring(1).replace("/", ".");
+    return renderJsonPointer(jsonPointer, "");
   }
 
   private static String jsonCheckName(JsonPointer jsonPointer) {
@@ -626,6 +741,43 @@ public class JsonAttribute {
     return !isJsonNodePresent(node);
   }
 
+  static JsonContentCheckRebaser rebaserFor(List<String> paths) {
+    if (paths.isEmpty()) {
+      throw new IllegalStateException("No paths");
+    }
+    return jsonContentMatchedValidation -> (node, contextPath) -> {
+      for (var path : paths) {
+        node = node.path(path);
+        contextPath = concatContextPath(contextPath, path);
+      }
+      return jsonContentMatchedValidation.validate(node, contextPath);
+    };
+  }
+
+  record JsonRebaseableCheckImpl(
+    String description,
+    BiFunction<JsonNode, String, Set<String>> impl
+  ) implements JsonRebaseableContentCheck {
+    @Override
+    public Set<String> validate(JsonNode body, String contextPath) {
+      return impl.apply(body, contextPath);
+    }
+
+    public static JsonRebaseableContentCheck of(JsonPointer jsonPointer, BiFunction<JsonNode, String, Set<String>> validator) {
+      return of(jsonCheckName(jsonPointer), jsonPointer, validator);
+    }
+
+    public static JsonRebaseableContentCheck of(String description, JsonPointer jsonPointer, BiFunction<JsonNode, String, Set<String>> validator) {
+      return new JsonRebaseableCheckImpl(
+        description,
+        (refNode, context) -> {
+          var node = refNode.at(jsonPointer);
+          var path = renderJsonPointer(jsonPointer, context);
+          return validator.apply(node, path);
+        }
+      );
+    }
+  }
 
   record JsonContentCheckImpl(
     @NonNull
@@ -642,16 +794,9 @@ public class JsonAttribute {
       return new JsonContentCheckImpl(description, impl);
     }
 
-    private static JsonContentCheck of(JsonPointer pointer, Function<JsonNode, Set<String>> impl) {
-      return new JsonContentCheckImpl(jsonCheckName(pointer), at(pointer, impl));
-    }
-
     private static JsonContentCheck of(JsonPointer pointer, JsonContentMatchedValidation impl) {
       return of(jsonCheckName(pointer), atMatched(pointer, impl));
     }
 
-    private static JsonContentCheck of(String description, JsonPointer pointer, JsonContentMatchedValidation impl) {
-      return new JsonContentCheckImpl(description, atMatched(pointer, impl));
-    }
   }
 }

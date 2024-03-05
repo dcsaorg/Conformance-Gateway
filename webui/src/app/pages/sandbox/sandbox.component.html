@@ -3,7 +3,7 @@
 <div *ngIf="sandbox">
     <div class="pageTitle">
         <span>Sandbox: {{sandbox.name}}</span>
-        
+
         <span style="vertical-align: middle;">
             <button
             mat-icon-button
@@ -15,26 +15,30 @@
     </div>
 </div>
 
-<div class="pageSubtitle">{{scenarios.length == 0 ? "No scenarios" : "All scenarios:"}}</div>
+<div class="pageSubtitle" *ngIf="standardModules.length == 0">No scenarios</div>
 
-<mat-card [ngClass]="'entityCard'" *ngFor="let scenario of scenarios">
-    <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
-        <button
-        mat-icon-button
-        color="primary"
-        [disabled]="cannotPerformAction(scenario)"
-        [title]="getActionTitle(scenario)"
-        (click)="onScenarioAction($event, scenario)"
-        ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+<div *ngFor="let standardModule of standardModules">
+  <div class="pageSubtitle">{{standardModule.moduleName}}</div>
 
-        <span
-        class="conformanceStatus"
-        [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
-        >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
-    
-        <span>{{scenario.name}}</span>
-    </div>
-</mat-card>
+  <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
+      <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
+          <button
+          mat-icon-button
+          color="primary"
+          [disabled]="cannotPerformAction(scenario)"
+          [title]="getActionTitle(scenario)"
+          (click)="onScenarioAction($event, scenario)"
+          ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+
+          <span
+          class="conformanceStatus"
+          [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
+          >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
+
+          <span>{{scenario.name}}</span>
+      </div>
+  </mat-card>
+</div>
 
 <div *ngIf="sandbox?.canNotifyParty">
     <div class="paragraph">

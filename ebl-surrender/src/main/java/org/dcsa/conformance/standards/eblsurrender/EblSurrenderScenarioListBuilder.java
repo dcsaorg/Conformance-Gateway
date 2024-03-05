@@ -10,7 +10,11 @@ import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState.*;
 
@@ -22,15 +26,19 @@ public class EblSurrenderScenarioListBuilder
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPlatformPartyName = new ThreadLocal<>();
 
-  public static EblSurrenderScenarioListBuilder buildTree(
-      EblSurrenderComponentFactory componentFactory,
-      String carrierPartyName,
-      String platformPartyName) {
+  public static LinkedHashMap<String, EblSurrenderScenarioListBuilder>
+      createModuleScenarioListBuilders(
+          EblSurrenderComponentFactory componentFactory,
+          String carrierPartyName,
+          String platformPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
-    return supplyAvailableTdrAction()
-            .thenAllPathsFrom(AVAILABLE_FOR_SURRENDER);
+    return Stream.of(
+            Map.entry("", supplyAvailableTdrAction().thenAllPathsFrom(AVAILABLE_FOR_SURRENDER)))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   private EblSurrenderScenarioListBuilder thenAllPathsFrom(

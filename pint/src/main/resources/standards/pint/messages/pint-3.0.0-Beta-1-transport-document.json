@@ -8,14 +8,15 @@
     "locationType": "UNCO",
     "UNLocationCode": "DKCPH"
   },
-  "cargoMovementTypeAtOrigin": "CY",
-  "cargoMovementTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
   "deliveryTypeAtDestination": "CY",
   "receiptTypeAtOrigin": "CY",
   "transportDocumentTypeCode": "SWB",
   "isShippedOnBoardType": true,
+  "shippedOnBoardDate": "2024-02-02",
   "freightPaymentTermCode": "PRE",
-  "transportDocumentStatus": "ISSU",
+  "transportDocumentStatus": "ISSUED",
   "utilizedTransportEquipments": [],
   "transports": {
     "vesselName": "Emma Maersk",
@@ -40,7 +41,45 @@
   ],
   "consignmentItems": [],
   "documentParties": [
-
+    {
+      "party": {
+        "partyName": "DCSA CTK SHIPPER",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "OS",
+      "isToBeNotified": false
+    },
+    {
+      "party": {
+        "partyName": "DCSA CTK Consignee",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "CN",
+      "isToBeNotified": false
+    },
+    {
+      "party": {
+        "partyName": "DCSA CTK Service Contract Owner",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "SCO",
+      "isToBeNotified": false
+    }
   ],
   "carrierCode": "ASDF",
   "carrierCodeListProvider": "NMFTA",

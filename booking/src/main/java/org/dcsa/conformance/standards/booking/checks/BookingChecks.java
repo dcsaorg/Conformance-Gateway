@@ -424,44 +424,23 @@ public class BookingChecks {
     };
   }
 
-
   private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
-    checks.add(JsonAttribute.customValidator(
+    checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'carrierServiceName' is used",
-      (body) -> {
-        var carrierServiceName = body.path("carrierServiceName");
-        var issues = new LinkedHashSet<String>();
-        if(carrierServiceName != null) {
-          delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName  );
-        }
-        return issues;
-      }
+      "carrierServiceName",
+      delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
     ));
-
-    checks.add(JsonAttribute.customValidator(
+    checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'contractQuotationReference' is used",
-      (body) -> {
-        var contractQuotationReference = body.path("contractQuotationReference");
-        var issues = new LinkedHashSet<String>();
-        if(contractQuotationReference != null) {
-          delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference);
-        }
-        return issues;
-      }
+      "contractQuotationReference",
+      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
     ));
 
-    checks.add(JsonAttribute.customValidator(
+    checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
-      (body) -> {
-        var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber");
-        var issues = new LinkedHashSet<String>();
-        if(carrierExportVoyageNumber != null) {
-          delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber);
-        }
-        return issues;
-      }
+      "carrierExportVoyageNumber",
+      delayedValue(cspSupplier, CarrierScenarioParameters::carrierExportVoyageNumber)
     ));
-
     checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
       "[Scenario] Validate the containers reefer settings",
       mav-> mav.submitAllMatching("requestedEquipments.*"),

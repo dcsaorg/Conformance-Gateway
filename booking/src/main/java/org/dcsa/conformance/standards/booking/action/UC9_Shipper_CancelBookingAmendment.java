@@ -83,8 +83,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             BookingRole::isCarrier,
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
-            responseSchemaValidator),
-          BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
+            responseSchemaValidator));
         return Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(

@@ -49,6 +49,19 @@
         },
         "partyFunction": "CN",
         "isToBeNotified": false
+      },
+      {
+        "party": {
+          "partyName": "DCSA CTK Service Contract Owner",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
+        },
+        "partyFunction": "SCO",
+        "isToBeNotified": false
       }
     ],
     "consignmentItems": [
@@ -91,7 +104,7 @@
       }
     ],
     "isShippedOnBoardType": true,
-    "transportDocumentStatus": "DRAFT",
+    "transportDocumentStatus": "ISSUED",
     "cargoMovementTypeAtOrigin": "FCL",
     "cargoMovementTypeAtDestination": "FCL",
     "receiptTypeAtOrigin": "CY",

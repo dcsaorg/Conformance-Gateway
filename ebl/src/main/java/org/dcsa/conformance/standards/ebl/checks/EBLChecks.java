@@ -1144,10 +1144,9 @@ public class EBLChecks {
   }
 
   public static void genericTdContentChecks(List<? super JsonRebaseableContentCheck> jsonContentChecks, Supplier<String> tdrSupplier, TransportDocumentStatus transportDocumentStatus) {
-    jsonContentChecks.add(JsonAttribute.mustEqual(
-      TD_TDR,
-      tdrSupplier
-    ));
+    if (tdrSupplier != null) {
+      jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
+    }
     jsonContentChecks.add(JsonAttribute.mustEqual(
       TD_TRANSPORT_DOCUMENT_STATUS,
       transportDocumentStatus.wireName()

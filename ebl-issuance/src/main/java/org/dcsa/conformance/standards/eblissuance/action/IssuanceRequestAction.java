@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.eblissuance.checks.IssuanceChecks;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 @Getter
@@ -142,7 +143,11 @@ public class IssuanceRequestAction extends IssuanceAction {
                         getMatchedExchangeUuid(),
                         HttpMessageType.REQUEST,
                         requestSchemaValidator)
-                    : null)
+                    : null,
+                isCorrect && expectedApiVersion.startsWith("3.")
+                  ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid())
+                  : null
+            )
             .filter(Objects::nonNull);
       }
     };

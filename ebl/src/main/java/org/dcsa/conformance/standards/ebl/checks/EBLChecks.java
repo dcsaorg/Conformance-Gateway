@@ -634,6 +634,13 @@ public class EBLChecks {
     OUTER_PACKAGING_CODE_IS_VALID,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
+      (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*"),
+      JsonAttribute.presenceImpliesOtherField(
+        "cargoGrossVolume",
+        "cargoGrossVolumeUnit"
+    )),
     JsonAttribute.customValidator(
       "Validate that 'utilizedTransportEquipment' weight is aligned with its 'cargoItems'",
       allUtilizedTransportEquipmentCargoItemAreAligned(

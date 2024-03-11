@@ -30,6 +30,7 @@ import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.jit.JitComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 import org.springframework.boot.SpringApplication;
@@ -151,6 +152,7 @@ public class ConformanceApplication {
                     .map(EblIssuanceComponentFactory::new),
                 EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblSurrenderComponentFactory::new),
+                JitComponentFactory.STANDARD_VERSIONS.stream().map(JitComponentFactory::new),
                 OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
                 TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
             .flatMap(Function.identity());

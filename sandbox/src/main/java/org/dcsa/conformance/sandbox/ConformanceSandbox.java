@@ -29,6 +29,7 @@ import org.dcsa.conformance.standards.booking.BookingComponentFactory;
 import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.jit.JitComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
@@ -808,6 +809,9 @@ public class ConformanceSandbox {
     }
     if (EblSurrenderComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblSurrenderComponentFactory(standardConfiguration.getVersion());
+    }
+    if (JitComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
+      return new JitComponentFactory(standardConfiguration.getVersion());
     }
     if (OvsComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new OvsComponentFactory(standardConfiguration.getVersion());

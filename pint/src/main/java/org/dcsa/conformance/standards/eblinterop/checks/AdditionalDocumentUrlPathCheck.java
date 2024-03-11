@@ -1,16 +1,17 @@
 package org.dcsa.conformance.standards.eblinterop.checks;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 
 public class AdditionalDocumentUrlPathCheck extends ActionCheck {
 
@@ -43,8 +44,9 @@ public class AdditionalDocumentUrlPathCheck extends ActionCheck {
     if (exchange == null) return Set.of();
     String requestUrl = exchange.getRequest().url();
     var m = URL_PATTERN.matcher(requestUrl);
-    var ok = false;
+    var issues = new LinkedHashSet<String>();
     var expectedReference = envelopeReferenceSupplier.get();
+    var ok = false;
     if (expectedReference == null) {
       throw new AssertionError("Missing expected envelopeReference");
     }
@@ -52,10 +54,25 @@ public class AdditionalDocumentUrlPathCheck extends ActionCheck {
       var reference = m.group(1);
       ok = expectedReference.equals(reference);
     }
+    if (ok) {
+        try {
+            var bytes = exchange.getRequest().message().body().getJsonBody().binaryValue();
+            var checksum = Checksums.sha256(bytes);
+            var urlLc = requestUrl.toLowerCase().replaceAll("/++$", "");
+            var idx = urlLc.lastIndexOf('/');
+            var urlChecksum = urlLc.substring(idx + 1);
+            if (!urlChecksum.equals(checksum)) {
+              issues.add("The decoded payload had checksum '%s' but according to the URL it should have had checksum '%s'".formatted(checksum, urlChecksum));
+            }
+        } catch (IOException e) {
+            issues.add("Could not parse the payload as a base64 encoded byte sequence");
+        }
+    } else {
+      issues.add(
+        "Request URL '%s' does not match '/envelopes/%s/additional-documents/{sha256checksum}'"
+          .formatted(requestUrl, expectedReference));
+    }
 
-    return ok
-        ? Collections.emptySet()
-        : Set.of("Request URL '%s' does not match '/envelopes/%s/additional-documents/{sha256checksum}'".formatted(
-          requestUrl, expectedReference));
+    return issues;
   }
 }

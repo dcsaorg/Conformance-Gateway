@@ -95,18 +95,10 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (existing != null){
       throw new IllegalStateException("Please do not reuse TDRs between scenarios in the conformance test");
     }
-
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
     var expectedRecipient = "12345-jane-doe";
-    var receivingParameters = new ReceiverScenarioParameters(
-      "CARX",
-      "Jane Doe",
-      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
-      "CargoX",
-      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
-    );
-
-    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM());
+    var receivingParameters = getReceiverScenarioParameters(ssp, scenarioClass, expectedRecipient);
+    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
     tdState.setExpectedReceiver(expectedRecipient);
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
@@ -117,6 +109,24 @@ public class PintReceivingPlatform extends ConformanceParty {
         .set("input", receivingParameters.toJson()));
     addOperatorLogEntry(
       "Finished ScenarioType");
+  }
+
+  private static ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    String platform, codeListName;
+    if ("CARX".equals(ssp.eblPlatform())) {
+      platform = "BOLE";
+      codeListName = "Bolero";
+    } else {
+      platform = "CARX";
+      codeListName = "CargoX";
+    }
+    return new ReceiverScenarioParameters(
+      platform,
+      "Jane Doe",
+      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
+      codeListName,
+      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
+    );
   }
 
 

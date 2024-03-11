@@ -17,7 +17,6 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
@@ -62,7 +61,7 @@ public class PintRetryTransferAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("senderTransmissionClass", SenderTransmissionClass.VALID.name());
+      .put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());

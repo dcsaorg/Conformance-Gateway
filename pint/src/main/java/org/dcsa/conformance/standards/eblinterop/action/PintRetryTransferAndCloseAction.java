@@ -43,7 +43,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
         receivingPlatform,
         previousAction,
         "RetryTransfer(%s)".formatted(responseCode.name()),
-        200
+        responseCode.getHttpResponseCode()
     );
     this.responseCode = responseCode;
     this.requestSchemaValidator = requestSchemaValidator;
@@ -60,7 +60,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("senderTransmissionClass", SenderTransmissionClass.VALID.name());
+      .put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());

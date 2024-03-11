@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -42,10 +41,20 @@ public class PintScenarioListBuilder
                 .thenEither(
                   initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
                     noAction(),
-                    initiateAndCloseTransferAction(PintResponseCode.DUPE)),
+                    retryTransfer(PintResponseCode.DUPE),
+                    manipulateLatestTransactionParameters().then(
+                      retryTransfer(PintResponseCode.DISE)
+                    )),
+                  initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+                    noAction(),
+                    manipulateLatestTransactionParameters().then(
+                      retryTransfer(PintResponseCode.DISE)
+                    )
+                  ),
                   initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
                     initiateAndCloseTransferAction(PintResponseCode.RECE)
-                  )
+                  ),
+                  initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM)
                 ),
               receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
                 initiateAndCloseTransferAction(PintResponseCode.BENV)
@@ -98,6 +107,19 @@ public class PintScenarioListBuilder
                 documentCount
             ));
   }
+
+  private static PintScenarioListBuilder manipulateLatestTransactionParameters() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction ->
+        new ManipulateTransactionsAction(
+          receivingPlatform,
+          sendingPlatform,
+          (PintAction) previousAction
+        ));
+  }
+
 
   private static PintScenarioListBuilder receiverStateSetup(ScenarioClass scenarioClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
@@ -204,7 +226,7 @@ public class PintScenarioListBuilder
 
 
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode) {
-    return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID);
+    return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID_ISSUANCE);
   }
 
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode, SenderTransmissionClass senderTransmissionClass) {

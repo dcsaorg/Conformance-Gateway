@@ -42,6 +42,7 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     return new SenderScenarioParameters(
       "TD reference",
+      "WAVE",
       "-----BEGIN RSA PUBLIC KEY-----\n<YOUR PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n"
     ).toJson();
   }

@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
@@ -20,6 +17,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
+import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.CouldNotValidateSignatureException;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
@@ -37,6 +35,10 @@ public class TDReceiveState {
   private static final String ENVELOPE_REFERENCE = "envelopeReference";
 
   private static final String EXPECTED_PUBLIC_KEY = "expectedSenderPublicKey";
+
+  private static final String RECEIVING_PLATFORM = "receivingEBLPlatform";
+
+  private static final String TRANSFER_CHAIN_ENTRY_HISTORY = "transferChainEntryHistory";
 
   private final ObjectNode state;
 
@@ -114,6 +116,24 @@ public class TDReceiveState {
     return envelopReference;
   }
 
+  private boolean isEnvelopeTransferChainValid(JsonNode etc) {
+    String expectedChecksum = null;
+    for (JsonNode entry : etc) {
+      JsonNode parsed;
+      try {
+          parsed = parseSignedNode(entry);
+      } catch (ParseException | JsonProcessingException e) {
+          return false;
+      }
+      var actualChecksum = parsed.path("previousEnvelopeTransferChainEntrySignedContentChecksum").asText(null);
+      if (!Objects.equals(expectedChecksum, actualChecksum)) {
+        return false;
+      }
+      expectedChecksum = Checksums.sha256(entry.asText());
+    }
+    return true;
+  }
+
   public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifer) {
     var etc = initiateRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
@@ -126,12 +146,38 @@ public class TDReceiveState {
     } catch (CouldNotValidateSignatureException e) {
         return PintResponseCode.BSIG;
     }
+    if (!isEnvelopeTransferChainValid(etc)) {
+      return PintResponseCode.BENV;
+    }
     var transactions = etcEntryParsed.path("transactions");
     var lastTransactionNode = transactions.path(transactions.size() - 1);
     var recipient = lastTransactionNode.path("recipient");
     var recipientPartyCodes = recipient.path("partyCodes");
+    var recipientPlatform = recipient.path("eblPlatform").asText("!?");
     var expectedReceiver = state.path(EXPECTED_RECEIVER).asText();
     boolean hasExpectedCode = false;
+    var transferChainEntryHistory = this.state.path(TRANSFER_CHAIN_ENTRY_HISTORY);
+    for (int i = 0; i < transferChainEntryHistory.size() ; i++) {
+      var transferChainEntry = etc.path(i);
+      var expectedTransferChainEntry = transferChainEntryHistory.path(i);
+      if (expectedTransferChainEntry.isNull()) {
+        // We allow a re-transfer with same history
+        if (!transferChainEntry.isMissingNode()) {
+          return PintResponseCode.DISE;
+        }
+        break;
+      }
+      if (!Objects.equals(expectedTransferChainEntry.asText(), transferChainEntry.asText())) {
+        return PintResponseCode.DISE;
+      }
+    }
+    if (transferChainEntryHistory.size() < transactions.size()) {
+      var newTransactionHistory = this.state.putArray(TRANSFER_CHAIN_ENTRY_HISTORY);
+      for (var transaction : etc) {
+        newTransactionHistory.add(transaction);
+      }
+    }
+
     for (var partyCodeNode : recipientPartyCodes) {
       if (!partyCodeNode.path("codeListProvider").asText("").equals("EPUI")) {
         continue;
@@ -140,6 +186,10 @@ public class TDReceiveState {
         hasExpectedCode = true;
         break;
       }
+    }
+
+    if (!state.path(RECEIVING_PLATFORM).asText("?").equals(recipientPlatform)) {
+      hasExpectedCode = false;
     }
 
     if (!hasExpectedCode) {
@@ -165,6 +215,15 @@ public class TDReceiveState {
     if (!getMissingDocumentChecksums().isEmpty()) {
       return PintResponseCode.MDOC;
     }
+    var newTransferHistory = this.state.path(TRANSFER_CHAIN_ENTRY_HISTORY);
+    var lastEntry = newTransferHistory.path(newTransferHistory.size() - 1);
+    if (!lastEntry.isNull()) {
+      if (!newTransferHistory.isArray()) {
+        newTransferHistory = this.state.putArray(TRANSFER_CHAIN_ENTRY_HISTORY);
+      }
+      // We use the null node to mark it as us owning the eBL.
+      ((ArrayNode)newTransferHistory).addNull();
+    }
     if (this.getTransferState() == TransferState.ACCEPTED) {
       responseCode = PintResponseCode.DUPE;
     }
@@ -189,10 +248,11 @@ public class TDReceiveState {
     return new TDReceiveState((ObjectNode) state);
   }
 
-  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM) {
+  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM, ReceiverScenarioParameters receivingParameters) {
     var state = OBJECT_MAPPER.createObjectNode()
       .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
       .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
+      .put(RECEIVING_PLATFORM, receivingParameters.eblPlatform())
       .put(EXPECTED_PUBLIC_KEY, senderPublicKeyPEM);
     return new TDReceiveState(state);
   }

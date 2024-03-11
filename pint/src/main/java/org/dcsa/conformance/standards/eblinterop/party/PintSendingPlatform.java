@@ -1,12 +1,15 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.eblinterop.action.SenderTransmissionClass.*;
+import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.generateTransactionEntry;
+import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.platform2CodeListName;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.nimbusds.jose.util.Base64URL;
-import java.time.Instant;
+
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -34,19 +37,6 @@ public class PintSendingPlatform extends ConformanceParty {
 
   private static final Random RANDOM = new Random();
 
-  private static final Map<String, String> PLATFORM2CODELISTNAME = Map.ofEntries(
-    Map.entry("WAVE", "Wave"),
-    Map.entry("CARX", "CargoX"),
-    Map.entry("EDOX", "EdoxOnline"),
-    Map.entry("IQAX", "IQAX"),
-    Map.entry("ESSD", "EssDOCS"),
-    Map.entry("BOLE", "Bolero"),
-    Map.entry("TRGO", "TradeGO"),
-    Map.entry("SECR", "Secro")/*,
-    Map.entry("", "GSBN"),
-    Map.entry("", "WiseTech")
-    */
-  );
 
   private final PayloadSigner payloadSigner;
 
@@ -82,9 +72,10 @@ public class PintSendingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(PintInitiateAndCloseTransferAction.class, this::sendIssuanceRequest),
-      Map.entry(PintInitiateTransferAction.class, this::sendIssuanceRequest),
-      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::sendIssuanceRequest),
+      Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
+      Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
+      Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
+      Map.entry(ManipulateTransactionsAction.class, this::manipulateTransactions),
       Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
       Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
@@ -138,7 +129,7 @@ public class PintSendingPlatform extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var tdr = generateTDR();
-    var scenarioParameters = new SenderScenarioParameters(tdr, PayloadSignerFactory.senderKeySignatureVerifier().getPublicKeyInPemFormat());
+    var scenarioParameters = new SenderScenarioParameters(tdr, "BOLE", PayloadSignerFactory.senderKeySignatureVerifier().getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()
@@ -146,6 +137,25 @@ public class PintSendingPlatform extends ConformanceParty {
         .set("input", scenarioParameters.toJson()));
     addOperatorLogEntry(
       "Provided ScenarioParameters: %s".formatted(scenarioParameters));
+  }
+
+  private void manipulateTransactions(JsonNode actionPrompt) {
+    log.info(
+        "EblInteropSendingPlatform.manipulateTransactions(%s)"
+            .formatted(actionPrompt.toPrettyString()));
+    var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
+    var tdr = ssp.transportDocumentReference();
+    var sendingState = TDSendingState.load(persistentMap, tdr);
+    sendingState.manipulateLatestTransaction(payloadSigner, rsp);
+    sendingState.save(persistentMap);
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText())
+        .putNull("input"));
+    addOperatorLogEntry(
+      "Mutated transaction chain for document: %s".formatted(tdr));
   }
 
   private void transferActionDocument(JsonNode actionPrompt) {
@@ -218,11 +228,69 @@ public class PintSendingPlatform extends ConformanceParty {
     return tdPayload.put("transportDocumentReference", tdr);
   }
 
-  private void sendIssuanceRequest(JsonNode actionPrompt) {
+  private String generateTransactions(ObjectNode payload, String tdChecksum, SenderTransmissionClass senderTransmissionClass, ReceiverScenarioParameters rsp) {
+    var sendingPlatform = "BOLE";
+    var receivingPlatform = rsp.eblPlatform();
+    var sendingEPUI = "1234";
+    var sendingLegalName = "DCSA CTK tester";
+    var receivingEPUI = rsp.receiverEPUI();
+    var receivingLegalName = rsp.receiverLegalName();
+    var receiverCodeListName = rsp.receiverEPUICodeListName();
+    if (sendingPlatform.equals(receivingPlatform)) {
+      sendingPlatform = "WAVE";
+    }
+    var transactions = payload.putArray("envelopeTransferChain");
+    var action = "ISSU";
+    String previousChecksum = null;
+    if (senderTransmissionClass == VALID_TRANSFER) {
+      var codeListName = platform2CodeListName(sendingPlatform);
+      var transaction = generateTransactionEntry(
+        payloadSigner,
+        null,
+        tdChecksum,
+        action,
+        sendingPlatform,
+        "DCSA CTK issuer",
+        "5432",
+        sendingPlatform,
+        sendingLegalName,
+        sendingEPUI,
+        codeListName
+      );
+      previousChecksum = Checksums.sha256(transaction);
+      transactions.add(transaction);
+      action = "TRNS";
+    }
+    if (senderTransmissionClass == WRONG_RECIPIENT_PLATFORM) {
+      if (receivingPlatform.equals("WAVE")) {
+        receivingPlatform = "BOLE";
+      } else {
+        receivingPlatform = "WAVE";
+      }
+    }
+    var latest = generateTransactionEntry(
+      payloadSigner,
+      previousChecksum,
+      tdChecksum,
+      action,
+      sendingPlatform,
+      sendingLegalName,
+      sendingEPUI,
+      receivingPlatform,
+      receivingLegalName,
+      receivingEPUI,
+      receiverCodeListName
+    );
+    transactions.add(latest);
+    return latest;
+  }
+
+  private void initiateTransferRequest(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
     var tdr = ssp.transportDocumentReference();
+
     var senderTransmissionClass = SenderTransmissionClass.valueOf(actionPrompt.required("senderTransmissionClass").asText());
 
     boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
@@ -236,54 +304,28 @@ public class PintSendingPlatform extends ConformanceParty {
     if (!isCorrect && tdPayload.path("transportDocument").has("issuingParty")) {
       ((ObjectNode) tdPayload.path("transportDocument")).remove("issuingParty");
     }
+
     var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
     var tdChecksum = Checksums.sha256CanonicalJson(tdPayload);
-    var sendingPlatform = "BOLE";
-    var receivingPlatform = rsp.eblPlatform();
-    var sendingEPUI = "1234";
-    var sendingLegalName = "DCSA CTK tester";
-    var receivingEPUI = rsp.receiverEPUI();
-    var receivingLegalName = rsp.receiverLegalName();
-    var receiverCodeListName = rsp.receiverEPUICodeListName();
-    var latestEnvelopeTransferChainUnsigned = OBJECT_MAPPER.createObjectNode()
-      .put("eblPlatform", sendingPlatform)
-      .put("transportDocumentChecksum", tdChecksum)
-      .putNull("previousEnvelopeTransferChainEntrySignedContentChecksum");
-    var issuingParty = OBJECT_MAPPER.createObjectNode()
-      .put("eblPlatform", sendingPlatform)
-      .put("legalName", sendingLegalName);
-    issuingParty.putArray("partyCodes")
-      .addObject()
-      .put("partyCode", sendingEPUI)
-      .put("codeListProvider", "EPUI")
-      .put("codeListName", PLATFORM2CODELISTNAME.get(sendingPlatform));
-    var issueToParty = OBJECT_MAPPER.createObjectNode()
-      .put("eblPlatform", receivingPlatform)
-      .put("legalName", receivingLegalName);
-    issueToParty.putArray("partyCodes")
-      .addObject()
-      .put("partyCode", receivingEPUI)
-      .put("codeListProvider", "EPUI")
-      .put("codeListName", receiverCodeListName);
-    var transaction = latestEnvelopeTransferChainUnsigned
-      .putArray("transactions")
-      .addObject()
-      .put("action", "ISSU")
-      .put("timestamp", Instant.now().toEpochMilli());
-    transaction.set("actor", issuingParty);
-    transaction.set("recipient", issueToParty);
 
-    var latestEnvelopeTransferChainEntrySigned = payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
-    var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(tdChecksum, Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
+    var latestEnvelopeTransferChainEntrySigned = generateTransactions(
+      body,
+      tdChecksum,
+      senderTransmissionClass,
+      rsp
+    );
+    var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(
+      tdChecksum,
+      Checksums.sha256(latestEnvelopeTransferChainEntrySigned)
+    );
 
     JsonNode signedManifest = TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString()));
     sendingState.setSignedManifest(signedManifest);
-    if (senderTransmissionClass == SenderTransmissionClass.SIGNATURE_ISSUE) {
+    if (senderTransmissionClass == SIGNATURE_ISSUE) {
       signedManifest = mutatePayload(signedManifest);
     }
     body.set("envelopeManifestSignedContent", signedManifest);
-    var envelopeTransferChain = body.putArray("envelopeTransferChain")
-      .add(latestEnvelopeTransferChainEntrySigned);
+    var envelopeTransferChain = body.path("envelopeTransferChain");
     sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
     sendingState.save(persistentMap);
     var response = this.syncCounterpartPost(

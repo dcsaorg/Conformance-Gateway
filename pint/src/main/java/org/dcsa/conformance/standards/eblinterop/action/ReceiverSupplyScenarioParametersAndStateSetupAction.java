@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
-import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 
 @Getter
 @Slf4j

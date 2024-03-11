@@ -2,8 +2,10 @@ package org.dcsa.conformance.standards.eblinterop.checks;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSObject;
@@ -14,6 +16,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
+import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
@@ -368,6 +371,40 @@ public class PintChecks {
         signedContentValidation(
           JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
         )
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate transfer chain checksums",
+        JsonAttribute.path("envelopeTransferChain", (etc, contextPath) -> {
+          String expectedChecksum = null;
+          if (!etc.isArray()) {
+            // Leave that to schema validation
+            return Set.of();
+          }
+          var issues = new LinkedHashSet<String>();
+          for (int i = 0 ; i < etc.size() ; i++) {
+            JsonNode entry = etc.path(i);
+            JsonNode parsed;
+            try {
+              parsed = parseSignedNode(entry);
+            } catch (ParseException | JsonProcessingException e) {
+              // Signed content + schema validation already takes care of that issue.
+              continue;
+            }
+            var actualChecksum = parsed.path("previousEnvelopeTransferChainEntrySignedContentChecksum").asText(null);
+            if (!Objects.equals(expectedChecksum, actualChecksum)) {
+              var path = contextPath + "[" + i + "].previousEnvelopeTransferChainEntrySignedContentChecksum";
+              issues.add("The checksum in '%s' was '%s' but it should have been '%s' (which is the checksum of the preceding item)".formatted(
+                path,
+                actualChecksum,
+                expectedChecksum
+              ));
+            }
+            expectedChecksum = Checksums.sha256(entry.asText());
+          }
+          return issues;
+        })
       )
     );
     return JsonAttribute.contentChecks(

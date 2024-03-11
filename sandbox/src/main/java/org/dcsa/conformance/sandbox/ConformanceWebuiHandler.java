@@ -19,6 +19,7 @@ import org.dcsa.conformance.standards.ebl.EblComponentFactory;
 import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
+import org.dcsa.conformance.standards.jit.JitComponentFactory;
 import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
@@ -61,6 +62,12 @@ public class ConformanceWebuiHandler {
                           .collect(
                               Collectors.toMap(
                                   Function.identity(), EblSurrenderComponentFactory::new)))),
+              Map.entry(
+                  JitComponentFactory.STANDARD_NAME,
+                  new TreeMap<>(
+                      JitComponentFactory.STANDARD_VERSIONS.stream()
+                          .collect(
+                              Collectors.toMap(Function.identity(), JitComponentFactory::new)))),
               Map.entry(
                   OvsComponentFactory.STANDARD_NAME,
                   new TreeMap<>(

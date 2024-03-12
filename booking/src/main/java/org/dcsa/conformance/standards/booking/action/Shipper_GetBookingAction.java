@@ -80,11 +80,6 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            new CarrierGetBookingPayloadResponseConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                requestAmendedContent),
             BookingChecks.responseContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus))
         ;
       }

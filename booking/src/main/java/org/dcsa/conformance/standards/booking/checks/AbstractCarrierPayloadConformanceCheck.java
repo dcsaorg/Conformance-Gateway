@@ -29,8 +29,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.DECLINED,
     BookingState.REJECTED,
     BookingState.CANCELLED,
-    BookingState.AMENDMENT_CANCELLED,
-    BookingState.AMENDMENT_DECLINED
+    BookingState.AMENDMENT_DECLINED,
+    BookingState.AMENDMENT_CANCELLED
   );
 
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(

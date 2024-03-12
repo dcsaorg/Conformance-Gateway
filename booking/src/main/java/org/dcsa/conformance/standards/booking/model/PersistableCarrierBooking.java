@@ -93,7 +93,8 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
-    setReason(reason);
+    setReason(null);
+    removeRequestedChanges();
   }
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator, String reason) {
@@ -106,6 +107,7 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
+    removeRequestedChanges();
     setReason(reason);
   }
 
@@ -124,6 +126,7 @@ public class PersistableCarrierBooking {
     addCharge(booking);
     generateTransportPlan(booking);
     replaceShipmentCutOffTimes(booking);
+    addAdvancedManifestFilings(booking);
   }
 
   public void declineBooking(String reference, String reason) {
@@ -271,7 +274,10 @@ public class PersistableCarrierBooking {
     } else {
       setBooking(newBookingData);
     }
-    removeRequestedChanges();
+    var bookingState = getOriginalBookingState();
+    if(!(PENDING_UPDATE.equals(bookingState) || PENDING_AMENDMENT.equals(bookingState) )) {
+      removeRequestedChanges();
+    }
     setReason(null);
   }
 
@@ -486,6 +492,27 @@ public class PersistableCarrierBooking {
         .put("quantity", 1);
     }
   }
+
+  private void addAdvancedManifestFilings(ObjectNode booking) {
+    ArrayNode advanceManifestFilings;
+    if (booking.get("advanceManifestFilings") instanceof ArrayNode advanceManifestFilingsNode) {
+      advanceManifestFilings = advanceManifestFilingsNode;
+    } else {
+      advanceManifestFilings = booking.putArray("advanceManifestFilings");
+    }
+    if (advanceManifestFilings.isEmpty()) {
+      advanceManifestFilings
+        .addObject()
+        .put("manifestTypeCode", "ACI")
+        .put("countryCode", "EG");
+    } else {
+      advanceManifestFilings
+        .addObject()
+        .put("manifestTypeCode", "ACI")
+        .put("countryCode", "EG");
+    }
+  }
+
 
   private record LocationBuilder<T>(ObjectNode location, Function<ObjectNode, T> onCompletion) {
 

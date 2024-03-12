@@ -511,6 +511,36 @@ public class JsonAttribute {
       });
   }
 
+  public static JsonRebaseableContentCheck atLeastOneOf(
+    @NonNull JsonPointer ... ptrs
+  ) {
+    if (ptrs.length < 2) {
+      throw new IllegalStateException("At least two arguments are required");
+    }
+    String name = "The following are mutually exclusive (at least one of): %s".formatted(
+      Arrays.stream(ptrs)
+        .map(JsonAttribute::renderJsonPointer)
+        .collect(Collectors.joining(", "))
+    );
+    return new JsonRebaseableCheckImpl(
+      name,
+      (body, contextPath) -> {
+        var present = Arrays.stream(ptrs)
+          .filter(p -> isJsonNodePresent(body.at(p)))
+          .toList();
+        if (!present.isEmpty()) {
+          return Set.of();
+        }
+        return Set.of(
+          "At least one of the following can be present: %s".formatted(
+            present.stream()
+              .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
+              .collect(Collectors.joining(", "
+              ))
+          ));
+      });
+  }
+
   public static JsonRebaseableContentCheck allOrNoneArePresent(
     @NonNull JsonPointer ... ptrs
   ) {

@@ -576,6 +576,26 @@ public class JsonAttribute {
         });
   }
 
+  public static JsonContentMatchedValidation combineAndValidateAgainstDataset(
+    KeywordDataset dataset,
+    String nameA,
+    String nameB
+  ) {
+    return (nodeToValidate, contextPath) -> {
+      var codeA = nodeToValidate.path(nameA).asText("");
+      var codeB = nodeToValidate.path(nameB).asText("");
+      var combined = codeA + "/" + codeB;
+      if (!dataset.contains(combined)) {
+        return Set.of(
+          "The combination of '%s' ('%s') and '%s' ('%s') used in '%s' is not known to be a valid combination.".
+            formatted(codeA, nameA, codeB, nameB, contextPath)
+        );
+      }
+      return Set.of();
+    };
+  }
+
+
   @Deprecated
   public static JsonContentCheck ifThen(
     @NonNull

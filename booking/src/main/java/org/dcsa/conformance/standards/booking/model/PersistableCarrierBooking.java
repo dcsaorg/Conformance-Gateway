@@ -508,8 +508,8 @@ public class PersistableCarrierBooking {
     } else {
       advanceManifestFilings
         .addObject()
-        .put("manifestTypeCode", "ACI")
-        .put("countryCode", "EG");
+        .put("manifestTypeCode", "ACE")
+        .put("countryCode", "US");
     }
   }
 

@@ -201,7 +201,7 @@ public class BookingChecks {
     (mav) -> {
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
     },
-    combineAndValidateAgainstDataset(BookingDataSets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
   );
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -291,7 +291,7 @@ public class BookingChecks {
   private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     ALL_AMF,
-    combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
@@ -494,7 +494,7 @@ public class BookingChecks {
       Set<String> partyShippers  = new HashSet<>(Arrays.asList("OS", "DDR"));
       if (partyFunctions.stream().noneMatch(partyShippers::contains)) {
         if (!partyFunctions.contains("BA")) {
-          issues.add("The 'BA' party must be provided if 'OS' or 'DDR' are absent ");
+          issues.add("The 'BA' party must exist if 'OS' or 'DDR' party is absent");
         }
       }
         return issues;
@@ -551,6 +551,21 @@ public class BookingChecks {
       }
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
+      "DangerousGoods implies numberOfPackages or description",
+      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging"),
+      (nodeToValidate, contextPath) -> {
+        var dg = nodeToValidate.path("dangerousGoods");
+        if (!dg.isArray() || dg.isEmpty()) {
+          return Set.of();
+        }
+        if (nodeToValidate.path("numberOfPackages").isMissingNode() && nodeToValidate.path("description").isMissingNode()) {
+          return Set.of("The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
+            .formatted(contextPath));
+        }
+        return Set.of();
+      }
+    ),
+    JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'imoClass' values must be from dataset",
       allDg((dg) -> dg.path("imoClass").submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_IMO_CLASSES)
@@ -574,22 +589,29 @@ public class BookingChecks {
       mav -> mav.submitAllMatching("charges.*.currencyCode"),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_4217_CURRENCY_CODES)
     ),
-    JsonAttribute.customValidator(
+
+    JsonAttribute.allIndividualMatchesMustBeValid(
       "The charges currency amount must not exceed more than 2 decimal points",
-      (body) -> {
-        var charges = body.path("charges");
-        var issues = new LinkedHashSet<String>();
-        for(JsonNode charge : charges) {
-          var currencyAmount = charge.path("currencyAmount").asDouble();
-          if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-            issues.add("Charge amount %s is expected to have 2 decimal precious ".formatted(currencyAmount));
-          }
+      mav -> mav.submitAllMatching("charges.*"),
+      (nodeToValidate, contextPath) -> {
+        var currencyAmount = nodeToValidate.path("currencyAmount").asDouble();
+        if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
+          return Set.of("currencyAmount %s is expected to have 2 decimal precious ".formatted(contextPath));
         }
-        return issues;
+        return Set.of();
       }
     )
     );
 
+  List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
+    ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    SHIPMENT_CUTOFF_TIMES_UNIQUE,
+    CHECK_CONFIRMED_BOOKING_FIELDS,
+    VALIDATE_SHIPMENT_LOCATIONS,
+    REQUESTED_CHANGES_PRESENCE,
+    REASON_PRESENCE
+  );
   public static ActionCheck responseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
@@ -600,14 +622,8 @@ public class BookingChecks {
       BOOKING_STATUS,
       bookingStatus.wireName()
     ));
-    checks.add(ADVANCED_MANIFEST_FILING_CODES_UNIQUE);
-    checks.add(AMF_CC_MTC_COMBINATION_VALIDATIONS);
-    checks.add(SHIPMENT_CUTOFF_TIMES_UNIQUE);
-    checks.add(CHECK_CONFIRMED_BOOKING_FIELDS);
-    checks.add(VALIDATE_SHIPMENT_LOCATIONS);
-    checks.add(REQUESTED_CHANGES_PRESENCE);
-    checks.add(REASON_PRESENCE);
     checks.addAll(STATIC_BOOKING_CHECKS);
+    checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
     }
@@ -623,26 +639,6 @@ public class BookingChecks {
       HttpMessageType.RESPONSE,
       checks
     );
-  }
-
-
-  private static JsonContentMatchedValidation combineAndValidateAgainstDataset(
-    KeywordDataset dataset,
-    String nameA,
-    String nameB
-  ) {
-    return (nodeToValidate, contextPath) -> {
-      var codeA = nodeToValidate.path(nameA).asText("");
-      var codeB = nodeToValidate.path(nameB).asText("");
-      var combined = codeA + "/" + codeB;
-      if (!dataset.contains(combined)) {
-        return Set.of(
-          "The combination of '%s' ('%s') and '%s' ('%s') used in '%s' is not known to be a valid combination.".
-            formatted(codeA, nameA, codeB, nameB, contextPath)
-        );
-      }
-      return Set.of();
-    };
   }
 
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {

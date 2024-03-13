@@ -603,7 +603,7 @@ public class BookingChecks {
     )
     );
 
-  List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
+  private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
@@ -612,6 +612,7 @@ public class BookingChecks {
     REQUESTED_CHANGES_PRESENCE,
     REASON_PRESENCE
   );
+
   public static ActionCheck responseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(

@@ -526,14 +526,13 @@ public class JsonAttribute {
       name,
       (body, contextPath) -> {
         var present = Arrays.stream(ptrs)
-          .filter(p -> isJsonNodePresent(body.at(p)))
-          .toList();
-        if (!present.isEmpty()) {
+          .anyMatch(p -> isJsonNodePresent(body.at(p)));
+        if (present) {
           return Set.of();
         }
         return Set.of(
           "At least one of the following can be present: %s".formatted(
-            present.stream()
+            Arrays.stream(ptrs)
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
               .collect(Collectors.joining(", "
               ))

@@ -352,7 +352,7 @@ public class BookingChecks {
       var bookingStatus = body.path("bookingStatus");
       var amendedBookingStatus = body.path("amendedBookingStatus");
       var issues = new LinkedHashSet<String>();
-      var status = amendedBookingStatus.isMissingNode() ? bookingStatus : amendedBookingStatus;
+      var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
       if (REASON_STATES.contains(BookingState.fromWireName(status.asText()))) {
         var reason = body.get("reason");
         if (reason == null) {
@@ -592,7 +592,7 @@ public class BookingChecks {
       (nodeToValidate, contextPath) -> {
         var currencyAmount = nodeToValidate.asDouble();
         if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-          return Set.of("currencyAmount is expected to have 2 decimal precious");
+          return Set.of("%s must have at most 2 decimal point of precision".formatted(contextPath));
         }
         return Set.of();
       }
@@ -624,11 +624,6 @@ public class BookingChecks {
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
       checks.add(JsonAttribute.mustBePresent(
-        CARRIER_BOOKING_REFERENCE
-      ));
-    }
-    if (BOOKING_STATES_WHERE_CBR_IS_OPTIONAL.contains(bookingStatus)) {
-      checks.add(JsonAttribute.mustBeAbsent(
         CARRIER_BOOKING_REFERENCE
       ));
     }

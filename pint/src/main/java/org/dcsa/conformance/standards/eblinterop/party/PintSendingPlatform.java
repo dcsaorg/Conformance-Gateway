@@ -6,12 +6,15 @@ import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.ge
 import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.platform2CodeListName;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.nimbusds.jose.util.Base64URL;
 
 import java.util.*;
 import java.util.function.Consumer;
+
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -72,6 +75,7 @@ public class PintSendingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
+      Map.entry(ResignLatestEntryAction.class, this::resignLatestEntry),
       Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
@@ -139,6 +143,26 @@ public class PintSendingPlatform extends ConformanceParty {
       "Provided ScenarioParameters: %s".formatted(scenarioParameters));
   }
 
+
+
+  private void resignLatestEntry(JsonNode actionPrompt) {
+    log.info(
+      "EblInteropSendingPlatform.resignLatestEntry(%s)"
+        .formatted(actionPrompt.toPrettyString()));
+    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
+    var tdr = ssp.transportDocumentReference();
+    var sendingState = TDSendingState.load(persistentMap, tdr);
+    sendingState.resignLatestEntry(payloadSigner);
+    sendingState.save(persistentMap);
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText())
+        .putNull("input"));
+    addOperatorLogEntry(
+      "Resigned latest entry for document: %s".formatted(tdr));
+  }
+
   private void manipulateTransactions(JsonNode actionPrompt) {
     log.info(
         "EblInteropSendingPlatform.manipulateTransactions(%s)"
@@ -158,18 +182,36 @@ public class PintSendingPlatform extends ConformanceParty {
       "Mutated transaction chain for document: %s".formatted(tdr));
   }
 
+  @SneakyThrows
+  private byte[] copyDocument(JsonNode jsonNode) {
+    return jsonNode.binaryValue().clone();
+  }
+
   private void transferActionDocument(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.transferActionDocument(%s)".formatted(actionPrompt.toPrettyString()));
     var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
     var tdr = ssp.transportDocumentReference();
+    var senderDocumentTransmissionTypeCode = SenderDocumentTransmissionTypeCode.valueOf(actionPrompt.required("senderDocumentTransmissionTypeCode").asText());
     var sendingState = TDSendingState.load(persistentMap, tdr);
     var envelopeReference = Objects.requireNonNull(dsp.envelopeReference());
     var document = sendingState.pollPendingDocument();
     var checksum = document.path("checksum").asText("?");
+    var content = document.path("content");
+    switch (senderDocumentTransmissionTypeCode) {
+      case VALID_DOCUMENT -> { /* No manipulation */ }
+      case CORRUPTED_DOCUMENT, UNRELATED_DOCUMENT -> {
+        var copy = copyDocument(content);
+        copy[0] ^= 0x01;
+        content = BinaryNode.valueOf(copy);
+        if (senderDocumentTransmissionTypeCode == SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT) {
+          checksum = Checksums.sha256(copy);
+        }
+      }
+    }
     var response = this.syncCounterpartPut(
       "/v" + apiVersion.charAt(0) + "/envelopes/" + envelopeReference + "/additional-documents/" + checksum,
-      document.path("content")
+      content
     );
     if (response.statusCode() == 204) {
       sendingState.successfulTransferOfAdditionalDocument(checksum);

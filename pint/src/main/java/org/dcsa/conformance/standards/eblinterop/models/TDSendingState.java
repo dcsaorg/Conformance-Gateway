@@ -11,6 +11,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import com.nimbusds.jose.JWSObject;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
@@ -165,6 +167,15 @@ public class TDSendingState {
 
 
     return payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
+  }
+
+  @SneakyThrows
+  public void resignLatestEntry(PayloadSigner payloadSigner) {
+    var chain = this.state.path(ENVELOPE_TRANSFER_CHAIN);
+    var lastSigned = chain.path(chain.size() - 1);
+    var lastUnsigned = JWSObject.parse(lastSigned.asText());
+    var lastResigned = payloadSigner.sign(lastUnsigned.getPayload().toString());
+    ((ArrayNode)chain).set(chain.size() - 1, lastResigned);
   }
 
   @SneakyThrows

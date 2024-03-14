@@ -158,6 +158,20 @@ public class JsonAttribute {
   }
 
 
+  public static Predicate<JsonNode> isEqualTo(
+    @NonNull String path,
+    @NonNull String expectedValue
+  ) {
+    return (baseNode) -> expectedValue.equals(baseNode.path(path).asText());
+  }
+
+  public static Predicate<JsonNode> isOneOf(
+    @NonNull String path,
+    @NonNull Set<String> expectedValue
+  ) {
+    return (baseNode) -> expectedValue.contains(baseNode.path(path).asText());
+  }
+
   public static Predicate<JsonNode> isNotNull(
     @NonNull
     JsonPointer jsonPointer
@@ -272,6 +286,28 @@ public class JsonAttribute {
     return contextPath.isEmpty() ? nextPathSegment : contextPath + "." + nextPathSegment;
   }
 
+  public static JsonContentMatchedValidation matchedMustBeNonEmpty() {
+    return (node, contextPath) -> {
+        if (node.isMissingNode() || node.isNull() || node.isEmpty()) {
+          return Set.of(
+            "The value of '%s' must present and non-empty"
+              .formatted(contextPath));
+        }
+        return Collections.emptySet();
+      };
+  }
+
+  public static JsonContentMatchedValidation matchedMustBeNotNull() {
+    return (node, contextPath) -> {
+      if (node.isMissingNode() || node.isNull()) {
+        return Set.of(
+          "The value of '%s' must present and not null"
+            .formatted(contextPath));
+      }
+      return Set.of();
+    };
+  }
+
   public static JsonRebaseableContentCheck mustBeNotNull(
     JsonPointer jsonPointer,
     String reason
@@ -285,7 +321,7 @@ public class JsonAttribute {
                 "The value of '%s' must present and not null because %s"
                     .formatted(renderJsonPointer(jsonPointer, contextPath), reason));
           }
-          return Collections.emptySet();
+          return Set.of();
         });
   }
 

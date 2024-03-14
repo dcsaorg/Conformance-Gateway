@@ -26,6 +26,33 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
+  private static final JsonContentCheckRebaser SIGNED_CONTENT_REBASER = delegate -> {
+    return (nodeToValidate, contextPath) -> {
+      var content = nodeToValidate.asText();
+      if (content == null || !content.contains(".")) {
+        return Set.of(
+          "The path '%s' should have been a signed payload, but was not".formatted(contextPath));
+      }
+      JWSObject jwsObject;
+      try {
+        jwsObject = JWSObject.parse(content);
+      } catch (ParseException e) {
+        return Set.of(
+          "The path '%s' should have been a signed payload, but could not be parsed as a JWS."
+            .formatted(contextPath));
+      }
+      JsonNode jsonBody;
+      try {
+        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
+      } catch (Exception e) {
+        return Set.of(
+          "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
+            contextPath, e.toString()
+          ));
+      }
+      return delegate.validate(jsonBody, contextPath + "!");
+    };
+  };
 
   public static JsonContentMatchedValidation arraySizeMustEqual(IntSupplier expectedSizeSupplier) {
     return (nodeToValidate,contextPath) -> {
@@ -153,38 +180,15 @@ public class PintChecks {
     return JsonAttribute.matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
   }
 
-  public static JsonContentMatchedValidation signedContentValidation(
-    JsonContentCheck delegate) {
-    return (nodeToValidate,contextPath) -> delegate.validate(nodeToValidate);
+  public static JsonRebaseableContentCheck signedContentValidation(
+    JsonRebaseableContentCheck delegate
+  ) {
+    return SIGNED_CONTENT_REBASER.offset(delegate);
   }
 
   public static JsonContentMatchedValidation signedContentValidation(
       JsonContentMatchedValidation delegate) {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS."
-                .formatted(contextPath));
-      }
-      JsonNode jsonBody;
-      try {
-        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
-      } catch (Exception e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
-              contextPath, e.toString()
-            ));
-      }
-      return delegate.validate(jsonBody, contextPath + "!");
-    };
+    return SIGNED_CONTENT_REBASER.offset(delegate);
   }
 
   public static JsonContentMatchedValidation signedContentSchemaValidation(
@@ -335,13 +339,43 @@ public class PintChecks {
         )
       )
     );
+    jsonContentChecks.add(
+      signedContentValidation(
+        JsonAttribute.ifThenElse(
+          "Validate that 'duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent' is conditionally present (%s)".formatted(PintResponseCode.DUPE.name()),
+          JsonAttribute.isEqualTo("responseCode", PintResponseCode.DUPE.name()),
+          JsonAttribute.path("duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent", JsonAttribute.matchedMustBeNotNull())::validate,
+          JsonAttribute.path("duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent", JsonAttribute.matchedMustBeAbsent())::validate
+        )
+      )
+    );
+    jsonContentChecks.add(
+      signedContentValidation(
+        JsonAttribute.ifThenElse(
+          "Validate that 'receivedAdditionalDocumentChecksums' is conditionally present (%s or %s)".formatted(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name()),
+          JsonAttribute.isOneOf("responseCode", Set.of(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name())),
+          JsonAttribute.path("receivedAdditionalDocumentChecksums", JsonAttribute.matchedMustBePresent())::validate,
+          JsonAttribute.path("receivedAdditionalDocumentChecksums", JsonAttribute.matchedMustBeAbsent())::validate
+        )
+      )
+    );
+
+    jsonContentChecks.add(
+      signedContentValidation(
+        JsonAttribute.ifThenElse(
+          "Validate that 'missingAdditionalDocumentChecksums' is conditionally present (%s)".formatted(PintResponseCode.MDOC.name()),
+          JsonAttribute.isEqualTo("responseCode", PintResponseCode.MDOC.name()),
+          JsonAttribute.path("missingAdditionalDocumentChecksums", JsonAttribute.matchedMustBeNonEmpty())::validate,
+          JsonAttribute.path("missingAdditionalDocumentChecksums", JsonAttribute.matchedMustBeAbsent())::validate
+        )
+      )
+    );
     return JsonAttribute.contentChecks(
       PintRole::isReceivingPlatform,
       matched,
       HttpMessageType.RESPONSE,
       jsonContentChecks
     );
-
   }
 
   public static ActionCheck validateInitiateTransferRequest(

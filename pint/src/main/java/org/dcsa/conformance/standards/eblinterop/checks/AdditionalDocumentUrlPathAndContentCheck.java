@@ -13,18 +13,18 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
 
-public class AdditionalDocumentUrlPathCheck extends ActionCheck {
+public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
 
   private static final Pattern URL_PATTERN = Pattern.compile("/envelopes/([^/]++)/additional-documents/[0-9a-fA-F]{64}/?$");
 
   private final Supplier<String> envelopeReferenceSupplier;
 
-  public AdditionalDocumentUrlPathCheck(
+  public AdditionalDocumentUrlPathAndContentCheck(
     Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, Supplier<String> envelopeReferenceSupplier) {
     this("", isRelevantForRoleName, matchedExchangeUuid, envelopeReferenceSupplier);
   }
 
-  public AdditionalDocumentUrlPathCheck(
+  public AdditionalDocumentUrlPathAndContentCheck(
       String titlePrefix,
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,

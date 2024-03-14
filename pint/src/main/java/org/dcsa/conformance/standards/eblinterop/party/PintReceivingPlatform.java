@@ -1,12 +1,10 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.DUPE;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.RECE;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -149,13 +147,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);
       unsignedPayload.put("responseCode", responseCode.name());
-      var receivedDocs = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
-      for (var checksum : receiveState.getKnownDocumentChecksums()) {
-        receivedDocs.add(checksum);
-      }
-
-      var signedPayload = payloadSigner.sign(unsignedPayload.toString());
-      var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),
@@ -219,16 +211,14 @@ public class PintReceivingPlatform extends ConformanceParty {
         } catch (Exception ignored) {
           // Will just fail the checksum check below
         }
-        if (!Objects.equals(checksum, computedChecksum)) {
+        if (!Objects.equals(checksum, computedChecksum) || !receiveState.receiveMissingDocument(checksum)) {
+          var payload = receiveState.generateSignedResponse(INCD, payloadSigner);
           return request.createResponse(
-            409,
-            Map.of("Api-Version", List.of(apiVersion)),
-            // TODO: Create correct rejection message
-            new ConformanceMessageBody("")
+            INCD.getHttpResponseCode(),
+            Map.of("API-Version", List.of(apiVersion)),
+            new ConformanceMessageBody(payload)
           );
         }
-        // TODO: Validate the content and switch to a different error code if not the right document
-        receiveState.receiveMissingDocument(checksum);
         receiveState.save(persistentMap);
         return request.createResponse(
           204,
@@ -255,21 +245,8 @@ public class PintReceivingPlatform extends ConformanceParty {
         return cannedResponse;
       }
       var responseCode = receiveState.finishTransferCode();
-      var unsignedPayload = OBJECT_MAPPER.createObjectNode();
-        //.put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
       receiveState.updateTransferState(responseCode);
-      unsignedPayload.put("responseCode", responseCode.name());
-      if (responseCode == RECE || responseCode == DUPE) {
-        var receivedDocuments = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
-        for (var checksum : receiveState.getKnownDocumentChecksums()) {
-          receivedDocuments.add(checksum);
-        }
-      }
-      //unsignedPayload.set("receivedAdditionalDocumentChecksums", documentChecksums);
-
-      var signedPayload = payloadSigner.sign(unsignedPayload.toString());
-      var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
-
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),

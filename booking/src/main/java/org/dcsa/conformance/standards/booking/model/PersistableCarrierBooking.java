@@ -505,11 +505,6 @@ public class PersistableCarrierBooking {
         .addObject()
         .put("manifestTypeCode", "ACI")
         .put("countryCode", "EG");
-    } else {
-      advanceManifestFilings
-        .addObject()
-        .put("manifestTypeCode", "ACE")
-        .put("countryCode", "US");
     }
   }
 

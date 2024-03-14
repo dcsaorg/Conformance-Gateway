@@ -265,10 +265,8 @@ public class BookingChecks {
         .filter(JsonNode::isTextual)
         .map(n -> n.asText(""))
         .collect(Collectors.toSet());
-      if (receiptTypeAtOrigin.equals("CFS")) {
-        if (cutOffDateTimeCodes.contains("LCL")) {
-          issues.add("For ReceiptTypeAtOrigin as CFS, the shipment cut off date time must have only LCL");
-        }
+      if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
+        issues.add("cutOffDateTimeCode 'LCL' must be present when receiptTypeAtOrigin is CFS");
       }
       return issues;
     }
@@ -303,13 +301,13 @@ public class BookingChecks {
       var polNode =
         StreamSupport.stream(shipmentLocations.spliterator(), false)
           .filter(o ->  o.path("locationTypeCode").asText("").equals("POL")
-            || o.path("locationTypeCode").asText("").equals("PDE") )
+            || o.path("locationTypeCode").asText("").equals("PRE") )
           .findFirst()
           .orElse(null);
       var podNode =
         StreamSupport.stream(shipmentLocations.spliterator(), false)
           .filter(o -> o.path("locationTypeCode").asText("").equals("POD")
-          || o.path("locationTypeCode").asText("").equals("PRE") )
+          || o.path("locationTypeCode").asText("").equals("PDE") )
           .findFirst()
           .orElse(null);
 
@@ -351,9 +349,11 @@ public class BookingChecks {
   private static final JsonContentCheck REASON_PRESENCE = JsonAttribute.customValidator(
     "Reason field must be present for the selected Booking Status",
     (body) -> {
-      var bookingStatus = body.path("bookingStatus").asText("");
+      var bookingStatus = body.path("bookingStatus");
+      var amendedBookingStatus = body.path("amendedBookingStatus");
       var issues = new LinkedHashSet<String>();
-      if (REASON_STATES.contains(BookingState.fromWireName(bookingStatus))) {
+      var status = amendedBookingStatus.isMissingNode() ? bookingStatus : amendedBookingStatus;
+      if (REASON_STATES.contains(BookingState.fromWireName(status.asText()))) {
         var reason = body.get("reason");
         if (reason == null) {
           issues.add("reason is missing in the Booking States %s".formatted(REASON_STATES));
@@ -494,7 +494,7 @@ public class BookingChecks {
       Set<String> partyShippers  = new HashSet<>(Arrays.asList("OS", "DDR"));
       if (partyFunctions.stream().noneMatch(partyShippers::contains)) {
         if (!partyFunctions.contains("BA")) {
-          issues.add("The 'BA' party must exist if 'OS' or 'DDR' party is absent");
+          issues.add("The BA party is required when (both) OS and DDR are not present");
         }
       }
         return issues;
@@ -543,10 +543,6 @@ public class BookingChecks {
           return Set.of("The '%s' object did not have a 'packageCode' nor an 'imoPackagingCode', which is required due to dangerousGoods"
             .formatted(contextPath));
         }
-        if (nodeToValidate.path("numberOfPackages").isMissingNode() && nodeToValidate.path("description").isMissingNode()) {
-          return Set.of("The '%s' object did not have a 'numberOfPackages' nor an 'description', which is required due to dangerousGoods"
-            .formatted(contextPath));
-        }
         return Set.of();
       }
     ),
@@ -592,11 +588,11 @@ public class BookingChecks {
 
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The charges currency amount must not exceed more than 2 decimal points",
-      mav -> mav.submitAllMatching("charges.*"),
+      mav -> mav.submitAllMatching("charges.*.currencyAmount"),
       (nodeToValidate, contextPath) -> {
-        var currencyAmount = nodeToValidate.path("currencyAmount").asDouble();
+        var currencyAmount = nodeToValidate.asDouble();
         if (BigDecimal.valueOf(currencyAmount).scale() > 2) {
-          return Set.of("currencyAmount %s is expected to have 2 decimal precious ".formatted(contextPath));
+          return Set.of("currencyAmount is expected to have 2 decimal precious");
         }
         return Set.of();
       }
@@ -627,6 +623,9 @@ public class BookingChecks {
     checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
+      checks.add(JsonAttribute.mustBePresent(
+        CARRIER_BOOKING_REFERENCE
+      ));
     }
     if (BOOKING_STATES_WHERE_CBR_IS_OPTIONAL.contains(bookingStatus)) {
       checks.add(JsonAttribute.mustBeAbsent(

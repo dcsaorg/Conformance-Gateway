@@ -350,6 +350,27 @@ public class JsonAttribute {
         });
   }
 
+
+  public static JsonRebaseableContentCheck mustEqual(
+    String title,
+    JsonPointer jsonPointer,
+    boolean expectedValue) {
+    return new JsonRebaseableCheckImpl(
+      title,
+      (body, contextPath) -> {
+        var node = body.at(jsonPointer);
+        if (!node.isBoolean() || node.asBoolean() != expectedValue) {
+          return Set.of(
+            "The value of '%s' was '%s' instead of '%s'"
+              .formatted(
+                renderJsonPointer(jsonPointer, contextPath),
+                renderValue(node),
+                expectedValue));
+        }
+        return Collections.emptySet();
+      });
+  }
+
   public static JsonRebaseableContentCheck mustEqual(
     JsonPointer jsonPointer,
     @NonNull

@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.eblissuance.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -75,6 +76,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private void sendIssuanceRequest(JsonNode actionPrompt) {
     log.info("EblIssuanceCarrier.sendIssuanceRequest(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("ssp"));
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    var eblType = dsp.eblType();
     String tdr =
         actionPrompt.has("tdr")
             ? actionPrompt.get("tdr").asText()
@@ -88,7 +91,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
     }
 
-    JsonNode jsonRequestBody =
+    var jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/eblissuance/messages/eblissuance-%s-request.json"
                 .formatted(apiVersion.startsWith("3") ? "v30" : "v20"),
@@ -97,8 +100,31 @@ public class EblIssuanceCarrier extends ConformanceParty {
                 Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
                 Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
                 Map.entry("SEND_TO_PLATFORM_PLACEHOLDER", ssp.sendToPlatform()),
-                Map.entry("PARTY_CODE_PLACEHOLDER", ssp.partyCode()),
-                Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName())));
+                Map.entry("ISSUE_TO_LEGAL_NAME_PLACEHOLDER", ssp.issueToLegalName()),
+                Map.entry("ISSUE_TO_PARTY_CODE_PLACEHOLDER", ssp.issueToPartyCode()),
+                Map.entry("ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER", ssp.issueToCodeListName()),
+                Map.entry("CONSIGNEE_LEGAL_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeLegalName()),
+                Map.entry("CONSIGNEE_PARTY_CODE_PLACEHOLDER", ssp.consigneeOrEndorseePartyCode()),
+                Map.entry("CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeCodeListName())
+        ));
+
+    if (eblType.isToOrder()) {
+      var td = (ObjectNode)jsonRequestBody.path("document");
+      td.put("isToOrder", true);
+      var documentParties = (ArrayNode)td.path("documentParties");
+      var cnIdx = -1;
+      for (int i = 0 ; i < documentParties.size() ; i++) {
+        if (documentParties.path(i).path("partyFunction").asText("?").equals("CN")) {
+          cnIdx = i;
+          break;
+        }
+      }
+      if (eblType.isBlankEbl()) {
+        documentParties.remove(cnIdx);
+      } else {
+        ((ObjectNode)documentParties.path(cnIdx)).put("partyFunction", "END");
+      }
+    }
     if (!isCorrect) {
       ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
     }

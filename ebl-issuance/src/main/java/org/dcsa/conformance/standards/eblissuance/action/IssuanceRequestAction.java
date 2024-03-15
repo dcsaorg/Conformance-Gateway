@@ -81,11 +81,12 @@ public class IssuanceRequestAction extends IssuanceAction {
   @Override
   public String getHumanReadablePrompt() {
     String tdr = getTdrSupplier().get();
+    var eblType = getDsp().eblType();
     return ("Send %s issuance request for %s")
         .formatted(
             isCorrect ? "an" : "an incorrect",
             tdr == null
-                ? "an eBL that has not yet been issued"
+                ? "an eBL that has not yet been issued of type %s".formatted(eblType)
                 : "the eBL with transportDocumentReference '%s'".formatted(tdr));
   }
 
@@ -93,6 +94,7 @@ public class IssuanceRequestAction extends IssuanceAction {
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("isCorrect", isCorrect);
+    jsonNode.set("dsp", getDsp().toJson());
     jsonNode.set("ssp", getSspSupplier().get().toJson());
     String tdr = getTdrSupplier().get();
     if (tdr != null) {
@@ -144,6 +146,9 @@ public class IssuanceRequestAction extends IssuanceAction {
                         HttpMessageType.REQUEST,
                         requestSchemaValidator)
                     : null,
+                expectedApiVersion.startsWith("3.0")
+                  ? IssuanceChecks.tdScenarioChecks(getMatchedExchangeUuid(), getDsp().eblType())
+                  : null,
                 isCorrect && expectedApiVersion.startsWith("3.")
                   ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid())
                   : null

@@ -110,7 +110,16 @@ public class EblIssuancePlatform extends ConformanceParty {
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters suppliedScenarioParameters =
-        new SuppliedScenarioParameters("XMPL", "Example party code", "Example code list");
+        new SuppliedScenarioParameters(
+          "BOLE",
+          "DCSA CTK Issue To party",
+          "1234-issue-to",
+          "Bolero",
+          // These are ignored for blank ones, so we can provide them unconditionally.
+          "DCSA CTK Consignee/Endorsee",
+          "5678-cn-or-end",
+          "Bolero"
+        );
     asyncOrchestratorPostPartyInput(
         objectMapper
             .createObjectNode()

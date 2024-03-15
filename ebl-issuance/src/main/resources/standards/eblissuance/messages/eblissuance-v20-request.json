@@ -48,12 +48,12 @@
   },
   "issueTo": {
     "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
-    "legalName": "legal name",
+    "legalName": "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
     "partyCodes": [
       {
-        "partyCode": "PARTY_CODE_PLACEHOLDER",
+        "partyCode": "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
         "codeListProvider": "EPUI",
-        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+        "codeListName": "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER"
       }
     ]
   }

@@ -32,6 +32,12 @@ public class BookingChecks {
     BookingState.DECLINED
   );
 
+  private static final Set<BookingState> NON_CONFIRMED_BOOKING_STATES = Set.of(
+    BookingState.RECEIVED,
+    BookingState.PENDING_UPDATE,
+    BookingState.UPDATE_RECEIVED
+  );
+
   private static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
     BookingState.PENDING_UPDATE,
     BookingState.PENDING_AMENDMENT
@@ -45,27 +51,21 @@ public class BookingChecks {
     BookingState.AMENDMENT_DECLINED
   );
 
-  private static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
-    BookingState.RECEIVED,
-    BookingState.REJECTED,
-    BookingState.PENDING_UPDATE,
-    BookingState.UPDATE_RECEIVED,
-    /* CANCELLED depends on whether cancel happens before CONFIRMED, but the logic does not track prior
-     * states. Therefore, we just assume it is optional in CANCELLED here.
-     */
-    BookingState.CANCELLED
-  );
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  private static final JsonPointer[] TD_UN_LOCATION_CODES = {
+  private static final JsonPointer[] BOOKING_UN_LOCATION_CODES = {
     JsonPointer.compile("/invoicePayableAt/UNLocationCode"),
-    JsonPointer.compile("/shipmentLocations/location/UNLocationCode"),
-    JsonPointer.compile("/shipmentLocations/location/facilityLocation/UNLocationCode")
+    JsonPointer.compile("/placeOfBLIssue/UNLocationCode"),
+    JsonPointer.compile("/transportPlan/loadLocation/UNLocationCode"),
+    JsonPointer.compile("/transportPlan/dischargeLocation/UNLocationCode")
   };
 
   public static ActionCheck requestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
+    for (var ptr : BOOKING_UN_LOCATION_CODES) {
+      checks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, BookingDataSets.UN_LOCODE_DATASET));
+    }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
@@ -91,6 +91,14 @@ public class BookingChecks {
     }
   );
 
+  private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS_UN_LOCATION = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate shipmentLocations UNLocationCode",
+    (mav) -> {
+      mav.submitAllMatching("shipmentLocations.*.location.UNLocationCode");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.UN_LOCODE_DATASET)
+  );
+
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
     (body) -> {
@@ -108,7 +116,7 @@ public class BookingChecks {
         }
       }
       return invalidDates.stream()
-        .map("The expected arrival dates  '%s' are valid"::formatted)
+        .map("The expected arrival dates  '%s' are not valid"::formatted)
         .collect(Collectors.toSet());
     }
   );
@@ -136,8 +144,17 @@ public class BookingChecks {
     "All requested Equipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_REQ_EQUIP,
     JsonAttribute.ifMatchedThen(
-      IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
+      IS_ISO_EQUIPMENT_CONTAINER_REEFER,
       JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBePresent())
+    )
+  );
+
+  private static final JsonContentCheck ISO_EQUIPMENT_CODE_AND_NOR_CHECK = JsonAttribute.allIndividualMatchesMustBeValid(
+    "All requested Equipments where ISOEquipmentCode is reefer code must have 'isNonOperatingReefer' flag",
+    ALL_REQ_EQUIP,
+    JsonAttribute.ifMatchedThen(
+      IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
+      JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBePresent())
     )
   );
 
@@ -150,17 +167,9 @@ public class BookingChecks {
         var isShipperOwned = rq.get("isShipperOwned").asBoolean(false);
         var commodities = requestedEquipments.get("commodities");
         if (isShipperOwned) {
-          for (var commodity : commodities) {
-            var cargoGrossWeight = commodity.get("cargoGrossWeight");
-            var cargoGrossWeightUnit = commodity.get("cargoGrossWeightUnit");
+          for (var commodity : commodities) {;
             var cargoGrossVolume = commodity.get("cargoGrossVolume");
               var cargoGrossVolumeUnit = commodity.get("cargoGrossVolumeUnit");
-            if (cargoGrossWeight == null || cargoGrossWeight.isEmpty()) {
-              issues.add("the container weight be provided");
-            }
-            if(cargoGrossWeightUnit == null || cargoGrossWeightUnit.isEmpty()) {
-              issues.add("the container weight unit must be provided");
-            }
             if(cargoGrossVolume != null && (cargoGrossVolumeUnit  == null || cargoGrossVolumeUnit.isEmpty()) ) {
               issues.add("the cargo gross volume unit must be provided");
             }
@@ -174,15 +183,15 @@ public class BookingChecks {
   private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE = JsonAttribute.customValidator(
     "Conditional Universal Service Reference",
     (body) -> {
-      var expectedDepartureDate = body.path("universalExportVoyageReference");
-      var expectedArrivalDate = body.path("expectedArrivalDate");
-      var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber");
+      var universalExportVoyageReference = body.path("universalExportVoyageReference");
+      var universalImportVoyageReference = body.path("universalImportVoyageReference");
+      var universalServiceReference = body.path("universalServiceReference");
       var issues = new LinkedHashSet<String>();
-
-      if (carrierExportVoyageNumber == null && (expectedDepartureDate == null || expectedArrivalDate == null))  {
-        issues.add("The carrierExportVoyageNumber must be present as either expectedDepartureDate or expectedArrivalDate are not present");
+      if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference) || JsonAttribute.isJsonNodePresent(universalImportVoyageReference) ) {
+        if (JsonAttribute.isJsonNodeAbsent(universalServiceReference) ){
+          issues.add("The universalServiceReference must be present as either universalExportVoyageReference or universalExportVoyageReference are present");
+        }
       }
-
       return issues;
     }
   );
@@ -191,7 +200,8 @@ public class BookingChecks {
     "Validate reference type field",
     (mav) -> {
       mav.submitAllMatching("requestedEquipments.*.references.*.type");
-        mav.submitAllMatching("requestedEquipments.*.commodities.*.references.*.type");
+      mav.submitAllMatching("requestedEquipments.*.commodities.*.references.*.type");
+      mav.submitAllMatching("references.*.type");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES)
   );
@@ -208,6 +218,7 @@ public class BookingChecks {
     "Validate ISO Equipment code",
     (mav) -> {
       mav.submitAllMatching("requestedEquipments.*.ISOEquipmentCode");
+      mav.submitAllMatching("confirmedEquipments.*.ISOEquipmentCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_6346_CONTAINER_CODES)
   );
@@ -272,14 +283,14 @@ public class BookingChecks {
     }
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
+  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings");
 
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     ALL_AMF,
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
-  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = (mav) -> mav.submitAllMatching("shipmentCutOffTimes.*");
+  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = (mav) -> mav.submitAllMatching("shipmentCutOffTimes");
 
   private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "in 'shipmentCutOfftimes' cutOff date time code must be unique",
@@ -317,16 +328,15 @@ public class BookingChecks {
           .findFirst()
           .orElse(null);
 
-      if (polNode == null || polNode.isEmpty() ) {
+      if (podNode == null || podNode.isEmpty() ) {
         issues.add("Port of Discharge/Place of Delivery value must be provided");
       }
-      if (podNode == null || podNode.isEmpty()) {
+      if (polNode == null || polNode.isEmpty()) {
         issues.add("Port of Load/Place of Receipt values must be provided");
       }
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
         issues.add("Container intermediate export stop-off location should not be provided");
       }
-
       return issues;
     });
 
@@ -363,6 +373,31 @@ public class BookingChecks {
     }
   );
 
+  private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
+    "check absence of confirmed fields in non confirmed booking states",
+    body -> {
+      var issues = new LinkedHashSet<String>();
+      var bookingStatus = body.path("bookingStatus").asText("");
+      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromWireName(bookingStatus))) {
+        if (body.hasNonNull("termsAndConditions")) {
+          issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("carrierClauses")) {
+          issues.add("carrierClauses must not be present".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("charges")) {
+          issues.add("charges must not be present".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("shipmentCutOffTimes")) {
+          issues.add("shipmentCutOffTimes must not be present".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("advanceManifestFilings")) {
+          issues.add("advanceManifestFilings must not be present".formatted(bookingStatus));
+        }
+      }
+      return issues;
+    });
+
   private static final JsonContentCheck CHECK_CONFIRMED_BOOKING_FIELDS = JsonAttribute.customValidator(
     "check confirmed booking fields availability",
     body -> {
@@ -372,23 +407,8 @@ public class BookingChecks {
         if (body.get("confirmedEquipments") == null) {
           issues.add("confirmedEquipments for confirmed booking is not present");
         }
-        if (body.get("termsAndConditions") == null) {
-          issues.add("termsAndConditions for confirmed booking is not present");
-        }
         if (body.get("transportPlan") == null) {
           issues.add("transportPlan for confirmed booking is not present");
-        }
-        if (body.get("carrierClauses") == null) {
-          issues.add("carrierClauses for confirmed booking is not present");
-        }
-        if (body.get("charges") == null) {
-          issues.add("charges for confirmed booking is not present");
-        }
-        if (body.get("shipmentCutOffTimes") == null) {
-          issues.add("shipmentCutOffTimes for confirmed booking is not present");
-        }
-        if (body.get("advanceManifestFilings") == null) {
-          issues.add("advanceManifestFilings for confirmed booking is not present");
         }
       }
       return issues;
@@ -510,9 +530,11 @@ public class BookingChecks {
       JsonPointer.compile("/shippedOnBoardDate"),
       JsonPointer.compile("/receivedForShipmentDate")
     ),
+    VALIDATE_SHIPMENT_LOCATIONS_UN_LOCATION,
     CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
+    ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     IS_SHIPPER_OWNED_CONTAINER,
     REFERENCE_TYPE_VALIDATION,
     ISO_EQUIPMENT_CODE_VALIDATION,
@@ -530,6 +552,10 @@ public class BookingChecks {
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
       JsonPointer.compile("/carrierExportVoyageNumber")
+    ),
+    JsonAttribute.allOrNoneArePresent(
+      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
+      JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "DangerousGoods implies packagingCode or imoPackagingCode",
@@ -600,6 +626,7 @@ public class BookingChecks {
     );
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
+    CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     AMF_CC_MTC_COMBINATION_VALIDATIONS,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,

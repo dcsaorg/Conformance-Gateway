@@ -583,6 +583,9 @@ public class JsonAttribute {
     return (nodeToValidate, contextPath) -> {
       var codeA = nodeToValidate.path(nameA).asText("");
       var codeB = nodeToValidate.path(nameB).asText("");
+      if (codeA.isEmpty() || codeB.isEmpty() ) {
+        return Set.of();
+      }
       var combined = codeA + "/" + codeB;
       if (!dataset.contains(combined)) {
         return Set.of(
@@ -782,11 +785,11 @@ public class JsonAttribute {
       .formatted(renderJsonPointer(jsonPointer));
   }
 
-  private static boolean isJsonNodePresent(JsonNode node) {
+  public static boolean isJsonNodePresent(JsonNode node) {
     return !node.isMissingNode() && !node.isNull();
   }
 
-  private static boolean isJsonNodeAbsent(JsonNode node) {
+  public static boolean isJsonNodeAbsent(JsonNode node) {
     return !isJsonNodePresent(node);
   }
 

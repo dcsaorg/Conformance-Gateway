@@ -65,15 +65,21 @@ public class EblIssuanceScenarioListBuilder
                                   issuanceResponseAccepted()
                                       .thenEither(
                                           noAction(),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted()),
                                           duplicateIssuanceRequest(),
                                           duplicateIssuanceResponse()),
                                   duplicateIssuanceRequest().then(issuanceResponseAccepted()),
+                                  duplicateAmendedIssuanceRequest().then(issuanceResponseAccepted()),
                                   issuanceResponseBlocked()
-                                      .then(
-                                          correctIssuanceRequest().then(issuanceResponseAccepted())),
+                                      .thenEither(
+                                          correctIssuanceRequest().then(issuanceResponseAccepted()),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted())
+                                      ),
                                   issuanceResponseRefused()
-                                      .then(
-                                          correctIssuanceRequest().then(issuanceResponseAccepted()))),
+                                      .thenEither(
+                                          correctIssuanceRequest().then(issuanceResponseAccepted()),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted())
+                                      )),
                           incorrectIssuanceRequest()
                               .then(correctIssuanceRequest().then(issuanceResponseAccepted()))),
                 supplyScenarioParameters(EblType.NEGOTIABLE_EBL).then(
@@ -103,25 +109,29 @@ public class EblIssuanceScenarioListBuilder
   }
 
   private static EblIssuanceScenarioListBuilder correctIssuanceRequest() {
-    return _issuanceRequest(true, false);
+    return _issuanceRequest(true, false, false);
   }
 
-  private static EblIssuanceScenarioListBuilder correctIssuanceRequest(EblType eblType) {
-    return _issuanceRequest(true, false);
+  private static EblIssuanceScenarioListBuilder correctAmendedIssuanceRequest() {
+    return _issuanceRequest(true, false, true);
   }
 
+  private static EblIssuanceScenarioListBuilder duplicateAmendedIssuanceRequest() {
+    return _issuanceRequest(true, true, true);
+  }
 
   private static EblIssuanceScenarioListBuilder incorrectIssuanceRequest() {
-    return _issuanceRequest(false, false);
+    return _issuanceRequest(false, false, false);
   }
 
   private static EblIssuanceScenarioListBuilder duplicateIssuanceRequest() {
-    return _issuanceRequest(true, true);
+    return _issuanceRequest(true, true, false);
   }
 
   private static EblIssuanceScenarioListBuilder _issuanceRequest(
       boolean isCorrect,
-      boolean isDuplicate
+      boolean isDuplicate,
+      boolean isAmended
   ) {
     EblIssuanceComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -131,6 +141,7 @@ public class EblIssuanceScenarioListBuilder
             new IssuanceRequestAction(
                 isCorrect,
                 isDuplicate,
+                isAmended,
                 platformPartyName,
                 carrierPartyName,
                 (IssuanceAction) previousAction,

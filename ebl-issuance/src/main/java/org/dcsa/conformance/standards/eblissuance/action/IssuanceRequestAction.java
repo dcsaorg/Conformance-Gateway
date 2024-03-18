@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +20,27 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 public class IssuanceRequestAction extends IssuanceAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isCorrect;
+  private final boolean isAmended;
 
   private final AtomicReference<String> transportDocumentReference;
+
+  private static String stepNameArg(
+    boolean isCorrect,
+    boolean isDuplicate,
+    boolean isAmended
+  ) {
+    return Stream.of(
+      isCorrect ? null : "incorrect",
+      isDuplicate ? "duplicate" : null,
+      isAmended ? "amended" : null
+    ).filter(Objects::nonNull)
+    .collect(Collectors.joining(","));
+  }
 
   public IssuanceRequestAction(
       boolean isCorrect,
       boolean isDuplicate,
+      boolean isAmended,
       String platformPartyName,
       String carrierPartyName,
       IssuanceAction previousAction,
@@ -33,13 +49,11 @@ public class IssuanceRequestAction extends IssuanceAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "Request(%s%s%s)"
-            .formatted(
-                isCorrect ? "" : "incorrect",
-                !isCorrect && isDuplicate ? "," : "",
-                isDuplicate ? "duplicate" : ""),
+        "Request(%s)"
+            .formatted(stepNameArg(isCorrect, isCorrect, isAmended)),
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
+    this.isAmended = isAmended;
     this.requestSchemaValidator = requestSchemaValidator;
     this.transportDocumentReference =
         previousAction != null && !(this.previousAction instanceof SupplyScenarioParametersAction)
@@ -87,13 +101,17 @@ public class IssuanceRequestAction extends IssuanceAction {
             isCorrect ? "an" : "an incorrect",
             tdr == null
                 ? "an eBL that has not yet been issued of type %s".formatted(eblType)
-                : "the eBL with transportDocumentReference '%s'".formatted(tdr));
+                : "%s the eBL with transportDocumentReference '%s'".formatted(
+                  tdr,
+                  isAmended ?  "an amended version of" : ""
+            ));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("isCorrect", isCorrect);
+    jsonNode.put("isCorrect", isCorrect)
+      .put("isAmended", isAmended);
     jsonNode.set("dsp", getDsp().toJson());
     jsonNode.set("ssp", getSspSupplier().get().toJson());
     String tdr = getTdrSupplier().get();

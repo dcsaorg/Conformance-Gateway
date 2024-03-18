@@ -297,10 +297,17 @@ public class BookingChecks {
     ALL_SHIPMENT_CUTOFF_TIMES,
     JsonAttribute.unique("cutOffDateTimeCode")
   );
-  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
-    ALL_AMF,
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+
+  private static final Predicate<JsonNode> HAS_NON_NULL_AMF_ITEM = (reqEquipNode) -> reqEquipNode.hasNonNull("countryCode")
+    && reqEquipNode.hasNonNull("manifestTypeCode");
+
+  private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "All utilizedTransportEquipments with a reefer ISO Equipment Code must have at least isNonOperatingReefer",
+    (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
+    JsonAttribute.ifMatchedThen(
+      HAS_NON_NULL_AMF_ITEM,
+      JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+    )
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(

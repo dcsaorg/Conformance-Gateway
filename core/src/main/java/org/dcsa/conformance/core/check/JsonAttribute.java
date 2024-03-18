@@ -583,9 +583,6 @@ public class JsonAttribute {
     return (nodeToValidate, contextPath) -> {
       var codeA = nodeToValidate.path(nameA).asText("");
       var codeB = nodeToValidate.path(nameB).asText("");
-      if (codeA.isEmpty() || codeB.isEmpty() ) {
-        return Set.of();
-      }
       var combined = codeA + "/" + codeB;
       if (!dataset.contains(combined)) {
         return Set.of(

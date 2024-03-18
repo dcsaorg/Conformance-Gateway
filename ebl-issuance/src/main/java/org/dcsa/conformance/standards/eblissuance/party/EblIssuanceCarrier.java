@@ -87,6 +87,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
 
     boolean isCorrect = actionPrompt.get("isCorrect").asBoolean();
+    var isAmended = actionPrompt.path("isAmended").asBoolean(false);
     if (isCorrect) {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
     }
@@ -127,6 +128,11 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
     if (!isCorrect) {
       ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
+    }
+    if (isAmended) {
+      var sealObj = (ObjectNode)jsonRequestBody.path("document").path("utilizedTransportEquipments").path(0).path("seals").path(0);
+      var sealNumber = sealObj.path("sealNumber").asText("") + "X";
+      sealObj.put("sealNumber", sealNumber);
     }
 
     syncCounterpartPost(

@@ -14,16 +14,20 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblissuance.crypto.Checksums;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
+  private final Map<String, String> tdr2PendingChecksum = new HashMap<>();
+  private final Map<String, Boolean> knownChecksums = new HashMap<>();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblIssuancePlatform(
@@ -44,8 +48,6 @@ public class EblIssuancePlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
-
     ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
     eblStatesByTdr.forEach(
         (key, value) -> {
@@ -55,6 +57,9 @@ public class EblIssuancePlatform extends ConformanceParty {
           arrayNodeEblStatesById.add(entryNode);
         });
     targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
+
+    targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(objectMapper, tdr2PendingChecksum));
+    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(objectMapper, knownChecksums, String::valueOf));
   }
 
   @Override
@@ -65,11 +70,16 @@ public class EblIssuancePlatform extends ConformanceParty {
                 eblStatesByTdr.put(
                     entryNode.get("key").asText(),
                     EblIssuanceState.valueOf(entryNode.get("value").asText())));
+
+    StateManagementUtil.restoreIntoMap(tdr2PendingChecksum, sourceObjectNode.path("tdr2PendingChecksum"));
+    StateManagementUtil.restoreIntoMap(knownChecksums, sourceObjectNode.path("knownChecksums"), Boolean::valueOf);
   }
 
   @Override
   protected void doReset() {
     eblStatesByTdr.clear();
+    tdr2PendingChecksum.clear();
+    knownChecksums.clear();
   }
 
   @Override
@@ -90,6 +100,8 @@ public class EblIssuancePlatform extends ConformanceParty {
         eblStatesByTdr.put(tdr, EblIssuanceState.ISSUED);
       } else {
         eblStatesByTdr.remove(tdr);
+        var checksum = tdr2PendingChecksum.get(tdr);
+        knownChecksums.remove(checksum);
       }
     }
 
@@ -135,12 +147,16 @@ public class EblIssuancePlatform extends ConformanceParty {
     log.info("EblIssuancePlatform.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
-    String tdr = jsonRequest.get("document").get("transportDocumentReference").asText();
+    var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
+    var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
+    var state = eblStatesByTdr.get(tdr);
 
     ConformanceResponse response;
-    if (!jsonRequest.get("document").has("issuingParty")) {
-      response =
-          request.createResponse(
+    if (tdr == null || !jsonRequest.path("document").has("issuingParty")) {
+      addOperatorLogEntry(
+        "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
+          .formatted(tdr));
+      return request.createResponse(
               400,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
@@ -148,16 +164,27 @@ public class EblIssuancePlatform extends ConformanceParty {
                       .createObjectNode()
                       .put(
                           "message",
-                          "Rejecting issuance request for document '%s' because the issuing party is missing"
+                          "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
                               .formatted(tdr))));
-    } else if (!eblStatesByTdr.containsKey(tdr)) {
+    }
+    if (state == null || state == EblIssuanceState.ISSUED && !knownChecksums.containsKey(checksum)) {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
+      knownChecksums.put(checksum, Boolean.TRUE);
+      tdr2PendingChecksum.put(tdr, checksum);
       response =
           request.createResponse(
               204,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(objectMapper.createObjectNode()));
     } else {
+      String message;
+      if (state == EblIssuanceState.ISSUANCE_REQUESTED) {
+        message = "Rejecting issuance request for document '%s' because there is a pending issuance request for it"
+          .formatted(tdr);
+      } else {
+        message = "Rejecting issuance request for document '%s' because has been issued in the past"
+          .formatted(tdr);
+      }
       response =
           request.createResponse(
               409,
@@ -165,10 +192,7 @@ public class EblIssuancePlatform extends ConformanceParty {
               new ConformanceMessageBody(
                   objectMapper
                       .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting issuance request for document '%s' because it is in state '%s'"
-                              .formatted(tdr, eblStatesByTdr.get(tdr)))));
+                      .put("message", message)));
     }
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"

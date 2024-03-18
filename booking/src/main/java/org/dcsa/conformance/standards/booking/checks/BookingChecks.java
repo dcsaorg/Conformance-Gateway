@@ -144,7 +144,7 @@ public class BookingChecks {
     "All requested Equipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_REQ_EQUIP,
     JsonAttribute.ifMatchedThen(
-      IS_ISO_EQUIPMENT_CONTAINER_REEFER,
+      IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
       JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBePresent())
     )
   );
@@ -153,7 +153,7 @@ public class BookingChecks {
     "All requested Equipments where ISOEquipmentCode is reefer code must have 'isNonOperatingReefer' flag",
     ALL_REQ_EQUIP,
     JsonAttribute.ifMatchedThen(
-      IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
+      IS_ISO_EQUIPMENT_CONTAINER_REEFER,
       JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBePresent())
     )
   );

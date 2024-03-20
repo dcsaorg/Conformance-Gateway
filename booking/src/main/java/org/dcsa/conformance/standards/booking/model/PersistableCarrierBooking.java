@@ -88,7 +88,7 @@ public class PersistableCarrierBooking {
     state.set(AMENDED_BOOKING_DATA_FIELD, node);
   }
 
-  public void confirmBookingAmendment(String reference, String reason) {
+  public void confirmBookingAmendment(String reference) {
     checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);

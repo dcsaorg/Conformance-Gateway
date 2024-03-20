@@ -407,13 +407,22 @@ public class BookingChecks {
           issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
         }
         if (body.hasNonNull("carrierClauses")) {
-          issues.add("carrierClauses must not be present".formatted(bookingStatus));
+          issues.add("carrierClauses must not be present in %s".formatted(bookingStatus));
         }
         if (body.hasNonNull("charges")) {
-          issues.add("charges must not be present".formatted(bookingStatus));
+          issues.add("charges must not be present in %s".formatted(bookingStatus));
         }
         if (body.hasNonNull("advanceManifestFilings")) {
-          issues.add("advanceManifestFilings must not be present".formatted(bookingStatus));
+          issues.add("advanceManifestFilings must not be present in %s".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("confirmedEquipments")) {
+          issues.add("confirmedEquipments must not be present in %s".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("transportPlan")) {
+          issues.add("transportPlan must not be present in %s".formatted(bookingStatus));
+        }
+        if (body.hasNonNull("shipmentCutOffTimes")) {
+          issues.add("shipmentCutOffTimes must not be present in %s".formatted(bookingStatus));
         }
       }
       return issues;

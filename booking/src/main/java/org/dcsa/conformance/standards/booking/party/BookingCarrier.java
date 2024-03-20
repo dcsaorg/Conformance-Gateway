@@ -197,7 +197,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     if (acceptAmendment) {
-      persistableCarrierBooking.confirmBookingAmendment(cbr, null);
+      persistableCarrierBooking.confirmBookingAmendment(cbr);
     } else {
       persistableCarrierBooking.declineBookingAmendment(
           cbr, "Declined as required by the conformance scenario");

@@ -138,12 +138,10 @@ public class BookingChecks {
   };
   private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = (reqEquipNode) -> {
     var norNode = reqEquipNode.path("isNonOperatingReefer");
-    if (norNode.isMissingNode() || !norNode.isBoolean()) {
-      // Only require the reefer if there is no equipment code or the equipment code is clearly a reefer.
-      // Otherwise, we give conflicting results in some scenarios.
-      return !HAS_ISO_EQUIPMENT_CODE.test(reqEquipNode) || IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(reqEquipNode);
+    if (HAS_ISO_EQUIPMENT_CODE.test(reqEquipNode) && IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(reqEquipNode)) {
+      return !norNode.isMissingNode() && !norNode.asBoolean(false);
     }
-    return !norNode.asBoolean(false);
+    return false;
   };
 
   private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP = (mav) -> mav.submitAllMatching("requestedEquipments.*");

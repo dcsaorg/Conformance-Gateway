@@ -96,6 +96,7 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
           Stream.concat(
             EBLChecks.siRefStatusContentChecks(
               getMatchedExchangeUuid(),
+              expectedApiVersion,
               siStatus,
               ShippingInstructionsStatus.SI_UPDATE_CANCELLED,
               EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())

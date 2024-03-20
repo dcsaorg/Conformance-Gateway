@@ -113,6 +113,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                     PintRole::isSendingPlatform,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
+                    expectedApiVersion,
                     JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
                     JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier)))
                   : null,
@@ -122,6 +123,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
@@ -131,6 +133,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                   PintRole::isReceivingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.RESPONSE,
+                  expectedApiVersion,
                   JsonAttribute.customValidator(
                     "Response signature must be valid",
                     PintChecks.signatureValidates(receiverVerifierSupplier)
@@ -144,16 +147,19 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                 ),
                 tdContentChecks(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp()
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()
                 ),
                 validateSignedFinishResponse(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   pintResponseCode
                 )
             ).filter(Objects::nonNull);

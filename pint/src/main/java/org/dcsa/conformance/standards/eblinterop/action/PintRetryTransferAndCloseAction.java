@@ -136,6 +136,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
                 ),
@@ -143,6 +144,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
@@ -152,6 +154,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                 PintRole::isReceivingPlatform,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
+                expectedApiVersion,
                 JsonAttribute.customValidator(
                   "Response signature must be valid",
                   PintChecks.signatureValidates(receiverVerifierSupplier)
@@ -165,12 +168,14 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()
                 ),
                 validateSignedFinishResponse(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   responseCode
                 )
             );

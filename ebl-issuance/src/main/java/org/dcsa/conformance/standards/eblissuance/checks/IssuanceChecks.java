@@ -45,12 +45,13 @@ public class IssuanceChecks {
     );
   }
 
-  public static ActionCheck tdScenarioChecks(UUID matched, EblType eblType) {
+  public static ActionCheck tdScenarioChecks(UUID matched, String standardsVersion, EblType eblType) {
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       EblIssuanceRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       JsonAttribute.mustEqual(
         "[Scenario] The 'document.isToOrder' attribute must match the scenario requirements",
         JsonPointer.compile("/document/isToOrder"),
@@ -60,13 +61,14 @@ public class IssuanceChecks {
     );
   }
 
-  public static ActionCheck tdContentChecks(UUID matched) {
+  public static ActionCheck tdContentChecks(UUID matched, String standardsVersion) {
     var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, null);
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       EblIssuanceRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       JsonContentCheckRebaser.of("document"),
       checks
     );

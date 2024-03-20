@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 class KeywordDatasets {
   private KeywordDatasets() {}
 
-
   static void checkResource(Class<?> resourceClass, String resourceName) {
     var resource = resourceClass.getResource(resourceName);
     if (resource == null) {
@@ -42,7 +41,6 @@ class KeywordDatasets {
     }
     return Collections.unmodifiableSet(keywords)::contains;
   }
-
 
   interface CSVRowSelector {
     default void setup(String resourceName, String[] headers) {

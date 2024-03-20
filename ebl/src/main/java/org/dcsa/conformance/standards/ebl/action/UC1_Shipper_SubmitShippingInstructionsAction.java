@@ -78,12 +78,13 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
               EBLChecks.siRefStatusContentChecks(
                 getMatchedExchangeUuid(),
+                expectedApiVersion,
                 ShippingInstructionsStatus.SI_RECEIVED,
                 EBLChecks.SIR_REQUIRED_IN_REF_STATUS
               ),

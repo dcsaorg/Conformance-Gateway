@@ -164,13 +164,14 @@ public class PintChecks {
     return combined;
   }
 
-  public static ActionCheck tdContentChecks(UUID matched, Supplier<SenderScenarioParameters> senderScenarioParametersSupplier) {
+  public static ActionCheck tdContentChecks(UUID matched, String standardsVersion, Supplier<SenderScenarioParameters> senderScenarioParametersSupplier) {
     var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, delayedValue(senderScenarioParametersSupplier, SenderScenarioParameters::transportDocumentReference));
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       PintRole::isSendingPlatform,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       JsonContentCheckRebaser.of("transportDocument"),
       checks
     );
@@ -289,6 +290,7 @@ public class PintChecks {
 
   public static ActionCheck validateUnsignedStartResponse(
     UUID matched,
+    String standardsVersion,
     int missingDocumentCount,
     Supplier<DynamicScenarioParameters> dspSupplier
   ) {
@@ -321,12 +323,14 @@ public class PintChecks {
       PintRole::isReceivingPlatform,
       matched,
       HttpMessageType.RESPONSE,
+      standardsVersion,
       jsonContentChecks
     );
   }
 
   public static ActionCheck validateSignedFinishResponse(
     UUID matched,
+    String standardsVersion,
     PintResponseCode expectedResponseCode
   ) {
     var jsonContentChecks = new ArrayList<JsonContentCheck>();
@@ -374,12 +378,14 @@ public class PintChecks {
       PintRole::isReceivingPlatform,
       matched,
       HttpMessageType.RESPONSE,
+      standardsVersion,
       jsonContentChecks
     );
   }
 
   public static ActionCheck validateInitiateTransferRequest(
     UUID matched,
+    String standardsVersion,
     Supplier<SenderScenarioParameters> sspSupplier,
     Supplier<ReceiverScenarioParameters> rspSupplier,
     Supplier<DynamicScenarioParameters> dspSupplier
@@ -445,6 +451,7 @@ public class PintChecks {
       PintRole::isSendingPlatform,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       jsonContentChecks
     );
   }

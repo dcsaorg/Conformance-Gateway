@@ -82,7 +82,7 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-                EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), getDspSupplier(), TransportDocumentStatus.TD_APPROVED));
+                EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier(), TransportDocumentStatus.TD_APPROVED));
         return Stream.concat(
           primaryExchangeChecks,
           getTDNotificationChecks(

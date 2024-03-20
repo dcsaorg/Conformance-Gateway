@@ -165,10 +165,10 @@ public class IssuanceRequestAction extends IssuanceAction {
                         requestSchemaValidator)
                     : null,
                 expectedApiVersion.startsWith("3.0")
-                  ? IssuanceChecks.tdScenarioChecks(getMatchedExchangeUuid(), getDsp().eblType())
+                  ? IssuanceChecks.tdScenarioChecks(getMatchedExchangeUuid(), expectedApiVersion, getDsp().eblType())
                   : null,
                 isCorrect && expectedApiVersion.startsWith("3.")
-                  ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid())
+                  ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid(), expectedApiVersion)
                   : null
             )
             .filter(Objects::nonNull);

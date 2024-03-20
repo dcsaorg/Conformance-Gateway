@@ -91,6 +91,7 @@ public class PintCloseTransferAction extends PintAction {
                 ),
                 validateSignedFinishResponse(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   pintResponseCode
                 )
             );

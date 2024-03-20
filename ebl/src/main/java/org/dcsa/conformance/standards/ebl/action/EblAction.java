@@ -192,7 +192,7 @@ public abstract class EblAction extends ConformanceAction {
                 notificationExchangeUuid,
                 HttpMessageType.REQUEST,
                 notificationSchemaValidator),
-          EBLChecks.siNotificationContentChecks(notificationExchangeUuid, expectedStatus, expectedUpdatedStatus, extraChecks)
+          EBLChecks.siNotificationContentChecks(notificationExchangeUuid, expectedApiVersion, expectedStatus, expectedUpdatedStatus, extraChecks)
       );
   }
 
@@ -241,7 +241,7 @@ public abstract class EblAction extends ConformanceAction {
         notificationExchangeUuid,
         HttpMessageType.REQUEST,
         notificationSchemaValidator),
-        EBLChecks.tdNotificationContentChecks(notificationExchangeUuid, transportDocumentStatus, tdrCheck)
+        EBLChecks.tdNotificationContentChecks(notificationExchangeUuid, expectedApiVersion, transportDocumentStatus, tdrCheck)
      );
   }
 }

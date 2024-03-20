@@ -1,0 +1,87 @@
+{
+  "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+  "isElectronic": true,
+  "isToOrder": false,
+  "sendToPlatform": "BOLE",
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "locationType": "UNCO",
+    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+  },
+  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
+  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+  "partyContactDetails": [
+    {
+      "name": "DCSA test person",
+      "email": "no-reply@dcsa.example.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+      "weight": 12000,
+      "weightUnit": "KGM",
+      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "HSCodes": [
+        "CONSIGNMENT_ITEM_HS_CODE"
+      ],
+      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "cargoItems": [
+        {
+          "equipmentReference": "ABCU7341935",
+          "weight": 12000,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "numberOfPackages": 400
+          }
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "type": "SI",
+      "value": "SI-REF-1234"
+    }
+  ],
+  "customsReferences": [
+    {
+      "type": "CTN",
+      "countryCode": "SN",
+      "value": "12345"
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": true,
+      "equipment": {
+        "equipmentReference": "ABCU7341935",
+        "ISOEquipmentCode": "45G1",
+        "tareWeight": 4030,
+        "weightUnit": "KGM"
+      },
+      "seals": [
+        {
+          "number": "NSL13386"
+        }
+      ]
+    }
+  ],
+  "documentParties": [
+    {
+      "party": {
+        "partyName": "DCSA CTK",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      },
+      "partyFunction": "OS",
+      "isToBeNotified": false
+    }
+  ]
+}

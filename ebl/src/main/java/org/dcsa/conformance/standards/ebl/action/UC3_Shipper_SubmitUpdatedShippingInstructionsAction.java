@@ -92,13 +92,14 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier())
+            EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier())
         );
         return Stream.concat(
           primaryExchangeChecks,
           Stream.concat(
               EBLChecks.siRefStatusContentChecks(
                 getMatchedExchangeUuid(),
+                expectedApiVersion,
                 currentState,
                 ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
                 EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())),

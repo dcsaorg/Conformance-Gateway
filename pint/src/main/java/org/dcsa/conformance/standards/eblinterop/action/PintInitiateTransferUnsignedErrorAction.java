@@ -120,6 +120,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
                 ),
@@ -127,6 +128,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
@@ -138,10 +140,12 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                 ),
                 tdContentChecks(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp()
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

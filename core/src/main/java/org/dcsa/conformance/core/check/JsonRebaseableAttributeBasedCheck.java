@@ -14,6 +14,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 class JsonRebaseableAttributeBasedCheck extends ActionCheck {
 
+  private final String standardsVersion;
   private final JsonContentCheckRebaser rebaser;
   private final List<JsonRebaseableContentCheck> validators;
 
@@ -23,6 +24,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
+    String standardsVersion,
     @NonNull JsonContentCheckRebaser rebaser,
     @NonNull
     List<@NonNull JsonRebaseableContentCheck> validators) {
@@ -30,6 +32,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
     if (validators.isEmpty()) {
       throw new IllegalArgumentException("Must have at least one subcheck (validators must be non-empty)");
     }
+    this.standardsVersion = standardsVersion;
     this.rebaser = rebaser;
     this.validators = validators;
   }
@@ -43,16 +46,18 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
   @Override
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return this.validators.stream()
-      .map(validator -> new SingleValidatorCheck(this::isRelevantForRole, matchedExchangeUuid, httpMessageType, rebaser.offset(validator)));
+      .map(validator -> new SingleValidatorCheck(this::isRelevantForRole, matchedExchangeUuid, httpMessageType, standardsVersion, rebaser.offset(validator)));
   }
 
 
   private static class SingleValidatorCheck extends ActionCheck {
 
+    private final String standardsVersion;
     private final JsonRebaseableContentCheck validator;
 
-    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, @NonNull JsonRebaseableContentCheck validator) {
+    public SingleValidatorCheck(Predicate<String> isRelevantForRoleName, UUID matchedExchangeUuid, HttpMessageType httpMessageType, String standardsVersion, @NonNull JsonRebaseableContentCheck validator) {
       super(validator.description(), isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
+      this.standardsVersion = standardsVersion;
       this.validator = validator;
     }
 
@@ -61,7 +66,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return Collections.emptySet();
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();
-      return this.validator.validate(jsonBody);
+      return VersionedKeywordDataset.withVersion(standardsVersion, () -> validator.validate(jsonBody));
     }
   }
 }

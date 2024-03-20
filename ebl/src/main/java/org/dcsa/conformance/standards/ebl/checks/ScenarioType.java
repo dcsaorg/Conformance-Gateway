@@ -26,7 +26,8 @@ public enum ScenarioType {
       case REGULAR_2C_2U_2E -> "2c2u2e";
       case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
       case REGULAR_SWB_AMF -> "amf";
-      case REGULAR_SWB, REGULAR_BOL, ACTIVE_REEFER, NON_OPERATING_REEFER, DG -> "request";
+      case DG -> "dg";
+      case REGULAR_SWB, REGULAR_BOL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
     };
     return "ebl-api-" + version.toLowerCase() + "-" + suffix + ".json";
   }
@@ -37,5 +38,9 @@ public enum ScenarioType {
 
   public boolean isCustomsReferencesRequired() {
     return this == REGULAR_SWB_SOC_AND_REFERENCES;
+  }
+
+  public boolean hasDG() {
+    return this == DG;
   }
 }

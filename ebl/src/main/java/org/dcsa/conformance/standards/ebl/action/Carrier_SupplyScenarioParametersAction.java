@@ -75,6 +75,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Shoes - black, 400 boxes",
         null,
+        "Fibreboard boxes",
         "ServiceContractReference-1234",
         "QuotationReference-1234"
       );
@@ -90,6 +91,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Dairy products",
         null,
+        "Bottles",
         "ServiceContractReference-1234AR",
         "QuotationReference-1234AR"
       );
@@ -105,6 +107,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Non alcoholic beverages, 40,000 cans",
         null,
+        "Bottles",
         "ServiceContractReference-1234NOR",
         "QuotationReference-1234NOR"
       );
@@ -119,6 +122,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "293499",
         null,
         "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        null,
         null,
         "ServiceContractReference-1234DG",
         "QuotationReference-1234DG"
@@ -135,6 +139,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "732391",
         "Tableware and kitchenware",
         "Kitchen pots and pans",
+        "Fibreboard boxes",
         "SCR-1234-RG2C2U1E",
         "QR-1234-RG2C2U1E"
       );
@@ -150,6 +155,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "732391",
         "Tableware and kitchenware",
         "Kitchen pots and pans",
+        "Fibreboard boxes",
         "SCR-1234-RG2C2U2E",
         "QR-1234-RG2C2U2E"
       );
@@ -164,6 +170,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Tableware and kitchenware",
         null,
+        "Fibreboard boxes",
         "SCR-1234-RG-SOC-REFERENCES",
         "QR-1234-RG-SOC-REFERENCES"
       );

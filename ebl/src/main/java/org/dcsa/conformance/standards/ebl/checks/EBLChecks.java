@@ -93,20 +93,10 @@ public class EBLChecks {
     return isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""));
   };
 
-  private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = (uteNode) -> {
-    var norNode = uteNode.path("isNonOperatingReefer");
-    if (norNode.isMissingNode() || !norNode.isBoolean()) {
-      // Only require the reefer if there is no equipment code or the equipment code is clearly a reefer.
-      // Otherwise, we give conflicting results in some scenarios.
-      return !HAS_ISO_EQUIPMENT_CODE.test(uteNode) || IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(uteNode);
-    }
-    return !norNode.asBoolean(false);
-  };
-
   private static final JsonRebaseableContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments with a reefer ISO Equipment Code must have at least isNonOperatingReefer",
+    "Validate utilizedTransportEquipment and reefer attributes",
     ALL_UTE,
-    JsonAttribute.ifMatchedThen(
+    JsonAttribute.ifMatchedThenElse(
       HAS_ISO_EQUIPMENT_CODE,
       JsonAttribute.ifMatchedThenElse(
         IS_ISO_EQUIPMENT_CONTAINER_REEFER,
@@ -115,6 +105,12 @@ public class EBLChecks {
           JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBeAbsent()),
           JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBeAbsent())
         )
+      ),
+      // If there is no ISOEquipmentCode, then we can only say that `activeReeferSettings` implies
+      // `isNonOperatingReefer=False` (the `=False` part is checked elsewhere).
+      JsonAttribute.presenceImpliesOtherField(
+        "activeReeferSettings",
+        "isNonOperatingReefer"
       )
     )
   );
@@ -123,7 +119,7 @@ public class EBLChecks {
     "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
-      IS_ACTIVE_REEFER_SETTINGS_REQUIRED,
+      JsonAttribute.isFalse("isNonOperatingReefer"),
       JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBePresent())
     )
   );
@@ -190,6 +186,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate field is a known ISO 3166 alpha 2 code",
     (mav) -> {
+      mav.submitAllMatching("placeOfIssue.countryCode");
       mav.submitAllMatching("advancedManifestFilings.*.countryCode");
       mav.submitAllMatching("customsReferences.*.countryCode");
       mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
@@ -674,7 +671,7 @@ public class EBLChecks {
     };
   }
 
-  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
+  private static void generateScenarioRelatedChecks(List<JsonContentCheck> checks, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, boolean isTD) {
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'transportDocumentTypeCode' is used",
       "transportDocumentTypeCode",
@@ -690,6 +687,20 @@ public class EBLChecks {
         JsonAttribute.customValidator(
           "[Scenario] Verify that the correct 'commoditySubreference' is used",
           JsonAttribute.path("consignmentItems", checkCommoditySubreference(cspSupplier))));
+
+      if (!standardVersion.equals("3.0.0-Beta-1")) {
+        checks.add(
+          JsonAttribute.allIndividualMatchesMustBeValid(
+            "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
+            (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+            JsonAttribute.ifMatchedThenElse(
+              (ignored) -> dspSupplier.get().scenarioType().hasDG(),
+              JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
+              JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
+            )
+          )
+        );
+      }
     }
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'equipmentReference' values are used",
@@ -1005,18 +1016,19 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck siRequestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck siRequestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier, false);
+    generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
+      standardVersion,
       checks
     );
   }
 
-  public static ActionCheck siResponseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
+  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       SI_REF_SIR_PTR,
@@ -1035,20 +1047,21 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
-    generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier, false);
+    generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
+      standardVersion,
       checks
     );
   }
 
-  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus, JsonContentCheck ... extraChecks) {
-    return siRefStatusContentChecks(matched, shippingInstructionsStatus, null, extraChecks);
+  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, JsonContentCheck ... extraChecks) {
+    return siRefStatusContentChecks(matched, standardsVersion, shippingInstructionsStatus, null, extraChecks);
   }
 
-  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
+  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
       ? JsonAttribute.mustEqual(
       SI_REF_UPDATED_SI_STATUS_PTR,
@@ -1065,16 +1078,18 @@ public class EBLChecks {
         EblRole::isCarrier,
         matched,
         HttpMessageType.RESPONSE,
+        standardsVersion,
         checks
       )
     );
   }
 
-  public static ActionCheck tdRefStatusChecks(UUID matched, Supplier<DynamicScenarioParameters> dspSupplier, TransportDocumentStatus transportDocumentStatus) {
+  public static ActionCheck tdRefStatusChecks(UUID matched, String standardVersion, Supplier<DynamicScenarioParameters> dspSupplier, TransportDocumentStatus transportDocumentStatus) {
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
+      standardVersion,
       JsonAttribute.mustEqual(
         TD_REF_TDR_PTR,
         () -> dspSupplier.get().transportDocumentReference()
@@ -1086,7 +1101,7 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck siNotificationContentChecks(UUID matched, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
+  public static ActionCheck siNotificationContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     String titlePrefix = "[Notification]";
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
       ? JsonAttribute.mustEqual(
@@ -1104,11 +1119,12 @@ public class EBLChecks {
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       jsonContentChecks
     );
   }
 
-  public static ActionCheck tdNotificationContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, JsonContentCheck ... extraChecks) {
+  public static ActionCheck tdNotificationContentChecks(UUID matched, String standardsVersion, TransportDocumentStatus transportDocumentStatus, JsonContentCheck ... extraChecks) {
     String titlePrefix = "[Notification]";
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>(Arrays.asList(extraChecks));
     jsonContentChecks.add(JsonAttribute.mustEqual(
@@ -1120,6 +1136,7 @@ public class EBLChecks {
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       jsonContentChecks
     );
   }
@@ -1148,7 +1165,7 @@ public class EBLChecks {
     return jsonContentChecks;
   }
 
-  public static ActionCheck tdPlusScenarioContentChecks(UUID matched, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck tdPlusScenarioContentChecks(UUID matched, String standardVersion, TransportDocumentStatus transportDocumentStatus, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
       jsonContentChecks,
@@ -1203,11 +1220,12 @@ public class EBLChecks {
         return Set.of();
       }
     ));
-    generateScenarioRelatedChecks(jsonContentChecks, cspSupplier, dspSupplier, true);
+    generateScenarioRelatedChecks(jsonContentChecks, standardVersion, cspSupplier, dspSupplier, true);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
+      standardVersion,
       jsonContentChecks
     );
   }

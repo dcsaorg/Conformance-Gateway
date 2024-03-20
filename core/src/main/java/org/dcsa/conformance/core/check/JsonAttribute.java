@@ -12,6 +12,7 @@ public class JsonAttribute {
 
   private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
 
+  @Deprecated
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -19,6 +20,28 @@ public class JsonAttribute {
     JsonContentCheck ... checks
   ) {
     return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
+  }
+
+  public static ActionCheck contentChecks(
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    String standardsVersion,
+    JsonContentCheck ... checks
+  ) {
+    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
+  }
+
+  @Deprecated
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    String standardsVersion,
+    JsonContentCheck ... checks
+  ) {
+    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
   public static ActionCheck contentChecks(
@@ -31,6 +54,7 @@ public class JsonAttribute {
     return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
   }
 
+  @Deprecated
   public static ActionCheck contentChecks(
     String titlePrefix,
     String title,
@@ -39,17 +63,51 @@ public class JsonAttribute {
     HttpMessageType httpMessageType,
     JsonContentCheck ... checks
   ) {
-    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
+    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, Arrays.asList(checks));
+  }
+
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    String title,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    String standardsVersion,
+    JsonContentCheck ... checks
+  ) {
+    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
 
+  @Deprecated
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
     List<JsonContentCheck> checks
   ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, checks);
+    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, checks);
+  }
+
+  public static ActionCheck contentChecks(
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    String standardsVersion,
+    List<JsonContentCheck> checks
+  ) {
+    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
+  }
+
+  @Deprecated
+  public static ActionCheck contentChecks(
+    String titlePrefix,
+    Predicate<String> isRelevantForRoleName,
+    UUID matchedExchangeUuid,
+    HttpMessageType httpMessageType,
+    List<JsonContentCheck> checks
+  ) {
+    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, checks);
   }
 
   public static ActionCheck contentChecks(
@@ -57,6 +115,7 @@ public class JsonAttribute {
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
+    String standardVersion,
     List<JsonContentCheck> checks
   ) {
     return contentChecks(
@@ -66,6 +125,7 @@ public class JsonAttribute {
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,
+      standardVersion,
       checks
     );
   }
@@ -76,6 +136,7 @@ public class JsonAttribute {
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
+    String standardsVersion,
     List<JsonContentCheck> checks
   ) {
     return new JsonAttributeBasedCheck(
@@ -84,6 +145,7 @@ public class JsonAttribute {
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,
+      standardsVersion,
       checks
     );
   }
@@ -93,6 +155,7 @@ public class JsonAttribute {
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
+    String standardsVersion,
     JsonContentCheckRebaser rebaser,
     List<JsonRebaseableContentCheck> checks
   ) {
@@ -102,6 +165,7 @@ public class JsonAttribute {
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,
+      standardsVersion,
       rebaser,
       checks
     );
@@ -113,6 +177,7 @@ public class JsonAttribute {
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
+    String standardsVersion,
     JsonContentCheckRebaser rebaser,
     List<JsonRebaseableContentCheck> checks
   ) {
@@ -122,6 +187,7 @@ public class JsonAttribute {
       isRelevantForRoleName,
       matchedExchangeUuid,
       httpMessageType,
+      standardsVersion,
       rebaser,
       checks
     );
@@ -157,6 +223,20 @@ public class JsonAttribute {
     return (baseNode) -> baseNode.path(path).asBoolean(defaultValue);
   }
 
+  public static Predicate<JsonNode> isFalse(
+    @NonNull
+    String path
+  ) {
+    return isFalse(path, true);
+  }
+
+  public static Predicate<JsonNode> isFalse(
+    @NonNull
+    String path,
+    boolean defaultValue
+  ) {
+    return (baseNode) -> !baseNode.path(path).asBoolean(defaultValue);
+  }
 
   public static Predicate<JsonNode> isEqualTo(
     @NonNull String path,

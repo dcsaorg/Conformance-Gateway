@@ -18,6 +18,8 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 public class CarrierShippingInstructions {
   private static final Random RANDOM = new Random();
 
+  private static final String STD_VERSION_FIELD = "standardsVersion";
+
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
 
@@ -104,14 +106,14 @@ public class CarrierShippingInstructions {
   };
 
   private static TDField initialFieldValue(String attribute, String value) {
-    return initialFieldValue(attribute, (o, a) -> o.put(a, value));
+    return initialFieldValue(attribute, (o, a, v) -> o.put(a, value));
   }
 
   private static TDField initialFieldValue(String attribute, Supplier<String> valueGenerator) {
-    return initialFieldValue(attribute, (o, a) -> o.put(a, valueGenerator.get()));
+    return initialFieldValue(attribute, (o, a, v) -> o.put(a, valueGenerator.get()));
   }
 
-  private static TDField initialFieldValue(String attribute, BiConsumer<ObjectNode, String> valueSetter) {
+  private static TDField initialFieldValue(String attribute, TriConsumer<ObjectNode, String, String> valueSetter) {
     return new TDField(attribute, valueSetter, null);
   }
 
@@ -119,12 +121,12 @@ public class CarrierShippingInstructions {
     return new TDField(attribute, null, null);
   }
 
-  private static TDField field(String attribute, BiConsumer<ObjectNode, String> initializer, BiConsumer<ObjectNode, String> updater) {
+  private static TDField field(String attribute, TriConsumer<ObjectNode, String, String> initializer, TriConsumer<ObjectNode, String, String> updater) {
     return new TDField(attribute, initializer, updater);
   }
 
   private static TDField issuingParty() {
-    return initialFieldValue("issuingParty", (o, a) -> {
+    return initialFieldValue("issuingParty", (o, a, v) -> {
       int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
       var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
       o.set(a, choice.deepCopy());
@@ -133,19 +135,19 @@ public class CarrierShippingInstructions {
 
   private record TDField(
     String attribute,
-    BiConsumer<ObjectNode, String> initializer,
-    BiConsumer<ObjectNode, String> updater
+    TriConsumer<ObjectNode, String, String> initializer,
+    TriConsumer<ObjectNode, String, String> updater
   ) {
 
-    public void provideField(JsonNode source, ObjectNode dest) {
+    public void provideField(JsonNode source, ObjectNode dest, String standardsVersion) {
       var data = source != null ? source.get(attribute) : null;
       if (data != null) {
         dest.set(attribute, data.deepCopy());
         if (updater != null) {
-          updater.accept(dest, attribute);
+          updater.accept(dest, attribute, standardsVersion);
         }
       } else if (initializer != null) {
-        initializer.accept(dest, attribute);
+        initializer.accept(dest, attribute, standardsVersion);
       }
     }
   }
@@ -161,14 +163,14 @@ public class CarrierShippingInstructions {
     initialFieldValue("deliveryTypeAtDestination", "CY"),
     initialFieldValue(
         "shippedOnBoardDate",
-        (o, a) -> {
+        (o, a, v) -> {
           if (o.path("isShippedOnBoardType").asBoolean(true)) {
             o.put(a, LocalDate.now().toString());
           }
         }),
     initialFieldValue(
         "receivedForShipmentDate",
-        (o, a) -> {
+        (o, a, v) -> {
           if (!o.path("isShippedOnBoardType").asBoolean(true)) {
             o.put(a, LocalDate.now().toString());
           }
@@ -180,7 +182,7 @@ public class CarrierShippingInstructions {
     issuingParty(),
     initialFieldValue(
         "carrierCode",
-        (o, a) -> {
+        (o, a, v) -> {
           var identifyingPartyCode = o.path("issuingParty").path("identifyingCodes").path(0);
           assert Objects.equals(
               identifyingPartyCode.path("DCSAResponsibleAgencyCode").asText(), "SMDG");
@@ -195,11 +197,85 @@ public class CarrierShippingInstructions {
     // change some other detail (like the requested change or the issuance date). But in the
     // conformance tests every thing happens in the same day and when the conformance toolkit is
     // the carrier, booking amendments are "zero-change" amendments.
-    field("charges", (o, a) -> addCharge(o.putArray(a)), (o, a) -> addCharge(o.path(a))),
-    initialFieldValue("transports", (o, a) -> initializeTransports(o, o.putObject(a)))
+    field("charges", (o, a, v) -> addCharge(o.putArray(a)), (o, a, v) -> addCharge(o.path(a))),
+    initialFieldValue("transports", (o, a, v) -> initializeTransports(o, o.putObject(a), v))
   };
 
-  private static void initializeTransports(ObjectNode td, ObjectNode transportsNode) {
+  private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER = Map.ofEntries(
+    Map.entry("3.0.0-Beta-1", (transportDocument, scenarioType) -> {
+      for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
+        if (consignmentItemNode instanceof ObjectNode consignmentItem) {
+          consignmentItem.remove("commoditySubreference");
+        }
+        for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
+          var outerPackagingNode = cargoItemNode.path("outerPackaging");
+          if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {
+            continue;
+          }
+          ObjectNode outerPackaging = (ObjectNode)outerPackagingNode;
+          // The packaging code has to be aligned with the description. To simplify things, we replace
+          // the packageCode to ensure they are aligned. Which is not perfect, but better than
+          // inconsistent data.
+          //
+          // The alternative is having a look-up table of all known packageCode's and their relevant
+          // description.
+          switch (scenarioType) {
+            case REGULAR_SWB:
+            case REGULAR_BOL:
+            case REGULAR_2C_2U_1E:
+            case REGULAR_2C_2U_2E:
+            case REGULAR_SWB_SOC_AND_REFERENCES:
+            case REGULAR_SWB_AMF:
+              outerPackaging.put("packageCode", "4G")
+                .put("description", "Fibreboard boxes");
+              break;
+            case NON_OPERATING_REEFER:
+            case ACTIVE_REEFER:
+              outerPackaging.put("packageCode", "BQ")
+                .put("description", "Bottles");
+              break;
+            case DG: {
+              outerPackaging.put("description", "Jerrican, steel")
+                .put("imoPackagingCode", "3A1");
+              var dg = outerPackaging.putArray("dangerousGoods").addObject();
+              dg.put("unNumber", "3082")
+                .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
+                .put("imoClass", "9")
+                .put("packingGroup", 3)
+                .put("EMSNumber", "F-A S-F");
+              break;
+            }
+            default:
+              throw new AssertionError("Missing case for " + scenarioType.name());
+          }
+        }
+      }
+    }),
+    Map.entry("3.0.0-Beta-2",  (transportDocument, scenarioType) -> {
+      for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
+        if (consignmentItemNode instanceof ObjectNode consignmentItem) {
+          consignmentItem.remove("commoditySubreference");
+        }
+        for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
+          if (!scenarioType.hasDG() || !cargoItemNode.isObject()) {
+            continue;
+          }
+          var outerPackaging = ((ObjectNode)cargoItemNode).putObject("outerPackaging");
+          outerPackaging.put("description", "Jerrican, steel")
+            .put("imoPackagingCode", "3A1")
+            .put("numberOfPackages", 400);
+          var dg = outerPackaging.putArray("dangerousGoods").addObject();
+          dg.put("unNumber", "3082")
+            .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
+            .put("imoClass", "9")
+            .put("packingGroup", 3)
+            .put("EMSNumber", "F-A S-F");
+        }
+      }
+    })
+  );
+
+  private static void initializeTransports(ObjectNode td, ObjectNode transportsNode, String standardsVersion) {
     var carrierCode = td.required("carrierCode").asText("<MISSING>");
     var vessel = CARRIER_SMDG_2_VESSEL.get(carrierCode);
     if (vessel == null) {
@@ -212,9 +288,17 @@ public class CarrierShippingInstructions {
         .put("plannedArrivalDate", today.plusDays(2).toString());
     transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
     unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
-    transportsNode
-      .put("vesselName", vessel.vesselName())
-      .put("carrierExportVoyageNumber", "402E");
+    if (standardsVersion.equals("3.0.0-Beta-1")) {
+      transportsNode
+        .put("vesselName", vessel.vesselName())
+        .put("carrierExportVoyageNumber", "402E");
+    } else {
+      transportsNode
+        .putArray("vesselVoyage")
+        .addObject()
+        .put("vesselName", vessel.vesselName())
+        .put("carrierExportVoyageNumber", "402E");
+    }
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {
@@ -259,6 +343,10 @@ public class CarrierShippingInstructions {
 
   private CarrierShippingInstructions(ObjectNode state) {
     this.state = state;
+  }
+
+  public String getStandardsVersion() {
+    return this.state.required(STD_VERSION_FIELD).asText("");
   }
 
   public String getShippingInstructionsReference() {
@@ -443,8 +531,9 @@ public class CarrierShippingInstructions {
   }
 
   private void preserveOrGenerateCarrierFields(JsonNode source, ObjectNode dest) {
+    var standardsVersion = getStandardsVersion();
     for (var entry : CARRIER_PROVIDED_TD_FIELDS) {
-      entry.provideField(source, dest);
+      entry.provideField(source, dest, standardsVersion);
     }
   }
 
@@ -483,53 +572,12 @@ public class CarrierShippingInstructions {
   }
 
   private void fixupConsignmentItems(ObjectNode transportDocument, ScenarioType scenarioType) {
-    for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
-      if (consignmentItemNode instanceof ObjectNode consignmentItem) {
-        consignmentItem.remove("commoditySubreference");
-      }
-      for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
-        var outerPackagingNode = cargoItemNode.path("outerPackaging");
-        if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {
-          continue;
-        }
-        ObjectNode outerPackaging = (ObjectNode)outerPackagingNode;
-        // The packaging code has to be aligned with the description. To simplify things, we replace
-        // the packageCode to ensure they are aligned. Which is not perfect, but better than
-        // inconsistent data.
-        //
-        // The alternative is having a look-up table of all known packageCode's and their relevant
-        // description.
-        switch (scenarioType) {
-          case REGULAR_SWB:
-          case REGULAR_BOL:
-          case REGULAR_2C_2U_1E:
-          case REGULAR_2C_2U_2E:
-          case REGULAR_SWB_SOC_AND_REFERENCES:
-          case REGULAR_SWB_AMF:
-            outerPackaging.put("packageCode", "4G")
-              .put("description", "Fibreboard boxes");
-            break;
-          case NON_OPERATING_REEFER:
-          case ACTIVE_REEFER:
-            outerPackaging.put("packageCode", "BQ")
-              .put("description", "Bottles");
-            break;
-          case DG: {
-            outerPackaging.put("description", "Jerrican, steel")
-              .put("imoPackagingCode", "3A1");
-            var dg = outerPackaging.putArray("dangerousGoods").addObject();
-            dg.put("unNumber", "3082")
-              .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
-              .put("imoClass", "9")
-              .put("packingGroup", 3)
-              .put("EMSNumber", "F-A S-F");
-             break;
-          }
-          default:
-            throw new AssertionError("Missing case for " + scenarioType.name());
-        }
-      }
+    var standardVersion = this.getStandardsVersion();
+    var handler = CONSIGNMENT_ITEMS_HANDLER.get(standardVersion);
+    if (handler == null) {
+      throw new AssertionError("Missing handler for version: " + standardVersion);
     }
+    handler.accept(transportDocument, scenarioType);
   }
 
   private void fixupUtilizedTransportEquipments(ObjectNode transportDocument, ScenarioType scenarioType) {
@@ -662,11 +710,12 @@ public class CarrierShippingInstructions {
     return TD_START;
   }
 
-  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode bookingRequest) {
+  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode bookingRequest, String standardsVersion) {
     String sir = UUID.randomUUID().toString();
     bookingRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
       .put(SI_STATUS, SI_RECEIVED.wireName());
-    var state = OBJECT_MAPPER.createObjectNode();
+    var state = OBJECT_MAPPER.createObjectNode()
+      .put(STD_VERSION_FIELD, standardsVersion);
     state.set(SI_DATA_FIELD, bookingRequest);
     return new CarrierShippingInstructions(state);
   }

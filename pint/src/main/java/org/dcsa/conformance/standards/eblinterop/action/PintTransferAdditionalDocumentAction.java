@@ -92,6 +92,7 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
                 senderDocumentTransmissionTypeCode.getHttpResponseCode() != 204
                   ? PintChecks.validateSignedFinishResponse(
                       getMatchedExchangeUuid(),
+                      expectedApiVersion,
                       PintResponseCode.INCD
                     )
                   : null

@@ -94,6 +94,7 @@ public class PersistableCarrierBooking {
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     removeRequestedChanges();
+    setReason(null);
   }
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator, String reason) {

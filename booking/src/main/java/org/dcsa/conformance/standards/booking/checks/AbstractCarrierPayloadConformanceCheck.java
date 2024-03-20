@@ -19,6 +19,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   );
 
   protected static final Set<BookingState> REASON_STATES = Set.of(
+    BookingState.PENDING_UPDATE,
+    BookingState.PENDING_AMENDMENT,
     BookingState.DECLINED,
     BookingState.REJECTED,
     BookingState.CANCELLED,

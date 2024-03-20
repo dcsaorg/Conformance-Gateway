@@ -262,6 +262,7 @@ public class BookingCarrier extends ConformanceParty {
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String reason = "Provided input is not a valid value";
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
@@ -275,7 +276,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
-    persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator);
+    persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator, reason);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
@@ -299,6 +300,7 @@ public class BookingCarrier extends ConformanceParty {
 
   private void requestToAmendConfirmedBooking(JsonNode actionPrompt) {
     log.info("Carrier.requestToAmendConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String reason = "Provided input is not a valid value";
 
     String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = actionPrompt.required("cbr").asText();
@@ -314,7 +316,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.updateConfirmedBooking(cbrr, bookingMutator, true);
+    persistableCarrierBooking.updateConfirmedBooking(cbrr, bookingMutator, true, reason);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 

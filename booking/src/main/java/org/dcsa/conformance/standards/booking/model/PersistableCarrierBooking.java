@@ -93,7 +93,6 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
-    setReason(null);
     removeRequestedChanges();
   }
 
@@ -153,11 +152,12 @@ public class PersistableCarrierBooking {
     }
   }
 
-  public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator) {
+  public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator,String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_UPDATE);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_UPDATE);
     mutateBookingAndAmendment(bookingMutator);
+    setReason(reason);
   }
 
   public void rejectBooking(String reference, String rejectReason) {
@@ -183,7 +183,7 @@ public class PersistableCarrierBooking {
     setReason(null);
   }
 
-  public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking) {
+  public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_AMENDMENT);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_AMENDMENT);
@@ -191,7 +191,7 @@ public class PersistableCarrierBooking {
     if (resetAmendedBooking) {
       resetAmendedBookingState();
     }
-    setReason(null);
+    setReason(reason);
   }
 
   public void cancelEntireBooking(String bookingReference, String reason) {

@@ -43,12 +43,19 @@ public class BookingChecks {
     BookingState.PENDING_AMENDMENT
   );
 
-  private static final Set<BookingState> REASON_STATES = Set.of(
+  private static final Set<BookingState> REASON_PRESENCE_STATES = Set.of(
+    BookingState.PENDING_UPDATE,
+    BookingState.PENDING_AMENDMENT,
     BookingState.DECLINED,
     BookingState.REJECTED,
     BookingState.CANCELLED,
     BookingState.AMENDMENT_CANCELLED,
     BookingState.AMENDMENT_DECLINED
+  );
+
+  private static final Set<BookingState> REASON_ABSENCE_STATES = Set.of(
+    BookingState.RECEIVED,
+    BookingState.CONFIRMED
   );
 
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
@@ -256,7 +263,7 @@ public class BookingChecks {
     (mav) -> {
       mav.submitAllMatching("requestedEquipments.*.commodities");
     },
-    JsonAttribute.unique("subReference")
+    JsonAttribute.unique("commoditySubreference")
   );
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -298,16 +305,10 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-  private static final Predicate<JsonNode> HAS_NON_NULL_AMF_ITEM = (reqEquipNode) -> reqEquipNode.hasNonNull("countryCode")
-    && reqEquipNode.hasNonNull("manifestTypeCode");
-
-  private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All utilizedTransportEquipments with a reefer ISO Equipment Code must have at least isNonOperatingReefer",
+  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
-    JsonAttribute.ifMatchedThen(
-      HAS_NON_NULL_AMF_ITEM,
-      JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
-    )
+    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
@@ -363,22 +364,38 @@ public class BookingChecks {
     }
   );
 
-  private static final JsonContentCheck REASON_PRESENCE = JsonAttribute.customValidator(
+  private static final JsonContentCheck REASON_FIELD_PRESENCE = JsonAttribute.customValidator(
     "Reason field must be present for the selected Booking Status",
     (body) -> {
       var bookingStatus = body.path("bookingStatus");
       var amendedBookingStatus = body.path("amendedBookingStatus");
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      if (REASON_STATES.contains(BookingState.fromWireName(status.asText()))) {
+      if (REASON_PRESENCE_STATES.contains(BookingState.fromWireName(status.asText()))) {
         var reason = body.get("reason");
         if (reason == null) {
-          issues.add("reason is missing in the Booking States %s".formatted(REASON_STATES));
+          issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_STATES));
         }
       }
       return issues;
     }
   );
+  private static final JsonContentCheck REASON_FIELD_ABSENCE = JsonAttribute.customValidator(
+    "Reason field must be present for the selected Booking Status",
+    (body) -> {
+      var bookingStatus = body.path("bookingStatus");
+      var amendedBookingStatus = body.path("amendedBookingStatus");
+      var issues = new LinkedHashSet<String>();
+      var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
+      if (REASON_ABSENCE_STATES.contains(BookingState.fromWireName(status.asText()))) {
+        if (body.hasNonNull("reason")) {
+          issues.add("reason must not be in the Booking States %s".formatted(REASON_ABSENCE_STATES));
+        }
+      }
+      return issues;
+    }
+  );
+
 
   private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
     "check absence of confirmed fields in non confirmed booking states",
@@ -394,9 +411,6 @@ public class BookingChecks {
         }
         if (body.hasNonNull("charges")) {
           issues.add("charges must not be present".formatted(bookingStatus));
-        }
-        if (body.hasNonNull("shipmentCutOffTimes")) {
-          issues.add("shipmentCutOffTimes must not be present".formatted(bookingStatus));
         }
         if (body.hasNonNull("advanceManifestFilings")) {
           issues.add("advanceManifestFilings must not be present".formatted(bookingStatus));
@@ -416,6 +430,9 @@ public class BookingChecks {
         }
         if (body.get("transportPlan") == null) {
           issues.add("transportPlan for confirmed booking is not present");
+        }
+        if (body.get("shipmentCutOffTimes") == null) {
+          issues.add("shipmentCutOffTimes for confirmed booking is not present");
         }
       }
       return issues;
@@ -640,7 +657,8 @@ public class BookingChecks {
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
     REQUESTED_CHANGES_PRESENCE,
-    REASON_PRESENCE
+    REASON_FIELD_PRESENCE,
+    REASON_FIELD_ABSENCE
   );
 
   public static ActionCheck responseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
@@ -660,6 +678,18 @@ public class BookingChecks {
       checks.add(JsonAttribute.mustBePresent(
         CARRIER_BOOKING_REFERENCE
       ));
+      checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
+          "The commoditySubreference is not present for confirmed booking",
+          mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
+          (nodeToValidate, contextPath) -> {
+            var commoditySubreference = nodeToValidate.path("commoditySubreference");
+            if (commoditySubreference.isMissingNode() || commoditySubreference.isNull()) {
+              return Set.of("The commoditySubreference at %s is not present for confirmed booking".formatted(contextPath));
+            }
+            return Set.of();
+          }
+        )
+      );
     }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(

@@ -20,8 +20,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.CUTOFF_DATE_TIME_CODES;
-
 @UtilityClass
 public class BookingChecks {
 
@@ -61,18 +59,8 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  private static final JsonPointer[] BOOKING_UN_LOCATION_CODES = {
-    JsonPointer.compile("/invoicePayableAt/UNLocationCode"),
-    JsonPointer.compile("/placeOfBLIssue/UNLocationCode"),
-    JsonPointer.compile("/transportPlan/loadLocation/UNLocationCode"),
-    JsonPointer.compile("/transportPlan/dischargeLocation/UNLocationCode")
-  };
-
   public static ActionCheck requestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
-    for (var ptr : BOOKING_UN_LOCATION_CODES) {
-      checks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, BookingDataSets.UN_LOCODE_DATASET));
-    }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
@@ -98,10 +86,14 @@ public class BookingChecks {
     }
   );
 
-  private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS_UN_LOCATION = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate shipmentLocations UNLocationCode",
+  private static final JsonContentCheck VALIDATE_ALL_BOOKING_UN_LOCATION_CODES = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate all booking UNLocationCodes",
     (mav) -> {
       mav.submitAllMatching("shipmentLocations.*.location.UNLocationCode");
+      mav.submitAllMatching("invoicePayableAt.UNLocationCode");
+      mav.submitAllMatching("placeOfBLIssue.UNLocationCode");
+      mav.submitAllMatching("transportPlan.loadLocation.UNLocationCode");
+      mav.submitAllMatching("transportPlan.dischargeLocation.UNLocationCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.UN_LOCODE_DATASET)
   );
@@ -163,41 +155,18 @@ public class BookingChecks {
     )
   );
 
-  private static final JsonContentCheck IS_SHIPPER_OWNED_CONTAINER = JsonAttribute.customValidator(
-    "valid Requested Equipments",
-    (body) -> {
-      var issues = new LinkedHashSet<String>();
-      var requestedEquipments = body.path("requestedEquipments");
-      for (var rq: requestedEquipments) {
-        var isShipperOwned = rq.get("isShipperOwned").asBoolean(false);
-        var commodities = requestedEquipments.get("commodities");
-        if (isShipperOwned) {
-          for (var commodity : commodities) {;
-            var cargoGrossVolume = commodity.get("cargoGrossVolume");
-              var cargoGrossVolumeUnit = commodity.get("cargoGrossVolumeUnit");
-            if(cargoGrossVolume != null && (cargoGrossVolumeUnit  == null || cargoGrossVolumeUnit.isEmpty()) ) {
-              issues.add("the cargo gross volume unit must be provided");
-            }
-          }
-        }
-      }
-      return issues;
-    }
-  );
-
   private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE = JsonAttribute.customValidator(
     "Conditional Universal Service Reference",
     (body) -> {
       var universalExportVoyageReference = body.path("universalExportVoyageReference");
       var universalImportVoyageReference = body.path("universalImportVoyageReference");
       var universalServiceReference = body.path("universalServiceReference");
-      var issues = new LinkedHashSet<String>();
       if (JsonAttribute.isJsonNodePresent(universalExportVoyageReference) || JsonAttribute.isJsonNodePresent(universalImportVoyageReference) ) {
         if (JsonAttribute.isJsonNodeAbsent(universalServiceReference) ){
-          issues.add("The universalServiceReference must be present as either universalExportVoyageReference or universalExportVoyageReference are present");
+          return Set.of("The universalServiceReference must be present as either universalExportVoyageReference or universalExportVoyageReference are present");
         }
       }
-      return issues;
+      return Set.of();
     }
   );
 
@@ -213,9 +182,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
-    (mav) -> {
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
-    },
+    mav -> mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*"),
     JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
   );
 
@@ -235,7 +202,7 @@ public class BookingChecks {
   );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
-    return (mav) -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
+    return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
   }
   private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThen(
     "Check Export declaration reference ",
@@ -258,20 +225,18 @@ public class BookingChecks {
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",
-    (mav) -> {
-      mav.submitAllMatching("requestedEquipments.*.commodities");
-    },
+    mav -> mav.submitAllMatching("requestedEquipments.*.commodities"),
     JsonAttribute.unique("commoditySubreference")
   );
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate allowed shipment cutoff codes",
-    (mav) -> mav.submitAllMatching("shipmentCutOffTimes.*.cutOffDateTimeCode"),
+    mav -> mav.submitAllMatching("shipmentCutOffTimes.*.cutOffDateTimeCode"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CUTOFF_DATE_TIME_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
-    "validate shipment cutOff Date time code",
+    "Validate shipment cutOff Date time code",
     (body) -> {
       var shipmentCutOffTimes = body.path("shipmentCutOffTimes");
       var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
@@ -542,7 +507,7 @@ public class BookingChecks {
           issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
         }
       }
-      Set<String> partyShippers  = new HashSet<>(Arrays.asList("OS", "DDR"));
+      Set<String> partyShippers  = Set.of("OS", "DDR");
       if (partyFunctions.stream().noneMatch(partyShippers::contains)) {
         if (!partyFunctions.contains("BA")) {
           issues.add("The BA party is required when (both) OS and DDR are not present");
@@ -557,16 +522,19 @@ public class BookingChecks {
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/communicationChannelCode"), BookingDataSets.COMMUNICATION_CHANNEL_CODES),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/declaredValueCurrency"), BookingDataSets.ISO_4217_CURRENCY_CODES),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/incoTerms"), BookingDataSets.INCO_TERMS_VALUES),
-    JsonAttribute.atMostOneOf(
-      JsonPointer.compile("/shippedOnBoardDate"),
-      JsonPointer.compile("/receivedForShipmentDate")
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
+      (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
+      JsonAttribute.presenceImpliesOtherField(
+        "cargoGrossVolume",
+        "cargoGrossVolumeUnit"
+      )
     ),
-    VALIDATE_SHIPMENT_LOCATIONS_UN_LOCATION,
+    VALIDATE_ALL_BOOKING_UN_LOCATION_CODES,
     CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
-    IS_SHIPPER_OWNED_CONTAINER,
     REFERENCE_TYPE_VALIDATION,
     ISO_EQUIPMENT_CODE_VALIDATION,
     IS_EXPORT_DECLARATION_REFERENCE_PRESENT,

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public record CarrierScenarioParameters(String contractQuotationReference,
+public record CarrierScenarioParameters(
+                                        String serviceContractReference,
+                                        String contractQuotationReference,
                                         String carrierExportVoyageNumber,
                                         String carrierServiceName,
                                         String  hsCodes1,
@@ -17,6 +19,7 @@ public record CarrierScenarioParameters(String contractQuotationReference,
   public ObjectNode toJson() {
     return new ObjectMapper()
         .createObjectNode()
+        .put("serviceContractReference", serviceContractReference())
         .put("contractQuotationReference", contractQuotationReference())
         .put("carrierExportVoyageNumber", carrierExportVoyageNumber())
         .put("carrierServiceName", carrierServiceName())
@@ -32,6 +35,7 @@ public record CarrierScenarioParameters(String contractQuotationReference,
     ObjectNode cspNode = (ObjectNode) jsonNode;
 
     return new CarrierScenarioParameters(
+        cspNode.required("serviceContractReference").asText(),
         cspNode.required("contractQuotationReference").asText(),
         cspNode.required("carrierExportVoyageNumber").asText(),
         cspNode.required("carrierServiceName").asText(),

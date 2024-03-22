@@ -1,15 +1,12 @@
 package org.dcsa.conformance.standards.booking.action;
 
-import java.util.*;
-import java.util.function.Function;
+
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.checks.CarrierGetBookingPayloadResponseConformanceCheck;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -82,46 +79,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            new CarrierGetBookingPayloadResponseConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                requestAmendedContent),
-            new ActionCheck(
-                "GET returns the expected Booking data",
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE) {
-              @Override
-              protected Set<String> checkConformance(
-                  Function<UUID, ConformanceExchange> getExchangeByUuid) {
-                ConformanceExchange getExchange = getExchangeByUuid.apply(getMatchedExchangeUuid());
-                if (getExchange == null) return Set.of();
-                Set<String> conformanceErrors = new HashSet<>();
-                if (previousAction
-                    instanceof UC1_Shipper_SubmitBookingRequestAction submitBookingRequestAction) {
-                  ConformanceExchange submitBookingRequestExchange =
-                      getExchangeByUuid.apply(submitBookingRequestAction.getMatchedExchangeUuid());
-                  if (submitBookingRequestExchange == null) return Set.of();
-                  // this is just an example
-                  String uc1CarrierServiceName =
-                      JsonToolkit.getTextAttributeOrNull(
-                          submitBookingRequestExchange.getRequest().message().body().getJsonBody(),
-                          "carrierServiceName");
-                  String getCarrierServiceName =
-                      JsonToolkit.getTextAttributeOrNull(
-                          getExchange.getResponse().message().body().getJsonBody(),
-                          "carrierServiceName");
-                  if (!Objects.equals(uc1CarrierServiceName, getCarrierServiceName)) {
-                    conformanceErrors.add(
-                        "Expected carrierServiceName '%s' but found '%s'"
-                            .formatted(uc1CarrierServiceName, getCarrierServiceName));
-                  }
-                }
-                return conformanceErrors;
-              }
-            })
-        // .filter(Objects::nonNull)
+            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus))
         ;
       }
     };

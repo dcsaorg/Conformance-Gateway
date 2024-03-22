@@ -568,6 +568,35 @@ public class JsonAttribute {
       });
   }
 
+  public static JsonRebaseableContentCheck atLeastOneOf(
+    @NonNull JsonPointer ... ptrs
+  ) {
+    if (ptrs.length < 2) {
+      throw new IllegalStateException("At least two arguments are required");
+    }
+    String name = "The following are mutually exclusive (at least one of): %s".formatted(
+      Arrays.stream(ptrs)
+        .map(JsonAttribute::renderJsonPointer)
+        .collect(Collectors.joining(", "))
+    );
+    return new JsonRebaseableCheckImpl(
+      name,
+      (body, contextPath) -> {
+        var present = Arrays.stream(ptrs)
+          .anyMatch(p -> isJsonNodePresent(body.at(p)));
+        if (present) {
+          return Set.of();
+        }
+        return Set.of(
+          "At least one of the following can be present: %s".formatted(
+            Arrays.stream(ptrs)
+              .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
+              .collect(Collectors.joining(", "
+              ))
+          ));
+      });
+  }
+
   public static JsonRebaseableContentCheck allOrNoneArePresent(
     @NonNull JsonPointer ... ptrs
   ) {
@@ -602,6 +631,26 @@ public class JsonAttribute {
           return Set.of();
         });
   }
+
+  public static JsonContentMatchedValidation combineAndValidateAgainstDataset(
+    KeywordDataset dataset,
+    String nameA,
+    String nameB
+  ) {
+    return (nodeToValidate, contextPath) -> {
+      var codeA = nodeToValidate.path(nameA).asText("");
+      var codeB = nodeToValidate.path(nameB).asText("");
+      var combined = codeA + "/" + codeB;
+      if (!dataset.contains(combined)) {
+        return Set.of(
+          "The combination of '%s' ('%s') and '%s' ('%s') used in '%s' is not known to be a valid combination.".
+            formatted(codeA, nameA, codeB, nameB, contextPath)
+        );
+      }
+      return Set.of();
+    };
+  }
+
 
   @Deprecated
   public static JsonContentCheck ifThen(
@@ -790,11 +839,11 @@ public class JsonAttribute {
       .formatted(renderJsonPointer(jsonPointer));
   }
 
-  private static boolean isJsonNodePresent(JsonNode node) {
+  public static boolean isJsonNodePresent(JsonNode node) {
     return !node.isMissingNode() && !node.isNull();
   }
 
-  private static boolean isJsonNodeAbsent(JsonNode node) {
+  public static boolean isJsonNodeAbsent(JsonNode node) {
     return !isJsonNodePresent(node);
   }
 

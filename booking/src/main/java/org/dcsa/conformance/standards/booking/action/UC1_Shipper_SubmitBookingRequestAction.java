@@ -7,9 +7,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
-import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-import org.dcsa.conformance.standards.booking.checks.ShipperBookingContentConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -56,7 +55,6 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var scenarioType = getDspSupplier().get().scenarioType();
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "POST"),
@@ -77,7 +75,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
               getMatchedExchangeUuid(),
               BookingState.RECEIVED
             ),
-            new ShipperBookingContentConformanceCheck(getMatchedExchangeUuid(),scenarioType),
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()),
             new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

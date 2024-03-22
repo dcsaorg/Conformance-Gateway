@@ -18,19 +18,14 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.PENDING_AMENDMENT
   );
 
-  protected static final Set<BookingState> CONFIRMED_BOOKING_STATES = Set.of(
-    BookingState.CONFIRMED,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.COMPLETED,
-    BookingState.DECLINED
-  );
-
   protected static final Set<BookingState> REASON_STATES = Set.of(
+    BookingState.PENDING_UPDATE,
+    BookingState.PENDING_AMENDMENT,
     BookingState.DECLINED,
     BookingState.REJECTED,
     BookingState.CANCELLED,
-    BookingState.AMENDMENT_CANCELLED,
-    BookingState.AMENDMENT_DECLINED
+    BookingState.AMENDMENT_DECLINED,
+    BookingState.AMENDMENT_CANCELLED
   );
 
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(

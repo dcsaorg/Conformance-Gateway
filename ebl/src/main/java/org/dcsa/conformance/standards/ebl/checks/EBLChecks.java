@@ -62,32 +62,13 @@ public class EBLChecks {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
-  private static JsonContentMatchedValidation combineAndValidateAgainstDataset(
-    KeywordDataset dataset,
-    String nameA,
-    String nameB
-  ) {
-    return (nodeToValidate, contextPath) -> {
-      var codeA = nodeToValidate.path(nameA).asText("");
-      var codeB = nodeToValidate.path(nameB).asText("");
-      var combined = codeA + "/" + codeB;
-      if (!dataset.contains(combined)) {
-        return Set.of(
-          "The combination of '%s' ('%s') and '%s' ('%s') used in '%s' is not known to be a valid combination.".
-            formatted(codeA, nameA, codeB, nameB, contextPath)
-        );
-      }
-      return Set.of();
-    };
-  }
-
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
     (mav) -> {
       mav.submitAllMatching("issuingParty.taxLegalReferences.*");
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
     },
-    combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
    );
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -179,7 +160,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     ALL_AMF,
-    combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
   );
 
   private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
@@ -192,7 +173,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
     ALL_CUSTOMS_REFERENCES,
-    combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
   );
 
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(

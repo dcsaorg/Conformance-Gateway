@@ -397,13 +397,13 @@ public class BookingChecks {
       var issues = new LinkedHashSet<String>();
       var bookingStatus = body.path("bookingStatus").asText("");
       if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromWireName(bookingStatus))) {
-        if (body.get("confirmedEquipments") == null) {
+        if (body.path("confirmedEquipments").isEmpty()) {
           issues.add("confirmedEquipments for confirmed booking is not present");
         }
-        if (body.get("transportPlan") == null) {
+        if (body.path("transportPlan").isEmpty()) {
           issues.add("transportPlan for confirmed booking is not present");
         }
-        if (body.get("shipmentCutOffTimes") == null) {
+        if (body.path("shipmentCutOffTimes").isEmpty()) {
           issues.add("shipmentCutOffTimes for confirmed booking is not present");
         }
       }

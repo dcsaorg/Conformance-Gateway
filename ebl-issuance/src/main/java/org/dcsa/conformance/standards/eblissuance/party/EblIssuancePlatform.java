@@ -106,7 +106,7 @@ public class EblIssuancePlatform extends ConformanceParty {
     }
 
     syncCounterpartPost(
-        "/%s/ebl-issuance-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)),
         objectMapper
             .createObjectNode()
             .put("transportDocumentReference", tdr)

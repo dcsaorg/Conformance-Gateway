@@ -20,7 +20,11 @@ import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
 public class EblSurrenderComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "eBL Surrender";
-  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0-Beta-1", "3.0.0-Beta-1");
+  public static final List<String> STANDARD_VERSIONS = List.of(
+    "2.0.0-Beta-1",
+    "3.0.0-Beta-1",
+    "3.0.0-Beta-2"
+  );
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
@@ -114,9 +118,9 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath =
-        "/standards/eblsurrender/schemas/eblsurrender-%s-%s.json"
+        "/standards/eblsurrender/schemas/eblsurrender-v%s-%s.json"
             .formatted(
-                standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
+                standardVersion, apiProviderRole.toLowerCase());
     String schemaName =
         EblSurrenderRole.isCarrier(apiProviderRole)
             ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")

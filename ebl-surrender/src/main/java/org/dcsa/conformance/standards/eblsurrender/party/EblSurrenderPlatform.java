@@ -85,8 +85,8 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/eblsurrender/messages/eblsurrender-api-%s-request.json"
-                .formatted(apiVersion.startsWith("3") ? "v30" : "v20"),
+            "/standards/eblsurrender/messages/eblsurrender-api-v%s-request.json"
+                .formatted(apiVersion),
             Map.ofEntries(
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
@@ -97,7 +97,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
     syncCounterpartPost(
-        "/%s/ebl-surrender-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
 
     addOperatorLogEntry(

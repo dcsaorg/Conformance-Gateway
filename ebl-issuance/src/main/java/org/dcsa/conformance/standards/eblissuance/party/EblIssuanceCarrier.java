@@ -94,8 +94,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     var jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/eblissuance/messages/eblissuance-%s-request.json"
-                .formatted(apiVersion.startsWith("3") ? "v30" : "v20"),
+            "/standards/eblissuance/messages/eblissuance-v%s-request.json"
+                .formatted(apiVersion),
             Map.ofEntries(
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
@@ -136,7 +136,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
 
     syncCounterpartPost(
-        "/%s/ebl-issuance-requests".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
 
     addOperatorLogEntry(

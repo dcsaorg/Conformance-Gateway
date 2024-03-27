@@ -86,6 +86,19 @@ public class PintScenarioListBuilder
                           retryTransfer(PintResponseCode.RECE)
                         )
                       ),
+                      resetScenarioClass(ScenarioClass.FAIL_W_503).then(
+                        transferDocumentReceiverFailure().then(
+                          resetScenarioClass(ScenarioClass.NO_ISSUES).thenEither(
+                            transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
+                            retryTransfer(1).then(
+                              transferDocument().thenEither(
+                                closeTransferAction(PintResponseCode.RECE),
+                                retryTransfer(PintResponseCode.RECE)
+                              )
+                            )
+                          )
+                        )
+                      ),
                       transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
                         retryTransfer(1).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
                       ),
@@ -189,6 +202,19 @@ public class PintScenarioListBuilder
         (PintAction) previousAction,
         senderDocumentTransmissionTypeCode,
         resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)
+      ));
+  }
+
+
+  private static PintScenarioListBuilder transferDocumentReceiverFailure() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction -> new PintTransferAdditionalDocumentFailureAction(
+        receivingPlatform,
+        sendingPlatform,
+        (PintAction) previousAction,
+        503
       ));
   }
 

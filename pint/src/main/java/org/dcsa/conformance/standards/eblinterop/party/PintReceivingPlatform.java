@@ -204,6 +204,10 @@ public class PintReceivingPlatform extends ConformanceParty {
       var tdr = this.envelopeReferences.get(envelopeReference);
       if (tdr != null) {
         var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+        var cannedResponse = receiveState.cannedResponse(request);
+        if (cannedResponse != null) {
+          return cannedResponse;
+        }
 
         String computedChecksum = "";
         try {

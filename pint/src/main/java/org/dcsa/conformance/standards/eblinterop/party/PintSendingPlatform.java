@@ -81,6 +81,7 @@ public class PintSendingPlatform extends ConformanceParty {
       Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
       Map.entry(ManipulateTransactionsAction.class, this::manipulateTransactions),
       Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
+      Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
       Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
       Map.entry(PintCloseTransferAction.class, this::finishTransfer)

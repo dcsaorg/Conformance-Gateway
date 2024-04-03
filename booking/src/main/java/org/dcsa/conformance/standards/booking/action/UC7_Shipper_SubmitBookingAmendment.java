@@ -18,6 +18,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final boolean invalidCase;
 
   public UC7_Shipper_SubmitBookingAmendment(
       String carrierPartyName,
@@ -25,11 +26,13 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 200);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean invalidCase) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7", invalidCase? 409 : 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -46,7 +49,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return true;
+    return !invalidCase;
   }
 
   @Override
@@ -80,20 +83,20 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                     BookingRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                new JsonSchemaCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    responseSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
-        return Stream.concat(
-            Stream.concat(primaryExchangeChecks,
+                    requestSchemaValidator));
+        return invalidCase ? primaryExchangeChecks : Stream.concat(
+          Stream.concat( primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
               BookingState.AMENDMENT_RECEIVED
-            ))),
+            ),
+              BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()),
+              new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

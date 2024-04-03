@@ -17,18 +17,20 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-
+  private final boolean invalidCase;
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
+      JsonSchemaValidator notificationSchemaValidator,
+      boolean invalidCase) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", invalidCase? 409 : 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -45,7 +47,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return true;
+    return !invalidCase;
   }
 
   @Override
@@ -78,19 +80,21 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
-                new JsonSchemaCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    responseSchemaValidator),
                 BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
-        return Stream.concat(
+        return invalidCase? primaryExchangeChecks: Stream.concat(
+          Stream.of(
+          new JsonSchemaCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            responseSchemaValidator)),
+          Stream.concat(
             primaryExchangeChecks,
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
                 BookingState.UPDATE_RECEIVED,
-                null));
+                null)));
       }
     };
   }

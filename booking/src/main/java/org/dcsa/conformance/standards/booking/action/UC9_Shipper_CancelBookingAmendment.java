@@ -18,8 +18,9 @@ import java.util.stream.Stream;
 public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
-
   private final JsonSchemaValidator notificationSchemaValidator;
+
+  private boolean invalidCase;
 
   public UC9_Shipper_CancelBookingAmendment(
     String carrierPartyName,
@@ -27,11 +28,13 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator responseSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC9", 200);
+    JsonSchemaValidator notificationSchemaValidator,
+    boolean invalidCase) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC9", invalidCase? 409 : 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -41,7 +44,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return true;
+    return !invalidCase;
   }
 
   @Override
@@ -78,24 +81,23 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             BookingRole::isShipper,
             getMatchedExchangeUuid(),
             HttpMessageType.REQUEST,
-            requestSchemaValidator),
-          new JsonSchemaCheck(
-            BookingRole::isCarrier,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator));
-        return Stream.concat(
+            requestSchemaValidator));
+        return !invalidCase ? Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
-              BookingState.AMENDMENT_CANCELLED
-            ))),
+              BookingState.AMENDMENT_CANCELLED),
+              new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator))),
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,
             expectedBookingStatus,
-            BookingState.AMENDMENT_CANCELLED));
+            BookingState.AMENDMENT_CANCELLED)):primaryExchangeChecks;
       }
     };
   }

@@ -1,5 +1,5 @@
 {
-  "receiptTypeAtOrigin": "CY",
+  "receiptTypeAtOrigin": "SD",
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
@@ -61,10 +61,17 @@
     },
     {
       "location": {
-        "locationType": "UNLO",
-        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
+        "locationType": "ADDR",
+        "address" : {
+          "name" : "Henrik",
+          "street": "Taylorweg",
+          "streetNumber": "5",
+          "postCode": "5466",
+          "city": "AE Veghel",
+          "country": "Netherlands"
+        }
       },
-      "locationTypeCode": "POD"
+      "locationTypeCode": "PRE"
     }
   ]
 }

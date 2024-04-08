@@ -59,13 +59,18 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  public static ActionCheck requestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck requestContentChecks(UUID matched, String standardsVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
+    if (standardsVersion.equals("2.0.0-Beta-1")) {
+      checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
+      checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
+    }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
+      standardsVersion,
       checks
     );
   }
@@ -537,8 +542,6 @@ public class BookingChecks {
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     REFERENCE_TYPE_VALIDATION,
     ISO_EQUIPMENT_CODE_VALIDATION,
-    IS_EXPORT_DECLARATION_REFERENCE_PRESENT,
-    IS_IMPORT_DECLARATION_REFERENCE_PRESENT,
     OUTER_PACKAGING_CODE_IS_VALID,
     TLR_CC_T_COMBINATION_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
@@ -636,7 +639,7 @@ public class BookingChecks {
     REASON_FIELD_ABSENCE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
+  public static ActionCheck responseContentChecks(UUID matched,String standardsVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -647,6 +650,10 @@ public class BookingChecks {
       bookingStatus.wireName()
     ));
     checks.addAll(STATIC_BOOKING_CHECKS);
+    if (standardsVersion.equals("2.0.0-beta-1")) {
+      checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
+      checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
+    }
     checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
@@ -671,6 +678,7 @@ public class BookingChecks {
       BookingRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
+      standardsVersion,
       checks
     );
   }

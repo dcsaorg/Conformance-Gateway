@@ -21,7 +21,7 @@ public class BookingDataSets {
 
   public static final KeywordDataset CUTOFF_DATE_TIME_CODES = KeywordDataset.staticDataset("DCO", "VCO", "FCO", "LCO", "ECP", "EFC");
 
-  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v2.0.0-b1.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v2.0.0-beta-1.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
   public static final KeywordDataset ISO_4217_CURRENCY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/currency-codes-iso-4217.csv", "CurrencyCode");
 
   public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "Customs Reference Type Code");
@@ -36,7 +36,7 @@ public class BookingDataSets {
 
   public static final KeywordDataset INHALATION_ZONE_CODE = KeywordDataset.staticDataset("A", "B", "C", "D");
 
-  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/taxandlegalreferences-v2.0.0-b1.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
+  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/taxandlegalreferences-v2.0.0-beta-1.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

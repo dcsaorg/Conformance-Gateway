@@ -19,6 +19,7 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
 
+  private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -33,7 +34,8 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
   public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
-      BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
+      BookingComponentFactory componentFactory, String standardVersion, String carrierPartyName, String shipperPartyName) {
+    STANDARD_VERSION.set(standardVersion);
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
@@ -217,17 +219,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           requestAmendedContent));
   }
 
-  private static BookingScenarioListBuilder shipper_GetAmendedBooking404() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-      previousAction ->
-        new Shipper_GetAmendedBooking404Action(
-          carrierPartyName,
-          shipperPartyName,
-          (BookingAction) previousAction));
-  }
-
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -360,41 +351,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static BookingScenarioListBuilder tbdCarrierAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                "TbdCarrierAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD carrier action";
-              }
-            }) {};
-  }
-
-  private static BookingScenarioListBuilder tbdShipperAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                shipperPartyName,
-                carrierPartyName,
-                (BookingAction) previousAction,
-                "TbdShipperAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD shipper action";
-              }
-            }) {};
-  }
 
   private interface CarrierNotificationUseCase {
     BookingAction newInstance(

@@ -1,6 +1,6 @@
 {
   "receiptTypeAtOrigin": "CY",
-  "deliveryTypeAtDestination": "SD",
+  "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
   "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
@@ -8,8 +8,10 @@
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
   "isPartialLoadAllowed": false,
-  "isExportDeclarationRequired": false,
-  "isImportLicenseRequired": false,
+  "isExportDeclarationRequired": true,
+  "isImportLicenseRequired": true,
+  "exportDeclarationReference": "ABC123123",
+  "importLicenseReference": "ABC123123",
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [

@@ -10,8 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "isImportLicenseRequired": true,
-  "exportDeclarationReference": "ABC123123",
-  "importLicenseReference": "ABC123123",
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [

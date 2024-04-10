@@ -217,17 +217,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           requestAmendedContent));
   }
 
-  private static BookingScenarioListBuilder shipper_GetAmendedBooking404() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-      previousAction ->
-        new Shipper_GetAmendedBooking404Action(
-          carrierPartyName,
-          shipperPartyName,
-          (BookingAction) previousAction));
-  }
-
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest(ScenarioType scenarioType) {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -360,41 +349,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static BookingScenarioListBuilder tbdCarrierAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                "TbdCarrierAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD carrier action";
-              }
-            }) {};
-  }
-
-  private static BookingScenarioListBuilder tbdShipperAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                shipperPartyName,
-                carrierPartyName,
-                (BookingAction) previousAction,
-                "TbdShipperAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD shipper action";
-              }
-            }) {};
-  }
 
   private interface CarrierNotificationUseCase {
     BookingAction newInstance(

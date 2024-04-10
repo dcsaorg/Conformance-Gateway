@@ -1,4 +1,4 @@
-  {
+{
   "receiptTypeAtOrigin": "CY",
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
@@ -8,38 +8,28 @@
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
   "isPartialLoadAllowed": false,
-  "isExportDeclarationRequired": true,
-  "isImportLicenseRequired": true,
-  "exportDeclarationReference": "ABC123123",
-  "importLicenseReference": "ABC123123",
+  "isExportDeclarationRequired": false,
+  "isImportLicenseRequired": false,
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "22GP",
+      "ISOEquipmentCode": "42R0",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 15000,
+          "cargoGrossWeight": 323.32,
           "cargoGrossWeightUnit": "KGM"
         }
-      ]
-    },
-    {
-      "ISOEquipmentCode": "22GP",
-      "units": 1,
-      "isShipperOwned": false,
-      "commodities": [
-        {
-          "HSCodes": ["COMMODITY_HS_CODE_2"],
-          "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
-          "cargoGrossWeight": 20000,
-          "cargoGrossWeightUnit": "KGM"
-        }
-      ]
+      ],
+      "isNonOperatingReefer": false,
+      "activeReeferSettings": {
+        "temperatureSetpoint": -5,
+        "temperatureUnit": "CEL"
+      }
     }
   ],
   "documentParties": [

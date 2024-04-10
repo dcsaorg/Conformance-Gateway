@@ -1,4 +1,4 @@
-  {
+{
   "receiptTypeAtOrigin": "CY",
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
@@ -10,8 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "isImportLicenseRequired": true,
-  "exportDeclarationReference": "ABC123123",
-  "importLicenseReference": "ABC123123",
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
@@ -23,7 +21,13 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 15000,
+          "cargoGrossWeight": 5000,
+          "cargoGrossWeightUnit": "KGM"
+        },
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_2"],
+          "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
+          "cargoGrossWeight": 10000 ,
           "cargoGrossWeightUnit": "KGM"
         }
       ]
@@ -34,9 +38,15 @@
       "isShipperOwned": false,
       "commodities": [
         {
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 5000,
+          "cargoGrossWeightUnit": "KGM"
+        },
+        {
           "HSCodes": ["COMMODITY_HS_CODE_2"],
           "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
-          "cargoGrossWeight": 20000,
+          "cargoGrossWeight": 10000,
           "cargoGrossWeightUnit": "KGM"
         }
       ]

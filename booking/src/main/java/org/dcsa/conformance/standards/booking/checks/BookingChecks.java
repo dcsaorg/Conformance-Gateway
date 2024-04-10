@@ -65,7 +65,7 @@ public class BookingChecks {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
     }
-    if (standardsVersion.equals("2.0.0-Beta-2")) {
+    if (!standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
     }
@@ -672,7 +672,7 @@ public class BookingChecks {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
     }
-    if (standardsVersion.equals("2.0.0-Beta-2")) {
+    if (!standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
     }

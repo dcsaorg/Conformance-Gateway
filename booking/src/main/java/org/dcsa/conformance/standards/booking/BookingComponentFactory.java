@@ -21,8 +21,8 @@ import org.dcsa.conformance.standards.booking.party.BookingShipper;
 public class BookingComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "Booking";
   public static final List<String> STANDARD_VERSIONS = List.of(
-    "2.0.0-beta-1",
-    "2.0.0-beta-2"
+    "2.0.0-Beta-1",
+    "2.0.0-Beta-2"
   );
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
@@ -87,7 +87,6 @@ public class BookingComponentFactory extends AbstractComponentFactory {
       CounterpartConfiguration[] counterpartConfigurations) {
     return BookingScenarioListBuilder.createModuleScenarioListBuilders(
         this,
-        this.standardVersion,
         _findPartyOrCounterpartName(
             partyConfigurations, counterpartConfigurations, BookingRole::isCarrier),
         _findPartyOrCounterpartName(

@@ -19,7 +19,6 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 @Slf4j
 public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
 
-  private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -34,8 +33,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
   public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(
-      BookingComponentFactory componentFactory, String standardVersion, String carrierPartyName, String shipperPartyName) {
-    STANDARD_VERSION.set(standardVersion);
+      BookingComponentFactory componentFactory, String carrierPartyName, String shipperPartyName) {
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);

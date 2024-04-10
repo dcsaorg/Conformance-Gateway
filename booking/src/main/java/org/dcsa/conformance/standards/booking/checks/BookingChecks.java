@@ -65,6 +65,10 @@ public class BookingChecks {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
     }
+    if (standardsVersion.equals("2.0.0-Beta-2")) {
+      checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
+      checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
+    }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
@@ -209,16 +213,30 @@ public class BookingChecks {
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
   }
-  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThen(
+  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThenElse(
     "Check Export declaration reference ",
     JsonAttribute.isTrue(JsonPointer.compile("/isExportDeclarationRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/exportDeclarationReference"))
+    JsonAttribute.mustBePresent(JsonPointer.compile("/exportDeclarationReference")),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
   );
 
-  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThen(
+  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
+    "Check Export declaration reference absence",
+    JsonAttribute.isFalse("/isExportDeclarationRequired"),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
+  );
+
+  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThenElse(
     "Check Import declaration reference presence",
     JsonAttribute.isTrue(JsonPointer.compile("/isImportLicenseRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/importLicenseReference"))
+    JsonAttribute.mustBePresent(JsonPointer.compile("/importLicenseReference")),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
+  );
+
+  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
+    "Check Import declaration reference absence",
+    JsonAttribute.isFalse("/isImportLicenseRequired"),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
   private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
@@ -650,9 +668,13 @@ public class BookingChecks {
       bookingStatus.wireName()
     ));
     checks.addAll(STATIC_BOOKING_CHECKS);
-    if (standardsVersion.equals("2.0.0-beta-1")) {
+    if (standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
+    }
+    if (standardsVersion.equals("2.0.0-Beta-2")) {
+      checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
+      checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
     }
     checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {

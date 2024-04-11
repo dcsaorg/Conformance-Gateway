@@ -91,7 +91,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
               expectedBookingStatus,
               BookingState.AMENDMENT_RECEIVED
             ),
-              BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()),
+              BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()),
               new JsonSchemaCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

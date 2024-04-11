@@ -80,7 +80,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
+                BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return invalidCase? primaryExchangeChecks: Stream.concat(
           Stream.of(
           new JsonSchemaCheck(

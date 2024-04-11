@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
@@ -25,6 +27,7 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
+  @Getter
   private final String standardVersion;
 
   public EblIssuanceComponentFactory(String standardVersion) {
@@ -114,9 +117,9 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath =
-        "/standards/eblissuance/schemas/eblissuance-%s-%s.json"
+        "/standards/eblissuance/schemas/eblissuance-v%s-%s.json"
             .formatted(
-                standardVersion.startsWith("2") ? "v20" : "v30", apiProviderRole.toLowerCase());
+                standardVersion, apiProviderRole.toLowerCase());
     String schemaName =
         EblIssuanceRole.isCarrier(apiProviderRole)
             ? (forRequest ? "issuanceRequest" : null)

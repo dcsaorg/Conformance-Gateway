@@ -79,7 +79,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus))
+            BookingChecks.responseContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus))
         ;
       }
     };

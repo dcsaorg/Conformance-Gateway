@@ -3,13 +3,12 @@ package org.dcsa.conformance.standards.ebl;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.*;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;

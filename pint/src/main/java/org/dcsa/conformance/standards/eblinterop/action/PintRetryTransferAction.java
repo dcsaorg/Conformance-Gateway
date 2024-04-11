@@ -17,7 +17,6 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
@@ -62,7 +61,7 @@ public class PintRetryTransferAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("senderTransmissionClass", SenderTransmissionClass.VALID.name());
+      .put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());
@@ -137,6 +136,7 @@ public class PintRetryTransferAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signatureValidates(senderVerifierSupplier))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signatureValidates(senderVerifierSupplier))
                 ),
@@ -144,6 +144,7 @@ public class PintRetryTransferAction extends PintAction {
                   PintRole::isSendingPlatform,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion,
                   JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", PintChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
                   JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), PintChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
                 ),
@@ -155,12 +156,14 @@ public class PintRetryTransferAction extends PintAction {
                 ),
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()
                 ),
                 validateUnsignedStartResponse(
                   getMatchedExchangeUuid(),
+                  expectedApiVersion,
                   expectedMissingDocCount,
                   () -> getDsp()
                 )

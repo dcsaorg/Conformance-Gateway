@@ -7,13 +7,33 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.KeywordDataset;
+import org.dcsa.conformance.core.check.VersionedStaticKeywordSet;
 
 public class EblDatasets {
 
+  private static final Predicate<String> IS_3_0_0_BETA1 = "3.0.0-Beta-1"::equals;
+
   public static final KeywordDataset UN_LOCODE_DATASET = KeywordDataset.lazyLoaded(EblDatasets::loadUNLocationCodeDataset);
-  public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset("WAVE", "CARX", "ESSD", "BOLE", "EDOX", "IQAX", "SECR", "TRGO");
+  public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticVersionedDataset(
+    VersionedStaticKeywordSet.versionedKeywords(
+      IS_3_0_0_BETA1,
+      Set.of("ESSD"),
+      Set.of("ICED")
+    ),
+    "WAVE",
+    "BOLE",
+    "EDOX",
+    "IQAX",
+    "SECR",
+    "CARX",
+    "TRGO"
+  );
+
 
   public static final KeywordDataset CARGO_MOVEMENT_TYPE = KeywordDataset.staticDataset("FCL", "LCL");
   public static final KeywordDataset REFERENCE_TYPE = KeywordDataset.staticDataset(
@@ -40,9 +60,9 @@ public class EblDatasets {
     "US/ACE",
     "CA/ACI"
   );
-  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v3.0.0-b1.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
-  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/taxandlegalreferences-v3.0.0-b1.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
-  public static final KeywordDataset CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(EblDatasets.class, "/standards/ebl/datasets/customsreferences-v3.0.0-b1.csv", "/", "Customs Reference Country Code", "Customs Reference Type Code");
+  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v%s.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/taxandlegalreferences-v%s.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
+  public static final KeywordDataset CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/customsreferences-v%s.csv", "/", "Customs Reference Country Code", "Customs Reference Type Code");
 
   public static final KeywordDataset OUTER_PACKAGING_CODE = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/rec21_Rev12e_Annex-V-VI_2021.csv", "Code");
 

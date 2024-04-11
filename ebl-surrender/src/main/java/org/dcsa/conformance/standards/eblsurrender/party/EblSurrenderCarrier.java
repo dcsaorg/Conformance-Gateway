@@ -140,7 +140,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
       srr = UUID.randomUUID().toString();
     }
     syncCounterpartPost(
-        "/%s/ebl-surrender-responses".formatted(apiVersion.startsWith("3") ? "v3" : "v2"),
+        "/v%s/ebl-surrender-responses".formatted(apiVersion.charAt(0)),
         objectMapper
             .createObjectNode()
             .put("surrenderRequestReference", srr)

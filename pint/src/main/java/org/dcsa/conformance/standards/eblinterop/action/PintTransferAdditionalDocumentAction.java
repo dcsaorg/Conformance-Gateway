@@ -1,44 +1,44 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Set;
+
+import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.eblinterop.checks.AdditionalDocumentUrlPathCheck;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
+import org.dcsa.conformance.standards.eblinterop.checks.AdditionalDocumentUrlPathAndContentCheck;
+import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter
 @Slf4j
 public class PintTransferAdditionalDocumentAction extends PintAction {
-  //private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator errorResponseSchemaValidator;
+  private final SenderDocumentTransmissionTypeCode senderDocumentTransmissionTypeCode;
 
   public PintTransferAdditionalDocumentAction(
     String receivingPlatform,
     String sendingPlatform,
-    PintAction previousAction
-    //JsonSchemaValidator requestSchemaValidator
+    PintAction previousAction,
+    SenderDocumentTransmissionTypeCode senderDocumentTransmissionTypeCode,
+    JsonSchemaValidator errorResponseSchemaValidator
     ) {
     super(
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "TransferAdditionalDocument",
-        204
+        "TransferAdditionalDocument(%s)".formatted(senderDocumentTransmissionTypeCode.name()),
+        senderDocumentTransmissionTypeCode.getHttpResponseCode()
     );
-    //this.requestSchemaValidator = requestSchemaValidator;
+    this.senderDocumentTransmissionTypeCode = senderDocumentTransmissionTypeCode;
+    this.errorResponseSchemaValidator = errorResponseSchemaValidator;
   }
 
   @Override
@@ -49,45 +49,11 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode();
+    node.put("senderDocumentTransmissionTypeCode", senderDocumentTransmissionTypeCode.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());
     return node;
-  }
-
-  protected void doHandleExchange(ConformanceExchange exchange) {
-    super.doHandleExchange(exchange);
-    var dsp = getDsp();
-    var td = exchange.getRequest().message().body().getJsonBody().path("transportDocument");
-    boolean dspChanged = false;
-    if (!td.isMissingNode() && dsp.transportDocumentChecksum() == null) {
-      var checksum = Checksums.sha256CanonicalJson(td);
-      dsp = dsp.withTransportDocumentChecksum(checksum);
-      dspChanged = true;
-    }
-    var requestBody = exchange.getRequest().message().body().getJsonBody();
-    if (dsp.documentChecksums().isEmpty()) {
-      var envelopeNode = parseSignedNodeNoErrors(
-        requestBody.path("envelopeManifestSignedContent")
-      );
-      var supportingDocuments = envelopeNode.path("supportingDocuments");
-      var visualizationChecksum = envelopeNode.path("eBLVisualisationByCarrier").path("documentChecksum").asText(null);
-
-      var missingDocuments = StreamSupport.stream(supportingDocuments.spliterator(), false)
-        .map(n -> n.path("documentChecksum"))
-        .filter(JsonNode::isTextual)
-        .map(JsonNode::asText)
-        .collect(Collectors.toSet());
-
-      if (visualizationChecksum != null) {
-        missingDocuments.add(visualizationChecksum);
-      }
-      dsp = dsp.withDocumentChecksums(Set.copyOf(missingDocuments));
-      dspChanged = true;
-    }
-    if (dspChanged) {
-        setDsp(dsp);
-    }
   }
 
   @Override
@@ -97,11 +63,14 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<DynamicScenarioParameters> dspSupplier = () -> getDsp();
         return Stream.of(
-                // TODO; Validate that the payload matches the body.
-                new AdditionalDocumentUrlPathCheck(
-                    PintRole::isSendingPlatform, getMatchedExchangeUuid(), delayedValue(dspSupplier, DynamicScenarioParameters::envelopeReference)),
+                senderDocumentTransmissionTypeCode != SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT
+                  ? new AdditionalDocumentUrlPathAndContentCheck(
+                      PintRole::isSendingPlatform,
+                      getMatchedExchangeUuid(),
+                      delayedValue(dspSupplier, DynamicScenarioParameters::envelopeReference))
+                  : null,
                 new ResponseStatusCheck(
-                    PintRole::isReceivingPlatform, getMatchedExchangeUuid(), 204),
+                    PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(
                     PintRole::isSendingPlatform,
                     getMatchedExchangeUuid(),
@@ -111,7 +80,22 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
                     PintRole::isReceivingPlatform,
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
-                    expectedApiVersion)
+                    expectedApiVersion),
+                senderDocumentTransmissionTypeCode.getHttpResponseCode() != 204
+                    ? new JsonSchemaCheck(
+                        PintRole::isReceivingPlatform,
+                        getMatchedExchangeUuid(),
+                        HttpMessageType.RESPONSE,
+                        errorResponseSchemaValidator
+                      )
+                    : null,
+                senderDocumentTransmissionTypeCode.getHttpResponseCode() != 204
+                  ? PintChecks.validateSignedFinishResponse(
+                      getMatchedExchangeUuid(),
+                      expectedApiVersion,
+                      PintResponseCode.INCD
+                    )
+                  : null
                 /*
                 new JsonSchemaCheck(
                     PintRole::isSendingPlatform,
@@ -120,7 +104,8 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
                     requestSchemaValidator
                 )
                  */
-            );
+                )
+            .filter(Objects::nonNull);
       }
     };
   }

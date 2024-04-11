@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -28,28 +27,66 @@ public class EblIssuanceScenarioListBuilder
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
+    if (componentFactory.getStandardVersion().startsWith("2.")) {
+      // Niels N. and Tom is still debating whether we should invest anymore effort into V2.
+      return Stream.of(
+          Map.entry(
+            "",
+            supplyScenarioParameters(EblType.STRAIGHT_EBL)
+              .thenEither(
+                correctIssuanceRequest()
+                  .thenEither(
+                    issuanceResponseAccepted()
+                      .thenEither(
+                        noAction(),
+                        duplicateIssuanceRequest(),
+                        duplicateIssuanceResponse()),
+                    duplicateIssuanceRequest().then(issuanceResponseAccepted()),
+                    issuanceResponseBlocked()
+                      .then(
+                        correctIssuanceRequest().then(issuanceResponseAccepted())),
+                    issuanceResponseRefused()
+                      .then(
+                        correctIssuanceRequest().then(issuanceResponseAccepted()))),
+                incorrectIssuanceRequest()
+                  .then(correctIssuanceRequest().then(issuanceResponseAccepted())))))
+        .collect(
+          Collectors.toMap(
+            Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
     return Stream.of(
             Map.entry(
                 "",
-                supplyScenarioParameters()
-                    .thenEither(
-                        correctIssuanceRequest()
-                            .thenEither(
-                                issuanceResponseAccepted()
-                                    .thenEither(
-                                        noAction(),
-                                        duplicateIssuanceRequest(),
-                                        duplicateIssuanceResponse()),
-                                duplicateIssuanceRequest().then(issuanceResponseAccepted()),
-                                issuanceResponseBlocked()
-                                    .then(
-                                        correctIssuanceRequest().then(issuanceResponseAccepted())),
-                                issuanceResponseRefused()
-                                    .then(
-                                        correctIssuanceRequest().then(issuanceResponseAccepted()))),
-                        incorrectIssuanceRequest()
-                            .then(correctIssuanceRequest().then(issuanceResponseAccepted())))))
-        .collect(
+                noAction().thenEither(
+                  supplyScenarioParameters(EblType.STRAIGHT_EBL)
+                      .thenEither(
+                          correctIssuanceRequest()
+                              .thenEither(
+                                  issuanceResponseAccepted()
+                                      .thenEither(
+                                          noAction(),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted()),
+                                          duplicateIssuanceRequest(),
+                                          duplicateIssuanceResponse()),
+                                  duplicateIssuanceRequest().then(issuanceResponseAccepted()),
+                                  duplicateAmendedIssuanceRequest().then(issuanceResponseAccepted()),
+                                  issuanceResponseBlocked()
+                                      .thenEither(
+                                          correctIssuanceRequest().then(issuanceResponseAccepted()),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted())
+                                      ),
+                                  issuanceResponseRefused()
+                                      .thenEither(
+                                          correctIssuanceRequest().then(issuanceResponseAccepted()),
+                                          correctAmendedIssuanceRequest().then(issuanceResponseAccepted())
+                                      )),
+                          incorrectIssuanceRequest()
+                              .then(correctIssuanceRequest().then(issuanceResponseAccepted()))),
+                supplyScenarioParameters(EblType.NEGOTIABLE_EBL).then(
+                          correctIssuanceRequest().then(issuanceResponseAccepted())),
+                supplyScenarioParameters(EblType.BLANK_EBL).then(
+                          correctIssuanceRequest().then(issuanceResponseAccepted()))))
+        ).collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
@@ -63,28 +100,39 @@ public class EblIssuanceScenarioListBuilder
     return new EblIssuanceScenarioListBuilder(null);
   }
 
-  private static EblIssuanceScenarioListBuilder supplyScenarioParameters() {
+  private static EblIssuanceScenarioListBuilder supplyScenarioParameters(EblType eblType) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblIssuanceScenarioListBuilder(
         previousAction ->
-            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, null));
+            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, null, eblType));
   }
 
   private static EblIssuanceScenarioListBuilder correctIssuanceRequest() {
-    return _issuanceRequest(true, false);
+    return _issuanceRequest(true, false, false);
+  }
+
+  private static EblIssuanceScenarioListBuilder correctAmendedIssuanceRequest() {
+    return _issuanceRequest(true, false, true);
+  }
+
+  private static EblIssuanceScenarioListBuilder duplicateAmendedIssuanceRequest() {
+    return _issuanceRequest(true, true, true);
   }
 
   private static EblIssuanceScenarioListBuilder incorrectIssuanceRequest() {
-    return _issuanceRequest(false, false);
+    return _issuanceRequest(false, false, false);
   }
 
   private static EblIssuanceScenarioListBuilder duplicateIssuanceRequest() {
-    return _issuanceRequest(true, true);
+    return _issuanceRequest(true, true, false);
   }
 
   private static EblIssuanceScenarioListBuilder _issuanceRequest(
-      boolean isCorrect, boolean isDuplicate) {
+      boolean isCorrect,
+      boolean isDuplicate,
+      boolean isAmended
+  ) {
     EblIssuanceComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
@@ -93,6 +141,7 @@ public class EblIssuanceScenarioListBuilder
             new IssuanceRequestAction(
                 isCorrect,
                 isDuplicate,
+                isAmended,
                 platformPartyName,
                 carrierPartyName,
                 (IssuanceAction) previousAction,

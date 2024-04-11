@@ -97,6 +97,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Shoes - black, 400 boxes",
           null,
+          "Fibreboard boxes",
           "SCR-1234-REGULAR",
           "QR-1234-REGULAR"
         );
@@ -112,6 +113,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Dairy products",
           null,
+          "Bottles",
           "SCR-1234-REEFER",
           "QR-1234-REEFER"
         );
@@ -127,6 +129,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Non alcoholic beverages, 40,000 cans",
           null,
+          "Bottles",
           "SCR-1234-NON_OPERATING_REEFER",
           "QR-1234-NON_OPERATING_REEFER"
         );
@@ -142,8 +145,8 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
           null,
+          null,
           "SCR-1234-DG",
-
           "QR-1234-DG"
         );
         case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
@@ -158,6 +161,7 @@ public class EblCarrier extends ConformanceParty {
           "732391",
           "Tableware and kitchenware",
           "Kitchen pots and pans",
+          "Fibreboard boxes",
           "SCR-1234-RG2C2U1E",
           "QR-1234-RG2C2U1E"
         );
@@ -173,6 +177,7 @@ public class EblCarrier extends ConformanceParty {
           "732391",
           "Tableware and kitchenware",
           "Kitchen pots and pans",
+          "Fibreboard boxes",
           "SCR-1234-RG2C2U2E",
           "QR-1234-RG2C2U2E"
         );
@@ -187,6 +192,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Tableware and kitchenware",
           null,
+          "Fibreboard boxes",
           "SCR-1234-RG-SOC-REFERENCES",
           "QR-1234-RG-SOC-REFERENCES"
         );
@@ -637,7 +643,7 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse _handlePostShippingInstructions(ConformanceRequest request) {
     ObjectNode siPayload =
       (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
-    var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload);
+    var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload, apiVersion);
     si.save(persistentMap);
     if (isShipperNotificationEnabled) {
       asyncCounterpartNotification(

@@ -13,9 +13,7 @@ public class Checksums {
 
   @SneakyThrows
   public static String sha256CanonicalJson(JsonNode node) {
-    var digester = MessageDigest.getInstance("SHA256");
-    var digestBytes = digester.digest(((Canonical) Convert.toJson(node)).toCanonicalString().getBytes(StandardCharsets.UTF_8));
-    return HexFormat.of().formatHex(digestBytes);
+    return sha256(((Canonical) Convert.toJson(node)).toCanonicalString());
   }
 
   @SneakyThrows

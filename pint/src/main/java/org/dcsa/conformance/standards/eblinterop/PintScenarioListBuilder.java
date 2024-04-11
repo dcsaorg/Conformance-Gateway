@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -42,10 +41,26 @@ public class PintScenarioListBuilder
                 .thenEither(
                   initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
                     noAction(),
-                    initiateAndCloseTransferAction(PintResponseCode.DUPE)),
+                    retryTransfer(PintResponseCode.DUPE),
+                    resignLatestEntry().then(
+                      retryTransfer(PintResponseCode.DUPE)
+                    ),
+                    manipulateLatestTransactionParameters().then(
+                      retryTransfer(PintResponseCode.DISE)
+                    )),
+                  initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+                    noAction(),
+                    resignLatestEntry().then(
+                      retryTransfer(PintResponseCode.DUPE)
+                    ),
+                    manipulateLatestTransactionParameters().then(
+                      retryTransfer(PintResponseCode.DISE)
+                    )
+                  ),
                   initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
                     initiateAndCloseTransferAction(PintResponseCode.RECE)
-                  )
+                  ),
+                  initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM)
                 ),
               receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
                 initiateAndCloseTransferAction(PintResponseCode.BENV)
@@ -69,6 +84,33 @@ public class PintScenarioListBuilder
                         transferDocument().thenEither(
                           closeTransferAction(PintResponseCode.RECE),
                           retryTransfer(PintResponseCode.RECE)
+                        )
+                      ),
+                      resetScenarioClass(ScenarioClass.FAIL_W_503).then(
+                        transferDocumentReceiverFailure().then(
+                          resetScenarioClass(ScenarioClass.NO_ISSUES).thenEither(
+                            transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
+                            retryTransfer(1).then(
+                              transferDocument().thenEither(
+                                closeTransferAction(PintResponseCode.RECE),
+                                retryTransfer(PintResponseCode.RECE)
+                              )
+                            )
+                          )
+                        )
+                      ),
+                      transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
+                        retryTransfer(1).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                      ),
+                      transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
+                        retryTransfer(1).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                      ),
+                      closeTransferAction(PintResponseCode.MDOC).then(
+                        retryTransfer(1).then(
+                          transferDocument().thenEither(
+                            closeTransferAction(PintResponseCode.RECE),
+                            retryTransfer(PintResponseCode.RECE)
+                          )
                         )
                       )
                     )
@@ -99,6 +141,31 @@ public class PintScenarioListBuilder
             ));
   }
 
+  private static PintScenarioListBuilder manipulateLatestTransactionParameters() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction ->
+        new ManipulateTransactionsAction(
+          receivingPlatform,
+          sendingPlatform,
+          (PintAction) previousAction
+        ));
+  }
+
+  private static PintScenarioListBuilder resignLatestEntry() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction ->
+        new ResignLatestEntryAction(
+          receivingPlatform,
+          sendingPlatform,
+          (PintAction) previousAction
+        ));
+  }
+
+
   private static PintScenarioListBuilder receiverStateSetup(ScenarioClass scenarioClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
@@ -121,15 +188,33 @@ public class PintScenarioListBuilder
         scenarioClass));
   }
 
-
   private static PintScenarioListBuilder transferDocument() {
+    return transferDocument(SenderDocumentTransmissionTypeCode.VALID_DOCUMENT);
+  }
+
+  private static PintScenarioListBuilder transferDocument(SenderDocumentTransmissionTypeCode senderDocumentTransmissionTypeCode) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
       previousAction -> new PintTransferAdditionalDocumentAction(
         receivingPlatform,
         sendingPlatform,
-        (PintAction) previousAction
+        (PintAction) previousAction,
+        senderDocumentTransmissionTypeCode,
+        resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)
+      ));
+  }
+
+
+  private static PintScenarioListBuilder transferDocumentReceiverFailure() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction -> new PintTransferAdditionalDocumentFailureAction(
+        receivingPlatform,
+        sendingPlatform,
+        (PintAction) previousAction,
+        503
       ));
   }
 
@@ -204,7 +289,7 @@ public class PintScenarioListBuilder
 
 
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode) {
-    return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID);
+    return initiateAndCloseTransferAction(signedResponseCode, SenderTransmissionClass.VALID_ISSUANCE);
   }
 
   private static PintScenarioListBuilder initiateAndCloseTransferAction(PintResponseCode signedResponseCode, SenderTransmissionClass senderTransmissionClass) {

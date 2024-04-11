@@ -9,11 +9,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class SupplyScenarioParametersAction extends IssuanceAction {
+  private final EblType eblType;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
   public SupplyScenarioParametersAction(
-      String sourcePartyName, String targetPartyName, ConformanceAction previousAction) {
-    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters", -1);
+      String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType) {
+    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s]".formatted(eblType.name()), -1);
+    this.eblType = eblType;
   }
 
   @Override
@@ -47,8 +49,26 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new SuppliedScenarioParameters("XMPL", "Example party code", "Example code list")
-        .toJson();
+    return (switch (eblType) {
+      case BLANK_EBL -> new SuppliedScenarioParameters(
+        "BOLE (platform code)",
+        "Legal name of issueTo party",
+        "Party code of issueTo party",
+        "Bolero (code list name for issueTo party)",
+        null,
+        null,
+        null
+      );
+      default -> new SuppliedScenarioParameters(
+        "BOLE (platform code)",
+        "Legal name of issue to party",
+        "Party code of issue to party",
+        "Bolero (code list name for issue to party)",
+        "Legal name of consignee/endorsee",
+        "Party code of consignee/endorsee",
+        "Bolero (code list name for consignee/endorsee)"
+      );
+    }).toJson();
   }
 
   @Override
@@ -59,7 +79,14 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
+    setDsp(getDsp().withEblType(eblType));
     getSspConsumer().accept(SuppliedScenarioParameters.fromJson(partyInput.get("input")));
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+      return super.asJsonNode()
+      .put("eblType", eblType.name());
   }
 
   @Override

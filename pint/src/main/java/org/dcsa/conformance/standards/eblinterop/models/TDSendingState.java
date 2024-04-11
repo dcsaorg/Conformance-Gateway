@@ -1,16 +1,22 @@
 package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.nimbusds.jose.JWSObject;
+import lombok.SneakyThrows;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
+import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
 
 public class TDSendingState {
 
@@ -18,6 +24,21 @@ public class TDSendingState {
   private static final String DOCUMENTS = "documents";
   private static final String SIGNED_MANIFEST = "signedManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN = "envelopeTransferChain";
+
+
+  private static final Map<String, String> PLATFORM2CODELISTNAME = Map.ofEntries(
+    Map.entry("WAVE", "Wave"),
+    Map.entry("CARX", "CargoX"),
+    Map.entry("EDOX", "EdoxOnline"),
+    Map.entry("IQAX", "IQAX"),
+    Map.entry("ESSD", "EssDOCS"),
+    Map.entry("BOLE", "Bolero"),
+    Map.entry("TRGO", "TradeGO"),
+    Map.entry("SECR", "Secro")/*,
+    Map.entry("", "GSBN"),
+    Map.entry("", "WiseTech")
+    */
+  );
 
   private final ObjectNode state;
 
@@ -94,6 +115,100 @@ public class TDSendingState {
   }
 
 
+
+  public static String platform2CodeListName(String platform) {
+    // The default is not valid, but it only happens with unknown platforms and null would be even worse
+    return PLATFORM2CODELISTNAME.getOrDefault(platform, platform);
+  }
+
+  public static ObjectNode generateTransaction(String action, String sendingPlatform, String sendingLegalName, String sendingEPUI, String receivingPlatform, String receivingLegalName, String receivingEPUI, String receivingCodeListName) {
+    var actor = OBJECT_MAPPER.createObjectNode()
+      .put("eblPlatform", sendingPlatform)
+      .put("legalName", sendingLegalName);
+    actor.putArray("partyCodes")
+      .addObject()
+      .put("partyCode", sendingEPUI)
+      .put("codeListProvider", "EPUI")
+      .put("codeListName", platform2CodeListName(sendingPlatform));
+    var recipient = OBJECT_MAPPER.createObjectNode()
+      .put("eblPlatform", receivingPlatform)
+      .put("legalName", receivingLegalName);
+    recipient.putArray("partyCodes")
+      .addObject()
+      .put("partyCode", receivingEPUI)
+      .put("codeListProvider", "EPUI")
+      .put("codeListName", receivingCodeListName);
+    var transaction = OBJECT_MAPPER.createObjectNode()
+      .put("action", action)
+      .put("timestamp", Instant.now().toEpochMilli());
+    transaction.set("actor", actor);
+    transaction.set("recipient", recipient);
+    return transaction;
+  }
+
+  public static String generateTransactionEntry(PayloadSigner payloadSigner, String previousEnvelopeTransferChainEntrySignedContentChecksum, String tdChecksum, String action, String sendingPlatform, String sendingLegalName, String sendingEPUI, String receivingPlatform, String receivingLegalName, String receivingEPUI, String receivingCodeListName) {
+    var latestEnvelopeTransferChainUnsigned = OBJECT_MAPPER.createObjectNode()
+      .put("eblPlatform", sendingPlatform)
+      .put("transportDocumentChecksum", tdChecksum)
+      .put("previousEnvelopeTransferChainEntrySignedContentChecksum", previousEnvelopeTransferChainEntrySignedContentChecksum);
+
+    latestEnvelopeTransferChainUnsigned
+      .putArray("transactions")
+      .add(generateTransaction(
+        action,
+        sendingPlatform,
+        sendingLegalName,
+        sendingEPUI,
+        receivingPlatform,
+        receivingLegalName,
+        receivingEPUI,
+        receivingCodeListName
+      ));
+
+
+    return payloadSigner.sign(latestEnvelopeTransferChainUnsigned.toString());
+  }
+
+  @SneakyThrows
+  public void resignLatestEntry(PayloadSigner payloadSigner) {
+    var chain = this.state.path(ENVELOPE_TRANSFER_CHAIN);
+    var lastSigned = chain.path(chain.size() - 1);
+    var lastUnsigned = JWSObject.parse(lastSigned.asText());
+    var lastResigned = payloadSigner.sign(lastUnsigned.getPayload().toString());
+    ((ArrayNode)chain).set(chain.size() - 1, lastResigned);
+  }
+
+  @SneakyThrows
+  public void manipulateLatestTransaction(PayloadSigner payloadSigner, ReceiverScenarioParameters rsp) {
+    var chain = this.state.path(ENVELOPE_TRANSFER_CHAIN);
+    var lastSigned = chain.path(chain.size() - 1);
+    var last = parseSignedNode(lastSigned);
+    var sendingPlatform = "BOLE";
+    var receivingPlatform = rsp.eblPlatform();
+    var sendingEPUI = "1234";
+    var sendingLegalName = "DCSA CTK tester";
+    var receivingEPUI = rsp.receiverEPUI();
+    var receivingLegalName = rsp.receiverLegalName();
+    var receiverCodeListName = rsp.receiverEPUICodeListName();
+    if (sendingPlatform.equals(receivingPlatform)) {
+      sendingPlatform = "WAVE";
+    }
+    var newTransactionEntry = generateTransaction(
+      "TRNS",
+      sendingPlatform,
+      sendingLegalName,
+      sendingEPUI,
+      sendingPlatform,
+      receivingLegalName,
+      receivingEPUI,
+      receiverCodeListName
+    );
+
+    ((ArrayNode)last.path("transactions")).insert(0, newTransactionEntry);
+
+    var newSigned = payloadSigner.sign(last.toString());
+    ((ArrayNode)chain).set(chain.size() - 1, newSigned);
+  }
 
   public ObjectNode generateEnvelopeManifest(String transportDocumentChecksum, String lastEnvelopeTransferChainEntrySignedContentChecksum) {
     var unsignedEnvelopeManifest = OBJECT_MAPPER.createObjectNode()

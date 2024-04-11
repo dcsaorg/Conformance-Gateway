@@ -36,5 +36,10 @@
             <artifactId>json-schema-validator</artifactId>
             <version>1.0.86</version>
         </dependency>
+			<dependency>
+				<groupId>io.setl</groupId>
+				<artifactId>canonical-json</artifactId>
+				<version>2.3</version>
+			</dependency>
     </dependencies>
 </project>

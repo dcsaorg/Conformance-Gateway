@@ -1,12 +1,10 @@
 package org.dcsa.conformance.standards.eblinterop.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.DUPE;
-import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.RECE;
+import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -95,18 +93,10 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (existing != null){
       throw new IllegalStateException("Please do not reuse TDRs between scenarios in the conformance test");
     }
-
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
     var expectedRecipient = "12345-jane-doe";
-    var receivingParameters = new ReceiverScenarioParameters(
-      "CARX",
-      "Jane Doe",
-      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
-      "CargoX",
-      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
-    );
-
-    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM());
+    var receivingParameters = getReceiverScenarioParameters(ssp, scenarioClass, expectedRecipient);
+    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
     tdState.setExpectedReceiver(expectedRecipient);
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
@@ -117,6 +107,24 @@ public class PintReceivingPlatform extends ConformanceParty {
         .set("input", receivingParameters.toJson()));
     addOperatorLogEntry(
       "Finished ScenarioType");
+  }
+
+  private static ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    String platform, codeListName;
+    if ("CARX".equals(ssp.eblPlatform())) {
+      platform = "BOLE";
+      codeListName = "Bolero";
+    } else {
+      platform = "CARX";
+      codeListName = "CargoX";
+    }
+    return new ReceiverScenarioParameters(
+      platform,
+      "Jane Doe",
+      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
+      codeListName,
+      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
+    );
   }
 
 
@@ -139,13 +147,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);
       unsignedPayload.put("responseCode", responseCode.name());
-      var receivedDocs = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
-      for (var checksum : receiveState.getKnownDocumentChecksums()) {
-        receivedDocs.add(checksum);
-      }
-
-      var signedPayload = payloadSigner.sign(unsignedPayload.toString());
-      var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),
@@ -202,6 +204,10 @@ public class PintReceivingPlatform extends ConformanceParty {
       var tdr = this.envelopeReferences.get(envelopeReference);
       if (tdr != null) {
         var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+        var cannedResponse = receiveState.cannedResponse(request);
+        if (cannedResponse != null) {
+          return cannedResponse;
+        }
 
         String computedChecksum = "";
         try {
@@ -209,16 +215,14 @@ public class PintReceivingPlatform extends ConformanceParty {
         } catch (Exception ignored) {
           // Will just fail the checksum check below
         }
-        if (!Objects.equals(checksum, computedChecksum)) {
+        if (!Objects.equals(checksum, computedChecksum) || !receiveState.receiveMissingDocument(checksum)) {
+          var payload = receiveState.generateSignedResponse(INCD, payloadSigner);
           return request.createResponse(
-            409,
-            Map.of("Api-Version", List.of(apiVersion)),
-            // TODO: Create correct rejection message
-            new ConformanceMessageBody("")
+            INCD.getHttpResponseCode(),
+            Map.of("API-Version", List.of(apiVersion)),
+            new ConformanceMessageBody(payload)
           );
         }
-        // TODO: Validate the content and switch to a different error code if not the right document
-        receiveState.receiveMissingDocument(checksum);
         receiveState.save(persistentMap);
         return request.createResponse(
           204,
@@ -245,21 +249,8 @@ public class PintReceivingPlatform extends ConformanceParty {
         return cannedResponse;
       }
       var responseCode = receiveState.finishTransferCode();
-      var unsignedPayload = OBJECT_MAPPER.createObjectNode();
-        //.put("lastEnvelopeTransferChainEntrySignedContentChecksum", lastEnvelopeTransferChainEntrySignedContentChecksum);
       receiveState.updateTransferState(responseCode);
-      unsignedPayload.put("responseCode", responseCode.name());
-      if (responseCode == RECE || responseCode == DUPE) {
-        var receivedDocuments = unsignedPayload.putArray("receivedAdditionalDocumentChecksums");
-        for (var checksum : receiveState.getKnownDocumentChecksums()) {
-          receivedDocuments.add(checksum);
-        }
-      }
-      //unsignedPayload.set("receivedAdditionalDocumentChecksums", documentChecksums);
-
-      var signedPayload = payloadSigner.sign(unsignedPayload.toString());
-      var signedPayloadJsonNode = TextNode.valueOf(signedPayload);
-
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),

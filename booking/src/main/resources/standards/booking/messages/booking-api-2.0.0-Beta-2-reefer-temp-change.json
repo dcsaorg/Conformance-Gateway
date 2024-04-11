@@ -1,0 +1,75 @@
+{
+  "receiptTypeAtOrigin": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
+  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
+  "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
+  "isPartialLoadAllowed": false,
+  "isExportDeclarationRequired": false,
+  "isImportLicenseRequired": false,
+  "communicationChannelCode": "AO",
+  "isEquipmentSubstitutionAllowed": true,
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "42R0",
+      "units": 1,
+      "isShipperOwned": false,
+      "commodities": [
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 323.32,
+          "cargoGrossWeightUnit": "KGM"
+        }
+      ],
+      "isNonOperatingReefer": false,
+      "activeReeferSettings": {
+        "temperatureSetpoint": -5,
+        "temperatureUnit": "CEL"
+      }
+    }
+  ],
+  "documentParties": [
+    {
+      "party": {
+        "partyName": "DCSA Conformance Toolkit",
+        "address": {
+          "name": "Mustermann",
+          "street": "Strawinskylaan",
+          "streetNumber": "4117",
+          "floor": "6",
+          "postCode": "1077 ZX",
+          "city": "Amsterdam",
+          "country": "Netherlands"
+        },
+        "partyContactDetails": [
+          {
+            "name": "Henrik",
+            "phone": "+31611444666"
+          }
+        ]
+      },
+      "partyFunction": "OS",
+      "isToBeNotified": false
+    }
+  ],
+  "shipmentLocations": [
+    {
+      "location": {
+        "locationType": "UNLO",
+        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
+      },
+      "locationTypeCode": "POL"
+    },
+    {
+      "location": {
+        "locationType": "UNLO",
+        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
+      },
+      "locationTypeCode": "POD"
+    }
+  ]
+}

@@ -13,6 +13,9 @@ call mvn clean install
 cd ..\ebl-surrender
 call mvn clean install
 
+cd ..\jit
+call mvn clean install
+
 cd ..\ovs
 call mvn clean install
 

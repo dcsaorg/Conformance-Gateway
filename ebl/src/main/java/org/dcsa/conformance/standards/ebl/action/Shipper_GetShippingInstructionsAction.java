@@ -121,7 +121,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               responseSchemaValidator),
-              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus)
+              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus)
           );
       }
     };

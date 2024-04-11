@@ -1,0 +1,31 @@
+{
+  "id": "SANDBOX_ID_PREFIX-auto-subscriber-testing-counterparts",
+  "name": "Auto subscriber testing counterparts",
+  "authHeaderName": "dcsa-conformance-api-key",
+  "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "Publisher1",
+    "role" : "Publisher",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-subscriber-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "Subscriber1",
+    "role" : "Subscriber",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-subscriber-tested-party/party/Subscriber1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER"
+  }, {
+    "name" : "Publisher1",
+    "role" : "Publisher",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-subscriber-testing-counterparts/party/Publisher1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER"
+  } ]
+}

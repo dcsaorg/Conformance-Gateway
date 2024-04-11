@@ -32,7 +32,7 @@
       },
       {
         "party": {
-          "partyName": "CONSIGNEE_NAME_PLACEHOLDER",
+          "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
           "partyCodes": [
             {
               "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
@@ -48,6 +48,19 @@
           ]
         },
         "partyFunction": "CN",
+        "isToBeNotified": false
+      },
+      {
+        "party": {
+          "partyName": "DCSA CTK Service Contract Owner",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
+        },
+        "partyFunction": "SCO",
         "isToBeNotified": false
       }
     ],
@@ -91,7 +104,7 @@
       }
     ],
     "isShippedOnBoardType": true,
-    "transportDocumentStatus": "DRAFT",
+    "transportDocumentStatus": "ISSUED",
     "cargoMovementTypeAtOrigin": "FCL",
     "cargoMovementTypeAtDestination": "FCL",
     "receiptTypeAtOrigin": "CY",
@@ -138,12 +151,12 @@
   },
   "issueTo": {
     "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
-    "legalName": "legal name",
+    "legalName": "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
     "partyCodes": [
       {
-        "partyCode": "PARTY_CODE_PLACEHOLDER",
+        "partyCode": "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
         "codeListProvider": "EPUI",
-        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+        "codeListName": "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER"
       }
     ]
   }

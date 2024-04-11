@@ -16,6 +16,7 @@ public record CarrierScenarioParameters(
   String consignmentItem2HSCode,
   String descriptionOfGoods,
   String descriptionOfGoods2,
+  String outerPackagingDescription,
   String serviceContractReference,
   String contractQuotationReference
   ) {
@@ -46,6 +47,9 @@ public record CarrierScenarioParameters(
     if (descriptionOfGoods2 != null) {
       node.put("descriptionOfGoods2", descriptionOfGoods2);
     }
+    if (outerPackagingDescription != null) {
+      node.put("outerPackagingDescription", outerPackagingDescription);
+    }
     return node;
   }
 
@@ -61,6 +65,7 @@ public record CarrierScenarioParameters(
       jsonNode.path("consignmentItem2HSCode").asText(null),
       jsonNode.required("descriptionOfGoods").asText(),
       jsonNode.path("descriptionOfGoods2").asText(null),
+      jsonNode.path("outerPackagingDescription").asText(null),
       jsonNode.required("serviceContractReference").asText(),
       jsonNode.required("contractQuotationReference").asText()
     );

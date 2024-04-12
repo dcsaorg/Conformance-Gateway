@@ -62,7 +62,7 @@ public class IssuanceChecks {
   }
 
   public static ActionCheck tdContentChecks(UUID matched, String standardsVersion) {
-    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, null);
+    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, standardsVersion, null);
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       EblIssuanceRole::isCarrier,

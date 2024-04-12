@@ -388,6 +388,7 @@ public class EblCarrier extends ConformanceParty {
         .apiVersion(apiVersion)
         .shippingInstructions(shippingInstructions.getShippingInstructions())
         .includeShippingInstructionsReference(includeShippingInstructionsReference)
+        .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
@@ -405,6 +406,7 @@ public class EblCarrier extends ConformanceParty {
         .apiVersion(apiVersion)
         .transportDocument(shippingInstructions.getTransportDocument().orElseThrow())
         .includeShippingInstructionsReference(includeShippingInstructionsReference)
+        .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
         .asJsonNode();
     if (isShipperNotificationEnabled) {
@@ -545,6 +547,7 @@ public class EblCarrier extends ConformanceParty {
           ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(siData)
+              .subscriptionReference(si.getSubscriptionReference())
               .build()
               .asJsonNode());
     }
@@ -575,6 +578,7 @@ public class EblCarrier extends ConformanceParty {
           TransportDocumentNotification.builder()
               .apiVersion(apiVersion)
               .transportDocument(td)
+              .subscriptionReference(si.getSubscriptionReference())
               .build()
               .asJsonNode());
     }
@@ -651,6 +655,7 @@ public class EblCarrier extends ConformanceParty {
           ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(si.getShippingInstructions())
+              .subscriptionReference(si.getSubscriptionReference())
               .build()
               .asJsonNode());
     }
@@ -683,6 +688,7 @@ public class EblCarrier extends ConformanceParty {
           ShippingInstructionsNotification.builder()
               .apiVersion(apiVersion)
               .shippingInstructions(si.getShippingInstructions())
+              .subscriptionReference(si.getSubscriptionReference())
               .build()
               .asJsonNode());
     }
@@ -760,6 +766,7 @@ public class EblCarrier extends ConformanceParty {
     private String shippingInstructionsStatus;
     private String updatedShippingInstructionsStatus;
     private String transportDocumentStatus;
+    private String subscriptionReference;
     private String reason;
     @Builder.Default
     private boolean includeShippingInstructionsReference = true;
@@ -788,6 +795,7 @@ public class EblCarrier extends ConformanceParty {
       setIfNotNull(notification, "id", id);
       setIfNotNull(notification, "source", source);
       setIfNotNull(notification, "type", computedType());
+      setIfNotNull(notification, "subscriptionReference", subscriptionReference);
       notification.put("time", Instant.now().toString());
       notification.put("datacontenttype", "application/json");
 

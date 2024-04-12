@@ -78,21 +78,20 @@
                         "email": "no-reply@dcsa.example.org"
                       }
                     ],
-                    "documentParties": [
-                      {
-                        "party": {
-                          "partyName": "DCSA CTK",
-                          "partyContactDetails": [
-                            {
-                              "name": "DCSA test person",
-                              "email": "no-reply@dcsa.example.org"
-                            }
-                          ]
-                        },
-                        "partyFunction": "OS",
-                        "isToBeNotified": false
+                    "documentParties": {
+                      "shipper": {
+                        "partyName": "DCSA CTK",
+                        "displayedAddress": [
+                          "Strawinskylaan 4117"
+                        ],
+                        "partyContactDetails": [
+                          {
+                            "name": "DCSA test person",
+                            "email": "no-reply@dcsa.example.org"
+                          }
+                        ]
                       }
-                    ],
+                    },
                     "consignmentItems": [
                       {
                         "carrierBookingReference": "CBR_123_REGULAR",
@@ -317,7 +316,7 @@
             "explode": false,
             "schema": {
               "maxLength": 100,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
             }
@@ -338,7 +337,7 @@
                 },
                 "examples": {
                   "regularSTDExample": {
-                    "summary": "Fetch Shipping Instruction with standard Dry cargo\n",
+                    "summary": "Fetch Shipping Instructions with standard Dry cargo\n",
                     "description": "A `RECEIVED` `Shipping Instructions` with standard Dry cargo waiting for the provider to `DRAFT` a `Transport Document`.\n",
                     "value": {
                       "shippingInstructionsReference": "fc5009a7-25ad-4bb0-9892-4e2dea6bcdd9",
@@ -357,21 +356,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REGULAR",
@@ -430,21 +428,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REEFER",
@@ -488,11 +485,11 @@
                       ],
                       "requestedChanges": [
                         {
-                          "field": "$.advanceManifestFilings[0]",
+                          "jsonPath": "$.advanceManifestFilings[0]",
                           "message": "Not a legal combination of \"manifestTypeCode\" (AFR) and \"countryCode\" (US)"
                         },
                         {
-                          "field": "$.advanceManifestFilings",
+                          "jsonPath": "$.advanceManifestFilings",
                           "message": "Missing \"ACI\" filing required for import to US"
                         }
                       ]
@@ -520,21 +517,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "RTM1234567",
@@ -720,7 +716,7 @@
             "explode": false,
             "schema": {
               "maxLength": 100,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
             }
@@ -753,21 +749,20 @@
                         "email": "no-reply@dcsa.example.org"
                       }
                     ],
-                    "documentParties": [
-                      {
-                        "party": {
-                          "partyName": "DCSA CTK",
-                          "partyContactDetails": [
-                            {
-                              "name": "DCSA test person",
-                              "email": "no-reply@dcsa.example.org"
-                            }
-                          ]
-                        },
-                        "partyFunction": "OS",
-                        "isToBeNotified": false
+                    "documentParties": {
+                      "shipper": {
+                        "partyName": "DCSA CTK",
+                        "displayedAddress": [
+                          "Strawinskylaan 4117"
+                        ],
+                        "partyContactDetails": [
+                          {
+                            "name": "DCSA test person",
+                            "email": "no-reply@dcsa.example.org"
+                          }
+                        ]
                       }
-                    ],
+                    },
                     "consignmentItems": [
                       {
                         "carrierBookingReference": "CBR_123_REGULAR",
@@ -1034,7 +1029,7 @@
             "explode": false,
             "schema": {
               "maxLength": 100,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
             }
@@ -1317,7 +1312,7 @@
             "explode": false,
             "schema": {
               "maxLength": 20,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
               "example": "HHL71800000"
@@ -1361,6 +1356,12 @@
                       "carrierCodeListProvider": "SMDG",
                       "issuingParty": {
                         "partyName": "Mediterranean Shipping Company",
+                        "address": {
+                          "street": "Chemin Rieu",
+                          "streetNumber": "12-14",
+                          "city": "Geneva",
+                          "countryCode": "CH"
+                        },
                         "identifyingCodes": [
                           {
                             "codeListProvider": "SMDG",
@@ -1407,21 +1408,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REGULAR",
@@ -1482,6 +1482,12 @@
                       "carrierCodeListProvider": "SMDG",
                       "issuingParty": {
                         "partyName": "Mediterranean Shipping Company",
+                        "address": {
+                          "street": "Chemin Rieu",
+                          "streetNumber": "12-14",
+                          "city": "Geneva",
+                          "countryCode": "CH"
+                        },
                         "identifyingCodes": [
                           {
                             "codeListProvider": "SMDG",
@@ -1528,21 +1534,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REEFER",
@@ -1608,6 +1613,13 @@
                       "carrierCodeListProvider": "SMDG",
                       "issuingParty": {
                         "partyName": "Hapag Lloyd",
+                        "address": {
+                          "street": "Ballindamm",
+                          "streetNumber": "25",
+                          "postCode": "D-20095",
+                          "city": "Hamburg",
+                          "countryCode": "DE"
+                        },
                         "identifyingCodes": [
                           {
                             "codeListProvider": "SMDG",
@@ -1654,21 +1666,20 @@
                           "email": "no-reply@dcsa.example.org"
                         }
                       ],
-                      "documentParties": [
-                        {
-                          "party": {
-                            "partyName": "DCSA CTK",
-                            "partyContactDetails": [
-                              {
-                                "name": "DCSA test person",
-                                "email": "no-reply@dcsa.example.org"
-                              }
-                            ]
-                          },
-                          "partyFunction": "OS",
-                          "isToBeNotified": false
+                      "documentParties": {
+                        "shipper": {
+                          "partyName": "DCSA CTK",
+                          "displayedAddress": [
+                            "Strawinskylaan 4117"
+                          ],
+                          "partyContactDetails": [
+                            {
+                              "name": "DCSA test person",
+                              "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
                         }
-                      ],
+                      },
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "RTM1234567",
@@ -1826,7 +1837,7 @@
             "explode": false,
             "schema": {
               "maxLength": 20,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
               "example": "HHL71800000"
@@ -1988,7 +1999,7 @@
   "components": {
     "schemas": {
       "CreateShippingInstructions": {
-        "title": "Shipping Instructions",
+        "title": "Create Shipping Instructions",
         "required": [
           "consignmentItems",
           "documentParties",
@@ -2039,7 +2050,7 @@
           "sendToPlatform": {
             "maxLength": 4,
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ICED` (ICE Digital)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v1.csv).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -2153,7 +2164,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "type": "string",
                     "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                    "example": "DK"
+                    "example": "NL"
                   }
                 }
               }
@@ -2170,19 +2181,14 @@
             }
           },
           "documentParties": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Document Parties`\n",
-            "items": {
-              "$ref": "#/components/schemas/DocumentParty"
-            }
+            "$ref": "#/components/schemas/CreateShippingInstructions_documentParties"
           },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
             "description": "A list of `ConsignmentItems`\n",
             "items": {
-              "$ref": "#/components/schemas/ConsignmentItem_SHI"
+              "$ref": "#/components/schemas/ConsignmentItemShipper"
             }
           },
           "utilizedTransportEquipments": {
@@ -2190,7 +2196,7 @@
             "type": "array",
             "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
             "items": {
-              "$ref": "#/components/schemas/UtilizedTransportEquipment_SHI"
+              "$ref": "#/components/schemas/UtilizedTransportEquipmentShipper"
             }
           },
           "references": {
@@ -2240,7 +2246,7 @@
         "properties": {
           "name": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the contact\n",
             "example": "Henrik"
@@ -2261,7 +2267,7 @@
             "properties": {
               "phone": {
                 "maxLength": 30,
-                "pattern": "^\\S+(\\s+\\S+)*$",
+                "pattern": "^\\S(?:.*\\S)?$",
                 "type": "string",
                 "description": "Phone number for the contact\n",
                 "example": "+45 70262970"
@@ -2288,46 +2294,8 @@
           }
         ]
       },
-      "DocumentParty": {
-        "title": "Document Party",
-        "required": [
-          "isToBeNotified",
-          "party",
-          "partyFunction"
-        ],
-        "type": "object",
-        "properties": {
-          "party": {
-            "$ref": "#/components/schemas/Party"
-          },
-          "partyFunction": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `OS` (Original shipper)\n- `CN` (Consignee)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `MS` (Document/message issuer/sender)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `HE` (Carrier booking office (transportation office))\n- `SCO` (Service contract owner - Defined by DCSA)\n- `BA` (Booking Agency)\n- `END` (Endorsee Party)\n",
-            "example": "DDS"
-          },
-          "displayedAddress": {
-            "maxItems": 5,
-            "minItems": 1,
-            "type": "array",
-            "description": "The address to be displayed in the `Transport Document`. The displayed address may be used to match the address provided in the letter of credit. It is mandatory to provide a displayed address if the B/L needs to be switched to paper later in the process\n",
-            "items": {
-              "maxLength": 35,
-              "type": "string",
-              "description": "A single address line to be used when a B/L needs to be printed.\n",
-              "example": "Strawinskylaan 4117"
-            }
-          },
-          "isToBeNotified": {
-            "type": "boolean",
-            "description": "Used to decide whether the party will be notified of the arrival of the cargo.\n",
-            "example": true
-          }
-        },
-        "description": "Associates a `Party` with a role.\n"
-      },
-      "Party": {
-        "title": "Party",
+      "Shipper": {
+        "title": "Shipper",
         "required": [
           "partyName"
         ],
@@ -2335,20 +2303,24 @@
         "properties": {
           "partyName": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
-            "example": "Asseco Denmark"
+            "example": "IKEA Denmark"
           },
           "address": {
-            "$ref": "#/components/schemas/Address"
+            "$ref": "#/components/schemas/PartyAddress"
           },
-          "partyContactDetails": {
+          "displayedAddress": {
+            "maxItems": 999,
             "minItems": 1,
             "type": "array",
-            "description": "A list of contact details\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
-              "$ref": "#/components/schemas/PartyContactDetail"
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
             }
           },
           "identifyingCodes": {
@@ -2363,25 +2335,28 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
           }
         },
-        "description": "Refers to a company or a legal entity.\n"
+        "description": "The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.\n\n**Condition:** Either the `address` or the `displayedAddress` must be included in the `Transport Document`.\n"
       },
-      "Address": {
+      "PartyAddress": {
         "title": "Address",
         "required": [
-          "country",
-          "name"
+          "city",
+          "countryCode",
+          "street",
+          "streetNumber"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
-            "type": "string",
-            "description": "Name of the address\n",
-            "example": "Henrik"
-          },
           "street": {
             "maxLength": 100,
             "type": "string",
@@ -2396,10 +2371,10 @@
           },
           "floor": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The floor of the party’s street number.\n",
-            "example": "N/A"
+            "example": "2nd"
           },
           "postCode": {
             "maxLength": 50,
@@ -2409,10 +2384,18 @@
           },
           "city": {
             "maxLength": 65,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
             "example": "Amsterdam"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the carrier booking office is located. The pattern used must be\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
           },
           "stateRegion": {
             "maxLength": 65,
@@ -2421,29 +2404,26 @@
             "nullable": true,
             "example": "North Holland"
           },
-          "country": {
-            "maxLength": 75,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
             "type": "string",
-            "description": "The country of the party’s address.\n",
-            "example": "The Netherlands"
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "NL"
           }
         },
         "description": "An object for storing address related information\n"
       },
       "IdentifyingCode": {
         "title": "Identifying Code",
-        "required": [
-          "codeListProvider",
-          "partyCode"
-        ],
         "type": "object",
         "properties": {
           "codeListProvider": {
-            "maxLength": 5,
+            "maxLength": 100,
             "type": "string",
-            "description": "A DCSA provided code for [UN/CEFACT](https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred3055.htm) code list providers:\n- `ISO` (International Standards Organization) - `UNECE` (United Nations Economic Commission for Europe) - `LLOYD` (Lloyd's register of shipping) - `BIC` (Bureau International des Containeurs) - `IMO` (International Maritime Organization) - `SCAC` (Standard Carrier Alpha Code) - `ITIGG` (International Transport Implementation Guidelines Group) - `ITU` (International Telecommunication Union) - `SMDG` (Shipplanning Message Development Group) - `NCBH` (NCB Hazcheck) - `FMC` (Federal Maritime Commission) - `CBSA` (Canada Border Services Agency) - `DCSA` (Digitial Container Shipping Association) - `W3C` (World Wide Web Consortium) - `GLEIF` (Global Legal Entity Identifier Foundation) - `EPI` (EBL Platform Identifier) - `ZZZ` (Mutually defined)\n",
-            "example": "SMDG"
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digitial Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "example": "W3C"
           },
           "partyCode": {
             "maxLength": 100,
@@ -2454,8 +2434,8 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the list, provided by the code list provider\n",
-            "example": "LCL"
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decenbtralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "example": "DID"
           }
         }
       },
@@ -2470,7 +2450,7 @@
         "properties": {
           "type": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The reference type code as defined by the relevant tax and/or legal authority.\n",
             "example": "PAN"
@@ -2481,11 +2461,11 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "NL"
           },
           "value": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `taxLegalReference`\n",
             "example": "AAAAA0000A"
@@ -2493,8 +2473,175 @@
         },
         "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\nA list of examples:\n| Type  | Country | Description | |-------|:-------:|-------------| |PAN|IN|Goods and Services Tax Identification Number in India| |GSTIN|IN|Goods and Services Tax Identification Number in India| |IEC|IN|Importer-Exported Code in India| |RUC|EC|Registro Único del Contribuyente in Ecuador| |RUC|PE|Registro Único del Contribuyente in Peru| |NIF|MG|Numéro d’Identification Fiscal in Madagascar| |NIF|DZ|Numéro d’Identification Fiscal in Algeria|\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
       },
-      "ConsignmentItem_SHI": {
-        "title": "Consignment Item",
+      "Consignee": {
+        "title": "Consignee",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "displayedAddress": {
+            "maxItems": 999,
+            "minItems": 1,
+            "type": "array",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "items": {
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "The party to which goods are consigned in the `Master Bill of Lading`.\n\n**Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)\n"
+      },
+      "Endorsee": {
+        "title": "Endorsee",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "displayedAddress": {
+            "maxItems": 999,
+            "minItems": 1,
+            "type": "array",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "items": {
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "The party to whom the title to the goods is transferred by means of endorsement.\n\n**Condition:** Can only be provided for negotiable BLs (`isToOrder=false`). If a negotiable BL does not have an `Endorsee`, the BL is said to be \"blank endorsed\". Note `Consignee` and `Endorsee` are mutually exclusive.\n"
+      },
+      "OtherDocumentParty": {
+        "title": "Other Document Party",
+        "required": [
+          "party",
+          "partyFunction"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "$ref": "#/components/schemas/Party"
+          },
+          "partyFunction": {
+            "maxLength": 3,
+            "type": "string",
+            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n",
+            "example": "DDS"
+          }
+        },
+        "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.\n"
+      },
+      "Party": {
+        "title": "Party",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "Asseco Denmark"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity.\n"
+      },
+      "ConsignmentItemShipper": {
+        "title": "Consignment Item (Shipper)",
         "required": [
           "cargoItems",
           "commoditySubreference"
@@ -2503,7 +2650,7 @@
         "properties": {
           "commoditySubreference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique reference to the commodity object assigned by the carrier in the booking confirmation. The reference must be provided by the shipper as part of the `Shipping Instructions` for the carrier to link this consignment item to the commodity. A commodity reference is only unique in the context of a booking.\n",
             "example": "COM-001"
@@ -2513,7 +2660,7 @@
             "type": "array",
             "description": "A list of all `cargoItems`\n",
             "items": {
-              "$ref": "#/components/schemas/CargoItem_SHI"
+              "$ref": "#/components/schemas/CargoItemShipper"
             }
           }
         },
@@ -2524,8 +2671,8 @@
           }
         ]
       },
-      "CargoItem_SHI": {
-        "title": "Cargo Item",
+      "CargoItemShipper": {
+        "title": "Cargo Item (Shipper)",
         "required": [
           "equipmentReference",
           "weight",
@@ -2535,7 +2682,7 @@
         "properties": {
           "equipmentReference": {
             "maxLength": 11,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
@@ -2575,7 +2722,7 @@
             ]
           },
           "outerPackaging": {
-            "$ref": "#/components/schemas/OuterPackaging_SHI"
+            "$ref": "#/components/schemas/OuterPackagingShipper"
           },
           "customsReferences": {
             "type": "array",
@@ -2587,8 +2734,8 @@
         },
         "description": "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n"
       },
-      "OuterPackaging_SHI": {
-        "title": "Outer Packaging",
+      "OuterPackagingShipper": {
+        "title": "Outer Packaging (Shipper)",
         "required": [
           "description",
           "numberOfPackages"
@@ -2620,7 +2767,7 @@
         "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.\n\n**Condition:** Mandatory for non-dangerous goods cargo.\n"
       },
       "CustomsReference": {
-        "title": "Custom Reference",
+        "title": "Customs Reference",
         "required": [
           "countryCode",
           "type",
@@ -2630,7 +2777,7 @@
         "properties": {
           "type": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The reference type code as defined in the relevant customs jurisdiction.\n",
             "example": "ACID"
@@ -2641,11 +2788,11 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "NL"
           },
           "value": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `customsReference`\n",
             "example": "4988470982020120017"
@@ -2664,14 +2811,14 @@
         "properties": {
           "carrierBookingReference": {
             "maxLength": 35,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The associated booking number provided by the carrier for this `Consignment Item`.\n\nWhen multiple `carrierBookingReferences` are used then the bookings referred to must all contain the same:\n- transportPlan\n- shipmentLocations\n- receiptTypeAtOrigin\n- deliveryTypeAtDestination\n- cargoMovementTypeAtOrigin\n- cargoMovementTypeAtDestination\n- serviceContractReference\n- termsAndConditions\n- Place of B/L Issue (if provided)\n",
             "example": "ABC709951"
           },
           "descriptionOfGoods": {
             "maxLength": 5000,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
             "example": "blue shoes size 47"
@@ -2739,8 +2886,8 @@
         },
         "description": "References provided by the shipper or freight forwarder at the time of `Booking` or at the time of providing `Shipping Instructions`. Carriers share it back when providing `Track & Trace` event updates, some are also printed on the B/L. Customers can use these references to track shipments in their internal systems.\n"
       },
-      "UtilizedTransportEquipment_SHI": {
-        "title": "Utilized Transport Equipment",
+      "UtilizedTransportEquipmentShipper": {
+        "title": "Utilized Transport Equipment (Shipper)",
         "required": [
           "seals"
         ],
@@ -2832,7 +2979,7 @@
         "description": "To be used for SoC (Shipper owned Containers). If `isShipperOwned` is true then the equipment used needs to be specified\n"
       },
       "RequiredEquipment": {
-        "title": "Equipment",
+        "title": "Equipment (Required Properties)",
         "type": "object",
         "description": "Used for storing cargo in/on during transport. The equipment size/type is defined by the ISO 6346 code. The most common equipment size/type is 20'/40'/45' DRY Freight Container, but several different versions exist.\n",
         "allOf": [
@@ -2849,14 +2996,14 @@
         "properties": {
           "equipmentReference": {
             "maxLength": 11,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
           },
           "ISOEquipmentCode": {
             "maxLength": 4,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
             "example": "22GP"
@@ -2896,7 +3043,7 @@
           },
           "equipmentReference": {
             "maxLength": 11,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
@@ -2915,7 +3062,7 @@
         "properties": {
           "manifestTypeCode": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The Manifest type code as defined by the provider. A list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv)\n",
             "example": "ACE"
@@ -2926,7 +3073,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "NL"
           },
           "advanceManifestFilingsHouseBLPerformedBy": {
             "type": "string",
@@ -2939,7 +3086,7 @@
           },
           "selfFilerCode": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Code identifying the party who will submit the advance manifest filing(s) for the House BL.\n\n**Mandatory** if `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SHIPPER`.\n",
             "example": "FLXP"
@@ -2976,14 +3123,14 @@
         "properties": {
           "shippingInstructionsReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
             "maxLength": 20,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
@@ -3024,10 +3171,16 @@
         ],
         "type": "object",
         "properties": {
-          "field": {
+          "property": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The name of the property causing the error.\n",
+            "example": "facilityCode"
+          },
+          "jsonPath": {
             "maxLength": 500,
             "type": "string",
-            "description": "The field that caused the error, e.g. a failed validation. The field can be expressed as a [JSONpath](https://github.com/json-path/JsonPath) using either the [DOT] Notation or the [Bracket] Notation.\n",
+            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
             "example": "$.location.facilityCode"
           },
           "message": {
@@ -3112,7 +3265,7 @@
         "description": "Unexpected error"
       },
       "UpdateShippingInstructions": {
-        "title": "Shipping Instructions",
+        "title": "Update Shipping Instructions",
         "required": [
           "consignmentItems",
           "documentParties",
@@ -3129,7 +3282,7 @@
         "properties": {
           "shippingInstructionsReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
@@ -3171,7 +3324,7 @@
           "sendToPlatform": {
             "maxLength": 4,
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ICED` (ICE Digital)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v1.csv).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -3285,7 +3438,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "type": "string",
                     "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                    "example": "DK"
+                    "example": "NL"
                   }
                 }
               }
@@ -3302,19 +3455,14 @@
             }
           },
           "documentParties": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Document Parties`\n",
-            "items": {
-              "$ref": "#/components/schemas/DocumentParty"
-            }
+            "$ref": "#/components/schemas/CreateShippingInstructions_documentParties"
           },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
             "description": "A list of `ConsignmentItems`\n",
             "items": {
-              "$ref": "#/components/schemas/ConsignmentItem_SHI"
+              "$ref": "#/components/schemas/ConsignmentItemShipper"
             }
           },
           "utilizedTransportEquipments": {
@@ -3322,7 +3470,7 @@
             "type": "array",
             "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
             "items": {
-              "$ref": "#/components/schemas/UtilizedTransportEquipment_SHI"
+              "$ref": "#/components/schemas/UtilizedTransportEquipmentShipper"
             }
           },
           "references": {
@@ -3381,14 +3529,14 @@
         "properties": {
           "shippingInstructionsReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
             "maxLength": 20,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
@@ -3442,7 +3590,7 @@
           "sendToPlatform": {
             "maxLength": 4,
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ICED` (ICE Digital)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGo)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=TRUE`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v1.csv).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -3556,7 +3704,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "type": "string",
                     "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                    "example": "DK"
+                    "example": "NL"
                   }
                 }
               }
@@ -3573,19 +3721,14 @@
             }
           },
           "documentParties": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Document Parties`\n",
-            "items": {
-              "$ref": "#/components/schemas/DocumentParty"
-            }
+            "$ref": "#/components/schemas/CreateShippingInstructions_documentParties"
           },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
             "description": "A list of `ConsignmentItems`\n",
             "items": {
-              "$ref": "#/components/schemas/ConsignmentItem_SHI"
+              "$ref": "#/components/schemas/ConsignmentItemShipper"
             }
           },
           "utilizedTransportEquipments": {
@@ -3593,7 +3736,7 @@
             "type": "array",
             "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
             "items": {
-              "$ref": "#/components/schemas/UtilizedTransportEquipment_SHI"
+              "$ref": "#/components/schemas/UtilizedTransportEquipmentShipper"
             }
           },
           "references": {
@@ -3649,7 +3792,7 @@
         "description": "The `Shipping Instructions` as provided by the Shipper.\n"
       },
       "ShippingInstructionsRefCancelStatus": {
-        "title": "Shipping Instructions Response",
+        "title": "Shipping Instructions Cancel Response",
         "required": [
           "shippingInstructionsStatus"
         ],
@@ -3657,14 +3800,14 @@
         "properties": {
           "shippingInstructionsReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
           },
           "transportDocumentReference": {
             "maxLength": 20,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
@@ -3719,14 +3862,14 @@
         "properties": {
           "transportDocumentReference": {
             "maxLength": 20,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
           },
           "shippingInstructionsReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier for a `Shipping Istructions` provided by the carrier for system purposes.\n",
             "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
@@ -3907,7 +4050,7 @@
           },
           "contractQuotationReference": {
             "maxLength": 35,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
             "example": "HHL1401"
@@ -3944,14 +4087,14 @@
             ]
           },
           "issuingParty": {
-            "$ref": "#/components/schemas/Party"
+            "$ref": "#/components/schemas/IssuingParty"
           },
           "carrierClauses": {
             "type": "array",
             "description": "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
             "items": {
               "maxLength": 20000,
-              "pattern": "^\\S+(\\s+\\S+)*$",
+              "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
               "description": "The content of the clause.\n",
               "example": "It is not allowed to..."
@@ -4008,7 +4151,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "type": "string",
                     "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                    "example": "DK"
+                    "example": "NL"
                   }
                 }
               }
@@ -4060,19 +4203,14 @@
             }
           },
           "documentParties": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Document Parties`\n",
-            "items": {
-              "$ref": "#/components/schemas/DocumentParty"
-            }
+            "$ref": "#/components/schemas/CreateShippingInstructions_documentParties"
           },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
             "description": "A list of `ConsignmentItems`\n",
             "items": {
-              "$ref": "#/components/schemas/ConsignmentItem_CAR"
+              "$ref": "#/components/schemas/ConsignmentItemCarrier"
             }
           },
           "utilizedTransportEquipments": {
@@ -4080,7 +4218,7 @@
             "type": "array",
             "description": "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
             "items": {
-              "$ref": "#/components/schemas/UtilizedTransportEquipment_CAR"
+              "$ref": "#/components/schemas/UtilizedTransportEquipmentCarrier"
             }
           },
           "references": {
@@ -4099,6 +4237,48 @@
           }
         },
         "description": "The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:\n- Bill of Lading\n- Sea Waybill. \n"
+      },
+      "IssuingParty": {
+        "title": "Party",
+        "required": [
+          "address",
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "Asseco Denmark"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity.\n"
       },
       "Transports": {
         "required": [
@@ -4158,6 +4338,7 @@
         }
       },
       "PlaceOfReceipt": {
+        "title": "Place of Receipt",
         "description": "General purpose object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
@@ -4210,6 +4391,71 @@
         },
         "description": "An interface used to express a location using an `Address` object."
       },
+      "Address": {
+        "title": "Address",
+        "required": [
+          "countryCode",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the address\n",
+            "example": "Henrik"
+          },
+          "street": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The name of the street of the party’s address.",
+            "example": "Ruijggoordweg"
+          },
+          "streetNumber": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The number of the street of the party’s address.",
+            "example": "100"
+          },
+          "floor": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The floor of the party’s street number.\n",
+            "example": "N/A"
+          },
+          "postCode": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The post code of the party’s address.",
+            "example": "1047 HM"
+          },
+          "city": {
+            "maxLength": 65,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The city name of the party’s address.\n",
+            "example": "Amsterdam"
+          },
+          "stateRegion": {
+            "maxLength": 65,
+            "type": "string",
+            "description": "The state/region of the party’s address.",
+            "nullable": true,
+            "example": "North Holland"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string",
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "NL"
+          }
+        },
+        "description": "An object for storing address related information\n"
+      },
       "FacilityLocation": {
         "title": "Facility Location",
         "required": [
@@ -4221,7 +4467,7 @@
         "properties": {
           "locationName": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The name of the location.",
             "example": "Port of Amsterdam"
@@ -4242,7 +4488,7 @@
           },
           "facilityCode": {
             "maxLength": 6,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\nThe definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx)  - for `BIC` - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)",
             "example": "ADT"
@@ -4269,7 +4515,7 @@
         "properties": {
           "locationName": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The name of the location.",
             "example": "Port of Amsterdam"
@@ -4289,9 +4535,11 @@
             "example": "NLAMS"
           }
         },
+        "additionalProperties": false,
         "description": "An interface used to express a location using a `Un Location Code`."
       },
       "PortOfLoading": {
+        "title": "Port of Loading",
         "description": "General purpose object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
@@ -4315,6 +4563,7 @@
         ]
       },
       "CityLocation": {
+        "title": "City Location",
         "required": [
           "city",
           "locationType"
@@ -4323,7 +4572,7 @@
         "properties": {
           "locationName": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The name of the location.",
             "example": "Port of Amsterdam"
@@ -4340,6 +4589,7 @@
         "description": "An interface used to express a location using a `City`, `state/region` and `country`\n"
       },
       "PortOfDischarge": {
+        "title": "Port of Discharge",
         "description": "General purpose object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
@@ -4363,6 +4613,7 @@
         ]
       },
       "PlaceOfDelivery": {
+        "title": "Place of Delivery",
         "description": "General purpose object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
@@ -4390,6 +4641,7 @@
         ]
       },
       "OnwardInlandRouting": {
+        "title": "Onward Inland Routing",
         "description": "General purpose object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
@@ -4430,7 +4682,7 @@
         "properties": {
           "chargeName": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Free text field describing the charge to apply\n",
             "example": "Documentation fee - Destination"
@@ -4461,7 +4713,7 @@
           },
           "calculationBasis": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.\n",
             "example": "Per day"
@@ -4483,8 +4735,8 @@
         },
         "description": "Addresses the monetary value of freight and other service charges for a `Booking`.\n"
       },
-      "ConsignmentItem_CAR": {
-        "title": "Consignment Item",
+      "ConsignmentItemCarrier": {
+        "title": "Consignment Item (Carrier)",
         "required": [
           "cargoItems"
         ],
@@ -4495,7 +4747,7 @@
             "type": "array",
             "description": "A list of all `cargoItems`\n",
             "items": {
-              "$ref": "#/components/schemas/CargoItem_CAR"
+              "$ref": "#/components/schemas/CargoItemCarrier"
             }
           }
         },
@@ -4506,8 +4758,8 @@
           }
         ]
       },
-      "CargoItem_CAR": {
-        "title": "Cargo Item",
+      "CargoItemCarrier": {
+        "title": "Cargo Item (Carrier)",
         "required": [
           "equipmentReference",
           "outerPackaging",
@@ -4518,7 +4770,7 @@
         "properties": {
           "equipmentReference": {
             "maxLength": 11,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
@@ -4558,7 +4810,7 @@
             ]
           },
           "outerPackaging": {
-            "$ref": "#/components/schemas/OuterPackaging_CAR"
+            "$ref": "#/components/schemas/OuterPackagingCarrier"
           },
           "customsReferences": {
             "type": "array",
@@ -4570,8 +4822,8 @@
         },
         "description": "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n"
       },
-      "OuterPackaging_CAR": {
-        "title": "Outer Packaging",
+      "OuterPackagingCarrier": {
+        "title": "Outer Packaging (Carrier)",
         "type": "object",
         "properties": {
           "imoPackagingCode": {
@@ -4593,7 +4845,7 @@
         "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.\n",
         "allOf": [
           {
-            "$ref": "#/components/schemas/OuterPackaging_SHI"
+            "$ref": "#/components/schemas/OuterPackagingShipper"
           }
         ]
       },
@@ -4696,7 +4948,7 @@
           },
           "competentAuthorityApproval": {
             "maxLength": 70,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name and reference number of the competent authority providing the approval.\n",
             "example": "{Name and reference...}"
@@ -4857,7 +5109,7 @@
           },
           "phone": {
             "maxLength": 30,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Phone number for the contact\n",
             "example": "+45 70262970"
@@ -4919,8 +5171,8 @@
         },
         "description": "Limits for the `Dangerous Goods`. The same `Temperature Unit` needs to apply to all attributes in this structure.\n"
       },
-      "UtilizedTransportEquipment_CAR": {
-        "title": "Utilized Transport Equipment",
+      "UtilizedTransportEquipmentCarrier": {
+        "title": "Utilized Transport Equipment (Carrier)",
         "required": [
           "equipment",
           "isShipperOwned",
@@ -5066,7 +5318,7 @@
         "properties": {
           "transportDocumentReference": {
             "maxLength": 20,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
@@ -5128,6 +5380,15 @@
               "PRE",
               "COL"
             ]
+          },
+          "otherChargesPaymentTermCode": {
+            "type": "string",
+            "description": "An indicator of whether origin charges (excluding port and haulage) are prepaid (`PRE`) or collect (`COL`).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
+            "example": "PRE",
+            "enum": [
+              "PRE",
+              "COL"
+            ]
           }
         },
         "description": "An indicator of whether origin charges are prepaid (`PRE`) or collect (`COL`). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n"
@@ -5147,6 +5408,15 @@
           "portChargesPaymentTermCode": {
             "type": "string",
             "description": "An indicator of whether the destination port charges are prepaid (`PRE`) or collect (`COL`).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
+            "example": "PRE",
+            "enum": [
+              "PRE",
+              "COL"
+            ]
+          },
+          "otherChargesPaymentTermCode": {
+            "type": "string",
+            "description": "An indicator of whether destination charges (excluding port and haulage) are prepaid (`PRE`) or collect (`COL`).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
             "example": "PRE",
             "enum": [
               "PRE",
@@ -5172,6 +5442,31 @@
           }
         },
         "description": "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location must be provided as a `UN Location Code`\n"
+      },
+      "CreateShippingInstructions_documentParties": {
+        "required": [
+          "shipper"
+        ],
+        "type": "object",
+        "properties": {
+          "shipper": {
+            "$ref": "#/components/schemas/Shipper"
+          },
+          "consignee": {
+            "$ref": "#/components/schemas/Consignee"
+          },
+          "endorsee": {
+            "$ref": "#/components/schemas/Endorsee"
+          },
+          "other": {
+            "type": "array",
+            "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
+            "items": {
+              "$ref": "#/components/schemas/OtherDocumentParty"
+            }
+          }
+        },
+        "description": "All `Parties` with associated roles.\n"
       },
       "Detailed Error": {
         "title": "Detailed Error",
@@ -5230,14 +5525,14 @@
         "properties": {
           "vesselName": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The name of the first sea going Vessel on board which the cargo is loaded or intended to be loaded\n",
             "example": "King of the Seas"
           },
           "carrierExportVoyageNumber": {
             "maxLength": 50,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
             "example": "2103S"
@@ -5255,14 +5550,13 @@
       },
       "CityLocation_city": {
         "required": [
-          "city",
-          "country"
+          "city"
         ],
         "type": "object",
         "properties": {
           "city": {
             "maxLength": 65,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
             "example": "Amsterdam"
@@ -5274,12 +5568,13 @@
             "nullable": true,
             "example": "North Holland"
           },
-          "country": {
-            "maxLength": 75,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
             "type": "string",
-            "description": "The country of the party’s address.\n",
-            "example": "The Netherlands"
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "NL"
           }
         },
         "description": "An object for storing city, state/region and coutry related information\n"
@@ -5411,7 +5706,7 @@
         "explode": false,
         "schema": {
           "maxLength": 100,
-          "pattern": "^\\S+(\\s+\\S+)*$",
+          "pattern": "^\\S(?:.*\\S)?$",
           "type": "string",
           "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
         }

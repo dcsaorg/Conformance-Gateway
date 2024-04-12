@@ -81,19 +81,16 @@
       ]
     }
   ],
-  "documentParties": [
-    {
-      "party": {
-        "partyName": "DCSA CTK",
-        "partyContactDetails": [
-          {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
-          }
-        ]
-      },
-      "partyFunction": "OS",
-      "isToBeNotified": false
+  "documentParties": {
+    "shipper": {
+
+      "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
     }
-  ]
+  }
 }

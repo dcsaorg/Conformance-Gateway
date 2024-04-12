@@ -22,6 +22,7 @@ public class CarrierShippingInstructions {
 
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
+  private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
 
 
   private static final String SHIPPING_INSTRUCTIONS_REFERENCE = "shippingInstructionsReference";
@@ -79,30 +80,40 @@ public class CarrierShippingInstructions {
     Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON"))
   );
 
-  private static JsonNode issuingCarrier(String name, String smdgCode) {
-    var issuingCarrier = OBJECT_MAPPER.createObjectNode()
-      .put("partyName", name);
-    issuingCarrier
-      .putArray("identifyingCodes")
-      .addObject()
-      .put("codeListProvider", "SMDG")
-      .put("codeListName", "LCL")
-      .put("partyCode", smdgCode);
-    return issuingCarrier;
+  private static Function<String, JsonNode> issuingCarrier(String name, String smdgCode, String countryCode) {
+    return (String version) -> {
+      var issuingCarrier = OBJECT_MAPPER.createObjectNode().put("partyName", name);
+      if (!version.equals("3.0.0-Beta-1")) {
+        issuingCarrier
+            .putObject("address")
+            .put("street", "The street name would be here")
+            .put("streetNumber", "... and here the street number")
+            .put("city", "... and here the city")
+            .put("countryCode", countryCode);
+      }
+      issuingCarrier
+          .putArray("identifyingCodes")
+          .addObject()
+          .put("codeListProvider", "SMDG")
+          .put("codeListName", "LCL")
+          .put("partyCode", smdgCode);
+      return issuingCarrier;
+    };
   }
 
   // Randomize the issuing carrier to avoid favouring a particular carrier
-  private static final JsonNode[] ISSUING_CARRIER_DEFINITIONS = {
+  @SuppressWarnings("unchecked")
+  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS = (Function<String, JsonNode>[]) new Function[]{
     // Name is from the SMDG code list
-    issuingCarrier("CMA CGM", "CMA"),
-    issuingCarrier("Evergreen Marine Corporation", "EMC"),
-    issuingCarrier("Hapag Lloyd", "HLC"),
-    issuingCarrier("Hyundai", "HMM"),
-    issuingCarrier("Maersk", "MSK"),
-    issuingCarrier("Mediterranean Shipping Company", "MSC"),
-    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE"),
-    issuingCarrier("Yang Ming Line", "YML"),
-    issuingCarrier("Zim Israel Navigation Company", "ZIM")
+    issuingCarrier("CMA CGM", "CMA", "US"),
+    issuingCarrier("Evergreen Marine Corporation", "EMC", "TW"),
+    issuingCarrier("Hapag Lloyd", "HLC", "DE"),
+    issuingCarrier("Hyundai", "HMM", "KR"),
+    issuingCarrier("Maersk", "MSK", "DK"),
+    issuingCarrier("Mediterranean Shipping Company", "MSC", "CH"),
+    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE", "JP"),
+    issuingCarrier("Yang Ming Line", "YML", "TW"),
+    issuingCarrier("Zim Israel Navigation Company", "ZIM", "IL")
   };
 
   private static TDField initialFieldValue(String attribute, String value) {
@@ -129,7 +140,7 @@ public class CarrierShippingInstructions {
     return initialFieldValue("issuingParty", (o, a, v) -> {
       int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
       var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
-      o.set(a, choice.deepCopy());
+      o.set(a, choice.apply(v).deepCopy());
     });
   }
 
@@ -347,6 +358,10 @@ public class CarrierShippingInstructions {
 
   public String getStandardsVersion() {
     return this.state.required(STD_VERSION_FIELD).asText("");
+  }
+
+  public String getSubscriptionReference() {
+    return this.state.required(SUBSCRIPTION_REFERENCE).asText("");
   }
 
   public String getShippingInstructionsReference() {
@@ -710,13 +725,14 @@ public class CarrierShippingInstructions {
     return TD_START;
   }
 
-  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode bookingRequest, String standardsVersion) {
+  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode siRequest, String standardsVersion) {
     String sir = UUID.randomUUID().toString();
-    bookingRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
+    siRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
       .put(SI_STATUS, SI_RECEIVED.wireName());
     var state = OBJECT_MAPPER.createObjectNode()
-      .put(STD_VERSION_FIELD, standardsVersion);
-    state.set(SI_DATA_FIELD, bookingRequest);
+      .put(STD_VERSION_FIELD, standardsVersion)
+      .put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
+    state.set(SI_DATA_FIELD, siRequest);
     return new CarrierShippingInstructions(state);
   }
 

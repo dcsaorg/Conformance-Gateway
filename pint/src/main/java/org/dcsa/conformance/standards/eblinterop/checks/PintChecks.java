@@ -165,7 +165,7 @@ public class PintChecks {
   }
 
   public static ActionCheck tdContentChecks(UUID matched, String standardsVersion, Supplier<SenderScenarioParameters> senderScenarioParametersSupplier) {
-    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, delayedValue(senderScenarioParametersSupplier, SenderScenarioParameters::transportDocumentReference));
+    var checks = genericTDContentChecks(TransportDocumentStatus.TD_ISSUED, standardsVersion, delayedValue(senderScenarioParametersSupplier, SenderScenarioParameters::transportDocumentReference));
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
       PintRole::isSendingPlatform,

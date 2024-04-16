@@ -394,42 +394,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
               invalidCase));
   }
 
-  private static BookingScenarioListBuilder tbdCarrierAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                carrierPartyName,
-                shipperPartyName,
-                (BookingAction) previousAction,
-                "TbdCarrierAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD carrier action";
-              }
-            }) {};
-  }
-
-  private static BookingScenarioListBuilder tbdShipperAction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-        previousAction ->
-            new BookingAction(
-                shipperPartyName,
-                carrierPartyName,
-                (BookingAction) previousAction,
-                "TbdShipperAction",
-                500) {
-              @Override
-              public String getHumanReadablePrompt() {
-                return "TBD shipper action";
-              }
-            }) {};
-  }
-
   private interface CarrierNotificationUseCase {
     BookingAction newInstance(
         String carrierPartyName,

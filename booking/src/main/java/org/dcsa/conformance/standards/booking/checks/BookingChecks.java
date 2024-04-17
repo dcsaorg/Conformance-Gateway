@@ -64,10 +64,13 @@ public class BookingChecks {
     if (standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
+      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1);
+      checks.add(VALIDATE_DOCUMENT_PARTIES_V2B1);
     }
     if (!standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
+      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER);
     }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
@@ -103,6 +106,15 @@ public class BookingChecks {
       mav.submitAllMatching("placeOfBLIssue.UNLocationCode");
       mav.submitAllMatching("transportPlan.loadLocation.UNLocationCode");
       mav.submitAllMatching("transportPlan.dischargeLocation.UNLocationCode");
+
+      // Beta-2 only
+      mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
+
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.UN_LOCODE_DATASET)
   );
@@ -239,11 +251,18 @@ public class BookingChecks {
     JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
-  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1 = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       "documentParties",
       JsonAttribute.unique("partyFunction")
+    ));
+
+  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER = JsonAttribute.customValidator(
+    "Each document party can be used at most once",
+    JsonAttribute.path(
+      "documentParties",
+      JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -295,6 +314,23 @@ public class BookingChecks {
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
     JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  );
+
+  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate field is a known ISO 3166 alpha 2 code",
+    (mav) -> {
+      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
+
+      // Beta-2 only
+      mav.submitAllMatching("documentParties.shippers.address.countryCode");
+      mav.submitAllMatching("documentParties.consignee.address.countryCode");
+      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
+      mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
@@ -511,7 +547,9 @@ public class BookingChecks {
     ));
   }
 
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
+
+
+  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES_V2B1 = JsonAttribute.customValidator(
     "Validate documentParties",
     body -> {
       var issues = new LinkedHashSet<String>();
@@ -536,7 +574,7 @@ public class BookingChecks {
           issues.add("The BA party is required when (both) OS and DDR are not present");
         }
       }
-        return issues;
+      return issues;
     });
 
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
@@ -562,11 +600,9 @@ public class BookingChecks {
     ISO_EQUIPMENT_CODE_VALIDATION,
     OUTER_PACKAGING_CODE_IS_VALID,
     TLR_CC_T_COMBINATION_VALIDATIONS,
-    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-    VALIDATE_DOCUMENT_PARTIES,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
@@ -671,10 +707,13 @@ public class BookingChecks {
     if (standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
+      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1);
+      checks.add(VALIDATE_DOCUMENT_PARTIES_V2B1);
     }
     if (!standardsVersion.equals("2.0.0-Beta-1")) {
       checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
       checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
+      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER);
     }
     checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {

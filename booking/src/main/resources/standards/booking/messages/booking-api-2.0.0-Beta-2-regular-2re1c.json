@@ -40,30 +40,26 @@
       ]
     }
   ],
-  "documentParties": [
-    {
-      "party": {
-        "partyName": "DCSA Conformance Toolkit",
-        "address": {
-          "name": "Mustermann",
-          "street": "Strawinskylaan",
-          "streetNumber": "4117",
-          "floor": "6",
-          "postCode": "1077 ZX",
-          "city": "Amsterdam",
-          "country": "Netherlands"
-        },
-        "partyContactDetails": [
-          {
-            "name": "Henrik",
-            "phone": "+31611444666"
-          }
-        ]
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "DCSA Conformance Toolkit",
+      "address": {
+        "name": "Mustermann",
+        "street": "Strawinskylaan",
+        "streetNumber": "4117",
+        "floor": "6",
+        "postCode": "1077 ZX",
+        "city": "Amsterdam",
+        "countryCode": "NL"
       },
-      "partyFunction": "OS",
-      "isToBeNotified": false
+      "partyContactDetails": [
+        {
+          "name": "Henrik",
+          "phone": "+31611444666"
+        }
+      ]
     }
-  ],
+  },
   "shipmentLocations": [
     {
       "location": {

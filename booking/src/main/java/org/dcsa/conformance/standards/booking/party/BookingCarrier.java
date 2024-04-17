@@ -652,6 +652,7 @@ public class BookingCarrier extends ConformanceParty {
       setIfNotNull(notification, "source", source);
       setIfNotNull(notification, "type", computedType());
       notification.put("time", Instant.now().toString());
+      notification.put("subscriptionReference", UUID.randomUUID().toString());
       notification.put("datacontenttype", "application/json");
 
       var data = OBJECT_MAPPER.createObjectNode();

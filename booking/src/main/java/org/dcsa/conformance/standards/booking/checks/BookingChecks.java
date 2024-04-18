@@ -326,8 +326,8 @@ public class BookingChecks {
       mav.submitAllMatching("documentParties.shippers.address.countryCode");
       mav.submitAllMatching("documentParties.consignee.address.countryCode");
       mav.submitAllMatching("documentParties.endorsee.address.countryCode");
-      mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.serviceContractOwner.address.countryCode");
+      mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
@@ -603,6 +603,7 @@ public class BookingChecks {
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
+    COUNTRY_CODE_VALIDATIONS,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

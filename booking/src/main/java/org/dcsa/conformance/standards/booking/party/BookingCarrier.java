@@ -340,6 +340,7 @@ public class BookingCarrier extends ConformanceParty {
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
             .includeCarrierBookingRequestReference(includeCbrr)
+            .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode();
     if (isShipperNotificationEnabled) {
@@ -473,10 +474,11 @@ public class BookingCarrier extends ConformanceParty {
       asyncCounterpartNotification(
           "/v2/booking-notifications",
           BookingNotification.builder()
-              .apiVersion(apiVersion)
-              .booking(booking)
-              .build()
-              .asJsonNode());
+            .apiVersion(apiVersion)
+            .booking(booking)
+            .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
+            .build()
+            .asJsonNode());
     }
     return returnBookingStatusResponse(200, request, booking, cbrr);
   }
@@ -514,6 +516,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
           .apiVersion(apiVersion)
           .booking(persistableCarrierBooking.getBooking())
+          .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
           .build()
           .asJsonNode());
     }
@@ -606,10 +609,11 @@ public class BookingCarrier extends ConformanceParty {
       asyncCounterpartNotification(
           "/v2/booking-notifications",
           BookingNotification.builder()
-              .apiVersion(apiVersion)
-              .booking(persistableCarrierBooking.getBooking())
-              .build()
-              .asJsonNode());
+            .apiVersion(apiVersion)
+            .booking(persistableCarrierBooking.getBooking())
+            .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
+            .build()
+            .asJsonNode());
     }
     return returnBookingStatusResponse(
         201,
@@ -625,6 +629,7 @@ public class BookingCarrier extends ConformanceParty {
     private String type;
     private String apiVersion;
 
+    private String subscriptionReference;
     private String carrierBookingReference;
     private String carrierBookingRequestReference;
     private String bookingStatus;
@@ -652,7 +657,7 @@ public class BookingCarrier extends ConformanceParty {
       setIfNotNull(notification, "source", source);
       setIfNotNull(notification, "type", computedType());
       notification.put("time", Instant.now().toString());
-      notification.put("subscriptionReference", UUID.randomUUID().toString());
+      notification.put("subscriptionReference", subscriptionReference);
       notification.put("datacontenttype", "application/json");
 
       var data = OBJECT_MAPPER.createObjectNode();

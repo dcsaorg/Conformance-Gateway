@@ -38,6 +38,8 @@ public class BookingDataSets {
 
   public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/taxandlegalreferences-v2.0.0-Beta-1.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
 
+  public static final KeywordDataset ISO_3166_ALPHA2_COUNTRY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/country-codes-iso3166-alpha2.csv", "Code");
+
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {
     var validCodes = new HashSet<>();

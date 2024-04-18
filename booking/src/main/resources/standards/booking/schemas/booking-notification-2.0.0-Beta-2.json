@@ -1,14 +1,18 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Booking Notifications",
-    "description": "API specification issued by DCSA.org.\n\nBooking Notifications for [DCSA OpenAPI specification for Booking](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG/2.0.0-Beta-1) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Booking` that is being subscribed to changes state or is updated.\n\nSubscribing to notification is done outside scope of this API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking Notification API. Further details can be found [here](https://developer.dcsa.org/#/http/guides/api-guides/stats-api)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/notification/v2#v200B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nBooking Notifications for [DCSA OpenAPI specification for Booking](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG/2.0.0-Beta-2) is a lightweight notification based on [CloudEvents](https://cloudevents.io/). The `POST` endPoint of the consumer is called whenever a `Booking` that is being subscribed to changes state or is updated.\n\nSubscribing to notification is done outside scope of this API.\n\n### Stats API\n\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking Notification API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2/notification#v200B2).\nPlease also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
       "email": "info@dcsa.org"
     },
-    "version": "2.0.0-Beta-1"
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "2.0.0-Beta-2"
   },
   "servers": [
     {
@@ -40,7 +44,7 @@
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2.0.0-Beta-1"
+              "example": "2.0.0-Beta-2"
             }
           }
         ],
@@ -62,6 +66,7 @@
                     "type": "org.dcsa.booking-notification.v2",
                     "time": "2018-04-05T17:31:00Z",
                     "datacontenttype": "application/json",
+                    "subscriptionReference": "BKG001",
                     "data": {
                       "bookingStatus": "RECEIVED",
                       "carrierBookingRequestReference": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
@@ -78,6 +83,7 @@
                     "type": "org.dcsa.booking-notification.v2",
                     "time": "2018-04-05T17:31:00Z",
                     "datacontenttype": "application/json",
+                    "subscriptionReference": "BKG001",
                     "data": {
                       "bookingStatus": "CONFIRMED",
                       "amendedBookingStatus": "AMENDMENT DECLINED",
@@ -101,7 +107,7 @@
                 "explode": false,
                 "schema": {
                   "type": "string",
-                  "example": "2.0.0-Beta-1"
+                  "example": "2.0.0-Beta-2"
                 }
               }
             }
@@ -125,6 +131,7 @@
           "id",
           "source",
           "specversion",
+          "subscriptionReference",
           "time",
           "type"
         ],
@@ -172,6 +179,13 @@
               "application/json"
             ]
           },
+          "subscriptionReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The reference of the subscription that has triggered this event\n",
+            "example": "30675492-50ff-4e17-a7df-7a487a8ad343"
+          },
           "data": {
             "$ref": "#/components/schemas/BookingNotification_data"
           }
@@ -198,14 +212,14 @@
           },
           "carrierBookingRequestReference": {
             "maxLength": 100,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference to the booking during the booking request phase.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
             "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
           },
           "carrierBookingReference": {
             "maxLength": 35,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
             "example": "ABC709951"

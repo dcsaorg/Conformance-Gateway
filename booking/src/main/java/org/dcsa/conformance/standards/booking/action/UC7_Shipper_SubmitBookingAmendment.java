@@ -18,7 +18,6 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final boolean invalidCase;
 
   public UC7_Shipper_SubmitBookingAmendment(
       String carrierPartyName,
@@ -26,13 +25,11 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean invalidCase) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", invalidCase? 409 : 200);
+      JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7",  200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -49,7 +46,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return !invalidCase;
+    return true;
   }
 
   @Override
@@ -84,7 +81,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator));
-        return invalidCase ? primaryExchangeChecks : Stream.concat(
+        return Stream.concat(
           Stream.concat( primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),

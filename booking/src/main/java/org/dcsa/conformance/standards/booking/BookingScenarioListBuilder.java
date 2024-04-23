@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking;
 
+import static org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType.*;
 import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 import java.util.LinkedHashMap;
@@ -14,6 +15,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
@@ -80,84 +82,83 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return switch (bookingState) {
       case COMPLETED  -> then(
         shipper_GetBooking(bookingState).thenEither(
-         uc7_shipper_submitBookingAmendment(true)
-            .then(shipper_GetBooking(bookingState))
+          auc_shipper_sendInvalidBookingAction(SUBMIT_BOOKING_AMENDMENT)
+            .then(shipper_GetBooking(COMPLETED)),
+          auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING)
+            .then(shipper_GetBooking(COMPLETED))
         )
       );
-      case DECLINED -> then(
-        shipper_GetBooking(bookingState).then(
-          uc7_shipper_submitBookingAmendment(true)
-            .then(shipper_GetBooking(bookingState))
-        )
-      );
-      case CANCELLED  -> then(
+      case DECLINED, CANCELLED, REJECTED -> then(
         shipper_GetBooking(bookingState).thenEither(
-          uc3_shipper_submitUpdatedBookingRequest(true)
+          auc_shipper_sendInvalidBookingAction(UPDATE_BOOKING)
+            .then(shipper_GetBooking(bookingState)),
+          auc_shipper_sendInvalidBookingAction(SUBMIT_BOOKING_AMENDMENT)
+            .then(shipper_GetBooking(bookingState)),
+          auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING)
             .then(shipper_GetBooking(bookingState))
         )
       );
-      case REJECTED  -> then(shipper_GetBooking(bookingState));
       case CONFIRMED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                   uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
                   uc6_carrier_requestToAmendConfirmedBooking().thenAllPathsFrom(PENDING_AMENDMENT),
-                  uc7_shipper_submitBookingAmendment(false)
+                  uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, CONFIRMED),
                   uc10_carrier_declineBooking().thenAllPathsFrom(DECLINED),
                   uc12_carrier_confirmBookingCompleted().thenAllPathsFrom(COMPLETED),
-                  uc11_shipper_cancelBooking(false).thenHappyPathFrom(CANCELLED)));
+                  uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
       case PENDING_UPDATE -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                   uc2_carrier_requestUpdateToBookingRequest().thenHappyPathFrom(PENDING_UPDATE),
-                  uc3_shipper_submitUpdatedBookingRequest(false)
+                  uc3_shipper_submitUpdatedBookingRequest()
                       .thenHappyPathFrom(UPDATE_RECEIVED),
                   uc4_carrier_rejectBookingRequest().thenHappyPathFrom(REJECTED),
-                  uc11_shipper_cancelBooking(false).thenHappyPathFrom(CANCELLED)));
+                  uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
       case UPDATE_RECEIVED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                   uc2_carrier_requestUpdateToBookingRequest().thenHappyPathFrom(PENDING_UPDATE),
-                  uc3_shipper_submitUpdatedBookingRequest(false)
+                  uc3_shipper_submitUpdatedBookingRequest()
                       .thenHappyPathFrom(UPDATE_RECEIVED),
                   uc4_carrier_rejectBookingRequest().thenHappyPathFrom(REJECTED),
                   uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
-                  uc11_shipper_cancelBooking(false).thenHappyPathFrom(CANCELLED)));
+                  uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
       case RECEIVED -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
-                  uc9_shipper_cancelBookingAmendment(true).then(shipper_GetBooking(bookingState)),
-                  uc2_carrier_requestUpdateToBookingRequest().thenAllPathsFrom(PENDING_UPDATE),
-                  uc3_shipper_submitUpdatedBookingRequest(false)
-                      .thenAllPathsFrom(UPDATE_RECEIVED),
-                  uc4_carrier_rejectBookingRequest().thenAllPathsFrom(REJECTED),
-                  uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
-                  uc11_shipper_cancelBooking(false).thenAllPathsFrom(CANCELLED)));
+                auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT).then(shipper_GetBooking(bookingState)),
+                uc2_carrier_requestUpdateToBookingRequest().thenAllPathsFrom(PENDING_UPDATE),
+                uc3_shipper_submitUpdatedBookingRequest()
+                    .thenAllPathsFrom(UPDATE_RECEIVED),
+                uc4_carrier_rejectBookingRequest().thenAllPathsFrom(REJECTED),
+                uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
+                uc11_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
       case START -> thenEither(
         uc1_shipper_SubmitBookingRequest().thenAllPathsFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
                 uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
-                  uc7_shipper_submitBookingAmendment(false)
+                  uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, PENDING_AMENDMENT),
                   uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
-                  uc11_shipper_cancelBooking(false).thenHappyPathFrom(CANCELLED)));
+                  uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
       case AMENDMENT_RECEIVED -> then(
         shipper_GetBooking(originalBookingState,AMENDMENT_RECEIVED)
           .thenEither(
             uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
             uc8a_carrier_approveBookingAmendment().thenAllPathsFrom(AMENDMENT_CONFIRMED,originalBookingState),
             uc8b_carrier_declineBookingAmendment().thenAllPathsFrom(AMENDMENT_DECLINED,originalBookingState),
-            uc9_shipper_cancelBookingAmendment(false).thenAllPathsFrom(AMENDMENT_CANCELLED,originalBookingState),
+            uc9_shipper_cancelBookingAmendment().thenAllPathsFrom(AMENDMENT_CANCELLED,originalBookingState),
             uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED)
         )
       );
       case AMENDMENT_CONFIRMED -> then(
         shipper_GetBooking(CONFIRMED,bookingState)
           .thenEither(
-            uc9_shipper_cancelBookingAmendment(true).thenHappyPathFrom(CONFIRMED),
+            auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT).thenHappyPathFrom(CONFIRMED),
             uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED)
           )
       );
@@ -166,12 +167,12 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
         shipper_GetBooking(PENDING_AMENDMENT,bookingState).thenEither(
           noAction().thenHappyPathFrom(originalBookingState),
           uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(originalBookingState),
-          uc9_shipper_cancelBookingAmendment(true).thenHappyPathFrom(originalBookingState)
+          auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT).thenHappyPathFrom(originalBookingState)
         ):
         shipper_GetBooking(CONFIRMED,bookingState).thenEither(
           noAction().thenHappyPathFrom(originalBookingState),
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
-          uc9_shipper_cancelBookingAmendment(true).thenHappyPathFrom(CONFIRMED)
+          auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT).thenHappyPathFrom(CONFIRMED)
         )
       );
     };
@@ -192,13 +193,13 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           uc12_carrier_confirmBookingCompleted().thenHappyPathFrom(COMPLETED,null)));
       case PENDING_AMENDMENT -> then(
         shipper_GetBooking(PENDING_AMENDMENT).then(
-          uc7_shipper_submitBookingAmendment(false).thenHappyPathFrom(AMENDMENT_RECEIVED,PENDING_AMENDMENT)));
+          uc7_shipper_submitBookingAmendment().thenHappyPathFrom(AMENDMENT_RECEIVED,PENDING_AMENDMENT)));
       case AMENDMENT_RECEIVED -> then(
         shipper_GetBooking(originalBookingState,AMENDMENT_RECEIVED).then(
           uc8a_carrier_approveBookingAmendment().thenHappyPathFrom(AMENDMENT_CONFIRMED,CONFIRMED)));
       case PENDING_UPDATE -> then(
         shipper_GetBooking(PENDING_UPDATE).then(
-          uc3_shipper_submitUpdatedBookingRequest(false).thenHappyPathFrom(UPDATE_RECEIVED,null)));
+          uc3_shipper_submitUpdatedBookingRequest().thenHappyPathFrom(UPDATE_RECEIVED,null)));
       case UPDATE_RECEIVED, RECEIVED -> then(
         shipper_GetBooking(bookingState).then(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED,null)));
@@ -220,6 +221,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return new BookingScenarioListBuilder(
         previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
   }
+
 
   private static BookingScenarioListBuilder shipper_GetBooking(BookingState expectedBookingStatus) {
     return shipper_GetBooking(expectedBookingStatus, null);
@@ -293,7 +295,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return carrierStateChange(UC2_Carrier_RequestUpdateToBookingRequestAction::new);
   }
 
-  private static BookingScenarioListBuilder uc3_shipper_submitUpdatedBookingRequest(boolean invalidCase) {
+  private static BookingScenarioListBuilder uc3_shipper_submitUpdatedBookingRequest() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -306,8 +308,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-                invalidCase));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder uc4_carrier_rejectBookingRequest() {
@@ -322,7 +323,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return carrierStateChange(UC6_Carrier_RequestToAmendConfirmedBookingAction::new);
   }
 
-  private static BookingScenarioListBuilder uc7_shipper_submitBookingAmendment(boolean invalidCase) {
+  private static BookingScenarioListBuilder uc7_shipper_submitBookingAmendment() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -335,8 +336,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(BOOKING_API, UPDATE_BOOKING_SCHEMA_NAME),
                 componentFactory.getMessageSchemaValidator(BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
                 componentFactory.getMessageSchemaValidator(
-                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-              invalidCase));
+                    BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
   }
 
   private static BookingScenarioListBuilder uc8a_carrier_approveBookingAmendment() {
@@ -349,7 +349,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
         new UC8_Carrier_ProcessAmendmentAction(carrierPartyName, shipperPartyName, previousAction, requestSchemaValidator, false));
   }
 
-  private static BookingScenarioListBuilder uc9_shipper_cancelBookingAmendment(boolean invalidCase) {
+  private static BookingScenarioListBuilder uc9_shipper_cancelBookingAmendment() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -363,8 +363,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           componentFactory.getMessageSchemaValidator(
             BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
           componentFactory.getMessageSchemaValidator(
-            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-          invalidCase)
+            BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME))
       );
   }
 
@@ -376,7 +375,7 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     return carrierStateChange(UC12_Carrier_ConfirmBookingCompletedAction::new);
   }
 
-  private static BookingScenarioListBuilder uc11_shipper_cancelBooking(boolean invalidCase) {
+  private static BookingScenarioListBuilder uc11_shipper_cancelBooking() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
@@ -390,8 +389,26 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
                 componentFactory.getMessageSchemaValidator(
                     BOOKING_API, BOOKING_REF_STATUS_SCHEMA),
               componentFactory.getMessageSchemaValidator(
-                BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME),
-              invalidCase));
+                BOOKING_NOTIFICATIONS_API, BOOKING_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static BookingScenarioListBuilder auc_shipper_sendInvalidBookingAction(InvalidBookingMessageType invalidBookingMessageType) {
+    BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new BookingScenarioListBuilder(
+      previousAction -> {
+        var schema = switch (invalidBookingMessageType) {
+          case CANCEL_BOOKING_AMENDMENT, CANCEL_BOOKING -> CANCEL_SCHEMA_NAME;
+          case UPDATE_BOOKING, SUBMIT_BOOKING_AMENDMENT ->  UPDATE_BOOKING_SCHEMA_NAME;
+        };
+        return new AUC_Shipper_SendInvalidBookingAction(
+          carrierPartyName,
+          shipperPartyName,
+          (BookingAction) previousAction,
+          invalidBookingMessageType,
+          componentFactory.getMessageSchemaValidator(BOOKING_API, schema));
+      });
   }
 
   private interface CarrierNotificationUseCase {

@@ -26,7 +26,8 @@ public class PersistableCarrierBooking {
     Map.entry(DECLINED, Set.of(CONFIRMED, PENDING_AMENDMENT, AMENDMENT_RECEIVED)::contains),
     Map.entry(PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
     Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
-    Map.entry(COMPLETED, Set.of(CONFIRMED)::contains)
+    Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
+    Map.entry(CANCELLED, Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)::contains)
   );
 
   private static final Set<BookingState> MAY_AMEND_STATES = Set.of(
@@ -196,7 +197,8 @@ public class PersistableCarrierBooking {
   }
 
   public void cancelEntireBooking(String bookingReference, String reason) {
-    checkState(bookingReference, getOriginalBookingState(), s -> s != CANCELLED);
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CANCELLED);
+    checkState(bookingReference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Entire booking cancelled by shipper (no reason given)";

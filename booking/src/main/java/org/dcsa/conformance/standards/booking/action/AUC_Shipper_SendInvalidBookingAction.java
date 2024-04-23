@@ -30,9 +30,10 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
   @Override
   public String getHumanReadablePrompt() {
     var dsp = getDspSupplier().get();
-    return ("AUC: Send an invalid booking action but otherwise valid message of type %s (%s) to the document reference %s".formatted(
+    return ("AUC: Send an invalid booking action but otherwise valid message of type %s (%s) to the booking reference %s".formatted(
       invalidBookingMessageType.name(),
-      invalidBookingMessageType.getUC()
+      invalidBookingMessageType.getUC(),
+      dsp.carrierBookingRequestReference()
     ));
   }
 
@@ -41,7 +42,7 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
     var dsp = getDspSupplier().get();
     return super.asJsonNode()
       .put("invalidBookingMessageType", this.invalidBookingMessageType.name())
-      .put("carrierBookingRequestReference", dsp.carrierBookingRequestReference());
+      .put("cbrr", dsp.carrierBookingRequestReference());
   }
 
   @Override

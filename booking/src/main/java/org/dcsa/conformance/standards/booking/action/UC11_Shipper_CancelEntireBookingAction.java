@@ -19,7 +19,6 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final boolean invalidCase;
 
   public UC11_Shipper_CancelEntireBookingAction(
       String carrierPartyName,
@@ -27,13 +26,11 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean invalidCase) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC11", invalidCase? 409 : 200);
+      JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -48,7 +45,7 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return !invalidCase;
+    return true;
   }
 
   @Override
@@ -84,7 +81,7 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator));
-        return !invalidCase? Stream.concat(
+        return Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
@@ -99,7 +96,7 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
             expectedApiVersion,
             notificationSchemaValidator,
             BookingState.CANCELLED,
-            null)): primaryExchangeChecks;
+            null));
       }
     };
   }

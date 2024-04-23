@@ -17,20 +17,17 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final boolean invalidCase;
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
-      JsonSchemaValidator notificationSchemaValidator,
-      boolean invalidCase) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", invalidCase? 409 : 200);
+      JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -47,7 +44,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return !invalidCase;
+    return true;
   }
 
   @Override
@@ -81,7 +78,7 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
                 BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()));
-        return invalidCase? primaryExchangeChecks: Stream.concat(
+        return Stream.concat(
           Stream.of(
           new JsonSchemaCheck(
             BookingRole::isCarrier,

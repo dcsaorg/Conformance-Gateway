@@ -20,21 +20,17 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
-  private boolean invalidCase;
-
   public UC9_Shipper_CancelBookingAmendment(
     String carrierPartyName,
     String shipperPartyName,
     BookingAction previousAction,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator responseSchemaValidator,
-    JsonSchemaValidator notificationSchemaValidator,
-    boolean invalidCase) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC9", invalidCase? 409 : 200);
+    JsonSchemaValidator notificationSchemaValidator) {
+    super(shipperPartyName, carrierPartyName, previousAction, "UC9", 200);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-    this.invalidCase = invalidCase;
   }
 
   @Override
@@ -44,7 +40,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
 
   @Override
   protected boolean expectsNotificationExchange() {
-    return !invalidCase;
+    return true;
   }
 
   @Override
@@ -82,7 +78,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             getMatchedExchangeUuid(),
             HttpMessageType.REQUEST,
             requestSchemaValidator));
-        return !invalidCase ? Stream.concat(
+        return Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
@@ -97,7 +93,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             expectedApiVersion,
             notificationSchemaValidator,
             expectedBookingStatus,
-            BookingState.AMENDMENT_CANCELLED)):primaryExchangeChecks;
+            BookingState.AMENDMENT_CANCELLED));
       }
     };
   }

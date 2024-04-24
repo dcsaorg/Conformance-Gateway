@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.eblissuance.checks;
 
+import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
 
 import java.util.Set;
@@ -17,27 +18,48 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class IssuanceChecks {
 
-  private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(EblType eblType) {
+  private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
+    if (standardsVersion.startsWith("2.") || standardsVersion.equals("3.0.0-Beta-1")) {
+      return JsonAttribute.customValidator(
+        "[Scenario] Validate END party presence is correct",
+        JsonAttribute.path("document", JsonAttribute.path("documentParties",
+          (documentParties, contextPath) -> {
+            var hadEndorsee = false;
+            if (!eblType.isToOrder()) {
+              return Set.of();
+            }
+            for (var party : documentParties) {
+              if (party.path("partyFunction").asText("").equals("END")) {
+                hadEndorsee = true;
+                break;
+              }
+            }
+
+            if (eblType.isBlankEbl() && hadEndorsee) {
+              return Set.of("The EBL should have been blank endorsed, but it has an END party");
+            }
+            if (!eblType.isBlankEbl() && !hadEndorsee) {
+              return Set.of("The EBL should have had a named endorsee, but it is missing the END party");
+            }
+            return Set.of();
+          }
+        ))
+      );
+    }
     return JsonAttribute.customValidator(
-      "[Scenario] Validate END party presence is correct",
+      "[Scenario] Validate endorsee party presence is correct",
       JsonAttribute.path("document", JsonAttribute.path("documentParties",
         (documentParties, contextPath) -> {
-          var hadEndorsee = false;
           if (!eblType.isToOrder()) {
             return Set.of();
           }
-          for (var party : documentParties) {
-            if (party.path("partyFunction").asText("").equals("END")) {
-              hadEndorsee = true;
-              break;
-            }
-          }
-
+          var hadEndorsee = documentParties.has("endorsee");
+          var endorseePath = concatContextPath(contextPath, "documentParties.endorsee");
           if (eblType.isBlankEbl() && hadEndorsee) {
-            return Set.of("The EBL should have been blank endorsed, but it has an END party");
+            return Set.of("The EBL should have been blank endorsed, but it has an '%s' attribute".formatted(endorseePath));
           }
           if (!eblType.isBlankEbl() && !hadEndorsee) {
-            return Set.of("The EBL should have had a named endorsee, but it is missing the END party");
+            return Set.of("The EBL should have had a named endorsee, but it is missing the '%s' attribute".formatted(endorseePath));
           }
           return Set.of();
         }
@@ -57,7 +79,7 @@ public class IssuanceChecks {
         JsonPointer.compile("/document/isToOrder"),
         eblType.isToOrder()
       ),
-      hasEndorseeScenarioCheck(eblType)
+      hasEndorseeScenarioCheck(standardsVersion, eblType)
     );
   }
 

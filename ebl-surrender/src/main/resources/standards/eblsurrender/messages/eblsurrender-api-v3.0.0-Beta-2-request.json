@@ -4,7 +4,7 @@
   "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
   "surrenderRequestedBy": {
     "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-    "legalName": "legal name",
+    "partyName": "legal name",
     "partyCodes": [
       {
         "partyCode": "PARTY_CODE_PLACEHOLDER",

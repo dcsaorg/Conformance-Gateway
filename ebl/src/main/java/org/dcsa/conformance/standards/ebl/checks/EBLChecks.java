@@ -247,7 +247,7 @@ public class EBLChecks {
 
       if (!documentParties.has("shipper")) {
         var documentPartiesPath = concatContextPath(contextPath, "documentParties.shipper");
-        issues.add("The 'shipper' party is mandatory in the eBL phase at '%s' (SI/TD)".formatted(documentPartiesPath));
+        issues.add("The '%s' party is mandatory in the eBL phase (SI/TD)".formatted(documentPartiesPath));
       }
       var isToOrderPath = concatContextPath(contextPath, "isToOrder");
 
@@ -260,7 +260,7 @@ public class EBLChecks {
       } else {
         if (!documentParties.has("consignee")) {
           var documentPartiesPath = concatContextPath(contextPath, "documentParties.consignee");
-          issues.add("The 'CN' party is mandatory when '%s' is false".formatted(documentPartiesPath, isToOrderPath));
+          issues.add("The '%s' party is mandatory when '%s' is false".formatted(documentPartiesPath, isToOrderPath));
         }
         if (documentParties.has("endorsee")) {
           var documentPartiesPath = concatContextPath(contextPath, "documentParties.endorsee");

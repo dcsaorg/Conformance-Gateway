@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "DCSA EBL Surrender Response API",
-    "description": "This API is intended as an API between a carrier (the client) and a EBL Solution Platform (the server).\n\nThis API is used to respond to requests that were submitted via the [DCSA EBL Surrender API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-2) API.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender_response#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "title": "DCSA OpenAPI specification for responding to an issuance request. \n",
+    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThis API is a counter part to the [DCSA OpenAPI specification for Issuance an EBL to an EBL platform](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_ISS/3.0.0-Beta-2) API.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA EBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-2) API.\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance_response#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -16,24 +16,25 @@
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR_RSP/3.0.0-Beta-2",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_ISS_RSP/3.0.0-Beta-2",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "tags": [
     {
-      "name": "Surrender Request responses",
-      "description": "The Surrender Request responses\n"
+      "name": "Issue Response",
+      "description": "The Issue Response\n"
     }
   ],
   "paths": {
-    "/v3/ebl-surrender-responses": {
+    "/v3/ebl-issuance-responses": {
       "post": {
         "tags": [
-          "Surrender Request responses"
+          "Issue Response"
         ],
-        "description": "The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.\n",
-        "operationId": "post-ebl-surrender-responses",
+        "summary": "Respond to a transport document issuance request",
+        "description": "Submit a response to a carrier issuance request.\n",
+        "operationId": "create-ebl-issuance-response",
         "parameters": [
           {
             "name": "API-Version",
@@ -52,7 +53,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SurrenderRequestAnswer"
+                "$ref": "#/components/schemas/IssuanceResponse"
               }
             }
           },
@@ -60,30 +61,15 @@
         },
         "responses": {
           "204": {
-            "description": "Request successful",
+            "description": "Carrier's acknowledgement of the Issuance Response",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
-              }
-            }
-          },
-          "409": {
-            "description": "A carrier may only answer once to a surrender request. Subsequent attempts to answer are considered an error and should be rejected with a 409 Conflict code.\n",
-            "headers": {
-              "API-Version": {
-                "$ref": "#/components/headers/API-Version"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
               }
             }
           },
           "default": {
-            "description": "Error",
+            "description": "Request successful",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -175,34 +161,36 @@
         },
         "description": "Unexpected error"
       },
-      "SurrenderRequestAnswer": {
+      "IssuanceResponse": {
         "required": [
-          "action",
-          "surrenderRequestReference"
+          "issuanceResponseCode",
+          "transportDocumentReference"
         ],
         "type": "object",
         "properties": {
-          "surrenderRequestReference": {
-            "maxLength": 100,
+          "transportDocumentReference": {
+            "maxLength": 20,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The surrender request provided by the EBL solution in the surrender request.\n",
-            "example": "Z12345"
+            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+            "example": "HHL71800000"
           },
-          "action": {
+          "issuanceResponseCode": {
             "type": "string",
-            "description": "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an admendment, the carrier will follow up with issuing the admended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
+            "description": "The platforms verdict on the issuance of the EBL  identified by the `transportDocumentReference`\n\nOptions are:\n  - `ISSU`: The document was successfully `ISSU` and successfully delivered to the initial possessor.\n  - `BREQ`: The platform reviewed the document and believe they cannot issue the document due to an error/issue with the content of the issuance request.\n  - `REFU`: The eBL issuance is rejected for a reason that the issuing eBL platform cannot resolve (for example when an Interoperable transfer fails, due to a reject of the receiving eBL platform via the `BENV` code from the interoperability standard). One reason could be that the `issueTo` referenced a valid eBL platform but the receiving platform did not recognise the recipient specified.\n\nRegardless of the response code, the issuance request is now considered handled. In case of successful issuance, the platform will still have some responsiblity but that is covered by other processes and APIs (e.g., the DCSA_SUR API mentioned in the description of this API). In case of failed issuance, it is up to the carrier to resolve the issue and, if needed, submit a revised issuance request.\n",
+            "example": "ISSU",
             "enum": [
-              "SURR",
-              "SREJ"
+              "ISSU",
+              "BREQ",
+              "REFU"
             ]
           },
-          "comments": {
+          "reason": {
             "maxLength": 255,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Free text comment associated with the surrender request transaction.  Must be provided for rejections but should be omitted when accepting the surrender.",
-            "example": "Comments..."
+            "description": "Human readable description of the rationale for an unsuccessful issuance.\n\nThe `reason` should be omitted when the `issuanceResponseCode` is `ISSU` or `TEXP`. If the platform for some reason chooses to deviate from this and provide the field anyway, they should use canned phrased like `Issued` that matches the meaning of the `issuanceResponseCode`.\n",
+            "example": "Cannot get..."
           }
         }
       },

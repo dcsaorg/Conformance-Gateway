@@ -121,10 +121,19 @@ public class EblSurrenderComponentFactory extends AbstractComponentFactory {
         "/standards/eblsurrender/schemas/eblsurrender-v%s-%s.json"
             .formatted(
                 standardVersion, apiProviderRole.toLowerCase());
-    String schemaName =
+    String schemaName;
+
+    if (standardVersion.startsWith("2.") || standardVersion.equals("3.0.0-Beta-1")) {
+      schemaName =
+          EblSurrenderRole.isCarrier(apiProviderRole)
+              ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")
+              : (forRequest ? "surrenderRequestAnswer" : null);
+    } else {
+      schemaName =
         EblSurrenderRole.isCarrier(apiProviderRole)
-            ? (forRequest ? "surrenderRequestDetails" : "surrenderRequestAcknowledgement")
-            : (forRequest ? "surrenderRequestAnswer" : null);
+          ? (forRequest ? "SurrenderRequestDetails" : "SurrenderRequestAcknowledgement")
+          : (forRequest ? "SurrenderRequestAnswer" : null);
+    }
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 

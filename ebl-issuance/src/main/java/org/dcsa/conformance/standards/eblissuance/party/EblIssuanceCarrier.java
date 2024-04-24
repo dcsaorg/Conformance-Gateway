@@ -112,20 +112,32 @@ public class EblIssuanceCarrier extends ConformanceParty {
     if (eblType.isToOrder()) {
       var td = (ObjectNode)jsonRequestBody.path("document");
       td.put("isToOrder", true);
-      var documentParties = (ArrayNode)td.path("documentParties");
-      var cnIdx = -1;
-      for (int i = 0 ; i < documentParties.size() ; i++) {
-        if (documentParties.path(i).path("partyFunction").asText("?").equals("CN")) {
-          cnIdx = i;
-          break;
+      if (apiVersion.startsWith("2.") || apiVersion.equals("3.0.0-Beta-1")) {
+        var documentParties = (ArrayNode)td.path("documentParties");
+        var cnIdx = -1;
+        for (int i = 0 ; i < documentParties.size() ; i++) {
+          if (documentParties.path(i).path("partyFunction").asText("?").equals("CN")) {
+            cnIdx = i;
+            break;
+          }
+        }
+        if (eblType.isBlankEbl()) {
+          documentParties.remove(cnIdx);
+        } else {
+          ((ObjectNode)documentParties.path(cnIdx)).put("partyFunction", "END");
+        }
+      } else {
+        var documentParties = (ObjectNode)td.path("documentParties");
+        if (eblType.isBlankEbl()) {
+          documentParties.remove("consignee");
+          documentParties.remove("endorsee");
+        } else {
+          var consignee = documentParties.remove("consignee");
+          documentParties.set("endorsee", consignee);
         }
       }
-      if (eblType.isBlankEbl()) {
-        documentParties.remove(cnIdx);
-      } else {
-        ((ObjectNode)documentParties.path(cnIdx)).put("partyFunction", "END");
-      }
     }
+
     if (!isCorrect) {
       ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
     }

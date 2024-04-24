@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
-
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC9_Shipper_CancelBookingAmendment(
@@ -78,19 +77,18 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
             BookingRole::isShipper,
             getMatchedExchangeUuid(),
             HttpMessageType.REQUEST,
-            requestSchemaValidator),
-          new JsonSchemaCheck(
-            BookingRole::isCarrier,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator));
+            requestSchemaValidator));
         return Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
-              BookingState.AMENDMENT_CANCELLED
-            ))),
+              BookingState.AMENDMENT_CANCELLED),
+              new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator))),
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,

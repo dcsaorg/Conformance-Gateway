@@ -17,7 +17,6 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
@@ -78,19 +77,21 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     requestSchemaValidator),
-                new JsonSchemaCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    responseSchemaValidator),
                 BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
+          Stream.of(
+          new JsonSchemaCheck(
+            BookingRole::isCarrier,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            responseSchemaValidator)),
+          Stream.concat(
             primaryExchangeChecks,
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
                 BookingState.UPDATE_RECEIVED,
-                null));
+                null)));
       }
     };
   }

@@ -86,7 +86,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     responseSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
+                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
             Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(

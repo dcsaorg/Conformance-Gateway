@@ -59,13 +59,14 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  public static ActionCheck requestContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
+      standardVersion,
       checks
     );
   }
@@ -636,7 +637,7 @@ public class BookingChecks {
     REASON_FIELD_ABSENCE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
+  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -671,6 +672,7 @@ public class BookingChecks {
       BookingRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
+      standardVersion,
       checks
     );
   }

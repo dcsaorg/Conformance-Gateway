@@ -83,14 +83,12 @@ public class CarrierShippingInstructions {
   private static Function<String, JsonNode> issuingCarrier(String name, String smdgCode, String countryCode) {
     return (String version) -> {
       var issuingCarrier = OBJECT_MAPPER.createObjectNode().put("partyName", name);
-      if (!version.equals("3.0.0-Beta-1")) {
-        issuingCarrier
-            .putObject("address")
-            .put("street", "The street name would be here")
-            .put("streetNumber", "... and here the street number")
-            .put("city", "... and here the city")
-            .put("countryCode", countryCode);
-      }
+      issuingCarrier
+          .putObject("address")
+          .put("street", "The street name would be here")
+          .put("streetNumber", "... and here the street number")
+          .put("city", "... and here the city")
+          .put("countryCode", countryCode);
       issuingCarrier
           .putArray("identifyingCodes")
           .addObject()
@@ -213,56 +211,7 @@ public class CarrierShippingInstructions {
   };
 
   private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER = Map.ofEntries(
-    Map.entry("3.0.0-Beta-1", (transportDocument, scenarioType) -> {
-      for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
-        if (consignmentItemNode instanceof ObjectNode consignmentItem) {
-          consignmentItem.remove("commoditySubreference");
-        }
-        for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
-          var outerPackagingNode = cargoItemNode.path("outerPackaging");
-          if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {
-            continue;
-          }
-          ObjectNode outerPackaging = (ObjectNode)outerPackagingNode;
-          // The packaging code has to be aligned with the description. To simplify things, we replace
-          // the packageCode to ensure they are aligned. Which is not perfect, but better than
-          // inconsistent data.
-          //
-          // The alternative is having a look-up table of all known packageCode's and their relevant
-          // description.
-          switch (scenarioType) {
-            case REGULAR_SWB:
-            case REGULAR_BOL:
-            case REGULAR_2C_2U_1E:
-            case REGULAR_2C_2U_2E:
-            case REGULAR_SWB_SOC_AND_REFERENCES:
-            case REGULAR_SWB_AMF:
-              outerPackaging.put("packageCode", "4G")
-                .put("description", "Fibreboard boxes");
-              break;
-            case NON_OPERATING_REEFER:
-            case ACTIVE_REEFER:
-              outerPackaging.put("packageCode", "BQ")
-                .put("description", "Bottles");
-              break;
-            case DG: {
-              outerPackaging.put("description", "Jerrican, steel")
-                .put("imoPackagingCode", "3A1");
-              var dg = outerPackaging.putArray("dangerousGoods").addObject();
-              dg.put("unNumber", "3082")
-                .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
-                .put("imoClass", "9")
-                .put("packingGroup", 3)
-                .put("EMSNumber", "F-A S-F");
-              break;
-            }
-            default:
-              throw new AssertionError("Missing case for " + scenarioType.name());
-          }
-        }
-      }
-    }),
-    Map.entry("3.0.0-Beta-2",  (transportDocument, scenarioType) -> {
+    Map.entry("3.0.0",  (transportDocument, scenarioType) -> {
       for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
         if (consignmentItemNode instanceof ObjectNode consignmentItem) {
           consignmentItem.remove("commoditySubreference");
@@ -299,17 +248,11 @@ public class CarrierShippingInstructions {
         .put("plannedArrivalDate", today.plusDays(2).toString());
     transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
     unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
-    if (standardsVersion.equals("3.0.0-Beta-1")) {
-      transportsNode
-        .put("vesselName", vessel.vesselName())
-        .put("carrierExportVoyageNumber", "402E");
-    } else {
-      transportsNode
-        .putArray("vesselVoyage")
-        .addObject()
-        .put("vesselName", vessel.vesselName())
-        .put("carrierExportVoyageNumber", "402E");
-    }
+    transportsNode
+      .putArray("vesselVoyage")
+      .addObject()
+      .put("vesselName", vessel.vesselName())
+      .put("carrierExportVoyageNumber", "402E");
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {

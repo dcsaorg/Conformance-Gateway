@@ -13,4 +13,5 @@ public class ConformanceConfiguration {
     boolean useDynamoDb;
     boolean createAutoTestingSandboxes;
     boolean createManualTestingSandboxes;
+    boolean showOnlyAllInOneSandboxes;
 }

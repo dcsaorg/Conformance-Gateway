@@ -188,7 +188,8 @@ public class ConformanceApplication {
                     String sandboxId = jsonSandboxConfigurationTemplate.get("id").asText();
                     if (sandboxId.contains("-auto-")
                         && (sandboxId.contains("all-in-one")
-                            || sandboxId.contains("testing-counterparts"))) {
+                            || (!conformanceConfiguration.showOnlyAllInOneSandboxes
+                                && sandboxId.contains("testing-counterparts")))) {
                       homepageSandboxIds.add(sandboxId);
                     }
                     ConformanceSandbox.create(

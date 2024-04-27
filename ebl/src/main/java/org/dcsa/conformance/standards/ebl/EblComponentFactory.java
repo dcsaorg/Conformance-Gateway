@@ -20,7 +20,7 @@ import org.dcsa.conformance.standards.ebl.party.EblShipper;
 
 public class EblComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "Ebl";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0-Beta-1");
+  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0");
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();

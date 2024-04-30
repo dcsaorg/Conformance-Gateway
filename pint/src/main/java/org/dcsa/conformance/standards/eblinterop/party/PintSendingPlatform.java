@@ -275,9 +275,9 @@ public class PintSendingPlatform extends ConformanceParty {
     var sendingPlatform = "BOLE";
     var receivingPlatform = rsp.eblPlatform();
     var sendingEPUI = "1234";
-    var sendingLegalName = "DCSA CTK tester";
+    var sendingPartyName = "DCSA CTK tester";
     var receivingEPUI = rsp.receiverEPUI();
-    var receivingLegalName = rsp.receiverLegalName();
+    var receivingPartyName = rsp.receiverPartyName();
     var receiverCodeListName = rsp.receiverEPUICodeListName();
     if (sendingPlatform.equals(receivingPlatform)) {
       sendingPlatform = "WAVE";
@@ -296,7 +296,7 @@ public class PintSendingPlatform extends ConformanceParty {
         "DCSA CTK issuer",
         "5432",
         sendingPlatform,
-        sendingLegalName,
+        sendingPartyName,
         sendingEPUI,
         codeListName
       );
@@ -317,10 +317,10 @@ public class PintSendingPlatform extends ConformanceParty {
       tdChecksum,
       action,
       sendingPlatform,
-      sendingLegalName,
+      sendingPartyName,
       sendingEPUI,
       receivingPlatform,
-      receivingLegalName,
+      receivingPartyName,
       receivingEPUI,
       receiverCodeListName
     );

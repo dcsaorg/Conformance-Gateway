@@ -7,11 +7,11 @@
       "platformHost": "https://exampleblplatform.net",
       "actor": {
         "eBLPlatformIdentifier": "test1234@exampleblplatform.net",
-        "legalName": "Some carrier"
+        "partyName": "Some carrier"
       },
       "recipient": {
         "eBLPlatformIdentifier": "RECEIVER_PLATFORM_IDENTIFIER",
-        "legalName": "RECEIVER_LEGAL_NAME"
+        "partyName": "RECEIVER_LEGAL_NAME"
       },
       "action": "ISSU"
     }

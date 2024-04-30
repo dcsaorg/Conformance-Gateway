@@ -121,10 +121,10 @@ public class TDSendingState {
     return PLATFORM2CODELISTNAME.getOrDefault(platform, platform);
   }
 
-  public static ObjectNode generateTransaction(String action, String sendingPlatform, String sendingLegalName, String sendingEPUI, String receivingPlatform, String receivingLegalName, String receivingEPUI, String receivingCodeListName) {
+  public static ObjectNode generateTransaction(String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, String receivingPlatform, String receivingPartyName, String receivingEPUI, String receivingCodeListName) {
     var actor = OBJECT_MAPPER.createObjectNode()
       .put("eblPlatform", sendingPlatform)
-      .put("legalName", sendingLegalName);
+      .put("partyName", sendingPartyName);
     actor.putArray("partyCodes")
       .addObject()
       .put("partyCode", sendingEPUI)
@@ -132,7 +132,7 @@ public class TDSendingState {
       .put("codeListName", platform2CodeListName(sendingPlatform));
     var recipient = OBJECT_MAPPER.createObjectNode()
       .put("eblPlatform", receivingPlatform)
-      .put("legalName", receivingLegalName);
+      .put("partyName", receivingPartyName);
     recipient.putArray("partyCodes")
       .addObject()
       .put("partyCode", receivingEPUI)
@@ -146,7 +146,7 @@ public class TDSendingState {
     return transaction;
   }
 
-  public static String generateTransactionEntry(PayloadSigner payloadSigner, String previousEnvelopeTransferChainEntrySignedContentChecksum, String tdChecksum, String action, String sendingPlatform, String sendingLegalName, String sendingEPUI, String receivingPlatform, String receivingLegalName, String receivingEPUI, String receivingCodeListName) {
+  public static String generateTransactionEntry(PayloadSigner payloadSigner, String previousEnvelopeTransferChainEntrySignedContentChecksum, String tdChecksum, String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, String receivingPlatform, String receivingPartyName, String receivingEPUI, String receivingCodeListName) {
     var latestEnvelopeTransferChainUnsigned = OBJECT_MAPPER.createObjectNode()
       .put("eblPlatform", sendingPlatform)
       .put("transportDocumentChecksum", tdChecksum)
@@ -157,10 +157,10 @@ public class TDSendingState {
       .add(generateTransaction(
         action,
         sendingPlatform,
-        sendingLegalName,
+        sendingPartyName,
         sendingEPUI,
         receivingPlatform,
-        receivingLegalName,
+        receivingPartyName,
         receivingEPUI,
         receivingCodeListName
       ));
@@ -186,9 +186,9 @@ public class TDSendingState {
     var sendingPlatform = "BOLE";
     var receivingPlatform = rsp.eblPlatform();
     var sendingEPUI = "1234";
-    var sendingLegalName = "DCSA CTK tester";
+    var sendingPartyName = "DCSA CTK tester";
     var receivingEPUI = rsp.receiverEPUI();
-    var receivingLegalName = rsp.receiverLegalName();
+    var receivingPartyName = rsp.receiverPartyName();
     var receiverCodeListName = rsp.receiverEPUICodeListName();
     if (sendingPlatform.equals(receivingPlatform)) {
       sendingPlatform = "WAVE";
@@ -196,10 +196,10 @@ public class TDSendingState {
     var newTransactionEntry = generateTransaction(
       "TRNS",
       sendingPlatform,
-      sendingLegalName,
+      sendingPartyName,
       sendingEPUI,
       sendingPlatform,
-      receivingLegalName,
+      receivingPartyName,
       receivingEPUI,
       receiverCodeListName
     );

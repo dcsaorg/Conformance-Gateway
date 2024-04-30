@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.party;
+package org.dcsa.conformance.standards.arrival-notice.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,12 +15,13 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ovs.action.OvsGetSchedulesAction;
+import org.dcsa.conformance.standards.an.action.ArrivalNoticeGetNotificationAction;
+import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
 @Slf4j
-public class OvsSubscriber extends ConformanceParty {
+public class ArrivalNoticeNotifyParty extends ConformanceParty {
 
-  public OvsSubscriber(
+  public ArrivalNoticeNotifyParty(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -47,10 +48,10 @@ public class OvsSubscriber extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(OvsGetSchedulesAction.class, this::getSchedules));
+    return Map.ofEntries(Map.entry(ArrivalNoticeGetNotificationAction.class, this::getArrivalNotice));
   }
 
-  private void getSchedules(JsonNode actionPrompt) {
+  private void getArrivalNotice(JsonNode actionPrompt) {
     log.info("OvsSubscriber.getSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
@@ -69,7 +70,7 @@ public class OvsSubscriber extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("OvsSubscriber.handleRequest(%s)".formatted(request));
+    log.info("ArrivalNoticeSubscriber.handleRequest(%s)".formatted(request));
     throw new UnsupportedOperationException();
   }
 }

@@ -20,7 +20,7 @@ import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
 import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
 import org.dcsa.conformance.standards.jit.JitComponentFactory;
-import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
+import org.dcsa.conformance.standards.an.OvsComponentFactory;
 import org.dcsa.conformance.standards.tnt.TntComponentFactory;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.party;
+package org.dcsa.conformance.standards.an.party;
 
 import lombok.Getter;
 
@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public enum OvsFilterParameter {
+public enum ArrivalNoticeFilterParameter {
   CARRIER_SERVICE_NAME("carrierServiceName"),
   CARRIER_SERVICE_CODE("carrierServiceCode"),
   UNIVERSAL_SERVICE_REFERENCE("universalServiceReference"),
@@ -22,15 +22,15 @@ public enum OvsFilterParameter {
   LIMIT("limit"),
   ;
 
-  public static final Map<String, OvsFilterParameter> byQueryParamName =
+  public static final Map<String, ArrivalNoticeFilterParameter> byQueryParamName =
       Arrays.stream(values())
           .collect(
               Collectors.toUnmodifiableMap(
-                  OvsFilterParameter::getQueryParamName, Function.identity()));
+                ArrivalNoticeFilterParameter::getQueryParamName, Function.identity()));
 
   @Getter private final String queryParamName;
 
-  OvsFilterParameter(String queryParamName) {
+  ArrivalNoticeFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;
   }
 }

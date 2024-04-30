@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.party;
+package org.dcsa.conformance.standards.an.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,14 +22,14 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 
 @Slf4j
-public class OvsPublisher extends ConformanceParty {
+public class ArrivalNoticeCarrier extends ConformanceParty {
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-  public OvsPublisher(
+  public ArrivalNoticeCarrier(
       String apiVersion,
       PartyConfiguration partyConfiguration,
       CounterpartConfiguration counterpartConfiguration,
@@ -66,16 +66,16 @@ public class OvsPublisher extends ConformanceParty {
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(
             StreamSupport.stream(
-                    actionPrompt.required("ovsFilterParametersQueryParamNames").spliterator(),
+                    actionPrompt.required("ArrivalNoticeFilterParametersQueryParamNames").spliterator(),
                     false)
                 .map(
                     jsonOvsFilterParameter ->
-                        OvsFilterParameter.byQueryParamName.get(jsonOvsFilterParameter.asText()))
+                      ArrivalNoticeFilterParameter.byQueryParamName.get(jsonOvsFilterParameter.asText()))
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
-                        ovsFilterParameter ->
-                            switch (ovsFilterParameter) {
+                      ArrivalNoticeFilterParameter ->
+                            switch (ArrivalNoticeFilterParameter) {
                               case CARRIER_SERVICE_NAME -> "Great Lion Service";
                               case CARRIER_SERVICE_CODE -> "FE1";
                               case UNIVERSAL_SERVICE_REFERENCE -> "SR12345A";
@@ -106,7 +106,7 @@ public class OvsPublisher extends ConformanceParty {
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-%s-response.json"
+            "/standards/an/messages/ovs-%s-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
 

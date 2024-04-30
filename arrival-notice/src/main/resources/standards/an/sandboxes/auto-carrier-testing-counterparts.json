@@ -1,0 +1,27 @@
+{
+  "id": "SANDBOX_ID_PREFIX-auto-carrier-testing-counterparts",
+  "name": "Auto carrier testing counterparts",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": true
+  },
+  "parties" : [ {
+    "name" : "NotifyParty1",
+    "role" : "NotifyParty",
+    "orchestratorUrl" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-carrier-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-carrier-tested-party/party/Carrier1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER"
+  }, {
+    "name" : "NotifyParty1",
+    "role" : "NotifyParty",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-carrier-testing-counterparts/party/NotifyParty1/api"
+  } ]
+}

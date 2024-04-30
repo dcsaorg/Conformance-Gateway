@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs;
+package org.dcsa.conformance.standards.an;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
@@ -16,9 +16,9 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.standards.ovs.party.OvsPublisher;
-import org.dcsa.conformance.standards.ovs.party.OvsRole;
-import org.dcsa.conformance.standards.ovs.party.OvsSubscriber;
+import org.dcsa.conformance.standards.an.party.OvsPublisher;
+import org.dcsa.conformance.standards.an.party.OvsRole;
+import org.dcsa.conformance.standards.an.party.OvsSubscriber;
 
 public class OvsComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "OVS";

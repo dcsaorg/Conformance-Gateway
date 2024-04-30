@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.action;
+package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -13,18 +13,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter;
+import org.dcsa.conformance.standards.an.party.OvsFilterParameter;
+import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
+
+import static org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter.LIMIT;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final LinkedHashSet<OvsFilterParameter> ovsFilterParameters;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, OvsFilterParameter... ovsFilterParameters) {
+      String publisherPartyName, ArrivalNoticeFilterParameter... ovsFilterParameters) {
     super(
         publisherPartyName,
         null,
@@ -32,10 +34,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
         "SupplyScenarioParameters(%s)"
             .formatted(
                 Arrays.stream(ovsFilterParameters)
-                    .map(OvsFilterParameter::getQueryParamName)
+                    .map(ArrivalNoticeFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
-    this.ovsFilterParameters =
-        Stream.of(ovsFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override
@@ -47,27 +47,17 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
-    if (suppliedScenarioParameters != null) {
-      jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
-    }
     return jsonState;
   }
 
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    if (jsonState.has("suppliedScenarioParameters")) {
-      suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
-    }
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonOvsFilterParameters = objectNode.putArray("ovsFilterParametersQueryParamNames");
-    ovsFilterParameters.forEach(
-        ovsFilterParameter -> jsonOvsFilterParameters.add(ovsFilterParameter.getQueryParamName()));
     return objectNode;
   }
 

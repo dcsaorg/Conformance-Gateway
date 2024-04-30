@@ -1,7 +1,7 @@
-package org.dcsa.conformance.standards.ovs.action;
+package org.dcsa.conformance.standards.an.action;
 
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
 import java.util.Map;
 import java.util.function.Supplier;

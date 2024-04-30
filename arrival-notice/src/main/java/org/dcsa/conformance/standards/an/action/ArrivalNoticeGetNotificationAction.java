@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.action;
+package org.dcsa.conformance.standards.an.action;
 
 import java.util.stream.Stream;
 
@@ -8,25 +8,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ovs.party.OvsRole;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeRole;
 
 @Getter
 @Slf4j
-public class OvsGetSchedulesAction extends OvsAction {
+public class ArrivalNoticeGetNotificationAction extends ArrivalNoticeAction {
   private final JsonSchemaValidator responseSchemaValidator;
 
-  public OvsGetSchedulesAction(
+  public ArrivalNoticeGetNotificationAction(
       String subscriberPartyName,
       String publisherPartyName,
       ConformanceAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetSchedules", 200);
+    super(subscriberPartyName, publisherPartyName, previousAction, "GetArrivalNotices", 200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET schedules request with the following parameters: "
+    return "Send a GET Arrival Notice request with the following parameters: "
         + sspSupplier.get().toJson().toPrettyString();
   }
 
@@ -36,10 +36,10 @@ public class OvsGetSchedulesAction extends OvsAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(OvsRole::isSubscriber, getMatchedExchangeUuid(), "/service-schedules"),
-            new ResponseStatusCheck(OvsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new UrlPathCheck(ArrivalNoticeRole::isCarrier, getMatchedExchangeUuid(), "/arrival-notices"),
+            new ResponseStatusCheck(ArrivalNoticeRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
-                OvsRole::isPublisher,
+                ArrivalNoticeRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator));

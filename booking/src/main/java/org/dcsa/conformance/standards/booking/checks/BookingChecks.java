@@ -95,6 +95,15 @@ public class BookingChecks {
       mav.submitAllMatching("placeOfBLIssue.UNLocationCode");
       mav.submitAllMatching("transportPlan.loadLocation.UNLocationCode");
       mav.submitAllMatching("transportPlan.dischargeLocation.UNLocationCode");
+
+      // Beta-2 only
+      mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
+
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.UN_LOCODE_DATASET)
   );
@@ -205,23 +214,24 @@ public class BookingChecks {
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
   }
-  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThen(
-    "Check Export declaration reference ",
-    JsonAttribute.isTrue(JsonPointer.compile("/isExportDeclarationRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/exportDeclarationReference"))
+
+  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
+    "Check Export declaration reference absence",
+    JsonAttribute.isFalse("/isExportDeclarationRequired"),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
   );
 
-  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThen(
-    "Check Import declaration reference presence",
-    JsonAttribute.isTrue(JsonPointer.compile("/isImportLicenseRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/importLicenseReference"))
+  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
+    "Check Import declaration reference absence",
+    JsonAttribute.isFalse("/isImportLicenseRequired"),
+    JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
-  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       "documentParties",
-      JsonAttribute.unique("partyFunction")
+      JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -273,6 +283,23 @@ public class BookingChecks {
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
     JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  );
+
+  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate field is a known ISO 3166 alpha 2 code",
+    (mav) -> {
+      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
+
+      // Beta-2 only
+      mav.submitAllMatching("documentParties.shippers.address.countryCode");
+      mav.submitAllMatching("documentParties.consignee.address.countryCode");
+      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
+      mav.submitAllMatching("documentParties.serviceContractOwner.address.countryCode");
+      mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
+      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
@@ -489,34 +516,6 @@ public class BookingChecks {
     ));
   }
 
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
-    "Validate documentParties",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var documentParties = body.path("documentParties");
-      var partyFunctions = StreamSupport.stream(documentParties.spliterator(), false)
-        .map(p -> p.path("partyFunction"))
-        .filter(JsonNode::isTextual)
-        .map(n -> n.asText(""))
-        .collect(Collectors.toSet());
-
-      if (!partyFunctions.contains("SCO")) {
-        if (!body.path("serviceContractReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
-        }
-        if (!body.path("contractQuotationReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
-        }
-      }
-      Set<String> partyShippers  = Set.of("OS", "DDR");
-      if (partyFunctions.stream().noneMatch(partyShippers::contains)) {
-        if (!partyFunctions.contains("BA")) {
-          issues.add("The BA party is required when (both) OS and DDR are not present");
-        }
-      }
-        return issues;
-    });
-
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
@@ -538,15 +537,15 @@ public class BookingChecks {
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     REFERENCE_TYPE_VALIDATION,
     ISO_EQUIPMENT_CODE_VALIDATION,
-    IS_EXPORT_DECLARATION_REFERENCE_PRESENT,
-    IS_IMPORT_DECLARATION_REFERENCE_PRESENT,
+    IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
+    IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
     OUTER_PACKAGING_CODE_IS_VALID,
     TLR_CC_T_COMBINATION_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-    VALIDATE_DOCUMENT_PARTIES,
+    COUNTRY_CODE_VALIDATIONS,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

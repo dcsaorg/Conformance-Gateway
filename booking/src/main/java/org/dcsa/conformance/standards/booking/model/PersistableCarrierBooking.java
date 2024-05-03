@@ -26,7 +26,8 @@ public class PersistableCarrierBooking {
     Map.entry(DECLINED, Set.of(CONFIRMED, PENDING_AMENDMENT, AMENDMENT_RECEIVED)::contains),
     Map.entry(PENDING_UPDATE, Set.of(RECEIVED, PENDING_UPDATE, UPDATE_RECEIVED)::contains),
     Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
-    Map.entry(COMPLETED, Set.of(CONFIRMED)::contains)
+    Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
+    Map.entry(CANCELLED, Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)::contains)
   );
 
   private static final Set<BookingState> MAY_AMEND_STATES = Set.of(
@@ -45,7 +46,7 @@ public class PersistableCarrierBooking {
 
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
-
+  private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -196,7 +197,8 @@ public class PersistableCarrierBooking {
   }
 
   public void cancelEntireBooking(String bookingReference, String reason) {
-    checkState(bookingReference, getOriginalBookingState(), s -> s != CANCELLED);
+    var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CANCELLED);
+    checkState(bookingReference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Entire booking cancelled by shipper (no reason given)";
@@ -298,8 +300,13 @@ public class PersistableCarrierBooking {
     bookingRequest.put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
       .put(BOOKING_STATUS, BookingState.RECEIVED.wireName());
     var state = OBJECT_MAPPER.createObjectNode();
+    state.put(SUBSCRIPTION_REFERENCE,UUID.randomUUID().toString());
     state.set(BOOKING_DATA_FIELD, bookingRequest);
     return new PersistableCarrierBooking(state);
+  }
+
+  public String getSubscriptionReference() {
+    return this.state.required(SUBSCRIPTION_REFERENCE).asText("");
   }
 
   public static PersistableCarrierBooking fromPersistentStore(JsonNode state) {

@@ -80,18 +80,18 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator),
-            new JsonSchemaCheck(
-              BookingRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator));
+                requestSchemaValidator));
         return Stream.concat(
           Stream.concat(primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               BookingState.CANCELLED
-            ))),
+            ),
+              new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator))),
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,

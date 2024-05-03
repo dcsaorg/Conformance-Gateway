@@ -59,25 +59,14 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  public static ActionCheck requestContentChecks(UUID matched, String standardsVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+  public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
-    if (standardsVersion.equals("2.0.0-Beta-1")) {
-      checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
-      checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
-      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1);
-      checks.add(VALIDATE_DOCUMENT_PARTIES_V2B1);
-    }
-    if (!standardsVersion.equals("2.0.0-Beta-1")) {
-      checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
-      checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
-      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER);
-    }
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
     return JsonAttribute.contentChecks(
       BookingRole::isShipper,
       matched,
       HttpMessageType.REQUEST,
-      standardsVersion,
+      standardVersion,
       checks
     );
   }
@@ -225,24 +214,11 @@ public class BookingChecks {
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
   }
-  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThenElse(
-    "Check Export declaration reference ",
-    JsonAttribute.isTrue(JsonPointer.compile("/isExportDeclarationRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/exportDeclarationReference")),
-    JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
-  );
 
   private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
     "Check Export declaration reference absence",
     JsonAttribute.isFalse("/isExportDeclarationRequired"),
     JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
-  );
-
-  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_PRESENT = JsonAttribute.ifThenElse(
-    "Check Import declaration reference presence",
-    JsonAttribute.isTrue(JsonPointer.compile("/isImportLicenseRequired")),
-    JsonAttribute.mustBePresent(JsonPointer.compile("/importLicenseReference")),
-    JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
   private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
@@ -251,14 +227,7 @@ public class BookingChecks {
     JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
-  private static final JsonContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1 = JsonAttribute.customValidator(
-    "Each document party can be used at most once",
-    JsonAttribute.path(
-      "documentParties",
-      JsonAttribute.unique("partyFunction")
-    ));
-
-  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       "documentParties",
@@ -547,36 +516,6 @@ public class BookingChecks {
     ));
   }
 
-
-
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTIES_V2B1 = JsonAttribute.customValidator(
-    "Validate documentParties",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      var documentParties = body.path("documentParties");
-      var partyFunctions = StreamSupport.stream(documentParties.spliterator(), false)
-        .map(p -> p.path("partyFunction"))
-        .filter(JsonNode::isTextual)
-        .map(n -> n.asText(""))
-        .collect(Collectors.toSet());
-
-      if (!partyFunctions.contains("SCO")) {
-        if (!body.path("serviceContractReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'serviceContractReference' is absent");
-        }
-        if (!body.path("contractQuotationReference").isTextual()) {
-          issues.add("The 'SCO' party is mandatory when 'contractQuotationReference' is absent");
-        }
-      }
-      Set<String> partyShippers  = Set.of("OS", "DDR");
-      if (partyFunctions.stream().noneMatch(partyShippers::contains)) {
-        if (!partyFunctions.contains("BA")) {
-          issues.add("The BA party is required when (both) OS and DDR are not present");
-        }
-      }
-      return issues;
-    });
-
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
@@ -598,8 +537,11 @@ public class BookingChecks {
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     REFERENCE_TYPE_VALIDATION,
     ISO_EQUIPMENT_CODE_VALIDATION,
+    IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
+    IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
     OUTER_PACKAGING_CODE_IS_VALID,
     TLR_CC_T_COMBINATION_VALIDATIONS,
+    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
@@ -694,7 +636,7 @@ public class BookingChecks {
     REASON_FIELD_ABSENCE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched,String standardsVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
+  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -705,17 +647,6 @@ public class BookingChecks {
       bookingStatus.wireName()
     ));
     checks.addAll(STATIC_BOOKING_CHECKS);
-    if (standardsVersion.equals("2.0.0-Beta-1")) {
-      checks.add(IS_EXPORT_DECLARATION_REFERENCE_PRESENT);
-      checks.add(IS_IMPORT_DECLARATION_REFERENCE_PRESENT);
-      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B1);
-      checks.add(VALIDATE_DOCUMENT_PARTIES_V2B1);
-    }
-    if (!standardsVersion.equals("2.0.0-Beta-1")) {
-      checks.add(IS_EXPORT_DECLARATION_REFERENCE_ABSENCE);
-      checks.add(IS_IMPORT_DECLARATION_REFERENCE_ABSENCE);
-      checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE_V2B2_OR_LATER);
-    }
     checks.addAll(RESPONSE_ONLY_CHECKS);
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);
@@ -740,7 +671,7 @@ public class BookingChecks {
       BookingRole::isCarrier,
       matched,
       HttpMessageType.RESPONSE,
-      standardsVersion,
+      standardVersion,
       checks
     );
   }

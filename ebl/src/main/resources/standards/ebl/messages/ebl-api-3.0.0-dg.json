@@ -29,39 +29,17 @@
       "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
       "cargoItems": [
         {
-          "equipmentReference": "ABCU7341935",
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
           "weight": 12000,
-          "weightUnit": "KGM",
-          "outerPackaging": {
-            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
-            "numberOfPackages": 400
-          }
+          "weightUnit": "KGM"
         }
       ]
     }
   ],
-  "references": [
-    {
-      "type": "SI",
-      "value": "SI-REF-1234"
-    }
-  ],
-  "customsReferences": [
-    {
-      "type": "CTN",
-      "countryCode": "SN",
-      "value": "12345"
-    }
-  ],
   "utilizedTransportEquipments": [
     {
-      "isShipperOwned": true,
-      "equipment": {
-        "equipmentReference": "ABCU7341935",
-        "ISOEquipmentCode": "45G1",
-        "tareWeight": 4030,
-        "weightUnit": "KGM"
-      },
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
       "seals": [
         {
           "number": "NSL13386"
@@ -69,19 +47,16 @@
       ]
     }
   ],
-  "documentParties": [
-    {
-      "party": {
-        "partyName": "DCSA CTK",
-        "partyContactDetails": [
-          {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
-          }
-        ]
-      },
-      "partyFunction": "OS",
-      "isToBeNotified": false
+  "documentParties": {
+    "shipper": {
+
+      "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
     }
-  ]
+  }
 }

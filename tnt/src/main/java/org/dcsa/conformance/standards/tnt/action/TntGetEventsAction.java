@@ -67,12 +67,9 @@ public class TntGetEventsAction extends TntAction {
               @Override
               protected Set<String> checkConformance(
                   Function<UUID, ConformanceExchange> getExchangeByUuid) {
-                JsonNode jsonResponse =
-                    getExchangeByUuid
-                        .apply(getMatchedExchangeUuid())
-                        .getMessage(httpMessageType)
-                        .body()
-                        .getJsonBody();
+                ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
+                if (exchange == null) return Set.of();
+                JsonNode jsonResponse = exchange.getMessage(httpMessageType).body().getJsonBody();
                 LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
                 if (!jsonResponse.isArray()) {
                   validationErrors.add("The root JSON response must be an array of events");

@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -111,11 +110,8 @@ public class EblShipper extends ConformanceParty {
     jsonRequestBody.put("isToOrder", scenarioType.isToOrder());
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is an array element
-      var parties = (ArrayNode) jsonRequestBody.path("documentParties");
-      var consignee = parties.addObject();
-      consignee.put("partyFunction", "CN")
-        .put("isToBeNotified", false)
-        .putObject("party")
+      var parties = (ObjectNode) jsonRequestBody.path("documentParties");
+      parties.putObject("consignee")
         .put("partyName", "DCSA CTK Consignee")
         .putArray("partyContactDetails")
         .addObject()

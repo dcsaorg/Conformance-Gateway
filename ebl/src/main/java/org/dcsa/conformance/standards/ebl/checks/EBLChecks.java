@@ -35,15 +35,6 @@ public class EBLChecks {
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
 
-  private static final JsonPointer[] TD_UN_LOCATION_CODES = {
-    JsonPointer.compile("/invoicePayableAt/UNLocationCode"),
-    JsonPointer.compile("/transports/placeOfReceipt/UNLocationCode"),
-    JsonPointer.compile("/transports/portOfLoading/UNLocationCode"),
-    JsonPointer.compile("/transports/portOfDischarge/UNLocationCode"),
-    JsonPointer.compile("/transports/placeOfDelivery/UNLocationCode"),
-    JsonPointer.compile("/transports/onwardInlandRouting/UNLocationCode"),
-  };
-
   private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
     JsonAttribute.isTrue(JsonPointer.compile("/isToOrder")),
@@ -80,6 +71,27 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
+  private static final Consumer<MultiAttributeValidator> ALL_UN_LOCATION_CODES = (mav) -> {
+    mav.submitAllMatching("invoicePayableAt.UNLocationCode");
+    mav.submitAllMatching("transports.placeOfReceipt.UNLocationCode");
+    mav.submitAllMatching("transports.portOfLoading.UNLocationCode");
+    mav.submitAllMatching("transports.portOfDischarge.UNLocationCode");
+    mav.submitAllMatching("transports.placeOfDelivery.UNLocationCode");
+    mav.submitAllMatching("transports.onwardInlandRouting.UNLocationCode");
+
+    // Beta-2 only
+    mav.submitAllMatching("issuingParty.address.UNLocationCode");
+    mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
+    mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
+    mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
+    mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
+  };
+
+  private static final JsonRebaseableContentCheck TD_UN_LOCATION_CODES_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
+    "UN Location are valid",
+      ALL_UN_LOCATION_CODES,
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.UN_LOCODE_DATASET)
+  );
 
   private static final Consumer<MultiAttributeValidator> ALL_UTE = (mav) -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
@@ -194,6 +206,13 @@ public class EBLChecks {
       mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
       mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
+
+      // Beta-2 only
+      mav.submitAllMatching("issuingParty.address.countryCode");
+      mav.submitAllMatching("documentParties.shippers.address.countryCode");
+      mav.submitAllMatching("documentParties.consignee.address.countryCode");
+      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
+      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
@@ -208,39 +227,52 @@ public class EBLChecks {
     "Each document party can be used at most once",
     JsonAttribute.path(
       "documentParties",
-      JsonAttribute.unique("partyFunction")
+      JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
 
-  private static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTIES = JsonAttribute.customValidator(
-    "Validate documentParties",
+
+  private static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTIES_MATCH_EBL = JsonAttribute.customValidator(
+    "Validate documentParties match the EBL type",
     (body, contextPath) -> {
       var issues = new LinkedHashSet<String>();
       var documentParties = body.path("documentParties");
       var isToOrder = body.path("isToOrder").asBoolean(false);
-      var partyFunctions = StreamSupport.stream(documentParties.spliterator(), false)
-        .map(p -> p.path("partyFunction"))
-        .filter(JsonNode::isTextual)
-        .map(n -> n.asText(""))
-        .collect(Collectors.toSet());
 
-      if (!partyFunctions.contains("OS")) {
-        var documentPartiesPath = concatContextPath(contextPath, "documentParties");
-        issues.add("The 'OS' party is mandatory in the eBL phase at '%s' (SI/TD)".formatted(documentPartiesPath));
+      if (!documentParties.has("shipper")) {
+        var documentPartiesPath = concatContextPath(contextPath, "documentParties.shipper");
+        issues.add("The '%s' party is mandatory in the eBL phase (SI/TD)".formatted(documentPartiesPath));
       }
       var isToOrderPath = concatContextPath(contextPath, "isToOrder");
 
       if (isToOrder) {
-        if (partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party cannot be used when '%s' is true (use 'END' instead)".formatted(isToOrderPath));
+        if (documentParties.has("consignee")) {
+          var documentPartiesPath = concatContextPath(contextPath, "documentParties.consignee");
+          var endorseePartiesPath = concatContextPath(contextPath, "documentParties.endorsee");
+          issues.add("The '%s' party cannot be used when '%s' is true (use '%s' instead)".formatted(documentPartiesPath, isToOrderPath, endorseePartiesPath));
         }
       } else {
-        if (!partyFunctions.contains("CN")) {
-          issues.add("The 'CN' party is mandatory when '%s' is false".formatted(isToOrderPath));
+        if (!documentParties.has("consignee")) {
+          var documentPartiesPath = concatContextPath(contextPath, "documentParties.consignee");
+          issues.add("The '%s' party is mandatory when '%s' is false".formatted(documentPartiesPath, isToOrderPath));
         }
-        if (partyFunctions.contains("END")) {
-          issues.add("The 'END' party cannot be used when '%s' is false".formatted(isToOrderPath));
+        if (documentParties.has("endorsee")) {
+          var documentPartiesPath = concatContextPath(contextPath, "documentParties.endorsee");
+          issues.add("The '%s' party cannot be used when '%s' is false".formatted(documentPartiesPath, isToOrderPath));
         }
       }
+      return issues;
+    });
+
+  private static final JsonRebaseableContentCheck VALIDATE_SCO_CONDITIONALLY_PRESENT = JsonAttribute.customValidator(
+    "Validate that SCO party is conditionally present",
+    (body, contextPath) -> {
+      var issues = new LinkedHashSet<String>();
+      var otherDocumentParties = body.path("documentParties").path("other");
+      var partyFunctions = StreamSupport.stream(otherDocumentParties.spliterator(), false)
+        .map(p -> p.path("partyFunction"))
+        .filter(JsonNode::isTextual)
+        .map(n -> n.asText(""))
+        .collect(Collectors.toSet());
 
       if (!partyFunctions.contains("SCO")) {
         if (!body.path("serviceContractReference").isTextual()) {
@@ -253,7 +285,8 @@ public class EBLChecks {
         }
       }
       return issues;
-  });
+    }
+  );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
@@ -493,10 +526,11 @@ public class EBLChecks {
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
-    JsonAttribute.ifThen(
+    JsonAttribute.ifThenElse(
       "'isElectronic' implies 'sendToPlatform'",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
-      JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform"))
+      JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform")),
+      JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
     ),
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
@@ -513,9 +547,7 @@ public class EBLChecks {
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
     TLR_CC_T_COMBINATION_VALIDATIONS,
-    TLR_CC_T_COMBINATION_UNIQUE,
-    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
-    VALIDATE_DOCUMENT_PARTIES
+    TLR_CC_T_COMBINATION_UNIQUE
   );
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
@@ -641,8 +673,7 @@ public class EBLChecks {
     ),
     TLR_CC_T_COMBINATION_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE,
-    DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
-    VALIDATE_DOCUMENT_PARTIES
+    TD_UN_LOCATION_CODES_VALID
   );
 
   public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
@@ -688,19 +719,17 @@ public class EBLChecks {
           "[Scenario] Verify that the correct 'commoditySubreference' is used",
           JsonAttribute.path("consignmentItems", checkCommoditySubreference(cspSupplier))));
 
-      if (!standardVersion.equals("3.0.0-Beta-1")) {
-        checks.add(
-          JsonAttribute.allIndividualMatchesMustBeValid(
-            "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
-            (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
-            JsonAttribute.ifMatchedThenElse(
-              (ignored) -> dspSupplier.get().scenarioType().hasDG(),
-              JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
-              JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
-            )
+      checks.add(
+        JsonAttribute.allIndividualMatchesMustBeValid(
+          "[Scenario] CargoItem and DG vs. outerPackaging in the SI",
+          (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*"),
+          JsonAttribute.ifMatchedThenElse(
+            (ignored) -> dspSupplier.get().scenarioType().hasDG(),
+            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBeAbsent()),
+            JsonAttribute.path("outerPackaging", JsonAttribute.matchedMustBePresent())
           )
-        );
-      }
+        )
+      );
     }
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'equipmentReference' values are used",
@@ -1018,6 +1047,9 @@ public class EBLChecks {
 
   public static ActionCheck siRequestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
+    checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
+    checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
+    checks.add(VALIDATE_SCO_CONDITIONALLY_PRESENT);
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
@@ -1141,7 +1173,7 @@ public class EBLChecks {
     );
   }
 
-  public static void genericTdContentChecks(List<? super JsonRebaseableContentCheck> jsonContentChecks, Supplier<String> tdrSupplier, TransportDocumentStatus transportDocumentStatus) {
+  public static void genericTdContentChecks(List<? super JsonRebaseableContentCheck> jsonContentChecks, String standardVersion, Supplier<String> tdrSupplier, TransportDocumentStatus transportDocumentStatus) {
     if (tdrSupplier != null) {
       jsonContentChecks.add(JsonAttribute.mustEqual(TD_TDR, tdrSupplier));
     }
@@ -1150,15 +1182,16 @@ public class EBLChecks {
       transportDocumentStatus.wireName()
     ));
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
-    for (var ptr : TD_UN_LOCATION_CODES) {
-      jsonContentChecks.add(JsonAttribute.mustBeDatasetKeywordIfPresent(ptr, EblDatasets.UN_LOCODE_DATASET));
-    }
+    jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
+    jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
+    jsonContentChecks.add(VALIDATE_SCO_CONDITIONALLY_PRESENT);
   }
 
-  public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, Supplier<String> tdrReferenceSupplier) {
+  public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, String eblStandardVersion, Supplier<String> tdrReferenceSupplier) {
     List<JsonRebaseableContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
       jsonContentChecks,
+      eblStandardVersion,
       tdrReferenceSupplier,
       transportDocumentStatus
     );
@@ -1169,6 +1202,7 @@ public class EBLChecks {
     List<JsonContentCheck> jsonContentChecks = new ArrayList<>();
     genericTdContentChecks(
       jsonContentChecks,
+      standardVersion,
       () -> dspSupplier.get().transportDocumentReference(),
       transportDocumentStatus
     );

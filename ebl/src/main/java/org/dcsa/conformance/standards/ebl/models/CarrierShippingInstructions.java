@@ -22,6 +22,7 @@ public class CarrierShippingInstructions {
 
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
+  private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
 
 
   private static final String SHIPPING_INSTRUCTIONS_REFERENCE = "shippingInstructionsReference";
@@ -79,30 +80,38 @@ public class CarrierShippingInstructions {
     Map.entry("ZIM", new VesselDetails("9699115", "ZIM WILMINGTON"))
   );
 
-  private static JsonNode issuingCarrier(String name, String smdgCode) {
-    var issuingCarrier = OBJECT_MAPPER.createObjectNode()
-      .put("partyName", name);
-    issuingCarrier
-      .putArray("identifyingCodes")
-      .addObject()
-      .put("codeListProvider", "SMDG")
-      .put("codeListName", "LCL")
-      .put("partyCode", smdgCode);
-    return issuingCarrier;
+  private static Function<String, JsonNode> issuingCarrier(String name, String smdgCode, String countryCode) {
+    return (String version) -> {
+      var issuingCarrier = OBJECT_MAPPER.createObjectNode().put("partyName", name);
+      issuingCarrier
+          .putObject("address")
+          .put("street", "The street name would be here")
+          .put("streetNumber", "... and here the street number")
+          .put("city", "... and here the city")
+          .put("countryCode", countryCode);
+      issuingCarrier
+          .putArray("identifyingCodes")
+          .addObject()
+          .put("codeListProvider", "SMDG")
+          .put("codeListName", "LCL")
+          .put("partyCode", smdgCode);
+      return issuingCarrier;
+    };
   }
 
   // Randomize the issuing carrier to avoid favouring a particular carrier
-  private static final JsonNode[] ISSUING_CARRIER_DEFINITIONS = {
+  @SuppressWarnings("unchecked")
+  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS = (Function<String, JsonNode>[]) new Function[]{
     // Name is from the SMDG code list
-    issuingCarrier("CMA CGM", "CMA"),
-    issuingCarrier("Evergreen Marine Corporation", "EMC"),
-    issuingCarrier("Hapag Lloyd", "HLC"),
-    issuingCarrier("Hyundai", "HMM"),
-    issuingCarrier("Maersk", "MSK"),
-    issuingCarrier("Mediterranean Shipping Company", "MSC"),
-    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE"),
-    issuingCarrier("Yang Ming Line", "YML"),
-    issuingCarrier("Zim Israel Navigation Company", "ZIM")
+    issuingCarrier("CMA CGM", "CMA", "US"),
+    issuingCarrier("Evergreen Marine Corporation", "EMC", "TW"),
+    issuingCarrier("Hapag Lloyd", "HLC", "DE"),
+    issuingCarrier("Hyundai", "HMM", "KR"),
+    issuingCarrier("Maersk", "MSK", "DK"),
+    issuingCarrier("Mediterranean Shipping Company", "MSC", "CH"),
+    issuingCarrier("Ocean Network Express Pte. Ltd.", "ONE", "JP"),
+    issuingCarrier("Yang Ming Line", "YML", "TW"),
+    issuingCarrier("Zim Israel Navigation Company", "ZIM", "IL")
   };
 
   private static TDField initialFieldValue(String attribute, String value) {
@@ -129,7 +138,7 @@ public class CarrierShippingInstructions {
     return initialFieldValue("issuingParty", (o, a, v) -> {
       int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
       var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
-      o.set(a, choice.deepCopy());
+      o.set(a, choice.apply(v).deepCopy());
     });
   }
 
@@ -202,56 +211,7 @@ public class CarrierShippingInstructions {
   };
 
   private static final Map<String, BiConsumer<ObjectNode, ScenarioType>> CONSIGNMENT_ITEMS_HANDLER = Map.ofEntries(
-    Map.entry("3.0.0-Beta-1", (transportDocument, scenarioType) -> {
-      for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
-        if (consignmentItemNode instanceof ObjectNode consignmentItem) {
-          consignmentItem.remove("commoditySubreference");
-        }
-        for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
-          var outerPackagingNode = cargoItemNode.path("outerPackaging");
-          if (!outerPackagingNode.isObject() || !outerPackagingNode.path("description").isMissingNode()) {
-            continue;
-          }
-          ObjectNode outerPackaging = (ObjectNode)outerPackagingNode;
-          // The packaging code has to be aligned with the description. To simplify things, we replace
-          // the packageCode to ensure they are aligned. Which is not perfect, but better than
-          // inconsistent data.
-          //
-          // The alternative is having a look-up table of all known packageCode's and their relevant
-          // description.
-          switch (scenarioType) {
-            case REGULAR_SWB:
-            case REGULAR_BOL:
-            case REGULAR_2C_2U_1E:
-            case REGULAR_2C_2U_2E:
-            case REGULAR_SWB_SOC_AND_REFERENCES:
-            case REGULAR_SWB_AMF:
-              outerPackaging.put("packageCode", "4G")
-                .put("description", "Fibreboard boxes");
-              break;
-            case NON_OPERATING_REEFER:
-            case ACTIVE_REEFER:
-              outerPackaging.put("packageCode", "BQ")
-                .put("description", "Bottles");
-              break;
-            case DG: {
-              outerPackaging.put("description", "Jerrican, steel")
-                .put("imoPackagingCode", "3A1");
-              var dg = outerPackaging.putArray("dangerousGoods").addObject();
-              dg.put("unNumber", "3082")
-                .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
-                .put("imoClass", "9")
-                .put("packingGroup", 3)
-                .put("EMSNumber", "F-A S-F");
-              break;
-            }
-            default:
-              throw new AssertionError("Missing case for " + scenarioType.name());
-          }
-        }
-      }
-    }),
-    Map.entry("3.0.0-Beta-2",  (transportDocument, scenarioType) -> {
+    Map.entry("3.0.0",  (transportDocument, scenarioType) -> {
       for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
         if (consignmentItemNode instanceof ObjectNode consignmentItem) {
           consignmentItem.remove("commoditySubreference");
@@ -288,17 +248,11 @@ public class CarrierShippingInstructions {
         .put("plannedArrivalDate", today.plusDays(2).toString());
     transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
     unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
-    if (standardsVersion.equals("3.0.0-Beta-1")) {
-      transportsNode
-        .put("vesselName", vessel.vesselName())
-        .put("carrierExportVoyageNumber", "402E");
-    } else {
-      transportsNode
-        .putArray("vesselVoyage")
-        .addObject()
-        .put("vesselName", vessel.vesselName())
-        .put("carrierExportVoyageNumber", "402E");
-    }
+    transportsNode
+      .putArray("vesselVoyage")
+      .addObject()
+      .put("vesselName", vessel.vesselName())
+      .put("carrierExportVoyageNumber", "402E");
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {
@@ -347,6 +301,10 @@ public class CarrierShippingInstructions {
 
   public String getStandardsVersion() {
     return this.state.required(STD_VERSION_FIELD).asText("");
+  }
+
+  public String getSubscriptionReference() {
+    return this.state.required(SUBSCRIPTION_REFERENCE).asText("");
   }
 
   public String getShippingInstructionsReference() {
@@ -710,13 +668,14 @@ public class CarrierShippingInstructions {
     return TD_START;
   }
 
-  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode bookingRequest, String standardsVersion) {
+  public static CarrierShippingInstructions initializeFromShippingInstructionsRequest(ObjectNode siRequest, String standardsVersion) {
     String sir = UUID.randomUUID().toString();
-    bookingRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
+    siRequest.put(SHIPPING_INSTRUCTIONS_REFERENCE, sir)
       .put(SI_STATUS, SI_RECEIVED.wireName());
     var state = OBJECT_MAPPER.createObjectNode()
-      .put(STD_VERSION_FIELD, standardsVersion);
-    state.set(SI_DATA_FIELD, bookingRequest);
+      .put(STD_VERSION_FIELD, standardsVersion)
+      .put(SUBSCRIPTION_REFERENCE, UUID.randomUUID().toString());
+    state.set(SI_DATA_FIELD, siRequest);
     return new CarrierShippingInstructions(state);
   }
 

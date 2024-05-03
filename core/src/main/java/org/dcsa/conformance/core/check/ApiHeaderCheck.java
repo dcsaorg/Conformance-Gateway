@@ -94,6 +94,9 @@ public class ApiHeaderCheck extends ActionCheck {
     Collection<String> headerValues = headers.get(headerName);
     if (headerValues.size() != 1) return Set.of("Duplicate Api-Version headers");
     String exchangeApiVersion = headerValues.stream().findFirst().orElseThrow();
+    if (exchangeApiVersion.contains("-")) {
+      exchangeApiVersion = exchangeApiVersion.substring(0, exchangeApiVersion.indexOf("-"));
+    }
     return switch (httpMessageType) {
       case REQUEST -> isNotification
           ? _checkNotificationRequestApiVersionHeader(expectedVersion, exchangeApiVersion)

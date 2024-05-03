@@ -500,6 +500,7 @@
             "example": "NLAMS"
           }
         },
+        "additionalProperties": false,
         "description": "An interface used to express a location using a `Un Location Code`."
       },
       "FacilitySMDGLocation": {

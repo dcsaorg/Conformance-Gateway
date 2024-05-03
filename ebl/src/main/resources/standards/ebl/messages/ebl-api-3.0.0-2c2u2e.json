@@ -20,7 +20,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 15000,
+      "weight": 5000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
       "HSCodes": [
@@ -30,18 +30,27 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 15000,
+          "weight": 2500,
           "weightUnit": "KGM",
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
-            "numberOfPackages": 600
+            "numberOfPackages": 100
+          }
+        },
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "weight": 2500,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "numberOfPackages": 100
           }
         }
       ]
     },
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 20000,
+      "weight": 10000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_2_PLACEHOLDER",
       "HSCodes": [
@@ -50,12 +59,21 @@
       "commoditySubreference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
       "cargoItems": [
         {
-          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-          "weight": 20000,
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "weight": 5000,
           "weightUnit": "KGM",
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
-            "numberOfPackages": 400
+            "numberOfPackages": 100
+          }
+        },
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+          "weight": 5000,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "numberOfPackages": 200
           }
         }
       ]
@@ -81,19 +99,16 @@
       ]
     }
   ],
-  "documentParties": [
-    {
-      "party": {
-        "partyName": "DCSA CTK",
-        "partyContactDetails": [
-          {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
-          }
-        ]
-      },
-      "partyFunction": "OS",
-      "isToBeNotified": false
+  "documentParties": {
+    "shipper": {
+
+      "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
     }
-  ]
+  }
 }

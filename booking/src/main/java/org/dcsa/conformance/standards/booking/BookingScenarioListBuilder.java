@@ -214,10 +214,13 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
         shipper_GetBooking(bookingState).thenEither(
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED, scenarioType)));
       case RECEIVED -> then(
+        ScenarioType.DG.equals(scenarioType) || ScenarioType.REEFER.equals(scenarioType)?
         shipper_GetBooking(bookingState).thenEither(
-          ScenarioType.DG.equals(scenarioType) || ScenarioType.REEFER.equals(scenarioType)?
-          uc2_carrier_requestUpdateToBookingRequest().thenHappyPathFrom(PENDING_UPDATE, scenarioType): noAction(),
-          uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED, scenarioType)));
+          uc2_carrier_requestUpdateToBookingRequest().thenHappyPathFrom(PENDING_UPDATE, scenarioType),
+          uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED, scenarioType)):
+          shipper_GetBooking(bookingState).then(
+            uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED, scenarioType))
+        );
       case START -> then(uc1_shipper_SubmitBookingRequest().thenHappyPathFrom(RECEIVED, scenarioType));
       case AMENDMENT_DECLINED, AMENDMENT_CANCELLED -> throw new AssertionError(
         "This happyPath from this state requires a context state");

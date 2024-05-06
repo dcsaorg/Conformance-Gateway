@@ -21,7 +21,7 @@ import org.dcsa.conformance.standards.jit.party.JitSubscriber;
 
 public class JitComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "JIT";
-  public static final List<String> STANDARD_VERSIONS = List.of("1.2.0-Beta-1");
+  public static final List<String> STANDARD_VERSIONS = List.of("1.2.0");
 
   private static final String PUBLISHER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SUBSCRIBER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();

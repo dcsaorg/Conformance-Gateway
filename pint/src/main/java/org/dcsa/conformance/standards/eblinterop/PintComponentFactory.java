@@ -20,7 +20,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 
 public class PintComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "PINT";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0-Beta-1");
+  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0");
 
   private static final String SENDING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String RECEIVING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();

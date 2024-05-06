@@ -1,6 +1,6 @@
 {
   "receiptTypeAtOrigin": "CY",
-  "deliveryTypeAtDestination": "SD",
+  "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
   "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
@@ -14,7 +14,7 @@
   "isEquipmentSubstitutionAllowed": true,
   "requestedEquipments": [
     {
-      "ISOEquipmentCode": "22GP",
+      "ISOEquipmentCode": "42R0",
       "units": 1,
       "isShipperOwned": false,
       "commodities": [
@@ -24,33 +24,34 @@
           "cargoGrossWeight": 323.32,
           "cargoGrossWeightUnit": "KGM"
         }
+      ],
+      "isNonOperatingReefer": false,
+      "activeReeferSettings": {
+        "temperatureSetpoint": -5,
+        "temperatureUnit": "CEL"
+      }
+    }
+  ],
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "DCSA Conformance Toolkit",
+      "address": {
+        "name": "Mustermann",
+        "street": "Strawinskylaan",
+        "streetNumber": "4117",
+        "floor": "6",
+        "postCode": "1077 ZX",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      },
+      "partyContactDetails": [
+        {
+          "name": "Henrik",
+          "phone": "+31611444666"
+        }
       ]
     }
-  ],
-  "documentParties": [
-    {
-      "party": {
-        "partyName": "DCSA Conformance Toolkit",
-        "address": {
-          "name": "Mustermann",
-          "street": "Strawinskylaan",
-          "streetNumber": "4117",
-          "floor": "6",
-          "postCode": "1077 ZX",
-          "city": "Amsterdam",
-          "country": "Netherlands"
-        },
-        "partyContactDetails": [
-          {
-            "name": "Henrik",
-            "phone": "+31611444666"
-          }
-        ]
-      },
-      "partyFunction": "OS",
-      "isToBeNotified": false
-    }
-  ],
+  },
   "shipmentLocations": [
     {
       "location": {

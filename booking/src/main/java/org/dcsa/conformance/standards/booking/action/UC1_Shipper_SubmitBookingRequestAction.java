@@ -75,7 +75,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
               getMatchedExchangeUuid(),
               BookingState.RECEIVED
             ),
-            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()),
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()),
             new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),

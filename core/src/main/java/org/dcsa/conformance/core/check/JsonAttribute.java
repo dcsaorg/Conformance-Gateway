@@ -12,16 +12,6 @@ public class JsonAttribute {
 
   private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
 
-  @Deprecated
-  public static ActionCheck contentChecks(
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    JsonContentCheck ... checks
-  ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
-  }
-
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -46,28 +36,6 @@ public class JsonAttribute {
 
   public static ActionCheck contentChecks(
     String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    JsonContentCheck ... checks
-  ) {
-    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, Arrays.asList(checks));
-  }
-
-  @Deprecated
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    String title,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    JsonContentCheck ... checks
-  ) {
-    return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, Arrays.asList(checks));
-  }
-
-  public static ActionCheck contentChecks(
-    String titlePrefix,
     String title,
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -79,16 +47,6 @@ public class JsonAttribute {
   }
 
 
-  @Deprecated
-  public static ActionCheck contentChecks(
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    List<JsonContentCheck> checks
-  ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, checks);
-  }
-
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -97,17 +55,6 @@ public class JsonAttribute {
     List<JsonContentCheck> checks
   ) {
     return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
-  }
-
-  @Deprecated
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    List<JsonContentCheck> checks
-  ) {
-    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, null, checks);
   }
 
   public static ActionCheck contentChecks(
@@ -729,58 +676,6 @@ public class JsonAttribute {
       }
       return Set.of();
     };
-  }
-
-
-  @Deprecated
-  public static JsonContentCheck ifThen(
-    @NonNull
-    String name,
-    @NonNull
-    Predicate<JsonNode> when,
-    @NonNull
-    JsonContentValidation then
-  ) {
-    return new JsonContentCheckImpl(
-      name,
-      (body) -> {
-        if (when.test(body)) {
-          return then.validate(body);
-        }
-        return Set.of();
-      });
-  }
-
-  @Deprecated
-  public static JsonContentCheck ifThenElse(
-    @NonNull
-    String name,
-    @NonNull
-    Predicate<JsonNode> when,
-    @NonNull
-    JsonContentValidation then,
-    @NonNull
-    JsonContentValidation elseCheck
-  ) {
-    return new JsonContentCheckImpl(
-      name,
-      (body) -> {
-        if (when.test(body)) {
-          return then.validate(body);
-        }
-        return elseCheck.validate(body);
-      });
-  }
-
-  public static JsonRebaseableContentCheck ifThen(
-    @NonNull
-    String name,
-    @NonNull
-    Predicate<JsonNode> when,
-    @NonNull
-    BiFunction<JsonNode, String, Set<String>> then
-  ) {
-    return ifThenElse(name, when, then, EMPTY_VALIDATOR);
   }
 
   public static JsonRebaseableContentCheck ifThen(

@@ -80,20 +80,20 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                     BookingRole::isShipper,
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                new JsonSchemaCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    responseSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(), getCspSupplier(), getDspSupplier()));
+                    requestSchemaValidator));
         return Stream.concat(
-            Stream.concat(primaryExchangeChecks,
+          Stream.concat( primaryExchangeChecks,
             Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               expectedBookingStatus,
               BookingState.AMENDMENT_RECEIVED
-            ))),
+            ),
+              BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()),
+              new JsonSchemaCheck(
+                BookingRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

@@ -22,11 +22,7 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class EblIssuanceComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "eBL Issuance";
-  public static final List<String> STANDARD_VERSIONS = List.of(
-    "2.0.0-Beta-1",
-    "3.0.0-Beta-1",
-    "3.0.0-Beta-2"
-  );
+  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0", "3.0.0");
 
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
@@ -125,7 +121,7 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
             .formatted(
                 standardVersion, apiProviderRole.toLowerCase());
     String schemaName;
-    if (standardVersion.startsWith("2.") || standardVersion.equals("3.0.0-Beta-1")) {
+    if (standardVersion.startsWith("2.")) {
       schemaName = EblIssuanceRole.isCarrier(apiProviderRole)
         ? (forRequest ? "issuanceRequest" : null)
         : (forRequest ? "issuanceResponse" : null);

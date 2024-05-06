@@ -19,7 +19,7 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 public class IssuanceChecks {
 
   private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
-    if (standardsVersion.startsWith("2.") || standardsVersion.equals("3.0.0-Beta-1")) {
+    if (standardsVersion.startsWith("2.")) {
       return JsonAttribute.customValidator(
         "[Scenario] Validate END party presence is correct",
         JsonAttribute.path("document", JsonAttribute.path("documentParties",

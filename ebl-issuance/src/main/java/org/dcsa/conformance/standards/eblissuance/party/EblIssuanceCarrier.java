@@ -112,7 +112,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     if (eblType.isToOrder()) {
       var td = (ObjectNode)jsonRequestBody.path("document");
       td.put("isToOrder", true);
-      if (apiVersion.startsWith("2.") || apiVersion.equals("3.0.0-Beta-1")) {
+      if (apiVersion.startsWith("2.")) {
         var documentParties = (ArrayNode)td.path("documentParties");
         var cnIdx = -1;
         for (int i = 0 ; i < documentParties.size() ; i++) {

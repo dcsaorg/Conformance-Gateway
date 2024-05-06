@@ -8,20 +8,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.check.VersionedStaticKeywordSet;
 
 public class EblDatasets {
-
-  private static final Predicate<String> IS_3_0_0_BETA1 = "3.0.0-Beta-1"::equals;
-
   public static final KeywordDataset UN_LOCODE_DATASET = KeywordDataset.lazyLoaded(EblDatasets::loadUNLocationCodeDataset);
   public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticVersionedDataset(
     VersionedStaticKeywordSet.versionedKeywords(
-      IS_3_0_0_BETA1,
+      _ignored -> false,
       Set.of("ESSD"),
       Set.of("ICED")
     ),

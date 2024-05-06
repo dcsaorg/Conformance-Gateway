@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -111,26 +110,13 @@ public class EblShipper extends ConformanceParty {
     jsonRequestBody.put("isToOrder", scenarioType.isToOrder());
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is an array element
-      if (apiVersion.equals("3.0.0-Beta-1")) {
-        var parties = (ArrayNode) jsonRequestBody.path("documentParties");
-        parties.addObject()
-            .put("partyFunction", "CN")
-            .put("isToBeNotified", false)
-            .putObject("party")
-            .put("partyName", "DCSA CTK Consignee")
-            .putArray("partyContactDetails")
-            .addObject()
-            .put("name", "DCSA another test person")
-            .put("email", "no-reply@dcsa-consignee.example.org");
-      } else {
-        var parties = (ObjectNode) jsonRequestBody.path("documentParties");
-        parties.putObject("consignee")
-          .put("partyName", "DCSA CTK Consignee")
-          .putArray("partyContactDetails")
-          .addObject()
-          .put("name", "DCSA another test person")
-          .put("email", "no-reply@dcsa-consignee.example.org");
-      }
+      var parties = (ObjectNode) jsonRequestBody.path("documentParties");
+      parties.putObject("consignee")
+        .put("partyName", "DCSA CTK Consignee")
+        .putArray("partyContactDetails")
+        .addObject()
+        .put("name", "DCSA another test person")
+        .put("email", "no-reply@dcsa-consignee.example.org");
     }
 
     ConformanceResponse conformanceResponse = syncCounterpartPost("/v3/shipping-instructions", jsonRequestBody);

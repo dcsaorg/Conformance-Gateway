@@ -5,7 +5,7 @@
   "isToOrder": false,
   "isElectronic": true,
   "invoicePayableAt": {
-    "locationType": "UNCO",
+    "locationType": "UNLO",
     "UNLocationCode": "DKCPH"
   },
   "cargoMovementTypeAtOrigin": "FCL",
@@ -37,11 +37,11 @@
     "plannedDepartureDate": "2024-02-02",
     "plannedArrivalDate": "2124-02-02",
     "portOfLoading": {
-      "locationType": "UNCO",
+      "locationType": "UNLO",
       "UNLocationCode": "DKCPH"
     },
     "portOfDischarge": {
-      "locationType": "UNCO",
+      "locationType": "UNLO",
       "UNLocationCode": "NLRTM"
     },
     "vesselVoyage": [

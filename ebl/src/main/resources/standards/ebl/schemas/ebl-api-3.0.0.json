@@ -1374,7 +1374,7 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNCO",
+                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {
@@ -1500,7 +1500,7 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNCO",
+                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {
@@ -1632,7 +1632,7 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNCO",
+                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {

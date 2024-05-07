@@ -7,7 +7,7 @@
     "isElectronic": true,
     "isToOrder": false,
     "invoicePayableAt": {
-      "locationType": "UNCO",
+      "locationType": "UNLO",
       "UNLocationCode": "DKAAR"
     },
     "partyContactDetails": [
@@ -131,7 +131,7 @@
       "plannedDepartureDate": "2023-12-19",
       "plannedArrivalDate": "2023-12-21",
       "portOfLoading": {
-        "locationType": "UNCO",
+        "locationType": "UNLO",
         "UNLocationCode": "DKAAR"
       },
       "portOfDischarge": {

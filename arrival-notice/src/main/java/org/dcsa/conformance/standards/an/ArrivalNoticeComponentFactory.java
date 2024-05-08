@@ -16,16 +16,16 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.standards.an.party.OvsPublisher;
-import org.dcsa.conformance.standards.an.party.OvsRole;
-import org.dcsa.conformance.standards.an.party.OvsSubscriber;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeCarrier;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeRole;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeNotifyParty;
 
 public class ArrivalNoticeComponentFactory extends AbstractComponentFactory {
-  public static final String STANDARD_NAME = "OVS";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0");
+  public static final String STANDARD_NAME = "Arrival Notice";
+  public static final List<String> STANDARD_VERSIONS = List.of("1.0.0");
 
-  private static final String PUBLISHER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-  private static final String SUBSCRIBER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+  private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
+  private static final String NOTIFYPARTY_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
   @Getter
   private final String standardVersion;
@@ -54,26 +54,26 @@ public class ArrivalNoticeComponentFactory extends AbstractComponentFactory {
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName());
+        partyConfigurationsByRoleName.get(ArrivalNoticeRole.CARRIER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
-          new OvsPublisher(
+          new ArrivalNoticeCarrier(
               standardVersion,
               publisherConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(ArrivalNoticeRole.NOTIFYPARTY.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
 
     PartyConfiguration subscriberConfiguration =
-        partyConfigurationsByRoleName.get(OvsRole.SUBSCRIBER.getConfigName());
+        partyConfigurationsByRoleName.get(ArrivalNoticeRole.NOTIFYPARTY.getConfigName());
     if (subscriberConfiguration != null) {
       parties.add(
-          new OvsSubscriber(
+          new ArrivalNoticeNotifyParty(
               standardVersion,
               subscriberConfiguration,
-              counterpartConfigurationsByRoleName.get(OvsRole.PUBLISHER.getConfigName()),
+              counterpartConfigurationsByRoleName.get(ArrivalNoticeRole.CARRIER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
@@ -85,26 +85,26 @@ public class ArrivalNoticeComponentFactory extends AbstractComponentFactory {
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return OvsScenarioListBuilder.createModuleScenarioListBuilders(
+    return ArrivalNoticeScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isPublisher),
+            partyConfigurations, counterpartConfigurations, ArrivalNoticeRole::isCarrier),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, OvsRole::isSubscriber));
+            partyConfigurations, counterpartConfigurations, ArrivalNoticeRole::isNotifyParty));
   }
 
   @Override
   public SortedSet<String> getRoleNames() {
-    return Arrays.stream(OvsRole.values())
-        .map(OvsRole::getConfigName)
+    return Arrays.stream(ArrivalNoticeRole.values())
+        .map(ArrivalNoticeRole::getConfigName)
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
   public Set<String> getReportRoleNames(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return (partyConfigurations.length == OvsRole.values().length
-            ? Arrays.stream(OvsRole.values()).map(OvsRole::getConfigName)
+    return (partyConfigurations.length == ArrivalNoticeRole.values().length
+            ? Arrays.stream(ArrivalNoticeRole.values()).map(ArrivalNoticeRole::getConfigName)
             : Arrays.stream(counterpartConfigurations)
                 .map(CounterpartConfiguration::getRole)
                 .filter(
@@ -115,15 +115,12 @@ public class ArrivalNoticeComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
+  public JsonSchemaValidator getMessageSchemaValidator() {
     String schemaFilePath =
-        "/standards/an/schemas/ovs-%s-%s.json"
+        "/standards/an/schemas/an-%s.json"
             .formatted(
-                standardVersion.toLowerCase().replaceAll("[.-]", ""),
-                apiProviderRole.toLowerCase());
-    String schemaName =
-        OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+                standardVersion.toLowerCase().replaceAll("[.-]", ""));
+    return JsonSchemaValidator.getInstance(schemaFilePath, "ArrivalNotice");
   }
 
   @SneakyThrows
@@ -142,8 +139,8 @@ public class ArrivalNoticeComponentFactory extends AbstractComponentFactory {
         Map.ofEntries(
             Map.entry("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME),
             Map.entry("STANDARD_VERSION_PLACEHOLDER", standardVersion),
-            Map.entry("PUBLISHER_AUTH_HEADER_VALUE_PLACEHOLDER", PUBLISHER_AUTH_HEADER_VALUE),
-            Map.entry("SUBSCRIBER_AUTH_HEADER_VALUE_PLACEHOLDER", SUBSCRIBER_AUTH_HEADER_VALUE),
+            Map.entry("CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER", CARRIER_AUTH_HEADER_VALUE),
+            Map.entry("NOTIFYPARTY_AUTH_HEADER_VALUE_PLACEHOLDER", NOTIFYPARTY_AUTH_HEADER_VALUE),
             Map.entry(
                 "SANDBOX_ID_PREFIX",
                 AbstractComponentFactory._sandboxIdPrefix(STANDARD_NAME, standardVersion))));

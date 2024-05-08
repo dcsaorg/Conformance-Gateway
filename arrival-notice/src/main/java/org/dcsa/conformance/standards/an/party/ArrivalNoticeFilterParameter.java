@@ -8,19 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum ArrivalNoticeFilterParameter {
-  CARRIER_SERVICE_NAME("carrierServiceName"),
-  CARRIER_SERVICE_CODE("carrierServiceCode"),
-  UNIVERSAL_SERVICE_REFERENCE("universalServiceReference"),
-  VESSEL_IMO_NUMBER("vesselIMONumber"),
-  VESSEL_NAME("vesselName"),
-  CARRIER_VOYAGE_NUMBER("carrierVoyageNumber"),
-  UNIVERSAL_VOYAGE_REFERENCE("universalVoyageReference"),
-  UN_LOCATION_CODE("UNLocationCode"),
-  FACILITY_SMDG_CODE("facilitySMDGCode"),
-  START_DATE("startDate"),
-  END_DATE("endDate"),
-  LIMIT("limit"),
-  ;
+  TRANSPORT_DOCUMENT_REFERENCE("transportDocumentReference");
 
   public static final Map<String, ArrivalNoticeFilterParameter> byQueryParamName =
       Arrays.stream(values())

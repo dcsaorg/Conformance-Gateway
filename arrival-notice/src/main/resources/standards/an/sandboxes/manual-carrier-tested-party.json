@@ -20,8 +20,8 @@
     "role" : "Carrier",
     "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-tested-party/party/Carrier1/api"
   }, {
-    "name" : "Shipper1",
-    "role" : "Shipper",
-    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts/party/Shipper1/api"
+    "name" : "NotifyParty1",
+    "role" : "NotifyParty",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-manual-carrier-testing-counterparts/party/NotifyParty1/api"
   } ]
 }

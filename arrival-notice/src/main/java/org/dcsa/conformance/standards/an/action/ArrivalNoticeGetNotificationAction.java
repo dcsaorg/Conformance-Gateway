@@ -20,7 +20,7 @@ public class ArrivalNoticeGetNotificationAction extends ArrivalNoticeAction {
       String publisherPartyName,
       ConformanceAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetArrivalNotices", 200);
+    super(subscriberPartyName, publisherPartyName, previousAction, "GetArrivalNotice", 200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
@@ -36,7 +36,7 @@ public class ArrivalNoticeGetNotificationAction extends ArrivalNoticeAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-            new UrlPathCheck(ArrivalNoticeRole::isCarrier, getMatchedExchangeUuid(), "/arrival-notices"),
+            new UrlPathCheck(ArrivalNoticeRole::isNotifyParty, getMatchedExchangeUuid(), "/arrival-notices"),
             new ResponseStatusCheck(ArrivalNoticeRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new JsonSchemaCheck(
                 ArrivalNoticeRole::isCarrier,

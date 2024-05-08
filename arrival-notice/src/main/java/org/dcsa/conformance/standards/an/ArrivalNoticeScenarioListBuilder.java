@@ -9,8 +9,12 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.standards.an.action.ArrivalNoticeGetNotificationAction;
 import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter;
+import org.dcsa.conformance.standards.an.party.ArrivalNoticeRole;
+
+import static org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
 
 @Slf4j
 public class ArrivalNoticeScenarioListBuilder extends ScenarioListBuilder<ArrivalNoticeScenarioListBuilder> {
@@ -26,43 +30,10 @@ public class ArrivalNoticeScenarioListBuilder extends ScenarioListBuilder<Arriva
     threadLocalSubscriberPartyName.set(subscriberPartyName);
     return Stream.of(
             Map.entry(
-                "Service schedules",
+                "Arrival Notices",
                 noAction()
                     .thenEither(
-                        scenarioWithParameters(CARRIER_SERVICE_CODE),
-                        scenarioWithParameters(CARRIER_SERVICE_CODE, LIMIT),
-                        scenarioWithParameters(UNIVERSAL_SERVICE_REFERENCE),
-                        scenarioWithParameters(UNIVERSAL_SERVICE_REFERENCE, LIMIT))),
-            Map.entry(
-                "Vessel schedules",
-                noAction()
-                    .thenEither(
-                        scenarioWithParameters(VESSEL_IMO_NUMBER),
-                        scenarioWithParameters(VESSEL_IMO_NUMBER, LIMIT))),
-            Map.entry(
-                "Location schedules",
-                noAction()
-                    .thenEither(
-                        scenarioWithParameters(UN_LOCATION_CODE),
-                        scenarioWithParameters(UN_LOCATION_CODE, LIMIT),
-                        scenarioWithParameters(UN_LOCATION_CODE, FACILITY_SMDG_CODE),
-                        scenarioWithParameters(UN_LOCATION_CODE, FACILITY_SMDG_CODE, LIMIT))),
-            Map.entry(
-                "Voyage schedules",
-                noAction()
-                    .thenEither(
-                        scenarioWithParameters(CARRIER_VOYAGE_NUMBER, CARRIER_SERVICE_CODE),
-                        scenarioWithParameters(CARRIER_VOYAGE_NUMBER, CARRIER_SERVICE_CODE, LIMIT),
-                        scenarioWithParameters(CARRIER_VOYAGE_NUMBER, UNIVERSAL_SERVICE_REFERENCE),
-                        scenarioWithParameters(
-                            CARRIER_VOYAGE_NUMBER, UNIVERSAL_SERVICE_REFERENCE, LIMIT),
-                        scenarioWithParameters(UNIVERSAL_VOYAGE_REFERENCE, CARRIER_SERVICE_CODE),
-                        scenarioWithParameters(
-                            UNIVERSAL_VOYAGE_REFERENCE, CARRIER_SERVICE_CODE, LIMIT),
-                        scenarioWithParameters(
-                            UNIVERSAL_VOYAGE_REFERENCE, UNIVERSAL_SERVICE_REFERENCE),
-                        scenarioWithParameters(
-                            UNIVERSAL_VOYAGE_REFERENCE, UNIVERSAL_SERVICE_REFERENCE, LIMIT))))
+                        scenarioWithParameters(TRANSPORT_DOCUMENT_REFERENCE))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -77,29 +48,28 @@ public class ArrivalNoticeScenarioListBuilder extends ScenarioListBuilder<Arriva
   }
 
   private static ArrivalNoticeScenarioListBuilder scenarioWithParameters(
-    ArrivalNoticeFilterParameter... ovsFilterParameters) {
-    return supplyScenarioParameters(ovsFilterParameters).then(getSchedules());
+    ArrivalNoticeFilterParameter... anFilterParameters) {
+    return supplyScenarioParameters(anFilterParameters).then(getArrivalNotice());
   }
 
   private static ArrivalNoticeScenarioListBuilder supplyScenarioParameters(
-    ArrivalNoticeFilterParameter... ovsFilterParameters) {
+    ArrivalNoticeFilterParameter... anFilterParameters) {
     String publisherPartyName = threadLocalPublisherPartyName.get();
     return new ArrivalNoticeScenarioListBuilder(
         previousAction ->
-            new SupplyScenarioParametersAction(publisherPartyName, ovsFilterParameters));
+            new SupplyScenarioParametersAction(publisherPartyName, anFilterParameters));
   }
 
-  private static ArrivalNoticeScenarioListBuilder getSchedules() {
+  private static ArrivalNoticeScenarioListBuilder getArrivalNotice() {
     ArrivalNoticeComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
-    return new OvsScenarioListBuilder(
+    return new ArrivalNoticeScenarioListBuilder(
         previousAction ->
-            new OvsGetSchedulesAction(
+            new ArrivalNoticeGetNotificationAction(
                 subscriberPartyName,
                 publisherPartyName,
                 previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    OvsRole.PUBLISHER.getConfigName(), false)));
+                componentFactory.getMessageSchemaValidator()));
   }
 }

@@ -23,8 +23,8 @@ public abstract class ArrivalNoticeAction extends ConformanceAction {
   }
 
   private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
-      ? supplyAvailableTdrAction::getSuppliedScenarioParameters
+    return previousAction instanceof SupplyScenarioParametersAction supplyScenarioParametersAction
+      ? supplyScenarioParametersAction::getSuppliedScenarioParameters
       : _getSspSupplier(previousAction.getPreviousAction());
   }
 

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.arrival-notice.party;
+package org.dcsa.conformance.standards.an.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,7 +16,6 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.an.action.ArrivalNoticeGetNotificationAction;
-import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
 @Slf4j
 public class ArrivalNoticeNotifyParty extends ConformanceParty {
@@ -52,12 +51,12 @@ public class ArrivalNoticeNotifyParty extends ConformanceParty {
   }
 
   private void getArrivalNotice(JsonNode actionPrompt) {
-    log.info("OvsSubscriber.getSchedules(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("AnNotifyParty.getArrivalNotices(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     syncCounterpartGet(
-        "/v3/service-schedules",
+        "/v2/arrival-notices",
         ssp.getMap().entrySet().stream()
             .collect(
                 Collectors.toMap(
@@ -65,7 +64,7 @@ public class ArrivalNoticeNotifyParty extends ConformanceParty {
                     entry -> Set.of(entry.getValue()))));
 
     addOperatorLogEntry(
-        "Sent GET schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+        "Sent GET arrival notices request with parameters %s".formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

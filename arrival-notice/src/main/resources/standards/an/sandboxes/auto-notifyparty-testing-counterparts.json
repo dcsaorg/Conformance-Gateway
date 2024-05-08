@@ -1,5 +1,5 @@
 {
-  "id": "SANDBOX_ID_PREFIX-auto-shipper-testing-counterparts",
+  "id": "SANDBOX_ID_PREFIX-auto-notifyparty-testing-counterparts",
   "name": "Auto notifyparty testing counterparts",
   "authHeaderName": "dcsa-conformance-api-key",
   "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER",

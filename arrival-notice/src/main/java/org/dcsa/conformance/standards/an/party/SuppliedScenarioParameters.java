@@ -13,32 +13,32 @@ import lombok.Getter;
 @Getter
 public class SuppliedScenarioParameters {
 
-  private final Map<OvsFilterParameter, String> map;
+  private final Map<ArrivalNoticeFilterParameter, String> map;
 
-  private SuppliedScenarioParameters(Map<OvsFilterParameter, String> map) {
+  private SuppliedScenarioParameters(Map<ArrivalNoticeFilterParameter, String> map) {
     this.map = Collections.unmodifiableMap(map);
   }
 
   public ObjectNode toJson() {
     ObjectNode objectNode = new ObjectMapper().createObjectNode();
     map.forEach(
-        (ovsFilterParameter, value) ->
-            objectNode.put(ovsFilterParameter.getQueryParamName(), value));
+        (anFilterParameter, value) ->
+            objectNode.put(anFilterParameter.getQueryParamName(), value));
     return objectNode;
   }
 
-  public static SuppliedScenarioParameters fromMap(Map<OvsFilterParameter, String> map) {
+  public static SuppliedScenarioParameters fromMap(Map<ArrivalNoticeFilterParameter, String> map) {
     return new SuppliedScenarioParameters(map);
   }
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
     return new SuppliedScenarioParameters(
-        Arrays.stream(OvsFilterParameter.values())
-            .filter(ovsFilterParameter -> jsonNode.has(ovsFilterParameter.getQueryParamName()))
+        Arrays.stream(ArrivalNoticeFilterParameter.values())
+            .filter(anFilterParameter -> jsonNode.has(anFilterParameter.getQueryParamName()))
             .collect(
                 Collectors.toUnmodifiableMap(
                     Function.identity(),
-                    ovsFilterParameter ->
-                        jsonNode.required(ovsFilterParameter.getQueryParamName()).asText())));
+                    anFilterParameter ->
+                        jsonNode.required(anFilterParameter.getQueryParamName()).asText())));
   }
 }

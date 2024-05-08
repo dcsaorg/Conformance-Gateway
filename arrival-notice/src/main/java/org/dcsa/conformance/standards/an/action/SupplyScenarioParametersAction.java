@@ -1,12 +1,10 @@
 package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,28 +12,30 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter;
-import org.dcsa.conformance.standards.an.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
-import static org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter.LIMIT;
+import static org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
+  private final LinkedHashSet<ArrivalNoticeFilterParameter> arrivalNoticeFilterParameters;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, ArrivalNoticeFilterParameter... ovsFilterParameters) {
+      String publisherPartyName, ArrivalNoticeFilterParameter... anFilterParameters) {
     super(
         publisherPartyName,
         null,
         null,
         "SupplyScenarioParameters(%s)"
             .formatted(
-                Arrays.stream(ovsFilterParameters)
+                Arrays.stream(anFilterParameters)
                     .map(ArrivalNoticeFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
+    this.arrivalNoticeFilterParameters =
+      Stream.of(anFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override
@@ -70,14 +70,13 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return SuppliedScenarioParameters.fromMap(
-            ovsFilterParameters.stream()
+        arrivalNoticeFilterParameters.stream()
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
-                        ovsFilterParameter ->
-                            switch (ovsFilterParameter) {
-                              case LIMIT -> "100";
-                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
+                        anFilterParameter ->
+                            switch (anFilterParameter) {
+                              case  TRANSPORT_DOCUMENT_REFERENCE-> "111111-333";
                               default -> "TODO";
                             })))
         .toJson();

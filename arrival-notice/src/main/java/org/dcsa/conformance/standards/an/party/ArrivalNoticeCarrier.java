@@ -24,6 +24,8 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
 
+import static org.dcsa.conformance.standards.an.party.ArrivalNoticeFilterParameter.TRANSPORT_DOCUMENT_REFERENCE;
+
 @Slf4j
 public class ArrivalNoticeCarrier extends ConformanceParty {
 
@@ -61,7 +63,7 @@ public class ArrivalNoticeCarrier extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("OvsPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info("ArrivalNoticeCarrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(
@@ -69,24 +71,14 @@ public class ArrivalNoticeCarrier extends ConformanceParty {
                     actionPrompt.required("ArrivalNoticeFilterParametersQueryParamNames").spliterator(),
                     false)
                 .map(
-                    jsonOvsFilterParameter ->
-                      ArrivalNoticeFilterParameter.byQueryParamName.get(jsonOvsFilterParameter.asText()))
+                    jsonAnFilterParameter ->
+                      ArrivalNoticeFilterParameter.byQueryParamName.get(jsonAnFilterParameter.asText()))
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
                       ArrivalNoticeFilterParameter ->
                             switch (ArrivalNoticeFilterParameter) {
-                              case CARRIER_SERVICE_NAME -> "Great Lion Service";
-                              case CARRIER_SERVICE_CODE -> "FE1";
-                              case UNIVERSAL_SERVICE_REFERENCE -> "SR12345A";
-                              case VESSEL_IMO_NUMBER -> "9321483";
-                              case VESSEL_NAME -> "King of the Seas";
-                              case CARRIER_VOYAGE_NUMBER -> "2103S";
-                              case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
-                              case UN_LOCATION_CODE -> "NLAMS";
-                              case FACILITY_SMDG_CODE -> "APM";
-                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
-                              case LIMIT -> "100";
+                              case  TRANSPORT_DOCUMENT_REFERENCE-> "112234344";
                             })));
 
     asyncOrchestratorPostPartyInput(
@@ -102,11 +94,11 @@ public class ArrivalNoticeCarrier extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("OvsPublisher.handleRequest(%s)".formatted(request));
+    log.info("ArrivalNoticeCarrier.handleRequest(%s)".formatted(request));
 
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/an/messages/ovs-%s-response.json"
+            "/standards/an/messages/an-%s-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
 

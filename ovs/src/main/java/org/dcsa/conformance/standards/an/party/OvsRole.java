@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.party;
+package org.dcsa.conformance.standards.an.party;
 
 import lombok.Getter;
 

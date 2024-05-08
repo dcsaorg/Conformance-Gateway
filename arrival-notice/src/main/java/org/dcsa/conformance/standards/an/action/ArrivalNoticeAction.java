@@ -1,16 +1,17 @@
-package org.dcsa.conformance.standards.ovs.action;
+package org.dcsa.conformance.standards.an.action;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
-public abstract class OvsAction extends ConformanceAction {
+public abstract class ArrivalNoticeAction extends ConformanceAction {
   protected final Supplier<SuppliedScenarioParameters> sspSupplier;
   protected final int expectedStatus;
 
-  public OvsAction(
+  public ArrivalNoticeAction (
       String sourcePartyName,
       String targetPartyName,
       ConformanceAction previousAction,
@@ -22,10 +23,12 @@ public abstract class OvsAction extends ConformanceAction {
   }
 
   private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
-        ? supplyAvailableTdrAction::getSuppliedScenarioParameters
-        : previousAction == null
-            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
-            : _getSspSupplier(previousAction.getPreviousAction());
+    return previousAction instanceof SupplyScenarioParametersAction supplyScenarioParametersAction
+      ? supplyScenarioParametersAction::getSuppliedScenarioParameters
+      : _getSspSupplier(previousAction.getPreviousAction());
+  }
+
+  public ObjectNode asJsonNode() {
+    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }
 }

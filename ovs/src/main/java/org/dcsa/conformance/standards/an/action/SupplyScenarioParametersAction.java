@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.action;
+package org.dcsa.conformance.standards.an.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.an.party.OvsFilterParameter;
+import org.dcsa.conformance.standards.an.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {

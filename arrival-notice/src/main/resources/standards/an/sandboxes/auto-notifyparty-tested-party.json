@@ -1,0 +1,31 @@
+{
+  "id": "SANDBOX_ID_PREFIX-auto-notifyparty-tested-party",
+  "name": "Auto notifyparty tested party",
+  "authHeaderName": "dcsa-conformance-api-key",
+  "authHeaderValue": "NOTIFYPARTY_AUTH_HEADER_VALUE_PLACEHOLDER",
+  "standard" : {
+    "name" : "STANDARD_NAME_PLACEHOLDER",
+    "version" : "STANDARD_VERSION_PLACEHOLDER"
+  },
+  "orchestrator" : {
+    "active": false
+  },
+  "parties" : [ {
+    "name" : "NotifyParty1",
+    "role" : "NotifyParty",
+    "orchestratorUrl": "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-notifyparty-testing-counterparts"
+  } ],
+  "counterparts" : [ {
+    "name" : "NotifyParty1",
+    "role" : "NotifyParty",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-notifyparty-tested-party/party/NotifyParty1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "NOTIFYPARTY_AUTH_HEADER_VALUE_PLACEHOLDER"
+  }, {
+    "name" : "Carrier1",
+    "role" : "Carrier",
+    "url" : "http://localhost:8080/conformance/sandbox/SANDBOX_ID_PREFIX-auto-notifyparty-testing-counterparts/party/Carrier1/api",
+    "authHeaderName": "dcsa-conformance-api-key",
+    "authHeaderValue": "CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER"
+  } ]
+}

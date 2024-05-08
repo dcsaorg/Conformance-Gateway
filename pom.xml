@@ -17,6 +17,7 @@
         <module>jit</module>
         <module>ovs</module>
         <module>tnt</module>
+				<module>arrival-notice</module>
         <module>cdk</module>
         <module>lambda</module>
         <module>sandbox</module>

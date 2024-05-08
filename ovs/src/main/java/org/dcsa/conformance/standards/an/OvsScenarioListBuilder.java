@@ -1,6 +1,6 @@
-package org.dcsa.conformance.standards.ovs;
+package org.dcsa.conformance.standards.an;
 
-import static org.dcsa.conformance.standards.ovs.party.OvsFilterParameter.*;
+import static org.dcsa.conformance.standards.an.party.OvsFilterParameter.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,10 +11,10 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.ovs.action.OvsGetSchedulesAction;
-import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
-import org.dcsa.conformance.standards.ovs.party.OvsRole;
+import org.dcsa.conformance.standards.an.action.OvsGetSchedulesAction;
+import org.dcsa.conformance.standards.an.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.an.party.OvsFilterParameter;
+import org.dcsa.conformance.standards.an.party.OvsRole;
 
 @Slf4j
 public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder> {

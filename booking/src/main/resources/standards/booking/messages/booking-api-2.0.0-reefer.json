@@ -12,6 +12,9 @@
   "isImportLicenseRequired": true,
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
+  "vessel": {
+    "name": "King of the Seas"
+  },
   "requestedEquipments": [
     {
       "ISOEquipmentCode": "42R0",

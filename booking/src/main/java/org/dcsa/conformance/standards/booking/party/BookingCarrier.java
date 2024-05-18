@@ -94,12 +94,6 @@ public class BookingCarrier extends ConformanceParty {
     return s.charAt(s.length() - 1);
   }
 
-  private String generateSchemaValidVesselIMONumber() {
-    var vesselIMONumberSansCheckDigit = "%06d".formatted(RANDOM.nextInt(999999));
-    var checkDigit = computeVesselIMONumberCheckDigit(vesselIMONumberSansCheckDigit);
-    return vesselIMONumberSansCheckDigit + checkDigit;
-  }
-
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());

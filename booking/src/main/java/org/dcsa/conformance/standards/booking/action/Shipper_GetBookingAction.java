@@ -41,6 +41,7 @@ public class Shipper_GetBookingAction extends BookingAction {
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
         .put("cbrr", getDspSupplier().get().carrierBookingRequestReference())
+        .put("cbr", getDspSupplier().get().carrierBookingReference())
         .put("amendedContent", requestAmendedContent);
   }
 
@@ -57,11 +58,13 @@ public class Shipper_GetBookingAction extends BookingAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        var dsp = getDspSupplier().get();
+        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
-                "/v2/bookings/" + getDspSupplier().get().carrierBookingRequestReference()),
+                "/v2/bookings/" + reference),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

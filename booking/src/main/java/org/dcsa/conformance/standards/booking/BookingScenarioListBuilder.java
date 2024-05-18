@@ -275,17 +275,6 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
           requestAmendedContent));
   }
 
-  private static BookingScenarioListBuilder shipper_GetAmendedBooking404() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new BookingScenarioListBuilder(
-      previousAction ->
-        new Shipper_GetAmendedBooking404Action(
-          carrierPartyName,
-          shipperPartyName,
-          (BookingAction) previousAction));
-  }
-
   private static BookingScenarioListBuilder uc1_shipper_SubmitBookingRequest() {
     BookingComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();

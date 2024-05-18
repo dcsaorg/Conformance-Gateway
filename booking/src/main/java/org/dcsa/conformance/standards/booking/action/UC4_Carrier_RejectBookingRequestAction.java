@@ -35,6 +35,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 

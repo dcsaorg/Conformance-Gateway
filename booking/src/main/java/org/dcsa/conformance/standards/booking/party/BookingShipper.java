@@ -73,12 +73,13 @@ public class BookingShipper extends ConformanceParty {
     log.info("Shipper.getBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.get("cbrr").asText();
+    String reference = getBookingReference(actionPrompt);
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     Map<String, List<String>> queryParams = requestAmendment
       ? Map.of("amendedContent", List.of("true"))
       : Collections.emptyMap();
 
-    syncCounterpartGet("/v2/bookings/" + cbrr, queryParams);
+    syncCounterpartGet("/v2/bookings/" + reference, queryParams);
 
     addOperatorLogEntry("Sent a GET request for booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
@@ -139,7 +140,7 @@ public class BookingShipper extends ConformanceParty {
 
   private void sendCancelEntireBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = getBookingReference(actionPrompt);
     syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
       Collections.emptyMap(),
@@ -152,15 +153,15 @@ public class BookingShipper extends ConformanceParty {
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {
     log.info("Shipper.sendCancelBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String reference = getBookingReference(actionPrompt);
     syncCounterpartPatch(
-      "/v2/bookings/%s".formatted(cbrr),
+      "/v2/bookings/%s".formatted(reference),
       Collections.emptyMap(),
       new ObjectMapper()
         .createObjectNode()
         .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.wireName()));
 
-    addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(cbrr));
+    addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }
 
   private void sendInvalidBookingAction(JsonNode actionPrompt) {
@@ -182,37 +183,36 @@ public class BookingShipper extends ConformanceParty {
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String reference = getBookingReference(actionPrompt);
     String cbrr = actionPrompt.get("cbrr").asText();
-
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut(
-      "/v2/bookings/%s".formatted(cbrr),bookingData);
+      "/v2/bookings/%s".formatted(reference),bookingData);
 
     addOperatorLogEntry(
       "Sent an updated booking request with the parameters: %s"
-        .formatted(cbrr));
+        .formatted(reference));
   }
 
   private void sendUpdatedConfirmedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
+    String reference = getBookingReference(actionPrompt);
     String cbrr = actionPrompt.get("cbrr").asText();
-
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut(
-      "/v2/bookings/%s".formatted(cbrr),bookingData);
+      "/v2/bookings/%s".formatted(reference),bookingData);
 
     addOperatorLogEntry(
       "Sent an updated confirmed booking with the parameters: %s"
-        .formatted(cbrr));
+        .formatted(reference));
   }
 
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Shipper.handleRequest(%s)".formatted(request));
-
     ConformanceResponse response =
         request.createResponse(
             204,
@@ -223,4 +223,12 @@ public class BookingShipper extends ConformanceParty {
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
+
+  private String getBookingReference(JsonNode actionPrompt ) {
+    String cbr = actionPrompt.path("cbr").asText(null);
+    String cbrr = actionPrompt.get("cbrr").asText();
+    return  cbr != null ? cbr : cbrr;
+  }
+
+
 }

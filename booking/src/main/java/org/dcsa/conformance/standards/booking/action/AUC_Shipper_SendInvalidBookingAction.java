@@ -42,7 +42,8 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
     var dsp = getDspSupplier().get();
     return super.asJsonNode()
       .put("invalidBookingMessageType", this.invalidBookingMessageType.name())
-      .put("cbrr", dsp.carrierBookingRequestReference());
+      .put("cbrr", dsp.carrierBookingRequestReference())
+      .put("cbr", dsp.carrierBookingReference());
   }
 
   @Override
@@ -52,10 +53,10 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         var urlFormat = invalidBookingMessageType.getExpectedRequestUrlFormat();
-        var cbrr = dsp.carrierBookingRequestReference();
+        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         return Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), invalidBookingMessageType.getExpectedRequestMethod()),
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), urlFormat.formatted(cbrr)),
+            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), urlFormat.formatted(reference)),
             new ResponseStatusCheck(
               BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

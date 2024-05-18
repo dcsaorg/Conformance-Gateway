@@ -52,6 +52,7 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -60,10 +61,11 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var cbrr = getDspSupplier().get().carrierBookingRequestReference();
+        var dsp = getDspSupplier().get();
+        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         Stream<ActionCheck> primaryExchangeChecks = Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
+            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(reference)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

@@ -22,16 +22,20 @@ public class BookingComponentFactory extends AbstractComponentFactory {
   public static final String STANDARD_NAME = "Booking";
   public static final List<String> STANDARD_VERSIONS = List.of("2.0.0");
 
+  public static final List<String> SCENARIO_SUITES = List.of("Conformance", "Reference Implementation");
+
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
-  private final String standardVersion;
-
-  public BookingComponentFactory(String standardVersion) {
-    this.standardVersion = standardVersion;
+  public BookingComponentFactory(String standardVersion, String scenarioSuite) {
+    super(standardVersion, scenarioSuite);
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
           "Unsupported standard version '%s'".formatted(standardVersion));
+    }
+    if (SCENARIO_SUITES.stream().noneMatch(version -> version.equals(scenarioSuite))) {
+      throw new IllegalArgumentException(
+        "Unsupported scenario suite '%s'".formatted(scenarioSuite));
     }
   }
 
@@ -135,10 +139,12 @@ public class BookingComponentFactory extends AbstractComponentFactory {
         Map.ofEntries(
             Map.entry("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME),
             Map.entry("STANDARD_VERSION_PLACEHOLDER", standardVersion),
+            Map.entry("SCENARIO_SUITE_PLACEHOLDER", scenarioSuite),
             Map.entry("CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER", CARRIER_AUTH_HEADER_VALUE),
             Map.entry("SHIPPER_AUTH_HEADER_VALUE_PLACEHOLDER", SHIPPER_AUTH_HEADER_VALUE),
             Map.entry(
                 "SANDBOX_ID_PREFIX",
-                AbstractComponentFactory._sandboxIdPrefix(STANDARD_NAME, standardVersion))));
+                AbstractComponentFactory._sandboxIdPrefix(
+                    STANDARD_NAME, standardVersion, scenarioSuite))));
   }
 }

@@ -41,7 +41,10 @@ public class ConformanceWebuiHandler {
                       BookingComponentFactory.STANDARD_VERSIONS.stream()
                           .collect(
                               Collectors.toMap(
-                                  Function.identity(), BookingComponentFactory::new)))),
+                                  Function.identity(),
+                                  standardVersion ->
+                                      new BookingComponentFactory(
+                                          standardVersion, "Conformance"))))),
               Map.entry(
                   EblComponentFactory.STANDARD_NAME,
                   new TreeMap<>(
@@ -77,7 +80,7 @@ public class ConformanceWebuiHandler {
               Map.entry(
                   PintComponentFactory.STANDARD_NAME,
                   new TreeMap<>(
-                    PintComponentFactory.STANDARD_VERSIONS.stream()
+                      PintComponentFactory.STANDARD_VERSIONS.stream()
                           .collect(
                               Collectors.toMap(Function.identity(), PintComponentFactory::new)))),
               Map.entry(

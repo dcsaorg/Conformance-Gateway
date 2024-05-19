@@ -26,10 +26,8 @@ public class TntComponentFactory extends AbstractComponentFactory {
   private static final String PUBLISHER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String SUBSCRIBER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
-  private final String standardVersion;
-
   public TntComponentFactory(String standardVersion) {
-    this.standardVersion = standardVersion;
+    super(standardVersion, "Conformance");
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
           "Unsupported standard version '%s'".formatted(standardVersion));

@@ -5,6 +5,7 @@
     "name" : "STANDARD_NAME_PLACEHOLDER",
     "version" : "STANDARD_VERSION_PLACEHOLDER"
   },
+  "scenarioSuite": "SCENARIO_SUITE_PLACEHOLDER",
   "orchestrator" : {
     "active": false
   },

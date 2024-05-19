@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import lombok.Getter;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -11,7 +13,17 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 
+@Getter
 public abstract class AbstractComponentFactory {
+
+  protected final String standardVersion;
+  protected final String scenarioSuite;
+
+  protected AbstractComponentFactory(String standardVersion, String scenarioSuite) {
+    this.standardVersion = standardVersion;
+    this.scenarioSuite = scenarioSuite;
+  }
+
   public abstract List<ConformanceParty> createParties(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations,
@@ -21,10 +33,10 @@ public abstract class AbstractComponentFactory {
 
   /**
    * Creates the ScenarioListBuilders of each standard module.
-   * <p>
-   * For a standard without modules, return a single-entry map with "" as key:
-   * <p>
-   * <code>
+   *
+   * <p>For a standard without modules, return a single-entry map with "" as key:
+   *
+   * <p><code>
    * return Stream.of(Map.entry("", yourRootScenarioListBuilder)).collect(Collectors.toMap(
    *    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
    * </code>
@@ -62,9 +74,19 @@ public abstract class AbstractComponentFactory {
 
   protected static String _sandboxIdPrefix(String standardName, String standardVersion) {
     return "%s-%s"
+      .formatted(
+        standardName.replaceAll(" ", ""),
+        standardVersion.replaceAll("\\.", "").replaceAll("-", ""))
+      .toLowerCase();
+  }
+
+  protected static String _sandboxIdPrefix(
+      String standardName, String standardVersion, String scenarioSuite) {
+    return "%s-%s-%s"
         .formatted(
             standardName.replaceAll(" ", ""),
-            standardVersion.replaceAll("\\.", "").replaceAll("-", ""))
+            standardVersion.replaceAll("\\.", "").replaceAll("-", ""),
+            scenarioSuite.replaceAll(" ", "-"))
         .toLowerCase();
   }
 }

@@ -29,10 +29,8 @@ public class EblComponentFactory extends AbstractComponentFactory {
 
   private static final ConcurrentHashMap<String, List<ConformanceScenario>> SCENARIO_CACHE = new ConcurrentHashMap<>();
 
-  private final String standardVersion;
-
   public EblComponentFactory(String standardVersion) {
-    this.standardVersion = standardVersion;
+    super(standardVersion, "Conformance");
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
           "Unsupported standard version '%s'".formatted(standardVersion));

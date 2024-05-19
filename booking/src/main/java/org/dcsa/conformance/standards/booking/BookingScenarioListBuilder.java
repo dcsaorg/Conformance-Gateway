@@ -39,6 +39,174 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
+    if ("Conformance".equals(componentFactory.getScenarioSuite())) {
+      return createConformanceScenarios(carrierPartyName);
+    }
+    if ("Reference Implementation".equals(componentFactory.getScenarioSuite())) {
+      return createReferenceImplementationScenarios(carrierPartyName);
+    }
+    throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
+  }
+
+  private static LinkedHashMap<String, BookingScenarioListBuilder> createConformanceScenarios(
+      String carrierPartyName) {
+    return Stream.of(
+            Map.entry(
+                "Dry cargo",
+                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REGULAR)
+                    .then(
+                        uc1_shipper_SubmitBookingRequest()
+                            .then(
+                                shipper_GetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc2_carrier_requestUpdateToBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(PENDING_UPDATE)
+                                                    .then(
+                                                        uc3_shipper_submitUpdatedBookingRequest()
+                                                            .then(
+                                                                shipper_GetBooking(UPDATE_RECEIVED)
+                                                                    .then(
+                                                                        uc5_carrier_confirmBookingRequest()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                        CONFIRMED)
+                                                                                    .then(
+                                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                                            .then(
+                                                                                                shipper_GetBooking(
+                                                                                                    COMPLETED)))))))),
+                                        uc3_shipper_submitUpdatedBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5_carrier_confirmBookingRequest()
+                                                            .then(
+                                                                shipper_GetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc4_carrier_rejectBookingRequest()
+                                            .then(shipper_GetBooking(REJECTED)),
+                                        uc5_carrier_confirmBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(CONFIRMED)
+                                                    .thenEither(
+                                                        uc5_carrier_confirmBookingRequest()
+                                                            .then(
+                                                                shipper_GetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                    COMPLETED)))),
+                                                        uc7_shipper_submitBookingAmendment()
+                                                            .then(
+                                                                shipper_GetBooking(
+                                                                        CONFIRMED,
+                                                                        AMENDMENT_RECEIVED)
+                                                                    .thenEither(
+                                                                        uc8a_carrier_approveBookingAmendment()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                        CONFIRMED,
+                                                                                        AMENDMENT_CONFIRMED)
+                                                                                    .then(
+                                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                                            .then(
+                                                                                                shipper_GetBooking(
+                                                                                                    COMPLETED)))),
+                                                                        uc8b_carrier_declineBookingAmendment()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                        CONFIRMED,
+                                                                                        AMENDMENT_DECLINED)
+                                                                                    .then(
+                                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                                            .then(
+                                                                                                shipper_GetBooking(
+                                                                                                    COMPLETED)))),
+                                                                        uc9_shipper_cancelBookingAmendment()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                        CONFIRMED,
+                                                                                        AMENDMENT_CANCELLED)
+                                                                                    .then(
+                                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                                            .then(
+                                                                                                shipper_GetBooking(
+                                                                                                    COMPLETED)))))),
+                                                        uc10_carrier_declineBooking()
+                                                            .then(shipper_GetBooking(DECLINED)),
+                                                        uc12_carrier_confirmBookingCompleted()
+                                                            .then(shipper_GetBooking(COMPLETED)))),
+                                        uc11_shipper_cancelBooking()
+                                            .then(shipper_GetBooking(CANCELLED)))))),
+            Map.entry(
+                "Dangerous goods",
+                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.DG)
+                    .then(
+                        uc1_shipper_SubmitBookingRequest()
+                            .then(
+                                shipper_GetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3_shipper_submitUpdatedBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5_carrier_confirmBookingRequest()
+                                                            .then(
+                                                                shipper_GetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5_carrier_confirmBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12_carrier_confirmBookingCompleted()
+                                                            .then(
+                                                                shipper_GetBooking(
+                                                                    COMPLETED)))))))),
+            Map.entry(
+                "Reefer containers",
+                carrier_SupplyScenarioParameters(carrierPartyName, ScenarioType.REEFER)
+                    .then(
+                        uc1_shipper_SubmitBookingRequest()
+                            .then(
+                                shipper_GetBooking(RECEIVED)
+                                    .thenEither(
+                                        uc3_shipper_submitUpdatedBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(UPDATE_RECEIVED)
+                                                    .then(
+                                                        uc5_carrier_confirmBookingRequest()
+                                                            .then(
+                                                                shipper_GetBooking(CONFIRMED)
+                                                                    .then(
+                                                                        uc12_carrier_confirmBookingCompleted()
+                                                                            .then(
+                                                                                shipper_GetBooking(
+                                                                                    COMPLETED)))))),
+                                        uc5_carrier_confirmBookingRequest()
+                                            .then(
+                                                shipper_GetBooking(CONFIRMED)
+                                                    .then(
+                                                        uc12_carrier_confirmBookingCompleted()
+                                                            .then(
+                                                                shipper_GetBooking(
+                                                                    COMPLETED)))))))))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static LinkedHashMap<String, BookingScenarioListBuilder>
+      createReferenceImplementationScenarios(String carrierPartyName) {
     return Stream.of(
             Map.entry(
                 "",

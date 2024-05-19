@@ -19,6 +19,7 @@ public class SandboxConfiguration {
   private String authHeaderName = "";
   private String authHeaderValue = "";
   private StandardConfiguration standard;
+  private String scenarioSuite;
   private OrchestratorConfiguration orchestrator;
   private PartyConfiguration[] parties;
   private CounterpartConfiguration[] counterparts;

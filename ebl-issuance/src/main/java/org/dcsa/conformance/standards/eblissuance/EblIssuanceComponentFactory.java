@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.Getter;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
@@ -27,11 +26,8 @@ public class EblIssuanceComponentFactory extends AbstractComponentFactory {
   private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
-  @Getter
-  private final String standardVersion;
-
   public EblIssuanceComponentFactory(String standardVersion) {
-    this.standardVersion = standardVersion;
+    super(standardVersion, "Conformance");
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
           "Unsupported standard version '%s'".formatted(standardVersion));

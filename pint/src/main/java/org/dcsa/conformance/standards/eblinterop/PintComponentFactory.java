@@ -25,10 +25,8 @@ public class PintComponentFactory extends AbstractComponentFactory {
   private static final String SENDING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
   private static final String RECEIVING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
 
-  private final String standardVersion;
-
   public PintComponentFactory(String standardVersion) {
-    this.standardVersion = standardVersion;
+    super(standardVersion, "Conformance");
     if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
       throw new IllegalArgumentException(
           "Unsupported standard version '%s'".formatted(standardVersion));

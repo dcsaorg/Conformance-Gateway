@@ -1,9 +1,10 @@
 package org.dcsa.conformance.springboot;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -44,8 +45,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 @RestController
@@ -150,7 +149,13 @@ public class ConformanceApplication {
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
                 BookingComponentFactory.STANDARD_VERSIONS.stream()
-                    .map(BookingComponentFactory::new),
+                    .flatMap(
+                        standardVersion ->
+                            BookingComponentFactory.SCENARIO_SUITES.stream()
+                                .map(
+                                    scenarioSuite ->
+                                        new BookingComponentFactory(
+                                            standardVersion, scenarioSuite))),
                 EblComponentFactory.STANDARD_VERSIONS.stream().map(EblComponentFactory::new),
                 EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
                     .map(EblIssuanceComponentFactory::new),

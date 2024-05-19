@@ -58,7 +58,9 @@ public class ConformanceSandbox {
                 SandboxConfiguration sandboxConfiguration =
                     loadSandboxConfiguration(persistenceProvider, sandboxId);
                 AbstractComponentFactory componentFactory =
-                    _createComponentFactory(sandboxConfiguration.getStandard());
+                    _createComponentFactory(
+                        sandboxConfiguration.getStandard(),
+                        sandboxConfiguration.getScenarioSuite());
                 ConformanceOrchestrator orchestrator =
                     new ConformanceOrchestrator(
                         sandboxConfiguration,
@@ -102,7 +104,9 @@ public class ConformanceSandbox {
                 SandboxConfiguration sandboxConfiguration =
                     loadSandboxConfiguration(persistenceProvider, sandboxId);
                 AbstractComponentFactory componentFactory =
-                    _createComponentFactory(sandboxConfiguration.getStandard());
+                    _createComponentFactory(
+                        sandboxConfiguration.getStandard(),
+                        sandboxConfiguration.getScenarioSuite());
 
                 Map<String, ? extends Collection<String>> orchestratorAuthHeader;
                 if (sandboxConfiguration.getOrchestrator().isActive()) {
@@ -721,7 +725,7 @@ public class ConformanceSandbox {
         loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     Set<String> reportRoleNames =
-        _createComponentFactory(sandboxConfiguration.getStandard())
+        _createComponentFactory(sandboxConfiguration.getStandard(), sandboxConfiguration.getScenarioSuite())
             .getReportRoleNames(
                 sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts());
 
@@ -803,9 +807,9 @@ public class ConformanceSandbox {
   }
 
   private static AbstractComponentFactory _createComponentFactory(
-      StandardConfiguration standardConfiguration) {
+      StandardConfiguration standardConfiguration, String scenarioSuite) {
     if (BookingComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new BookingComponentFactory(standardConfiguration.getVersion());
+      return new BookingComponentFactory(standardConfiguration.getVersion(), scenarioSuite);
     }
     if (EblComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
       return new EblComponentFactory(standardConfiguration.getVersion());

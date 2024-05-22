@@ -330,7 +330,7 @@ public class BookingChecks {
     "Validate shipper's minimum request fields",
     body -> {
       var issues = new LinkedHashSet<String>();
-      var vesselName = body.has("vessel") ? body.path("vessel").path("name").asText(""): "";
+      var vesselName = body.path("vessel").path("name").asText("");
       var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
       var carrierServiceCode = body.path("carrierServiceCode").asText("");
       var carrierServiceName = body.path("carrierServiceName").asText("");

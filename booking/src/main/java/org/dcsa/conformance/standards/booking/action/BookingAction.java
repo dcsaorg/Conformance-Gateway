@@ -129,10 +129,7 @@ public abstract class BookingAction extends ConformanceAction {
   }
 
   private String getCbrFromNotificationPayload(JsonNode requestJsonNode) {
-    if(requestJsonNode.path("data").path("carrierBookingReference").asText(null) != null) {
-      return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
-    }
-    return null;
+    return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
   }
   protected Stream<ActionCheck> getNotificationChecks(
       String expectedApiVersion,

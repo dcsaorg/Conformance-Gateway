@@ -72,7 +72,7 @@ public class BookingShipper extends ConformanceParty {
   private void getBookingRequest(JsonNode actionPrompt) {
     log.info("Shipper.getBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText(null);
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.path("cbrr").asText();
     String reference = getBookingReference(actionPrompt);
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     Map<String, List<String>> queryParams = requestAmendment
@@ -184,7 +184,7 @@ public class BookingShipper extends ConformanceParty {
   private void sendUpdatedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut(
@@ -198,7 +198,7 @@ public class BookingShipper extends ConformanceParty {
   private void sendUpdatedConfirmedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.path("cbrr").asText();
     var bookingData = persistentMap.load(cbrr);
     ((ObjectNode) bookingData).put(SERVICE_CONTRACT_REF, SERVICE_REF_PUT);
     syncCounterpartPut(
@@ -226,7 +226,7 @@ public class BookingShipper extends ConformanceParty {
 
   private String getBookingReference(JsonNode actionPrompt ) {
     String cbr = actionPrompt.path("cbr").asText(null);
-    String cbrr = actionPrompt.get("cbrr").asText();
+    String cbrr = actionPrompt.path("cbrr").asText();
     return  cbr != null ? cbr : cbrr;
   }
 

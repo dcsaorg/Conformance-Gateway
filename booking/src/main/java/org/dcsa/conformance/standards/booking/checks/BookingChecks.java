@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -306,31 +307,17 @@ public class BookingChecks {
     "Validate shipmentLocations",
     body -> {
       var issues = new LinkedHashSet<String>();
-      var shipmentLocations = body.path("shipmentLocations");
       var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
-      var polNode =
-        StreamSupport.stream(shipmentLocations.spliterator(), false)
-          .filter(o ->  o.path("locationTypeCode").asText("").equals("POL")
-            || o.path("locationTypeCode").asText("").equals("PRE") )
-          .findFirst()
-          .orElse(null);
-      var podNode =
-        StreamSupport.stream(shipmentLocations.spliterator(), false)
-          .filter(o -> o.path("locationTypeCode").asText("").equals("POD")
-          || o.path("locationTypeCode").asText("").equals("PDE") )
-          .findFirst()
-          .orElse(null);
+      var polNode = getShipmenLocationTypeCode(body,"POL");
+      var preNode = getShipmenLocationTypeCode(body,"PRE");
+      var pdeNode = getShipmenLocationTypeCode(body,"PDE");
+      var podNode = getShipmenLocationTypeCode(body,"POD");
+      var ielNode = getShipmenLocationTypeCode(body,"IEL");
 
-      var ielNode =
-        StreamSupport.stream(shipmentLocations.spliterator(), false)
-          .filter(o ->  o.path("locationTypeCode").asText("").equals("IEL"))
-          .findFirst()
-          .orElse(null);
-
-      if (podNode == null || podNode.isEmpty() ) {
+      if ((pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty()) ) {
         issues.add("Port of Discharge/Place of Delivery value must be provided");
       }
-      if (polNode == null || polNode.isEmpty()) {
+      if ((preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty())) {
         issues.add("Port of Load/Place of Receipt values must be provided");
       }
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
@@ -339,6 +326,47 @@ public class BookingChecks {
       return issues;
     });
 
+  private static final JsonContentCheck VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS = JsonAttribute.customValidator(
+    "Validate shipper's minimum request fields",
+    body -> {
+      var issues = new LinkedHashSet<String>();
+      var vesselName = body.path("vessel").path("name").asText("");
+      var carrierExportVoyageNumber = body.path("carrierExportVoyageNumber").asText("");
+      var carrierServiceCode = body.path("carrierServiceCode").asText("");
+      var carrierServiceName = body.path("carrierServiceName").asText("");
+      var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
+
+      var polNode = getShipmenLocationTypeCode(body,"POL");
+      var preNode = getShipmenLocationTypeCode(body,"PRE");
+      var pdeNode = getShipmenLocationTypeCode(body,"PDE");
+      var podNode = getShipmenLocationTypeCode(body,"POD");
+
+      String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
+      String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
+
+      var isPodAbsent = (pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty());
+      var isPolAbsent = (preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty());
+
+      var poldServiceCodeAbsent = (isPolAbsent && isPodAbsent && vesselName.isEmpty() && carrierExportVoyageNumber.isEmpty())
+        || (isPolAbsent && isPodAbsent && carrierServiceCode.isEmpty() && carrierExportVoyageNumber.isEmpty())
+        || (isPolAbsent && isPodAbsent && carrierServiceName.isEmpty() && carrierExportVoyageNumber.isEmpty());
+
+      var poldExpectedDepartureDateAbsent = isPolAbsent && isPodAbsent && expectedDepartureDate.isEmpty() ;
+
+      var poldArrivalStartEndDateAbsent = isPolAbsent && isPodAbsent && providedArrivalStartDate.isEmpty() && providedArrivalEndDate.isEmpty();
+
+      if ( poldServiceCodeAbsent || poldExpectedDepartureDateAbsent || poldArrivalStartEndDateAbsent ) {
+        issues.add("The minimum options to provide shipper's requested fields are missing.");
+      }
+       return issues;
+    });
+  private static JsonNode getShipmenLocationTypeCode(JsonNode body, @NonNull String locationTypeCode) {
+    var shipmentLocations = body.path("shipmentLocations");
+    return StreamSupport.stream(shipmentLocations.spliterator(), false)
+      .filter(o ->  o.path("locationTypeCode").asText("").equals(locationTypeCode))
+      .findFirst()
+      .orElse(null);
+  }
 
   private static final JsonContentCheck REQUESTED_CHANGES_PRESENCE = JsonAttribute.customValidator(
     "Requested changes must be present for the selected Booking Status ",
@@ -546,6 +574,7 @@ public class BookingChecks {
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
     COUNTRY_CODE_VALIDATIONS,
+    VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

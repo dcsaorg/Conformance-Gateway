@@ -12,6 +12,10 @@
   "isImportLicenseRequired": true,
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
+  "carrierServiceCode": "TA1",
+  "vessel": {
+    "name": "King of the Seas"
+  },
   "requestedEquipments": [
     {
       "ISOEquipmentCode": "22GP",

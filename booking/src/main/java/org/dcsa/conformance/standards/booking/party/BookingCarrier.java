@@ -94,12 +94,6 @@ public class BookingCarrier extends ConformanceParty {
     return s.charAt(s.length() - 1);
   }
 
-  private String generateSchemaValidVesselIMONumber() {
-    var vesselIMONumberSansCheckDigit = "%06d".formatted(RANDOM.nextInt(999999));
-    var checkDigit = computeVesselIMONumberCheckDigit(vesselIMONumberSansCheckDigit);
-    return vesselIMONumberSansCheckDigit + checkDigit;
-  }
-
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
@@ -332,14 +326,23 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private void generateAndEmitNotificationFromBooking(
+    JsonNode actionPrompt,
+    PersistableCarrierBooking persistableCarrierBooking,
+    boolean includeCbrr) {
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, includeCbrr,false);
+  }
+
+  private void generateAndEmitNotificationFromBooking(
       JsonNode actionPrompt,
       PersistableCarrierBooking persistableCarrierBooking,
-      boolean includeCbrr) {
+      boolean includeCbrr,
+      boolean includeCbr) {
     var notification =
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
             .includeCarrierBookingRequestReference(includeCbrr)
+            .includeCarrierBookingReference(includeCbr)
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode();
@@ -638,6 +641,7 @@ public class BookingCarrier extends ConformanceParty {
 
     private JsonNode booking;
     @Builder.Default private boolean includeCarrierBookingRequestReference = true;
+    @Builder.Default private boolean includeCarrierBookingReference = false;
 
     private String computedType() {
       if (type != null) {
@@ -665,6 +669,10 @@ public class BookingCarrier extends ConformanceParty {
       if (includeCarrierBookingRequestReference) {
         setBookingProvidedField(
             data, "carrierBookingRequestReference", carrierBookingRequestReference);
+      }
+      if (includeCarrierBookingReference) {
+        setBookingProvidedField(
+          data, "carrierBookingReference", carrierBookingReference);
       }
       setBookingProvidedField(data, "bookingStatus", bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);

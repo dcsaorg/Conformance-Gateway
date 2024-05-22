@@ -108,8 +108,11 @@ public abstract class BookingAction extends ConformanceAction {
     DynamicScenarioParameters dsp = dspReference.get();
 
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
+    JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
+    String newCbr = getCbrFromNotificationPayload(requestJsonNode) != null ?
+      getCbrFromNotificationPayload(requestJsonNode) :
+      responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
-    var newCbr = responseJsonNode.path("carrierBookingReference").asText(null);
     var newBookingStatus = parseBookingState(responseJsonNode.path("bookingStatus").asText(null));
     var newAmendedBookingStatus = parseBookingState(responseJsonNode.path("amendedBookingStatus").asText(null));
 
@@ -125,6 +128,9 @@ public abstract class BookingAction extends ConformanceAction {
     }
   }
 
+  private String getCbrFromNotificationPayload(JsonNode requestJsonNode) {
+    return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
+  }
   protected Stream<ActionCheck> getNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,

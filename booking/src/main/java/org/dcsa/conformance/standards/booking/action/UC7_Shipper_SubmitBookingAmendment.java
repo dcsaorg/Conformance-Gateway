@@ -41,6 +41,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -55,7 +56,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var cbrr = dsp.carrierBookingRequestReference();
+        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
         var expectedBookingStatus = dsp.bookingStatus();
         Stream<ActionCheck> primaryExchangeChecks =
             Stream.of(
@@ -63,7 +64,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
                 new UrlPathCheck(
                     BookingRole::isShipper,
                     getMatchedExchangeUuid(),
-                    "/v2/bookings/%s".formatted(cbrr)),
+                    "/v2/bookings/%s".formatted(reference)),
                 new ResponseStatusCheck(
                     BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

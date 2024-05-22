@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
@@ -47,6 +45,7 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
+    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -55,12 +54,14 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var cbrr = getDspSupplier().get().carrierBookingRequestReference();
+        var dsp = getDspSupplier().get();
+        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        //var cbrr = getDspSupplier().get().carrierBookingRequestReference();
         var expectedBookingStatus = getDspSupplier().get().bookingStatus();
         Stream<ActionCheck> primaryExchangeChecks =
         Stream.of(
           new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
-          new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
+          new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(reference)),
           new ResponseStatusCheck(
             BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
           new ApiHeaderCheck(

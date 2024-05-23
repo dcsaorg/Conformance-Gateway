@@ -308,17 +308,25 @@ public class BookingChecks {
     body -> {
       var issues = new LinkedHashSet<String>();
       var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
-      var polNode = getShipmenLocationTypeCode(body,"POL");
-      var preNode = getShipmenLocationTypeCode(body,"PRE");
-      var pdeNode = getShipmenLocationTypeCode(body,"PDE");
-      var podNode = getShipmenLocationTypeCode(body,"POD");
-      var ielNode = getShipmenLocationTypeCode(body,"IEL");
+      var deliveryTypeAtDestination = body.path("deliveryTypeAtDestination").asText("");
+      var polNode = getShipmentLocationTypeCode(body,"POL");
+      var preNode = getShipmentLocationTypeCode(body,"PRE");
+      var pdeNode = getShipmentLocationTypeCode(body,"PDE");
+      var podNode = getShipmentLocationTypeCode(body,"POD");
+      var ielNode = getShipmentLocationTypeCode(body,"IEL");
 
+
+      if (((pdeNode == null || pdeNode.isEmpty()) &&  "SD".equals(deliveryTypeAtDestination)) && (podNode == null || podNode.isEmpty()) ) {
+        issues.add("Place of Delivery value must be provided");
+      }
       if ((pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty()) ) {
-        issues.add("Port of Discharge/Place of Delivery value must be provided");
+        issues.add("Port of Discharge value must be provided");
       }
       if ((preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty())) {
-        issues.add("Port of Load/Place of Receipt values must be provided");
+        issues.add("Port of Load values must be provided");
+      }
+      if (((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin)) && (polNode == null || polNode.isEmpty())) {
+        issues.add("Place of Receipt values must be provided");
       }
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
         issues.add("Container intermediate export stop-off location should not be provided");
@@ -336,10 +344,10 @@ public class BookingChecks {
       var carrierServiceName = body.path("carrierServiceName").asText("");
       var expectedDepartureDate = body.path("expectedDepartureDate").asText("");
 
-      var polNode = getShipmenLocationTypeCode(body,"POL");
-      var preNode = getShipmenLocationTypeCode(body,"PRE");
-      var pdeNode = getShipmenLocationTypeCode(body,"PDE");
-      var podNode = getShipmenLocationTypeCode(body,"POD");
+      var polNode = getShipmentLocationTypeCode(body,"POL");
+      var preNode = getShipmentLocationTypeCode(body,"PRE");
+      var pdeNode = getShipmentLocationTypeCode(body,"PDE");
+      var podNode = getShipmentLocationTypeCode(body,"POD");
 
       String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
       String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
@@ -360,7 +368,8 @@ public class BookingChecks {
       }
        return issues;
     });
-  private static JsonNode getShipmenLocationTypeCode(JsonNode body, @NonNull String locationTypeCode) {
+
+  private static JsonNode getShipmentLocationTypeCode(JsonNode body, @NonNull String locationTypeCode) {
     var shipmentLocations = body.path("shipmentLocations");
     return StreamSupport.stream(shipmentLocations.spliterator(), false)
       .filter(o ->  o.path("locationTypeCode").asText("").equals(locationTypeCode))

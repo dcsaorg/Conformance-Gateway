@@ -68,7 +68,7 @@
           "streetNumber": "5",
           "postCode": "5466",
           "city": "AE Veghel",
-          "country": "Netherlands"
+          "countryCode": "NL"
         }
       },
       "locationTypeCode": "POD"

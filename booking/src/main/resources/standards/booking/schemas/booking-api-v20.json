@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Booking",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0 Beta 2](https://dcsa.org/standards/booking/documentation-booking-2-beta-2) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-2). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0 Beta 3](https://dcsa.org/standards/booking/documentation-booking-2-beta-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,7 +12,7 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "2.0.0-Beta-2"
+    "version": "2.0.0-Beta-3"
   },
   "servers": [
     {
@@ -32,7 +32,7 @@
           "Booking"
         ],
         "summary": "Creates a new Booking\n",
-        "description": "Creates a new booking request. This endPoint corresponds with **UseCase 1 - Submit booking request**.\n\n**Needs to be updated**\n\n## Precondition\nThe consumer has information for a `Booking Request`\n\n## Postcondition\nThe provider has received the `Booking Request`. \n\nThe consumer will receive a `201` (Created) if the request payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a `Booking Request`:\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n    - all required properties are provided\n    - all values provided have correct data type.\n\n    A `carrierBookingRequestReference` (as a reference to the `Booking Request`) is created and stored along with the payload in the provider system.\n  \n    **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**\n\n3. A `201` (Created) response is returned with the following payload\n    ```\n    {\n      carrierBookingRequestReference: 'cbrr-123',\n      bookingStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-2#/Notifications/booking-notifications).\n\nFor `POST` `Booking Request` the process ends here. The `Booking Request`\n\n  - is now stored in the provider system\n  - has status `RECEIVED`\n  - a `201` (Created) response is sent to the consumer with a payload containing `bookingStatus='RECEIVED'`\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Booking Request` will be communicated via a `Booking Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v2/bookings/{bookingReference}\n    \n  endPoint to check if the `bookingStatus` of the `Booking Request` has changed.\n",
+        "description": "Creates a new booking request. This endPoint corresponds with **UseCase 1 - Submit booking request**.\n\n**Needs to be updated**\n\n## Precondition\nThe consumer has information for a `Booking Request`\n\n## Postcondition\nThe provider has received the `Booking Request`. \n\nThe consumer will receive a `201` (Created) if the request payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a `Booking Request`:\n\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n    - all required properties are provided\n    - all values provided have correct data type.\n\n    A `carrierBookingRequestReference` (as a reference to the `Booking Request`) is created and stored along with the payload in the provider system.\n  \n    **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**\n\n3. A `201` (Created) response is returned with the following payload\n    ```\n    {\n      carrierBookingRequestReference: 'cbrr-123',\n      bookingStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3#/Notifications/booking-notifications).\n\nFor `POST` `Booking Request` the process ends here. The `Booking Request`\n  - is now stored in the provider system\n  - has status `RECEIVED`\n  - a `201` (Created) response is sent to the consumer with a payload containing `bookingStatus='RECEIVED'`\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Booking Request` will be communicated via a `Booking Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v2/bookings/{bookingReference}\n    \nendPoint to check if the `bookingStatus` of the `Booking Request` has changed.\n",
         "operationId": "create-bookings",
         "parameters": [
           {
@@ -463,7 +463,7 @@
                               "dangerousGoods": [
                                 {
                                   "unNumber": "3082",
-                                  "properShippingName": "Environmentally hazardous substance, liquid, N.O.S",
+                                  "properShippingName": "Environmentally hazardous substance, liquid, N.O.S\n",
                                   "imoClass": "9",
                                   "isMarinePollutant": false,
                                   "packingGroup": 3,
@@ -545,7 +545,7 @@
                       "requestUri": "/v2/bookings",
                       "statusCode": 400,
                       "statusCodeText": "Bad Request",
-                      "statusCodeMessage": "receiptTypeAtOrigin not found - it is a mandatory property in Booking request",
+                      "statusCodeMessage": "receiptTypeAtOrigin not found - it is a mandatory property in Booking request\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -553,7 +553,7 @@
                           "errorCode": 7003,
                           "property": "receiptTypeAtOrigin",
                           "errorCodeText": "mandatory property missing",
-                          "errorCodeMessage": "receiptTypeAtOrigin must be provided as part of a Booking request"
+                          "errorCodeMessage": "receiptTypeAtOrigin must be provided as part of a Booking request\n"
                         }
                       ]
                     }
@@ -583,7 +583,7 @@
                       "requestUri": "/v2/bookings",
                       "statusCode": 500,
                       "statusCodeText": "Internal Server Error",
-                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request",
+                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -614,13 +614,13 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Making too many Bookings Requests\n",
-                    "description": "Calling the endPoint\n\n    POST /v2/bookings\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    POST /v2/bookings\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "POST",
                       "requestUri": "/v2/bookings",
                       "statusCode": 429,
                       "statusCodeText": "Too Many Requests",
-                      "statusCodeMessage": "Too many request to create a booking has been requested. Please try again in 1 hour",
+                      "statusCodeMessage": "Too many request to create a booking has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -645,7 +645,7 @@
           "Booking"
         ],
         "summary": "Gets the Booking\n",
-        "description": "Retrieves the `Booking Request` with the `bookingReference`. The path can contain a `carrierBookingRequestReference` or a `carrierBookingReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Booking`. It is also possible to get the latest amendment to a `Booking` called the `Amended Booking`. In order to get the `Amended Booking`, it is necessary to use the query parameter `amendedContent` and set it to `true`.\n\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n\nThe `status` of the \"original\" `Booking` is included in both payloads as `bookingStatus`. `amendedBookingStatus` and related content is only available after the provider has approved the `Booking` via **UseCase 5: Confirm Booking request** and until:\n- the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessable.\n- the consumer submits a new amendment (**UseCase 7: Request amendment to confirmed Booking**) in which case the \"new update\" provided **replaces** the \"old update\".\n- the provider re-confirms the `Booking` (**UseCase 5: Confirm booking request**) in which case the \"old update\" is no longer accessable.\n\nIf `amendedContent=true` is requested but no amendment has yet been provided by the consumer **or** the state of the \"original\" `Booking` is `PENDING AMENDMENT`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting some changes to the `Booking` this will also be part of the \"original\" `Booking` payload in the `requestedChanges` property. This property is **conditional** on the `bookingStatus='PENDING UPDATE'` (in case the `Booking` has not yet been confirmed) or `bookingStatus='PENDING AMENDMENT'` (in case it is a confirmed `Booking`).\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `bookingStatus` and/or `amendedBookingStatus` has changed.\n",
+        "description": "Retrieves the `Booking Request` with the `bookingReference`. The path can contain a `carrierBookingRequestReference` or a `carrierBookingReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Booking`. It is also possible to get the latest amendment to a `Booking` called the `Amended Booking`. In order to get the `Amended Booking`, it is necessary to use the query parameter `amendedContent` and set it to `true`.\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n\nThe `status` of the \"original\" `Booking` is included in both payloads as `bookingStatus`. `amendedBookingStatus` and related content is only available after the provider has approved the `Booking` via **UseCase 5: Confirm Booking request** and until:\n- the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessable.\n- the consumer submits a new amendment (**UseCase 7: Request amendment to confirmed Booking**) in which case the \"new update\" provided **replaces** the \"old update\".\n- the provider re-confirms the `Booking` (**UseCase 5: Confirm booking request**) in which case the \"old update\" is no longer accessable.\n\nIf `amendedContent=true` is requested but no amendment has yet been provided by the consumer **or** the state of the \"original\" `Booking` is `PENDING AMENDMENT`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting some changes to the `Booking` this will also be part of the \"original\" `Booking` payload in the `requestedChanges` property. This property is **conditional** on the `bookingStatus='PENDING UPDATE'` (in case the `Booking` has not yet been confirmed) or `bookingStatus='PENDING AMENDMENT'` (in case it is a confirmed `Booking`).\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `bookingStatus` and/or `amendedBookingStatus` has changed.\n",
         "operationId": "get-bookings",
         "parameters": [
           {
@@ -804,7 +804,7 @@
                         {
                           "jsonPath": "$.requestedEquipment.units",
                           "property": "units",
-                          "message": "Not enough available \"42GP\" equipment. Please change to \"22G1\" instead"
+                          "message": "Not enough available \"42GP\" equipment. Please change to \"22G1\" instead\n"
                         }
                       ]
                     }
@@ -935,7 +935,7 @@
                           "modeOfTransport": "VESSEL",
                           "vesselName": "MAERSK IOWA",
                           "vesselIMONumber": "9298686",
-                          "carrierSerivceCode": "TA1",
+                          "carrierServiceCode": "TA1",
                           "carrierExportVoyageNumber": "403W"
                         }
                       ],
@@ -960,7 +960,7 @@
                         }
                       ],
                       "carrierClauses": [
-                        "The date of shipment, the carrying vessel and the schedule are not guaranteed and are always subject to changes.",
+                        "The date of shipment, the carrying vessel and theschedule are not guaranteed and are always subject tochanges.",
                         "Operations such as lifting, stowage, drayage and customs declaration of containers are based on the description of the nature, quantity, measurement and weight declared by the Shipper. The Shipper shall be liable for any damage, loss, expense and fines incurred by Carrier XYZ or its agents due to incorrectness or incompleteness of such declaration.",
                         "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014).",
                         "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
@@ -972,7 +972,7 @@
             }
           },
           "404": {
-            "description": "In case the consumer is requesting the `Amended Booking` by calling:\n\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n    \nbut:\n- the `Booking` has not yet been confirmed\n- the `Booking` has been confirmed but no amendment has yet been provided by the consumer\n- the provider has requested for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessable.\n\na `404` (Not Found) is returned.\n",
+            "description": "In case the consumer is requesting the `Amended Booking` by calling:\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n    \nbut:\n- the `Booking` has not yet been confirmed\n- the `Booking` has been confirmed but no amendment has yet been provided by the consumer\n- the provider has requested for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessable.\n\na `404` (Not Found) is returned.\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1029,7 +1029,7 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 500,
                       "statusCodeText": "Internal Server Error",
-                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request",
+                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -1060,20 +1060,20 @@
                 "examples": {
                   "getError": {
                     "summary": "GET non-existing Booking Request\n",
-                    "description": "Calling\n\n    GET /v2/bookings/cbrr-123\n    \nresults in an error as booking `cbrr-123` does not exist.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling\n    GET /v2/bookings/cbrr-123\n    \nresults in an error as booking `cbrr-123` does not exist.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 404,
                       "statusCodeText": "Not Found",
-                      "statusCodeMessage": "The requested carrierBookingRequestReference does not exist",
+                      "statusCodeMessage": "The requested carrierBookingRequestReference does not exist\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
                           "errorCodeText": "Non existent carrierBookingRequestReference",
-                          "errorCodeMessage": "carrierBookingRequestReference `cbrr-123` does not exist"
+                          "errorCodeMessage": "carrierBookingRequestReference `cbrr-123` does not exist\n"
                         }
                       ]
                     }
@@ -1089,7 +1089,7 @@
           "Booking"
         ],
         "summary": "Updates the Booking\n",
-        "description": "Updates the `Booking Request` with the `bookingReference`. The path can contain either a `carrierBookingRequestReference` or a `carrierBookingReference`. This endPoint corresponds with either\n\n- **UseCase 3 - Submit updated Booking request**\n- **UseCase 7 - Request amendments to confirmed Booking**\n\nThis endPoint is to be used in response to\n\n- **UseCase 2 - Request to update Booking request**\n- **UseCase 6 - Request to amend confirmed Booking**\n\nthe endPoint can also be used in case `bookingStatus='RECEIVED'` and the consumer has an update to the `Booking Request`.\n\n### Precondition\nIn order to update a `Booking Request`, the status of the `Booking Request` needs to be in state\n\n- `RECEIVED` in case the consumer has updated information for the `Booking Request`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Booking Request` (a result of **UseCase 2 - Request to update Booking request**)\n- `UPDATE RECEIVED` in case the consumer has additional changes to an already sent update\n- `PENDING AMENDMENT` in case the provider has requested the consumer to amend the `Booking Request` (a result of **UseCase 6 - Request to amend confirmed Booking**)\n- `CONFIRMED` in case the consumer has an amendment to the `Booking Request`\n\n## Postcondition\nThe provider has received an update (**UseCase 3 - Submit updated Booking request**) or an amendment (**UseCase 7 - Request amendments to confirmed Booking**) to the `Booking Request`.\n\nIn case an amendment was received to the `Booking Request`(**UseCase 7 - Request to amend confirmed Booking**) - the amendment will be called `Amended Booking`. The `Amended Booking` and the \"original\" `Booking Request` will **co-exist** until a new amendment is submitted by the consumer (via **UseCase 7: Request amendments to confirmed Booking**) or until the provider requests an update (sets the `bookingStatus='PENDING AMENDMENT'` via **UseCase 6: Request to amend confirmed Booking**). If the `amendedBookingStatus` is present it always represents the latest version of an amendment received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an **update** to a `Booking Request`\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n\n2. The payload is schema-valid which means\n   - all required properties are provided\n   - all values provided have correct data type\n  \n   The updated `Booking Request` is stored in the provider system.\n\n   **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**\n\n3. The response depends on which useCase is the reason for calling this endPoint (what the `bookingStatus` is):\n\n    - If `bookingStatus` **is** `RECEIVED` then this endPoint is being used in addition to **UseCase 1 - Submit booking request**. In this case the consumer would like to make an update to an already sent `Booking Request` - this is done via **UseCase 3 - Submit updated Booking Request**. The `bookingStatus` now changes to `UPDATE RECEIVED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `bookingStatus` is `PENDING UPDATE` then this endPoint is being used as a reponse to **UseCase 2 - Request to update Booking request** in this case the provider has requested an update to a `Booking Request`.  The `bookingStatus` now changes to `UPDATE RECEIVED`.\n\n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n    \n    - If `bookingStatus` is `UPDATE RECEIVED` then this endPoint is being used to update an already sent update. The `bookingStatus` stays as `UPDATE RECEIVED`.\n\n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n    \n    - If `bookingStatus` is `PENDING AMENDMENT` then this endPoint is being used as a response to **UseCase 6 - Request to amend Confirmed Booking**, in this case the provider has requested an amendment to a `Confirmed Booking`. The `bookingStatus` stays `PENDING AMENDMENT` and `amendedBookingStatus` is set to `AMENDMENT RECEVIED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingReference: 'cbr-987',\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'PENDING AMENDMENT',\n        amendedBookingStatus: 'AMENDMENT RECEIVED'\n      }\n      ```\n    \n    - If `bookingStatus` is `CONFIRMED` then this endPoint is being used in order to request an amendment to a `Confirmed Booking` this is done via **UseCase 7 - Request Amendments to Confirmed Booking**. The `bookingStatus` stays `CONFIRMED` and `amendedBookingStatus` is set to `AMENDMENT RECEIVED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingReference: 'cbr-987',\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'CONFIRMED',\n        amendedBookingStatus: 'AMENDMENT RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-2#/Notifications/booking-notifications).\n\nFor `PUT` `Booking Request` the process ends here. The `Booking Request`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Booking` (and possibly also with the `amendedBookingStatus`) with one of the following values (depending on the useCase):\n    - `bookingStatus='UPDATE RECEIVED'` (if endPoint used before a `Booking`has been confirmed)\n    - `bookingStatus='PENDING AMENDMENT'` and `amendedBookingStatus='AMENDMENT RECEIVED'` (if endPoint used as a response to **UseCase 6 - Request to amend Confirmed Booking**)\n    - `bookingStatus='CONFIRMED'` and `amendedBookingStatus='AMENDMENT RECEIVED'` (if consumer is requesting an amendment to a `Confirmed Booking`)\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Booking` and `Amended Booking Request` will be communicated via a `Booking Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v2/bookings/{bookingReference}\n    \n  endPoint to check if the `bookingStatus` and `amendedBookingStatus` of the `Booking` has changed.\n  \n  If the consumer wants to get the content of the `Amended Booking` provided via this `PUT` endPoint, the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:\n\n      GET /v2/bookings/{bookingReference}?amendedContent=true\n\n  It is possible to `GET` the content of the `Amended Booking` via the example above until either:\n\n  - the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 7: Request amendment to confirmed Booking**) in which case the \"new amendment\" provided **replaces** the \"old amendment\".\n",
+        "description": "Updates the `Booking Request` with the `bookingReference`. The path can contain either a `carrierBookingRequestReference` or a `carrierBookingReference`. This endPoint corresponds with either\n- **UseCase 3 - Submit updated Booking request**\n- **UseCase 7 - Request amendments to confirmed Booking**\n\nThis endPoint is to be used in response to\n- **UseCase 2 - Request to update Booking request**\n- **UseCase 6 - Request to amend confirmed Booking**\n\nthe endPoint can also be used in case `bookingStatus='RECEIVED'` and the consumer has an update to the `Booking Request`.\n\n### Precondition\nIn order to update a `Booking Request`, the status of the `Booking Request` needs to be in state\n- `RECEIVED` in case the consumer has updated information for the `Booking Request`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Booking Request` (a result of **UseCase 2 - Request to update Booking request**)\n- `UPDATE RECEIVED` in case the consumer has additional changes to an already sent update\n- `PENDING AMENDMENT` in case the provider has requested the consumer to amend the `Booking Request` (a result of **UseCase 6 - Request to amend confirmed Booking**)\n- `CONFIRMED` in case the consumer has an amendment to the `Booking Request`\n\n## Postcondition\nThe provider has received an update (**UseCase 3 - Submit updated Booking request**) or an amendment (**UseCase 7 - Request amendments to confirmed Booking**) to the `Booking Request`.\n\nIn case an amendment was received to the `Booking Request`(**UseCase 7 - Request to amend confirmed Booking**) - the amendment will be called `Amended Booking`. The `Amended Booking` and the \"original\" `Booking Request` will **co-exist** until a new amendment is submitted by the consumer (via **UseCase 7: Request amendments to confirmed Booking**) or until the provider requests an update (sets the `bookingStatus='PENDING AMENDMENT'` via **UseCase 6: Request to amend confirmed Booking**). If the `amendedBookingStatus` is present it always represents the latest version of an amendment received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an **update** to a `Booking Request`\n1. The payload (`Booking Request`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means\n   - all required properties are provided\n   - all values provided have correct data type\n  \n   The updated `Booking Request` is stored in the provider system.\n\n   **For the rest of this description and in all examples the value `cbrr-123` will be used as `carrierBookingRequestReference`**\n3. The response depends on which useCase is the reason for calling this endPoint (what the `bookingStatus` is):\n    - If `bookingStatus` **is** `RECEIVED` then this endPoint is being used in addition to **UseCase 1 - Submit booking request**. In this case the consumer would like to make an update to an already sent `Booking Request` - this is done via **UseCase 3 - Submit updated Booking Request**. The `bookingStatus` now changes to `UPDATE RECEIVED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n    - If `bookingStatus` is `PENDING UPDATE` then this endPoint is being used as a reponse to **UseCase 2 - Request to update Booking request** in this case the provider has requested an update to a `Booking Request`.  The `bookingStatus` now changes to `UPDATE RECEIVED`.\n\n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n    - If `bookingStatus` is `UPDATE RECEIVED` then this endPoint is being used to update an already sent update. The `bookingStatus` stays as `UPDATE RECEIVED`.\n\n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'UPDATE RECEIVED'\n      }\n      ```\n    - If `bookingStatus` is `PENDING AMENDMENT` then this endPoint is being used as a response to **UseCase 6 - Request to amend Confirmed Booking**, in this case the provider has requested an amendment to a `Confirmed Booking`. The `bookingStatus` stays `PENDING AMENDMENT` and `amendedBookingStatus` is set to `AMENDMENT RECEVIED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingReference: 'cbr-987',\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'PENDING AMENDMENT',\n        amendedBookingStatus: 'AMENDMENT RECEIVED'\n      }\n      ```\n    - If `bookingStatus` is `CONFIRMED` then this endPoint is being used in order to request an amendment to a `Confirmed Booking` this is done via **UseCase 7 - Request Amendments to Confirmed Booking**. The `bookingStatus` stays `CONFIRMED` and `amendedBookingStatus` is set to `AMENDMENT RECEIVED`.\n    \n      A `200` (OK) response corresponding to the following payload is returned\n      ```\n      {\n        carrierBookingReference: 'cbr-987',\n        carrierBookingRequestReference: 'cbrr-123',\n        bookingStatus: 'CONFIRMED',\n        amendedBookingStatus: 'AMENDMENT RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3#/Notifications/booking-notifications).\n\nFor `PUT` `Booking Request` the process ends here. The `Booking Request`\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Booking` (and possibly also with the `amendedBookingStatus`) with one of the following values (depending on the useCase):\n    - `bookingStatus='UPDATE RECEIVED'` (if endPoint used before a `Booking`has been confirmed)\n    - `bookingStatus='PENDING AMENDMENT'` and `amendedBookingStatus='AMENDMENT RECEIVED'` (if endPoint used as a response to **UseCase 6 - Request to amend Confirmed Booking**)\n    - `bookingStatus='CONFIRMED'` and `amendedBookingStatus='AMENDMENT RECEIVED'` (if consumer is requesting an amendment to a `Confirmed Booking`)\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Booking` and `Amended Booking Request` will be communicated via a `Booking Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n    GET /v2/bookings/{bookingReference}\n    \nendPoint to check if the `bookingStatus` and `amendedBookingStatus` of the `Booking` has changed.\n  \nIf the consumer wants to get the content of the `Amended Booking` provided via this `PUT` endPoint, the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n\nIt is possible to `GET` the content of the `Amended Booking` via the example above until either:\n\n- the provider requests for a new amendment (**UseCase 6: Request to amend confirmed Booking**) in which case the \"old update\" is no longer accessible\n- the consumer submits a new update (**UseCase 7: Request amendment to confirmed Booking**) in which case the \"new amendment\" provided **replaces** the \"old amendment\".\n",
         "operationId": "update-bookings",
         "parameters": [
           {
@@ -1540,7 +1540,7 @@
                               "dangerousGoods": [
                                 {
                                   "unNumber": "3082",
-                                  "properShippingName": "Environmentally hazardous substance, liquid, N.O.S",
+                                  "properShippingName": "Environmentally hazardous substance, liquid, N.O.S\n",
                                   "imoClass": "9",
                                   "isMarinePollutant": false,
                                   "packingGroup": 3,
@@ -1577,7 +1577,7 @@
         },
         "responses": {
           "200": {
-            "description": "The `Booking request` has been successfully updated in the provider systemwith one of the following combinations (depending on the use case):\n- `bookingStatus='PENDING UPDATE'` in case the consumer has provided an update to a `Booking request` and is awaiting the provider to take action\n- `bookingStatus='PENDING AMENDMENT'` and `amendedBookingStatus='AMENDMENT RECEIVED'` in case the provider has requested an amendment and the consumer has provided an amendment to a `Confirmed Booking` and is awaiting the provider to take action\n- `bookingStatus='CONFIRMED'` and `amendedBookingStatus='AMENDMENT RECEIVED'` in case the consumer has provided an amendment to a `Confirmed Booking` and is awaiting the provider to take action\n\nThe status of the `Booking` can be monitored on the\n\n    GET /v2/bookings/{bookingReference}\n\n  endPoint by the consumer. If the consumer wants to get the content of the `Amended Booking` the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:\n\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n",
+            "description": "The `Booking request` has been successfully updated in the provider systemwith one of the following combinations (depending on the use case):\n- `bookingStatus='PENDING UPDATE'` in case the consumer has provided an update to a `Booking request` and is awaiting the provider to take action\n- `bookingStatus='PENDING AMENDMENT'` and `amendedBookingStatus='AMENDMENT RECEIVED'` in case the provider has requested an amendment and the consumer has provided an amendment to a `Confirmed Booking` and is awaiting the provider to take action\n- `bookingStatus='CONFIRMED'` and `amendedBookingStatus='AMENDMENT RECEIVED'` in case the consumer has provided an amendment to a `Confirmed Booking` and is awaiting the provider to take action\n\nThe status of the `Booking` can be monitored on the\n    GET /v2/bookings/{bookingReference}\n\nendPoint by the consumer. If the consumer wants to get the content of the `Amended Booking` the `GET` endPoint needs to be used in combination with the `?amendedContent=true` queryParameter:\n    GET /v2/bookings/{bookingReference}?amendedContent=true\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1591,7 +1591,7 @@
                 "examples": {
                   "updateReceivedExample": {
                     "summary": "Booking request updated\n",
-                    "description": "An updated `Booking request` received, schema validated and stored in provider system - the `Booking` now awaits provider action\n\n    bookingStatus='UPDATE RECEIVED'\n",
+                    "description": "An updated `Booking request` received, schema validated and stored in provider system - the `Booking` now awaits provider action\n    bookingStatus='UPDATE RECEIVED'\n",
                     "value": {
                       "carrierBookingRequestReference": "cbrr-123",
                       "bookingStatus": "UPDATE RECEIVED"
@@ -1599,7 +1599,7 @@
                   },
                   "pendingAmendmentApprovalExample": {
                     "summary": "Confirmed Booking amendment\n",
-                    "description": "An amendment to a `Confirmed Booking` received, schema validated and stored in provider system - the `Booking` now awaits provider action\n\n    bookingStatus='CONFIRMED'\n    amendedBookingStatus: 'AMENDMENT RECEIVED'\n",
+                    "description": "An amendment to a `Confirmed Booking` received, schema validated and stored in provider system - the `Booking` now awaits provider action\n    bookingStatus='CONFIRMED'\n    amendedBookingStatus: 'AMENDMENT RECEIVED'\n",
                     "value": {
                       "carrierBookingRequestReference": "cbrr-123",
                       "carrierBookingReference": "cbr-987",
@@ -1609,7 +1609,7 @@
                   },
                   "pendingAmendmentExample": {
                     "summary": "Confirm requested Booking amendment\n",
-                    "description": "A requested amendment to a `Confirmed Booking` by the provider has been received, schema validated and stored in provider system. The `Booking` now awaits provider action\n\n    bookingStatus='PENDING AMENDMENT'\n    amendedBookingStatus: 'AMENDMENT RECEIVED'\n",
+                    "description": "A requested amendment to a `Confirmed Booking` by the provider has been received, schema validated and stored in provider system. The `Booking` now awaits provider action\n    bookingStatus='PENDING AMENDMENT'\n    amendedBookingStatus: 'AMENDMENT RECEIVED'\n",
                     "value": {
                       "carrierBookingRequestReference": "cbrr-123",
                       "carrierBookingReference": "cbr-987",
@@ -1642,7 +1642,7 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 400,
                       "statusCodeText": "Bad Request",
-                      "statusCodeMessage": "receiptTypeAtOrigin not found - it is a mandatory property in Booking request",
+                      "statusCodeMessage": "receiptTypeAtOrigin not found - it is a mandatory property in Booking request\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -1650,7 +1650,7 @@
                           "errorCode": 7003,
                           "property": "receiptTypeAtOrigin",
                           "errorCodeText": "mandatory property missing",
-                          "errorCodeMessage": "receiptTypeAtOrigin must be provided as part of a Booking request"
+                          "errorCodeMessage": "receiptTypeAtOrigin must be provided as part of a Booking request\n"
                         }
                       ]
                     }
@@ -1680,14 +1680,14 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 409,
                       "statusCodeText": "Conflict",
-                      "statusCodeMessage": "Previous request is being processed. Please try again later",
+                      "statusCodeMessage": "Previous request is being processed. Please try again\nlater\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
                           "errorCodeText": "Conflicting request is being processed",
-                          "errorCodeMessage": "The Booking cannot be updated/amended while it is being processed. Please try again later"
+                          "errorCodeMessage": "The Booking cannot be updated/amended while it is being processed. Please try again later\n"
                         }
                       ]
                     }
@@ -1717,7 +1717,7 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 500,
                       "statusCodeText": "Internal Server Error",
-                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request",
+                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -1754,7 +1754,7 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 429,
                       "statusCodeText": "Too Many Requests",
-                      "statusCodeMessage": "Too many request to update a booking has been requested. Please try again in 1 hour",
+                      "statusCodeMessage": "Too many request to update a booking has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -1777,7 +1777,7 @@
           "Booking"
         ],
         "summary": "Cancels the Booking or cancels a Booking Amendment\n",
-        "description": "A shipper initiated cancellation of the `Booking` or `Booking Amendment`. This endPoint corresponds with **UseCase 11 - Cancel Booking by shipper** or **UseCase 9 - Cancel amendment to confirmed Booking**.\n\n## Precondition\nIn order to cancel a `Booking`, the `bookingStatus` must be either\n- `RECEIVED`\n- `PENDING UPDATE`\n- `UPDATE RECEIVED`\n- `CONFIRMED`\n- `PENDING AMENDMENT`\n\nIn order to cancel a `Booking Amendment`, the status of the `Booking Amendment` must be\n- `AMENDMENT RECEIVED`\n\n## Postcondition\nThe provider has received a cancellation from the consumer for a `Booking` or for a `Booking Amendment`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a cancellation request:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n\n   - all required properties are provided.\n   - all values provided have correct data type.\n3. Depending on the paylod of the request - either:\n\n   - the entire `Booking` is cancelled (including any ongoing amendment). This is the case when the payload contains `bookingStatus='CANCELLED'`.\n   \n     When cancelling a `Booking` the `amendedBookingStatus` is set to `AMENDMENT CANCELLED`\n   - only the amendment to the `Booking` is cancelled (in this case the `Booking` continues and `bookingStatus` stays unchanged). This is the case when the payload contains `amendedBookingStatus='AMENDMENT CANCELLED'`.\n     \n     **If** no amendment is being requested prior to this call (`amendedBookingStatus` is **not** `AMENDMENT RECIEVED`) then a 404 (Not Found) is returned\n4. All '*relevant*' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-2#/Notifications/booking-notifications).\n",
+        "description": "A shipper initiated cancellation of the `Booking` or `Booking Amendment`. This endPoint corresponds with **UseCase 11 - Cancel Booking by shipper** or **UseCase 9 - Cancel amendment to confirmed Booking**.\n\n## Precondition\nIn order to cancel a `Booking`, the `bookingStatus` must be either\n- `RECEIVED`\n- `PENDING UPDATE`\n- `UPDATE RECEIVED`\n- `CONFIRMED`\n- `PENDING AMENDMENT`\n\nIn order to cancel a `Booking Amendment`, the status of the `Booking Amendment` must be\n- `AMENDMENT RECEIVED`\n\n## Postcondition\nThe provider has received a cancellation from the consumer for a `Booking` or for a `Booking Amendment`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a cancellation request:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n   - all required properties are provided.\n   - all values provided have correct data type.\n3. Depending on the paylod of the request - either:\n   - the entire `Booking` is cancelled (including any ongoing amendment). This is the case when the payload contains `bookingStatus='CANCELLED'`.\n   \n     When cancelling a `Booking` the `amendedBookingStatus` is set to `AMENDMENT CANCELLED`\n   - only the amendment to the `Booking` is cancelled (in this case the `Booking` continues and `bookingStatus` stays unchanged). This is the case when the payload contains `amendedBookingStatus='AMENDMENT CANCELLED'`.\n     \n     **If** no amendment is being requested prior to this call (`amendedBookingStatus` is **not** `AMENDMENT RECIEVED`) then a 404 (Not Found) is returned\n4. All '*relevant*' subscribers will be notified via a [Booking Notification](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3#/Notifications/booking-notifications).\n",
         "operationId": "cancel-booking",
         "parameters": [
           {
@@ -1902,7 +1902,7 @@
                       "requestUri": "/v2/bookings/cbrr-123",
                       "statusCode": 409,
                       "statusCodeText": "Conflict",
-                      "statusCodeMessage": "Previous request is being processed. Please try again later",
+                      "statusCodeMessage": "Previous request is being processed. Please try again later\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
@@ -2049,6 +2049,7 @@
         "properties": {
           "locationName": {
             "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The name of the location.",
             "example": "Port of Amsterdam"
@@ -2056,7 +2057,7 @@
           "locationType": {
             "maxLength": 4,
             "type": "string",
-            "description": "Discriminator used to identify this as an `Address` location interface.",
+            "description": "Discriminator used to identify this as an `Address` location interface.\n",
             "example": "ADDR"
           },
           "address": {
@@ -2067,45 +2068,50 @@
       },
       "Address": {
         "title": "Address",
+        "required": [
+          "city",
+          "countryCode",
+          "street",
+          "streetNumber"
+        ],
         "type": "object",
         "properties": {
           "street": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the street of the party’s address.",
+            "description": "The name of the street of the party's address.",
             "example": "Ruijggoordweg"
           },
           "streetNumber": {
             "maxLength": 50,
             "type": "string",
-            "description": "The number of the street of the party’s address.",
+            "description": "The number of the street of the party's address.",
             "example": "100"
           },
           "floor": {
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The floor of the party’s street number.\n",
+            "description": "The floor of the party's street number.\n",
             "example": "2nd"
           },
           "postCode": {
-            "maxLength": 50,
+            "maxLength": 10,
             "type": "string",
-            "description": "The post code of the party’s address.",
+            "description": "The post code of the party's address.",
             "example": "1047 HM"
           },
           "city": {
             "maxLength": 65,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The city name of the party’s address.\n",
+            "description": "The city name of the party's address.\n",
             "example": "Amsterdam"
           },
           "stateRegion": {
             "maxLength": 65,
             "type": "string",
-            "description": "The state/region of the party’s address.",
-            "nullable": true,
+            "description": "The state/region of the party's address.",
             "example": "North Holland"
           },
           "countryCode": {
@@ -2153,13 +2159,12 @@
             "maxLength": 6,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\nThe definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx)  - for `BIC` - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)",
-            "nullable": false,
+            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\n\nThe definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx) \n- for `BIC` - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)\n",
             "example": "ADT"
           },
           "facilityCodeListProvider": {
             "type": "string",
-            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code) - `SMDG` (Requires a UN Location Code)\n",
+            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code)\n- `SMDG` (Requires a UN Location Code)\n",
             "example": "SMDG",
             "enum": [
               "BIC",
@@ -2187,7 +2192,7 @@
           "locationType": {
             "maxLength": 4,
             "type": "string",
-            "description": "Discriminator used to identify this as a `UNLocation` location interface.",
+            "description": "Discriminator used to identify this as a `UNLocation` location interface.\n",
             "example": "UNLO"
           },
           "UNLocationCode": {
@@ -2257,7 +2262,7 @@
           "serviceContractReference": {
             "maxLength": 30,
             "type": "string",
-            "description": "Reference number for agreement between shipper and carrier through which optionally includes a certain minimum quantity of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n",
+            "description": "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n\n**Condition:** Either a valid `serviceContractReference` or `contractQuotationReference` must be provided.\n",
             "example": "HHL51800000"
           },
           "freightPaymentTermCode": {
@@ -2270,16 +2275,16 @@
             ]
           },
           "originChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_originChargesPaymentTerm"
+            "$ref": "#/components/schemas/Origin Charges Payment Term"
           },
           "destinationChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_destinationChargesPaymentTerm"
+            "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
           "contractQuotationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
+            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n\n**Condition:** Either a valid `contractQuotationReference` or `serviceContractReference` must be provided.\n",
             "example": "HHL1401"
           },
           "vessel": {
@@ -2289,14 +2294,14 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of a service as specified by the carrier\n",
+            "description": "The name of a service as specified by the carrier.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceCode` are blank\n",
             "example": "Great Lion Service"
           },
           "carrierServiceCode": {
             "maxLength": 11,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The carrier-specific code of the service for which the schedule details are published.\n",
+            "description": "The carrier specific code of the service for which the schedule details are published.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceName` are blank\n",
             "example": "FE1"
           },
           "universalServiceReference": {
@@ -2311,7 +2316,7 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
+            "description": "The carrier specific identifier of the export Voyage.\n\n**Condition:** Mandatory if `expectedDepartureDate` or `expectedArrivalAtPlaceOfDeliveryStartDate` and `expectedArrivalAtPlaceOfDeliveryEndDate` is not provided.\n",
             "example": "2103S"
           },
           "universalExportVoyageReference": {
@@ -2319,7 +2324,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
+            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "declaredValue": {
@@ -2356,7 +2361,7 @@
           },
           "isImportLicenseRequired": {
             "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular shipment/commodity/destination.\n",
+            "description": "Information provided by the shipper whether an import permit or license is required for this particular\nshipment/commodity/destination.\n",
             "example": true
           },
           "importLicenseReference": {
@@ -2368,19 +2373,19 @@
           },
           "expectedDepartureDate": {
             "type": "string",
-            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent. If vessel/voyage or expected date of arrival is not provided, this is mandatory\n",
+            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryStartDate": {
             "type": "string",
-            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryEndDate`\n",
+            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryEndDate": {
             "type": "string",
-            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryStartDate`\n",
+            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-19"
           },
@@ -2404,7 +2409,7 @@
             "maxLength": 20,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other. Conditional on booking channel being used\n",
+            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.\n\n**Condition:** a booking channel is being used\n",
             "example": "Inttra reference"
           },
           "incoTerms": {
@@ -2476,7 +2481,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/CreateBooking_documentParties"
+            "$ref": "#/components/schemas/Document Parties"
           },
           "partyContactDetails": {
             "type": "array",
@@ -2525,14 +2530,14 @@
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
           },
           "carrierBookingReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "ABC709951"
           },
           "receiptTypeAtOrigin": {
@@ -2572,7 +2577,7 @@
           "serviceContractReference": {
             "maxLength": 30,
             "type": "string",
-            "description": "Reference number for agreement between shipper and carrier through which optionally includes a certain minimum quantity of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n",
+            "description": "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n\n**Condition:** Either a valid `serviceContractReference` or `contractQuotationReference` must be provided.\n",
             "example": "HHL51800000"
           },
           "freightPaymentTermCode": {
@@ -2585,16 +2590,16 @@
             ]
           },
           "originChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_originChargesPaymentTerm"
+            "$ref": "#/components/schemas/Origin Charges Payment Term"
           },
           "destinationChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_destinationChargesPaymentTerm"
+            "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
           "contractQuotationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
+            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n\n**Condition:** Either a valid `contractQuotationReference` or `serviceContractReference` must be provided.\n",
             "example": "HHL1401"
           },
           "vessel": {
@@ -2604,14 +2609,14 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of a service as specified by the carrier\n",
+            "description": "The name of a service as specified by the carrier.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceCode` are blank\n",
             "example": "Great Lion Service"
           },
           "carrierServiceCode": {
             "maxLength": 11,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The carrier-specific code of the service for which the schedule details are published.\n",
+            "description": "The carrier specific code of the service for which the schedule details are published.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceName` are blank\n",
             "example": "FE1"
           },
           "universalServiceReference": {
@@ -2626,7 +2631,7 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
+            "description": "The carrier specific identifier of the export Voyage.\n\n**Condition:** Mandatory if `expectedDepartureDate` or `expectedArrivalAtPlaceOfDeliveryStartDate` and `expectedArrivalAtPlaceOfDeliveryEndDate` is not provided.\n",
             "example": "2103S"
           },
           "universalExportVoyageReference": {
@@ -2666,36 +2671,36 @@
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is ‘True’.\n",
+            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
             "example": "ABC123123"
           },
           "isImportLicenseRequired": {
             "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular shipment/commodity/destination.\n",
+            "description": "Information provided by the shipper whether an import permit or license is required for this particular\nshipment/commodity/destination.\n",
             "example": true
           },
           "importLicenseReference": {
             "maxLength": 35,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
             "example": "ABC123123"
           },
           "expectedDepartureDate": {
             "type": "string",
-            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent. If vessel/voyage or expected date of arrival is not provided, this is mandatory\n",
+            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryStartDate": {
             "type": "string",
-            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryEndDate`\n",
+            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryEndDate": {
             "type": "string",
-            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryStartDate`\n",
+            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-19"
           },
@@ -2719,7 +2724,7 @@
             "maxLength": 20,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other. Conditional on booking channel being used\n",
+            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.\n\n**Condition:** a booking channel is being used\n",
             "example": "Inttra reference"
           },
           "incoTerms": {
@@ -2791,7 +2796,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/CreateBooking_documentParties"
+            "$ref": "#/components/schemas/Document Parties"
           },
           "partyContactDetails": {
             "type": "array",
@@ -2841,14 +2846,14 @@
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
           },
           "carrierBookingReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "ABC709951"
           },
           "bookingStatus": {
@@ -2860,7 +2865,8 @@
           "amendedBookingStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n"
+            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n",
+            "example": "AMENDMENT RECEIVED"
           },
           "receiptTypeAtOrigin": {
             "maxLength": 3,
@@ -2899,7 +2905,7 @@
           "serviceContractReference": {
             "maxLength": 30,
             "type": "string",
-            "description": "Reference number for agreement between shipper and carrier through which optionally includes a certain minimum quantity of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n",
+            "description": "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n\n**Condition:** Either a valid `serviceContractReference` or `contractQuotationReference` must be provided.\n",
             "example": "HHL51800000"
           },
           "freightPaymentTermCode": {
@@ -2912,16 +2918,16 @@
             ]
           },
           "originChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_originChargesPaymentTerm"
+            "$ref": "#/components/schemas/Origin Charges Payment Term"
           },
           "destinationChargesPaymentTerm": {
-            "$ref": "#/components/schemas/CreateBooking_destinationChargesPaymentTerm"
+            "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
           "contractQuotationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference. Mandatory if service contract (owner) is not provided.\n",
+            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n\n**Condition:** Either a valid `contractQuotationReference` or `serviceContractReference` must be provided.\n",
             "example": "HHL1401"
           },
           "vessel": {
@@ -2931,14 +2937,14 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of a service as specified by the carrier\n",
+            "description": "The name of a service as specified by the carrier.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceCode` are blank\n",
             "example": "Great Lion Service"
           },
           "carrierServiceCode": {
             "maxLength": 11,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The carrier-specific code of the service for which the schedule details are published.\n",
+            "description": "The carrier specific code of the service for which the schedule details are published.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceName` are blank\n",
             "example": "FE1"
           },
           "universalServiceReference": {
@@ -2953,7 +2959,7 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The identifier of an export voyage. The carrier-specific identifier of the export Voyage.\n",
+            "description": "The carrier specific identifier of the export Voyage.\n\n**Condition:** Mandatory if `expectedDepartureDate` or `expectedArrivalAtPlaceOfDeliveryStartDate` and `expectedArrivalAtPlaceOfDeliveryEndDate` is not provided.\n",
             "example": "2103S"
           },
           "universalExportVoyageReference": {
@@ -2993,7 +2999,7 @@
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is ‘True’.\n",
+            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
             "example": "ABC123123"
           },
           "isImportLicenseRequired": {
@@ -3003,26 +3009,26 @@
           },
           "importLicenseReference": {
             "maxLength": 35,
-            "pattern": "^\\S+(\\s+\\S+)*$",
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
             "example": "ABC123123"
           },
           "expectedDepartureDate": {
             "type": "string",
-            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent. If vessel/voyage or expected date of arrival is not provided, this is mandatory\n",
+            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryStartDate": {
             "type": "string",
-            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryEndDate`\n",
+            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-17"
           },
           "expectedArrivalAtPlaceOfDeliveryEndDate": {
             "type": "string",
-            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at final destination. If vessel/voyage or `expectedDepartureDate` is not provided, this is mandatory together with `expectedArrivalAtPlaceOfDeliveryStartDate`\n",
+            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
             "format": "date",
             "example": "2021-05-19"
           },
@@ -3046,7 +3052,7 @@
             "maxLength": 20,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other. Conditional on booking channel being used\n",
+            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.\n\n**Condition:** a booking channel is being used\n",
             "example": "Inttra reference"
           },
           "incoTerms": {
@@ -3069,7 +3075,8 @@
           "termsAndConditions": {
             "maxLength": 50000,
             "type": "string",
-            "description": "Carrier terms and conditions of transport.\n"
+            "description": "Carrier terms and conditions of transport.\n",
+            "example": "Any reference in..."
           },
           "invoicePayableAt": {
             "$ref": "#/components/schemas/Invoice Payable At"
@@ -3123,7 +3130,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/Booking_documentParties"
+            "$ref": "#/components/schemas/Document Parties_1"
           },
           "partyContactDetails": {
             "type": "array",
@@ -3150,21 +3157,21 @@
           },
           "confirmedEquipments": {
             "type": "array",
-            "description": "A list of `Confirmed Equipments`\n\n**Conditional:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
+            "description": "A list of `Confirmed Equipments`\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
             "items": {
               "$ref": "#/components/schemas/ConfirmedEquipment"
             }
           },
           "transportPlan": {
             "type": "array",
-            "description": "A list of `Transport` objects (legs) describing the entire transport plan including transshipments.\n\n**Conditional:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
+            "description": "A list of `Transport` objects (legs) describing the entire transport plan including transshipments.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
             "items": {
               "$ref": "#/components/schemas/Transport"
             }
           },
           "shipmentCutOffTimes": {
             "type": "array",
-            "description": "A list of cut-off times provided by the carrier in the booking confirmation. A cut-off time indicates the latest deadline within which a task must be completed. The confirmed schedule cannot be guaranteed if a cut-off time is missed. Customs brokers may set additional cut-off times to receive the export customs documentation, which is not included in the shipment cut-off times of a carrier booking.\n\n**Conditional:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
+            "description": "A list of cut-off times provided by the carrier in the booking confirmation. A cut-off time indicates the latest deadline within which a task must be completed. The confirmed schedule cannot be guaranteed if a cut-off time is missed. Customs brokers may set additional cut-off times to receive the export customs documentation, which is not included in the shipment cut-off times of a carrier booking.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
             "items": {
               "$ref": "#/components/schemas/ShipmentCutOffTime"
             }
@@ -3202,7 +3209,6 @@
             }
           },
           "reason": {
-            "title": "reason",
             "maxLength": 5000,
             "type": "string",
             "description": "This field can be used to explain `bookingStatus` and/or `amendedBookingStatus`.\n",
@@ -3221,14 +3227,14 @@
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
           },
           "carrierBookingReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "ABC709951"
           },
           "bookingStatus": {
@@ -3240,7 +3246,8 @@
           "amendedBookingStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n"
+            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n",
+            "example": "AMENDMENT RECEIVED"
           },
           "requestedChanges": {
             "type": "array",
@@ -3250,7 +3257,6 @@
             }
           },
           "reason": {
-            "title": "reason",
             "maxLength": 5000,
             "type": "string",
             "description": "This field can be used to explain `bookingStatus` and/or `amendedBookingStatus`.\n",
@@ -3270,20 +3276,20 @@
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
           },
           "carrierBookingReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Conditional:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
             "example": "ABC709951"
           },
           "bookingStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Booking`. It can only be:\n\n- `CANCELLED` (in case the entire `Booking` has been cancelled)\n- `CONFIRMED` (in case the `Booking` is still confirmed)\n- `PENDING AMENDMENT` (in case the provider is still waithing for an amendment to a `Booking`)\n",
+            "description": "The status of the `Booking`. It can only be:\n- `CANCELLED` (in case the entire `Booking` has been cancelled)\n- `CONFIRMED` (in case the `Booking` is still confirmed)\n- `PENDING AMENDMENT` (in case the provider is still waithing for an amendment to a `Booking`)\n",
             "example": "CANCELLED"
           },
           "amendedBookingStatus": {
@@ -3293,7 +3299,6 @@
             "example": "AMENDMENT CANCELLED"
           },
           "reason": {
-            "title": "reason",
             "maxLength": 5000,
             "type": "string",
             "description": "This field can be used to explain `bookingStatus` and/or `amendedBookingStatus`.\n",
@@ -3404,39 +3409,45 @@
         "description": "The specifications for a Reefer equipment.\n\n**Condition:** Only applicable when `isNonOperatingReefer` is set to `false`\n"
       },
       "PartyAddress": {
-        "title": "Address",
+        "title": "Party Address",
+        "required": [
+          "city",
+          "countryCode",
+          "street",
+          "streetNumber"
+        ],
         "type": "object",
         "properties": {
           "street": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the street of the party’s address.",
+            "description": "The name of the street of the party's address.",
             "example": "Ruijggoordweg"
           },
           "streetNumber": {
             "maxLength": 50,
             "type": "string",
-            "description": "The number of the street of the party’s address.",
+            "description": "The number of the street of the party's address.",
             "example": "100"
           },
           "floor": {
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The floor of the party’s street number.\n",
+            "description": "The floor of the party's street number.\n",
             "example": "2nd"
           },
           "postCode": {
-            "maxLength": 50,
+            "maxLength": 10,
             "type": "string",
-            "description": "The post code of the party’s address.",
+            "description": "The post code of the party's address.",
             "example": "1047 HM"
           },
           "city": {
             "maxLength": 65,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The city name of the party’s address.\n",
+            "description": "The city name of the party's address.\n",
             "example": "Amsterdam"
           },
           "UNLocationCode": {
@@ -3450,8 +3461,7 @@
           "stateRegion": {
             "maxLength": 65,
             "type": "string",
-            "description": "The state/region of the party’s address.",
-            "nullable": true,
+            "description": "The state/region of the party's address.",
             "example": "North Holland"
           },
           "countryCode": {
@@ -3795,7 +3805,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digitial Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Origional)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digitial Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -3844,7 +3854,7 @@
             "example": "AAAAA0000A"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
       },
       "Reference": {
         "title": "Reference",
@@ -3857,7 +3867,7 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder’s Reference)\n- `SI` (Shipper’s Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer’s Reference)\n- `AAO` (Consignee’s Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder's Reference)\n- `SI` (Shipper's Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer's Reference)\n- `AAO` (Consignee's Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
             "example": "FF"
           },
           "value": {
@@ -3913,12 +3923,6 @@
             "type": "string",
             "description": "Links to the Location Type Code defined by DCSA. Possible values are:\n- `PRE` (Place of Receipt)\n- `POL` (Port of Loading)\n- `POD` (Port of Discharge)\n- `PDE` (Place of Delivery)\n- `PCF` (Pre-carriage From)\n- `OIR` (Onward In-land Routing)\n- `DRL` (Depot release location)\n- `ORI` (Origin of goods)\n- `IEL` (Container intermediate export stop off location)\n- `PTP` (Prohibited transshipment port)\n- `RTP` (Requested transshipment port)\n- `FCD` (Full container drop-off location)\n",
             "example": "PRE"
-          },
-          "eventDateTime": {
-            "type": "string",
-            "description": "A date when the event is taking place at the location\n",
-            "format": "date-time",
-            "example": "2021-11-03T10:23:00-01:00"
           }
         },
         "description": "Maps the relationship between `Shipment` and `Location`, e.g., the `Place of Receipt` and the `Place of Delivery` for a specific shipment. This is a reusable object between `Booking` and `Transport Document`\n"
@@ -3952,7 +3956,7 @@
               "maxLength": 11,
               "pattern": "^\\S(?:.*\\S)?$",
               "type": "string",
-              "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
+              "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\n\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
               "example": "APZU4812090"
             }
           },
@@ -3962,16 +3966,7 @@
             "example": false
           },
           "activeReeferSettings": {
-            "required": [
-              "temperatureSetpoint",
-              "temperatureUnit"
-            ],
-            "description": "The specifications for a Reefer equipment.\n\n**Condition:** Only applicable when `isNonOperatingReefer` is set to `false`\n",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ActiveReeferSettings"
-              }
-            ]
+            "$ref": "#/components/schemas/ActiveReeferSettings"
           },
           "references": {
             "type": "array",
@@ -4107,7 +4102,7 @@
               "minLength": 6,
               "pattern": "^\\d{6,10}$",
               "type": "string",
-              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx).\n\nThis standard is based on the 2022 revision.\n",
               "example": "851713"
             }
           },
@@ -4138,7 +4133,7 @@
           },
           "cargoGrossVolumeUnit": {
             "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Conditional:** If the `cargoGrossVolume` is populated then the `cargoGrossVolumeUnit` is required\n",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** If the `cargoGrossVolume` is populated then the `cargoGrossVolumeUnit` is required\n",
             "example": "MTQ",
             "enum": [
               "MTQ",
@@ -4198,7 +4193,7 @@
             "minLength": 2,
             "pattern": "^[A-Z0-9]{2}$",
             "type": "string",
-            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12 Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
             "example": "5H"
           },
           "imoPackagingCode": {
@@ -4212,7 +4207,7 @@
           "numberOfPackages": {
             "minimum": 1,
             "type": "integer",
-            "description": "Specifies the number of outer packagings/overpacks associated with this `Commodity`.\n\n**Conditional:** In case this `OuterPackaging` includes `Dangerous Goods` the `numberOfPackages` is mandatory to provide\n",
+            "description": "Specifies the number of outer packagings/overpacks associated with this `Commodity`.\n\n**Condition:** In case this `OuterPackaging` includes `Dangerous Goods` the `numberOfPackages` is mandatory to provide\n",
             "format": "int32",
             "example": 18
           },
@@ -4230,7 +4225,7 @@
             }
           }
         },
-        "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport. It is an array of the attributes below.\n\n**Conditional:** Mandatory for DG (Dangerous Goods) cargo.\n"
+        "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.\n\n**Condition:** Mandatory for DG (Dangerous Goods) cargo.\n"
       },
       "DangerousGoods": {
         "title": "Dangerous Goods",
@@ -4256,7 +4251,7 @@
             "minLength": 4,
             "pattern": "^[0-3][0-9A-Z]{3}$",
             "type": "string",
-            "description": "Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single UN number or NA number that may occur when two companies exchange DG information.\n\nCharacter | Valid Characters | Description\n:--------:|------------------|------------\n1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group\n2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs\n3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.\n",
+            "description": "Four-character code supplied by Exis Technologies that assists to remove ambiguities when identifying a variant within a single `UN number` or `NA number` that may occur when two companies exchange DG information.\n\nCharacter | Valid Characters | Description\n:--------:|------------------|------------\n1| 0, 1, 2, 3|The packing group. Code 0 indicates there is no packing group\n2|0 to 9 and A to Z|A sequence letter for the PSN, or 0 if there were no alternative PSNs\n3 and 4|0 to 9 and A to Z|Two sequence letters for other information, for the cases where the variant is required because of different in subrisks, packing instruction etc.\n",
             "example": "2200"
           },
           "properShippingName": {
@@ -4268,12 +4263,13 @@
           "technicalName": {
             "maxLength": 250,
             "type": "string",
-            "description": "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.\n"
+            "description": "The recognized chemical or biological name or other name currently used for the referenced dangerous goods as described in chapter 3.1.2.8 of the IMDG Code.\n",
+            "example": "xylene and benzene"
           },
           "imoClass": {
             "maxLength": 4,
             "type": "string",
-            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
+            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
             "example": "1.4S"
           },
           "subsidiaryRisk1": {
@@ -4353,7 +4349,7 @@
             "items": {
               "maxLength": 2,
               "type": "string",
-              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n",
+              "description": "Grouping of Dangerous Goods having certain similar chemical properties. Possible values are:\n- `1` (Acids)\n- `2` (Ammonium Compounds)\n- `3` (Bromates)\n- `4` (Chlorates)\n- `5` (Chlorites)\n- `6` (Cyanides)\n- `7` (Heavy metals and their salts)\n- `8` (Hypochlorites)\n- `9` (Lead and its compounds)\n- `10` (Liquid halogenated hydrocarbons)\n- `11` (Mercury and mercury compounds)\n- `12` (Nitrites and their mixtures)\n- `13` (Perchlorates)\n- `14` (Permanganates)\n- `15` (Powdered metals)\n- `16` (Peroxides),\n- `17` (Azides)\n- `18` (Alkalis)\n",
               "example": "12"
             }
           },
@@ -4370,7 +4366,7 @@
           "EMSNumber": {
             "maxLength": 7,
             "type": "string",
-            "description": "The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.\n",
+            "description": "The emergency schedule identified in the IMO EmS Guide - Emergency Response Procedures for Ships Carrying Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z. Possible values fire: F-A to F-Z.\n",
             "example": "F-A S-Q"
           },
           "endOfHoldingTime": {
@@ -4398,16 +4394,16 @@
             "example": "A"
           },
           "grossWeight": {
-            "$ref": "#/components/schemas/DangerousGoods_grossWeight"
+            "$ref": "#/components/schemas/Gross Weight"
           },
           "netWeight": {
-            "$ref": "#/components/schemas/DangerousGoods_netWeight"
+            "$ref": "#/components/schemas/Net Weight"
           },
           "netExplosiveContent": {
-            "$ref": "#/components/schemas/DangerousGoods_netExplosiveContent"
+            "$ref": "#/components/schemas/Net Explosive Content"
           },
           "volume": {
-            "$ref": "#/components/schemas/DangerousGoods_volume"
+            "$ref": "#/components/schemas/Volume"
           },
           "limits": {
             "$ref": "#/components/schemas/Limits"
@@ -4530,6 +4526,7 @@
         "description": "24 hr emergency contact details\n"
       },
       "Limits": {
+        "title": "Limits",
         "required": [
           "temperatureUnit"
         ],
@@ -4537,7 +4534,7 @@
         "properties": {
           "temperatureUnit": {
             "type": "string",
-            "description": "The unit for **all attributes in the limits structure** in Celsius or Fahrenheit\n\n- `CEL` (Celsius)\n- `FAH` (Fahrenheit)\n",
+            "description": "The unit for **all attributes in the limits structure** in Celsius or Fahrenheit\n- `CEL` (Celsius)\n- `FAH` (Fahrenheit)\n",
             "example": "CEL",
             "enum": [
               "CEL",
@@ -4546,7 +4543,7 @@
           },
           "flashPoint": {
             "type": "number",
-            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air. Condition: only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
+            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
             "format": "float",
             "example": 42
           },
@@ -4603,6 +4600,7 @@
         "description": "The confirmed equipments for the booking\n"
       },
       "Transport": {
+        "title": "Transport",
         "required": [
           "dischargeLocation",
           "loadLocation",
@@ -4638,12 +4636,14 @@
           "plannedDepartureDate": {
             "type": "string",
             "description": "The planned date of departure.\n",
-            "format": "date"
+            "format": "date",
+            "example": "2021-05-17"
           },
           "plannedArrivalDate": {
             "type": "string",
             "description": "The planned date of arrival.\n",
-            "format": "date"
+            "format": "date",
+            "example": "2021-05-19"
           },
           "modeOfTransport": {
             "maxLength": 50,
@@ -4666,7 +4666,7 @@
             "description": "The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel\n",
             "example": "9321483"
           },
-          "carrierSerivceCode": {
+          "carrierServiceCode": {
             "maxLength": 11,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
@@ -4716,6 +4716,7 @@
       },
       "LoadLocation": {
         "title": "Load Location",
+        "type": "object",
         "description": "General purpose object to capture the `Load Location`.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Shanghai Shengdong International Container Terminal",
@@ -4746,6 +4747,7 @@
       },
       "DischargeLocation": {
         "title": "Discharge Location",
+        "type": "object",
         "description": "General purpose object to capture the `Discharge Location`.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Transnet Port Terminals Cape Town",
@@ -4828,6 +4830,7 @@
         }
       },
       "Charge": {
+        "title": "Charge",
         "required": [
           "calculationBasis",
           "chargeName",
@@ -4874,7 +4877,7 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.",
+            "description": "The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton, per square metre.\n",
             "example": "Per day"
           },
           "unitPrice": {
@@ -4985,7 +4988,8 @@
           }
         }
       },
-      "CreateBooking_originChargesPaymentTerm": {
+      "Origin Charges Payment Term": {
+        "title": "Origin Charges Payment Term",
         "type": "object",
         "properties": {
           "haulageChargesPaymentTermCode": {
@@ -5018,7 +5022,8 @@
         },
         "description": "An indicator of whether origin charges are prepaid (`PRE`) or collect (`COL`). When prepaid, the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n"
       },
-      "CreateBooking_destinationChargesPaymentTerm": {
+      "Destination Charges Payment Term": {
+        "title": "Destination Charges Payment Term",
         "type": "object",
         "properties": {
           "haulageChargesPaymentTermCode": {
@@ -5073,7 +5078,8 @@
             "description": "The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd&apos;s register code, which does not change during the lifetime of the vessel\n",
             "example": "9321483"
           }
-        }
+        },
+        "description": "Vessels related to this booking request.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and `carrierServiceCode` or `carrierServiceName` are blank.\n"
       },
       "Invoice Payable At": {
         "title": "Invoice Payable At",
@@ -5093,7 +5099,8 @@
         },
         "description": "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location must be provided as a `UN Location Code`\n"
       },
-      "CreateBooking_documentParties": {
+      "Document Parties": {
+        "title": "Document Parties",
         "required": [
           "bookingAgent"
         ],
@@ -5124,7 +5131,8 @@
         },
         "description": "All `Parties` with associated roles.\n"
       },
-      "Booking_documentParties": {
+      "Document Parties_1": {
+        "title": "Document Parties",
         "type": "object",
         "properties": {
           "bookingAgent": {
@@ -5152,7 +5160,8 @@
         },
         "description": "All `Parties` with associated roles.\n"
       },
-      "DangerousGoods_grossWeight": {
+      "Gross Weight": {
+        "title": "Gross Weight",
         "required": [
           "unit",
           "value"
@@ -5163,7 +5172,7 @@
             "minimum": 0,
             "exclusiveMinimum": true,
             "type": "number",
-            "description": "The grand total weight of the DG cargo and weight per UNNumber/NANumber including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "description": "The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
             "format": "float",
             "example": 12000.3
           },
@@ -5179,7 +5188,8 @@
         },
         "description": "Total weight of the goods carried, including packaging.\n"
       },
-      "DangerousGoods_netWeight": {
+      "Net Weight": {
+        "title": "Net Weight",
         "required": [
           "unit",
           "value"
@@ -5187,6 +5197,8 @@
         "type": "object",
         "properties": {
           "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
             "type": "number",
             "description": "Total weight of the goods carried, excluding packaging.\n",
             "format": "float",
@@ -5204,7 +5216,8 @@
         },
         "description": "Total weight of the goods carried, excluding packaging.\n"
       },
-      "DangerousGoods_netExplosiveContent": {
+      "Net Explosive Content": {
+        "title": "Net Explosive Content",
         "required": [
           "unit",
           "value"
@@ -5212,24 +5225,29 @@
         "type": "object",
         "properties": {
           "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
             "type": "number",
-            "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
+            "description": "The total weight of the explosive substances, without the packaging's, casings, etc.\n",
             "format": "float",
             "example": 2.4
           },
           "unit": {
             "type": "string",
-            "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n- `KGM` (Kilograms)\n- `GRM` (Grams)\n",
+            "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n- `GRM` (Grams)\n- `ONZ` (Ounce)\n",
             "example": "KGM",
             "enum": [
               "KGM",
-              "GRM"
+              "LBR",
+              "GRM",
+              "ONZ"
             ]
           }
         },
-        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
+        "description": "The total weight of the explosive substances, without the packaging's, casings, etc.\n"
       },
-      "DangerousGoods_volume": {
+      "Volume": {
+        "title": "Volume",
         "required": [
           "unit",
           "value"
@@ -5237,6 +5255,8 @@
         "type": "object",
         "properties": {
           "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
             "type": "number",
             "description": "The volume of the referenced dangerous goods.\n",
             "format": "float",

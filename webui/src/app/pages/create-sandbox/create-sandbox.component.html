@@ -38,6 +38,21 @@
         </div>
 
         <div *ngIf="selectedVersion">
+          <br />
+          <mat-select
+            placeholder="Select the scenario suite"
+            name="selectedSuite"
+            [(ngModel)]="selectedSuite"
+            (ngModelChange)="onSelectedSuiteChanged(selectedSuite)"
+          >
+            <mat-option
+              *ngFor="let suite of selectedVersion.suites"
+              [value]="suite"
+            >{{suite}}</mat-option>
+          </mat-select>
+        </div>
+
+        <div *ngIf="selectedVersion && selectedSuite">
             <br />
             <mat-select
             placeholder="Select tested implementation role"

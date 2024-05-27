@@ -102,6 +102,7 @@ export class ConformanceService {
   async createSandbox(
     standardName: string,
     versionNumber: string,
+    scenarioSuite: string,
     testedPartyRole: string,
     isDefaultType: boolean,
     sandboxName: string
@@ -110,6 +111,7 @@ export class ConformanceService {
       operation: "createSandbox",
       standardName,
       versionNumber,
+      scenarioSuite,
       testedPartyRole,
       isDefaultType,
       sandboxName,

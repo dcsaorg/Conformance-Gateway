@@ -20,7 +20,9 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Slf4j
-public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
+class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
+  static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
+  static final String SCENARIO_SUITE_RI = "Reference Implementation";
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
@@ -43,10 +45,40 @@ public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListB
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
   public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
-      String standardVersion, String carrierPartyName, String shipperPartyName) {
+      EblComponentFactory componentFactory, String standardVersion, String carrierPartyName, String shipperPartyName) {
     STANDARD_VERSION.set(standardVersion);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
+
+    if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
+      return createConformanceSiOnlyScenarios(carrierPartyName);
+    }
+    if (SCENARIO_SUITE_RI.equals(componentFactory.getScenarioSuite())) {
+      return createReferenceImplementationScenarios(carrierPartyName);
+    }
+    throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
+    String carrierPartyName) {
+    return Stream.of(
+            Map.entry(
+                "Dry cargo",
+                noAction()
+                    .thenEither(
+                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB)
+                            .then(
+                                uc1_shipper_submitShippingInstructions()
+                                    .then(shipper_GetShippingInstructions(SI_RECEIVED, false)))
+                        // TODO DT-1163 list
+                        )))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createReferenceImplementationScenarios(
+      String carrierPartyName) {
     return Stream.of(
             Map.entry(
                 "",

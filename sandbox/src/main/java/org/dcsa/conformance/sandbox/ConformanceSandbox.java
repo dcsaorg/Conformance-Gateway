@@ -1,5 +1,7 @@
 package org.dcsa.conformance.sandbox;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,6 +14,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -24,16 +27,14 @@ import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.booking.BookingComponentFactory;
-import org.dcsa.conformance.standards.ebl.EblComponentFactory;
-import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
-import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
-import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
-import org.dcsa.conformance.standards.jit.JitComponentFactory;
-import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
-import org.dcsa.conformance.standards.tnt.TntComponentFactory;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.eblinterop.PintStandard;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
+import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.ovs.OvsStandard;
+import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
 public class ConformanceSandbox {
@@ -808,31 +809,21 @@ public class ConformanceSandbox {
 
   private static AbstractComponentFactory _createComponentFactory(
       StandardConfiguration standardConfiguration, String scenarioSuite) {
-    if (BookingComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new BookingComponentFactory(standardConfiguration.getVersion(), scenarioSuite);
-    }
-    if (EblComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new EblComponentFactory(standardConfiguration.getVersion());
-    }
-    if (EblIssuanceComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new EblIssuanceComponentFactory(standardConfiguration.getVersion());
-    }
-    if (EblSurrenderComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new EblSurrenderComponentFactory(standardConfiguration.getVersion());
-    }
-    if (JitComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new JitComponentFactory(standardConfiguration.getVersion());
-    }
-    if (OvsComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new OvsComponentFactory(standardConfiguration.getVersion());
-    }
-    if (PintComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new PintComponentFactory(standardConfiguration.getVersion());
-    }
-    if (TntComponentFactory.STANDARD_NAME.equals(standardConfiguration.getName())) {
-      return new TntComponentFactory(standardConfiguration.getVersion());
-    }
-    throw new UnsupportedOperationException(
-        "Unsupported standard: %s".formatted(standardConfiguration));
+    return Stream.of(
+            BookingStandard.INSTANCE,
+            EblStandard.INSTANCE,
+            EblIssuanceStandard.INSTANCE,
+            EblSurrenderStandard.INSTANCE,
+            JitStandard.INSTANCE,
+            OvsStandard.INSTANCE,
+            PintStandard.INSTANCE,
+            TntStandard.INSTANCE)
+        .filter(standard -> standard.getName().equals(standardConfiguration.getName()))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new UnsupportedOperationException(
+                    "Unsupported standard: %s".formatted(standardConfiguration)))
+        .createComponentFactory(standardConfiguration.getVersion(), scenarioSuite);
   }
 }

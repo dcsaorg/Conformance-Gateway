@@ -12,7 +12,7 @@ import org.dcsa.conformance.standards.eblissuance.action.*;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 @Slf4j
-public class EblIssuanceScenarioListBuilder
+class EblIssuanceScenarioListBuilder
     extends ScenarioListBuilder<EblIssuanceScenarioListBuilder> {
   private static final ThreadLocal<EblIssuanceComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();

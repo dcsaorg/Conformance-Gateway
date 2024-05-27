@@ -1,5 +1,7 @@
 package org.dcsa.conformance.sandbox;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -7,23 +9,23 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.booking.BookingComponentFactory;
-import org.dcsa.conformance.standards.ebl.EblComponentFactory;
-import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
-import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
-import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
-import org.dcsa.conformance.standards.jit.JitComponentFactory;
-import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
-import org.dcsa.conformance.standards.tnt.TntComponentFactory;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.eblinterop.PintStandard;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
+import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.ovs.OvsStandard;
+import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
 public class ConformanceWebuiHandler {
@@ -32,63 +34,18 @@ public class ConformanceWebuiHandler {
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<JsonNode> deferredSandboxTaskConsumer;
 
-  private final SortedMap<String, SortedMap<String, AbstractComponentFactory>> componentFactories =
+  private final SortedMap<String, ? extends AbstractStandard> standardsByName =
       new TreeMap<>(
-          Map.ofEntries(
-              Map.entry(
-                  BookingComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      BookingComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(
-                                  Function.identity(),
-                                  standardVersion ->
-                                      new BookingComponentFactory(
-                                          standardVersion, "Conformance"))))),
-              Map.entry(
-                  EblComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      EblComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(Function.identity(), EblComponentFactory::new)))),
-              Map.entry(
-                  EblIssuanceComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(
-                                  Function.identity(), EblIssuanceComponentFactory::new)))),
-              Map.entry(
-                  EblSurrenderComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(
-                                  Function.identity(), EblSurrenderComponentFactory::new)))),
-              Map.entry(
-                  JitComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      JitComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(Function.identity(), JitComponentFactory::new)))),
-              Map.entry(
-                  OvsComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      OvsComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(Function.identity(), OvsComponentFactory::new)))),
-              Map.entry(
-                  PintComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      PintComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(Function.identity(), PintComponentFactory::new)))),
-              Map.entry(
-                  TntComponentFactory.STANDARD_NAME,
-                  new TreeMap<>(
-                      TntComponentFactory.STANDARD_VERSIONS.stream()
-                          .collect(
-                              Collectors.toMap(Function.identity(), TntComponentFactory::new))))));
+          Stream.of(
+                  BookingStandard.INSTANCE,
+                  EblStandard.INSTANCE,
+                  EblIssuanceStandard.INSTANCE,
+                  EblSurrenderStandard.INSTANCE,
+                  JitStandard.INSTANCE,
+                  OvsStandard.INSTANCE,
+                  PintStandard.INSTANCE,
+                  TntStandard.INSTANCE)
+              .collect(Collectors.toMap(AbstractStandard::getName, Function.identity())));
 
   public ConformanceWebuiHandler(
       ConformanceAccessChecker accessChecker,
@@ -132,17 +89,22 @@ public class ConformanceWebuiHandler {
           "A sandbox named '%s' already exists".formatted(sandboxName));
 
     String standardName = requestNode.get("standardName").asText();
-    if (!componentFactories.containsKey(standardName))
-      throw new IllegalArgumentException("Unsupported standard: " + standardName);
+    AbstractStandard standard = standardsByName.get(standardName);
+    if (standard == null)
+      throw new IllegalArgumentException("Unsupported standard '%s'".formatted(standardName));
 
     String versionNumber = requestNode.get("versionNumber").asText();
-    if (!componentFactories.get(standardName).containsKey(versionNumber))
-      throw new IllegalArgumentException("Unsupported version: " + versionNumber);
+    SortedSet<String> availableScenarioSuites = standard.getScenarioSuitesByStandardVersion().get(versionNumber);
+    if (availableScenarioSuites == null)
+      throw new IllegalArgumentException("Unsupported version '%s'".formatted(versionNumber));
 
+    String scenarioSuite = requestNode.get("scenarioSuite").asText();
+    if (!availableScenarioSuites.contains(scenarioSuite))
+      throw new IllegalArgumentException("Unsupported scenario suite '%s'".formatted(scenarioSuite));
+
+    AbstractComponentFactory componentFactory = standard.createComponentFactory(versionNumber, scenarioSuite);
     String testedPartyRole = requestNode.get("testedPartyRole").asText();
-    if (!componentFactories
-        .get(standardName)
-        .get(versionNumber)
+    if (!componentFactory
         .getRoleNames()
         .contains(testedPartyRole))
       throw new IllegalArgumentException("Unsupported role: " + testedPartyRole);
@@ -151,10 +113,8 @@ public class ConformanceWebuiHandler {
 
     SandboxConfiguration sandboxConfiguration =
         SandboxConfiguration.fromJsonNode(
-            componentFactories
-                .get(standardName)
-                .get(versionNumber)
-                .getJsonSandboxConfigurationTemplate(testedPartyRole, true, isDefaultType));
+            componentFactory.getJsonSandboxConfigurationTemplate(
+                testedPartyRole, true, isDefaultType));
 
     sandboxConfiguration.setId(sandboxId);
     sandboxConfiguration.setName(sandboxName);
@@ -290,35 +250,63 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _getAvailableStandards(String ignoredUserId) {
+    /*
+    [
+      {
+        "name": "Booking",
+        "versions": [
+            {
+              "number": "2.0.0",
+              "suites": [
+                "Conformance",
+                "Reference Implementation"
+              ],
+              "roles": [
+                "Carrier",
+                "Shipper"
+              ]
+            }
+        ]
+      },
+     */
     ArrayNode standardsNode = OBJECT_MAPPER.createArrayNode();
     TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
-    sortedStandardNames.addAll(componentFactories.keySet());
+    sortedStandardNames.addAll(standardsByName.keySet());
     sortedStandardNames.forEach(
         standardName -> {
           ObjectNode standardNode = OBJECT_MAPPER.createObjectNode().put("name", standardName);
+          standardsNode.add(standardNode);
           {
             ArrayNode versionsNode = OBJECT_MAPPER.createArrayNode();
             standardNode.set("versions", versionsNode);
-            componentFactories
-                .get(standardName)
+            AbstractStandard standard = standardsByName.get(standardName);
+            SortedMap<String, SortedSet<String>> scenarioSuitesByStandardVersion =
+                standard.getScenarioSuitesByStandardVersion();
+            scenarioSuitesByStandardVersion
                 .keySet()
                 .forEach(
                     standardVersion -> {
                       ObjectNode versionNode =
-                        OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
-                      {
+                          OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
+                      versionsNode.add(versionNode);
+
+                      SortedSet<String> scenarioSuites =
+                          scenarioSuitesByStandardVersion.get(standardVersion);
+                      { // scoped
+                        ArrayNode suitesNode = OBJECT_MAPPER.createArrayNode();
+                        versionNode.set("suites", suitesNode);
+                        scenarioSuites.forEach(suitesNode::add);
+                      }
+                      { // scoped
                         ArrayNode rolesNode = OBJECT_MAPPER.createArrayNode();
-                        componentFactories
-                            .get(standardName)
-                            .get(standardVersion)
+                        versionNode.set("roles", rolesNode);
+                        standard
+                            .createComponentFactory(standardVersion, scenarioSuites.first())
                             .getRoleNames()
                             .forEach(rolesNode::add);
-                        versionNode.set("roles", rolesNode);
                       }
-                      versionsNode.add(versionNode);
                     });
           }
-          standardsNode.add(standardNode);
         });
     return standardsNode;
   }

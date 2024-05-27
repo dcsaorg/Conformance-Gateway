@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState.*;
 
 @Slf4j
-public class EblSurrenderScenarioListBuilder
+class EblSurrenderScenarioListBuilder
     extends ScenarioListBuilder<EblSurrenderScenarioListBuilder> {
   private static final ThreadLocal<EblSurrenderComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();

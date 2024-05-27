@@ -16,7 +16,7 @@ import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 
 @Slf4j
-public class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
+class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder> {
   private static final ThreadLocal<TntComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();

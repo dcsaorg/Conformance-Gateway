@@ -19,7 +19,9 @@ import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 @Slf4j
-public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioListBuilder> {
+  static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
+  static final String SCENARIO_SUITE_RI = "Reference Implementation";
 
   private static final ThreadLocal<BookingComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
@@ -39,10 +41,11 @@ public class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScena
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalShipperPartyName.set(shipperPartyName);
-    if ("Conformance".equals(componentFactory.getScenarioSuite())) {
+
+    if (SCENARIO_SUITE_CONFORMANCE.equals(componentFactory.getScenarioSuite())) {
       return createConformanceScenarios(carrierPartyName);
     }
-    if ("Reference Implementation".equals(componentFactory.getScenarioSuite())) {
+    if (SCENARIO_SUITE_RI.equals(componentFactory.getScenarioSuite())) {
       return createReferenceImplementationScenarios(carrierPartyName);
     }
     throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));

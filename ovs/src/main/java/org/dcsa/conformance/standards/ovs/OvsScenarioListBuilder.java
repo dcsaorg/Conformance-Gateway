@@ -17,7 +17,7 @@ import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 
 @Slf4j
-public class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder> {
+class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder> {
   private static final ThreadLocal<OvsComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();

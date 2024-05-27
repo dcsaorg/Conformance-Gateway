@@ -12,8 +12,7 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 
 @Slf4j
-public class PintScenarioListBuilder
-    extends ScenarioListBuilder<PintScenarioListBuilder> {
+class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilder> {
 
   private static final ThreadLocal<String> STANDARD_VERSION = new ThreadLocal<>();
   private static final ThreadLocal<String> SENDING_PLATFORM_PARTY_NAME = new ThreadLocal<>();

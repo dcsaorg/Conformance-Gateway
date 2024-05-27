@@ -18,6 +18,7 @@ export class CreateSandboxComponent {
   standards: Standard[] = [];
   selectedStandard: Standard | undefined;
   selectedVersion: StandardVersion | undefined;
+  selectedSuite: string | undefined;
   selectedRole: string | undefined;
   selectedSandboxType: string | undefined;
   newSandboxName: string = '';
@@ -40,10 +41,20 @@ export class CreateSandboxComponent {
 
   onSelectedStandardChanged(standard: Standard | undefined) {
     this.selectedVersion = undefined;
+    this.selectedSuite = undefined;
+    this.selectedRole = undefined;
+    this.selectedSandboxType = undefined;
   }
 
   onSelectedVersionChanged(version: StandardVersion | undefined) {
+    this.selectedSuite = undefined;
     this.selectedRole = undefined;
+    this.selectedSandboxType = undefined;
+  }
+
+  onSelectedSuiteChanged(role: string | undefined) {
+    this.selectedRole = undefined;
+    this.selectedSandboxType = undefined;
   }
 
   onSelectedRoleChanged(role: string | undefined) {
@@ -55,7 +66,7 @@ export class CreateSandboxComponent {
   }
 
   cannotCreate(): boolean {
-    return !this.selectedStandard || !this.selectedVersion || !this.selectedRole || !this.selectedSandboxType || !this.newSandboxName;
+    return !this.selectedStandard || !this.selectedVersion || !this.selectedSuite || !this.selectedRole || !this.selectedSandboxType || !this.newSandboxName;
   }
 
   async onCreate() {
@@ -63,6 +74,7 @@ export class CreateSandboxComponent {
     const sandboxId: string = await this.conformanceService.createSandbox(
       this.selectedStandard!.name,
       this.selectedVersion!.number,
+      this.selectedSuite!,
       this.selectedRole!,
       this.selectedSandboxType === this.SANDBOX_TYPES[0],
       this.newSandboxName

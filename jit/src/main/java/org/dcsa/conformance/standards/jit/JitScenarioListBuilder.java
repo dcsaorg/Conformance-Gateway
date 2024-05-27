@@ -16,7 +16,7 @@ import org.dcsa.conformance.standards.jit.party.JitFilterParameter;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
-public class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder> {
+class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder> {
   private static final ThreadLocal<JitComponentFactory> threadLocalComponentFactory =
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPublisherPartyName = new ThreadLocal<>();

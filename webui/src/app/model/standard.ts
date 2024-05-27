@@ -5,5 +5,6 @@ export interface Standard {
 
 export interface StandardVersion {
     number: string,
+    suites: string[],
     roles: string[],
 }

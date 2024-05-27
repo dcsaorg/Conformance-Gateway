@@ -1,10 +1,8 @@
 package org.dcsa.conformance.standards.booking;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -13,30 +11,13 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingShipper;
 
-public class BookingComponentFactory extends AbstractComponentFactory {
-  public static final String STANDARD_NAME = "Booking";
-  public static final List<String> STANDARD_VERSIONS = List.of("2.0.0");
-
-  public static final List<String> SCENARIO_SUITES = List.of("Conformance", "Reference Implementation");
-
-  private static final String CARRIER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-  private static final String SHIPPER_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-
-  public BookingComponentFactory(String standardVersion, String scenarioSuite) {
-    super(standardVersion, scenarioSuite);
-    if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
-      throw new IllegalArgumentException(
-          "Unsupported standard version '%s'".formatted(standardVersion));
-    }
-    if (SCENARIO_SUITES.stream().noneMatch(version -> version.equals(scenarioSuite))) {
-      throw new IllegalArgumentException(
-        "Unsupported scenario suite '%s'".formatted(scenarioSuite));
-    }
+class BookingComponentFactory extends AbstractComponentFactory {
+  BookingComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+    super(standardName, standardVersion, scenarioSuite, "Carrier", "Shipper");
   }
 
   public List<ConformanceParty> createParties(
@@ -121,30 +102,5 @@ public class BookingComponentFactory extends AbstractComponentFactory {
       .formatted(apiName, standardVersion.charAt(0));
 
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
-  }
-
-  @SneakyThrows
-  public JsonNode getJsonSandboxConfigurationTemplate(
-      String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig) {
-    return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/sandboxes/%s.json"
-            .formatted(
-                testedPartyRole == null
-                    ? "auto-all-in-one"
-                    : "%s-%s-%s"
-                        .formatted(
-                            isManual ? "manual" : "auto",
-                            testedPartyRole.toLowerCase(),
-                            isTestingCounterpartsConfig ? "testing-counterparts" : "tested-party")),
-        Map.ofEntries(
-            Map.entry("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME),
-            Map.entry("STANDARD_VERSION_PLACEHOLDER", standardVersion),
-            Map.entry("SCENARIO_SUITE_PLACEHOLDER", scenarioSuite),
-            Map.entry("CARRIER_AUTH_HEADER_VALUE_PLACEHOLDER", CARRIER_AUTH_HEADER_VALUE),
-            Map.entry("SHIPPER_AUTH_HEADER_VALUE_PLACEHOLDER", SHIPPER_AUTH_HEADER_VALUE),
-            Map.entry(
-                "SANDBOX_ID_PREFIX",
-                AbstractComponentFactory._sandboxIdPrefix(
-                    STANDARD_NAME, standardVersion, scenarioSuite))));
   }
 }

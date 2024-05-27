@@ -28,14 +28,14 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
-import org.dcsa.conformance.standards.booking.BookingComponentFactory;
-import org.dcsa.conformance.standards.ebl.EblComponentFactory;
-import org.dcsa.conformance.standards.eblinterop.PintComponentFactory;
-import org.dcsa.conformance.standards.eblissuance.EblIssuanceComponentFactory;
-import org.dcsa.conformance.standards.eblsurrender.EblSurrenderComponentFactory;
-import org.dcsa.conformance.standards.jit.JitComponentFactory;
-import org.dcsa.conformance.standards.ovs.OvsComponentFactory;
-import org.dcsa.conformance.standards.tnt.TntComponentFactory;
+import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.eblinterop.PintStandard;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
+import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
+import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.ovs.OvsStandard;
+import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -148,24 +148,28 @@ public class ConformanceApplication {
 
     Stream<AbstractComponentFactory> componentFactories =
         Stream.of(
-                BookingComponentFactory.STANDARD_VERSIONS.stream()
-                    .flatMap(
-                        standardVersion ->
-                            BookingComponentFactory.SCENARIO_SUITES.stream()
-                                .map(
-                                    scenarioSuite ->
-                                        new BookingComponentFactory(
-                                            standardVersion, scenarioSuite))),
-                EblComponentFactory.STANDARD_VERSIONS.stream().map(EblComponentFactory::new),
-                EblIssuanceComponentFactory.STANDARD_VERSIONS.stream()
-                    .map(EblIssuanceComponentFactory::new),
-                EblSurrenderComponentFactory.STANDARD_VERSIONS.stream()
-                    .map(EblSurrenderComponentFactory::new),
-                JitComponentFactory.STANDARD_VERSIONS.stream().map(JitComponentFactory::new),
-                OvsComponentFactory.STANDARD_VERSIONS.stream().map(OvsComponentFactory::new),
-                PintComponentFactory.STANDARD_VERSIONS.stream().map(PintComponentFactory::new),
-                TntComponentFactory.STANDARD_VERSIONS.stream().map(TntComponentFactory::new))
-            .flatMap(Function.identity());
+                BookingStandard.INSTANCE,
+                EblStandard.INSTANCE,
+                EblIssuanceStandard.INSTANCE,
+                EblSurrenderStandard.INSTANCE,
+                JitStandard.INSTANCE,
+                OvsStandard.INSTANCE,
+                PintStandard.INSTANCE,
+                TntStandard.INSTANCE)
+            .flatMap(
+                standard ->
+                    standard.getScenarioSuitesByStandardVersion().keySet().stream()
+                        .flatMap(
+                            standardVersion ->
+                                standard
+                                    .getScenarioSuitesByStandardVersion()
+                                    .get(standardVersion)
+                                    .stream()
+                                    .map(
+                                        scenarioSuite ->
+                                            standard.createComponentFactory(
+                                                standardVersion, scenarioSuite))));
+
     componentFactories.forEach(
         componentFactory -> {
           ArrayList<String> roleNames = new ArrayList<>(componentFactory.getRoleNames());

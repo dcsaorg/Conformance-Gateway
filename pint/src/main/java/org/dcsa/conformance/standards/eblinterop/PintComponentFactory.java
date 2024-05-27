@@ -1,10 +1,8 @@
 package org.dcsa.conformance.standards.eblinterop;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -12,25 +10,14 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.party.PintReceivingPlatform;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 
-public class PintComponentFactory extends AbstractComponentFactory {
-  public static final String STANDARD_NAME = "PINT";
-  public static final List<String> STANDARD_VERSIONS = List.of("3.0.0");
-
-  private static final String SENDING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-  private static final String RECEIVING_PLATFORM_AUTH_HEADER_VALUE = UUID.randomUUID().toString();
-
-  public PintComponentFactory(String standardVersion) {
-    super(standardVersion, "Conformance");
-    if (STANDARD_VERSIONS.stream().noneMatch(version -> version.equals(standardVersion))) {
-      throw new IllegalArgumentException(
-          "Unsupported standard version '%s'".formatted(standardVersion));
-    }
+class PintComponentFactory extends AbstractComponentFactory {
+  PintComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+    super(standardName, standardVersion, scenarioSuite, "SendingPlatform", "ReceivingPlatform");
   }
 
   public List<ConformanceParty> createParties(
@@ -112,28 +99,5 @@ public class PintComponentFactory extends AbstractComponentFactory {
                             .map(PartyConfiguration::getRole)
                             .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
         .collect(Collectors.toSet());
-  }
-
-  @SneakyThrows
-  public JsonNode getJsonSandboxConfigurationTemplate(
-      String testedPartyRole, boolean isManual, boolean isTestingCounterpartsConfig) {
-    return JsonToolkit.templateFileToJsonNode(
-        "/standards/pint/sandboxes/%s.json"
-            .formatted(
-                testedPartyRole == null
-                    ? "auto-all-in-one"
-                    : "%s-%s-%s"
-                        .formatted(
-                            isManual ? "manual" : "auto",
-                            testedPartyRole.toLowerCase(),
-                            isTestingCounterpartsConfig ? "testing-counterparts" : "tested-party")),
-        Map.ofEntries(
-            Map.entry("STANDARD_NAME_PLACEHOLDER", STANDARD_NAME),
-            Map.entry("STANDARD_VERSION_PLACEHOLDER", standardVersion),
-            Map.entry("SENDING_PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER", SENDING_PLATFORM_AUTH_HEADER_VALUE),
-            Map.entry("RECEIVING_PLATFORM_AUTH_HEADER_VALUE_PLACEHOLDER", RECEIVING_PLATFORM_AUTH_HEADER_VALUE),
-            Map.entry(
-                "SANDBOX_ID_PREFIX",
-                AbstractComponentFactory._sandboxIdPrefix(STANDARD_NAME, standardVersion))));
   }
 }

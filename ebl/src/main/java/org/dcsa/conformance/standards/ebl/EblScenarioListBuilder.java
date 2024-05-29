@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.*;
 import static org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus.*;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,34 +52,141 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
     threadLocalShipperPartyName.set(shipperPartyName);
 
     if (SCENARIO_SUITE_CONFORMANCE_SI_ONLY.equals(componentFactory.getScenarioSuite())) {
-      return createConformanceSiOnlyScenarios(carrierPartyName);
+      return createConformanceSiOnlyScenarios();
     }
     if (SCENARIO_SUITE_RI.equals(componentFactory.getScenarioSuite())) {
-      return createReferenceImplementationScenarios(carrierPartyName);
+      return createReferenceImplementationScenarios();
     }
     throw new IllegalArgumentException("Invalid scenario suite name '%s'".formatted(componentFactory.getScenarioSuite()));
   }
 
-  private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios(
-    String carrierPartyName) {
+  private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceSiOnlyScenarios() {
     return Stream.of(
             Map.entry(
-                "Dry cargo",
+                "Supported shipment types scenarios",
                 noAction()
                     .thenEither(
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB)
-                            .then(
-                                uc1_shipper_submitShippingInstructions()
-                                    .then(shipper_GetShippingInstructions(SI_RECEIVED, false)))
-                        // TODO DT-1163 list
-                        )))
+                        Arrays.stream(ScenarioType.values())
+                            .map(
+                                scenarioType ->
+                                    carrier_SupplyScenarioParameters(scenarioType)
+                                        .then(_uc1_get(SI_RECEIVED, _uc14_get(SI_COMPLETED))))
+                            .toList()
+                            .toArray(new EblScenarioListBuilder[] {}))),
+            Map.entry(
+                "Carrier requested update scenarios",
+                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
+                    .then(
+                        _uc1_get(
+                            SI_RECEIVED,
+                            _uc2_get(
+                                SI_PENDING_UPDATE,
+                                _uc3_andAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
+            Map.entry(
+                "Shipper initiated update scenarios",
+                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
+                    .then(_uc1_get(SI_RECEIVED, _uc3_andAllSiOnlyPathsFrom(SI_RECEIVED)))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static LinkedHashMap<String, EblScenarioListBuilder> createReferenceImplementationScenarios(
-      String carrierPartyName) {
+  @SuppressWarnings("unused")
+  private static void _ignoreSingleValueArgs() {
+    _uc1_get(SI_ANY);
+    _uc2_get(SI_ANY);
+    _uc3_get(SI_ANY, SI_ANY);
+    _uc4a_get(SI_ANY, SI_ANY);
+    _uc4d_get(SI_ANY, SI_ANY);
+    _uc5_get(SI_ANY, SI_ANY);
+    _uc14_get(SI_ANY);
+  }
+
+  private static EblScenarioListBuilder _uc3_andAllSiOnlyPathsFrom(
+      ShippingInstructionsStatus originalSiState) {
+    return _uc3_get(
+        originalSiState,
+        SI_UPDATE_RECEIVED,
+        _uc2_get(SI_PENDING_UPDATE, _uc3_get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, _uc4a_uc14())),
+        _uc4a_get(
+            SI_RECEIVED,
+            SI_UPDATE_CONFIRMED,
+            _uc2_get(
+                SI_PENDING_UPDATE, _uc3_get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, _uc4a_uc14())),
+            _uc3_get(SI_RECEIVED, SI_UPDATE_RECEIVED, _uc4a_uc14()),
+            _uc14_get(SI_COMPLETED)),
+        _uc4d_get(
+            originalSiState,
+            SI_UPDATE_DECLINED,
+            _uc3_get(originalSiState, SI_UPDATE_RECEIVED, _uc4a_uc14())),
+        _uc5_get(
+            originalSiState,
+            SI_UPDATE_CANCELLED,
+            _uc3_get(originalSiState, SI_UPDATE_RECEIVED, _uc4a_uc14())));
+  }
+
+  private static EblScenarioListBuilder _uc1_get(
+      ShippingInstructionsStatus siState, EblScenarioListBuilder... thenEither) {
+    return uc1_shipper_submitShippingInstructions()
+        .then(shipper_GetShippingInstructions(siState, false).thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc2_get(
+      ShippingInstructionsStatus siState, EblScenarioListBuilder... thenEither) {
+    return uc2_carrier_requestUpdateToShippingInstruction()
+        .then(shipper_GetShippingInstructions(siState, false).thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc3_get(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      EblScenarioListBuilder... thenEither) {
+    return uc3_shipper_submitUpdatedShippingInstructions(false)
+        .then(
+            shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
+                .thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc4a_get(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      EblScenarioListBuilder... thenEither) {
+    return uc4a_carrier_acceptUpdatedShippingInstructions()
+        .then(
+            shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
+                .thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc4d_get(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      EblScenarioListBuilder... thenEither) {
+    return uc4d_carrier_declineUpdatedShippingInstructions()
+        .then(
+            shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
+                .thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc4a_uc14() {
+    return _uc4a_get(SI_RECEIVED, SI_UPDATE_CONFIRMED, _uc14_get(SI_COMPLETED));
+  }
+
+  private static EblScenarioListBuilder _uc5_get(
+      ShippingInstructionsStatus originalSiState,
+      ShippingInstructionsStatus modifiedSiState,
+      EblScenarioListBuilder... thenEither) {
+    return uc5_shipper_cancelUpdateToShippingInstructions(false)
+        .then(
+            shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
+                .thenEither(thenEither));
+  }
+
+  private static EblScenarioListBuilder _uc14_get(ShippingInstructionsStatus siState) {
+    return uc14_carrier_confirmShippingInstructionsComplete()
+        .then(shipper_GetShippingInstructions(siState, false));
+  }
+
+  private static LinkedHashMap<String, EblScenarioListBuilder> createReferenceImplementationScenarios() {
     return Stream.of(
             Map.entry(
                 "",

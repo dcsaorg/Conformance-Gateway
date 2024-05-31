@@ -590,6 +590,10 @@ public class BookingChecks {
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
       JsonPointer.compile("/carrierExportVoyageNumber")
     ),
+    JsonAttribute.atLeastOneOf(
+      JsonPointer.compile("/contractQuotationReference"),
+      JsonPointer.compile("/serviceContractReference")
+    ),
     JsonAttribute.allOrNoneArePresent(
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate")

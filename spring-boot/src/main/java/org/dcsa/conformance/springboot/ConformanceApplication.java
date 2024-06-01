@@ -28,14 +28,6 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
-import org.dcsa.conformance.standards.booking.BookingStandard;
-import org.dcsa.conformance.standards.ebl.EblStandard;
-import org.dcsa.conformance.standards.eblinterop.PintStandard;
-import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
-import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
-import org.dcsa.conformance.standards.jit.JitStandard;
-import org.dcsa.conformance.standards.ovs.OvsStandard;
-import org.dcsa.conformance.standards.tnt.TntStandard;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -147,15 +139,7 @@ public class ConformanceApplication {
                 TimeUnit.MILLISECONDS);
 
     Stream<AbstractComponentFactory> componentFactories =
-        Stream.of(
-                BookingStandard.INSTANCE,
-                EblStandard.INSTANCE,
-                EblIssuanceStandard.INSTANCE,
-                EblSurrenderStandard.INSTANCE,
-                JitStandard.INSTANCE,
-                OvsStandard.INSTANCE,
-                PintStandard.INSTANCE,
-                TntStandard.INSTANCE)
+        Arrays.stream(ConformanceSandbox.SUPPORTED_STANDARDS)
             .flatMap(
                 standard ->
                     standard.getScenarioSuitesByStandardVersion().keySet().stream()

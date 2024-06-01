@@ -55,6 +55,7 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Override
   public void importJsonState(JsonNode jsonState) {
+    if (!jsonState.has("id")) return;
     id = UUID.fromString(jsonState.get("id").asText());
 
     int nextActionsSize = jsonState.get("nextActionsSize").asInt();

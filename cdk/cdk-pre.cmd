@@ -19,10 +19,16 @@ call mvn clean install
 cd ..\ovs
 call mvn clean install
 
+cd ..\pint
+call mvn clean install
+
 cd ..\tnt
 call mvn clean install
 
 cd ..\sandbox
+call mvn clean install
+
+cd ..\lambda
 call mvn clean install
 
 cd ..\webui

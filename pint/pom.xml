@@ -5,8 +5,8 @@
     <groupId>org.dcsa.conformance</groupId>
     <artifactId>pint</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>dcsa-conformance-ebl-interop</name>
-    <description>DCSA Conformance eBL Interop</description>
+    <name>dcsa-conformance-pint</name>
+    <description>DCSA Conformance PINT</description>
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -49,3 +49,4 @@
 			</dependency>
     </dependencies>
 </project>
+

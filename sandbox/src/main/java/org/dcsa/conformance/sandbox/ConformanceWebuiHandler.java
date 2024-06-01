@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -18,14 +17,6 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import org.dcsa.conformance.standards.booking.BookingStandard;
-import org.dcsa.conformance.standards.ebl.EblStandard;
-import org.dcsa.conformance.standards.eblinterop.PintStandard;
-import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
-import org.dcsa.conformance.standards.eblsurrender.EblSurrenderStandard;
-import org.dcsa.conformance.standards.jit.JitStandard;
-import org.dcsa.conformance.standards.ovs.OvsStandard;
-import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
 public class ConformanceWebuiHandler {
@@ -36,15 +27,7 @@ public class ConformanceWebuiHandler {
 
   private final SortedMap<String, ? extends AbstractStandard> standardsByName =
       new TreeMap<>(
-          Stream.of(
-                  BookingStandard.INSTANCE,
-                  EblStandard.INSTANCE,
-                  EblIssuanceStandard.INSTANCE,
-                  EblSurrenderStandard.INSTANCE,
-                  JitStandard.INSTANCE,
-                  OvsStandard.INSTANCE,
-                  PintStandard.INSTANCE,
-                  TntStandard.INSTANCE)
+          Arrays.stream(ConformanceSandbox.SUPPORTED_STANDARDS)
               .collect(Collectors.toMap(AbstractStandard::getName, Function.identity())));
 
   public ConformanceWebuiHandler(

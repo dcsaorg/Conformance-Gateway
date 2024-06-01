@@ -14,10 +14,10 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
@@ -38,6 +38,17 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
 public class ConformanceSandbox {
+  public static final AbstractStandard[] SUPPORTED_STANDARDS = {
+    BookingStandard.INSTANCE,
+    EblStandard.INSTANCE,
+    EblIssuanceStandard.INSTANCE,
+    EblSurrenderStandard.INSTANCE,
+    JitStandard.INSTANCE,
+    OvsStandard.INSTANCE,
+    PintStandard.INSTANCE,
+    TntStandard.INSTANCE
+  };
+
   private record OrchestratorTask(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<ConformanceWebRequest> asyncWebClient,
@@ -809,15 +820,7 @@ public class ConformanceSandbox {
 
   private static AbstractComponentFactory _createComponentFactory(
       StandardConfiguration standardConfiguration, String scenarioSuite) {
-    return Stream.of(
-            BookingStandard.INSTANCE,
-            EblStandard.INSTANCE,
-            EblIssuanceStandard.INSTANCE,
-            EblSurrenderStandard.INSTANCE,
-            JitStandard.INSTANCE,
-            OvsStandard.INSTANCE,
-            PintStandard.INSTANCE,
-            TntStandard.INSTANCE)
+    return Arrays.stream(SUPPORTED_STANDARDS)
         .filter(standard -> standard.getName().equals(standardConfiguration.getName()))
         .findFirst()
         .orElseThrow(

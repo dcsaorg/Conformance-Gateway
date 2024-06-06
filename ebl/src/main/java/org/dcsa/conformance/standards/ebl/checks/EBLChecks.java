@@ -263,29 +263,9 @@ public class EBLChecks {
       return issues;
     });
 
-  private static final JsonRebaseableContentCheck VALIDATE_SCO_CONDITIONALLY_PRESENT = JsonAttribute.customValidator(
-    "Validate that SCO party is conditionally present",
-    (body, contextPath) -> {
-      var issues = new LinkedHashSet<String>();
-      var otherDocumentParties = body.path("documentParties").path("other");
-      var partyFunctions = StreamSupport.stream(otherDocumentParties.spliterator(), false)
-        .map(p -> p.path("partyFunction"))
-        .filter(JsonNode::isTextual)
-        .map(n -> n.asText(""))
-        .collect(Collectors.toSet());
-
-      if (!partyFunctions.contains("SCO")) {
-        if (!body.path("serviceContractReference").isTextual()) {
-          var scrPath = concatContextPath(contextPath, "serviceContractReference");
-          issues.add("The 'SCO' party is mandatory when '%s' is absent".formatted(scrPath));
-        }
-        if (!body.path("contractQuotationReference").isTextual()) {
-          var cqrPath = concatContextPath(contextPath, "contractQuotationReference");
-          issues.add("The 'SCO' party is mandatory when '%s' is absent".formatted(cqrPath));
-        }
-      }
-      return issues;
-    }
+  private static final JsonRebaseableContentCheck VALIDATE_CONTRACT_REFERENCE = JsonAttribute.atLeastOneOf(
+      JsonPointer.compile("/contractQuotationReference"),
+      JsonPointer.compile("/serviceContractReference")
   );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
@@ -1049,7 +1029,7 @@ public class EBLChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.add(VALIDATE_SCO_CONDITIONALLY_PRESENT);
+    checks.add(VALIDATE_CONTRACT_REFERENCE);
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
@@ -1184,7 +1164,7 @@ public class EBLChecks {
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
     jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    jsonContentChecks.add(VALIDATE_SCO_CONDITIONALLY_PRESENT);
+    jsonContentChecks.add(VALIDATE_CONTRACT_REFERENCE);
   }
 
   public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, String eblStandardVersion, Supplier<String> tdrReferenceSupplier) {

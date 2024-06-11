@@ -244,23 +244,37 @@ public class BookingChecks {
       while (fields.hasNext()) {
         Map.Entry<String, JsonNode> field = fields.next();
         JsonNode childNode = field.getValue();
-        var address = childNode.path("address");
-        var identifyingCodes = childNode.path("identifyingCodes");
-        if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
-          issues.add("address or identifyingCodes must have provided.");
+        if(field.getKey().equals("other")) {
+          var otherDocumentParties = childNode.path("other");
+          for(JsonNode node:otherDocumentParties) {
+            issues.addAll(validateDocumentPartyFields(node.path("party")));
+          }
         }
-        var partyContactDetails = childNode.path("partyContactDetails");
-        if (partyContactDetails.isArray()) {
-          StreamSupport.stream(partyContactDetails.spliterator(), false)
-            .forEach(element -> {
-              if (element.path("phone").isMissingNode() && element.path("email").isMissingNode()) {
-                issues.add("PartyContactDetails must have phone or an email id.");
-              }
-            });
+        else {
+          issues.addAll(validateDocumentPartyFields(childNode));
         }
       }
       return issues;
     });
+
+  private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode) {
+    var issues = new LinkedHashSet<String>();
+    var address = documentPartyNode.path("address");
+    var identifyingCodes = documentPartyNode.path("identifyingCodes");
+    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
+      issues.add("address or identifyingCodes must have provided.");
+    }
+    var partyContactDetails = documentPartyNode.path("partyContactDetails");
+    if (partyContactDetails.isArray()) {
+      StreamSupport.stream(partyContactDetails.spliterator(), false)
+        .forEach(element -> {
+          if (element.path("phone").isMissingNode() && element.path("email").isMissingNode()) {
+            issues.add("PartyContactDetails must have phone or an email id.");
+          }
+        });
+    }
+    return issues;
+  }
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",

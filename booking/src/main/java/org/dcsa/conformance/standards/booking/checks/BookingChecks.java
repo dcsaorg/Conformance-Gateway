@@ -98,9 +98,9 @@ public class BookingChecks {
       mav.submitAllMatching("transportPlan.dischargeLocation.UNLocationCode");
 
       // Beta-2 only
-      mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.shipper.address.UNLocationCode");
       mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
+      mav.submitAllMatching("documentParties.bookingAgent.address.UNLocationCode");
       mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
       mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
       mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
@@ -234,6 +234,47 @@ public class BookingChecks {
       "documentParties",
       JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
+
+  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTY = JsonAttribute.customValidator(
+    "Validate document party for address, identifyingCodes and partyContactDetails",
+    (body) -> {
+      var documentParties = body.path("documentParties");
+      var issues = new LinkedHashSet<String>();
+      Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
+      while (fields.hasNext()) {
+        Map.Entry<String, JsonNode> field = fields.next();
+        JsonNode childNode = field.getValue();
+        if(field.getKey().equals("other")) {
+          var otherDocumentParties = childNode.path("other");
+          for(JsonNode node:otherDocumentParties) {
+            issues.addAll(validateDocumentPartyFields(node.path("party")));
+          }
+        }
+        else {
+          issues.addAll(validateDocumentPartyFields(childNode));
+        }
+      }
+      return issues;
+    });
+
+  private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode) {
+    var issues = new LinkedHashSet<String>();
+    var address = documentPartyNode.path("address");
+    var identifyingCodes = documentPartyNode.path("identifyingCodes");
+    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
+      issues.add("address or identifyingCodes must have provided.");
+    }
+    var partyContactDetails = documentPartyNode.path("partyContactDetails");
+    if (partyContactDetails.isArray()) {
+      StreamSupport.stream(partyContactDetails.spliterator(), false)
+        .forEach(element -> {
+          if (element.path("phone").isMissingNode() && element.path("email").isMissingNode()) {
+            issues.add("PartyContactDetails must have phone or an email id.");
+          }
+        });
+    }
+    return issues;
+  }
 
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",
@@ -584,6 +625,7 @@ public class BookingChecks {
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
     COUNTRY_CODE_VALIDATIONS,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
+    VALIDATE_DOCUMENT_PARTY,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

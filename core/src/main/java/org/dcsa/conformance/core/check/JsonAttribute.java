@@ -209,6 +209,35 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonRebaseableContentCheck lostAttributeCheck(
+    @NonNull
+    String description,
+    @NonNull
+    Supplier<JsonNode> baseNodeSupplier
+  ) {
+    return LostAttributeCheck.of(
+      description,
+      baseNodeSupplier,
+      null
+    );
+  }
+
+
+  public static JsonRebaseableContentCheck lostAttributeCheck(
+    @NonNull
+    String description,
+    @NonNull
+    Supplier<JsonNode> baseNodeSupplier,
+    @NonNull
+    BiConsumer<JsonNode, JsonNode> normalizer
+  ) {
+    return LostAttributeCheck.of(
+      description,
+      baseNodeSupplier,
+      normalizer
+    );
+  }
+
   public static JsonContentMatchedValidation presenceImpliesOtherField(
     @NonNull
     String sourceFieldName,

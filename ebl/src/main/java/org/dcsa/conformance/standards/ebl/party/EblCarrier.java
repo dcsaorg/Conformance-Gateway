@@ -455,15 +455,15 @@ public class EblCarrier extends ConformanceParty {
       new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
+  private static final Set<String> QUERY_BOOLEAN = Set.of("true", "false");
   private String readAmendedContent(ConformanceRequest request) {
     var queryParams = request.queryParams();
-    var operationParams = queryParams.get("amendedContent");
+    var operationParams = queryParams.get("updatedContent");
     if (operationParams == null || operationParams.isEmpty()) {
       return "false";
     }
     var operation = operationParams.iterator().next();
-    if (operationParams.size() > 1
-      || !(operation.equals("true") || operation.equals("false"))) {
+    if (operationParams.size() > 1 || !QUERY_BOOLEAN.contains(operation)) {
       return "!INVALID-VALUE!";
     }
     return operation;

@@ -224,7 +224,7 @@ public class EblShipper extends ConformanceParty {
     String documentReference = actionPrompt.get("documentReference").asText();
     boolean requestAmendment = actionPrompt.path("amendedContent").asBoolean(false);
     Map<String, List<String>> queryParams = requestAmendment
-      ? Map.of("amendedContent", List.of("true"))
+      ? Map.of("updatedContent", List.of("true"))
       : Collections.emptyMap();
 
     syncCounterpartGet("/v3/shipping-instructions/" + documentReference, queryParams);

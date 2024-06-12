@@ -171,7 +171,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
               .formatted(src, srr, tdr, eblStatesById.get(tdr)));
 
       return request.createResponse(
-          202,
+          204,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
               objectMapper

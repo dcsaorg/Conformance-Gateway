@@ -45,8 +45,8 @@ class EblSurrenderScenarioListBuilder
           EblSurrenderState surrenderState) {
     return switch (surrenderState) {
       case AVAILABLE_FOR_SURRENDER -> thenEither(
-              requestSurrenderForDelivery(202).thenAllPathsFrom(DELIVERY_SURRENDER_REQUESTED),
-              requestSurrenderForAmendment(202).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED),
+              requestSurrenderForDelivery(204).thenAllPathsFrom(DELIVERY_SURRENDER_REQUESTED),
+              requestSurrenderForAmendment(204).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED),
               acceptSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER),
               rejectSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER)
       );
@@ -76,7 +76,7 @@ class EblSurrenderScenarioListBuilder
   private EblSurrenderScenarioListBuilder thenAllHappyPathsFrom(
           EblSurrenderState surrenderState) {
     var cases = switch (surrenderState) {
-      case AVAILABLE_FOR_SURRENDER -> requestSurrenderForDelivery(202).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED);
+      case AVAILABLE_FOR_SURRENDER -> requestSurrenderForDelivery(204).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED);
       case DELIVERY_SURRENDER_REQUESTED -> acceptSurrenderRequest(204);
       case SURRENDERED_FOR_DELIVERY -> noAction();
       case AMENDMENT_SURRENDER_REQUESTED -> acceptSurrenderRequest(204)

@@ -375,8 +375,6 @@ public class CarrierShippingInstructions {
 
   public void declineUpdatedShippingInstructions(String documentReference, String reason) {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
-    var updated = getUpdatedShippingInstructions().orElseThrow();
-    setShippingInstructions(updated);
     clearUpdatedShippingInstructions();
     setReason(reason);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));

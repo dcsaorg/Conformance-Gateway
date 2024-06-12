@@ -5,7 +5,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
@@ -22,6 +24,13 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
     super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204);
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptChanges = acceptChanges;
+  }
+
+  protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dsp) {
+    if (acceptChanges) {
+      dsp = dsp.withShippingInstructions(dsp.updatedShippingInstructions());
+    }
+    return dsp.withUpdatedShippingInstructions(null);
   }
 
   @Override

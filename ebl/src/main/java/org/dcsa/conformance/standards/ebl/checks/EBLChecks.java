@@ -1040,7 +1040,7 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus) {
+  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       SI_REF_SIR_PTR,
@@ -1059,6 +1059,10 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
+    checks.add(JsonAttribute.lostAttributeCheck(
+      "Validate that shipper provided data was not altered",
+      delayedValue(dspSupplier, (dsp) -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions())
+    ));
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,

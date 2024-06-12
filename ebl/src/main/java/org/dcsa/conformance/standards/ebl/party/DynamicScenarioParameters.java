@@ -15,17 +15,22 @@ public record DynamicScenarioParameters(
     ScenarioType scenarioType,
     String shippingInstructionsReference,
     String transportDocumentReference,
+    JsonNode shippingInstructions,
+    JsonNode updatedShippingInstructions,
     ShippingInstructionsStatus shippingInstructionsStatus,
     ShippingInstructionsStatus updatedShippingInstructionsStatus,
     TransportDocumentStatus transportDocumentStatus) {
   public ObjectNode toJson() {
-    return OBJECT_MAPPER.createObjectNode()
+    var node = OBJECT_MAPPER.createObjectNode()
       .put("scenarioType", scenarioType.name())
       .put("shippingInstructionsReference", shippingInstructionsReference)
       .put("transportDocumentReference", transportDocumentReference)
       .put("shippingInstructionsStatus", serializeEnum(shippingInstructionsStatus, ShippingInstructionsStatus::wireName))
       .put("updatedShippingInstructionsStatus", serializeEnum(updatedShippingInstructionsStatus, ShippingInstructionsStatus::wireName))
       .put("transportDocumentStatus", serializeEnum(transportDocumentStatus, TransportDocumentStatus::wireName));
+    node.replace("shippingInstructions", shippingInstructions);
+    node.replace("updatedShippingInstructions", updatedShippingInstructions);
+    return node;
   }
 
   private static <E extends Enum<E>> String serializeEnum(E v, Function<E, String> mapper) {
@@ -47,6 +52,8 @@ public record DynamicScenarioParameters(
         readEnum(jsonNode.required("scenarioType").asText(), ScenarioType::valueOf),
         jsonNode.path("shippingInstructionsReference").asText(null),
         jsonNode.path("transportDocumentReference").asText(null),
+        jsonNode.path("shippingInstructions"),
+        jsonNode.path("updatedShippingInstructions"),
         readEnum(jsonNode.required("shippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
         readEnum(jsonNode.required("updatedShippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
         readEnum(jsonNode.required("transportDocumentStatus").asText(null), TransportDocumentStatus::fromWireName)

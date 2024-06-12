@@ -67,7 +67,8 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       throw new IllegalStateException("Missing document reference for use-case 3");
     }
     return super.asJsonNode()
-      .put("documentReference", documentReference);
+      .put("documentReference", documentReference)
+      .put("amendedContent", requestAmendedStatus);
   }
 
   @Override
@@ -121,7 +122,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               responseSchemaValidator),
-              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus)
+              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus, requestAmendedStatus)
           );
       }
     };

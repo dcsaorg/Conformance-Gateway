@@ -31,7 +31,7 @@ public abstract class EblAction extends ConformanceAction {
     this.dspReference =
         previousAction == null
             ? new OverwritingReference<>(
-                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null))
+                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -81,6 +81,10 @@ public abstract class EblAction extends ConformanceAction {
     return dspReference::set;
   }
 
+  protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
+    return dynamicScenarioParameters;
+  }
+
   protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dsp = dspReference.get();
 
@@ -118,6 +122,8 @@ public abstract class EblAction extends ConformanceAction {
     updatedDsp =
         updateIfNotNull(
             updatedDsp, newTransportDocumentStatus, updatedDsp::withTransportDocumentStatus);
+
+    updatedDsp = updateDSPFromSIHook(exchange, updatedDsp);
 
     if (!dsp.equals(updatedDsp)) {
       dspReference.set(updatedDsp);

@@ -12,5 +12,59 @@
         "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
       }
     ]
-  }
+  },
+  "endorsementChain": [
+    {
+      "actionCode": "ISSUE",
+      "actionDateTime": "2024-06-11T13:54:00Z",
+      "actor": {
+        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+        "partyName": "legal name",
+        "partyCodes": [
+          {
+            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
+            "codeListProvider": "EPUI",
+            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      },
+      "recipient": {
+        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+        "partyName": "legal name",
+        "partyCodes": [
+          {
+            "partyCode": "PARTY_CODE_PLACEHOLDER",
+            "codeListProvider": "EPUI",
+            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      }
+    },
+    {
+      "actionCode": "SURRENDER FOR DELIVERY",
+      "actionDateTime": "2024-06-12T14:54:00Z",
+      "recipient": {
+        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+        "partyName": "legal name",
+        "partyCodes": [
+          {
+            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
+            "codeListProvider": "EPUI",
+            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      },
+      "actor": {
+        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+        "partyName": "legal name",
+        "partyCodes": [
+          {
+            "partyCode": "PARTY_CODE_PLACEHOLDER",
+            "codeListProvider": "EPUI",
+            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ]
+      }
+    }
+  ]
 }

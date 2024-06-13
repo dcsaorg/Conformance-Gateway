@@ -112,8 +112,11 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
     } else {
       schemaName =
         EblSurrenderRole.isCarrier(apiProviderRole)
-          ? (forRequest ? "SurrenderRequestDetails" : "SurrenderRequestAcknowledgement")
+          ? (forRequest ? "SurrenderRequestDetails" : null)
           : (forRequest ? "SurrenderRequestAnswer" : null);
+    }
+    if (schemaName == null) {
+      throw new IllegalArgumentException("No schema for " + apiProviderRole + " (forRequest=" + forRequest + ")");
     }
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }

@@ -47,9 +47,10 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new SuppliedScenarioParameters(
+    return  new SuppliedScenarioParameters(
             UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20),
             "XMPL",
+        "Example carrier party code",
             "Example party code",
             "Example code list")
         .toJson();

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA EBL Surrender API",
-    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThe EBL Solution Platform will submit surrender requests to the carrier, which will be processed asynchronously. Responses to the surrender reqests will be submitted by the carrier via the [DCSA EBL Surrender Response API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR_RSP/3.0.0-Beta-2) API.\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negoitable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/SurrenderRequestDetails) for details on what data the platform will provide.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThe EBL Solution Platform will submit surrender requests to the carrier, which will be processed asynchronously. Responses to the surrender reqests will be submitted by the carrier via the [DCSA EBL Surrender Response API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR_RSP/3.0.0-Beta-3) API.\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negoitable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,11 +12,11 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "3.0.0-Beta-2"
+    "version": "3.0.0-Beta-3"
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-2",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-3",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
@@ -59,18 +59,11 @@
           }
         },
         "responses": {
-          "202": {
+          "204": {
             "description": "Submission registered successfully.\n\nThe carrier will later follow up via the callback with a response.\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SurrenderRequestAcknowledgement"
-                }
               }
             }
           },
@@ -107,7 +100,7 @@
             "maxLength": 4,
             "pattern": "\\S+",
             "type": "string",
-            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n"
+            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-3.csv).\n"
           },
           "partyName": {
             "maxLength": 100,
@@ -132,45 +125,9 @@
         },
         "description": "Refers to a company or a legal entity."
       },
-      "SurrenderRequestedBy": {
-        "title": "Surrender Requested By",
-        "required": [
-          "eblPlatform",
-          "partyName"
-        ],
-        "type": "object",
-        "properties": {
-          "eblPlatform": {
-            "maxLength": 4,
-            "pattern": "\\S+",
-            "type": "string",
-            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n"
-          },
-          "partyName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Name of the party.\n",
-            "example": "Globeteam"
-          },
-          "identifyingCodes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IdentifyingCode"
-            }
-          },
-          "taxLegalReferences": {
-            "type": "array",
-            "description": "A list of `Tax References` for a `Party`\n",
-            "items": {
-              "$ref": "#/components/schemas/TaxLegalReference"
-            }
-          }
-        },
-        "description": "The party that requested the surrender of the EBL.\n\nThe EBL platform has verified that the party submitting the surrender request was in possion of the EBL and was entitled to perform the surrender ([see description of surrenderRequestDetails](#/components/schemas/surrenderRequestDetails)).\n"
-      },
       "EndorsementChainLink": {
         "required": [
+          "actionCode",
           "actionDateTime",
           "actor",
           "recipient"
@@ -179,8 +136,12 @@
         "properties": {
           "actionDateTime": {
             "type": "string",
-            "description": "Date time when the action occured.",
+            "description": "Date time when the action occurred.",
             "format": "date-time"
+          },
+          "actionCode": {
+            "type": "string",
+            "description": "The action performed by the party. This should be one of:\n\n- `ISSUED` (The actor issued the document to the recipient)\n- `ENDORSED` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER FOR DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER FOR AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\n\nNot all actions are applicable to all surrender requests.\n"
           },
           "actor": {
             "$ref": "#/components/schemas/TransactionParty"
@@ -190,25 +151,6 @@
           }
         },
         "description": "Entry in the endorsement chain.\n"
-      },
-      "SurrenderRequestAcknowledgement": {
-        "type": "object",
-        "properties": {
-          "surrenderRequestReference": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A server defined reference for a concrete surrender request. Surrender request references MUST NOT be reused.\n",
-            "example": "Z12345"
-          },
-          "transportDocumentReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-            "example": "HHL71800000"
-          }
-        }
       },
       "SurrenderRequestDetails": {
         "required": [
@@ -245,7 +187,7 @@
           "reason": {
             "maxLength": 4,
             "type": "string",
-            "description": "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-  `SWTP` (Switch to paper)\n",
+            "description": "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-\t`SWTP` (Switch to paper)\n",
             "example": "SWTP"
           },
           "comments": {
@@ -253,9 +195,6 @@
             "type": "string",
             "description": "Optional free text comment associated with the surrender request transaction.",
             "example": "As requested..."
-          },
-          "surrenderRequestedBy": {
-            "$ref": "#/components/schemas/SurrenderRequestedBy"
           },
           "endorsementChain": {
             "minItems": 0,
@@ -266,7 +205,7 @@
             }
           }
         },
-        "description": "A concrete surrender request related to a transport document.\n\nThe platform guarantees *all* of the following:\n\n  1) The surrender request was submitted by the sole possessor of the EBL.\n  2) Depending on the eBL type:\n   * For non-negoitable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n  3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n"
+        "description": "A concrete surrender request related to a transport document.\n\nThe platform guarantees *all* of the following:\n\n  1) The surrender request was submitted by the sole possessor of the EBL.\n  2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n  3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n"
       },
       "IdentifyingCode": {
         "title": "Identifying Code",
@@ -279,7 +218,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digitial Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -289,7 +228,7 @@
             "example": "MSK"
           },
           "codeListName": {
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decenbtralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
             "example": "DID"
           }
         }
@@ -470,7 +409,7 @@
         "explode": false,
         "schema": {
           "type": "string",
-          "example": "3.0.0-Beta-2"
+          "example": "3.0.0-Beta-3"
         }
       }
     }

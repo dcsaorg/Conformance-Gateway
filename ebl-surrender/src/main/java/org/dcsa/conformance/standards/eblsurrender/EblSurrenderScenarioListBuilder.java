@@ -138,9 +138,8 @@ class EblSurrenderScenarioListBuilder
                 expectedStatus,
                 previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    EblSurrenderRole.CARRIER.getConfigName(), true),
-                componentFactory.getMessageSchemaValidator(
-                    EblSurrenderRole.CARRIER.getConfigName(), false)));
+                    EblSurrenderRole.CARRIER.getConfigName(), true))
+    );
   }
 
   private static EblSurrenderScenarioListBuilder acceptSurrenderRequest(int status) {

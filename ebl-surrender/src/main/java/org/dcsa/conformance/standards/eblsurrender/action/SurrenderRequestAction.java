@@ -15,11 +15,12 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
 
+import static org.dcsa.conformance.standards.eblsurrender.SurrenderChecks.surrenderRequestChecks;
+
 @Getter
 @Slf4j
 public class SurrenderRequestAction extends EblSurrenderAction {
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final boolean forAmendment;
 
   private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
@@ -32,8 +33,7 @@ public class SurrenderRequestAction extends EblSurrenderAction {
       String carrierPartyName,
       int expectedStatus,
       ConformanceAction previousAction,
-      JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator) {
     super(
         platformPartyName,
         carrierPartyName,
@@ -42,7 +42,6 @@ public class SurrenderRequestAction extends EblSurrenderAction {
         "%s %d".formatted(forAmendment ? "AREQ" : "SREQ", expectedStatus));
     this.forAmendment = forAmendment;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
@@ -115,17 +114,13 @@ public class SurrenderRequestAction extends EblSurrenderAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator),
-            new JsonSchemaCheck(
-                EblSurrenderRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
             new JsonAttributeCheck(
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 JsonPointer.compile("/surrenderRequestCode"),
                 forAmendment ? "AREQ" : "SREQ"),
+            surrenderRequestChecks(getMatchedExchangeUuid(), expectedApiVersion),
             new JsonAttributeCheck(
                 EblSurrenderRole::isPlatform,
                 getMatchedExchangeUuid(),

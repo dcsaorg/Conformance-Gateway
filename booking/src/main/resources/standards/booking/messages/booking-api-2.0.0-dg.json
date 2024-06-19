@@ -28,33 +28,66 @@
           "cargoGrossWeight": 12000,
           "cargoGrossWeightUnit": "KGM",
           "outerPackaging": {
+            "packageCode" : "5H",
             "imoPackagingCode": "3A1",
             "numberOfPackages": 5,
             "description": "Jerrican, steel",
             "dangerousGoods": [
               {
-                "unNumber": "3082",
-                "imoClass": "9",
-                "packingGroup": 3,
-                "EMSNumber": "F-A S-F",
+                "codedVariantList": "2200",
                 "properShippingName": "Environmentally hazardous substance, liquid, N.O.S",
+                "technicalName": "xylene and benzene",
+                "imoClass": "9",
+                "subsidiaryRisk1": "1.2",
+                "subsidiaryRisk2": "1.2",
+                "isMarinePollutant": false,
+                "packingGroup": 3,
+                "isLimitedQuantity":  false,
+                "isExceptedQuantity":  false,
+                "isSalvagePackings":  false,
+                "isEmptyUncleanedResidue":  false,
+                "isWaste":  false,
+                "isHot":  false,
+                "isCompetentAuthorityApprovalProvided" : false,
+                "competentAuthorityApproval": "Transport Authority",
+                "segregationGroups": ["12"],
+                "innerPackagings" : [{
+                  "quantity": 20,
+                  "material": "Plastic",
+                  "description": "Woven plastic water resistant Bag"
+                }],
                 "emergencyContactDetails" :  {
                   "contact": "DCSA test person",
                   "phone": "+41 23456789"
                 },
+                "EMSNumber": "F-A S-F",
+                "endOfHoldingTime": "2024-10-03",
+                "fumigationDateTime": "2024-05-03T09:03:00-02:00",
+                "isReportableQuantity":  false,
+                "inhalationZone": "A",
                 "grossWeight" : {
                   "value": 12000,
                   "unit": "KGM"
                 },
-                "isCompetentAuthorityApprovalProvided" : false,
-                "isEmptyUncleanedResidue":  false,
-                "isExceptedQuantity":  false,
-                "isHot":  false,
-                "isLimitedQuantity":  false,
-                "isMarinePollutant": false,
-                "isReportableQuantity":  false,
-                "isSalvagePackings":  false,
-                "isWaste":  false
+                "netWeight": {
+                  "value": 104.5,
+                  "unit": "KGM"
+                },
+                "volume": {
+                  "value": 10.5,
+                  "unit": "MTQ"
+                },
+                "limits": {
+                  "temperatureUnit": "CEL",
+                  "flashPoint": 42,
+                  "transportControlTemperature": 24,
+                  "transportEmergencyTemperature": 35,
+                  "SADT": 15,
+                  "SAPT": 20
+                },
+                "specialCertificateNumber": "22663:3",
+                "additionalContainerCargoHandling": "To be handled with extreme care",
+                "unNumber": "3082"
               }
             ]
           }

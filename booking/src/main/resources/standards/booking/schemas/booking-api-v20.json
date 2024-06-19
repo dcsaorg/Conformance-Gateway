@@ -3867,7 +3867,7 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder's Reference)\n- `SI` (Shipper's Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer's Reference)\n- `AAO` (Consignee's Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder's Reference)\n- `SI` (Shipper's Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer's Reference)\n- `AAO` (Consignee's Reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
             "example": "FF"
           },
           "value": {

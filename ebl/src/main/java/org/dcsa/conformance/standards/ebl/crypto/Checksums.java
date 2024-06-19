@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblinterop.crypto;
+package org.dcsa.conformance.standards.ebl.crypto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.setl.json.Canonical;

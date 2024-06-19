@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter

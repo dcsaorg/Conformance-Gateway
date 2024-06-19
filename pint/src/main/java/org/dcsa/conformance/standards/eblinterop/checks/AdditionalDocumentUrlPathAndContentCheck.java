@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 
 public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
 

@@ -6,6 +6,7 @@
     "freightPaymentTermCode": "PRE",
     "isElectronic": true,
     "isToOrder": false,
+    "contractQuotationReference": "12345",
     "invoicePayableAt": {
       "locationType": "UNLO",
       "UNLocationCode": "DKAAR"

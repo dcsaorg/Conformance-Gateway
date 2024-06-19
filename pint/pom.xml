@@ -32,21 +32,6 @@
             <optional>true</optional>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.networknt/json-schema-validator -->
-        <dependency>
-            <groupId>com.networknt</groupId>
-            <artifactId>json-schema-validator</artifactId>
-            <version>1.0.86</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.24.4</version>
-        </dependency>
-			<dependency>
-				<groupId>io.setl</groupId>
-				<artifactId>canonical-json</artifactId>
-				<version>2.3</version>
-			</dependency>
     </dependencies>
 </project>
 

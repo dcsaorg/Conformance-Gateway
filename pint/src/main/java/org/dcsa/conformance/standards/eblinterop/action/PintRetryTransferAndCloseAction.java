@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
+import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,7 +16,7 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblinterop.checks.PintChecks;
-import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 
 @Getter

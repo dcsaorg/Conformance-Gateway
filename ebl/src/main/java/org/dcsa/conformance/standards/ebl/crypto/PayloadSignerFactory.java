@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblinterop.crypto;
+package org.dcsa.conformance.standards.ebl.crypto;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
@@ -7,7 +7,7 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import lombok.SneakyThrows;
-import org.dcsa.conformance.standards.eblinterop.crypto.impl.DefaultPayloadSigner;
+import org.dcsa.conformance.standards.ebl.crypto.impl.DefaultPayloadSigner;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;

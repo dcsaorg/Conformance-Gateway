@@ -1,12 +1,12 @@
-package org.dcsa.conformance.standards.eblinterop.crypto.impl;
+package org.dcsa.conformance.standards.ebl.crypto.impl;
 
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.Payload;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.dcsa.conformance.standards.eblinterop.crypto.JWSSignerDetails;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.ebl.crypto.JWSSignerDetails;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
 
 @RequiredArgsConstructor
 public class DefaultPayloadSigner implements PayloadSigner {

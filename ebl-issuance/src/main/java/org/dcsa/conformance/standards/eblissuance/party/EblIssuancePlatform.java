@@ -24,12 +24,13 @@ import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
   private final Map<String, String> tdr2PendingChecksum = new HashMap<>();
   private final Map<String, Boolean> knownChecksums = new HashMap<>();
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblIssuancePlatform(
       String apiVersion,
@@ -49,18 +50,18 @@ public class EblIssuancePlatform extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ArrayNode arrayNodeEblStatesById = objectMapper.createArrayNode();
+    ArrayNode arrayNodeEblStatesById = OBJECT_MAPPER.createArrayNode();
     eblStatesByTdr.forEach(
         (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
+          ObjectNode entryNode = OBJECT_MAPPER.createObjectNode();
           entryNode.put("key", key);
           entryNode.put("value", value.name());
           arrayNodeEblStatesById.add(entryNode);
         });
     targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
 
-    targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(objectMapper, tdr2PendingChecksum));
-    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(objectMapper, knownChecksums, String::valueOf));
+    targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(OBJECT_MAPPER, tdr2PendingChecksum));
+    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(OBJECT_MAPPER, knownChecksums, String::valueOf));
   }
 
   @Override
@@ -108,7 +109,7 @@ public class EblIssuancePlatform extends ConformanceParty {
 
     syncCounterpartPost(
         "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)),
-        objectMapper
+      OBJECT_MAPPER
             .createObjectNode()
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", irc));
@@ -133,7 +134,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             "5678-cn-or-end",
             "Bolero");
     asyncOrchestratorPostPartyInput(
-        objectMapper
+      OBJECT_MAPPER
             .createObjectNode()
             .put("actionId", actionPrompt.required("actionId").asText())
             .set("input", suppliedScenarioParameters.toJson()));
@@ -160,7 +161,7 @@ public class EblIssuancePlatform extends ConformanceParty {
               400,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
-                  objectMapper
+                OBJECT_MAPPER
                       .createObjectNode()
                       .put(
                           "message",
@@ -175,7 +176,7 @@ public class EblIssuancePlatform extends ConformanceParty {
           request.createResponse(
               204,
               Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(objectMapper.createObjectNode()));
+              new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       String message;
       if (state == EblIssuanceState.ISSUANCE_REQUESTED) {
@@ -190,7 +191,7 @@ public class EblIssuancePlatform extends ConformanceParty {
               409,
               Map.of("Api-Version", List.of(apiVersion)),
               new ConformanceMessageBody(
-                  objectMapper
+                OBJECT_MAPPER
                       .createObjectNode()
                       .put("message", message)));
     }

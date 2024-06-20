@@ -26,6 +26,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
@@ -41,7 +42,7 @@ public class PintSendingPlatform extends ConformanceParty {
   private static final Random RANDOM = new Random();
 
 
-  private final PayloadSigner payloadSigner;
+  private final PayloadSignerWithKey payloadSigner;
 
   public PintSendingPlatform(
       String apiVersion,
@@ -50,7 +51,7 @@ public class PintSendingPlatform extends ConformanceParty {
       JsonNodeMap persistentMap,
       PartyWebClient asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSigner payloadSigner
+      PayloadSignerWithKey payloadSigner
   ) {
     super(
         apiVersion,
@@ -134,7 +135,7 @@ public class PintSendingPlatform extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var tdr = generateTDR();
-    var scenarioParameters = new SenderScenarioParameters(tdr, "BOLE", PayloadSignerFactory.senderKeySignatureVerifier().getPublicKeyInPemFormat());
+    var scenarioParameters = new SenderScenarioParameters(tdr, "BOLE", payloadSigner.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()

@@ -18,6 +18,11 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
+import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
@@ -27,6 +32,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final PayloadSignerWithKey payloadSigner;
 
   public EblIssuanceCarrier(
       String apiVersion,
@@ -34,7 +40,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
       PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader,
+      PayloadSignerWithKey payloadSigner) {
     super(
         apiVersion,
         partyConfiguration,
@@ -42,6 +49,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         persistentMap,
         webClient,
         orchestratorAuthHeader);
+    this.payloadSigner = payloadSigner;
   }
 
   @Override
@@ -70,7 +78,27 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest));
+    return Map.ofEntries(
+      Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest),
+      Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters)
+    );
+  }
+
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info(
+      "EblIssuanceCarrier.supplyScenarioParameters(%s)"
+        .formatted(actionPrompt.toPrettyString()));
+    var carrierScenarioParameters =
+        new CarrierScenarioParameters(
+          payloadSigner.getPublicKeyInPemFormat());
+    asyncOrchestratorPostPartyInput(
+      objectMapper
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText())
+        .set("input", carrierScenarioParameters.toJson()));
+    addOperatorLogEntry(
+      "Submitting CarrierScenarioParameters: %s"
+        .formatted(carrierScenarioParameters.toJson().toPrettyString()));
   }
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
@@ -93,7 +121,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
 
     var jsonRequestBody =
-        JsonToolkit.templateFileToJsonNode(
+      (ObjectNode)JsonToolkit.templateFileToJsonNode(
             "/standards/eblissuance/messages/eblissuance-v%s-request.json"
                 .formatted(apiVersion),
             Map.ofEntries(
@@ -146,6 +174,14 @@ public class EblIssuanceCarrier extends ConformanceParty {
       var sealNumber = sealObj.path("sealNumber").asText("") + "X";
       sealObj.put("sealNumber", sealNumber);
     }
+
+    var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
+    var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
+    var issuanceManifest = objectMapper.createObjectNode()
+        .put("documentChecksum", tdChecksum)
+        .put("issueToChecksum", issueToChecksum);
+
+    jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
     syncCounterpartPost(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),

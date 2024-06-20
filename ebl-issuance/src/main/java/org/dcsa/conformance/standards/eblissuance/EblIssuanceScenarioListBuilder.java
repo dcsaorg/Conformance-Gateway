@@ -57,6 +57,7 @@ class EblIssuanceScenarioListBuilder
     return Stream.of(
             Map.entry(
                 "",
+              carrierScenarioParameters().then(
                 noAction().thenEither(
                   supplyScenarioParameters(EblType.STRAIGHT_EBL)
                       .thenEither(
@@ -86,6 +87,7 @@ class EblIssuanceScenarioListBuilder
                           correctIssuanceRequest().then(issuanceResponseAccepted())),
                 supplyScenarioParameters(EblType.BLANK_EBL).then(
                           correctIssuanceRequest().then(issuanceResponseAccepted()))))
+            )
         ).collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -105,7 +107,16 @@ class EblIssuanceScenarioListBuilder
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblIssuanceScenarioListBuilder(
         previousAction ->
-            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, null, eblType));
+            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, (IssuanceAction) previousAction, eblType));
+  }
+
+  private static EblIssuanceScenarioListBuilder carrierScenarioParameters() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String platformPartyName = threadLocalPlatformPartyName.get();
+    return new EblIssuanceScenarioListBuilder(
+        previousAction ->
+            new CarrierScenarioParametersAction(
+                carrierPartyName, platformPartyName, (IssuanceAction) previousAction));
   }
 
   private static EblIssuanceScenarioListBuilder correctIssuanceRequest() {

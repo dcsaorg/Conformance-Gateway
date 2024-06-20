@@ -18,10 +18,11 @@ import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.eblissuance.crypto.Checksums;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
@@ -123,15 +124,14 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-          "BOLE",
-          "DCSA CTK Issue To party",
-          "1234-issue-to",
-          "Bolero",
-          // These are ignored for blank ones, so we can provide them unconditionally.
-          "DCSA CTK Consignee/Endorsee",
-          "5678-cn-or-end",
-          "Bolero"
-        );
+            "BOLE",
+            "DCSA CTK Issue To party",
+            "1234-issue-to",
+            "Bolero",
+            // These are ignored for blank ones, so we can provide them unconditionally.
+            "DCSA CTK Consignee/Endorsee",
+            "5678-cn-or-end",
+            "Bolero");
     asyncOrchestratorPostPartyInput(
         objectMapper
             .createObjectNode()

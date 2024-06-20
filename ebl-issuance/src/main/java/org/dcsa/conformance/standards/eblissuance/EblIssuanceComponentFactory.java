@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
@@ -45,7 +46,9 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
               persistentMap,
               webClient,
-              orchestratorAuthHeader));
+              orchestratorAuthHeader,
+              PayloadSignerFactory.senderPayloadSigner()
+            ));
     }
 
     PartyConfiguration platformConfiguration =

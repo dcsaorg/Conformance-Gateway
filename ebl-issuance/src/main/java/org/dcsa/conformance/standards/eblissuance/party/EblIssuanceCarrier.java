@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,6 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;

@@ -157,7 +157,9 @@ class EblIssuanceScenarioListBuilder
                 carrierPartyName,
                 (IssuanceAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    EblIssuanceRole.CARRIER.getConfigName(), true)));
+                    EblIssuanceRole.CARRIER.getConfigName(), true, false),
+                componentFactory.getMessageSchemaValidator(
+                  EblIssuanceRole.CARRIER.getConfigName(), true, true)));
   }
 
   private static EblIssuanceScenarioListBuilder issuanceResponseAccepted() {
@@ -190,6 +192,6 @@ class EblIssuanceScenarioListBuilder
                 platformPartyName,
                 (IssuanceAction) previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    EblIssuanceRole.PLATFORM.getConfigName(), true)));
+                    EblIssuanceRole.PLATFORM.getConfigName(), true, false)));
   }
 }

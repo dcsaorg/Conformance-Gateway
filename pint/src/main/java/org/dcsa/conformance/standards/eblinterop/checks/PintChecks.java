@@ -7,17 +7,16 @@ import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseS
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -26,33 +25,6 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
-  private static final JsonContentCheckRebaser SIGNED_CONTENT_REBASER = delegate -> {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of(
-          "The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-          "The path '%s' should have been a signed payload, but could not be parsed as a JWS."
-            .formatted(contextPath));
-      }
-      JsonNode jsonBody;
-      try {
-        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
-      } catch (Exception e) {
-        return Set.of(
-          "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
-            contextPath, e.toString()
-          ));
-      }
-      return delegate.validate(jsonBody, contextPath + "!");
-    };
-  };
 
   public static JsonContentMatchedValidation arraySizeMustEqual(IntSupplier expectedSizeSupplier) {
     return (nodeToValidate,contextPath) -> {
@@ -181,75 +153,6 @@ public class PintChecks {
     return JsonAttribute.matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
   }
 
-  public static JsonRebaseableContentCheck signedContentValidation(
-    JsonRebaseableContentCheck delegate
-  ) {
-    return SIGNED_CONTENT_REBASER.offset(delegate);
-  }
-
-  public static JsonContentMatchedValidation signedContentValidation(
-      JsonContentMatchedValidation delegate) {
-    return SIGNED_CONTENT_REBASER.offset(delegate);
-  }
-
-  public static JsonContentMatchedValidation signedContentSchemaValidation(
-      JsonSchemaValidator schemaValidator) {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.".formatted(contextPath));
-      }
-      JsonNode jsonBody;
-      try {
-        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
-      } catch (Exception e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
-              contextPath,
-              e.toString()
-            ));
-      }
-      return schemaValidator.validate(jsonBody);
-    };
-  }
-  ;
-
-  public static JsonContentMatchedValidation signatureValidates(
-      Supplier<SignatureVerifier> signatureVerifierSupplier) {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString()));
-      }
-      if (Algorithm.NONE.equals(jwsObject.getHeader().getAlgorithm())) {
-        return Set.of(
-          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath));
-      }
-      var signatureVerifier = signatureVerifierSupplier.get();
-      if (signatureVerifier == null) {
-        throw new AssertionError("Missing signatureVerifier");
-      }
-      if (!signatureVerifier.verifySignature(jwsObject)) {
-        return Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key".formatted(contextPath));
-      }
-      return Set.of();
-    };
-  }
-
   private static void generateScenarioRelatedChecksForTransferRequest(
       List<JsonContentCheck> checks,
       Supplier<SenderScenarioParameters> sspSupplier,
@@ -264,7 +167,7 @@ public class PintChecks {
       JsonAttribute.customValidator(
         "[Scenario] Verify receiver EPUI is correct",
         pathChain(
-          signedContentValidation(
+          SignatureChecks.signedContentValidation(
             pathChain(
               anyArrayElementMatching(
                 (n) -> n.path("codeListProvider").asText("").equals("EPUI"),
@@ -281,7 +184,7 @@ public class PintChecks {
     checks.add(
       JsonAttribute.customValidator(
         "[Scenario] Verify that the number of additional documents match the scenario",
-        JsonAttribute.path("envelopeManifestSignedContent", signedContentValidation(
+        JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentValidation(
           JsonAttribute.path("supportingDocuments", arraySizeMustEqual(delayedValue(dspSupplier, DynamicScenarioParameters::documentCount, -1)))
         ))
       )
@@ -338,13 +241,13 @@ public class PintChecks {
     jsonContentChecks.add(
       JsonAttribute.customValidator(
         "Validate that the response code was as expected",
-        signedContentValidation(
+        SignatureChecks.signedContentValidation(
           JsonAttribute.path("responseCode", JsonAttribute.matchedMustEqual(expectedResponseCode::name))
         )
       )
     );
     jsonContentChecks.add(
-      signedContentValidation(
+      SignatureChecks.signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent' is conditionally present (%s)".formatted(PintResponseCode.DUPE.name()),
           JsonAttribute.isEqualTo("responseCode", PintResponseCode.DUPE.name()),
@@ -354,7 +257,7 @@ public class PintChecks {
       )
     );
     jsonContentChecks.add(
-      signedContentValidation(
+      SignatureChecks.signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'receivedAdditionalDocumentChecksums' is conditionally present (%s or %s)".formatted(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name()),
           JsonAttribute.isOneOf("responseCode", Set.of(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name())),
@@ -365,7 +268,7 @@ public class PintChecks {
     );
 
     jsonContentChecks.add(
-      signedContentValidation(
+      SignatureChecks.signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'missingAdditionalDocumentChecksums' is conditionally present (%s)".formatted(PintResponseCode.MDOC.name()),
           JsonAttribute.isEqualTo("responseCode", PintResponseCode.MDOC.name()),
@@ -398,7 +301,7 @@ public class PintChecks {
         "Validate the transportDocument checksum in the envelopeManifestSignedContent",
         JsonAttribute.path(
           "envelopeManifestSignedContent",
-          signedContentValidation(
+          SignatureChecks.signedContentValidation(
             JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
           )
         )
@@ -408,7 +311,7 @@ public class PintChecks {
       JsonAttribute.allIndividualMatchesMustBeValid(
         "Validate the transportDocument checksum in the envelopeTransferChain",
         (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
-        signedContentValidation(
+        SignatureChecks.signedContentValidation(
           JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
         )
       )

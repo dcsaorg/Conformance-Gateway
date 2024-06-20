@@ -1,17 +1,18 @@
 package org.dcsa.conformance.standards.eblissuance.checks;
 
-import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.core.check.JsonAttribute.*;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonPointer;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.JsonAttribute;
-import org.dcsa.conformance.core.check.JsonContentCheckRebaser;
-import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
+import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblissuance.action.EblType;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
@@ -81,6 +82,67 @@ public class IssuanceChecks {
       ),
       hasEndorseeScenarioCheck(standardsVersion, eblType)
     );
+  }
+
+  public static ActionCheck issuanceRequestSignatureChecks(UUID matched, String standardsVersion, JsonSchemaValidator issuanceManifestSchemaValidator, Supplier<SignatureVerifier> signatureVerifierSupplier) {
+    return JsonAttribute.contentChecks(
+        "",
+        "Complex validations of issuanceManifest",
+        EblIssuanceRole::isCarrier,
+        matched,
+        HttpMessageType.REQUEST,
+        standardsVersion,
+        JsonAttribute.customValidator(
+          "Signature of the issuanceManifestSignedContent is valid",
+          path("issuanceManifestSignedContent", SignatureChecks.signatureValidates(signatureVerifierSupplier))
+        ),
+        JsonAttribute.customValidator(
+          "Schema validation of the payload of issuanceManifestSignedManifest",
+          path("issuanceManifestSignedContent", SignatureChecks.signedContentSchemaValidation(
+            issuanceManifestSchemaValidator
+          ))
+        ),
+        JsonAttribute.customValidator(
+          "Validate checksum of transportDocument vs. the checksum provided in the issuanceManifest",
+          validateJsonNodeToChecksumAttribute(
+            "document",
+            "documentChecksum"
+          )
+        ),
+        JsonAttribute.customValidator(
+          "Validate checksum of issueTo vs. the checksum provided in the issuanceManifest",
+          validateJsonNodeToChecksumAttribute(
+            "issueTo",
+            "issueToChecksum"
+          )
+        ),
+        JsonAttribute.customValidator(
+          "Validate checksum of eBLVisualisationByCarrier vs. the checksum provided in the issuanceManifest",
+          validateJsonNodeToChecksumAttribute(
+            "eBLVisualisationByCarrier",
+            "eBLVisualisationByCarrierChecksum"
+          )
+        )
+    );
+  }
+
+  public static JsonContentMatchedValidation validateJsonNodeToChecksumAttribute(
+    String protectedAttribute,
+    String manifestChecksumAttribute
+  ) {
+    return (nodeToValidate, contextPath) -> {
+      var json = nodeToValidate.path(protectedAttribute);
+      var checksumValidator = JsonAttribute.matchedMustBeAbsent();
+      if (!json.isMissingNode()) {
+        var actualChecksum = Checksums.sha256CanonicalJson(json);
+        checksumValidator = JsonAttribute.combine(
+          JsonAttribute.matchedMustBePresent(),
+          matchedMustEqual(() -> actualChecksum)
+        );
+      }
+      var c = path("issuanceManifestSignedContent", SignatureChecks.signedContentValidation(path(manifestChecksumAttribute, checksumValidator)));
+      return c.validate(nodeToValidate, contextPath);
+    };
   }
 
   public static ActionCheck tdContentChecks(UUID matched, String standardsVersion) {

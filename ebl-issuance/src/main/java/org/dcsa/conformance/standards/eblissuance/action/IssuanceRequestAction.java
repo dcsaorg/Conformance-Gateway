@@ -12,13 +12,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblissuance.checks.IssuanceChecks;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
+
+import javax.xml.stream.FactoryConfigurationError;
 
 @Getter
 @Slf4j
 public class IssuanceRequestAction extends IssuanceAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator issuanceManifestSchemaValidator;
   private final boolean isCorrect;
   private final boolean isAmended;
 
@@ -44,7 +49,8 @@ public class IssuanceRequestAction extends IssuanceAction {
       String platformPartyName,
       String carrierPartyName,
       IssuanceAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator issuanceManifestSchemaValidator) {
     super(
         carrierPartyName,
         platformPartyName,
@@ -55,6 +61,7 @@ public class IssuanceRequestAction extends IssuanceAction {
     this.isCorrect = isCorrect;
     this.isAmended = isAmended;
     this.requestSchemaValidator = requestSchemaValidator;
+    this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
     this.transportDocumentReference =
         previousAction != null && !(this.previousAction instanceof SupplyScenarioParametersAction)
             ? null
@@ -143,6 +150,7 @@ public class IssuanceRequestAction extends IssuanceAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        Supplier<SignatureVerifier> signatureVerifier = () -> PayloadSignerFactory.verifierFromPemEncodedPublicKey(getCspSupplier().get().carrierSigningKeyPEM());
         return Stream.of(
                 new UrlPathCheck(
                     EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "/ebl-issuance-requests"),
@@ -167,6 +175,9 @@ public class IssuanceRequestAction extends IssuanceAction {
                     : null,
                 expectedApiVersion.startsWith("3.0")
                   ? IssuanceChecks.tdScenarioChecks(getMatchedExchangeUuid(), expectedApiVersion, getDsp().eblType())
+                  : null,
+                isCorrect && expectedApiVersion.startsWith("3.")
+                  ? IssuanceChecks.issuanceRequestSignatureChecks(getMatchedExchangeUuid(), expectedApiVersion, issuanceManifestSchemaValidator, signatureVerifier)
                   : null,
                 isCorrect && expectedApiVersion.startsWith("3.")
                   ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid(), expectedApiVersion)

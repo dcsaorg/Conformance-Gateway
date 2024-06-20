@@ -19,10 +19,9 @@ import org.dcsa.conformance.core.state.StateManagementUtil;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
+import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
@@ -31,7 +30,7 @@ import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
 public class PintReceivingPlatform extends ConformanceParty {
   private final Map<String, String> envelopeReferences = new HashMap<>();
 
-  private final PayloadSigner payloadSigner;
+  private final PayloadSignerWithKey payloadSigner;
 
   public PintReceivingPlatform(
       String apiVersion,
@@ -40,7 +39,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       JsonNodeMap persistentMap,
       PartyWebClient asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSigner payloadSigner) {
+      PayloadSignerWithKey payloadSigner) {
     super(
         apiVersion,
         partyConfiguration,
@@ -109,7 +108,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       "Finished ScenarioType");
   }
 
-  private static ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
     String platform, codeListName;
     if ("CARX".equals(ssp.eblPlatform())) {
       platform = "BOLE";
@@ -123,7 +122,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       "Jane Doe",
       scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
       codeListName,
-      PayloadSignerFactory.receiverKeySignatureVerifier().getPublicKeyInPemFormat()
+      payloadSigner.getPublicKeyInPemFormat()
     );
   }
 

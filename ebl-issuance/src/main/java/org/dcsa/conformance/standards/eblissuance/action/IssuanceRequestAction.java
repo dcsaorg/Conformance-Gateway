@@ -114,6 +114,7 @@ public class IssuanceRequestAction extends IssuanceAction {
       .put("isAmended", isAmended);
     jsonNode.set("dsp", getDsp().toJson());
     jsonNode.set("ssp", getSspSupplier().get().toJson());
+    jsonNode.set("csp", getCspSupplier().get().toJson());
     String tdr = getTdrSupplier().get();
     if (tdr != null) {
       jsonNode.put("tdr", tdr);

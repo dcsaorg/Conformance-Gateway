@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
@@ -67,6 +68,15 @@ public abstract class IssuanceAction extends ConformanceAction {
   protected Supplier<SuppliedScenarioParameters> getSspSupplier() {
     return getPreviousIssuanceAction().getSspSupplier();
   }
+
+  protected Consumer<CarrierScenarioParameters> getCspConsumer() {
+    return getPreviousIssuanceAction().getCspConsumer();
+  }
+
+  protected Supplier<CarrierScenarioParameters> getCspSupplier() {
+    return getPreviousIssuanceAction().getCspSupplier();
+  }
+
 
   protected abstract Supplier<String> getTdrSupplier();
 }

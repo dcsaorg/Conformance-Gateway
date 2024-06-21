@@ -1,8 +1,8 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.tdContentChecks;
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInitiateTransferRequest;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.validateInnerRequestSchemas;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,6 +27,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
+  private final JsonSchemaValidator issuanceManifestSchemaValidator;
 
   public PintInitiateTransferUnsignedErrorAction(
     String receivingPlatform,
@@ -35,7 +36,8 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
     int expectedStatus,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
-    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator
+    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+    JsonSchemaValidator issuanceManifestSchemaValidator
     ) {
     super(
         sendingPlatform,
@@ -47,6 +49,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
     this.requestSchemaValidator = requestSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
     this.envelopeTransferChainEntrySchemaValidator = envelopeTransferChainEntrySchemaValidator;
+    this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
   }
 
   @Override
@@ -105,6 +108,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> carrierVerifierSupplier = () -> resolveSignatureVerifierCarrierSignatures();
 
         return Stream.of(
                 new UrlPathCheck(
@@ -116,21 +120,18 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                     getMatchedExchangeUuid(),
                     HttpMessageType.REQUEST,
                     expectedApiVersion),
-                JsonAttribute.contentChecks(
-                  PintRole::isSendingPlatform,
+                validateRequestSignatures(
                   getMatchedExchangeUuid(),
-                  HttpMessageType.REQUEST,
                   expectedApiVersion,
-                  JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signatureValidates(senderVerifierSupplier))),
-                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signatureValidates(senderVerifierSupplier))
+                  senderVerifierSupplier,
+                  carrierVerifierSupplier
                 ),
-                JsonAttribute.contentChecks(
-                  PintRole::isSendingPlatform,
+                validateInnerRequestSchemas(
                   getMatchedExchangeUuid(),
-                  HttpMessageType.REQUEST,
                   expectedApiVersion,
-                  JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
-                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
+                  envelopeEnvelopeSchemaValidator,
+                  envelopeTransferChainEntrySchemaValidator,
+                  issuanceManifestSchemaValidator
                 ),
                 new JsonSchemaCheck(
                         PintRole::isSendingPlatform,

@@ -25,6 +25,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
+  private final JsonSchemaValidator issuanceManifestSchemaValidator;
 
   public PintInitiateAndCloseTransferAction(
     String receivingPlatform,
@@ -35,6 +36,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+    JsonSchemaValidator issuanceManifestSchemaValidator,
     JsonSchemaValidator responseSchemaValidator
     ) {
     super(
@@ -50,6 +52,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
     this.envelopeTransferChainEntrySchemaValidator = envelopeTransferChainEntrySchemaValidator;
+    this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
   }
 
   @Override
@@ -83,6 +86,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> senderVerifierSupplier = () -> resolveSignatureVerifierSenderSignatures();
+        Supplier<SignatureVerifier> carrierVerifierSupplier = () -> resolveSignatureVerifierCarrierSignatures();
         Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
 
         return Stream.of(
@@ -107,26 +111,20 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                   responseSchemaValidator
                 ),
                 senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
-                  ? JsonAttribute.contentChecks(
-                    "",
-                    "The signatures of the signed content of the HTTP request can be validated",
-                    PintRole::isSendingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion,
-                    JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signatureValidates(senderVerifierSupplier))),
-                    JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signatureValidates(senderVerifierSupplier)))
+                  ? validateRequestSignatures(
+                      getMatchedExchangeUuid(),
+                      expectedApiVersion,
+                      senderVerifierSupplier,
+                      carrierVerifierSupplier
+                    )
                   : null,
-                JsonAttribute.contentChecks(
-                  "",
-                  "The signed payloads of the HTTP request matches the schema",
-                  PintRole::isSendingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.REQUEST,
-                  expectedApiVersion,
-                  JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
-                  JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator))
-                ),
+              validateInnerRequestSchemas(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                envelopeEnvelopeSchemaValidator,
+                envelopeTransferChainEntrySchemaValidator,
+                issuanceManifestSchemaValidator
+              ),
                 JsonAttribute.contentChecks(
                   "",
                   "The signatures of the signed content of the HTTP response can be validated",

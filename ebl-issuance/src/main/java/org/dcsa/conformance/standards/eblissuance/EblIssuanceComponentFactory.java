@@ -47,7 +47,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
               persistentMap,
               webClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.senderPayloadSigner()
+              PayloadSignerFactory.carrierPayloadSigner()
             ));
     }
 

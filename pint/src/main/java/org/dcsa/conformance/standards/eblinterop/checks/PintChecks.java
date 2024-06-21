@@ -1,22 +1,24 @@
 package org.dcsa.conformance.standards.eblinterop.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.core.check.JsonAttribute.matchedMustEqual;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.ebl.checks.SignatureChecks.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
+import org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
-import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -150,7 +152,7 @@ public class PintChecks {
   }
 
   public static JsonContentMatchedValidation expectedTDChecksum(Supplier<DynamicScenarioParameters> dynamicScenarioParametersSupplier) {
-    return JsonAttribute.matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
+    return matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
   }
 
   private static void generateScenarioRelatedChecksForTransferRequest(
@@ -167,11 +169,11 @@ public class PintChecks {
       JsonAttribute.customValidator(
         "[Scenario] Verify receiver EPUI is correct",
         pathChain(
-          SignatureChecks.signedContentValidation(
+          signedContentValidation(
             pathChain(
               anyArrayElementMatching(
                 (n) -> n.path("codeListProvider").asText("").equals("EPUI"),
-                JsonAttribute.path("partyCode", JsonAttribute.matchedMustEqual(delayedValue(rspSupplier, ReceiverScenarioParameters::receiverEPUI))),
+                JsonAttribute.path("partyCode", matchedMustEqual(delayedValue(rspSupplier, ReceiverScenarioParameters::receiverEPUI))),
                 true
               ),
               "transactions", -1, "recipient", "partyCodes")
@@ -184,7 +186,7 @@ public class PintChecks {
     checks.add(
       JsonAttribute.customValidator(
         "[Scenario] Verify that the number of additional documents match the scenario",
-        JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentValidation(
+        JsonAttribute.path("envelopeManifestSignedContent", signedContentValidation(
           JsonAttribute.path("supportingDocuments", arraySizeMustEqual(delayedValue(dspSupplier, DynamicScenarioParameters::documentCount, -1)))
         ))
       )
@@ -212,12 +214,6 @@ public class PintChecks {
     );
     jsonContentChecks.add(
       JsonAttribute.customValidator(
-        "Validate the missing documents checksum",
-        JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
-      )
-    );
-    jsonContentChecks.add(
-      JsonAttribute.customValidator(
         "Validate the transportDocument checksum",
         JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
       )
@@ -241,13 +237,13 @@ public class PintChecks {
     jsonContentChecks.add(
       JsonAttribute.customValidator(
         "Validate that the response code was as expected",
-        SignatureChecks.signedContentValidation(
-          JsonAttribute.path("responseCode", JsonAttribute.matchedMustEqual(expectedResponseCode::name))
+        signedContentValidation(
+          JsonAttribute.path("responseCode", matchedMustEqual(expectedResponseCode::name))
         )
       )
     );
     jsonContentChecks.add(
-      SignatureChecks.signedContentValidation(
+      signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent' is conditionally present (%s)".formatted(PintResponseCode.DUPE.name()),
           JsonAttribute.isEqualTo("responseCode", PintResponseCode.DUPE.name()),
@@ -257,7 +253,7 @@ public class PintChecks {
       )
     );
     jsonContentChecks.add(
-      SignatureChecks.signedContentValidation(
+      signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'receivedAdditionalDocumentChecksums' is conditionally present (%s or %s)".formatted(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name()),
           JsonAttribute.isOneOf("responseCode", Set.of(PintResponseCode.RECE.name(), PintResponseCode.DUPE.name())),
@@ -268,7 +264,7 @@ public class PintChecks {
     );
 
     jsonContentChecks.add(
-      SignatureChecks.signedContentValidation(
+      signedContentValidation(
         JsonAttribute.ifThenElse(
           "Validate that 'missingAdditionalDocumentChecksums' is conditionally present (%s)".formatted(PintResponseCode.MDOC.name()),
           JsonAttribute.isEqualTo("responseCode", PintResponseCode.MDOC.name()),
@@ -283,6 +279,47 @@ public class PintChecks {
       HttpMessageType.RESPONSE,
       standardsVersion,
       jsonContentChecks
+    );
+  }
+
+  public static ActionCheck validateRequestSignatures(
+    UUID uuid,
+    String expectedApiVersion,
+    Supplier<SignatureVerifier> senderVerifierSupplier,
+    Supplier<SignatureVerifier> carrierVerifierSupplier
+  ) {
+    return JsonAttribute.contentChecks(
+      PintRole::isSendingPlatform,
+      uuid,
+      HttpMessageType.REQUEST,
+      expectedApiVersion,
+      JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signatureValidates(senderVerifierSupplier))),
+      JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signatureValidates(senderVerifierSupplier)),
+      JsonAttribute.customValidator(
+        "issuanceManifestSignedContent signature could be validated",
+        JsonAttribute.path("issuanceManifestSignedContent", signatureValidates(carrierVerifierSupplier))
+      )
+    );
+  }
+
+  public static ActionCheck validateInnerRequestSchemas(
+    UUID uuid,
+    String expectedApiVersion,
+    JsonSchemaValidator envelopeEnvelopeSchemaValidator,
+    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+    JsonSchemaValidator issuanceManifestSchemaValidator
+  ) {
+    return JsonAttribute.contentChecks(
+      PintRole::isSendingPlatform,
+      uuid,
+      HttpMessageType.REQUEST,
+      expectedApiVersion,
+      JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
+      JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator)),
+      JsonAttribute.customValidator(
+        "Validate issuance manifest schema validation",
+        JsonAttribute.path("issuanceManifestSignedContent", signedContentSchemaValidation(issuanceManifestSchemaValidator))
+      )
     );
   }
 
@@ -301,7 +338,7 @@ public class PintChecks {
         "Validate the transportDocument checksum in the envelopeManifestSignedContent",
         JsonAttribute.path(
           "envelopeManifestSignedContent",
-          SignatureChecks.signedContentValidation(
+          signedContentValidation(
             JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
           )
         )
@@ -311,7 +348,7 @@ public class PintChecks {
       JsonAttribute.allIndividualMatchesMustBeValid(
         "Validate the transportDocument checksum in the envelopeTransferChain",
         (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
-        SignatureChecks.signedContentValidation(
+        signedContentValidation(
           JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
         )
       )
@@ -348,6 +385,34 @@ public class PintChecks {
           }
           return issues;
         })
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate conditional presence of issuanceManifest",
+        (rootNode, contextPath) -> {
+          var chain = rootNode.path("envelopeTransferChain");
+          var lastIdx = chain.size() - 1;
+          var lastEntry = chain.path(lastIdx);
+          var payload = SignedNodeSupport.parseSignedNodeNoErrors(lastEntry);
+          var issues = new LinkedHashSet<String>();
+          var hadIssuance = false;
+          for (var transaction : payload.path("transactions")) {
+            if (transaction.path("action").asText("").equals("ISSU")) {
+              hadIssuance = true;
+              break;
+            }
+          }
+          if (hadIssuance && rootNode.path("issuanceManifestSignedContent").isMissingNode()) {
+            issues.add("Issuance transaction implies 'issuanceManifestSignedContent' being present");
+          }
+          return issues;
+        })
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate issuance manifest checksums",
+        JsonAttribute.path("issuanceManifestSignedContent", signedContentValidation(JsonAttribute.path("documentChecksum", expectedTDChecksum(dspSupplier))))
       )
     );
     return JsonAttribute.contentChecks(

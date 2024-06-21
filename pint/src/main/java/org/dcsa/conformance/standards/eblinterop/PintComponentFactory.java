@@ -46,7 +46,8 @@ class PintComponentFactory extends AbstractComponentFactory {
               persistentMap,
               asyncWebClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.senderPayloadSigner()
+              PayloadSignerFactory.senderPayloadSigner(),
+              PayloadSignerFactory.carrierPayloadSigner()
           ));
     }
 

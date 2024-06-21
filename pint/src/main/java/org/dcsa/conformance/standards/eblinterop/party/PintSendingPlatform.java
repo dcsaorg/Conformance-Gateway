@@ -29,8 +29,6 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -43,6 +41,7 @@ public class PintSendingPlatform extends ConformanceParty {
 
 
   private final PayloadSignerWithKey payloadSigner;
+  private final PayloadSignerWithKey carrierPayloadSigner;
 
   public PintSendingPlatform(
       String apiVersion,
@@ -51,7 +50,8 @@ public class PintSendingPlatform extends ConformanceParty {
       JsonNodeMap persistentMap,
       PartyWebClient asyncWebClient,
       Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSignerWithKey payloadSigner
+      PayloadSignerWithKey senderPayloadSigner,
+      PayloadSignerWithKey carrierPayloadSigner
   ) {
     super(
         apiVersion,
@@ -60,7 +60,8 @@ public class PintSendingPlatform extends ConformanceParty {
         persistentMap,
         asyncWebClient,
         orchestratorAuthHeader);
-    this.payloadSigner = payloadSigner;
+    this.payloadSigner = senderPayloadSigner;
+    this.carrierPayloadSigner = carrierPayloadSigner;
   }
 
   @Override
@@ -135,7 +136,12 @@ public class PintSendingPlatform extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var tdr = generateTDR();
-    var scenarioParameters = new SenderScenarioParameters(tdr, "BOLE", payloadSigner.getPublicKeyInPemFormat());
+    var scenarioParameters = new SenderScenarioParameters(
+      tdr,
+      "BOLE",
+      payloadSigner.getPublicKeyInPemFormat(),
+      carrierPayloadSigner.getPublicKeyInPemFormat()
+    );
     asyncOrchestratorPostPartyInput(
       OBJECT_MAPPER
         .createObjectNode()
@@ -144,8 +150,6 @@ public class PintSendingPlatform extends ConformanceParty {
     addOperatorLogEntry(
       "Provided ScenarioParameters: %s".formatted(scenarioParameters));
   }
-
-
 
   private void resignLatestEntry(JsonNode actionPrompt) {
     log.info(
@@ -246,6 +250,10 @@ public class PintSendingPlatform extends ConformanceParty {
     body.set("transportDocument", tdPayload);
     body.set("envelopeManifestSignedContent", sendingState.getSignedManifest());
     body.set("envelopeTransferChain", sendingState.getSignedEnvelopeTransferChain());
+    var manifestNode = sendingState.getIssuanceManifestNode();
+    if (!manifestNode.isMissingNode()) {
+      body.set("issuanceManifestSignedContent", manifestNode);
+    }
     var response = this.syncCounterpartPost(
       "/v" + apiVersion.charAt(0) + "/envelopes",
       body
@@ -362,12 +370,19 @@ public class PintSendingPlatform extends ConformanceParty {
       tdChecksum,
       Checksums.sha256(latestEnvelopeTransferChainEntrySigned)
     );
+    var issuanceManifest = OBJECT_MAPPER.createObjectNode()
+      .put("documentChecksum", tdChecksum)
+      // The receiver cannot validate the issueToChecksum anyway.
+      .put("issueToChecksum", Checksums.sha256(UUID.randomUUID().toString()));
+    var issuanceManifestSignedContentNode = TextNode.valueOf(carrierPayloadSigner.sign(issuanceManifest.toString()));
 
     JsonNode signedManifest = TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString()));
     sendingState.setSignedManifest(signedManifest);
     if (senderTransmissionClass == SIGNATURE_ISSUE) {
       signedManifest = mutatePayload(signedManifest);
     }
+    sendingState.setIssuanceManifestNode(issuanceManifestSignedContentNode);
+    body.set("issuanceManifestSignedContent", issuanceManifestSignedContentNode);
     body.set("envelopeManifestSignedContent", signedManifest);
     var envelopeTransferChain = body.path("envelopeTransferChain");
     sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);

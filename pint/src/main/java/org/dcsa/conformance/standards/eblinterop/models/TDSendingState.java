@@ -24,6 +24,7 @@ public class TDSendingState {
   private static final String DOCUMENTS = "documents";
   private static final String SIGNED_MANIFEST = "signedManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN = "envelopeTransferChain";
+  private static final String ISSUANCE_MANIFEST = "issuanceManifestSignedContent";
 
 
   private static final Map<String, String> PLATFORM2CODELISTNAME = Map.ofEntries(
@@ -71,6 +72,18 @@ public class TDSendingState {
     }
   }
 
+
+  public JsonNode getIssuanceManifestNode() {
+    return state.path(ISSUANCE_MANIFEST);
+  }
+
+  public void setIssuanceManifestNode(JsonNode node) {
+    if (node.isMissingNode()) {
+      state.remove(ISSUANCE_MANIFEST);
+      return;
+    }
+    state.set(ISSUANCE_MANIFEST, node);
+  }
 
   public void registerMissingAdditionalDocument(String checksum) {
     for (var doc : state.path(DOCUMENTS)) {

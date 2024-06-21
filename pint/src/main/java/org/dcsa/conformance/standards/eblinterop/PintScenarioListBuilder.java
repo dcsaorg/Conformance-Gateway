@@ -25,6 +25,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
 
   private static final String ENVELOPE_MANIFEST_SCHEMA = "EnvelopeManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA = "EnvelopeTransferChainEntry";
+  private static final String ISSUANCE_MANIFEST_SCHEMA = "IssuanceManifest";
 
   public static LinkedHashMap<String, PintScenarioListBuilder> createModuleScenarioListBuilders(
     String standardVersion, String sendingPlatformPartyName, String receivingPlatformPartyName) {
@@ -234,7 +235,8 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 expectedStatus,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
-                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA)));
+                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA)));
   }
 
   private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount) {
@@ -250,6 +252,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(TRANSFER_STARTED_UNSIGNED_RESPONSE_SCHEMA)
                 ));
   }
@@ -267,6 +270,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(TRANSFER_STARTED_UNSIGNED_RESPONSE_SCHEMA)));
   }
 
@@ -283,6 +287,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)));
   }
 
@@ -305,6 +310,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
+                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(TRANSFER_FINISHED_SIGNED_RESPONSE_SCHEMA)
               ));
   }

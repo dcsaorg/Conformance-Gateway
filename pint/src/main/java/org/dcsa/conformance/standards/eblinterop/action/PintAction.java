@@ -30,7 +30,7 @@ public abstract class PintAction extends ConformanceAction {
       this.dspReference =
           new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null));
       this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", "", ""));
-      this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", ""));
+      this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", "", ""));
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
       this.rspReference = new OverwritingReference<>(previousAction.rspReference, null);
@@ -49,6 +49,11 @@ public abstract class PintAction extends ConformanceAction {
 
   public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
     var pem = getSsp().senderPublicKeyPEM();
+    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+  }
+
+  public SignatureVerifier resolveSignatureVerifierCarrierSignatures() {
+    var pem = getSsp().carrierPublicKeyPEM();
     return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
   }
 

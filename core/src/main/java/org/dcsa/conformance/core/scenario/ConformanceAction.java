@@ -42,6 +42,7 @@ public abstract class ConformanceAction implements StatefulEntity {
   public void reset() {
     id = UUID.randomUUID();
     matchedExchangeUuid = null;
+    matchedNotificationExchangeUuid = null;
   }
 
   @Override

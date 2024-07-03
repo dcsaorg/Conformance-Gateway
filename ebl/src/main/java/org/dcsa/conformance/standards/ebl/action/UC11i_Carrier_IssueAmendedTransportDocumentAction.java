@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -23,6 +24,15 @@ public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChan
   public String getHumanReadablePrompt() {
     return ("UC11i: Issue amended transport document to replace the transport document with reference %s."
         .formatted(getDspSupplier().get().transportDocumentReference()));
+  }
+
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    var dsp = getDspSupplier().get();
+    // This is a re-issuance; those will de facto change the TD.
+    if (!dsp.newTransportDocumentContent()) {
+      getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
+    }
   }
 
   @Override

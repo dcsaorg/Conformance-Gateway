@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -28,7 +29,15 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
   @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
-      .put("documentReference", getDspSupplier().get().shippingInstructionsReference());
+      .put("documentReference", getDspSupplier().get().transportDocumentReference());
+  }
+
+
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    var dsp = getDspSupplier().get();
+    // Issuance can bump the issuance date.
+    getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
   }
 
   @Override

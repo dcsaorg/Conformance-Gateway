@@ -19,7 +19,10 @@ public record DynamicScenarioParameters(
     JsonNode updatedShippingInstructions,
     ShippingInstructionsStatus shippingInstructionsStatus,
     ShippingInstructionsStatus updatedShippingInstructionsStatus,
-    TransportDocumentStatus transportDocumentStatus) {
+    TransportDocumentStatus transportDocumentStatus,
+    boolean newTransportDocumentContent,
+    JsonNode transportDocument,
+    JsonNode previousTransportDocument) {
   public ObjectNode toJson() {
     var node = OBJECT_MAPPER.createObjectNode()
       .put("scenarioType", scenarioType.name())
@@ -27,9 +30,12 @@ public record DynamicScenarioParameters(
       .put("transportDocumentReference", transportDocumentReference)
       .put("shippingInstructionsStatus", serializeEnum(shippingInstructionsStatus, ShippingInstructionsStatus::wireName))
       .put("updatedShippingInstructionsStatus", serializeEnum(updatedShippingInstructionsStatus, ShippingInstructionsStatus::wireName))
-      .put("transportDocumentStatus", serializeEnum(transportDocumentStatus, TransportDocumentStatus::wireName));
+      .put("transportDocumentStatus", serializeEnum(transportDocumentStatus, TransportDocumentStatus::wireName))
+      .put("newTransportDocumentContent", newTransportDocumentContent);
     node.replace("shippingInstructions", shippingInstructions);
     node.replace("updatedShippingInstructions", updatedShippingInstructions);
+    node.replace("transportDocument", transportDocument);
+    node.replace("previousTransportDocument", previousTransportDocument);
     return node;
   }
 
@@ -56,7 +62,10 @@ public record DynamicScenarioParameters(
         jsonNode.path("updatedShippingInstructions"),
         readEnum(jsonNode.required("shippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
         readEnum(jsonNode.required("updatedShippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
-        readEnum(jsonNode.required("transportDocumentStatus").asText(null), TransportDocumentStatus::fromWireName)
+        readEnum(jsonNode.required("transportDocumentStatus").asText(null), TransportDocumentStatus::fromWireName),
+        jsonNode.path("newTransportDocumentContent").asBoolean(false),
+        jsonNode.path("transportDocument"),
+        jsonNode.path("previousTransportDocument")
     );
   }
 }

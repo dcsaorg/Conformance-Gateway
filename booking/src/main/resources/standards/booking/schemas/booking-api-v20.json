@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Booking",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0 Beta 3](https://dcsa.org/standards/booking/documentation-booking-2-beta-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0 Beta 3](https://dcsa.org/standards/booking/documentation-booking-2-beta-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,7 +12,7 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "2.0.0-Beta-3"
+    "version": "2.0.0"
   },
   "servers": [
     {
@@ -91,7 +91,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -189,7 +189,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -298,7 +298,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -396,7 +396,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -739,7 +739,7 @@
                       "isEquipmentSubstitutionAllowed": false,
                       "references": [
                         {
-                          "type": "FF",
+                          "type": "CR",
                           "value": "KN-00103004"
                         }
                       ],
@@ -849,7 +849,7 @@
                       "isEquipmentSubstitutionAllowed": false,
                       "references": [
                         {
-                          "type": "FF",
+                          "type": "CR",
                           "value": "KN-00103004"
                         }
                       ],
@@ -1163,7 +1163,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -1263,7 +1263,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -1372,7 +1372,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -1473,7 +1473,7 @@
                     "isEquipmentSubstitutionAllowed": false,
                     "references": [
                       {
-                        "type": "FF",
+                        "type": "CR",
                         "value": "KN-00103004"
                       }
                     ],
@@ -2033,11 +2033,60 @@
             "type": "array",
             "description": "An array of errors providing more detail about the root cause.\n",
             "items": {
-              "$ref": "#/components/schemas/Detailed Error"
+              "$ref": "#/components/schemas/DetailedError"
             }
           }
         },
         "description": "Unexpected error"
+      },
+      "DetailedError": {
+        "title": "Detailed Error",
+        "required": [
+          "errorCodeMessage",
+          "errorCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "property": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The name of the property causing the error.\n",
+            "example": "facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value of the property causing the error serialised as a string exactly as in the original request.\n",
+            "example": "SG SIN WHS"
+          },
+          "jsonPath": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
+            "example": "$.location.facilityCode"
+          },
+          "errorCodeText": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A standard short description corresponding to the `errorCode`.\n",
+            "example": "invalidData"
+          },
+          "errorCodeMessage": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "A long description corresponding to the `errorCode` with additional information.\n",
+            "example": "Spaces not allowed in facility code"
+          }
+        },
+        "description": "A detailed description of what has caused the error.\n"
       },
       "AddressLocation": {
         "title": "Address Location",
@@ -2071,8 +2120,7 @@
         "required": [
           "city",
           "countryCode",
-          "street",
-          "streetNumber"
+          "street"
         ],
         "type": "object",
         "properties": {
@@ -2477,7 +2525,7 @@
             "type": "array",
             "description": "A list of `References`\n",
             "items": {
-              "$ref": "#/components/schemas/Reference"
+              "$ref": "#/components/schemas/ReferenceShipper"
             }
           },
           "documentParties": {
@@ -2792,7 +2840,7 @@
             "type": "array",
             "description": "A list of `References`\n",
             "items": {
-              "$ref": "#/components/schemas/Reference"
+              "$ref": "#/components/schemas/ReferenceShipper"
             }
           },
           "documentParties": {
@@ -3152,7 +3200,7 @@
             "type": "array",
             "description": "List of `Requested Equipments`. Multiple containers can be requested within the same booking. For each Requested Equipment object with 2 or more units, it is a condition that the commodity (or list of commodities) defined within the same Requested Equipment object is the same for each requested unit.\n\n**Example:** 2 x 20' containing 50% shoes and 50% t-shirts can be requested within the same Requested Equipment object only if each 20' will contain 50% shoes and 50% t-shirts. If 1 x 20' will contain 100% shoes and the other 20' will be 100% t-shirts, 2 separate Requested Equipment objects must be defined.\n",
             "items": {
-              "$ref": "#/components/schemas/RequestedEquipmentCarrier"
+              "$ref": "#/components/schemas/RequestedEquipment"
             }
           },
           "confirmedEquipments": {
@@ -3413,8 +3461,7 @@
         "required": [
           "city",
           "countryCode",
-          "street",
-          "streetNumber"
+          "street"
         ],
         "type": "object",
         "properties": {
@@ -3532,6 +3579,13 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "bookingAgentsReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Booking Agent`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party placing the booking request on behalf of the customer.\n"
@@ -3573,6 +3627,20 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "shippersReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Shipper`.\n",
+            "example": "HHL007"
+          },
+          "shippersPurchaseOrderReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Shipper Purchase Order`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.\n"
@@ -3614,6 +3682,20 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "consigneesReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Consignee`.\n",
+            "example": "HHL007"
+          },
+          "consigneesPurchaseOrderReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Consignee Purchase Order`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party to which goods are consigned in the Master Bill of Lading.\n"
@@ -3655,6 +3737,13 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "serviceContractOwnersReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Service Contract Owner`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party signing the service contract with the carrier.\n"
@@ -3713,14 +3802,6 @@
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
-          "partyContactDetails": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of contact details\n",
-            "items": {
-              "$ref": "#/components/schemas/PartyContactDetail"
-            }
-          },
           "identifyingCodes": {
             "type": "array",
             "items": {
@@ -3733,6 +3814,21 @@
             "items": {
               "$ref": "#/components/schemas/TaxLegalReference"
             }
+          },
+          "partyContactDetails": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "reference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Party`.\n",
+            "example": "HHL007"
           }
         },
         "description": "Refers to a company or a legal entity.\n"
@@ -3805,7 +3901,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Origional)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digitial Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -3817,7 +3913,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decenbtralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
             "example": "DID"
           }
         }
@@ -3856,6 +3952,29 @@
         },
         "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
       },
+      "ReferenceShipper": {
+        "title": "Reference (Shipper)",
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 3,
+            "type": "string",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `CSI` (Customer shipment ID)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "example": "CR"
+          },
+          "value": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The value of the reference. \n",
+            "example": "HHL00103004"
+          }
+        },
+        "description": "References provided by the shipper or freight forwarder at the time of `Booking` or at the time of providing `Shipping Instructions`. Carriers share it back when providing `Track & Trace` event updates, some are also printed on the B/L. Customers can use these references to track shipments in their internal systems.\n"
+      },
       "Reference": {
         "title": "Reference",
         "required": [
@@ -3867,8 +3986,8 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder's Reference)\n- `SI` (Shipper's Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer's Reference)\n- `AAO` (Consignee's Reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
-            "example": "FF"
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "example": "CR"
           },
           "value": {
             "maxLength": 100,
@@ -3974,6 +4093,13 @@
             "items": {
               "$ref": "#/components/schemas/Reference"
             }
+          },
+          "commodities": {
+            "type": "array",
+            "description": "A list of `Commodities`\n",
+            "items": {
+              "$ref": "#/components/schemas/Commodity"
+            }
           }
         },
         "description": "If needed - it is **only** possible to specify a single Reefer setting. If multiple settings are required for the same `equipmentSizeType` then multiple `requestedEquipment` should be specified (one for each Reefer setting).\n",
@@ -3993,41 +4119,76 @@
           }
         ]
       },
-      "RequestedEquipmentCarrier": {
-        "title": "Requested Equipment (Carrier)",
-        "type": "object",
-        "properties": {
-          "commodities": {
-            "type": "array",
-            "description": "A list of `Commodities`\n",
-            "items": {
-              "$ref": "#/components/schemas/CommodityCarrier"
-            }
-          }
-        },
-        "description": "If needed - it is **only** possible to specify a single Reefer setting. If multiple settings are required for the same `equipmentSizeType` then multiple `requestedEquipment` should be specified (one for each Reefer setting).\n",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/RequestedEquipment"
-          }
-        ]
-      },
       "RequestedEquipmentShipper": {
         "title": "Requested Equipment (Shipper)",
+        "required": [
+          "ISOEquipmentCode",
+          "units"
+        ],
         "type": "object",
         "properties": {
+          "ISOEquipmentCode": {
+            "maxLength": 4,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
+            "example": "22RT"
+          },
+          "units": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of requested equipment units.\n",
+            "format": "int32",
+            "example": 3
+          },
+          "equipmentReferences": {
+            "type": "array",
+            "description": "A list of equipments to be used by the shipper if known at the time of booking\n",
+            "items": {
+              "maxLength": 11,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\n\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
+              "example": "APZU4812090"
+            }
+          },
+          "isNonOperatingReefer": {
+            "type": "boolean",
+            "description": "If the equipment is a Reefer Container then setting this attribute will indicate that the container should be treated as a `DRY` container.\n\n**Condition:** Only applicable if `ISOEquipmentCode` shows a Reefer type.\n",
+            "example": false
+          },
+          "activeReeferSettings": {
+            "$ref": "#/components/schemas/ActiveReeferSettings"
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceShipper"
+            }
+          },
           "commodities": {
             "type": "array",
             "description": "A list of `Commodities`\n",
             "items": {
-              "$ref": "#/components/schemas/Commodity"
+              "$ref": "#/components/schemas/CommodityShipper"
             }
           }
         },
         "description": "If needed - it is **only** possible to specify a single Reefer setting. If multiple settings are required for the same `equipmentSizeType` then multiple `requestedEquipment` should be specified (one for each Reefer setting).\n",
-        "allOf": [
+        "discriminator": {
+          "propertyName": "isShipperOwned",
+          "mapping": {
+            "true": "#/components/schemas/SocEquipment",
+            "false": "#/components/schemas/CocEquipment"
+          }
+        },
+        "oneOf": [
           {
-            "$ref": "#/components/schemas/RequestedEquipment"
+            "$ref": "#/components/schemas/SocEquipment"
+          },
+          {
+            "$ref": "#/components/schemas/CocEquipment"
           }
         ]
       },
@@ -4078,8 +4239,8 @@
           }
         }
       },
-      "Commodity": {
-        "title": "Commodity",
+      "CommodityShipper": {
+        "title": "Commodity (Shipper)",
         "required": [
           "cargoGrossWeight",
           "cargoGrossWeightUnit",
@@ -4159,14 +4320,19 @@
             "type": "array",
             "description": "A list of `References`\n",
             "items": {
-              "$ref": "#/components/schemas/Reference"
+              "$ref": "#/components/schemas/ReferenceShipper"
             }
           }
         },
         "description": "Type of goods, defined by its commodity type\n"
       },
-      "CommodityCarrier": {
-        "title": "Commodity (Carrier)",
+      "Commodity": {
+        "title": "Commodity",
+        "required": [
+          "cargoGrossWeight",
+          "cargoGrossWeightUnit",
+          "commodityType"
+        ],
         "type": "object",
         "properties": {
           "commoditySubreference": {
@@ -4175,14 +4341,84 @@
             "type": "string",
             "description": "A unique reference for this commodity object assigned by the carrier in the booking confirmation. The reference must be provided by the shipper as part of the `Shipping Instructions` for the carrier to link the consignment item to this commodity. A commodity reference is only unique in the context of a booking.\n\n**Conditional:** Mandatory to provide for `CONFIRMED` bookings\n",
             "example": "COM-001"
+          },
+          "commodityType": {
+            "maxLength": 550,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "High-level description of goods to be shipped which allow the carrier to confirm acceptance and commercial terms. To be replaced by \"description of goods\" upon submission of `Shipping Instructions`\n",
+            "example": "Mobile phones"
+          },
+          "HSCodes": {
+            "type": "array",
+            "description": "A list of `HS Codes` that apply to this `commodity`\n",
+            "items": {
+              "maxLength": 10,
+              "minLength": 6,
+              "pattern": "^\\d{6,10}$",
+              "type": "string",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx).\n\nThis standard is based on the 2022 revision.\n",
+              "example": "851713"
+            }
+          },
+          "cargoGrossWeight": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 36000
+          },
+          "cargoGrossWeightUnit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          },
+          "cargoGrossVolume": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total volume of the commodity\n",
+            "format": "float",
+            "example": 360
+          },
+          "cargoGrossVolumeUnit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** If the `cargoGrossVolume` is populated then the `cargoGrossVolumeUnit` is required\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          },
+          "exportLicenseIssueDate": {
+            "type": "string",
+            "description": "Issue date of the export license applicable to the booking. Mandatory to provide in booking request for specific commodities\n",
+            "format": "date",
+            "example": "2021-05-14"
+          },
+          "exportLicenseExpiryDate": {
+            "type": "string",
+            "description": "Expiry date of the export license applicable to the booking.\n\nMandatory to provide in booking request for specific commodities.\n",
+            "format": "date",
+            "example": "2021-05-21"
+          },
+          "outerPackaging": {
+            "$ref": "#/components/schemas/OuterPackaging"
+          },
+          "references": {
+            "type": "array",
+            "description": "A list of `References`\n",
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            }
           }
         },
-        "description": "Type of goods, defined by its commodity type\n",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Commodity"
-          }
-        ]
+        "description": "Type of goods, defined by its commodity type\n"
       },
       "OuterPackaging": {
         "title": "Outer Packaging",
@@ -4939,54 +5175,6 @@
             }
           }
         ]
-      },
-      "Detailed Error": {
-        "title": "Detailed Error",
-        "required": [
-          "errorCodeMessage",
-          "errorCodeText"
-        ],
-        "type": "object",
-        "properties": {
-          "errorCode": {
-            "maximum": 9999,
-            "minimum": 7000,
-            "type": "integer",
-            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).\n",
-            "format": "int32",
-            "example": 7003
-          },
-          "property": {
-            "maxLength": 100,
-            "type": "string",
-            "description": "The name of the property causing the error.\n",
-            "example": "facilityCode"
-          },
-          "value": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "The value of the property causing the error serialised as a string exactly as in the original request.\n",
-            "example": "SG SIN WHS"
-          },
-          "jsonPath": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
-            "example": "$.location.facilityCode"
-          },
-          "errorCodeText": {
-            "maxLength": 100,
-            "type": "string",
-            "description": "A standard short description corresponding to the `errorCode`.\n",
-            "example": "invalidData"
-          },
-          "errorCodeMessage": {
-            "maxLength": 200,
-            "type": "string",
-            "description": "A long description corresponding to the `errorCode` with additional information.\n",
-            "example": "Spaces not allowed in facility code"
-          }
-        }
       },
       "Origin Charges Payment Term": {
         "title": "Origin Charges Payment Term",

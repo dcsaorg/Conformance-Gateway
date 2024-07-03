@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.*;
+
+import lombok.NonNull;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
@@ -685,8 +687,16 @@ public class CarrierShippingInstructions {
     return this.state;
   }
 
+  private static @NonNull String notNull(String reference) {
+    var r = Objects.requireNonNull(reference, "Reference was null");
+    if (r.equals("null")) {
+      throw new IllegalArgumentException("Reference was \"null\" (string version of null)!");
+    }
+    return r;
+  }
+
   public static CarrierShippingInstructions fromPersistentStore(JsonNodeMap jsonNodeMap, String shippingInstructionsReference) {
-    var data = jsonNodeMap.load(shippingInstructionsReference);
+    var data = jsonNodeMap.load(notNull(shippingInstructionsReference));
     if (data == null) {
       throw new IllegalArgumentException("Unknown SI Reference: " + shippingInstructionsReference);
     }

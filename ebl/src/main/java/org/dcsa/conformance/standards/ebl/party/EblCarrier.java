@@ -24,6 +24,8 @@ import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
+import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
+
 @Slf4j
 public class EblCarrier extends ConformanceParty {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -76,7 +78,8 @@ public class EblCarrier extends ConformanceParty {
       Map.entry(UC11i_Carrier_IssueAmendedTransportDocumentAction.class, this::issueAmendedTransportDocument),
       Map.entry(UC12_Carrier_AwaitSurrenderRequestForDeliveryAction.class, this::notifyOfSurrenderForDelivery),
       Map.entry(UC13_Carrier_ProcessSurrenderRequestForDeliveryAction.class, this::processSurrenderRequestForDelivery),
-      Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete)
+      Map.entry(UC14_Carrier_ConfirmShippingInstructionsCompleteAction.class, this::confirmShippingInstructionsComplete),
+      Map.entry(UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction.class, this::processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction)
     );
   }
 
@@ -242,14 +245,45 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry("Processed update to the shipping instructions with document reference '%s'".formatted(documentReference));
   }
 
+
+
+  private void processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(JsonNode actionPrompt) {
+    log.info("Carrier.processOutOfBandUpdateOrAmendmentRequestTransportDocumentAction(%s)".formatted(actionPrompt.toPrettyString()));
+
+    var documentReference = actionPrompt.required("documentReference").asText();
+    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    var updatedSI = EblShipper.updateShippingInstructions(si.getShippingInstructions());
+    si.putShippingInstructions(documentReference, updatedSI);
+    si.acceptUpdatedShippingInstructions(documentReference);
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText()));
+    addOperatorLogEntry("Process out of band amendment for transport document '%s'".formatted(documentReference));
+  }
+
   private void publishDraftTransportDocument(JsonNode actionPrompt) {
     log.info("Carrier.publishDraftTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
 
-    var documentReference = actionPrompt.required("documentReference").asText();
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-
-    var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    var skipSI = actionPrompt.required("skipSI").asBoolean(false);
+    String documentReference;
+    CarrierShippingInstructions si;
+    if (skipSI) {
+      var csp = CarrierScenarioParameters.fromJson(actionPrompt.required("csp"));
+      var jsonRequestBody = siFromScenarioType(
+        scenarioType,
+        csp,
+        apiVersion
+      );
+      si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(jsonRequestBody, apiVersion);
+      documentReference = si.getShippingInstructionsReference();
+    } else {
+      documentReference = actionPrompt.required("documentReference").asText();
+      var sir = tdrToSir.getOrDefault(documentReference, documentReference);
+      si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
+    }
     si.publishDraftTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
@@ -291,7 +325,6 @@ public class EblCarrier extends ConformanceParty {
 
     var documentReference = actionPrompt.required("documentReference").asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.surrenderForDeliveryRequest(documentReference);
     si.save(persistentMap);
@@ -324,7 +357,6 @@ public class EblCarrier extends ConformanceParty {
 
     var documentReference = actionPrompt.required("documentReference").asText();
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
-
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
     si.voidTransportDocument(documentReference);
     si.save(persistentMap);

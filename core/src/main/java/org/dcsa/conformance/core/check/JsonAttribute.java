@@ -630,7 +630,7 @@ public class JsonAttribute {
     if (ptrs.length < 2) {
       throw new IllegalStateException("At least two arguments are required");
     }
-    String name = "The following are mutually exclusive (at least one of): %s".formatted(
+    String name = "The following are conditionally required (at least one of): %s".formatted(
       Arrays.stream(ptrs)
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
@@ -644,13 +644,36 @@ public class JsonAttribute {
           return Set.of();
         }
         return Set.of(
-          "At least one of the following can be present: %s".formatted(
+          "At least one of the following must be present: %s".formatted(
             Arrays.stream(ptrs)
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
-              .collect(Collectors.joining(", "
-              ))
+              .collect(Collectors.joining(", "))
           ));
       });
+  }
+
+  public static JsonContentMatchedValidation atLeastOneOfMatched(
+    @NonNull BiConsumer<JsonNode, List<JsonPointer>> ptrSupplier
+  ) {
+    return (body, contextPath) -> {
+      var ptrs = new ArrayList<JsonPointer>();
+      ptrSupplier.accept(body, ptrs);
+      if (ptrs.isEmpty()) {
+        return Set.of();
+      }
+      var present = ptrs
+        .stream()
+        .anyMatch(p -> isJsonNodePresent(body.at(p)));
+      if (present) {
+        return Set.of();
+      }
+      return Set.of(
+        "At least one of the following must be present: %s".formatted(
+          ptrs.stream()
+            .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
+            .collect(Collectors.joining(", "))
+        ));
+      };
   }
 
   public static JsonRebaseableContentCheck allOrNoneArePresent(

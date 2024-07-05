@@ -48,12 +48,6 @@
       "selfFilerCode": "FLXT"
     }
   ],
-  "references": [
-    {
-      "type": "SI",
-      "value": "SI-REF-1234"
-    }
-  ],
   "customsReferences": [
     {
       "type": "CTN",
@@ -76,6 +70,7 @@
     "shipper": {
 
       "partyName": "DCSA CTK",
+      "shippersReference": "SI-REF-1234",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

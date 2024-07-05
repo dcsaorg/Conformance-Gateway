@@ -33,16 +33,8 @@ public class EblDatasets {
 
   public static final KeywordDataset CARGO_MOVEMENT_TYPE = KeywordDataset.staticDataset("FCL", "LCL");
   public static final KeywordDataset REFERENCE_TYPE = KeywordDataset.staticDataset(
-    "FF",
-    "SI",
-    "SPO",
-    "CPO",
     "CR",
-    "AAO",
-    "ECR",
     "CSI",
-    "BPR",
-    "BID",
     "SAC"
   );
 

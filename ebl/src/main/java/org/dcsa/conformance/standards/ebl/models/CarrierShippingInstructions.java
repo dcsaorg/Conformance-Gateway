@@ -88,7 +88,6 @@ public class CarrierShippingInstructions {
       issuingCarrier
           .putObject("address")
           .put("street", "The street name would be here")
-          .put("streetNumber", "... and here the street number")
           .put("city", "... and here the city")
           .put("countryCode", countryCode);
       issuingCarrier

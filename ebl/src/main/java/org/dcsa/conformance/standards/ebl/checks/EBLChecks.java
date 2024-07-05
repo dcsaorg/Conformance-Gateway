@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -742,7 +741,7 @@ public class EBLChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that 'references' is used when the scenario requires it",
+      "[Scenario] Verify that the scenario contained references when the scenario requires it",
       scenarioReferencesCheck(dspSupplier)
     ));
     checks.add(JsonAttribute.customValidator(
@@ -768,23 +767,34 @@ public class EBLChecks {
     };
   }
 
-  private static JsonContentMatchedValidation scenarioReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
-    return (nodeToValidate,contextPath) -> {
-      var dsp = dspSupplier.get();
-      var scenarioType = dsp.scenarioType();
-      if (!scenarioType.isReferencesRequired()) {
-        return Set.of();
-      }
-      var allReferencesParents = nodeToValidate.findParents("references");
-      for (var referencesParent : allReferencesParents) {
-        if (isNonEmptyNode(referencesParent.path("references"))) {
-          return Set.of();
-        }
-      }
-      return Set.of("Expected 'references' to be used somewhere.");
-    };
-  }
+  private static final JsonPointer[] REFERENCE_PATHS = {
+    JsonPointer.compile("/references"),
+    JsonPointer.compile("/documentParties/shipper/shippersReference"),
+    JsonPointer.compile("/documentParties/shipper/shippersPurchaseOrderReference"),
+    JsonPointer.compile("/documentParties/consignee/consigneesReference"),
+    JsonPointer.compile("/documentParties/consignee/consigneesPurchaseOrderReference")
+  };
 
+  private static JsonContentMatchedValidation scenarioReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.ifMatchedThen(
+      (ignored) -> dspSupplier.get().scenarioType().isReferencesRequired(),
+      JsonAttribute.atLeastOneOfMatched((body, ptrs) -> {
+        ptrs.addAll(Arrays.asList(REFERENCE_PATHS));
+        var uteCount = body.path("utilizedTransportEquipments").size();
+        for (int i = 0 ; i < uteCount ; i++) {
+          ptrs.add(JsonPointer.compile("/utilizedTransportEquipments/%d/references".formatted(i)));
+        }
+        var ciCount = body.path("consignmentItems").size();
+        for (int i = 0 ; i < ciCount ; i++) {
+          ptrs.add(JsonPointer.compile("/consignmentItems/%d/references".formatted(i)));
+        }
+        var otherPartyCount = body.path("documentParties").path("other").size();
+        for (int i = 0 ; i < otherPartyCount ; i++) {
+          ptrs.add(JsonPointer.compile("/documentParties/other/%d/party/references".formatted(i)));
+        }
+      })
+    );
+  }
 
   private static boolean isNonEmptyNode(JsonNode field) {
     if (field == null || field.isMissingNode()) {

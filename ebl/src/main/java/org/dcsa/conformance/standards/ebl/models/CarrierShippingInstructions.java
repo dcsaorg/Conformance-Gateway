@@ -250,7 +250,7 @@ public class CarrierShippingInstructions {
     transportsNode.set("portOfLoading", td.required("invoicePayableAt").deepCopy());
     unLocation(transportsNode.putObject("portOfDischarge"), "DEBRV");
     transportsNode
-      .putArray("vesselVoyage")
+      .putArray("vesselVoyages")
       .addObject()
       .put("vesselName", vessel.vesselName())
       .put("carrierExportVoyageNumber", "402E");

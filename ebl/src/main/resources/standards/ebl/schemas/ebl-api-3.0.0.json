@@ -1374,14 +1374,12 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
-                        "vesselVoyage": [
+                        "vesselVoyages": [
                           {
                             "vesselName": "MSC Gülsün",
                             "carrierExportVoyageNumber": "402E"
@@ -1500,14 +1498,12 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
-                        "vesselVoyage": [
+                        "vesselVoyages": [
                           {
                             "vesselName": "Ever Ace",
                             "carrierExportVoyageNumber": "402E"
@@ -1632,14 +1628,12 @@
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
                         "portOfLoading": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DKAAR"
                         },
                         "portOfDischarge": {
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
-                        "vesselVoyage": [
+                        "vesselVoyages": [
                           {
                             "vesselName": "Berlin Express",
                             "carrierExportVoyageNumber": "402E"
@@ -3027,33 +3021,6 @@
         },
         "description": "A detailed description of what has caused the error.\n"
       },
-      "AddressLocation": {
-        "title": "Address Location",
-        "required": [
-          "address",
-          "locationType"
-        ],
-        "type": "object",
-        "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as an `Address` location interface.",
-            "example": "ADDR"
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          }
-        },
-        "description": "An interface used to express a location using an `Address` object."
-      },
       "Address": {
         "title": "Address",
         "required": [
@@ -3112,63 +3079,46 @@
         },
         "description": "An object for storing address related information\n"
       },
-      "CityLocation": {
-        "title": "City Location",
+      "City": {
+        "title": "City",
         "required": [
           "city",
-          "locationType"
+          "countryCode"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
+          "city": {
+            "maxLength": 65,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
+            "description": "The city name of the party’s address.\n",
+            "example": "Amsterdam"
           },
-          "locationType": {
-            "maxLength": 4,
+          "stateRegion": {
+            "maxLength": 65,
             "type": "string",
-            "description": "Discriminator used to identify this as a `City Location` interface\n",
-            "example": "CITY"
+            "description": "The state/region of the party’s address.\n",
+            "example": "North Holland"
           },
-          "city": {
-            "$ref": "#/components/schemas/CityLocation_city"
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string",
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "NL"
           }
         },
-        "description": "An interface used to express a location using a `City`, `state/region` and `country`\n"
+        "description": "An object for storing city, state/region and country related information\n"
       },
-      "FacilityLocation": {
-        "title": "Facility Location",
+      "Facility": {
+        "title": "Facility",
         "required": [
           "facilityCode",
-          "facilityCodeListProvider",
-          "locationType"
+          "facilityCodeListProvider"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as a `Facility Location` interface\n",
-            "example": "FACI"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n\nThis field is **conditionally mandatory** depending on the value of the `facilityCodeListProvider` field.",
-            "example": "NLAMS"
-          },
           "facilityCode": {
             "maxLength": 6,
             "pattern": "^\\S(?:.*\\S)?$",
@@ -3187,40 +3137,30 @@
             ]
           }
         },
-        "description": "An interface used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
+        "description": "An object used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
       },
-      "UNLocationLocation": {
-        "title": "UNLocation Location",
+      "GeoCoordinate": {
+        "title": "Geo Coordinate",
         "required": [
-          "UNLocationCode",
-          "locationType"
+          "latitude",
+          "longitude"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
+          "latitude": {
+            "maxLength": 10,
             "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
+            "description": "Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+            "example": "48.8585500"
           },
-          "locationType": {
-            "maxLength": 4,
+          "longitude": {
+            "maxLength": 11,
             "type": "string",
-            "description": "Discriminator used to identify this as a `UNLocation` location interface.",
-            "example": "UNLO"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-            "example": "NLAMS"
+            "description": "Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+            "example": "2.294492036"
           }
         },
-        "additionalProperties": false,
-        "description": "An interface used to express a location using a `Un Location Code`."
+        "description": "An object used to express a location using `latitude` and `longitude`.\n"
       },
       "OtherDocumentParty": {
         "title": "Other Document Party",
@@ -3739,7 +3679,7 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer’s Reference)\n- `CSI` (Customer shipment ID)\n- `SAC` (Shipping Agency Code)\n",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer’s Reference)\n- `AKG` (Vehicle Identification Number)\n",
             "example": "CR"
           },
           "value": {
@@ -5327,7 +5267,7 @@
           "plannedDepartureDate",
           "portOfDischarge",
           "portOfLoading",
-          "vesselVoyage"
+          "vesselVoyages"
         ],
         "type": "object",
         "properties": {
@@ -5416,139 +5356,162 @@
       "PlaceOfReceipt": {
         "title": "Place of Receipt",
         "type": "object",
-        "description": "General purpose object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PortOfLoading": {
         "title": "Port of Loading",
         "type": "object",
-        "description": "General purpose object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "CITY": "#/components/schemas/CityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/CityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PortOfDischarge": {
         "title": "Port of Discharge",
         "type": "object",
-        "description": "General purpose object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "CITY": "#/components/schemas/CityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/CityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PlaceOfDelivery": {
         "title": "Place of Delivery",
         "type": "object",
-        "description": "General purpose object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "OnwardInlandRouting": {
         "title": "Onward Inland Routing",
         "type": "object",
-        "description": "General purpose object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "Charge": {
         "title": "Charge",
@@ -5757,37 +5720,6 @@
           }
         },
         "description": "All `Parties` with associated roles.\n"
-      },
-      "CityLocation_city": {
-        "required": [
-          "city",
-          "countryCode"
-        ],
-        "type": "object",
-        "properties": {
-          "city": {
-            "maxLength": 65,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The city name of the party’s address.\n",
-            "example": "Amsterdam"
-          },
-          "stateRegion": {
-            "maxLength": 65,
-            "type": "string",
-            "description": "The state/region of the party’s address.\n",
-            "example": "North Holland"
-          },
-          "countryCode": {
-            "maxLength": 2,
-            "minLength": 2,
-            "pattern": "^[A-Z]{2}$",
-            "type": "string",
-            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "NL"
-          }
-        },
-        "description": "An object for storing city, state/region and coutry related information\n"
       },
       "Gross Weight": {
         "title": "Gross Weight",

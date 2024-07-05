@@ -34,8 +34,7 @@ public class EblDatasets {
   public static final KeywordDataset CARGO_MOVEMENT_TYPE = KeywordDataset.staticDataset("FCL", "LCL");
   public static final KeywordDataset REFERENCE_TYPE = KeywordDataset.staticDataset(
     "CR",
-    "CSI",
-    "SAC"
+    "AKG"
   );
 
   public static final KeywordDataset DG_IMO_CLASSES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/imoclasses.csv");

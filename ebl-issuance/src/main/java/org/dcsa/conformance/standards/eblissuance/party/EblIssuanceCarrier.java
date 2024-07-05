@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +19,20 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
+import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, EblIssuanceState> eblStatesByTdr = new HashMap<>();
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final PayloadSignerWithKey payloadSigner;
 
   public EblIssuanceCarrier(
       String apiVersion,
@@ -34,7 +40,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
       PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader,
+      PayloadSignerWithKey payloadSigner) {
     super(
         apiVersion,
         partyConfiguration,
@@ -42,15 +49,16 @@ public class EblIssuanceCarrier extends ConformanceParty {
         persistentMap,
         webClient,
         orchestratorAuthHeader);
+    this.payloadSigner = payloadSigner;
   }
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
         "eblStatesByTdr",
-        StateManagementUtil.storeMap(objectMapper, eblStatesByTdr, EblIssuanceState::name));
-    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(objectMapper, sirsByTdr));
-    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(objectMapper, brsByTdr));
+        StateManagementUtil.storeMap(OBJECT_MAPPER, eblStatesByTdr, EblIssuanceState::name));
+    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, sirsByTdr));
+    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, brsByTdr));
   }
 
   @Override
@@ -70,7 +78,27 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest));
+    return Map.ofEntries(
+      Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest),
+      Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters)
+    );
+  }
+
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info(
+      "EblIssuanceCarrier.supplyScenarioParameters(%s)"
+        .formatted(actionPrompt.toPrettyString()));
+    var carrierScenarioParameters =
+        new CarrierScenarioParameters(
+          payloadSigner.getPublicKeyInPemFormat());
+    asyncOrchestratorPostPartyInput(
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("actionId", actionPrompt.required("actionId").asText())
+        .set("input", carrierScenarioParameters.toJson()));
+    addOperatorLogEntry(
+      "Submitting CarrierScenarioParameters: %s"
+        .formatted(carrierScenarioParameters.toJson().toPrettyString()));
   }
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
@@ -93,7 +121,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
 
     var jsonRequestBody =
-        JsonToolkit.templateFileToJsonNode(
+      (ObjectNode)JsonToolkit.templateFileToJsonNode(
             "/standards/eblissuance/messages/eblissuance-v%s-request.json"
                 .formatted(apiVersion),
             Map.ofEntries(
@@ -147,6 +175,14 @@ public class EblIssuanceCarrier extends ConformanceParty {
       sealObj.put("sealNumber", sealNumber);
     }
 
+    var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
+    var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
+    var issuanceManifest = OBJECT_MAPPER.createObjectNode()
+        .put("documentChecksum", tdChecksum)
+        .put("issueToChecksum", issueToChecksum);
+
+    jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
+
     syncCounterpartPost(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
@@ -175,13 +211,13 @@ public class EblIssuanceCarrier extends ConformanceParty {
       return request.createResponse(
           204,
           Map.of("Api-Version", List.of(apiVersion)),
-          new ConformanceMessageBody(objectMapper.createObjectNode()));
+          new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       return request.createResponse(
           409,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
-              objectMapper
+            OBJECT_MAPPER
                   .createObjectNode()
                   .put(
                       "message",

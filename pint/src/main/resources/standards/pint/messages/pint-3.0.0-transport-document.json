@@ -17,6 +17,7 @@
   "shippedOnBoardDate": "2024-02-02",
   "freightPaymentTermCode": "PRE",
   "transportDocumentStatus": "ISSUED",
+  "contractQuotationReference": "12345",
   "utilizedTransportEquipments": [
     {
       "equipment": {

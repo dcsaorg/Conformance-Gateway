@@ -10,7 +10,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblinterop.party.PintReceivingPlatform;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
@@ -46,7 +46,8 @@ class PintComponentFactory extends AbstractComponentFactory {
               persistentMap,
               asyncWebClient,
               orchestratorAuthHeader,
-              PayloadSignerFactory.senderPayloadSigner()
+              PayloadSignerFactory.senderPayloadSigner(),
+              PayloadSignerFactory.carrierPayloadSigner()
           ));
     }
 

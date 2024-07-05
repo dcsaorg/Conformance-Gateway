@@ -43,7 +43,8 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
     return new SenderScenarioParameters(
       "TD reference",
       "WAVE",
-      "-----BEGIN RSA PUBLIC KEY-----\n<YOUR PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n"
+      "-----BEGIN RSA PUBLIC KEY-----\n<YOUR PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n",
+      "-----BEGIN RSA PUBLIC KEY-----\n<THE CARRIER'S PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n"
     ).toJson();
   }
 

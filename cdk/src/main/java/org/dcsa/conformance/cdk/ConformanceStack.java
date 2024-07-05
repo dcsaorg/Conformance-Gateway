@@ -114,7 +114,7 @@ public class ConformanceStack extends Stack {
                             Arrays.asList(
                                 "/bin/sh",
                                 "-c",
-                                "mvn clean install && cp /asset-input/target/conformance-lambda.jar /asset-output/"))
+                                "cp /asset-input/target/conformance-lambda.jar /asset-output/"))
                         .image(Runtime.JAVA_21.getBundlingImage())
                         .volumes(
                             singletonList(

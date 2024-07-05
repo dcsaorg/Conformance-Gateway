@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblinterop.crypto;
+package org.dcsa.conformance.standards.ebl.crypto;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
@@ -7,7 +7,7 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import lombok.SneakyThrows;
-import org.dcsa.conformance.standards.eblinterop.crypto.impl.DefaultPayloadSigner;
+import org.dcsa.conformance.standards.ebl.crypto.impl.RSAPayloadSigner;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -55,7 +55,7 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-    private static final String CTK_SENDER_INCORRECT_PRIVATE_RSA_KEY_PEM = """
+    private static final String CTK_CARRIER_PRIVATE_RSA_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC588633cONawxd
             r7ynVvwmeRd2KVTpskYHxn51qYwUqK1jVPxGgDy1I8j+ImWbI1Q8ZaDbvWoIHcrv
@@ -118,23 +118,24 @@ public class PayloadSignerFactory {
             """;
 
     private static final KeyPair CTK_SENDER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_PRIVATE_KEY_PEM);
-    private static final KeyPair CTK_SENDER_INCORRECT_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_INCORRECT_PRIVATE_RSA_KEY_PEM);
+    private static final KeyPair CTK_CARRIER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_CARRIER_PRIVATE_RSA_KEY_PEM);
     private static final KeyPair CTK_RECEIVER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
-    private static final PayloadSigner CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
-    private static final PayloadSigner CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_INCORRECT_RSA_KEY_PAIR);
-    private static final PayloadSigner CTK_RECEIVER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_RECEIVER_RSA_KEY_PAIR);
-    private static final SignatureVerifierWithKey CTK_SENDER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey)fromPublicKey(CTK_SENDER_RSA_KEY_PAIR.getPublic());
-    private static final SignatureVerifierWithKey CTK_RECEIVER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey)fromPublicKey(CTK_RECEIVER_RSA_KEY_PAIR.getPublic());
+    private static final PayloadSignerWithKey CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
+    private static final PayloadSignerWithKey CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_CARRIER_RSA_KEY_PAIR);
+    private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_RECEIVER_RSA_KEY_PAIR);
+    private static final SignatureVerifierWithKey CTK_SENDER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_SENDER_RSA_KEY_PAIR.getPublic());
+    private static final SignatureVerifierWithKey CTK_RECEIVER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_RECEIVER_RSA_KEY_PAIR.getPublic());
+    private static final SignatureVerifierWithKey CTK_CARRIER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_CARRIER_RSA_KEY_PAIR.getPublic());
 
-    public static PayloadSigner senderPayloadSigner() {
+    public static PayloadSignerWithKey senderPayloadSigner() {
         return CTK_SENDER_KEY_PAYLOAD_SIGNER;
     }
 
-    public static PayloadSigner receiverPayloadSigner() {
+    public static PayloadSignerWithKey receiverPayloadSigner() {
       return CTK_RECEIVER_KEY_PAYLOAD_SIGNER;
     }
 
-    public static PayloadSigner testIncorrectPayloadSigner() {
+    public static PayloadSignerWithKey carrierPayloadSigner() {
         return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
     }
 
@@ -146,12 +147,17 @@ public class PayloadSignerFactory {
     return CTK_RECEIVER_SIGNATURE_VERIFIER;
   }
 
-    private static PayloadSigner rsaBasedPayloadSigner(KeyPair keyPair) {
-        return new DefaultPayloadSigner(
+    public static SignatureVerifierWithKey carrierKeySignatureVerifier() {
+    return CTK_CARRIER_SIGNATURE_VERIFIER;
+  }
+
+    private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
+        return new RSAPayloadSigner(
                 new JWSSignerDetails(
                         JWSAlgorithm.PS256,
                         new RSASSASigner(keyPair.getPrivate())
-                )
+                ),
+              (RSAPublicKey) keyPair.getPublic()
         );
     }
 
@@ -175,7 +181,7 @@ public class PayloadSignerFactory {
     }
 
     @SneakyThrows
-    public static SignatureVerifier fromPublicKey(PublicKey publicKey) {
+    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey) {
       if (publicKey instanceof RSAPublicKey rsaPublicKey) {
         return new SingleExportableKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey), rsaPublicKey);
       }
@@ -186,7 +192,7 @@ public class PayloadSignerFactory {
     }
 
     @SneakyThrows
-    public static SignatureVerifier fromPemEncodedPublicKey(String publicKeyPem) {
+    public static SignatureVerifier verifierFromPemEncodedPublicKey(String publicKeyPem) {
       if (publicKeyPem.contains("-----BEGIN RSA PUBLIC KEY-----")) {
         String privKeyPEM = publicKeyPem.replace("-----BEGIN RSA PUBLIC KEY-----", "")
           .replace("-----END RSA PUBLIC KEY-----", "")
@@ -229,7 +235,7 @@ public class PayloadSignerFactory {
       }
     }
 
-    private static String pemEncodeKey(RSAPublicKey key) {
+    public static String pemEncodeKey(RSAPublicKey key) {
       var base64 = Base64.getEncoder().encodeToString(key.getEncoded());
       var result = new StringBuilder("-----BEGIN RSA PUBLIC KEY-----\n");
       for (int i = 0; i < base64.length() ; i += 64) {

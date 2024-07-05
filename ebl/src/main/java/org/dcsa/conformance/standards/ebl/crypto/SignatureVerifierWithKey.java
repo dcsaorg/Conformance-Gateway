@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.eblinterop.crypto;
+package org.dcsa.conformance.standards.ebl.crypto;
 
 
 public interface SignatureVerifierWithKey extends SignatureVerifier {

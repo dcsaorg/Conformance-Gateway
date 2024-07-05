@@ -1,3 +1,3 @@
-package org.dcsa.conformance.standards.eblinterop.crypto;
+package org.dcsa.conformance.standards.ebl.crypto;
 
 public class CouldNotValidateSignatureException extends Exception {}

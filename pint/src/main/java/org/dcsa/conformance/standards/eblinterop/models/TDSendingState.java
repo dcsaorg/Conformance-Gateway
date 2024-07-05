@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,8 +15,8 @@ import java.util.UUID;
 import com.nimbusds.jose.JWSObject;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSigner;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSigner;
 
 public class TDSendingState {
 
@@ -24,6 +24,7 @@ public class TDSendingState {
   private static final String DOCUMENTS = "documents";
   private static final String SIGNED_MANIFEST = "signedManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN = "envelopeTransferChain";
+  private static final String ISSUANCE_MANIFEST = "issuanceManifestSignedContent";
 
 
   private static final Map<String, String> PLATFORM2CODELISTNAME = Map.ofEntries(
@@ -71,6 +72,18 @@ public class TDSendingState {
     }
   }
 
+
+  public JsonNode getIssuanceManifestNode() {
+    return state.path(ISSUANCE_MANIFEST);
+  }
+
+  public void setIssuanceManifestNode(JsonNode node) {
+    if (node.isMissingNode()) {
+      state.remove(ISSUANCE_MANIFEST);
+      return;
+    }
+    state.set(ISSUANCE_MANIFEST, node);
+  }
 
   public void registerMissingAdditionalDocument(String checksum) {
     for (var doc : state.path(DOCUMENTS)) {

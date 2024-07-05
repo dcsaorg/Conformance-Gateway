@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceCarrier;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuancePlatform;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
@@ -45,7 +46,9 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(EblIssuanceRole.PLATFORM.getConfigName()),
               persistentMap,
               webClient,
-              orchestratorAuthHeader));
+              orchestratorAuthHeader,
+              PayloadSignerFactory.carrierPayloadSigner()
+            ));
     }
 
     PartyConfiguration platformConfiguration =
@@ -97,7 +100,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
+  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
     String schemaFilePath =
         "/standards/eblissuance/schemas/eblissuance-v%s-%s.json"
             .formatted(
@@ -111,6 +114,9 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
       schemaName = EblIssuanceRole.isCarrier(apiProviderRole)
         ? (forRequest ? "IssuanceRequest" : null)
         : (forRequest ? "IssuanceResponse" : null);
+      if (issuanceManifest) {
+        schemaName = "IssuanceManifest";
+      }
     }
 
 

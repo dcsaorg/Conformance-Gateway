@@ -5,13 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public record SuppliedScenarioParameters(
-    String transportDocumentReference, String eblPlatform, String partyCode, String codeListName) {
+        String transportDocumentReference, String eblPlatform, String carrierPartyCode, String surrenderPartyCode, String codeListName) {
   public ObjectNode toJson() {
     return new ObjectMapper()
         .createObjectNode()
         .put("transportDocumentReference", transportDocumentReference)
         .put("eblPlatform", eblPlatform)
-        .put("partyCode", partyCode)
+        .put("carrierPartyCode", surrenderPartyCode)
+        .put("surrenderPartyCode", surrenderPartyCode)
         .put("codeListName", codeListName);
   }
 
@@ -19,7 +20,8 @@ public record SuppliedScenarioParameters(
     return new SuppliedScenarioParameters(
         jsonNode.required("transportDocumentReference").asText(),
         jsonNode.required("eblPlatform").asText(),
-        jsonNode.required("partyCode").asText(),
+        jsonNode.required("carrierPartyCode").asText(),
+        jsonNode.required("surrenderPartyCode").asText(),
         jsonNode.required("codeListName").asText());
   }
 }

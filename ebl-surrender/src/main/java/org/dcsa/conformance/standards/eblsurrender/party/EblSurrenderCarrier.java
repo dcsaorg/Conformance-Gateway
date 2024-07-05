@@ -88,7 +88,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
 
     SuppliedScenarioParameters suppliedScenarioParameters =
-        new SuppliedScenarioParameters(tdr, "XMPL", "Example party code", "Example code list");
+        new SuppliedScenarioParameters(tdr, "XMPL",  "Example carrier party code", "Example party code", "Example code list");
 
     asyncOrchestratorPostPartyInput(
         objectMapper
@@ -171,7 +171,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
               .formatted(src, srr, tdr, eblStatesById.get(tdr)));
 
       return request.createResponse(
-          202,
+          204,
           Map.of("Api-Version", List.of(apiVersion)),
           new ConformanceMessageBody(
               objectMapper

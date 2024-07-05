@@ -1,23 +1,24 @@
 package org.dcsa.conformance.standards.eblinterop.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.core.check.JsonAttribute.matchedMustEqual;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.ebl.checks.SignatureChecks.*;
+import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.JWSObject;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.*;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
+import org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
-import org.dcsa.conformance.standards.eblinterop.crypto.Checksums;
-import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -26,33 +27,6 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
-  private static final JsonContentCheckRebaser SIGNED_CONTENT_REBASER = delegate -> {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of(
-          "The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-          "The path '%s' should have been a signed payload, but could not be parsed as a JWS."
-            .formatted(contextPath));
-      }
-      JsonNode jsonBody;
-      try {
-        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
-      } catch (Exception e) {
-        return Set.of(
-          "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
-            contextPath, e.toString()
-          ));
-      }
-      return delegate.validate(jsonBody, contextPath + "!");
-    };
-  };
 
   public static JsonContentMatchedValidation arraySizeMustEqual(IntSupplier expectedSizeSupplier) {
     return (nodeToValidate,contextPath) -> {
@@ -178,76 +152,7 @@ public class PintChecks {
   }
 
   public static JsonContentMatchedValidation expectedTDChecksum(Supplier<DynamicScenarioParameters> dynamicScenarioParametersSupplier) {
-    return JsonAttribute.matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
-  }
-
-  public static JsonRebaseableContentCheck signedContentValidation(
-    JsonRebaseableContentCheck delegate
-  ) {
-    return SIGNED_CONTENT_REBASER.offset(delegate);
-  }
-
-  public static JsonContentMatchedValidation signedContentValidation(
-      JsonContentMatchedValidation delegate) {
-    return SIGNED_CONTENT_REBASER.offset(delegate);
-  }
-
-  public static JsonContentMatchedValidation signedContentSchemaValidation(
-      JsonSchemaValidator schemaValidator) {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS.".formatted(contextPath));
-      }
-      JsonNode jsonBody;
-      try {
-        jsonBody = OBJECT_MAPPER.readTree(jwsObject.getPayload().toString());
-      } catch (Exception e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload containing Json as content, but could not be parsed: %s".formatted(
-              contextPath,
-              e.toString()
-            ));
-      }
-      return schemaValidator.validate(jsonBody);
-    };
-  }
-  ;
-
-  public static JsonContentMatchedValidation signatureValidates(
-      Supplier<SignatureVerifier> signatureVerifierSupplier) {
-    return (nodeToValidate, contextPath) -> {
-      var content = nodeToValidate.asText();
-      if (content == null || !content.contains(".")) {
-        return Set.of("The path '%s' should have been a signed payload, but was not".formatted(contextPath));
-      }
-      JWSObject jwsObject;
-      try {
-        jwsObject = JWSObject.parse(content);
-      } catch (ParseException e) {
-        return Set.of(
-            "The path '%s' should have been a signed payload, but could not be parsed as a JWS (%s).".formatted(contextPath, e.toString()));
-      }
-      if (Algorithm.NONE.equals(jwsObject.getHeader().getAlgorithm())) {
-        return Set.of(
-          "The JWS payload at '%s' uses the 'none' algorithm and is therefore unsigned.".formatted(contextPath));
-      }
-      var signatureVerifier = signatureVerifierSupplier.get();
-      if (signatureVerifier == null) {
-        throw new AssertionError("Missing signatureVerifier");
-      }
-      if (!signatureVerifier.verifySignature(jwsObject)) {
-        return Set.of("The path '%s' was a valid JWS, but it was not signed by the expected key".formatted(contextPath));
-      }
-      return Set.of();
-    };
+    return matchedMustEqual(delayedValue(dynamicScenarioParametersSupplier, DynamicScenarioParameters::transportDocumentChecksum));
   }
 
   private static void generateScenarioRelatedChecksForTransferRequest(
@@ -268,7 +173,7 @@ public class PintChecks {
             pathChain(
               anyArrayElementMatching(
                 (n) -> n.path("codeListProvider").asText("").equals("EPUI"),
-                JsonAttribute.path("partyCode", JsonAttribute.matchedMustEqual(delayedValue(rspSupplier, ReceiverScenarioParameters::receiverEPUI))),
+                JsonAttribute.path("partyCode", matchedMustEqual(delayedValue(rspSupplier, ReceiverScenarioParameters::receiverEPUI))),
                 true
               ),
               "transactions", -1, "recipient", "partyCodes")
@@ -309,12 +214,6 @@ public class PintChecks {
     );
     jsonContentChecks.add(
       JsonAttribute.customValidator(
-        "Validate the missing documents checksum",
-        JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
-      )
-    );
-    jsonContentChecks.add(
-      JsonAttribute.customValidator(
         "Validate the transportDocument checksum",
         JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
       )
@@ -339,7 +238,7 @@ public class PintChecks {
       JsonAttribute.customValidator(
         "Validate that the response code was as expected",
         signedContentValidation(
-          JsonAttribute.path("responseCode", JsonAttribute.matchedMustEqual(expectedResponseCode::name))
+          JsonAttribute.path("responseCode", matchedMustEqual(expectedResponseCode::name))
         )
       )
     );
@@ -380,6 +279,47 @@ public class PintChecks {
       HttpMessageType.RESPONSE,
       standardsVersion,
       jsonContentChecks
+    );
+  }
+
+  public static ActionCheck validateRequestSignatures(
+    UUID uuid,
+    String expectedApiVersion,
+    Supplier<SignatureVerifier> senderVerifierSupplier,
+    Supplier<SignatureVerifier> carrierVerifierSupplier
+  ) {
+    return JsonAttribute.contentChecks(
+      PintRole::isSendingPlatform,
+      uuid,
+      HttpMessageType.REQUEST,
+      expectedApiVersion,
+      JsonAttribute.customValidator("envelopeManifestSignedContent signature could be validated", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signatureValidates(senderVerifierSupplier))),
+      JsonAttribute.allIndividualMatchesMustBeValid("envelopeManifestSignedContent signature could be validated", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signatureValidates(senderVerifierSupplier)),
+      JsonAttribute.customValidator(
+        "issuanceManifestSignedContent signature could be validated",
+        JsonAttribute.path("issuanceManifestSignedContent", signatureValidates(carrierVerifierSupplier))
+      )
+    );
+  }
+
+  public static ActionCheck validateInnerRequestSchemas(
+    UUID uuid,
+    String expectedApiVersion,
+    JsonSchemaValidator envelopeEnvelopeSchemaValidator,
+    JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
+    JsonSchemaValidator issuanceManifestSchemaValidator
+  ) {
+    return JsonAttribute.contentChecks(
+      PintRole::isSendingPlatform,
+      uuid,
+      HttpMessageType.REQUEST,
+      expectedApiVersion,
+      JsonAttribute.customValidator("envelopeManifestSignedContent matches schema", JsonAttribute.path("envelopeManifestSignedContent", SignatureChecks.signedContentSchemaValidation(envelopeEnvelopeSchemaValidator))),
+      JsonAttribute.allIndividualMatchesMustBeValid("envelopeTransferChain matches schema", mav -> mav.submitAllMatching("envelopeTransferChain.*"), SignatureChecks.signedContentSchemaValidation(envelopeTransferChainEntrySchemaValidator)),
+      JsonAttribute.customValidator(
+        "Validate issuance manifest schema validation",
+        JsonAttribute.path("issuanceManifestSignedContent", signedContentSchemaValidation(issuanceManifestSchemaValidator))
+      )
     );
   }
 
@@ -445,6 +385,34 @@ public class PintChecks {
           }
           return issues;
         })
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate conditional presence of issuanceManifest",
+        (rootNode, contextPath) -> {
+          var chain = rootNode.path("envelopeTransferChain");
+          var lastIdx = chain.size() - 1;
+          var lastEntry = chain.path(lastIdx);
+          var payload = SignedNodeSupport.parseSignedNodeNoErrors(lastEntry);
+          var issues = new LinkedHashSet<String>();
+          var hadIssuance = false;
+          for (var transaction : payload.path("transactions")) {
+            if (transaction.path("action").asText("").equals("ISSU")) {
+              hadIssuance = true;
+              break;
+            }
+          }
+          if (hadIssuance && rootNode.path("issuanceManifestSignedContent").isMissingNode()) {
+            issues.add("Issuance transaction implies 'issuanceManifestSignedContent' being present");
+          }
+          return issues;
+        })
+    );
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate issuance manifest checksums",
+        JsonAttribute.path("issuanceManifestSignedContent", signedContentValidation(JsonAttribute.path("documentChecksum", expectedTDChecksum(dspSupplier))))
       )
     );
     return JsonAttribute.contentChecks(

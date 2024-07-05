@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
-import org.dcsa.conformance.standards.eblinterop.crypto.PayloadSignerFactory;
-import org.dcsa.conformance.standards.eblinterop.crypto.SignatureVerifier;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
+import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -30,7 +30,7 @@ public abstract class PintAction extends ConformanceAction {
       this.dspReference =
           new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null));
       this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", "", ""));
-      this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", ""));
+      this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", "", ""));
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
       this.rspReference = new OverwritingReference<>(previousAction.rspReference, null);
@@ -49,12 +49,17 @@ public abstract class PintAction extends ConformanceAction {
 
   public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
     var pem = getSsp().senderPublicKeyPEM();
-    return PayloadSignerFactory.fromPemEncodedPublicKey(pem);
+    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+  }
+
+  public SignatureVerifier resolveSignatureVerifierCarrierSignatures() {
+    var pem = getSsp().carrierPublicKeyPEM();
+    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
   }
 
   public SignatureVerifier resolveSignatureVerifierForReceiverSignatures() {
     var pem = getRsp().receiverPublicKeyPEM();
-    return PayloadSignerFactory.fromPemEncodedPublicKey(pem);
+    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
   }
 
   @Override

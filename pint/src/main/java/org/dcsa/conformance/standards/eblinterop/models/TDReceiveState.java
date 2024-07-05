@@ -2,7 +2,7 @@ package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.*;
-import static org.dcsa.conformance.standards.eblinterop.crypto.SignedNodeSupport.parseSignedNode;
+import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,9 +19,9 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.*;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
 import org.dcsa.conformance.standards.eblinterop.action.ScenarioClass;
-import org.dcsa.conformance.standards.eblinterop.crypto.*;
 
 public class TDReceiveState {
 
@@ -305,7 +305,7 @@ public class TDReceiveState {
 
   public SignatureVerifier getSignatureVerifierForSenderSignatures() {
     var pem = state.path(EXPECTED_PUBLIC_KEY).asText();
-    return PayloadSignerFactory.fromPemEncodedPublicKey(pem);
+    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
   }
 
   public static TDReceiveState fromPersistentStore(JsonNode state) {

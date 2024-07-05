@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Getter
@@ -29,6 +30,15 @@ public class UC11v_Carrier_VoidTransportDocumentAction extends StateChangingSIAc
   public ObjectNode asJsonNode() {
     return super.asJsonNode()
       .put("documentReference", getDspSupplier().get().transportDocumentReference());
+  }
+
+  protected void doHandleExchange(ConformanceExchange exchange) {
+    super.doHandleExchange(exchange);
+    var dsp = getDspSupplier().get();
+    // Clear the flag if set.
+    if (dsp.newTransportDocumentContent()) {
+      getDspConsumer().accept(dsp.withNewTransportDocumentContent(false));
+    }
   }
 
   @Override

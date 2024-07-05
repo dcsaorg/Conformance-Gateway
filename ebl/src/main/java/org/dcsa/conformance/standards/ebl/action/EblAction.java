@@ -16,6 +16,8 @@ import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 public abstract class EblAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
@@ -31,7 +33,7 @@ public abstract class EblAction extends ConformanceAction {
     this.dspReference =
         previousAction == null
             ? new OverwritingReference<>(
-                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null))
+                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 

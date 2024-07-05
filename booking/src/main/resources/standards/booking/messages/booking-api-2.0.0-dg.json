@@ -100,8 +100,7 @@
       "partyName": "DCSA Conformance Toolkit",
       "address": {
         "name": "Mustermann",
-        "street": "Strawinskylaan",
-        "streetNumber": "4117",
+        "street": "Strawinskylaan 4117",
         "floor": "6",
         "postCode": "1077 ZX",
         "city": "Amsterdam",

@@ -88,6 +88,74 @@
                 "specialCertificateNumber": "22663:3",
                 "additionalContainerCargoHandling": "To be handled with extreme care",
                 "unNumber": "3082"
+              },
+              {
+                "codedVariantList": "2300",
+                "properShippingName": "ETHANOL (ETHYL ALCOHOL)",
+                "technicalName": "DIESEL or FUEL OIL or FURNACE OIL / PG III",
+                "imoClass": "3A",
+                "subsidiaryRisk1": "1.2",
+                "subsidiaryRisk2": "1.2",
+                "isMarinePollutant": false,
+                "packingGroup": 3,
+                "isLimitedQuantity":  false,
+                "isExceptedQuantity":  false,
+                "isSalvagePackings":  false,
+                "isEmptyUncleanedResidue":  false,
+                "isWaste":  false,
+                "isHot":  false,
+                "isCompetentAuthorityApprovalProvided" : false,
+                "competentAuthorityApproval": "Transport Authority",
+                "segregationGroups": ["12"],
+                "innerPackagings" : [{
+                  "quantity": 20,
+                  "material": "Plastic",
+                  "description": "Woven plastic water resistant Bag"
+                },
+                  {
+                    "quantity": 40,
+                    "material": "Plastic",
+                    "description": "Woven plastic water resistant Bag"
+                  }
+                ],
+                "emergencyContactDetails" :  {
+                  "contact": "DCSA test person",
+                  "phone": "+41 23456789",
+                  "provider": "Technical Support DCSA",
+                  "referenceNumber": "231144"
+                },
+                "EMSNumber": "F-A S-F",
+                "endOfHoldingTime": "2024-10-03",
+                "fumigationDateTime": "2024-05-03T09:03:00-02:00",
+                "isReportableQuantity":  false,
+                "inhalationZone": "A",
+                "grossWeight" : {
+                  "value": 12000,
+                  "unit": "KGM"
+                },
+                "netWeight": {
+                  "value": 104.5,
+                  "unit": "KGM"
+                },
+                "netExplosiveContent": {
+                  "value": 104.5,
+                  "unit": "KGM"
+                },
+                "volume": {
+                  "value": 10.5,
+                  "unit": "MTQ"
+                },
+                "limits": {
+                  "temperatureUnit": "CEL",
+                  "flashPoint": 60,
+                  "transportControlTemperature": 24,
+                  "transportEmergencyTemperature": 35,
+                  "SADT": 15,
+                  "SAPT": 20
+                },
+                "specialCertificateNumber": "22663:3",
+                "additionalContainerCargoHandling": "To be handled with extreme care",
+                "unNumber": "1170"
               }
             ]
           }

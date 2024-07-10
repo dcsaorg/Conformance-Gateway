@@ -18,17 +18,17 @@
         <div *ngIf="!scenarioStatus.nextActions">
             <div class="paragraph">The execution of this scenario is complete.</div>
         </div>
-    
+
         <div *ngIf="scenarioStatus.nextActions">
             <div class="paragraph">Next actions: {{scenarioStatus.nextActions}}</div>
-    
+
             <div *ngIf="scenarioStatus.promptText">
                 <div class="paragraph">{{scenarioStatus.promptText}}</div>
-    
+
                 <div *ngIf="scenarioStatus.jsonForPromptText" class="paragraph">
                     <pre>{{getJsonForPromptText()}}</pre>
                 </div>
-    
+
                 <div *ngIf="scenarioStatus.inputRequired">
                     <div class="paragraph">
                         <mat-form-field
@@ -51,23 +51,21 @@
                         >Submit</button>
                     </div>
                 </div>
-    
-                <div *ngIf="!scenarioStatus.inputRequired" class="paragraph">
-                    <button
-                    mat-raised-button
-                    color="primary"
-                    (click)="onSubmit(false)"
-                    >Done</button>
-                </div>
             </div>
-            
-            <div *ngIf="!scenarioStatus.promptText">
+
+            <div *ngIf="!scenarioStatus.inputRequired">
                 <div class="paragraph">
                     <button
                     mat-raised-button
                     color="primary"
                     (click)="loadScenarioStatus()"
                     >Refresh</button>
+                    &nbsp;
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="completeCurrentAction()"
+                    >Next action</button>
                 </div>
             </div>
         </div>
@@ -77,6 +75,7 @@
         <div class="pageSubtitle">Conformance status</div>
         <app-report
         *ngIf="scenario && scenarioStatus?.conformanceSubReport"
+        [folded]="false"
         [report]="scenarioStatus.conformanceSubReport"
         ></app-report>
     </div>

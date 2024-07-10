@@ -445,6 +445,22 @@ public class ConformanceSandbox {
     return OBJECT_MAPPER.createObjectNode();
   }
 
+  public static JsonNode completeCurrentAction(
+      ConformancePersistenceProvider persistenceProvider,
+      Consumer<JsonNode> deferredSandboxTaskConsumer,
+      String sandboxId) {
+    new OrchestratorTask(
+            persistenceProvider,
+            conformanceWebRequest ->
+                ConformanceSandbox._asyncSendOutboundWebRequest(
+                    deferredSandboxTaskConsumer, conformanceWebRequest),
+            sandboxId,
+            "completing current action in sandbox %s".formatted(sandboxId),
+            ConformanceOrchestrator::completeCurrentAction)
+        .run();
+    return OBJECT_MAPPER.createObjectNode();
+  }
+
   private static ConformanceWebResponse _handlePartyNotification(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,

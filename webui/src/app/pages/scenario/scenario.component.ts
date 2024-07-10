@@ -10,6 +10,8 @@ import { ConformanceStatus,
   getConformanceStatusTitle
 } from "src/app/model/conformance-status";
 import { ScenarioStatus } from "src/app/model/scenario-status";
+import {ConfirmationDialog} from "../../dialogs/confirmation/confirmation-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-scenario',
@@ -32,6 +34,7 @@ export class ScenarioComponent {
     public authService: AuthService,
     public conformanceService: ConformanceService,
     private router: Router,
+    private dialog: MatDialog,
   ) {}
 
   async ngOnInit() {
@@ -57,6 +60,18 @@ export class ScenarioComponent {
       this.sandbox!.id,
       this.scenario!.id
     );
+  }
+
+  async completeCurrentAction() {
+    if (await ConfirmationDialog.open(
+      this.dialog,
+      "Complete action",
+      "Are you sure you want to complete the current action? "
+      + "You cannot go back to a previous action without restarting the scenario.")
+    ) {
+      await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+      await this.loadScenarioStatus();
+    }
   }
 
   async ngOnDestroy() {

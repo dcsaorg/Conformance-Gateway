@@ -58,6 +58,7 @@ public class ConformanceWebuiHandler {
       case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
       case "handleActionInput" -> _handleActionInput(userId, requestNode);
       case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
+      case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
   }
@@ -384,5 +385,12 @@ public class ConformanceWebuiHandler {
         deferredSandboxTaskConsumer,
         sandboxId,
         requestNode.get("scenarioId").asText());
+  }
+
+  private JsonNode _completeCurrentAction(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.completeCurrentAction(
+        persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
   }
 }

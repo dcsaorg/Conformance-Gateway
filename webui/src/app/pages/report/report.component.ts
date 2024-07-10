@@ -10,6 +10,7 @@ import { ScenarioConformanceReport } from "src/app/model/scenario-status";
   styleUrls: ['../../shared-styles.css']
 })
 export class ReportComponent {
+  @Input() folded!: boolean;
   @Input() report!: ScenarioConformanceReport;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;

@@ -93,7 +93,7 @@
                 "codedVariantList": "2300",
                 "properShippingName": "ETHANOL (ETHYL ALCOHOL)",
                 "technicalName": "DIESEL or FUEL OIL or FURNACE OIL / PG III",
-                "imoClass": "3A",
+                "imoClass": "3",
                 "subsidiaryRisk1": "1.2",
                 "subsidiaryRisk2": "1.2",
                 "isMarinePollutant": false,

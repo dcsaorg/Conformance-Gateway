@@ -6,11 +6,13 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 @Getter
 @Slf4j
@@ -43,6 +45,12 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
     jsonNode.set("csp", getCspSupplier().get().toJson());
     jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
     return jsonNode;
+  }
+
+  @Override
+  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
+    var body = exchange.getRequest().message().body().getJsonBody();
+    return dynamicScenarioParameters.withBooking(body);
   }
 
   @Override

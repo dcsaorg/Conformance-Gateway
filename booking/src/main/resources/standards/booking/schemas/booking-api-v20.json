@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Booking",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0 Beta 3](https://dcsa.org/standards/booking/documentation-booking-2-beta-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n### Notifications\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_BKG_NTF/2.0.0-Beta-3). Signing up for notifications is defined outside the scope of this API specification.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0](https://dcsa.org/standards/booking/documentation-booking-2) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes. All `/v2/bookings` endPoints must be implmented by the provider\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification endPoint](#/BookingNotification).\n\n    POST /v2/booking-notifications\n\nfor \"shallow\" notifications - and\n\n    POST /v2/booking-full-notifications\n\nfor full state transfer.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\nBoth of these endPoint is to be implemented by the consumers of the `Booking API` in order to have push events.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Booking API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -22,7 +22,11 @@
   "tags": [
     {
       "name": "Booking",
-      "description": "The Booking"
+      "description": "Booking endPoints to be implemented by providers of the Booking API"
+    },
+    {
+      "name": "Notifications",
+      "description": "Notifications to be implemented by the consumers of the Booking API"
     }
   ],
   "paths": {
@@ -124,7 +128,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -132,7 +135,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -222,7 +224,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -230,7 +231,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -331,7 +331,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -339,7 +338,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -429,7 +427,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -437,7 +434,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -772,7 +768,6 @@
                         {
                           "location": {
                             "locationName": "Bremerhaven",
-                            "locationType": "UNLO",
                             "UNLocationCode": "DEBRV"
                           },
                           "locationTypeCode": "POL"
@@ -780,7 +775,6 @@
                         {
                           "location": {
                             "locationName": "Norfolk",
-                            "locationType": "UNLO",
                             "UNLocationCode": "USORF"
                           },
                           "locationTypeCode": "POD"
@@ -882,7 +876,6 @@
                         {
                           "location": {
                             "locationName": "Bremerhaven",
-                            "locationType": "UNLO",
                             "UNLocationCode": "DEBRV"
                           },
                           "locationTypeCode": "POL"
@@ -890,7 +883,6 @@
                         {
                           "location": {
                             "locationName": "Norfolk",
-                            "locationType": "UNLO",
                             "UNLocationCode": "USORF"
                           },
                           "locationTypeCode": "POD"
@@ -922,12 +914,10 @@
                           "transportPlanStageSequenceNumber": 1,
                           "loadLocation": {
                             "locationName": "Bremerhaven",
-                            "locationType": "UNLO",
                             "UNLocationCode": "DEBRV"
                           },
                           "dischargeLocation": {
                             "locationName": "Norfolk",
-                            "locationType": "UNLO",
                             "UNLocationCode": "USORF"
                           },
                           "plannedDepartureDate": "2024-01-20",
@@ -1196,7 +1186,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -1204,7 +1193,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -1296,7 +1284,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -1304,7 +1291,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -1405,7 +1391,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -1413,7 +1398,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -1506,7 +1490,6 @@
                       {
                         "location": {
                           "locationName": "Bremerhaven",
-                          "locationType": "UNLO",
                           "UNLocationCode": "DEBRV"
                         },
                         "locationTypeCode": "POL"
@@ -1514,7 +1497,6 @@
                       {
                         "location": {
                           "locationName": "Norfolk",
-                          "locationType": "UNLO",
                           "UNLocationCode": "USORF"
                         },
                         "locationTypeCode": "POD"
@@ -1935,10 +1917,530 @@
           }
         }
       }
+    },
+    "/v2/booking-notifications": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Send a new Booking Notification",
+        "description": "Creates a new [`Booking Notification`](#/BookingNotification). This endPoint is called whenever a `Booking` that a consumer has subscribed to changes state or is updated.\n",
+        "operationId": "booking-notifications",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The payload used to create a [`Booking Notification`](#/BookingNotification)\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingNotification"
+              },
+              "examples": {
+                "receivedExample": {
+                  "summary": "Booking request received\n",
+                  "description": "A notification explaining that a `Booking Request` has been received and stored in provider system (`bookingStatus='RECEIVED'`).\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.booking.v2",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "subscriptionReference": "BKG001",
+                    "data": {
+                      "bookingStatus": "RECEIVED",
+                      "carrierBookingRequestReference": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
+                    }
+                  }
+                },
+                "declinedExample": {
+                  "summary": "Booking amendment declined\n",
+                  "description": "A notification explaining that an amendment to a `Booking` has been declined (`amendedBookingStatus='AMENDMENT DECLINED'`)\n",
+                  "value": {
+                    "specversion": "1.0",
+                    "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+                    "source": "https://member.com/",
+                    "type": "org.dcsa.booking.v2",
+                    "time": "2018-04-05T17:31:00Z",
+                    "datacontenttype": "application/json",
+                    "subscriptionReference": "BKG001",
+                    "data": {
+                      "bookingStatus": "CONFIRMED",
+                      "amendedBookingStatus": "AMENDMENT DECLINED",
+                      "carrierBookingRequestReference": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa",
+                      "carrierBookingReference": "ABC709951",
+                      "reason": "Declined because of no equipment availability"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "400": {
+            "description": "In case the `Notification` does not schema validate a `400` (Bad Request) is returned\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "badRequestExample": {
+                    "summary": "Booking missing carrierBookingReference or carrierBookingRequestReference\n",
+                    "description": "`carrierBookingReference` or `carrierBookingRequestReference` is a conditionary property in the `Notification` (at least one of them must be present). This is an example of how the error object would look in case this property is missing\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-notifications",
+                      "statusCode": 400,
+                      "statusCodeText": "Bad Request",
+                      "statusCodeMessage": "carrierBookingReference or carrierBookingRequestReference not found - one of them is a mandatory to provide in a Notification\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "property": "carrierBookingReference or carrierBookingRequestReference",
+                          "errorCodeText": "mandatory property missing",
+                          "errorCodeMessage": "carrierBookingReference or carrierBookingRequestReference must be provided as part of a Notification\n"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "In case a server error occurs in provider system a `500` (Internal Server Error) is returned\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorExample": {
+                    "summary": "Internal Server Error while processing Notification\n",
+                    "description": "An Internal Server Error has occurred - the consumer should contact {provider-support} and provide the `providerCorrelationReference` (in the example this is `4426d965-0dd8-4005-8c63-dc68b01c4962`)\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-notifications",
+                      "statusCode": 500,
+                      "statusCodeText": "Internal Server Error",
+                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "Internal Error occurred",
+                          "errorCodeMessage": "Internal Error occurred"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "For other errors the error object should be populated with relevant information\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "tooManyRequestsExample": {
+                    "summary": "Making too many Notifications\n",
+                    "description": "Calling the endPoint\n\n    POST /v2/booking-notifications\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-notifications",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to create a Notification has been requested. Please try again in 1 hour\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "Max Notifications reached",
+                          "errorCodeMessage": "A maximum of 10 Notifications can be created per hour"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/booking-full-notifications": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Send a full Booking Notification",
+        "description": "Sends an entire [`Booking`](#/Booking). This endPoint is called whenever a `Booking` that a consumer has subscribed to changes state or is updated.\n",
+        "operationId": "booking-full-notifications",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The Booking to send [`Booking`](#/Booking)\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking"
+              },
+              "examples": {
+                "receivedExample": {
+                  "summary": "Booking request received\n",
+                  "description": "A Full Notification containing the `Booking Request` received and stored in provider system (`bookingStatus='RECEIVED'`).\n",
+                  "value": {
+                    "carrierBookingRequestReference": "cbrr-123",
+                    "bookingStatus": "RECEIVED",
+                    "receiptTypeAtOrigin": "CY",
+                    "deliveryTypeAtDestination": "CY",
+                    "cargoMovementTypeAtOrigin": "FCL",
+                    "cargoMovementTypeAtDestination": "FCL",
+                    "serviceContractReference": "HHL51800000",
+                    "freightPaymentTermCode": "PRE",
+                    "originChargesPaymentTerm": {
+                      "haulageChargesPaymentTermCode": "PRE",
+                      "portChargesPaymentTermCode": "PRE"
+                    },
+                    "destinationChargesPaymentTerm": {
+                      "haulageChargesPaymentTermCode": "COL",
+                      "portChargesPaymentTermCode": "PRE",
+                      "otherChargesPaymentTermCode": "PRE"
+                    },
+                    "contractQuotationReference": "HHL1401",
+                    "vessel": {
+                      "name": "MAERSK IOWA",
+                      "vesselIMONumber": "9298686"
+                    },
+                    "carrierServiceCode": "TA1",
+                    "carrierExportVoyageNumber": "403W",
+                    "isPartialLoadAllowed": false,
+                    "isExportDeclarationRequired": false,
+                    "isImportLicenseRequired": false,
+                    "expectedDepartureDate": "2024-01-20",
+                    "incoTerms": "EXW",
+                    "communicationChannelCode": "AO",
+                    "isEquipmentSubstitutionAllowed": false,
+                    "references": [
+                      {
+                        "type": "CR",
+                        "value": "KN-00103004"
+                      }
+                    ],
+                    "documentParties": {
+                      "bookingAgent": {
+                        "partyName": "KN Bremerhaven",
+                        "address": {
+                          "name": "Kuehne + Nagel (AG & Co.) KG",
+                          "street": "Amerikaring",
+                          "streetNumber": "40",
+                          "postCode": "27568",
+                          "city": "Bremerhaven",
+                          "countryCode": "DE"
+                        },
+                        "partyContactDetails": [
+                          {
+                            "name": "Export operations department",
+                            "phone": "+49 471 945410"
+                          }
+                        ]
+                      }
+                    },
+                    "partyContactDetails": [
+                      {
+                        "name": "Diane",
+                        "phone": "+49 471 945410"
+                      }
+                    ],
+                    "shipmentLocations": [
+                      {
+                        "location": {
+                          "locationName": "Bremerhaven",
+                          "UNLocationCode": "DEBRV"
+                        },
+                        "locationTypeCode": "POL"
+                      },
+                      {
+                        "location": {
+                          "locationName": "Norfolk",
+                          "UNLocationCode": "USORF"
+                        },
+                        "locationTypeCode": "POD"
+                      }
+                    ],
+                    "requestedEquipments": [
+                      {
+                        "isShipperOwned": false,
+                        "ISOEquipmentCode": "42GP",
+                        "units": 3,
+                        "commodities": [
+                          {
+                            "commodityType": "Dry cargo, Freight all kinds",
+                            "cargoGrossWeight": 36000,
+                            "cargoGrossWeightUnit": "KGM"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "400": {
+            "description": "In case the `Full Notification` does not schema validate a `400` (Bad Request) is returned\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "badRequestExample": {
+                    "summary": "Booking missing bookingStatus\n",
+                    "description": "`bookingStatus` is a mandatory property in the `Full Notification`. This is an example of how the error object would look in case this property is missing\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-full-notifications",
+                      "statusCode": 400,
+                      "statusCodeText": "Bad Request",
+                      "statusCodeMessage": "bookingStatus not found - one of them is a mandatory to provide in a Full Notification\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "property": "bookingStatus",
+                          "errorCodeText": "mandatory property missing",
+                          "errorCodeMessage": "bookingStatus must be provided as part of a Full Notification\n"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "In case a server error occurs in provider system a `500` (Internal Server Error) is returned\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorExample": {
+                    "summary": "Internal Server Error while processing Full Notification\n",
+                    "description": "An Internal Server Error has occurred - the consumer should contact {provider-support} and provide the `providerCorrelationReference` (in the example this is `4426d965-0dd8-4005-8c63-dc68b01c4962`)\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-full-notifications",
+                      "statusCode": 500,
+                      "statusCodeText": "Internal Server Error",
+                      "statusCodeMessage": "Internal Server Error occurred while processing Booking request\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "Internal Error occurred",
+                          "errorCodeMessage": "Internal Error occurred"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "For other errors the error object should be populated with relevant information\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "tooManyRequestsExample": {
+                    "summary": "Making too many Full Notifications\n",
+                    "description": "Calling the endPoint\n\n    POST /v2/booking-full-notifications\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "POST",
+                      "requestUri": "/v2/booking-full-notifications",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to create a Notification has been requested. Please try again in 1 hour\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "Max Full Notifications reached",
+                          "errorCodeMessage": "A maximum of 10 Full Notifications can be created per hour"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BookingNotification": {
+        "title": "Booking Notification",
+        "required": [
+          "data",
+          "datacontenttype",
+          "id",
+          "source",
+          "specversion",
+          "subscriptionReference",
+          "time",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "description": "The version of the CloudEvents specification which the event uses. This enables the interpretation of the context. Compliant event producers MUST use a value of `1.0` when referring to this version of the specification.\n\nCurrently, this attribute will only have the 'major' and 'minor' version numbers included in it. This allows for 'patch' changes to the specification to be made without changing this property's value in the serialization. Note: for 'release candidate' releases a suffix might be used for testing purposes.\n",
+            "example": "1.0",
+            "enum": [
+              "1.0"
+            ]
+          },
+          "id": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Identifies the event. Producers MUST ensure that `source` + `id` is unique for each distinct event. If a duplicate event is re-sent (e.g. due to a network error) it MAY have the same `id`. Consumers MAY assume that Events with identical `source` and `id` are duplicates.\n",
+            "example": "3cecb101-7a1a-43a4-9d62-e88a131651e2"
+          },
+          "source": {
+            "maxLength": 4096,
+            "type": "string",
+            "description": "Identifies the context in which an event happened. Often this will include information such as the type of the event source, the organization publishing the event or the process that produced the event. The exact syntax and semantics behind the data encoded in the URI is defined by the event producer.\n\nProducers MUST ensure that `source` + `id` is unique for each distinct event.\n\nAn application MAY assign a unique `source` to each distinct producer, which makes it easy to produce unique IDs since no other producer will have the same source. The application MAY use UUIDs, URNs, DNS authorities or an application-specific scheme to create unique `source` identifiers.\n\nA source MAY include more than one producer. In that case the producers MUST collaborate to ensure that `source` + `id` is unique for each distinct event.\n",
+            "example": "https://member.com/"
+          },
+          "type": {
+            "type": "string",
+            "description": "This attribute contains a value describing the type of event related to the originating occurrence. Often this attribute is used for routing, observability, policy enforcement, etc. The format of this is producer defined and might include information such as the version of the type - see [Versioning of CloudEvents in the Primer](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/primer.md#versioning-of-cloudevents) for more information.\n",
+            "example": "org.dcsa.booking.v2",
+            "enum": [
+              "org.dcsa.booking.v2"
+            ]
+          },
+          "time": {
+            "type": "string",
+            "description": "Timestamp of when the occurrence happened. If the time of the occurrence cannot be determined then this attribute MAY be set to some other time (such as the current time) by the CloudEvents producer, however all producers for the same `source` MUST be consistent in this respect. In other words, either they all use the actual time of the occurrence or they all use the same algorithm to determine the value used.\n",
+            "format": "date-time",
+            "example": "2018-04-05T17:31:00Z"
+          },
+          "datacontenttype": {
+            "type": "string",
+            "description": "Content type of `data` value. This attribute enables `data` to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, an event rendered using the [JSON envelope](formats/json-format.md#3-envelope) format might carry an XML payload in `data`, and the consumer is informed by this attribute being set to \"application/xml\". The rules for how `data` content is rendered for different `datacontenttype` values are defined in the event format specifications; for example, the JSON event format defines the relationship in [section 3.1](formats/json-format.md#31-handling-of-data).\n\nFor some binary mode protocol bindings, this field is directly mapped to the respective protocol's content-type metadata property. Normative rules for the binary mode and the content-type metadata mapping can be found in the respective protocol.\n\nIn some event formats the `datacontenttype` attribute MAY be omitted. For example, if a JSON format event has no `datacontenttype` attribute, then it is implied that the `data` is a JSON value conforming to the \"application/json\" media type. In other words: a JSON-format event with no `datacontenttype` is exactly equivalent to one with `datacontenttype=\"application/json\"`.\n\nWhen translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.\n",
+            "example": "application/json",
+            "enum": [
+              "application/json"
+            ]
+          },
+          "subscriptionReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The reference of the subscription that has triggered this event\n",
+            "example": "30675492-50ff-4e17-a7df-7a487a8ad343"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BookingNotification_data"
+          }
+        },
+        "description": "`CloudEvent` specific properties for the `Notification`.\n"
+      },
       "RequestedChange": {
         "title": "Requested Change",
         "required": [
@@ -2088,33 +2590,6 @@
         },
         "description": "A detailed description of what has caused the error.\n"
       },
-      "AddressLocation": {
-        "title": "Address Location",
-        "required": [
-          "address",
-          "locationType"
-        ],
-        "type": "object",
-        "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as an `Address` location interface.\n",
-            "example": "ADDR"
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          }
-        },
-        "description": "An interface used to express a location using an `Address` object."
-      },
       "Address": {
         "title": "Address",
         "required": [
@@ -2173,36 +2648,14 @@
         },
         "description": "An object for storing address related information\n"
       },
-      "FacilityLocation": {
-        "title": "Facility Location",
+      "Facility": {
+        "title": "Facility",
         "required": [
           "facilityCode",
-          "facilityCodeListProvider",
-          "locationType"
+          "facilityCodeListProvider"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as a `Facility Location` interface\n",
-            "example": "FACI"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
-            "example": "NLAMS"
-          },
           "facilityCode": {
             "maxLength": 6,
             "pattern": "^\\S(?:.*\\S)?$",
@@ -2220,40 +2673,30 @@
             ]
           }
         },
-        "description": "An interface used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
+        "description": "An object used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
       },
-      "UNLocationLocation": {
-        "title": "UNLocation Location",
+      "GeoCoordinate": {
+        "title": "Geo Coordinate",
         "required": [
-          "UNLocationCode",
-          "locationType"
+          "latitude",
+          "longitude"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
+          "latitude": {
+            "maxLength": 10,
             "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
+            "description": "Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+            "example": "48.8585500"
           },
-          "locationType": {
-            "maxLength": 4,
+          "longitude": {
+            "maxLength": 11,
             "type": "string",
-            "description": "Discriminator used to identify this as a `UNLocation` location interface.\n",
-            "example": "UNLO"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
-            "example": "NLAMS"
+            "description": "Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+            "example": "2.294492036"
           }
         },
-        "additionalProperties": false,
-        "description": "An interface used to express a location using a `Un Location Code`."
+        "description": "An object used to express a location using `latitude` and `longitude`.\n"
       },
       "CreateBooking": {
         "title": "Create Booking",
@@ -3963,7 +4406,7 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `CSI` (Customer shipment ID)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `AKG` (Vehicle Identification Number)\n- `AEF` (Customer Load Reference)\n",
             "example": "CR"
           },
           "value": {
@@ -3986,7 +4429,7 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer's Reference)\n- `ECR` (Empty container release reference)\n- `AKG` (Vehicle Identification Number)\n- `AEF` (Customer Load Reference)\n",
             "example": "CR"
           },
           "value": {
@@ -4007,35 +4450,7 @@
         "type": "object",
         "properties": {
           "location": {
-            "title": "Location",
-            "type": "object",
-            "description": "General purpose object to capture the location in the `ShipmentLocation`.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
-            "example": {
-              "locationName": "CMP Container Terminal Copenhagen",
-              "locationType": "FACI",
-              "UNLocationCode": "DKCPH",
-              "facilityCode": "CMPDK",
-              "facilityCodeListProvider": "SMDG"
-            },
-            "discriminator": {
-              "propertyName": "locationType",
-              "mapping": {
-                "ADDR": "#/components/schemas/AddressLocation",
-                "FACI": "#/components/schemas/FacilityLocation",
-                "UNLO": "#/components/schemas/UNLocationLocation"
-              }
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AddressLocation"
-              },
-              {
-                "$ref": "#/components/schemas/FacilityLocation"
-              },
-              {
-                "$ref": "#/components/schemas/UNLocationLocation"
-              }
-            ]
+            "$ref": "#/components/schemas/Location"
           },
           "locationTypeCode": {
             "maxLength": 3,
@@ -4045,6 +4460,45 @@
           }
         },
         "description": "Maps the relationship between `Shipment` and `Location`, e.g., the `Place of Receipt` and the `Place of Delivery` for a specific shipment. This is a reusable object between `Booking` and `Transport Document`\n"
+      },
+      "Location": {
+        "title": "Location",
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "The location can be specified using **any** of the nested structures:\n- `address` (used to specify the location via an Address)\n- `UNLocationCode`\n- `facility` (used to specify a location using a `facilityCode` and a `facilityCodeListProvider`)\n- `geoCoordinate` (used to specify a location using `latitude` and `longitude`)\n\nIt is expected that if a location is specified in multiple ways (both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
+        "example": {
+          "locationName": "CMP Container Terminal Copenhagen",
+          "UNLocationCode": "DKCPH",
+          "facility": {
+            "facilityCode": "CMPDK",
+            "facilityCodeListProvider": "SMDG"
+          }
+        }
       },
       "RequestedEquipment": {
         "title": "Requested Equipment",
@@ -4067,6 +4521,15 @@
             "description": "Number of requested equipment units.\n",
             "format": "int32",
             "example": 3
+          },
+          "emptyContainerPositioningDateTime": {
+            "type": "string",
+            "description": "The date and time requested by the shipper for the positioning of the empty container(s) at the `Empty Container Positioning Location` (ECP), if provided, or the `Place of Receipt` (PRE) if ECP location is not provided.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = SD`).\n",
+            "format": "date-time",
+            "example": "2024-07-05T09:03:00-02:00"
+          },
+          "emptyContainerPositioningLocation": {
+            "$ref": "#/components/schemas/EmptyContainerPositioningLocation"
           },
           "equipmentReferences": {
             "type": "array",
@@ -4140,6 +4603,15 @@
             "description": "Number of requested equipment units.\n",
             "format": "int32",
             "example": 3
+          },
+          "emptyContainerPositioningDateTime": {
+            "type": "string",
+            "description": "The date and time requested by the shipper for the positioning of the empty container(s) at the `Empty Container Positioning Location` (ECP), if provided, or the `Place of Receipt` (PRE) if ECP location is not provided.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = SD`).\n",
+            "format": "date-time",
+            "example": "2024-07-05T09:03:00-02:00"
+          },
+          "emptyContainerPositioningLocation": {
+            "$ref": "#/components/schemas/EmptyContainerPositioningLocation"
           },
           "equipmentReferences": {
             "type": "array",
@@ -4236,6 +4708,37 @@
             "type": "boolean",
             "description": "Indicates whether the container is shipper owned (`SOC`).\n",
             "example": false
+          }
+        }
+      },
+      "EmptyContainerPositioningLocation": {
+        "title": "Empty Container Positioning Location",
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Shanghai Shengdong International Container Terminal"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture the `Empty Container Positioning Location`.\n\nThe location of the customer facility where the empty container(s) will be loaded. If multiple `ECP` locations are provided, all locations must be within the same city.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = SD`).\n\nThe location can be specified in **any** of the following ways: `Address`, `Facility` or a `GeoCoordinate`.\n",
+        "example": {
+          "locationName": "Shanghai Shengdong International Container Terminal",
+          "UNLocationCode": "CNSGH",
+          "facility": {
+            "facilityCode": "SHENG",
+            "facilityCodeListProvider": "SMDG"
           }
         }
       },
@@ -4831,6 +5334,15 @@
             "description": "Number of confirmed equipment units\n",
             "format": "int32",
             "example": 3
+          },
+          "estimatedEmptyContainerPositioningDateTime": {
+            "type": "string",
+            "description": "The estimated date and time for the positioning of the empty container(s) at the `Empty Container Positioning Location` (ECP), if provided, or the `Place of Receipt` (PRE) if ECP location is not provided.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = SD`).\n",
+            "format": "date-time",
+            "example": "2024-07-05T09:03:00-02:00"
+          },
+          "emptyContainerPositioningLocation": {
+            "$ref": "#/components/schemas/EmptyContainerPositioningLocation"
           }
         },
         "description": "The confirmed equipments for the booking\n"
@@ -4953,64 +5465,74 @@
       "LoadLocation": {
         "title": "Load Location",
         "type": "object",
-        "description": "General purpose object to capture the `Load Location`.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture the `Load Location`.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Shanghai Shengdong International Container Terminal",
-          "locationType": "FACI",
           "UNLocationCode": "CNSGH",
-          "facilityCode": "SHENG",
-          "facilityCodeListProvider": "SMDG"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
+          "facility": {
+            "facilityCode": "SHENG",
+            "facilityCodeListProvider": "SMDG"
           }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          }
-        ]
+        }
       },
       "DischargeLocation": {
         "title": "Discharge Location",
         "type": "object",
-        "description": "General purpose object to capture the `Discharge Location`.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture the `Discharge Location`.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Transnet Port Terminals Cape Town",
-          "locationType": "FACI",
           "UNLocationCode": "ZACPT",
-          "facilityCode": "TNCT",
-          "facilityCodeListProvider": "SMDG"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
+          "facility": {
+            "facilityCode": "TNCT",
+            "facilityCodeListProvider": "SMDG"
           }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          }
-        ]
+        }
       },
       "ShipmentCutOffTime": {
         "title": "Shipment Cut-Off Time",
@@ -5175,6 +5697,47 @@
             }
           }
         ]
+      },
+      "BookingNotification_data": {
+        "required": [
+          "bookingStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "bookingStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the `Booking`. Possible values are:\n\n- `RECEIVED` (Booking request has been received)\n- `PENDING UPDATE` (An update is required to the Booking)\n- `UPDATE RECEIVED` (An update has been received and is awaiting to be processed)\n- `CONFIRMED` (Booking has been Confirmed)\n- `PENDING AMENDMENT` (An amendment is required to the Booking)\n- `REJECTED` (Booking discontinued by carrier before it has been Confirmed)\n- `DECLINED` (Booking discontinued by carrier after it has been Confirmed)\n- `CANCELLED` (Booking discontinued by consumer)\n- `COMPLETED` (The Transport Document this Booking is connected to has been Surrendered for Delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/bookingstatuses.csv).\n",
+            "example": "RECEIVED"
+          },
+          "amendedBookingStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this property is empty. Possible values are:\n\n- `AMENDMENT RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT CANCELLED` (Amendment discontinued by consumer)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/bookingstatuses.csv).\n",
+            "example": "AMENDMENT RECEIVED"
+          },
+          "carrierBookingRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
+            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
+          },
+          "carrierBookingReference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
+            "example": "ABC709951"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "This property can be used to explain `bookingStatus`.\n",
+            "example": "Rejected because of strike..."
+          }
+        },
+        "description": "`Booking` specific properties for the `Notification`\n"
       },
       "Origin Charges Payment Term": {
         "title": "Origin Charges Payment Term",

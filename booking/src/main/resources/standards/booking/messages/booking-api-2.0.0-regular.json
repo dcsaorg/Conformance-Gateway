@@ -53,15 +53,35 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
-        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER",
+        "address": {
+          "name": "Port of Rotterdam",
+          "street": "Europoort Rotterdam",
+          "postCode": "3198 LK",
+          "city": "Rotterdam",
+          "countryCode": "NL"
+        },
+        "geoCoordinate": {
+          "latitude": "53.551086",
+          "longitude": "9.993682"
+        }
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "UNLO",
-        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
+        "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER",
+        "address": {
+          "name": "Port of Hamburg",
+          "street": " Neuer Wandrahm 4",
+          "postCode": "20457",
+          "city": "Hamburg",
+          "countryCode": "DE"
+        },
+        "geoCoordinate": {
+          "latitude": "51.907619",
+          "longitude": "4.547350"
+        }
       },
       "locationTypeCode": "POD"
     }

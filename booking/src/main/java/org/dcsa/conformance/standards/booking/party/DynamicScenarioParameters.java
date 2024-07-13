@@ -17,7 +17,8 @@ public record DynamicScenarioParameters(
     String carrierBookingReference,
     BookingState bookingStatus,
     BookingState amendedBookingStatus,
-    JsonNode booking
+    JsonNode booking,
+    JsonNode updatedBooking
     ) {
   public ObjectNode toJson() {
     ObjectNode dspNode = new ObjectMapper().createObjectNode();
@@ -36,6 +37,9 @@ public record DynamicScenarioParameters(
     }
     if (booking != null) {
       dspNode.replace("booking", booking);
+    }
+    if (updatedBooking != null) {
+      dspNode.replace("updatedBooking", updatedBooking);
     }
     return dspNode;
   }
@@ -62,7 +66,8 @@ public record DynamicScenarioParameters(
         dspNode.path("carrierBookingReference").asText(null),
         bookingState(dspNode.path("bookingStatus").asText(null)),
         bookingState(dspNode.path("amendedBookingStatus").asText(null)),
-        dspNode.path("booking")
+        dspNode.path("booking"),
+        dspNode.path("updatedBooking")
       );
   }
 }

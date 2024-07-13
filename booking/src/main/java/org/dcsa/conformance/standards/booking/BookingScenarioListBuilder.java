@@ -109,7 +109,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                             .then(
                                                                 shipper_GetBooking(
                                                                         CONFIRMED,
-                                                                        AMENDMENT_RECEIVED)
+                                                                        AMENDMENT_RECEIVED,true)
                                                                     .thenEither(
                                                                         uc8a_carrier_approveBookingAmendment()
                                                                             .then(
@@ -319,7 +319,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
                 uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
       case AMENDMENT_RECEIVED -> then(
-        shipper_GetBooking(originalBookingState,AMENDMENT_RECEIVED)
+        shipper_GetBooking(originalBookingState,AMENDMENT_RECEIVED,true)
           .thenEither(
             uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
             uc8a_carrier_approveBookingAmendment().thenAllPathsFrom(AMENDMENT_CONFIRMED,originalBookingState),

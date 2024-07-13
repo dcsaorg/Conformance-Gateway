@@ -1,13 +1,13 @@
 <mat-spinner *ngIf="!sandbox"></mat-spinner>
 
 <div *ngIf="sandbox">
-    <div class="pageTitle">Sandbox: {{sandbox.name}}</div>
+    <div class="paragraph">Sandbox: {{sandbox.name}}</div>
     <div class="paragraph">
         <a [routerLink]="'/sandbox/' + sandbox!.id">Back to the sandbox overview</a>
     </div>
 </div>
 
-<div *ngIf="scenario" class="pageSubtitle">Scenario: {{scenario.name}}</div>
+<div *ngIf="scenario" class="paragraph">Scenario: {{scenario.name}}</div>
 
 <div *ngIf="scenarioStatus">
     <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
@@ -20,7 +20,7 @@
         </div>
 
         <div *ngIf="scenarioStatus.nextActions">
-            <div class="paragraph">Next actions: {{scenarioStatus.nextActions}}</div>
+            <div class="pageTitle">Next actions: <b>{{scenarioStatus.nextActions}}</b></div>
 
             <div *ngIf="scenarioStatus.promptText">
                 <div class="paragraph">{{scenarioStatus.promptText}}</div>
@@ -65,7 +65,7 @@
                       mat-raised-button
                       color="primary"
                       (click)="completeCurrentAction()"
-                    >Next action</button>
+                    >Complete action</button>
                 </div>
             </div>
         </div>

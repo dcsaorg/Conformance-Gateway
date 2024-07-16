@@ -75,9 +75,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Shoes - black, 400 boxes",
         null,
-        "Fibreboard boxes",
-        "ServiceContractReference-1234",
-        "QuotationReference-1234"
+        "Fibreboard boxes"
       );
       case ACTIVE_REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -91,9 +89,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Dairy products",
         null,
-        "Bottles",
-        "ServiceContractReference-1234AR",
-        "QuotationReference-1234AR"
+        "Bottles"
       );
       case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -107,9 +103,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Non alcoholic beverages, 40,000 cans",
         null,
-        "Bottles",
-        "ServiceContractReference-1234NOR",
-        "QuotationReference-1234NOR"
+        "Bottles"
       );
       case DG -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -123,9 +117,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
         null,
-        null,
-        "ServiceContractReference-1234DG",
-        "QuotationReference-1234DG"
+        null
       );
       case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -139,9 +131,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "732391",
         "Tableware and kitchenware",
         "Kitchen pots and pans",
-        "Fibreboard boxes",
-        "SCR-1234-RG2C2U1E",
-        "QR-1234-RG2C2U1E"
+        "Fibreboard boxes"
       );
       case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -155,9 +145,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "732391",
         "Tableware and kitchenware",
         "Kitchen pots and pans",
-        "Fibreboard boxes",
-        "SCR-1234-RG2C2U2E",
-        "QR-1234-RG2C2U2E"
+        "Fibreboard boxes"
       );
       case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
         "Booking Reference",
@@ -170,9 +158,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Tableware and kitchenware",
         null,
-        "Fibreboard boxes",
-        "SCR-1234-RG-SOC-REFERENCES",
-        "QR-1234-RG-SOC-REFERENCES"
+        "Fibreboard boxes"
       );
     };
     return csp.toJson();

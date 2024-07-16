@@ -46,8 +46,6 @@ public class CarrierShippingInstructions {
     "destinationChargesPaymentTermCode",
     "isElectronic",
     "isToOrder",
-    "serviceContractReference",
-    "contractQuotationReference",
     "numberOfCopiesWithCharges",
     "numberOfCopiesWithoutCharges",
     "numberOfOriginalsWithCharges",
@@ -171,6 +169,7 @@ public class CarrierShippingInstructions {
     initialFieldValue("cargoMovementTypeAtDestination", "FCL"),
     initialFieldValue("receiptTypeAtOrigin", "CY"),
     initialFieldValue("deliveryTypeAtDestination", "CY"),
+    initialFieldValue("serviceContractReference", "Ref-123"),
     initialFieldValue(
         "shippedOnBoardDate",
         (o, a, v) -> {

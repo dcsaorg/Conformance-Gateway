@@ -262,11 +262,6 @@ public class EBLChecks {
       return issues;
     });
 
-  private static final JsonRebaseableContentCheck VALIDATE_CONTRACT_REFERENCE = JsonAttribute.atLeastOneOf(
-      JsonPointer.compile("/contractQuotationReference"),
-      JsonPointer.compile("/serviceContractReference")
-  );
-
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
@@ -724,17 +719,6 @@ public class EBLChecks {
     ));
 
     checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'serviceContractReference' is used",
-      "serviceContractReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
-    ));
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
-      "contractQuotationReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
-    ));
-
-    checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'invoicePayableAt' location is used",
       SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
       delayedValue(cspSupplier, CarrierScenarioParameters::invoicePayableAtUNLocationCode)
@@ -1039,7 +1023,6 @@ public class EBLChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.add(VALIDATE_CONTRACT_REFERENCE);
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
@@ -1178,7 +1161,6 @@ public class EBLChecks {
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
     jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    jsonContentChecks.add(VALIDATE_CONTRACT_REFERENCE);
   }
 
   public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, String eblStandardVersion, Supplier<String> tdrReferenceSupplier) {

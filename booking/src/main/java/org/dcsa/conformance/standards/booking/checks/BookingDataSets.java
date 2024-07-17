@@ -24,7 +24,7 @@ public class BookingDataSets {
   public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v2.0.0.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
   public static final KeywordDataset ISO_4217_CURRENCY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/currency-codes-iso-4217.csv", "CurrencyCode");
 
-  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "Customs Reference Type Code");
+  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "General Reference Type Code");
 
   public static final KeywordDataset ISO_6346_CONTAINER_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/iso-6346-container-codes.csv", "code");
 

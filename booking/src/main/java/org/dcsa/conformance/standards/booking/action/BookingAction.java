@@ -35,7 +35,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null,null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -64,6 +64,11 @@ public abstract class BookingAction extends ConformanceAction {
       dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
     }
   }
+
+  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
+    return dynamicScenarioParameters;
+  }
+
 
   protected BookingAction getPreviousBookingAction() {
     return (BookingAction) previousAction;
@@ -122,6 +127,7 @@ public abstract class BookingAction extends ConformanceAction {
     updatedDsp = updateIfNotNull(updatedDsp, newBookingStatus, updatedDsp::withBookingStatus);
     updatedDsp = updateIfNotNull(updatedDsp, newAmendedBookingStatus, updatedDsp::withAmendedBookingStatus);
 
+    updatedDsp = updateDSPFromBookingAction(exchange, updatedDsp);
 
     if (!dsp.equals(updatedDsp)) {
       dspReference.set(updatedDsp);

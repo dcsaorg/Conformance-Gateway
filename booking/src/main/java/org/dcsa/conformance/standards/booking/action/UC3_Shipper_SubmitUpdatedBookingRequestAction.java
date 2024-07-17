@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 @Getter
 @Slf4j
@@ -41,6 +42,12 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     return jsonNode;
+  }
+
+  @Override
+  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
+    var body = exchange.getRequest().message().body().getJsonBody();
+    return dynamicScenarioParameters.withBooking(body);
   }
 
   @Override

@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
+import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 import java.util.stream.Stream;
 
@@ -43,6 +45,12 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
     jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
+  }
+
+  @Override
+  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
+    var body = exchange.getRequest().message().body().getJsonBody();
+    return dynamicScenarioParameters.withUpdatedBooking(body);
   }
 
   @Override

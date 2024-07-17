@@ -51,7 +51,7 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
 
   @Override
   public Set<String> validate(JsonNode nodeToValidate, String contextPath) {
-    var left = baseNode.get();
+      var left = baseNode.get();
     var right = nodeToValidate;
     if (left == null) {
       return Set.of();

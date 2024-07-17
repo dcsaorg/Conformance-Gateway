@@ -178,9 +178,6 @@ public class BookingShipper extends ConformanceParty {
     addOperatorLogEntry("Sent a invalid booking action request of '%s'".formatted(cbrr));
   }
 
-
-
-
   private void sendUpdatedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));
     String reference = getBookingReference(actionPrompt);

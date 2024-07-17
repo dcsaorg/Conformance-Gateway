@@ -292,9 +292,35 @@ public class ConformanceOrchestrator implements StatefulEntity {
     }
 
     if (nextAction.handleExchange(exchange)) {
-      currentScenario.popNextAction();
-      notifyNextActionParty();
+      boolean autoAdvance =
+          Arrays.stream(sandboxConfiguration.getCounterparts())
+              .noneMatch(CounterpartConfiguration::isInManualMode);
+      if (autoAdvance) {
+        currentScenario.popNextAction();
+        notifyNextActionParty();
+      }
     }
+  }
+
+  public void completeCurrentAction() {
+    log.info("ConformanceOrchestrator.completeCurrentAction()");
+
+    if (currentScenarioId == null) {
+      log.info("Ignoring request to complete the current action: there is no active scenario");
+      return;
+    }
+
+    ConformanceScenario currentScenario = _getCurrentScenario();
+    ConformanceAction nextAction = currentScenario.peekNextAction();
+    if (nextAction == null) {
+      log.info(
+          "Ignoring request to complete the current action: the currently active scenario '%s' has no next action"
+              .formatted(currentScenario.toString()));
+      return;
+    }
+
+    currentScenario.popNextAction();
+    notifyNextActionParty();
   }
 
   public String generateReport(Set<String> roleNames, boolean printable) {

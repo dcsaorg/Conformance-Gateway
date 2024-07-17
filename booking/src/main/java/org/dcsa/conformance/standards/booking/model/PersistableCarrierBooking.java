@@ -273,6 +273,8 @@ public class PersistableCarrierBooking {
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
+      ensureRequestedChangesExist(newBookingData);
+      ensureConfirmedBookingHasCarrierFields(newBookingData);
       setAmendedBooking(newBookingData);
     } else {
       setBooking(newBookingData);
@@ -282,6 +284,15 @@ public class PersistableCarrierBooking {
       removeRequestedChanges();
     }
     setReason(null);
+  }
+
+  private void ensureRequestedChangesExist(ObjectNode booking) {
+    booking
+      .putArray("requestedChanges")
+      .addObject()
+      .put(
+        "message",
+        "Please perform the changes requested by the Conformance orchestrator");
   }
 
   public BookingState getOriginalBookingState() {

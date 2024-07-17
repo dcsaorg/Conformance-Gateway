@@ -99,6 +99,13 @@ export class ConformanceService {
     });
   }
 
+  async completeCurrentAction(sandboxId: string): Promise<void> {
+    await this.apiService.call({
+      operation: "completeCurrentAction",
+      sandboxId,
+    });
+  }
+
   async createSandbox(
     standardName: string,
     versionNumber: string,

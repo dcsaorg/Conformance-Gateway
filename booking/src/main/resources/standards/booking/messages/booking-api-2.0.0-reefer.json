@@ -31,7 +31,19 @@
       "isNonOperatingReefer": false,
       "activeReeferSettings": {
         "temperatureSetpoint": -18,
-        "temperatureUnit": "CEL"
+        "temperatureUnit": "CEL",
+        "o2Setpoint": 75,
+        "co2Setpoint": 15,
+        "humiditySetpoint": 60,
+        "airExchangeSetpoint": 15,
+        "airExchangeUnit": "MQH",
+        "isVentilationOpen": false,
+        "isDrainholesOpen":  false,
+        "isBulbMode": false,
+        "isColdTreatmentRequired": false,
+        "isControlledAtmosphereRequired": false,
+        "isPreCoolingRequired": false,
+        "isGeneratorSetRequired": false
       }
     }
   ],

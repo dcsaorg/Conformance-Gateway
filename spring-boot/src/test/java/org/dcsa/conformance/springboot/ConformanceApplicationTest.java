@@ -42,6 +42,7 @@ class ConformanceApplicationTest {
     "tnt-220-conformance-auto-all-in-one"
   })
   void testEachSuite(final String sandboxId) throws InterruptedException {
+    log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed
     String rootURL = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
     Assumptions.assumeTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
@@ -82,7 +83,7 @@ class ConformanceApplicationTest {
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
     assertEquals("{\"scenariosLeft\":0}", status, "Scenario did not finish. Original start status: " + startStatus);
-    log.info("Original start status: {}", startStatus);
+    log.info("Original start status of sandboxId: {} was: {}", sandboxId, startStatus);
   }
 
   private String getAppURL(String scenarioID, String urlPath) {

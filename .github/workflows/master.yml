@@ -17,7 +17,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           path: Conformance-Gateway
           submodules: recursive
@@ -29,39 +30,14 @@ jobs:
           java-version: 21
           cache: 'maven'
 
-      - name: Build Conformance-Gateway
+      - name: Print commit sha
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "sha: $COMMIT_SHA"
+
+      - name: Build and test Conformance-Gateway
         run: |
           cd Conformance-Gateway
-          mvn install -DskipTests -U -B
-
-      - name: Run the app
-        run: |
-          ls
-          cd Conformance-Gateway && docker-compose -f docker-compose.yml up -d -V --build
-
-      - name: Fetch Backend Status
-        run: |
-          sleep 10
-          status=$(curl -s http://localhost:8080/actuator/health | jq -r '.status')
-          retries=12
-
-          while [[ "$status" != "UP" ]] && [[ $retries -gt 0 ]]; do
-            echo "Status is '$status' - waiting 5 secs ($retries retries left)"
-            sleep 5
-            retries=$((retries - 1))
-            status=$(curl -s http://localhost:8080/actuator/health | jq -r '.status')
-          done
-
-          echo "Final status is '$status'"
-          if [[ "$status" != "UP" ]]; then
-            curl -v http://localhost:8080/actuator/health || :
-            exit 1
-          fi
-
-          echo "::set-output name=STATUS::$status"
-        id: healthcheck
-
-      - name: Confirm microservice status
-        if: ${{ steps.healthcheck.outputs.STATUS == 'UP' }}
-        run: |
-          echo "The Conformance-Gateway service is UP."
+          mvn package -U -B -V

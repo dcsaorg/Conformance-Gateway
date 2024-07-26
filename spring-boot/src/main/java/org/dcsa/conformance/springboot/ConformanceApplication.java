@@ -1,21 +1,8 @@
 package org.dcsa.conformance.springboot;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.OutputStreamWriter;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +10,11 @@ import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.MemorySortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.sandbox.*;
+import org.dcsa.conformance.sandbox.ConformanceAccessChecker;
+import org.dcsa.conformance.sandbox.ConformanceSandbox;
+import org.dcsa.conformance.sandbox.ConformanceWebRequest;
+import org.dcsa.conformance.sandbox.ConformanceWebResponse;
+import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsLockingMap;
@@ -31,20 +22,55 @@ import org.dcsa.conformance.sandbox.state.DynamoDbSortedPartitionsNonLockingMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
+import software.amazon.awssdk.services.dynamodb.model.BillingMode;
+import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
+import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput;
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
+
+import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 @RestController
 @SpringBootApplication
 @ConfigurationPropertiesScan("org.dcsa.conformance.springboot")
 public class ConformanceApplication {
+  private static final String USER_ID = "spring-boot-env";
   private final ConformanceConfiguration conformanceConfiguration;
   private final ConformancePersistenceProvider persistenceProvider;
+  final ConformanceWebuiHandler webuiHandler;
 
   ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
   @Getter
@@ -54,7 +80,7 @@ public class ConformanceApplication {
       new ConformanceAccessChecker() {
         @Override
         public String getUserEnvironmentId(String userId) {
-          return "spring-boot-env";
+          return USER_ID;
         }
 
         @Override
@@ -193,29 +219,25 @@ public class ConformanceApplication {
                     ConformanceSandbox.create(
                         persistenceProvider,
                         deferredSandboxTaskConsumer,
-                        "spring-boot-env",
+                        USER_ID,
                         SandboxConfiguration.fromJsonNode(jsonSandboxConfigurationTemplate));
                   });
         });
+    webuiHandler = new ConformanceWebuiHandler(accessChecker, "http://localhost:8080",
+      persistenceProvider, deferredSandboxTaskConsumer);
   }
 
   @CrossOrigin(origins = "http://localhost:4200")
   @RequestMapping(value = "/conformance/webui/**")
-  public void handleWebuiRequest(
-      HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+  public void handleWebuiRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+    String requestBody = _getRequestBody(servletRequest);
+    log.info("Handling webui request: {}", requestBody);
     _writeResponse(
-        servletResponse,
-        200,
-        "application/json;charset=utf-8",
-        Collections.emptyMap(),
-        new ConformanceWebuiHandler(
-                accessChecker,
-                "http://localhost:8080",
-                persistenceProvider,
-                deferredSandboxTaskConsumer)
-            .handleRequest(
-                "spring-boot-env", JsonToolkit.stringToJsonNode(_getRequestBody(servletRequest)))
-            .toPrettyString());
+      servletResponse,
+      200,
+      "application/json;charset=utf-8",
+      Collections.emptyMap(),
+      webuiHandler.handleRequest(USER_ID, JsonToolkit.stringToJsonNode(requestBody)).toPrettyString());
   }
 
   @RequestMapping(value = "/conformance/**")

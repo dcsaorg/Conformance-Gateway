@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,6 +27,8 @@ class ConformanceBasicAPITest {
   @Autowired
   private ConformanceApplication app;
 
+  private static final String SANDBOX_ID = "booking-200-conformance-auto-all-in-one";
+
   @Test
   void shouldReturnDefaultHomepage() throws Exception {
     mockMvc.perform(get("/"))
@@ -33,14 +36,13 @@ class ConformanceBasicAPITest {
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
       .andExpect(content().string(containsString("DCSA Conformance")))
-      .andExpect(content().string(containsString("booking-200-conformance-auto-all-in-one")))
+      .andExpect(content().string(containsString(SANDBOX_ID)))
       .andExpect(content().string(containsString("tnt-220-conformance-auto-all-in-one")));
   }
 
   @Test
   void shouldStartBookingScenario() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("{}")));
@@ -48,10 +50,9 @@ class ConformanceBasicAPITest {
 
   @Test
   void shouldReturnStatus() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset"))).andExpect(status().isOk());
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset"))).andExpect(status().isOk());
 
-    mockMvc.perform(get(getAppURL(sandboxId, "status")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "status")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("{\"scenariosLeft\":14}")));
@@ -59,10 +60,9 @@ class ConformanceBasicAPITest {
 
   @Test
   void shouldReturnReport() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset"))).andExpect(status().isOk());
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset"))).andExpect(status().isOk());
 
-    mockMvc.perform(get(getAppURL(sandboxId, "report")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "report")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
       .andExpect(content().string(containsString("Conformance Report")))
@@ -72,17 +72,16 @@ class ConformanceBasicAPITest {
 
   @Test
   void shouldReturnPrintableReport() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset"))).andExpect(status().isOk());
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset"))).andExpect(status().isOk());
 
-    mockMvc.perform(get(getAppURL(sandboxId, "printableReport")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "printableReport")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
       .andExpect(content().string(containsString("Conformance Report")))
       .andExpect(content().string(containsString("Carrier conformance")))
       .andExpect(content().string(containsString("Shipper conformance")));
 
-    mockMvc.perform(get(getAppURL(sandboxId, "party/Carrier1/prompt/json")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "party/Carrier1/prompt/json")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("SupplyCSP [REGULAR]")));
@@ -90,10 +89,9 @@ class ConformanceBasicAPITest {
 
   @Test
   void shouldReturnCarrier1Prompt() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset"))).andExpect(status().isOk());
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset"))).andExpect(status().isOk());
 
-    mockMvc.perform(get(getAppURL(sandboxId, "party/Carrier1/prompt/json")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "party/Carrier1/prompt/json")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("SupplyCSP [REGULAR]")));
@@ -101,13 +99,24 @@ class ConformanceBasicAPITest {
 
   @Test
   void shouldReturnPlatform1Prompt() throws Exception {
-    String sandboxId = "booking-200-conformance-auto-all-in-one";
-    mockMvc.perform(get(getAppURL(sandboxId, "reset"))).andExpect(status().isOk());
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "reset"))).andExpect(status().isOk());
 
-    mockMvc.perform(get(getAppURL(sandboxId, "party/Platform1/prompt/json")))
+    mockMvc.perform(get(getAppURL(SANDBOX_ID, "party/Platform1/prompt/json")))
       .andExpect(status().isOk())
       .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(content().string(containsString("[ ]")));
+  }
+
+  @Test
+  void shouldReturnWebUIHandlerResponse() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders
+        .post("/conformance/webui/")
+        .content("{\"operation\":\"getAllSandboxes\"}")
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(content().string(containsString("auto-all-in-one")));
   }
 
   private String getAppURL(String scenarioID, String urlPath) {

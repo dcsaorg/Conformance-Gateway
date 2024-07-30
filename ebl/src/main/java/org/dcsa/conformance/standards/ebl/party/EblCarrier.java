@@ -866,7 +866,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.transport-document-notification";
+      return "org.dcsa.transport-document";
     }
 
     @Override
@@ -888,7 +888,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.shipping-instructions-notification";
+      return "org.dcsa.shipping-instructions";
     }
 
     @Override

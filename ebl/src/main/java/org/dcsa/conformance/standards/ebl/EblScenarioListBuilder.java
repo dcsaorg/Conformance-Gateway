@@ -39,7 +39,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
 
   private static final String EBL_API = "api";
 
-  private static final String EBL_NOTIFICATIONS_API = "notification";
+  private static final String EBL_NOTIFICATIONS_API = "api";
   private static final String GET_EBL_SCHEMA_NAME = "ShippingInstructions";
   private static final String GET_TD_SCHEMA_NAME = "TransportDocument";
   private static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";

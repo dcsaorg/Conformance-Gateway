@@ -52,13 +52,13 @@ public class EBLChecks {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
-  private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
+  private static final JsonRebaseableContentCheck TLR_TYPES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' against 'taxAndLegalReferences'",
     (mav) -> {
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
+      mav.submitAllMatching("issuingParty.taxLegalReferences.*.type");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.type");
     },
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.LTR_TYPES)
    );
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -520,7 +520,7 @@ public class EBLChecks {
     VOLUME_IMPLIES_VOLUME_UNIT,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
@@ -645,7 +645,7 @@ public class EBLChecks {
         RATIO_VOLUME
       )
     ),
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE,
     TD_UN_LOCATION_CODES_VALID
   );

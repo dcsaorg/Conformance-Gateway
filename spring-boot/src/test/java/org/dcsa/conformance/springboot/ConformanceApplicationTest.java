@@ -32,9 +32,9 @@ class ConformanceApplicationTest {
     "ebl-300-conformance-si-only-auto-all-in-one",
     "ebl-300-conformance-td-only-auto-all-in-one",
 //    "ebl-300-reference-implementation-auto-all-in-one", // Perhaps needs fix: STNG-128
-    "eblissuance-200-conformance-auto-all-in-one",
+//    "eblissuance-200-conformance-auto-all-in-one", // To be removed after DT-1442
     "eblissuance-300-conformance-auto-all-in-one",
-    "eblsurrender-200-conformance-auto-all-in-one",
+//    "eblsurrender-200-conformance-auto-all-in-one", // To be removed after DT-1442
     "eblsurrender-300-conformance-auto-all-in-one",
     "jit-120-conformance-auto-all-in-one",
     "ovs-300-conformance-auto-all-in-one",

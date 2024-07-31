@@ -164,23 +164,21 @@ public class EBLChecks {
       return Set.of();
   });
 
-  private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
+  private static final JsonRebaseableContentCheck AMF_TYPE_CODES_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'manifestTypeCode' in 'advanceManifestFilings' against data set",
     ALL_AMF,
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+    JsonAttribute.path("manifestTypeCode", JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.AMF_TYPE_CODES))
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
-    mav.submitAllMatching("customsReferences.*");
-    mav.submitAllMatching("consignmentItems.*.customsReferences.*");
-    mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*");
-    mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*");
-  };
-
   private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
-    ALL_CUSTOMS_REFERENCES,
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
+    "Validate 'type' against known customs reference type codes",
+    (mav) -> {
+      mav.submitAllMatching("customsReferences.*.type");
+      mav.submitAllMatching("consignmentItems.*.customsReferences.*.type");
+      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.type");
+      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.type");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.CUSTOMS_REFERENCE_TYPE_CODES)
   );
 
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -512,7 +510,7 @@ public class EBLChecks {
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_TYPE_CODES_VALIDATION,
     AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
@@ -612,7 +610,7 @@ public class EBLChecks {
     COUNTRY_CODE_VALIDATIONS,
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_TYPE_CODES_VALIDATION,
     AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
     VOLUME_IMPLIES_VOLUME_UNIT,
     OUTER_PACKAGING_CODE_IS_VALID,

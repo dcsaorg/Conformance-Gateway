@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -629,6 +630,14 @@ public class EBLChecks {
         "volumeUnit",
         RATIO_VOLUME
       )
+    ),
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate mode of transport type",
+      mav -> {
+        mav.submitAllMatching("transports.preCarriageBy");
+        mav.submitAllMatching("transports.onCarriageBy");
+      },
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
     ),
     TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE,

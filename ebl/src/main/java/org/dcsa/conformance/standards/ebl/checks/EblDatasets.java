@@ -54,6 +54,13 @@ public class EblDatasets {
     "Processed",
     "Treated and certified"
   );
+  public static final KeywordDataset MODE_OF_TRANSPORT = KeywordDataset.staticDataset(
+    "VESSEL",
+    "RAIL",
+    "TRUCK",
+    "BARGE",
+    "MULTIMODAL"
+  );
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

@@ -142,6 +142,12 @@ public class CarrierShippingInstructions {
     });
   }
 
+  private static void ensureTrue(boolean isTrue, String msg) {
+    if (!isTrue) {
+      throw new IllegalStateException(msg);
+    }
+  }
+
   private record TDField(
     String attribute,
     TriConsumer<ObjectNode, String, String> initializer,
@@ -194,9 +200,15 @@ public class CarrierShippingInstructions {
         "carrierCode",
         (o, a, v) -> {
           var identifyingPartyCode = o.path("issuingParty").path("identifyingCodes").path(0);
-          assert Objects.equals(
-              identifyingPartyCode.path("DCSAResponsibleAgencyCode").asText(), "SMDG");
-          assert Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "LCL");
+          ensureTrue(
+            Objects.equals(
+              identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
+            "Unexpected 'codeListProvider' for issuingParty"
+          );
+          ensureTrue(
+            Objects.equals(identifyingPartyCode.path("codeListName").asText(), "LCL"),
+            "Unexpected 'codeListName' for issuingParty"
+          );
           var result = identifyingPartyCode.path("partyCode");
           assert result.isTextual();
           o.set(a, result);

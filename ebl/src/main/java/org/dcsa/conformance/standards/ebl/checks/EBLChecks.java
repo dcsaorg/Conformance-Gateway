@@ -150,29 +150,10 @@ public class EBLChecks {
     )
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
-  private static final JsonRebaseableContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate conditionally mandatory 'selfFilerCode' in 'advanceManifestFilings'",
-    ALL_AMF,
-    (nodeToValidate, contextPath) -> {
-      if (!nodeToValidate.path("advanceManifestFilingsHouseBLPerformedBy").asText("").equals("SHIPPER")
-      || nodeToValidate.path("selfFilerCode").isTextual()) {
-        return Set.of();
-      }
-      var country = nodeToValidate.path("countryCode").asText("");
-      var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
-      var combined = country + "/" + manifestTypeCode;
-      if (EblDatasets.AMF_CC_MTC_REQUIRES_SELF_FILER_CODE.contains(combined)) {
-        return Set.of(
-          "The 'selfFilerCode' must be provided in '%s' due to the combination of 'advanceManifestFilingsHouseBLPerformedBy', 'countryCode' and 'manifestTypeCode'.".formatted(contextPath)
-        );
-      }
-      return Set.of();
-  });
 
   private static final JsonRebaseableContentCheck AMF_TYPE_CODES_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate 'manifestTypeCode' in 'advanceManifestFilings' against data set",
-    ALL_AMF,
+    (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
     JsonAttribute.path("manifestTypeCode", JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.AMF_TYPE_CODES))
   );
 
@@ -518,7 +499,6 @@ public class EBLChecks {
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
     AMF_TYPE_CODES_VALIDATION,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
     OUTER_PACKAGING_CODE_IS_VALID,
@@ -619,7 +599,6 @@ public class EBLChecks {
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
     AMF_TYPE_CODES_VALIDATION,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
     VOLUME_IMPLIES_VOLUME_UNIT,
     OUTER_PACKAGING_CODE_IS_VALID,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,

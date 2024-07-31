@@ -43,10 +43,6 @@ public class EblDatasets {
 
   public static final KeywordDataset ISO_3166_ALPHA2_COUNTRY_CODES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/country-codes-iso3166-alpha2.csv", "Code");
 
-  public static final KeywordDataset AMF_CC_MTC_REQUIRES_SELF_FILER_CODE = KeywordDataset.staticDataset(
-    "US/ACE",
-    "CA/ACI"
-  );
   public static final KeywordDataset AMF_TYPE_CODES = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/advancemanifestfilings-v%s.csv", "Advance Manifest Filing Type Code");
   public static final KeywordDataset LTR_TYPES = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/taxandlegalreferences-v%s.csv", "Tax and Legal Reference Type Code");
   public static final KeywordDataset CUSTOMS_REFERENCE_TYPE_CODES = KeywordDataset.fromVersionedCSV(EblDatasets.class, "/standards/ebl/datasets/customsreferences-v%s.csv", "Customs Reference Type Code");

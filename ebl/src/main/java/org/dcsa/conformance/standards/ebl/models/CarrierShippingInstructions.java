@@ -235,6 +235,7 @@ public class CarrierShippingInstructions {
           }
           var outerPackaging = ((ObjectNode)cargoItemNode).putObject("outerPackaging");
           outerPackaging.put("description", "Jerrican, steel")
+            .put("woodDeclaration", "Not Applicable")
             .put("imoPackagingCode", "3A1")
             .put("numberOfPackages", 400);
           var dg = outerPackaging.putArray("dangerousGoods").addObject();

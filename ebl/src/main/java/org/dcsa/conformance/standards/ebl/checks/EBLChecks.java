@@ -46,6 +46,12 @@ public class EBLChecks {
     mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
+  public static final JsonRebaseableContentCheck VALID_WOOD_DECLARATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate the 'woodDeclaration' against known dataset",
+    (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.woodDeclaration"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.WOOD_DECLARATION_VALUES)
+  );
+
   private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
     "All reference 'type' fields must be valid",
         ALL_REFERENCE_TYPES,
@@ -504,6 +510,7 @@ public class EBLChecks {
       JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform")),
       JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
     ),
+    VALID_WOOD_DECLARATIONS,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
@@ -551,6 +558,7 @@ public class EBLChecks {
       JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
+    VALID_WOOD_DECLARATIONS,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,

@@ -321,6 +321,18 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
+  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
+    mav.submitAllMatching("customsReferences.*");
+    mav.submitAllMatching("requestedEquipments.*.customsReferences.*");
+    mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*");
+  };
+
+  private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
+    ALL_CUSTOMS_REFERENCES,
+    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.CUSTOMS_REFERENCE_RE_REC_COMBINATIONS, "countryCode", "type")
+  );
+
   private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
     (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
@@ -627,6 +639,7 @@ public class BookingChecks {
     COUNTRY_CODE_VALIDATIONS,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
+    CR_CC_T_COMBINATION_KNOWN,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

@@ -40,6 +40,8 @@ public class BookingDataSets {
 
   public static final KeywordDataset ISO_3166_ALPHA2_COUNTRY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/country-codes-iso3166-alpha2.csv", "Code");
 
+  public static final KeywordDataset CUSTOMS_REFERENCE_RE_REC_COMBINATIONS = KeywordDataset.fromVersionedCSV(BookingDataSets.class, "/standards/booking/datasets/customsreferences-v%s.csv", "/", "Customs Reference Country Code", "Customs Reference Type Code");
+
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {
     var validCodes = new HashSet<>();

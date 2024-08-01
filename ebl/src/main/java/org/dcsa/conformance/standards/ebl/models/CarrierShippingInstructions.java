@@ -270,8 +270,7 @@ public class CarrierShippingInstructions {
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {
-    locationNode.put("locationType", "UNLO")
-      .put("UNLocationCode", unlocationCode);
+    locationNode.put("UNLocationCode", unlocationCode);
   }
 
   private static void addCharge(JsonNode chargesArray) {

@@ -135,7 +135,7 @@
       "portOfDischarge": {
         "UNLocationCode": "DEBRV"
       },
-      "vesselVoyage": [
+      "vesselVoyages": [
         {
           "vesselName": "HMM Algeciras",
           "carrierExportVoyageNumber": "402E"

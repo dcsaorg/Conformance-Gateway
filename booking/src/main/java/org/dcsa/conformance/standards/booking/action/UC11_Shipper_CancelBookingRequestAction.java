@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBookingAction {
+public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
-  public UC11_Shipper_CancelEntireBookingAction(
+  public UC11_Shipper_CancelBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
@@ -51,7 +51,6 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbrr", getDspSupplier().get().carrierBookingRequestReference());
-    jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
   }
 
@@ -61,10 +60,10 @@ public class UC11_Shipper_CancelEntireBookingAction extends StateChangingBooking
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        String cbrr = dsp.carrierBookingRequestReference();
         Stream<ActionCheck> primaryExchangeChecks = Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(reference)),
+            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/%s".formatted(cbrr)),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

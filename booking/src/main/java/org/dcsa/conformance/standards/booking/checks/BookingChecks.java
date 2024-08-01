@@ -340,6 +340,7 @@ public class BookingChecks {
       mav.submitAllMatching("documentParties.serviceContractOwner.address.countryCode");
       mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
+      mav.submitAllMatching("placeOfBLIssue.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );

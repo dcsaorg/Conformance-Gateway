@@ -27,33 +27,6 @@ class EblIssuanceScenarioListBuilder
     threadLocalComponentFactory.set(componentFactory);
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
-    if (componentFactory.getStandardVersion().startsWith("2.")) {
-      // Niels N. and Tom is still debating whether we should invest anymore effort into V2.
-      return Stream.of(
-          Map.entry(
-            "",
-            supplyScenarioParameters(EblType.STRAIGHT_EBL)
-              .thenEither(
-                correctIssuanceRequest()
-                  .thenEither(
-                    issuanceResponseAccepted()
-                      .thenEither(
-                        noAction(),
-                        duplicateIssuanceRequest(),
-                        duplicateIssuanceResponse()),
-                    duplicateIssuanceRequest().then(issuanceResponseAccepted()),
-                    issuanceResponseBlocked()
-                      .then(
-                        correctIssuanceRequest().then(issuanceResponseAccepted())),
-                    issuanceResponseRefused()
-                      .then(
-                        correctIssuanceRequest().then(issuanceResponseAccepted()))),
-                incorrectIssuanceRequest()
-                  .then(correctIssuanceRequest().then(issuanceResponseAccepted())))))
-        .collect(
-          Collectors.toMap(
-            Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-    }
     return Stream.of(
             Map.entry(
                 "",

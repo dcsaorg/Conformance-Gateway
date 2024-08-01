@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -187,12 +188,12 @@ public class EBLChecks {
       mav.submitAllMatching("advancedManifestFilings.*.countryCode");
       mav.submitAllMatching("customsReferences.*.countryCode");
       mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
+      mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.countryCode");
+
       mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.countryCode");
       mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
       mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
-
-      // Beta-2 only
       mav.submitAllMatching("issuingParty.address.countryCode");
       mav.submitAllMatching("documentParties.shippers.address.countryCode");
       mav.submitAllMatching("documentParties.consignee.address.countryCode");
@@ -200,6 +201,12 @@ public class EBLChecks {
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
+  );
+
+  private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'type' of 'nationalCommodityCodes' is a known code",
+    (mav) -> mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
   private static final JsonRebaseableContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -493,6 +500,7 @@ public class EBLChecks {
       JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
     ),
     VALID_WOOD_DECLARATIONS,
+    NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
@@ -540,6 +548,7 @@ public class EBLChecks {
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
     VALID_WOOD_DECLARATIONS,
+    NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,

@@ -61,6 +61,14 @@ public class EblDatasets {
     "BARGE",
     "MULTIMODAL"
   );
+  public static final KeywordDataset NATIONAL_COMMODITY_CODES = KeywordDataset.staticDataset(
+    "NCM",
+    "HTS",
+    "Schedule B",
+    "TARIC",
+    "CN",
+    "CUS"
+  );
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

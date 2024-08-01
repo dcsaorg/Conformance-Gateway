@@ -20,6 +20,13 @@
       "weight": 12000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "nationalCommodityCodes": [
+        {
+          "type": "NCM",
+          "countryCode": "BR",
+          "values": ["1515"]
+        }
+      ],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],

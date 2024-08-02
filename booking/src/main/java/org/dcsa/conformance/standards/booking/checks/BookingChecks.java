@@ -191,10 +191,10 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES)
   );
 
-  private static final JsonContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
+  private static final JsonContentCheck TLR_TYPE_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' in 'taxAndLegalReferences' static data",
     mav -> mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*"),
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.LTR_TYPE_CODES)
   );
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -321,22 +321,22 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
-    mav.submitAllMatching("customsReferences.*");
-    mav.submitAllMatching("requestedEquipments.*.customsReferences.*");
-    mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*");
+  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES_TYPE = (mav) -> {
+    mav.submitAllMatching("customsReferences.*.type");
+    mav.submitAllMatching("requestedEquipments.*.customsReferences.*.type");
+    mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*.type");
   };
 
-  private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
-    ALL_CUSTOMS_REFERENCES,
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.CUSTOMS_REFERENCE_RE_REC_COMBINATIONS, "countryCode", "type")
+  private static final JsonRebaseableContentCheck CR_TYPE_CODES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' in 'customsReferences' must be valid",
+    ALL_CUSTOMS_REFERENCES_TYPE,
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CUSTOMS_REFERENCE_RE_REC_TYPE_CODES)
   );
 
-  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
-    (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  private static final JsonContentCheck AMF_MTC_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'manifestTypeCode' in 'advanceManifestFilings' static data",
+    (mav) -> mav.submitAllMatching("advanceManifestFilings.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.AMF_CC_MTC_TYPE_CODES)
   );
 
   private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -631,7 +631,7 @@ public class BookingChecks {
     IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
     IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
     OUTER_PACKAGING_CODE_IS_VALID,
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_TYPE_CODE_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
@@ -639,7 +639,7 @@ public class BookingChecks {
     COUNTRY_CODE_VALIDATIONS,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
-    CR_CC_T_COMBINATION_KNOWN,
+    CR_TYPE_CODES_VALIDATIONS,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
@@ -725,7 +725,7 @@ public class BookingChecks {
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_MTC_VALIDATIONS,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,

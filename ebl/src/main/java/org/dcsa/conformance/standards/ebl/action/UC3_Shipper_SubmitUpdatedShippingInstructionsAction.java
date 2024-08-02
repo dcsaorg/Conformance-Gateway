@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), Set.of(200, 202));
     this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;

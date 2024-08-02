@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", Set.of(200));
     this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;

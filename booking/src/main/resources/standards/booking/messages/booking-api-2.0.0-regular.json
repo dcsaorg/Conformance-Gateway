@@ -45,6 +45,7 @@
     "UNLocationCode": "NLAMS"
   },
   "placeOfBLIssue": {
+    "locationName": "Amsterdam",
     "UNLocationCode" : "NLAMS"
   },
   "references": [

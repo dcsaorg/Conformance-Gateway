@@ -21,6 +21,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
+
 @UtilityClass
 public class BookingChecks {
 
@@ -86,6 +88,12 @@ public class BookingChecks {
         .map("The expected departure date '%s' can not be past date"::formatted)
         .collect(Collectors.toSet());
     }
+  );
+
+  private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'type' of 'nationalCommodityCodes' is a known code",
+    (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_ALL_BOOKING_UN_LOCATION_CODES = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -353,6 +361,7 @@ public class BookingChecks {
       mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
       mav.submitAllMatching("placeOfBLIssue.countryCode");
+      mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
@@ -640,6 +649,7 @@ public class BookingChecks {
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
     CR_TYPE_CODES_VALIDATIONS,
+    NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

@@ -19,9 +19,12 @@ public class BookingDataSets {
 
   public static final KeywordDataset INCO_TERMS_VALUES = KeywordDataset.staticDataset("EXW", "FCA", "FAS", "FOB", "CFR", "CIF", "CPT", "CIP", "DAP", "DPU", "DDP");
 
+  public static final KeywordDataset NATIONAL_COMMODITY_TYPE_CODES = KeywordDataset.staticDataset(    "NCM",    "HTS",    "Schedule B",    "TARIC",    "CN",    "CUS"  );
+
   public static final KeywordDataset CUTOFF_DATE_TIME_CODES = KeywordDataset.staticDataset("DCO", "VCO", "FCO", "LCO", "ECP", "EFC");
 
   public static final KeywordDataset AMF_CC_MTC_TYPE_CODES = KeywordDataset.fromVersionedCSV(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v%s.csv",  "Advance Manifest Filing Type Code");
+
   public static final KeywordDataset ISO_4217_CURRENCY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/currency-codes-iso-4217.csv", "CurrencyCode");
 
   public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "General Reference Type Code");

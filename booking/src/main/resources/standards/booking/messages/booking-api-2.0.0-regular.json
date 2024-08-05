@@ -134,16 +134,12 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationName": "Norfolk",
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationName": "Bremerhaven",
-        "locationType": "UNLO",
         "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POD"

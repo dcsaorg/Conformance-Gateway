@@ -801,7 +801,6 @@
                           "message": "Not enough available \"42GP\" equipment. Please change to \"22G1\" instead\n",
                           "jsonPath": "$.requestedEquipment.units",
                           "property": "units"
-
                         }
                       ]
                     }
@@ -2098,168 +2097,10 @@
                       "reason": "Declined because of no equipment availability"
                     }
                   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 },
                 "declinedFullStateTransferExample": {
                   "summary": "Booking amendment declined (Full State Transfer)\n",
                   "description": "A full state transfer notification explaining that an amendment to a `Booking` has been declined (`amendedBookingStatus='AMENDMENT DECLINED'`). The notification both contains the Booking from before the amendment (in the `booking` property) it also contains the amended booking (in the `amendedBooking` property).\n",
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                   "value": {
                     "specversion": "1.0",
                     "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
@@ -2289,25 +2130,6 @@
                           "haulageChargesPaymentTermCode": "PRE",
                           "portChargesPaymentTermCode": "PRE",
                           "otherChargesPaymentTermCode": "COL"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         },
                         "destinationChargesPaymentTerm": {
                           "haulageChargesPaymentTermCode": "COL",
@@ -2442,21 +2264,6 @@
                           "Warranted shipper must fulfill the requirements of SOLAS regulations and the IMO guidelines regarding the Verified Gross Mass (VGM) of container carrying cargo (msc.1/circ.1474, 9 June 2014).",
                           "In accordance with SOLAS regulations and IMO guidelines regarding the VGM (verified gross mass), any expenses incurred because the VGM was submitted late or was not submitted at all will be charged back to the customer with an additional administration fee."
                         ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                       },
                       "amendedBooking": {
                         "carrierBookingRequestReference": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa",
@@ -3256,44 +3063,6 @@
           },
           "placeOfBLIssue": {
             "$ref": "#/components/schemas/Place of BL Issue"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           },
           "references": {
             "type": "array",
@@ -3578,44 +3347,6 @@
           },
           "placeOfBLIssue": {
             "$ref": "#/components/schemas/Place of BL Issue"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           },
           "references": {
             "type": "array",
@@ -3919,44 +3650,6 @@
           },
           "placeOfBLIssue": {
             "$ref": "#/components/schemas/Place of BL Issue"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           },
           "references": {
             "type": "array",
@@ -6245,47 +5938,6 @@
           }
         ]
       },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       "Origin Charges Payment Term": {
         "title": "Origin Charges Payment Term",
         "type": "object",
@@ -6449,9 +6101,6 @@
       },
       "Document Parties": {
         "title": "Document Parties",
-
-
-
         "type": "object",
         "properties": {
           "bookingAgent": {

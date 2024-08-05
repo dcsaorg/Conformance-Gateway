@@ -279,8 +279,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                   uc7_shipper_submitBookingAmendment()
                       .thenAllPathsFrom(AMENDMENT_RECEIVED, CONFIRMED),
                   uc10_carrier_declineBooking().thenAllPathsFrom(DECLINED),
-                  uc12_carrier_confirmBookingCompleted().thenAllPathsFrom(COMPLETED),
-                  uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)));
+                  uc12_carrier_confirmBookingCompleted().thenAllPathsFrom(COMPLETED)));
       case PENDING_UPDATE -> then(
           shipper_GetBooking(bookingState)
               .thenEither(
@@ -567,7 +566,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new BookingScenarioListBuilder(
         previousAction ->
-            new UC11_Shipper_CancelEntireBookingAction(
+            new UC11_Shipper_CancelBookingRequestAction(
                 carrierPartyName,
                 shipperPartyName,
                 (BookingAction) previousAction,

@@ -94,8 +94,6 @@ public class EblShipper extends ConformanceParty {
           Map.entry("DESCRIPTION_OF_GOODS_PLACEHOLDER", carrierScenarioParameters.descriptionOfGoods()),
           Map.entry("DESCRIPTION_OF_GOODS_2_PLACEHOLDER", Objects.requireNonNullElse(carrierScenarioParameters.descriptionOfGoods2(), "")),
           Map.entry("OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER", Objects.requireNonNullElse(carrierScenarioParameters.outerPackagingDescription(), "")),
-          Map.entry("SERVICE_CONTRACT_REFERENCE_PLACEHOLDER", carrierScenarioParameters.serviceContractReference()),
-          Map.entry("CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER", carrierScenarioParameters.contractQuotationReference()),
           Map.entry("TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER", scenarioType.transportDocumentTypeCode())
         ));
 

@@ -8,7 +8,6 @@
     "isToOrder": false,
     "contractQuotationReference": "12345",
     "invoicePayableAt": {
-      "locationType": "UNLO",
       "UNLocationCode": "DKAAR"
     },
     "partyContactDetails": [
@@ -103,7 +102,6 @@
       "partyName": "Hyundai",
       "address": {
         "street": "The street name would be here",
-        "streetNumber": "... and here the street number",
         "city": "... and here the city",
         "countryCode": "KR"
       },
@@ -132,14 +130,12 @@
       "plannedDepartureDate": "2023-12-19",
       "plannedArrivalDate": "2023-12-21",
       "portOfLoading": {
-        "locationType": "UNLO",
         "UNLocationCode": "DKAAR"
       },
       "portOfDischarge": {
-        "locationType": "UNLO",
         "UNLocationCode": "DEBRV"
       },
-      "vesselVoyage": [
+      "vesselVoyages": [
         {
           "vesselName": "HMM Algeciras",
           "carrierExportVoyageNumber": "402E"

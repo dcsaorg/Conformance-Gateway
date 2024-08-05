@@ -496,7 +496,8 @@ public class BookingCarrier extends ConformanceParty {
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
-    var cbrr = cbrToCbrr.getOrDefault(bookingReference, bookingReference);
+    var cbrr = cancelOperation.equals("cancelBooking") ? bookingReference
+      : cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var bookingData = persistentMap.load(cbrr);
     if (bookingData == null || bookingData.isMissingNode()) {
       return return404(request);
@@ -505,7 +506,7 @@ public class BookingCarrier extends ConformanceParty {
     var reason = request.message().body().getJsonBody().path("reason").asText(null);
     try {
       if (cancelOperation.equals("cancelBooking")) {
-        persistableCarrierBooking.cancelEntireBooking(bookingReference, reason);
+        persistableCarrierBooking.cancelBookingRequest(bookingReference, reason);
       } else {
         persistableCarrierBooking.cancelBookingAmendment(bookingReference, reason);
       }

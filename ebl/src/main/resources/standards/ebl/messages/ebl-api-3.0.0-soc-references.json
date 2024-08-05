@@ -6,11 +6,8 @@
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "locationType": "UNLO",
     "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
   },
-  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
   "partyContactDetails": [
     {
       "name": "DCSA test person",

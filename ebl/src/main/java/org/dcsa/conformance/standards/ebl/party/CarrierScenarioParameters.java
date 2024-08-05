@@ -16,9 +16,7 @@ public record CarrierScenarioParameters(
   String consignmentItem2HSCode,
   String descriptionOfGoods,
   String descriptionOfGoods2,
-  String outerPackagingDescription,
-  String serviceContractReference,
-  String contractQuotationReference
+  String outerPackagingDescription
   ) {
   public ObjectNode toJson() {
     var node = OBJECT_MAPPER
@@ -28,9 +26,7 @@ public record CarrierScenarioParameters(
         .put("equipmentReference", equipmentReference)
         .put("invoicePayableAtUNLocationCode", invoicePayableAtUNLocationCode)
         .put("consignmentItemHSCode", consignmentItemHSCode)
-        .put("descriptionOfGoods", descriptionOfGoods)
-        .put("serviceContractReference", serviceContractReference)
-        .put("contractQuotationReference", contractQuotationReference);
+        .put("descriptionOfGoods", descriptionOfGoods);
 
     if (commoditySubreference2 != null) {
       node.put("commoditySubreference2", commoditySubreference2);
@@ -65,9 +61,7 @@ public record CarrierScenarioParameters(
       jsonNode.path("consignmentItem2HSCode").asText(null),
       jsonNode.required("descriptionOfGoods").asText(),
       jsonNode.path("descriptionOfGoods2").asText(null),
-      jsonNode.path("outerPackagingDescription").asText(null),
-      jsonNode.required("serviceContractReference").asText(),
-      jsonNode.required("contractQuotationReference").asText()
+      jsonNode.path("outerPackagingDescription").asText(null)
     );
   }
 }

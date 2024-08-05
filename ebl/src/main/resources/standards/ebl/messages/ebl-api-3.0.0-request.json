@@ -6,11 +6,8 @@
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
-    "locationType": "UNLO",
     "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
   },
-  "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
   "partyContactDetails": [
     {
       "name": "DCSA test person",
@@ -23,6 +20,13 @@
       "weight": 12000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "nationalCommodityCodes": [
+        {
+          "type": "NCM",
+          "countryCode": "BR",
+          "values": ["1515"]
+        }
+      ],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],

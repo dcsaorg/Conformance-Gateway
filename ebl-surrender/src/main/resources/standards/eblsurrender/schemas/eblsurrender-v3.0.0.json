@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA EBL Surrender API",
-    "description": "This API is intended as an API between a carrier (the server) and a EBL Solution Platform (the client).\n\nThe EBL Solution Platform will submit surrender requests to the carrier, which will be processed asynchronously. Responses to the surrender reqests will be submitted by the carrier via the [DCSA EBL Surrender Response API](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR_RSP/3.0.0-Beta-3) API.\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negoitable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300B2). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "This API is intended as an API between a carrier and an EBL Solution Platform.\n\nThe EBL Solution Platform will submit surrender requests to the carrier, via\n\n    /v3/ebl-surrender-requests\n\nwhich will be processed asynchronously. Responses to the surrender reqests will be submitted by the carrier via \n\n    /v3/ebl-surrender-responses\n\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,18 +12,22 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "3.0.0-Beta-3"
+    "version": "3.0.0"
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0-Beta-3",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "tags": [
     {
       "name": "Surrender Requests",
-      "description": "The Surrender Requests\n"
+      "description": "The Surrender Requests implemented\n"
+    },
+    {
+      "name": "Surrender Request responses",
+      "description": "The Surrender Request responses\n"
     }
   ],
   "paths": {
@@ -84,6 +88,79 @@
           }
         }
       }
+    },
+    "/v3/ebl-surrender-responses": {
+      "post": {
+        "tags": [
+          "Surrender Request responses"
+        ],
+        "description": "The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.\n",
+        "operationId": "post-ebl-surrender-responses",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "3"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurrenderRequestAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Request successful",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "409": {
+            "description": "A carrier may only answer once to a surrender request. Subsequent attempts to answer are considered an error and should be rejected with a 409 Conflict code.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -98,9 +175,10 @@
         "properties": {
           "eblPlatform": {
             "maxLength": 4,
-            "pattern": "\\S+",
+            "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-3.csv).\n"
+            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "example": "BOLE"
           },
           "partyName": {
             "maxLength": 100,
@@ -126,6 +204,7 @@
         "description": "Refers to a company or a legal entity."
       },
       "EndorsementChainLink": {
+        "title": "Endorsement Chain Link",
         "required": [
           "actionCode",
           "actionDateTime",
@@ -137,11 +216,14 @@
           "actionDateTime": {
             "type": "string",
             "description": "Date time when the action occurred.",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2024-07-01T08:00:00+08:30"
           },
           "actionCode": {
+            "maxLength": 50,
             "type": "string",
-            "description": "The action performed by the party. This should be one of:\n\n- `ISSUED` (The actor issued the document to the recipient)\n- `ENDORSED` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER FOR DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER FOR AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\n\nNot all actions are applicable to all surrender requests.\n"
+            "description": "The action performed by the party. This should be one of:\n- `ISSUE` (The actor issued the document to the recipient)\n- `ENDORSE` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER FOR DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER FOR AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\nNot all actions are applicable to all surrender requests.\n",
+            "example": "ISSUE"
           },
           "actor": {
             "$ref": "#/components/schemas/TransactionParty"
@@ -153,6 +235,7 @@
         "description": "Entry in the endorsement chain.\n"
       },
       "SurrenderRequestDetails": {
+        "title": "Surrender Request Details",
         "required": [
           "surrenderRequestCode",
           "surrenderRequestReference",
@@ -184,7 +267,7 @@
               "AREQ"
             ]
           },
-          "reason": {
+          "reasonCode": {
             "maxLength": 4,
             "type": "string",
             "description": "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-\t`SWTP` (Switch to paper)\n",
@@ -192,12 +275,12 @@
           },
           "comments": {
             "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Optional free text comment associated with the surrender request transaction.",
             "example": "As requested..."
           },
           "endorsementChain": {
-            "minItems": 0,
             "type": "array",
             "description": "The endorsement chain consist of (a number of) endorsement actions that were performed **after** the eBL bill was issued.\n\nFor straight B/Ls, the endorsement chain can be omitted. For negotiable eBLs, the endorsement chain must be present, as the carrier receiving the surrender request and will check all endorsements before accepting the eBL. The endorsement chain is the electronic version of the \"back side\" of the paper world B/L.\n",
             "items": {
@@ -228,6 +311,8 @@
             "example": "MSK"
           },
           "codeListName": {
+            "maxLength": 100,
+            "type": "string",
             "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
             "example": "DID"
           }
@@ -333,13 +418,13 @@
             "type": "array",
             "description": "An array of errors providing more detail about the root cause.\n",
             "items": {
-              "$ref": "#/components/schemas/Detailed Error"
+              "$ref": "#/components/schemas/DetailedError"
             }
           }
         },
         "description": "Unexpected error"
       },
-      "Detailed Error": {
+      "DetailedError": {
         "title": "Detailed Error",
         "required": [
           "errorCodeMessage",
@@ -385,6 +470,40 @@
             "description": "A long description corresponding to the `errorCode` with additional information.\n",
             "example": "Spaces not allowed in facility code"
           }
+        },
+        "description": "A detailed description of what has caused the error.\n"
+      },
+      "SurrenderRequestAnswer": {
+        "title": "Surrender Request Answer",
+        "required": [
+          "action",
+          "surrenderRequestReference"
+        ],
+        "type": "object",
+        "properties": {
+          "surrenderRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The surrender request provided by the EBL solution in the surrender request.\n",
+            "example": "Z12345"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an admendment, the carrier will follow up with issuing the admended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
+            "example": "SURR",
+            "enum": [
+              "SURR",
+              "SREJ"
+            ]
+          },
+          "comments": {
+            "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Free text comment associated with the surrender request transaction.  Must be provided for rejections but should be omitted when accepting the surrender.",
+            "example": "Comments..."
+          }
         }
       }
     },
@@ -409,7 +528,7 @@
         "explode": false,
         "schema": {
           "type": "string",
-          "example": "3.0.0-Beta-3"
+          "example": "3.0.0"
         }
       }
     }

@@ -100,9 +100,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Shoes - black, 400 boxes",
           null,
-          "Fibreboard boxes",
-          "SCR-1234-REGULAR",
-          "QR-1234-REGULAR"
+          "Fibreboard boxes"
         );
         case ACTIVE_REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
@@ -116,9 +114,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Dairy products",
           null,
-          "Bottles",
-          "SCR-1234-REEFER",
-          "QR-1234-REEFER"
+          "Bottles"
         );
         case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
           "CBR_123_NON_OPERATING_REEFER",
@@ -132,9 +128,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Non alcoholic beverages, 40,000 cans",
           null,
-          "Bottles",
-          "SCR-1234-NON_OPERATING_REEFER",
-          "QR-1234-NON_OPERATING_REEFER"
+          "Bottles"
         );
         case DG -> new CarrierScenarioParameters(
           "RTM1234567",
@@ -148,9 +142,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
           null,
-          null,
-          "SCR-1234-DG",
-          "QR-1234-DG"
+          null
         );
         case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
           "RG-2C-2U-1E",
@@ -164,9 +156,7 @@ public class EblCarrier extends ConformanceParty {
           "732391",
           "Tableware and kitchenware",
           "Kitchen pots and pans",
-          "Fibreboard boxes",
-          "SCR-1234-RG2C2U1E",
-          "QR-1234-RG2C2U1E"
+          "Fibreboard boxes"
         );
         case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
           "RG-2C-2U-1E",
@@ -180,9 +170,7 @@ public class EblCarrier extends ConformanceParty {
           "732391",
           "Tableware and kitchenware",
           "Kitchen pots and pans",
-          "Fibreboard boxes",
-          "SCR-1234-RG2C2U2E",
-          "QR-1234-RG2C2U2E"
+          "Fibreboard boxes"
         );
         case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
           "RG-SOC-REFERENCES",
@@ -195,9 +183,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Tableware and kitchenware",
           null,
-          "Fibreboard boxes",
-          "SCR-1234-RG-SOC-REFERENCES",
-          "QR-1234-RG-SOC-REFERENCES"
+          "Fibreboard boxes"
         );
     };
     asyncOrchestratorPostPartyInput(
@@ -216,7 +202,9 @@ public class EblCarrier extends ConformanceParty {
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.requestChangesToShippingInstructions(documentReference, requestedChanges -> requestedChanges.addObject()
+    si.provideFeedbackToShippingInstructions(documentReference, feedbacks -> feedbacks.addObject()
+      .put("severity", "ERROR")
+      .put("code", "PROPERTY_VALUE_MUST_CHANGE")
       .put("message", "Please perform the changes requested by the Conformance orchestrator")
     );
     si.save(persistentMap);
@@ -880,7 +868,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.transport-document-notification";
+      return "org.dcsa.transport-document";
     }
 
     @Override
@@ -902,7 +890,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.shipping-instructions-notification";
+      return "org.dcsa.shipping-instructions";
     }
 
     @Override

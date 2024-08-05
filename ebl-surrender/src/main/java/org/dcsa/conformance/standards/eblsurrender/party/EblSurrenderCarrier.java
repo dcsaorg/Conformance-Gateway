@@ -159,7 +159,14 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String srr = jsonRequest.get("surrenderRequestReference").asText();
     String tdr = jsonRequest.get("transportDocumentReference").asText();
 
-    if (Objects.equals(EblSurrenderState.AVAILABLE_FOR_SURRENDER, eblStatesById.get(tdr))) {
+    if (Objects.equals(
+        EblSurrenderState.AVAILABLE_FOR_SURRENDER,
+        eblStatesById.getOrDefault(
+            tdr,
+            // workaround for supplyScenarioParameters() not getting called on parties in manual mode
+            this.partyConfiguration.isInManualMode()
+                ? EblSurrenderState.AVAILABLE_FOR_SURRENDER
+                : null))) {
       eblStatesById.put(
           tdr,
           Objects.equals("AREQ", src)

@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,19 +48,25 @@ public class EBLChecks {
     mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
+  public static final JsonRebaseableContentCheck VALID_WOOD_DECLARATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate the 'woodDeclaration' against known dataset",
+    (mav) -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.woodDeclaration"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.WOOD_DECLARATION_VALUES)
+  );
+
   private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
     "All reference 'type' fields must be valid",
         ALL_REFERENCE_TYPES,
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
-  private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
+  private static final JsonRebaseableContentCheck TLR_TYPES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' against 'taxAndLegalReferences'",
     (mav) -> {
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*");
+      mav.submitAllMatching("issuingParty.taxLegalReferences.*.type");
+      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.type");
     },
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.LTR_TYPES)
    );
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -144,43 +152,22 @@ public class EBLChecks {
     )
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings.*");
-  private static final JsonRebaseableContentCheck AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate conditionally mandatory 'selfFilerCode' in 'advanceManifestFilings'",
-    ALL_AMF,
-    (nodeToValidate, contextPath) -> {
-      if (!nodeToValidate.path("advanceManifestFilingsHouseBLPerformedBy").asText("").equals("SHIPPER")
-      || nodeToValidate.path("selfFilerCode").isTextual()) {
-        return Set.of();
-      }
-      var country = nodeToValidate.path("countryCode").asText("");
-      var manifestTypeCode = nodeToValidate.path("manifestTypeCode").asText("");
-      var combined = country + "/" + manifestTypeCode;
-      if (EblDatasets.AMF_CC_MTC_REQUIRES_SELF_FILER_CODE.contains(combined)) {
-        return Set.of(
-          "The 'selfFilerCode' must be provided in '%s' due to the combination of 'advanceManifestFilingsHouseBLPerformedBy', 'countryCode' and 'manifestTypeCode'.".formatted(contextPath)
-        );
-      }
-      return Set.of();
-  });
 
-  private static final JsonRebaseableContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
-    ALL_AMF,
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  private static final JsonRebaseableContentCheck AMF_TYPE_CODES_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'manifestTypeCode' in 'advanceManifestFilings' against data set",
+    (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
+    JsonAttribute.path("manifestTypeCode", JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.AMF_TYPE_CODES))
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES = (mav) -> {
-    mav.submitAllMatching("customsReferences.*");
-    mav.submitAllMatching("consignmentItems.*.customsReferences.*");
-    mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*");
-    mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*");
-  };
-
   private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The combination of 'countryCode' and 'type' in 'customsReferences' must be valid",
-    ALL_CUSTOMS_REFERENCES,
-    JsonAttribute.combineAndValidateAgainstDataset(EblDatasets.CUSTOMS_REFERENCE_CC_RTC_COMBINATIONS, "countryCode", "type")
+    "Validate 'type' against known customs reference type codes",
+    (mav) -> {
+      mav.submitAllMatching("customsReferences.*.type");
+      mav.submitAllMatching("consignmentItems.*.customsReferences.*.type");
+      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.type");
+      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.type");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.CUSTOMS_REFERENCE_TYPE_CODES)
   );
 
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -201,12 +188,12 @@ public class EBLChecks {
       mav.submitAllMatching("advancedManifestFilings.*.countryCode");
       mav.submitAllMatching("customsReferences.*.countryCode");
       mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
+      mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.countryCode");
+
       mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.countryCode");
       mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
       mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
-
-      // Beta-2 only
       mav.submitAllMatching("issuingParty.address.countryCode");
       mav.submitAllMatching("documentParties.shippers.address.countryCode");
       mav.submitAllMatching("documentParties.consignee.address.countryCode");
@@ -214,6 +201,12 @@ public class EBLChecks {
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
+  );
+
+  private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'type' of 'nationalCommodityCodes' is a known code",
+    (mav) -> mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
   private static final JsonRebaseableContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -261,11 +254,6 @@ public class EBLChecks {
       }
       return issues;
     });
-
-  private static final JsonRebaseableContentCheck VALIDATE_CONTRACT_REFERENCE = JsonAttribute.atLeastOneOf(
-      JsonPointer.compile("/contractQuotationReference"),
-      JsonPointer.compile("/serviceContractReference")
-  );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
     return (mav) -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
@@ -511,21 +499,22 @@ public class EBLChecks {
       JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform")),
       JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
     ),
+    VALID_WOOD_DECLARATIONS,
+    NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    AMF_TYPE_CODES_VALIDATION,
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
     OUTER_PACKAGING_CODE_IS_VALID,
     VOLUME_IMPLIES_VOLUME_UNIT,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
@@ -558,6 +547,8 @@ public class EBLChecks {
       JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
+    VALID_WOOD_DECLARATIONS,
+    NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
@@ -617,8 +608,7 @@ public class EBLChecks {
     COUNTRY_CODE_VALIDATIONS,
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
-    AMF_SELF_FILER_CODE_CONDITIONALLY_MANDATORY,
+    AMF_TYPE_CODES_VALIDATION,
     VOLUME_IMPLIES_VOLUME_UNIT,
     OUTER_PACKAGING_CODE_IS_VALID,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
@@ -650,7 +640,15 @@ public class EBLChecks {
         RATIO_VOLUME
       )
     ),
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate mode of transport type",
+      mav -> {
+        mav.submitAllMatching("transports.preCarriageBy");
+        mav.submitAllMatching("transports.onCarriageBy");
+      },
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
+    ),
+    TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE,
     TD_UN_LOCATION_CODES_VALID
   );
@@ -721,17 +719,6 @@ public class EBLChecks {
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
       JsonAttribute.path("consignmentItems", checkDescriptionOfGoods(cspSupplier))
-    ));
-
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'serviceContractReference' is used",
-      "serviceContractReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::serviceContractReference)
-    ));
-    checks.add(JsonAttribute.mustEqual(
-      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
-      "contractQuotationReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
     ));
 
     checks.add(JsonAttribute.mustEqual(
@@ -1039,7 +1026,6 @@ public class EBLChecks {
     var checks = new ArrayList<>(STATIC_SI_CHECKS);
     checks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     checks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    checks.add(VALIDATE_CONTRACT_REFERENCE);
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isShipper,
@@ -1178,7 +1164,6 @@ public class EBLChecks {
     jsonContentChecks.addAll(STATIC_TD_CHECKS);
     jsonContentChecks.add(DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE);
     jsonContentChecks.add(VALIDATE_DOCUMENT_PARTIES_MATCH_EBL);
-    jsonContentChecks.add(VALIDATE_CONTRACT_REFERENCE);
   }
 
   public static List<JsonRebaseableContentCheck> genericTDContentChecks(TransportDocumentStatus transportDocumentStatus, String eblStandardVersion, Supplier<String> tdrReferenceSupplier) {

@@ -63,7 +63,7 @@ public class ConformanceApplication {
         }
       };
 
-  private final String localhostAuthUrlToken = UUID.randomUUID().toString();
+  protected final String localhostAuthUrlToken = UUID.randomUUID().toString();
 
   private final LinkedList<String> homepageSandboxIds = new LinkedList<>();
 
@@ -309,7 +309,7 @@ public class ConformanceApplication {
   private String _buildHomePage() {
     return String.join(
         System.lineSeparator(),
-        "<html>",
+        "<!doctype html><html lang=\"en\">",
         "<head><title>DCSA Conformance</title></head>",
         "<body style=\"font-family: sans-serif;\">",
         "<h2>DCSA Conformance</h2>",

@@ -5,9 +5,9 @@ import org.dcsa.conformance.core.AbstractStandard;
 
 import java.util.*;
 
-public class CommercialSchedulesStandard extends AbstractStandard {
+public class CsStandard extends AbstractStandard {
 
-  private CommercialSchedulesStandard() {
+  private CsStandard() {
     super("CS");
   }
   @Override
@@ -19,6 +19,6 @@ public class CommercialSchedulesStandard extends AbstractStandard {
 
   @Override
   protected AbstractComponentFactory doCreateComponentFactory(String standardVersion, String scenarioSuite) {
-    return new CommercialSchedulesComponentFactory(getName(), standardVersion, scenarioSuite);
+    return new CsComponentFactory(getName(), standardVersion, scenarioSuite);
   }
 }

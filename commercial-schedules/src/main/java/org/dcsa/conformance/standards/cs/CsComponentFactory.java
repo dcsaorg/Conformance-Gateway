@@ -8,15 +8,15 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.cs.party.CommercialSchedulesPublisher;
-import org.dcsa.conformance.standards.cs.party.CommercialSchedulesRole;
+import org.dcsa.conformance.standards.cs.party.CsPublisher;
+import org.dcsa.conformance.standards.cs.party.CsRole;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CommercialSchedulesComponentFactory extends AbstractComponentFactory {
-  protected CommercialSchedulesComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
+public class CsComponentFactory extends AbstractComponentFactory {
+  protected CsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
     super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
   }
 
@@ -36,31 +36,30 @@ public class CommercialSchedulesComponentFactory extends AbstractComponentFactor
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
     PartyConfiguration publisherConfiguration =
-      partyConfigurationsByRoleName.get(CommercialSchedulesRole.PUBLISHER.getConfigName());
+      partyConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName());
     if (publisherConfiguration != null) {
       parties.add(
-        new CommercialSchedulesPublisher(
+        new CsPublisher(
           standardVersion,
           publisherConfiguration,
-          counterpartConfigurationsByRoleName.get(CommercialSchedulesRole.SUBSCRIBER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(CommercialSchedulesRole.PUBLISHER.getConfigName());
+      partyConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-        new CommercialSchedulesPublisher(
+        new CsPublisher(
           standardVersion,
           consumerConfiguration,
-          counterpartConfigurationsByRoleName.get(CommercialSchedulesRole.SUBSCRIBER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));
     }
-
     return parties;
   }
 
@@ -71,15 +70,15 @@ public class CommercialSchedulesComponentFactory extends AbstractComponentFactor
 
   @Override
   public SortedSet<String> getRoleNames() {
-    return Arrays.stream(CommercialSchedulesRole.values())
-      .map(CommercialSchedulesRole::getConfigName)
+    return Arrays.stream(CsRole.values())
+      .map(CsRole::getConfigName)
       .collect(Collectors.toCollection(TreeSet::new));
   }
 
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations)
     {
-      return (partyConfigurations.length == CommercialSchedulesRole.values().length
-        ? Arrays.stream(CommercialSchedulesRole.values()).map(CommercialSchedulesRole::getConfigName)
+      return (partyConfigurations.length == CsRole.values().length
+        ? Arrays.stream(CsRole.values()).map(CsRole::getConfigName)
         : Arrays.stream(counterpartConfigurations)
         .map(CounterpartConfiguration::getRole)
         .filter(

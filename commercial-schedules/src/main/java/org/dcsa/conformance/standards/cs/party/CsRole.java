@@ -3,22 +3,22 @@ package org.dcsa.conformance.standards.cs.party;
 import lombok.Getter;
 
 @Getter
-public enum CommercialSchedulesRole {
+public enum CsRole {
 
   PUBLISHER("Publisher"),
   SUBSCRIBER("Subscriber");
 
   private final String configName;
 
-  CommercialSchedulesRole(String configName) {
+  CsRole(String configName) {
     this.configName = configName;
   }
 
   public static boolean isCarrier(String configName) {
-    return CommercialSchedulesRole.PUBLISHER.configName.equals(configName);
+    return CsRole.PUBLISHER.configName.equals(configName);
   }
 
   public static boolean isShipper(String configName) {
-    return CommercialSchedulesRole.SUBSCRIBER.configName.equals(configName);
+    return CsRole.SUBSCRIBER.configName.equals(configName);
   }
 }

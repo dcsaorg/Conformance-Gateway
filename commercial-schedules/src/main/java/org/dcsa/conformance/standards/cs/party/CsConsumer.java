@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @Slf4j
-public class CommercialSchedulesPublisher extends ConformanceParty {
-  public CommercialSchedulesPublisher(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+public class CsConsumer extends ConformanceParty {
+  protected CsConsumer(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(apiVersion, partyConfiguration, counterpartConfiguration, persistentMap, webClient, orchestratorAuthHeader);
   }
 

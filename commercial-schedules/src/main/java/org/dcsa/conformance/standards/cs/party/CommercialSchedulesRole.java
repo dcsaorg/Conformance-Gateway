@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.cs.party;
 
+import lombok.Getter;
+
+@Getter
 public enum CommercialSchedulesRole {
 
   PUBLISHER("Publisher"),

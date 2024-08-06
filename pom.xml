@@ -21,6 +21,7 @@
         <module>lambda</module>
         <module>sandbox</module>
         <module>spring-boot</module>
+        <module>commercial-schedules</module>
     </modules>
 
 </project>

@@ -14,11 +14,11 @@ public enum CsRole {
     this.configName = configName;
   }
 
-  public static boolean isCarrier(String configName) {
+  public static boolean isPublisher(String configName) {
     return CsRole.PUBLISHER.configName.equals(configName);
   }
 
-  public static boolean isShipper(String configName) {
+  public static boolean isSubscriber(String configName) {
     return CsRole.SUBSCRIBER.configName.equals(configName);
   }
 }

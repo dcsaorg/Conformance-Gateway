@@ -6,7 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 import java.util.*;
 
 public class CsStandard extends AbstractStandard {
-
+  public static final CsStandard INSTANCE = new CsStandard();
   private CsStandard() {
     super("CS");
   }

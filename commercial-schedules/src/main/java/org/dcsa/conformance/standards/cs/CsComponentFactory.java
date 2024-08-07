@@ -63,9 +63,16 @@ public class CsComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
-  @Override
-  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations) {
-    return null;
+
+  public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations) {
+    return CsScenarioListBuilder.createModuleScenarioListBuilders(
+      this,
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, CsRole::isPublisher),
+      _findPartyOrCounterpartName(
+        partyConfigurations, counterpartConfigurations, CsRole::isSubscriber));
   }
 
   @Override

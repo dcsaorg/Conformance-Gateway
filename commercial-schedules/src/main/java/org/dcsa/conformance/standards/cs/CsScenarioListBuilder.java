@@ -57,8 +57,8 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           "Vessel Schedules - Service",
           noAction()
             .thenEither(
-              scenarioWithParametersVsVessel(CARRIER_SERVICE_CODE),
-              scenarioWithParametersVsVessel(UNIVERSAL_SERVICE_REFERENCE))),
+              scenarioWithParametersVsService(CARRIER_SERVICE_CODE),
+              scenarioWithParametersVsService(UNIVERSAL_SERVICE_REFERENCE))),
         Map.entry(
           "Vessel Schedules - Vessel",
           noAction()

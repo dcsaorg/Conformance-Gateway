@@ -28,6 +28,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
@@ -46,7 +47,8 @@ public class ConformanceSandbox {
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
-    TntStandard.INSTANCE
+    TntStandard.INSTANCE,
+    CsStandard.INSTANCE
   };
 
   private record OrchestratorTask(

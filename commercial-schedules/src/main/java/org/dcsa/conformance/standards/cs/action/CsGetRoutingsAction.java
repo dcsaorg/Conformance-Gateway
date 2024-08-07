@@ -5,6 +5,13 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 
 public class CsGetRoutingsAction extends CsAction{
     public CsGetRoutingsAction(String subscriberPartyName, String publisherPartyName, ConformanceAction previousAction, JsonSchemaValidator vesselSchedule) {
-        super();
+      super(publisherPartyName, null, null,
+        "SupplyCSP [%s]");
+
     }
+
+  @Override
+  public String getHumanReadablePrompt() {
+    return null;
+  }
 }

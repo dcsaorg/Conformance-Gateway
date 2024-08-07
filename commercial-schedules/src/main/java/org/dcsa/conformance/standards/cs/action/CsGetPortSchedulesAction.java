@@ -8,7 +8,6 @@ public class CsGetPortSchedulesAction extends CsAction{
   private String scenarioType;
     public CsGetPortSchedulesAction(String subscriberPartyName, String publisherPartyName, ConformanceAction previousAction, JsonSchemaValidator portSchedule) {
         super(subscriberPartyName, publisherPartyName, previousAction, "GetSchedules", 200);
-        this.responseSchemaValidator = responseSchemaValidator;
     }
 
   @Override

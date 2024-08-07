@@ -37,7 +37,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
     return Stream.of(
-        Map.entry(
+        /*Map.entry(
           "Point to Point Routings",
           noAction()
             .thenEither(
@@ -52,7 +52,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           "Port Schedules",
           noAction()
             .thenEither(
-              scenarioWithParametersPs(UN_LOCATION_CODE,DATE))),
+              scenarioWithParametersPs(UN_LOCATION_CODE,DATE))),*/
         Map.entry(
           "Vessel Schedules - Service",
           noAction()

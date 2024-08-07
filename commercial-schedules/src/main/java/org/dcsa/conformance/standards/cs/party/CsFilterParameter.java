@@ -2,8 +2,13 @@ package org.dcsa.conformance.standards.cs.party;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum CsFilterParameter {
-  PLACE_OF_RECEIPT("placeOfReceipt"),
+ /* PLACE_OF_RECEIPT("placeOfReceipt"),
   PLACE_OF_DELIVERY("placeOfDelivery"),
   DEPARTURE_START_DATE("departureStartDate"),
   DEPARTURE_END_DATE("departureEndDate"),
@@ -12,7 +17,7 @@ public enum CsFilterParameter {
   MAX_TRANSHIPMENT("maxTranshipment"),
   RECEIPT_TYPE_AT_ORIGIN("receiptTypeAtOrigin"),
   DELIVERY_TYPE_AT_DESTINATION("deliveryTypeAtDestination"),
-  DATE("date"),
+  DATE("date"),*/
   CARRIER_SERVICE_NAME("carrierServiceName"),
   CARRIER_SERVICE_CODE("carrierServiceCode"),
   UNIVERSAL_SERVICE_REFERENCE("universalServiceReference"),
@@ -24,12 +29,17 @@ public enum CsFilterParameter {
   UN_LOCATION_CODE("UNLocationCode"),
   FACILITY_SMDG_CODE("facilitySMDGCode"),
   START_DATE("startDate"),
-  END_DATE("endDate"),
-  LIMIT("limit"),
+  END_DATE("endDate")
   ;
 
   @Getter
   private final String queryParamName;
+
+  public static final Map<String, CsFilterParameter> byQueryParamName =
+    Arrays.stream(values())
+      .collect(
+        Collectors.toUnmodifiableMap(
+          CsFilterParameter::getQueryParamName, Function.identity()));
 
   CsFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;

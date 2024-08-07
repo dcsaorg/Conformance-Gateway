@@ -131,8 +131,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           subscriberPartyName,
           publisherPartyName,
           previousAction,
-          componentFactory.getMessageSchemaValidator(
-            CsRole.PUBLISHER.getConfigName(),"VesselSchedule")));
+          componentFactory.getMessageSchemaValidator("api","VesselSchedule")));
   }
 
   private static CsScenarioListBuilder getPtpRoutings() {
@@ -145,8 +144,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           subscriberPartyName,
           publisherPartyName,
           previousAction,
-          componentFactory.getMessageSchemaValidator(
-            CsRole.PUBLISHER.getConfigName(),"PointToPoint")));
+          componentFactory.getMessageSchemaValidator("api","PointToPoint")));
   }
 
   private static CsScenarioListBuilder getPortSchedules() {
@@ -159,8 +157,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           subscriberPartyName,
           publisherPartyName,
           previousAction,
-          componentFactory.getMessageSchemaValidator(
-            CsRole.PUBLISHER.getConfigName(),"PortSchedule")));
+          componentFactory.getMessageSchemaValidator("api","PortSchedule")));
   }
 
 }

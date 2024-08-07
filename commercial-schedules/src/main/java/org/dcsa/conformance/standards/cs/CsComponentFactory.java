@@ -96,9 +96,9 @@ public class CsComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
     }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiName, String jsonSchema) {
+  public JsonSchemaValidator getMessageSchemaValidator(String api, String jsonSchema) {
     String schemaFilePath = "/standards/commercialschedules/schemas/commercialschedules-%s-v%s0.json"
-      .formatted(apiName, standardVersion.charAt(0));
+      .formatted(api, standardVersion.charAt(0));
 
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }

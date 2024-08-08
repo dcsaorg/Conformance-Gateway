@@ -57,27 +57,27 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           "Vessel Schedules - Service",
           noAction()
             .thenEither(
-              scenarioWithParametersVsService(CARRIER_SERVICE_CODE),
-              scenarioWithParametersVsService(UNIVERSAL_SERVICE_REFERENCE))),
+              scenarioWithParametersVs(CARRIER_SERVICE_CODE),
+              scenarioWithParametersVs(UNIVERSAL_SERVICE_REFERENCE))),
         Map.entry(
           "Vessel Schedules - Vessel",
           noAction()
             .thenEither(
-              scenarioWithParametersVsVessel(VESSEL_IMO_NUMBER),
-              scenarioWithParametersVsVessel(VESSEL_IMO_NUMBER,CARRIER_SERVICE_CODE,UNIVERSAL_SERVICE_REFERENCE),
-              scenarioWithParametersVsVessel(VESSEL_IMO_NUMBER,CARRIER_SERVICE_CODE,UNIVERSAL_SERVICE_REFERENCE,CARRIER_VOYAGE_NUMBER,UNIVERSAL_VOYAGE_REFERENCE))),
+              scenarioWithParametersVs(VESSEL_IMO_NUMBER),
+              scenarioWithParametersVs(VESSEL_IMO_NUMBER,CARRIER_SERVICE_CODE,UNIVERSAL_SERVICE_REFERENCE),
+              scenarioWithParametersVs(VESSEL_IMO_NUMBER,CARRIER_SERVICE_CODE,UNIVERSAL_SERVICE_REFERENCE,CARRIER_VOYAGE_NUMBER,UNIVERSAL_VOYAGE_REFERENCE))),
         Map.entry(
           "Vessel Schedules - Voyage",
           noAction()
             .thenEither(
-              scenarioWithParametersVsVoyage(CARRIER_SERVICE_CODE,CARRIER_VOYAGE_NUMBER),
-              scenarioWithParametersVsVoyage(UNIVERSAL_VOYAGE_REFERENCE,CARRIER_SERVICE_CODE, UNIVERSAL_SERVICE_REFERENCE))),
+              scenarioWithParametersVs(CARRIER_SERVICE_CODE,CARRIER_VOYAGE_NUMBER),
+              scenarioWithParametersVs(UNIVERSAL_VOYAGE_REFERENCE,CARRIER_SERVICE_CODE, UNIVERSAL_SERVICE_REFERENCE))),
         Map.entry(
           "Vessel Schedules - Location",
           noAction()
             .thenEither(
-              scenarioWithParametersVsLocation(UN_LOCATION_CODE),
-              scenarioWithParametersVsLocation(UN_LOCATION_CODE, FACILITY_SMDG_CODE))))
+              scenarioWithParametersVs(UN_LOCATION_CODE),
+              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -96,19 +96,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     CsFilterParameter... csFilterParameters) {
     return supplyScenarioParameters(csFilterParameters).then(getPortSchedules());
   }
-  private static CsScenarioListBuilder scenarioWithParametersVsService(
-    CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules());
-  }
-  private static CsScenarioListBuilder scenarioWithParametersVsVessel(
-    CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules());
-  }
-  private static CsScenarioListBuilder scenarioWithParametersVsVoyage(
-    CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules());
-  }
-  private static CsScenarioListBuilder scenarioWithParametersVsLocation(
+  private static CsScenarioListBuilder scenarioWithParametersVs(
     CsFilterParameter... csFilterParameters) {
     return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules());
   }
@@ -131,7 +119,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           subscriberPartyName,
           publisherPartyName,
           previousAction,
-          componentFactory.getMessageSchemaValidator("api","VesselSchedule")));
+          componentFactory.getMessageSchemaValidator("api","ServiceSchedule")));
   }
 
   private static CsScenarioListBuilder getPtpRoutings() {

@@ -53,14 +53,27 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonOvsFilterParameters = objectNode.putArray("csFilterParametersQueryParamNames");
+    ArrayNode jsonCsFilterParameters = objectNode.putArray("csFilterParametersQueryParamNames");
     csFilterParameters.forEach(
-      csFilterParameter -> jsonOvsFilterParameters.add(csFilterParameter.getQueryParamName()));
+      csFilterParameter -> jsonCsFilterParameters.add(csFilterParameter.getQueryParamName()));
     return objectNode;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return null;
+    return "Use the following format to provide the values of the specified query parameters"
+      + " for which your party can successfully process a GET request:";
+  }
+
+  @Override
+  public void handlePartyInput(JsonNode partyInput) {
+    super.handlePartyInput(partyInput);
+    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    suppliedScenarioParameters = null;
   }
 }

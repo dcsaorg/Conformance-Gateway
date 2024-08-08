@@ -52,7 +52,7 @@ public class CsPublisher extends ConformanceParty {
 
     JsonNode jsonResponseBody =
       JsonToolkit.templateFileToJsonNode(
-        "/standards/cs/messages/commercialschedules-api-1.0.0-vs.json",
+        "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json",
         Map.ofEntries());
 
     return request.createResponse(
@@ -78,7 +78,7 @@ public class CsPublisher extends ConformanceParty {
     SuppliedScenarioParameters responseSsp =
       SuppliedScenarioParameters.fromMap(
         StreamSupport.stream(
-            actionPrompt.required("CsFilterParametersQueryParamNames").spliterator(),
+            actionPrompt.required("csFilterParametersQueryParamNames").spliterator(),
             false)
           .map(
             jsonCsFilterParameter ->

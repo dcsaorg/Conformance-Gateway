@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.cs.party.CsPublisher;
 import org.dcsa.conformance.standards.cs.party.CsRole;
+import org.dcsa.conformance.standards.cs.party.CsSubscriber;
 
 import java.util.*;
 import java.util.function.Function;
@@ -49,13 +50,13 @@ public class CsComponentFactory extends AbstractComponentFactory {
     }
 
     PartyConfiguration consumerConfiguration =
-      partyConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName());
+      partyConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName());
     if (consumerConfiguration != null) {
       parties.add(
-        new CsPublisher(
+        new CsSubscriber(
           standardVersion,
           consumerConfiguration,
-          counterpartConfigurationsByRoleName.get(CsRole.SUBSCRIBER.getConfigName()),
+          counterpartConfigurationsByRoleName.get(CsRole.PUBLISHER.getConfigName()),
           persistentMap,
           webClient,
           orchestratorAuthHeader));

@@ -394,6 +394,28 @@ public class BookingChecks {
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
         issues.add("Container intermediate export stop-off location should not be provided");
       }
+      if("SD".equals(receiptTypeAtOrigin)) {
+        var requestedEquipments = body.path("requestedEquipments");
+        if (requestedEquipments.isArray()) {
+          StreamSupport.stream(requestedEquipments.spliterator(), false)
+            .forEach(element -> {
+              if ((element.path("emptyContainerPositioningLocation").isContainerNode()
+                || (preNode != null && !preNode.isEmpty())) && element.path("emptyContainerPositioningDateTime").asText("").isEmpty()  ) {
+                issues.add("Empty container positioning DateTime must have provided.");
+              }
+            });
+        }
+      }
+      var requestedEquipments = body.path("requestedEquipments");
+      if (requestedEquipments.isArray()) {
+        StreamSupport.stream(requestedEquipments.spliterator(), false)
+          .forEach(element -> {
+            if (element.path("emptyContainerDepotReleaseLocation").isContainerNode()
+              && element.path("emptyContainerPickupDateTime").asText("").isEmpty()  ) {
+              issues.add("Empty container Pickup DateTime must have provided.");
+            }
+          });
+      }
       return issues;
     });
 
@@ -729,8 +751,7 @@ public class BookingChecks {
         }
         return Set.of();
       }
-    )
-    );
+    ));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,

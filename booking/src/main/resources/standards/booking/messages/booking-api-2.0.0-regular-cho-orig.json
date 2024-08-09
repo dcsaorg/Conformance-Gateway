@@ -21,6 +21,13 @@
       "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
+      "emptyContainerPositioningDateTime": "2024-07-05T09:03:00-02:00",
+      "emptyContainerPositioningLocation": {
+        "geoCoordinate": {
+          "latitude": "51.439021",
+          "longitude": "6.761648"
+        }
+      },
       "commodities": [
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],

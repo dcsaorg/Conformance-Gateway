@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.booking.action;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,7 +23,7 @@ import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 public abstract class BookingAction extends ConformanceAction {
-  protected final int expectedStatus;
+  protected final Set<Integer> expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   public BookingAction(
@@ -32,11 +33,25 @@ public abstract class BookingAction extends ConformanceAction {
       String actionTitle,
       int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
-    this.expectedStatus = expectedStatus;
+    this.expectedStatus = Set.of(expectedStatus);
     this.dspReference =
         previousAction == null
             ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null,null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
+  }
+
+  public BookingAction(
+    String sourcePartyName,
+    String targetPartyName,
+    BookingAction previousAction,
+    String actionTitle,
+    Set<Integer> expectedStatus) {
+    super(sourcePartyName, targetPartyName, previousAction, actionTitle);
+    this.expectedStatus = expectedStatus;
+    this.dspReference =
+      previousAction == null
+        ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null,null, null))
+        : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override

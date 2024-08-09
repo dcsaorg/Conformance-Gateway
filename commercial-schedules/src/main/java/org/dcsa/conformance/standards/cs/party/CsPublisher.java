@@ -50,10 +50,16 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
 
-    JsonNode jsonResponseBody =
-      JsonToolkit.templateFileToJsonNode(
-        "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json",
-        Map.ofEntries());
+    String filePath;
+    if(request.url().endsWith("v1/point-to-point-routes")){
+      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
+    }else if(request.url().endsWith("v1/port-schedules")){
+      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
+    }else{
+      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
+    }
+    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(filePath,
+      Map.ofEntries());
 
     return request.createResponse(
       200,
@@ -98,8 +104,7 @@ public class CsPublisher extends ConformanceParty {
                   case UN_LOCATION_CODE -> "NLAMS";
                   case FACILITY_SMDG_CODE -> "APM";
                   case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
-                  case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
-
+                  case START_DATE, END_DATE, DATE -> DATE_FORMAT.format(new Date());
                 })));
 
     asyncOrchestratorPostPartyInput(

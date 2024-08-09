@@ -1011,6 +1011,12 @@
           }
         }
       },
+      "portSchedules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PortSchedule"
+        }
+      },
       "PortSchedule": {
         "title": "Port Schedule",
         "required": [
@@ -1192,6 +1198,12 @@
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
+        }
+      },
+      "serviceSchedules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ServiceSchedule"
         }
       },
       "ServiceSchedule": {

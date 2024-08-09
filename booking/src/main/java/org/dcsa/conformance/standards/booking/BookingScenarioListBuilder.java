@@ -28,7 +28,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalShipperPartyName = new ThreadLocal<>();
   private static final String BOOKING_API = "api";
-  private static final String BOOKING_NOTIFICATIONS_API = "notification";
+  private static final String BOOKING_NOTIFICATIONS_API = "api";
   private static final String CREATE_BOOKING_SCHEMA_NAME = "CreateBooking";
   private static final String GET_BOOKING_SCHEMA_NAME = "Booking";
   private static final String UPDATE_BOOKING_SCHEMA_NAME = "UpdateBooking";

@@ -25,6 +25,7 @@ export class SandboxComponent {
   standardModules: StandardModule[] = [];
   isAnyScenarioRunning: boolean = false;
   isLoading: boolean = false;
+  startingOrStoppingScenario: boolean = false;
 
   activatedRouteSubscription: Subscription | undefined;
 
@@ -55,6 +56,8 @@ export class SandboxComponent {
 
   async _loadData() {
     this.isLoading = true;
+    this.sandbox = undefined;
+    this.standardModules = [];
     this.sandbox = await this.conformanceService.getSandbox(this.sandboxId, true);
     this.standardModules = await this.conformanceService.getScenarioDigests(this.sandboxId);
     this.isAnyScenarioRunning = this.standardModules.filter(
@@ -106,7 +109,9 @@ export class SandboxComponent {
           "Are you sure you want to " + action.toLowerCase() + " the scenario? "
           + "All current scenario status and traffic will be lost.")
     ) {
+      this.startingOrStoppingScenario = true;
       await this.conformanceService.startOrStopScenario(this.sandbox!.id, scenario.id);
+      this.startingOrStoppingScenario = false;
       if (action === "Stop") {
         await this._loadData();
       } else {

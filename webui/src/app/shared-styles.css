@@ -1,7 +1,3 @@
-mat-spinner {
-    margin-top: 1em;
-}
-
 .cardContent {
     display: flex;
     flex-direction: row;
@@ -35,6 +31,12 @@ mat-spinner {
     margin-top: 1em;
 }
 
+.waiting {
+  margin-top: 1em;
+  color: darkgray;
+  font-style: italic;
+}
+
 .readOnlyInput {
     width: 99%;
     background-color: #eee;
@@ -48,4 +50,15 @@ mat-spinner {
 
 .withPointerCursor {
     cursor: pointer;
+}
+
+.text-with-spinner {
+  display: flex;
+  align-items: center;
+}
+
+.inline-spinner {
+  width: 1em;
+  height: 1em;
+  margin-right: 8px;
 }

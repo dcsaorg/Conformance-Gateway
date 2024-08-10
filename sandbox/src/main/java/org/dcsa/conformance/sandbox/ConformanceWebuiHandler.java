@@ -44,9 +44,10 @@ public class ConformanceWebuiHandler {
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
     log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
     String operation = requestNode.get("operation").asText();
-    return switch (operation) {
+    JsonNode resultNode = switch (operation) {
       case "createSandbox" -> _createSandbox(userId, requestNode);
       case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
+      case "getSandboxStatus" -> _getSandboxStatus(userId, requestNode);
       case "updateSandboxConfig" -> _updateSandboxConfig(userId, requestNode);
       case "getAvailableStandards" -> _getAvailableStandards(userId);
       case "getAllSandboxes" -> _getAllSandboxes(userId);
@@ -61,6 +62,8 @@ public class ConformanceWebuiHandler {
       case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
+    log.info("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
+    return resultNode;
   }
 
   private JsonNode _createSandbox(String userId, JsonNode requestNode) {
@@ -185,6 +188,12 @@ public class ConformanceWebuiHandler {
         .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
         .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
         .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
+  }
+
+  private JsonNode _getSandboxStatus(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get("sandboxId").asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getSandboxStatus(persistenceProvider, sandboxId);
   }
 
   private JsonNode _updateSandboxConfig(String userId, JsonNode requestNode) {

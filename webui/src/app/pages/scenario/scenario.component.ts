@@ -12,6 +12,7 @@ import { ConformanceStatus,
 import { ScenarioStatus } from "src/app/model/scenario-status";
 import {ConfirmationDialog} from "../../dialogs/confirmation/confirmation-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
+import {SandboxStatus} from "../../model/sandbox-status";
 
 @Component({
   selector: 'app-scenario',
@@ -20,10 +21,12 @@ import {MatDialog} from "@angular/material/dialog";
 })
 export class ScenarioComponent {
 
+  sandboxStatus: SandboxStatus | undefined;
   sandbox: Sandbox | undefined;
   scenario: ScenarioDigest | undefined;
   scenarioStatus: ScenarioStatus | undefined;
   actionInput: string = '';
+  processingActionInput: boolean = false;
   activatedRouteSubscription: Subscription | undefined;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
@@ -56,6 +59,10 @@ export class ScenarioComponent {
 
   async loadScenarioStatus() {
     this.actionInput = '';
+    this.sandboxStatus = undefined;
+    this.scenarioStatus = undefined;
+    this.sandboxStatus = await this.conformanceService.getSandboxStatus(this.sandbox!.id);
+    console.log("sandboxStatus=" + JSON.stringify(this.sandboxStatus));
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
       this.sandbox!.id,
       this.scenario!.id
@@ -89,11 +96,13 @@ export class ScenarioComponent {
   }
 
   async onSubmit(withInput: boolean) {
+    this.processingActionInput = true;
     await this.conformanceService.handleActionInput(
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
       withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
+    this.processingActionInput = false;
     await this.loadScenarioStatus();
   }
 }

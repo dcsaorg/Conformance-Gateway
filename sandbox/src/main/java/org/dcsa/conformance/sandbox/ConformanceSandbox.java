@@ -184,6 +184,8 @@ public class ConformanceSandbox {
                 if (originalPartyState != null && !originalPartyState.isEmpty()) {
                   party.importJsonState(originalPartyState);
                 }
+                party.setWaitingForBiConsumer(
+                    (who, forWhat) -> _setWaitingFor(persistenceProvider, sandboxId, who, forWhat));
                 partyConsumer.accept(party);
                 return party.exportJsonState();
               });
@@ -391,6 +393,47 @@ public class ConformanceSandbox {
             orchestrator -> resultReference.set(orchestrator.getScenarioDigest(scenarioId)))
         .run();
     return resultReference.get();
+  }
+
+  public static ObjectNode getSandboxStatus(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId) {
+    ArrayNode waitingArrayNode = OBJECT_MAPPER.createArrayNode();
+    _getWaitingFor(persistenceProvider, sandboxId)
+        .forEach(
+            (who, forWhat) ->
+                waitingArrayNode.add(
+                    OBJECT_MAPPER.createObjectNode().put("who", who).put("forWhat", forWhat)));
+    return OBJECT_MAPPER.createObjectNode().set("waiting", waitingArrayNode);
+  }
+
+  private static Map<String, String> _getWaitingFor(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId) {
+    JsonNode waitingJsonNode =
+        persistenceProvider.getNonLockingMap().getItemValue("sandbox#" + sandboxId, "waiting");
+    if (waitingJsonNode != null && waitingJsonNode.isObject()) {
+      return JsonToolkit.objectNodeToStringStringMap((ObjectNode) waitingJsonNode);
+    }
+    return Collections.emptyMap();
+  }
+
+  private static void _setWaitingFor(
+      ConformancePersistenceProvider persistenceProvider,
+      String sandboxId,
+      String who,
+      String forWhat) {
+    HashMap<String, String> waitingForMap =
+        new HashMap<>(_getWaitingFor(persistenceProvider, sandboxId));
+    if (forWhat != null) {
+      waitingForMap.put(who, forWhat);
+    } else {
+      waitingForMap.remove(who);
+    }
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue(
+            "sandbox#" + sandboxId,
+            "waiting",
+            JsonToolkit.stringStringMapToObjectNode(waitingForMap));
   }
 
   public static ObjectNode getScenarioStatus(

@@ -1,4 +1,4 @@
-<mat-spinner *ngIf="!sandbox"></mat-spinner>
+<app-text-waiting *ngIf="!sandbox" text="Retrieving sandbox metadata..."></app-text-waiting>
 
 <div *ngIf="sandbox">
     <div class="paragraph">Sandbox: {{sandbox.name}}</div>
@@ -7,9 +7,23 @@
     </div>
 </div>
 
+<app-text-waiting *ngIf="sandbox && !scenario" text="Retrieving scenario metadata..."></app-text-waiting>
+
 <div *ngIf="scenario" class="paragraph">Scenario: {{scenario.name}}</div>
 
-<div *ngIf="scenarioStatus">
+<app-text-waiting *ngIf="sandbox && scenario && !sandboxStatus" text="Retrieving sandbox status..."></app-text-waiting>
+
+<app-text-waiting *ngIf="sandbox && scenario && sandboxStatus && !scenarioStatus" text="Retrieving scenario status..."></app-text-waiting>
+
+<app-text-waiting *ngIf="sandbox && scenario && processingActionInput" text="Processing action input..."></app-text-waiting>
+
+<div *ngIf="sandboxStatus">
+    <div *ngFor="let whoForWhat of sandboxStatus!.waiting">
+      <div class="paragraph" style="border: 3px solid red;">Waiting: &apos;{{whoForWhat.who}}&apos; for &apos;{{whoForWhat.forWhat}}&apos;</div>
+    </div>
+</div>
+
+<div *ngIf="scenarioStatus && !processingActionInput">
     <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
         <div class="paragraph">The scenario was not started yet.</div>
     </div>

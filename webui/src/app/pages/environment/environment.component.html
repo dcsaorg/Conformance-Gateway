@@ -9,7 +9,7 @@
         >Create sandbox</button>
 </div>
 
-<mat-spinner *ngIf="isLoading"></mat-spinner>
+<app-text-waiting *ngIf="isLoading" text="Retrieving existing sandboxes..."></app-text-waiting>
 
 <mat-card
 *ngFor="let sandbox of sandboxes"

@@ -14,6 +14,7 @@ export class EditSandboxComponent {
   sandboxId: string = '';
   originalSandboxConfig: SandboxConfig | undefined;
   updatedSandboxConfig: SandboxConfig | undefined;
+  updatingSandbox: boolean = false;
 
   activatedRouteSubscription: Subscription | undefined;
 
@@ -57,6 +58,7 @@ export class EditSandboxComponent {
 
   async onUpdate() {
     if (this.cannotUpdate()) return;
+    this.updatingSandbox = true;
     await this.conformanceService.updateSandboxConfig(
       this.sandboxId,
       this.updatedSandboxConfig!.sandboxName,

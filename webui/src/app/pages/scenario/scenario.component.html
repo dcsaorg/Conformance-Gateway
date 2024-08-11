@@ -39,7 +39,7 @@
             <div class="pageTitle">Current action: <b>{{getCurrentActionTitle()}}</b></div>
 
             <div *ngIf="scenarioStatus.promptText">
-                <div class="paragraph">{{scenarioStatus.promptText}}</div>
+                <div class="paragraph">▶️ {{scenarioStatus.promptText}}</div>
 
                 <div *ngIf="scenarioStatus.jsonForPromptText" class="paragraph">
                     <pre>{{getJsonForPromptText()}}</pre>

@@ -389,11 +389,13 @@ public class ConformanceWebuiHandler {
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {
     String sandboxId = requestNode.get("sandboxId").asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
-    return ConformanceSandbox.startOrStopScenario(
+    ConformanceSandbox.startOrStopScenario(
         persistenceProvider,
         deferredSandboxTaskConsumer,
         sandboxId,
         requestNode.get("scenarioId").asText());
+    ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _completeCurrentAction(String userId, JsonNode requestNode) {

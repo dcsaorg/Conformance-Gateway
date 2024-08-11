@@ -15,7 +15,6 @@ public class EblSurrenderStandard extends AbstractStandard {
   public SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion() {
     return new TreeMap<>(
         Map.ofEntries(
-            Map.entry("2.0.0", new TreeSet<>(Set.of("Conformance"))),
             Map.entry("3.0.0", new TreeSet<>(Set.of("Conformance")))));
   }
 

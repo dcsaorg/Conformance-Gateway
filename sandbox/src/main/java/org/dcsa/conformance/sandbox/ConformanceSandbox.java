@@ -475,7 +475,7 @@ public class ConformanceSandbox {
     return OBJECT_MAPPER.createObjectNode();
   }
 
-  public static JsonNode startOrStopScenario(
+  public static void startOrStopScenario(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
@@ -486,10 +486,9 @@ public class ConformanceSandbox {
                 ConformanceSandbox._asyncSendOutboundWebRequest(
                     deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
-            "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
+            "starting or stopping in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
             orchestrator -> orchestrator.startOrStopScenario(scenarioId))
         .run();
-    return OBJECT_MAPPER.createObjectNode();
   }
 
   public static JsonNode completeCurrentAction(

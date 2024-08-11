@@ -6,6 +6,7 @@ import {ScenarioStatus} from "../model/scenario-status";
 import {Standard} from "../model/standard";
 import {SandboxConfig} from "../model/sandbox-config";
 import {StandardModule} from "../model/standard-module";
+import {SandboxStatus} from "../model/sandbox-status";
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,14 @@ export class ConformanceService {
       includeOperatorLog,
     });
     return sandbox;
+  }
+
+  async getSandboxStatus(sandboxId: string): Promise<SandboxStatus> {
+    const sandboxStatus: SandboxStatus = await this.apiService.call({
+      operation: "getSandboxStatus",
+      sandboxId,
+    });
+    return sandboxStatus;
   }
 
   async notifyParty(sandboxId: string): Promise<Sandbox> {

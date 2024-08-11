@@ -9,8 +9,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
+
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -29,6 +32,8 @@ public abstract class ConformanceParty implements StatefulEntity {
   protected final String apiVersion;
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
+
+  @Setter private BiConsumer<String, String> waitingForBiConsumer = (who, forWhat) -> {};
 
   /**
    * Used to store full documents between steps. Unlike the state saved and loaded via
@@ -146,23 +151,36 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected void syncCounterpartGet(
       String path, Map<String, ? extends Collection<String>> queryParams) {
-    webClient.syncRequest(_createConformanceRequest(false, "GET", path, queryParams, null));
+    _syncWebClientRequest(_createConformanceRequest(false, "GET", path, queryParams, null));
   }
 
   protected void syncCounterpartPatch(
       String path, Map<String, ? extends Collection<String>> queryParams, JsonNode jsonBody) {
-    webClient.syncRequest(
+    _syncWebClientRequest(
         _createConformanceRequest(false, "PATCH", path, queryParams, jsonBody));
   }
 
   protected ConformanceResponse syncCounterpartPost(String path, JsonNode jsonBody) {
-    return webClient.syncRequest(
+    return _syncWebClientRequest(
         _createConformanceRequest(false, "POST", path, Collections.emptyMap(), jsonBody));
   }
 
   protected ConformanceResponse syncCounterpartPut(String path, JsonNode jsonBody) {
-    return webClient.syncRequest(
+    return _syncWebClientRequest(
         _createConformanceRequest(false, "PUT", path, Collections.emptyMap(), jsonBody));
+  }
+
+  private ConformanceResponse _syncWebClientRequest(ConformanceRequest conformanceRequest) {
+    waitingForBiConsumer.accept(
+        counterpartConfiguration.getName(),
+        "respond to %s request".formatted(conformanceRequest.method()));
+    ConformanceResponse conformanceResponse;
+    try {
+      conformanceResponse = webClient.syncRequest(conformanceRequest);
+    } finally {
+      waitingForBiConsumer.accept(null, null);
+    }
+    return conformanceResponse;
   }
 
   protected void asyncCounterpartNotification(String path, JsonNode jsonBody) {

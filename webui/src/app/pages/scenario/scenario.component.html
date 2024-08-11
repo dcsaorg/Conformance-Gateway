@@ -1,4 +1,4 @@
-<mat-spinner *ngIf="!sandbox"></mat-spinner>
+<app-text-waiting *ngIf="!sandbox" text="Retrieving sandbox metadata..."></app-text-waiting>
 
 <div *ngIf="sandbox">
     <div class="paragraph">Sandbox: {{sandbox.name}}</div>
@@ -7,9 +7,23 @@
     </div>
 </div>
 
+<app-text-waiting *ngIf="sandbox && !scenario" text="Retrieving scenario metadata..."></app-text-waiting>
+
 <div *ngIf="scenario" class="paragraph">Scenario: {{scenario.name}}</div>
 
-<div *ngIf="scenarioStatus">
+<app-text-waiting *ngIf="sandbox && scenario && !sandboxStatus" text="Retrieving sandbox status..."></app-text-waiting>
+
+<app-text-waiting *ngIf="sandbox && scenario && sandboxStatus && sandboxStatus!.waiting.length == 0 && !scenarioStatus" text="Retrieving scenario status..."></app-text-waiting>
+
+<app-text-waiting *ngIf="sandbox && scenario && performingAction" [text]="performingAction"></app-text-waiting>
+
+<div *ngIf="sandboxStatus">
+    <div *ngFor="let sandboxWaiting of sandboxStatus!.waiting">
+      <app-text-waiting [text]="formattedSandboxWaiting(sandboxWaiting)"></app-text-waiting>
+    </div>
+</div>
+
+<div *ngIf="scenarioStatus && !performingAction">
     <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
         <div class="paragraph">The scenario was not started yet.</div>
     </div>
@@ -20,10 +34,12 @@
         </div>
 
         <div *ngIf="scenarioStatus.nextActions">
-            <div class="pageTitle">Next actions: <b>{{scenarioStatus.nextActions}}</b></div>
+            <div class="paragraph">Remaining actions: {{scenarioStatus.nextActions}}</div>
+
+            <div class="pageTitle">Current action: <b>{{getCurrentActionTitle()}}</b></div>
 
             <div *ngIf="scenarioStatus.promptText">
-                <div class="paragraph">{{scenarioStatus.promptText}}</div>
+                <div class="paragraph">▶️ {{scenarioStatus.promptText}}</div>
 
                 <div *ngIf="scenarioStatus.jsonForPromptText" class="paragraph">
                     <pre>{{getJsonForPromptText()}}</pre>
@@ -59,13 +75,13 @@
                     mat-raised-button
                     color="primary"
                     (click)="loadScenarioStatus()"
-                    >Refresh</button>
+                    >Refresh status</button>
                     &nbsp;
                     <button
                       mat-raised-button
                       color="primary"
                       (click)="completeCurrentAction()"
-                    >Complete action</button>
+                    >Action completed</button>
                 </div>
             </div>
         </div>

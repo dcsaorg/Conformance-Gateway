@@ -1,4 +1,4 @@
-<mat-spinner *ngIf="isLoading"></mat-spinner>
+<app-text-waiting *ngIf="isLoading && !sandbox" text="Retrieving sandbox metadata..."></app-text-waiting>
 
 <div *ngIf="sandbox">
     <div class="pageTitle">
@@ -15,29 +15,36 @@
     </div>
 </div>
 
-<div class="pageSubtitle" *ngIf="standardModules.length == 0">No scenarios</div>
+<app-text-waiting *ngIf="isLoading && sandbox && !sandbox.canNotifyParty" text="Retrieving scenarios..."></app-text-waiting>
 
-<div *ngFor="let standardModule of standardModules">
-  <div class="pageSubtitle">{{standardModule.moduleName}}</div>
+<div class="pageSubtitle" *ngIf="!isLoading && standardModules.length == 0">No scenarios</div>
 
-  <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
-      <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
-          <button
-          mat-icon-button
-          color="primary"
-          [disabled]="cannotPerformAction(scenario)"
-          [title]="getActionTitle(scenario)"
-          (click)="onScenarioAction($event, scenario)"
-          ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+<app-text-waiting *ngIf="startingOrStoppingScenario" text="Updating scenario state..."></app-text-waiting>
 
-          <span
-          class="conformanceStatus"
-          [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
-          >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
+<div *ngIf="!startingOrStoppingScenario">
+    <div *ngFor="let standardModule of standardModules">
+        <div class="pageSubtitle">{{standardModule.moduleName}}</div>
 
-          <span>{{scenario.name}}</span>
-      </div>
-  </mat-card>
+        <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
+            <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
+                <button
+                mat-icon-button
+                color="primary"
+                [disabled]="cannotPerformAction(scenario)"
+                [title]="getActionTitle(scenario)"
+                (click)="onScenarioAction($event, scenario)"
+                ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
+
+                <span
+                class="conformanceStatus"
+                [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
+                >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
+
+                <span>{{scenario.name}}</span>
+            </div>
+        </mat-card>
+        <br/>
+    </div>
 </div>
 
 <div *ngIf="sandbox?.canNotifyParty">

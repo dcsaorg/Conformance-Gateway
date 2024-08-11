@@ -1,116 +1,121 @@
 <div class="pageTitle">Create sandbox</div>
 
-<mat-spinner *ngIf="!standards"></mat-spinner>
 
-<form
-#createSandboxForm="ngForm"
-(submit)="onCreate()"
->
-    <div *ngIf="standards">
-        <div>
-            <br />
-            <mat-select
-            placeholder="Select standard"
-            name="selectedStandard"
-            [(ngModel)]="selectedStandard"
-            (ngModelChange)="onSelectedStandardChanged(selectedStandard)"
-            >
+<app-text-waiting *ngIf="standards.length == 0" text="Retrieving available standard configurations..."></app-text-waiting>
+
+<app-text-waiting *ngIf="creatingSandbox" text="Creating sandbox..."></app-text-waiting>
+
+<div *ngIf="!creatingSandbox && standards.length > 0">
+    <form
+    #createSandboxForm="ngForm"
+    (submit)="onCreate()"
+    >
+        <div *ngIf="standards">
+            <div>
+                <br />
+                <mat-select
+                placeholder="Select standard"
+                name="selectedStandard"
+                [(ngModel)]="selectedStandard"
+                (ngModelChange)="onSelectedStandardChanged(selectedStandard)"
+                >
+                    <mat-option
+                    *ngFor="let standard of standards"
+                    [value]="standard"
+                    >{{standard.name}}</mat-option>
+                </mat-select>
+            </div>
+
+            <div *ngIf="selectedStandard">
+                <br />
+                <mat-select
+                placeholder="Select version"
+                name="selectedVersion"
+                [(ngModel)]="selectedVersion"
+                (ngModelChange)="onSelectedVersionChanged(selectedVersion)"
+                >
+                    <mat-option
+                    *ngFor="let version of selectedStandard.versions"
+                    [value]="version"
+                    >{{version.number}}</mat-option>
+                </mat-select>
+            </div>
+
+            <div *ngIf="selectedVersion">
+              <br />
+              <mat-select
+                placeholder="Select the scenario suite"
+                name="selectedSuite"
+                [(ngModel)]="selectedSuite"
+                (ngModelChange)="onSelectedSuiteChanged(selectedSuite)"
+              >
                 <mat-option
-                *ngFor="let standard of standards"
-                [value]="standard"
-                >{{standard.name}}</mat-option>
-            </mat-select>
-        </div>
+                  *ngFor="let suite of selectedVersion.suites"
+                  [value]="suite"
+                >{{suite}}</mat-option>
+              </mat-select>
+            </div>
 
-        <div *ngIf="selectedStandard">
+            <div *ngIf="selectedVersion && selectedSuite">
+                <br />
+                <mat-select
+                placeholder="Select tested implementation role"
+                name="selectedRole"
+                [(ngModel)]="selectedRole"
+                (ngModelChange)="onSelectedRoleChanged(selectedRole)"
+                >
+                    <mat-option
+                    *ngFor="let role of selectedVersion.roles"
+                    [value]="role"
+                    >{{role}}</mat-option>
+                </mat-select>
+            </div>
+
+            <div *ngIf="selectedRole">
+                <br />
+                <mat-select
+                placeholder="Select sandbox type"
+                name="selectedSandboxType"
+                [(ngModel)]="selectedSandboxType"
+                (ngModelChange)="onSelectedSandboxTypeChanged(selectedSandboxType)"
+                >
+                    <mat-option
+                    *ngFor="let sandboxType of SANDBOX_TYPES"
+                    [value]="sandboxType"
+                    >{{sandboxType}}</mat-option>
+                </mat-select>
+            </div>
+
+            <div *ngIf="selectedSandboxType">
+                <br />
+                <mat-form-field class="fullWidth">
+                    <mat-label>New sandbox name</mat-label>
+                    <input
+                    matInput
+                    #sandboxNameInput
+                    type = "text"
+                    autocomplete="off"
+                    name="sandboxNameTextField"
+                    [(ngModel)]="newSandboxName"
+                    />
+                </mat-form-field>
+            </div>
+
             <br />
-            <mat-select
-            placeholder="Select version"
-            name="selectedVersion"
-            [(ngModel)]="selectedVersion"
-            (ngModelChange)="onSelectedVersionChanged(selectedVersion)"
-            >
-                <mat-option
-                *ngFor="let version of selectedStandard.versions"
-                [value]="version"
-                >{{version.number}}</mat-option>
-            </mat-select>
+            <div>
+                <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="cannotCreate()"
+                ><mat-icon>done</mat-icon>Create</button>
+                &nbsp;
+                <button
+                mat-raised-button
+                type="button"
+                (click)="onCancel()"
+                ><mat-icon>not_interested</mat-icon>Cancel</button>
+            </div>
         </div>
-
-        <div *ngIf="selectedVersion">
-          <br />
-          <mat-select
-            placeholder="Select the scenario suite"
-            name="selectedSuite"
-            [(ngModel)]="selectedSuite"
-            (ngModelChange)="onSelectedSuiteChanged(selectedSuite)"
-          >
-            <mat-option
-              *ngFor="let suite of selectedVersion.suites"
-              [value]="suite"
-            >{{suite}}</mat-option>
-          </mat-select>
-        </div>
-
-        <div *ngIf="selectedVersion && selectedSuite">
-            <br />
-            <mat-select
-            placeholder="Select tested implementation role"
-            name="selectedRole"
-            [(ngModel)]="selectedRole"
-            (ngModelChange)="onSelectedRoleChanged(selectedRole)"
-            >
-                <mat-option
-                *ngFor="let role of selectedVersion.roles"
-                [value]="role"
-                >{{role}}</mat-option>
-            </mat-select>
-        </div>
-
-        <div *ngIf="selectedRole">
-            <br />
-            <mat-select
-            placeholder="Select sandbox type"
-            name="selectedSandboxType"
-            [(ngModel)]="selectedSandboxType"
-            (ngModelChange)="onSelectedSandboxTypeChanged(selectedSandboxType)"
-            >
-                <mat-option
-                *ngFor="let sandboxType of SANDBOX_TYPES"
-                [value]="sandboxType"
-                >{{sandboxType}}</mat-option>
-            </mat-select>
-        </div>
-
-        <div *ngIf="selectedSandboxType">
-            <br />
-            <mat-form-field class="fullWidth">
-                <mat-label>New sandbox name</mat-label>
-                <input
-                matInput
-                #sandboxNameInput
-                type = "text"
-                autocomplete="off"
-                name="sandboxNameTextField"
-                [(ngModel)]="newSandboxName"
-                />
-            </mat-form-field>
-        </div>
-
-        <br />
-        <div>
-            <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="cannotCreate()"
-            ><mat-icon>done</mat-icon>Create</button>
-            &nbsp;
-            <button
-            mat-raised-button
-            type="button"
-            (click)="onCancel()"
-            ><mat-icon>not_interested</mat-icon>Cancel</button>
-        </div>
-    </div>
-</form>
+    </form>
+</div>

@@ -4,7 +4,7 @@ package org.dcsa.conformance.sandbox.state;
 //
 // PK=sandbox#UUID      SK=config              value={...}
 // PK=sandbox#UUID      SK=state               value={currentSessionId: UUID, ...}  lock=...
-// PK=sandbox#UUID      SK=waiting             value={"Orchestrator": "notification response", "Carrier1": "API call response"}
+// PK=sandbox#UUID      SK=waiting             value=[{"who": "Orchestrator", "forWhom": "Shipper1", "toDoWhat": "perform action 'UC1'"}, ...]
 //
 // PK=sandbox#UUID      SK=session#UTC#UUID
 //

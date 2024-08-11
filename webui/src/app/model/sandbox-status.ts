@@ -1,6 +1,9 @@
 export interface SandboxStatus {
-  waiting: {
-    who: string,
-    forWhat: string,
-  }[],
+  waiting: SandboxWaiting[],
+}
+
+export interface SandboxWaiting {
+  who: string,
+  forWhom: string,
+  toDoWhat: string,
 }

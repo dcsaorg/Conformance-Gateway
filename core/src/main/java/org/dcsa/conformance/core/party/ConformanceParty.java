@@ -172,14 +172,13 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   private ConformanceResponse _syncWebClientRequest(ConformanceRequest conformanceRequest) {
     waitingForBiConsumer.accept(
-        partyConfiguration.getName(),
-        "response for %s %s request"
-            .formatted(partyConfiguration.getName(), conformanceRequest.method()));
+        counterpartConfiguration.getName(),
+        "respond to %s request".formatted(conformanceRequest.method()));
     ConformanceResponse conformanceResponse;
     try {
       conformanceResponse = webClient.syncRequest(conformanceRequest);
     } finally {
-      waitingForBiConsumer.accept(partyConfiguration.getName(), null);
+      waitingForBiConsumer.accept(null, null);
     }
     return conformanceResponse;
   }

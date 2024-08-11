@@ -13,17 +13,17 @@
 
 <app-text-waiting *ngIf="sandbox && scenario && !sandboxStatus" text="Retrieving sandbox status..."></app-text-waiting>
 
-<app-text-waiting *ngIf="sandbox && scenario && sandboxStatus && !scenarioStatus" text="Retrieving scenario status..."></app-text-waiting>
+<app-text-waiting *ngIf="sandbox && scenario && sandboxStatus && sandboxStatus!.waiting.length == 0 && !scenarioStatus" text="Retrieving scenario status..."></app-text-waiting>
 
-<app-text-waiting *ngIf="sandbox && scenario && processingActionInput" text="Processing action input..."></app-text-waiting>
+<app-text-waiting *ngIf="sandbox && scenario && performingAction" [text]="performingAction"></app-text-waiting>
 
 <div *ngIf="sandboxStatus">
-    <div *ngFor="let whoForWhat of sandboxStatus!.waiting">
-      <div class="paragraph" style="border: 3px solid red;">Waiting: &apos;{{whoForWhat.who}}&apos; for &apos;{{whoForWhat.forWhat}}&apos;</div>
+    <div *ngFor="let sandboxWaiting of sandboxStatus!.waiting">
+      <app-text-waiting [text]="formattedSandboxWaiting(sandboxWaiting)"></app-text-waiting>
     </div>
 </div>
 
-<div *ngIf="scenarioStatus && !processingActionInput">
+<div *ngIf="scenarioStatus && !performingAction">
     <div *ngIf="!scenarioStatus.isRunning && scenarioStatus.nextActions !== ''">
         <div class="paragraph">The scenario was not started yet.</div>
     </div>
@@ -34,7 +34,9 @@
         </div>
 
         <div *ngIf="scenarioStatus.nextActions">
-            <div class="pageTitle">Next actions: <b>{{scenarioStatus.nextActions}}</b></div>
+            <div class="paragraph">Remaining actions: {{scenarioStatus.nextActions}}</div>
+
+            <div class="pageTitle">Current action: <b>{{getCurrentActionTitle()}}</b></div>
 
             <div *ngIf="scenarioStatus.promptText">
                 <div class="paragraph">{{scenarioStatus.promptText}}</div>
@@ -73,13 +75,13 @@
                     mat-raised-button
                     color="primary"
                     (click)="loadScenarioStatus()"
-                    >Refresh</button>
+                    >Refresh status</button>
                     &nbsp;
                     <button
                       mat-raised-button
                       color="primary"
                       (click)="completeCurrentAction()"
-                    >Complete action</button>
+                    >Action completed</button>
                 </div>
             </div>
         </div>

@@ -3,6 +3,7 @@ import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 import { Sandbox } from "../../model/sandbox";
+import { sleep } from "../../model/toolkit";
 import { Subscription } from "rxjs";
 import { ScenarioDigest } from "src/app/model/scenario";
 import { ConformanceStatus,
@@ -12,7 +13,7 @@ import { ConformanceStatus,
 import { ScenarioStatus } from "src/app/model/scenario-status";
 import {ConfirmationDialog} from "../../dialogs/confirmation/confirmation-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
-import {SandboxStatus} from "../../model/sandbox-status";
+import {SandboxStatus, SandboxWaiting} from "../../model/sandbox-status";
 
 @Component({
   selector: 'app-scenario',
@@ -26,7 +27,7 @@ export class ScenarioComponent {
   scenario: ScenarioDigest | undefined;
   scenarioStatus: ScenarioStatus | undefined;
   actionInput: string = '';
-  processingActionInput: boolean = false;
+  performingAction: string = '';
   activatedRouteSubscription: Subscription | undefined;
 
   getConformanceStatusEmoji = getConformanceStatusEmoji;
@@ -61,22 +62,35 @@ export class ScenarioComponent {
     this.actionInput = '';
     this.sandboxStatus = undefined;
     this.scenarioStatus = undefined;
-    this.sandboxStatus = await this.conformanceService.getSandboxStatus(this.sandbox!.id);
-    console.log("sandboxStatus=" + JSON.stringify(this.sandboxStatus));
+
+    const sandboxStatusCheckStartTime = new Date().getTime();
+    do {
+      this.sandboxStatus = await this.conformanceService.getSandboxStatus(this.sandbox!.id);
+      console.log("sandboxStatus=" + JSON.stringify(this.sandboxStatus));
+      await sleep(1000);
+    } while (this.sandboxStatus.waiting.length > 0
+      && new Date().getTime() - sandboxStatusCheckStartTime < 60 * 1000);
+
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
       this.sandbox!.id,
       this.scenario!.id
     );
   }
 
+  formattedSandboxWaiting(sandboxWaiting: SandboxWaiting): string {
+    return `${sandboxWaiting.who} is waiting for ${sandboxWaiting.forWhom} to ${sandboxWaiting.toDoWhat}`;
+  }
+
   async completeCurrentAction() {
     if (await ConfirmationDialog.open(
       this.dialog,
-      "Complete action",
-      "Are you sure you want to complete the current action? "
+      "Action completed",
+      "Are you sure you want to mark the current action as completed? "
       + "You cannot go back to a previous action without restarting the scenario.")
     ) {
+      this.performingAction = "Marking current action as completed...";
       await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+      this.performingAction = "";
       await this.loadScenarioStatus();
     }
   }
@@ -91,18 +105,22 @@ export class ScenarioComponent {
     return JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
   }
 
+  getCurrentActionTitle(): string {
+    return this.scenarioStatus?.nextActions.split(" - ")[0] || "";
+  }
+
   cannotSubmit(): boolean {
     return this.actionInput.trim() === '';
   }
 
   async onSubmit(withInput: boolean) {
-    this.processingActionInput = true;
+    this.performingAction = "Processing action input...";
     await this.conformanceService.handleActionInput(
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
       withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
-    this.processingActionInput = false;
+    this.performingAction = "";
     await this.loadScenarioStatus();
   }
 }

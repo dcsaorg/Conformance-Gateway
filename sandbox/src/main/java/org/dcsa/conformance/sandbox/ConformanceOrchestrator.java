@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.ConformanceCheck;
@@ -20,8 +22,8 @@ import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
-import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
@@ -37,6 +39,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
   private final LinkedHashMap<UUID, ConformanceScenario> _scenariosById = new LinkedHashMap<>();
   private final Map<UUID, UUID> latestRunIdsByScenarioId = new HashMap<>();
   private UUID currentScenarioId;
+
+  @Setter private BiConsumer<String, String> waitingForBiConsumer = (forWhom, toDoWhat) -> {};
 
   public ConformanceOrchestrator(
       SandboxConfiguration sandboxConfiguration,
@@ -200,6 +204,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
+    waitingForBiConsumer.accept(
+        partyName, "perform action '%s'".formatted(nextAction.getActionTitle()));
+
     asyncWebClient.accept(
         new ConformanceWebRequest(
             "GET",
@@ -259,8 +266,9 @@ public class ConformanceOrchestrator implements StatefulEntity {
       }
     }
 
-    currentScenario.popNextAction();
+    waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
 
+    currentScenario.popNextAction();
     nextAction.handlePartyInput(partyInput);
     notifyNextActionParty();
   }
@@ -290,6 +298,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString(), exchange));
       return;
     }
+
+    waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
 
     if (nextAction.handleExchange(exchange)) {
       boolean autoAdvance =

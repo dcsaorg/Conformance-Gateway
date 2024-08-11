@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 
 public enum JsonToolkit {
@@ -78,19 +77,5 @@ public enum JsonToolkit {
                     entryNode.get("key").asText(),
                     JsonToolkit.arrayNodeToStringCollection((ArrayNode) entryNode.get("values"))));
     return map;
-  }
-
-  public static ObjectNode stringStringMapToObjectNode(Map<String, String> stringStringMap) {
-    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
-    stringStringMap.forEach(objectNode::put);
-    return objectNode;
-  }
-
-  public static Map<String, String> objectNodeToStringStringMap(ObjectNode objectNode) {
-    HashMap<String, String> stringStringMap = new HashMap<>();
-    objectNode
-        .fields()
-        .forEachRemaining(entry -> stringStringMap.put(entry.getKey(), entry.getValue().asText()));
-    return stringStringMap;
   }
 }

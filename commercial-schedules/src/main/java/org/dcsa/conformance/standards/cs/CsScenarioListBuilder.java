@@ -37,7 +37,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
     return Stream.of(
-        /*Map.entry(
+        Map.entry(
           "Point to Point Routings",
           noAction()
             .thenEither(
@@ -47,7 +47,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
               scenarioWithParametersPtp(PLACE_OF_DELIVERY,PLACE_OF_RECEIPT,DEPARTURE_START_DATE,DEPARTURE_END_DATE,ARRIVAL_START_DATE,ARRIVAL_END_DATE,MAX_TRANSHIPMENT),
               scenarioWithParametersPtp(PLACE_OF_DELIVERY,PLACE_OF_RECEIPT,DEPARTURE_START_DATE,RECEIPT_TYPE_AT_ORIGIN,DELIVERY_TYPE_AT_DESTINATION),
               scenarioWithParametersPtp(PLACE_OF_DELIVERY,PLACE_OF_RECEIPT,DEPARTURE_START_DATE,DEPARTURE_END_DATE,ARRIVAL_START_DATE,ARRIVAL_END_DATE,RECEIPT_TYPE_AT_ORIGIN,DELIVERY_TYPE_AT_DESTINATION),
-              scenarioWithParametersPtp(PLACE_OF_DELIVERY,PLACE_OF_RECEIPT,DEPARTURE_START_DATE,DEPARTURE_END_DATE,ARRIVAL_START_DATE,ARRIVAL_END_DATE,RECEIPT_TYPE_AT_ORIGIN,DELIVERY_TYPE_AT_DESTINATION,MAX_TRANSHIPMENT))),*/
+              scenarioWithParametersPtp(PLACE_OF_DELIVERY,PLACE_OF_RECEIPT,DEPARTURE_START_DATE,DEPARTURE_END_DATE,ARRIVAL_START_DATE,ARRIVAL_END_DATE,RECEIPT_TYPE_AT_ORIGIN,DELIVERY_TYPE_AT_DESTINATION,MAX_TRANSHIPMENT))),
         Map.entry(
           "Port Schedules",
           noAction()
@@ -132,7 +132,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           subscriberPartyName,
           publisherPartyName,
           previousAction,
-          componentFactory.getMessageSchemaValidator("api","PointToPoint")));
+          componentFactory.getMessageSchemaValidator("api","pointToPointRoutings")));
   }
 
   private static CsScenarioListBuilder getPortSchedules() {

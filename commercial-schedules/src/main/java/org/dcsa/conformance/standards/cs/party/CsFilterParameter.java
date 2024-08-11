@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum CsFilterParameter {
- /* PLACE_OF_RECEIPT("placeOfReceipt"),
+  PLACE_OF_RECEIPT("placeOfReceipt"),
   PLACE_OF_DELIVERY("placeOfDelivery"),
   DEPARTURE_START_DATE("departureStartDate"),
   DEPARTURE_END_DATE("departureEndDate"),
@@ -16,7 +16,7 @@ public enum CsFilterParameter {
   ARRIVAL_END_DATE("arrivalEndDate"),
   MAX_TRANSHIPMENT("maxTranshipment"),
   RECEIPT_TYPE_AT_ORIGIN("receiptTypeAtOrigin"),
-  DELIVERY_TYPE_AT_DESTINATION("deliveryTypeAtDestination"),*/
+  DELIVERY_TYPE_AT_DESTINATION("deliveryTypeAtDestination"),
   DATE("date"),
   CARRIER_SERVICE_NAME("carrierServiceName"),
   CARRIER_SERVICE_CODE("carrierServiceCode"),

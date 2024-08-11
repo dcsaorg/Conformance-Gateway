@@ -29,7 +29,7 @@ public class CsGetRoutingsAction extends CsAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routings"),
+          new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routes"),
           new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
           new JsonSchemaCheck(
             CsRole::isPublisher,

@@ -945,6 +945,12 @@
         },
         "description": "The Location specifying where the place of departure is located.\n"
       },
+      "pointToPointRoutings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PointToPoint"
+        }
+      },
       "PointToPoint": {
         "title": "Point to Point",
         "required": [

@@ -105,6 +105,16 @@ public class CsPublisher extends ConformanceParty {
                   case FACILITY_SMDG_CODE -> "APM";
                   case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
                   case START_DATE, END_DATE, DATE -> DATE_FORMAT.format(new Date());
+                  case PLACE_OF_RECEIPT -> "NLAMS";
+                  case PLACE_OF_DELIVERY -> "NLAMS";
+                  case DEPARTURE_START_DATE -> DATE_FORMAT.format(new Date());
+                  case DEPARTURE_END_DATE -> DATE_FORMAT.format(new Date());
+                  case ARRIVAL_START_DATE -> DATE_FORMAT.format(new Date());
+                  case ARRIVAL_END_DATE -> DATE_FORMAT.format(new Date());
+                  case MAX_TRANSHIPMENT -> "1";
+                  case RECEIPT_TYPE_AT_ORIGIN -> "CY";
+                  case DELIVERY_TYPE_AT_DESTINATION -> "CY";
+
                 })));
 
     asyncOrchestratorPostPartyInput(

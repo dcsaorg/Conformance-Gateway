@@ -14,4 +14,5 @@ public class ConformanceConfiguration {
     boolean createAutoTestingSandboxes;
     boolean createManualTestingSandboxes;
     boolean showOnlyAllInOneSandboxes;
+    long simulatedLambdaDelay;
 }

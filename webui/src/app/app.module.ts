@@ -28,6 +28,7 @@ import { ScenarioComponent } from './pages/scenario/scenario.component';
 import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.component';
 import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.component';
 import { ReportComponent } from './pages/report/report.component';
+import {TextWaitingComponent} from "./text/waiting/text-waiting.component";
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { ReportComponent } from './pages/report/report.component';
     SandboxComponent,
     ScenarioComponent,
     SimpleTextComponent,
+    TextWaitingComponent,
   ],
   imports: [
     BrowserAnimationsModule,

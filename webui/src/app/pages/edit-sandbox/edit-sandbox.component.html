@@ -1,8 +1,12 @@
 <div class="pageTitle">Sandbox settings</div>
 
-<mat-spinner *ngIf="!originalSandboxConfig || !updatedSandboxConfig"></mat-spinner>
+<app-text-waiting
+  *ngIf="!originalSandboxConfig || !updatedSandboxConfig"
+  text="Retrieving sandbox settings..."></app-text-waiting>
 
-<div *ngIf="originalSandboxConfig && updatedSandboxConfig">
+<app-text-waiting *ngIf="updatingSandbox" text="Updating sandbox settings..."></app-text-waiting>
+
+<div *ngIf="originalSandboxConfig && updatedSandboxConfig && !updatingSandbox">
     <div class="pageSubtitle">Connecting to the sandbox</div>
 
     <div class="paragraph">Sandbox URL:</div>
@@ -97,7 +101,7 @@
                 />
             </mat-form-field>
         </div>
-    
+
         <br />
         <div>
             <button

@@ -39,7 +39,7 @@ public class CsGetRoutingsAction extends CsAction{
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
             responseSchemaValidator),
-          CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(),expectedApiVersion));
+          CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
       }
     };
   }

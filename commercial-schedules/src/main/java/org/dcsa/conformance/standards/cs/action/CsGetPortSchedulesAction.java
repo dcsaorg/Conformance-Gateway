@@ -36,7 +36,7 @@ public class CsGetPortSchedulesAction extends CsAction{
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
             responseSchemaValidator),
-          CsChecks.getPayloadChecksForPs(getMatchedExchangeUuid(),expectedApiVersion));
+          CsChecks.getPayloadChecksForPs(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
       }
     };
   }

@@ -40,7 +40,7 @@ public class CsGetVesselSchedulesAction extends CsAction{
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
             responseSchemaValidator),
-          CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(),expectedApiVersion));
+          CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
       }
     };
   }

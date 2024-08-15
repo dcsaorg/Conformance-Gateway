@@ -64,10 +64,11 @@ public class CsChecks {
     );
   }
 
-  public static ActionCheck getPayloadChecksForPs(UUID matchedExchangeUuid, String expectedApiVersion) {
+  public static ActionCheck getPayloadChecksForPs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
     ArrayList<JsonContentCheck> checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckforPs());
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
+    checks.add(validateDateForPs(sspSupplier));
     return JsonAttribute.contentChecks(
       CsRole::isPublisher,
       matchedExchangeUuid,
@@ -94,9 +95,11 @@ public class CsChecks {
     );
   }
 
-  public static ActionCheck getPayloadChecksForVs(UUID matchedExchangeUuid, String expectedApiVersion) {
+  public static ActionCheck getPayloadChecksForVs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
     ArrayList<JsonContentCheck> checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckforVs());
+    checks.add(validateUSRForVs(sspSupplier));
+    checks.add(validateIMONumberForVS(sspSupplier));
     return JsonAttribute.contentChecks(
       CsRole::isPublisher,
       matchedExchangeUuid,
@@ -217,9 +220,76 @@ public class CsChecks {
     if (dateType.equals("startDate")&& !dateTimeAsDate.isAfter(date)) {
       return String.format("The %s date should be after the %s start date",operation,operation);
     } else if (dateType.equals("endDate") && !dateTimeAsDate.isBefore(date)) {
-      return String.format("The %s date should be before the %s start date",operation, operation);
+      return String.format("The %s date should be before the %s end date",operation, operation);
     }
     return "";
+  }
+
+  private static final JsonContentCheck validateUSRForVs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+    return JsonAttribute.customValidator(
+      "Validate USR available in the response",
+      body ->{
+        var issues = new LinkedHashSet<String>();
+        for(JsonNode vs : body){
+          var csp = sspSupplier.get().getMap();
+          if(csp.containsKey(UNIVERSAL_SERVICE_REFERENCE)){
+            if(body.at("universalServiceReference").isMissingNode()){
+              issues.add("The 'universalServiceReference' needs to be provided in the response if it is given in the filter.");
+            }
+          }
+        }
+        return issues;
+      }
+    );
+  }
+
+  private static final JsonContentCheck validateDateForPs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+    return JsonAttribute.customValidator(
+      "Validate date in the response",
+      body ->{
+        var issues = new LinkedHashSet<String>();
+        for (JsonNode schedule : body) {
+          schedule.at("/vesselSchedules").forEach(vesselSchedule -> {
+            vesselSchedule.at("/timestamps").forEach(timestamp -> {
+              JsonNode eventDateTime = timestamp.at("/eventDateTime");
+              JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
+              if (eventClassifierCode.asText().equals("EST")) {
+                if(!isAfterTheDate(eventDateTime.asText(),sspSupplier.get().getMap().get(DATE))){
+                  issues.add("The estimated arrival or departure dates should be on or after the date provided");
+                }
+              }else if(eventClassifierCode.asText().equals("PLN")){
+                if(!isAfterTheDate(eventDateTime.asText(),sspSupplier.get().getMap().get(DATE))){
+                  issues.add("The estimated arrival or departure dates should be on or after the date provided");
+                }
+              }
+            });
+          });
+        }
+        return issues;
+      }
+    );
+  }
+  private boolean isAfterTheDate(String dateValue, String dateQueryParam){
+    LocalDate filterDate = LocalDate.parse(dateQueryParam);
+    ZonedDateTime dateTime = ZonedDateTime.parse(dateValue);
+    LocalDate responseDateTimeAsDate = dateTime.toLocalDate();
+    return !responseDateTimeAsDate.isBefore(filterDate);
+  }
+
+  private JsonContentCheck validateIMONumberForVS(Supplier<SuppliedScenarioParameters> sspSupplier){
+    return JsonAttribute.customValidator("Validate vesselIMONumber present in response",
+      body ->{
+        var issues = new LinkedHashSet<String>();
+        for(JsonNode schedule : body){
+          for(JsonNode vs : schedule.at("/vesselSchedules")){
+            if(sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER) && (vs.at("/vessel/vesselIMONumber").isMissingNode() || vs.at("/vessel/vesselIMONumber").isNull()))
+            {
+              issues.add("VesselIMONumber should be present in the response if provided in the filter.");
+            }
+          }
+        }
+        return issues;
+      });
   }
 
 }

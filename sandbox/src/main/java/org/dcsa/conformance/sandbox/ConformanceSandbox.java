@@ -43,14 +43,14 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     BookingStandard.INSTANCE,
+    CsStandard.INSTANCE,
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
-    TntStandard.INSTANCE,
-    CsStandard.INSTANCE
+    TntStandard.INSTANCE
   };
 
   private record OrchestratorTask(

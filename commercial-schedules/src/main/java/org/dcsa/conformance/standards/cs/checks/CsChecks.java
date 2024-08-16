@@ -32,9 +32,13 @@ public class CsChecks {
     checks.add(createLocationCheckforPtp("arrival"));
     checks.add(createLocationCheckforPtp("departure"));
     checks.add(VALIDATE_CUTOFF_TIME_CODE);
-    if(sspSupplier.get().getMap().containsKey(ARRIVAL_START_DATE)|| sspSupplier.get().getMap().containsKey(ARRIVAL_END_DATE)
-      || sspSupplier.get().getMap().containsKey(DEPARTURE_START_DATE)|| sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
-      checks.add(validateDateRange(sspSupplier));
+    if (sspSupplier.get() != null) {
+      if (sspSupplier.get().getMap().containsKey(ARRIVAL_START_DATE)
+          || sspSupplier.get().getMap().containsKey(ARRIVAL_END_DATE)
+          || sspSupplier.get().getMap().containsKey(DEPARTURE_START_DATE)
+          || sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
+        checks.add(validateDateRange(sspSupplier));
+      }
     }
     return JsonAttribute.contentChecks(
       CsRole::isPublisher,
@@ -233,7 +237,7 @@ public class CsChecks {
         for(JsonNode vs : body){
           var csp = sspSupplier.get().getMap();
           if(csp.containsKey(UNIVERSAL_SERVICE_REFERENCE)){
-            if(body.at("universalServiceReference").isMissingNode()){
+            if(body.at("/universalServiceReference").isMissingNode()){
               issues.add("The 'universalServiceReference' needs to be provided in the response if it is given in the filter.");
             }
           }

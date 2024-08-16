@@ -4,7 +4,7 @@ import {Sandbox} from "../model/sandbox";
 import {ScenarioDigest} from "../model/scenario";
 import {ScenarioStatus} from "../model/scenario-status";
 import {Standard} from "../model/standard";
-import {SandboxConfig} from "../model/sandbox-config";
+import {HeaderNameAndValue, SandboxConfig} from "../model/sandbox-config";
 import {StandardModule} from "../model/standard-module";
 import {SandboxStatus} from "../model/sandbox-status";
 
@@ -149,6 +149,7 @@ export class ConformanceService {
     externalPartyUrl: string,
     externalPartyAuthHeaderName: string,
     externalPartyAuthHeaderValue: string,
+    externalPartyAdditionalHeaders: HeaderNameAndValue[],
   ): Promise<void> {
     await this.apiService.call({
       operation: "updateSandboxConfig",
@@ -157,6 +158,7 @@ export class ConformanceService {
       externalPartyUrl,
       externalPartyAuthHeaderName,
       externalPartyAuthHeaderValue,
+      externalPartyAdditionalHeaders,
     });
   }
 }

@@ -36,7 +36,7 @@ export class EditSandboxComponent {
       async params => {
         this.sandboxId = params['sandboxId'];
         this.originalSandboxConfig = await this.conformanceService.getSandboxConfig(this.sandboxId);
-        this.updatedSandboxConfig = {...this.originalSandboxConfig};
+        this.updatedSandboxConfig = JSON.parse(JSON.stringify(this.originalSandboxConfig));
       });
   }
 
@@ -46,14 +46,24 @@ export class EditSandboxComponent {
     }
   }
 
+  onAddHeader() {
+    this.updatedSandboxConfig?.externalPartyAdditionalHeaders.push({headerName: '', headerValue: ''});
+  }
+
+  onRemoveHeader() {
+    this.updatedSandboxConfig?.externalPartyAdditionalHeaders.pop();
+  }
+
+  headerNameRegex = /^[!#$%&'*+.^_`|~\w-]+$/;
+  headerValueRegex = /^[\t\x20-\x7E\x80-\xFF]*$/;
+
   cannotUpdate(): boolean {
     if (!this.originalSandboxConfig || !this.updatedSandboxConfig) return true;
-    return (
-      this.updatedSandboxConfig.sandboxName === this.originalSandboxConfig.sandboxName
-      && this.updatedSandboxConfig.externalPartyUrl === this.originalSandboxConfig.externalPartyUrl
-      && this.updatedSandboxConfig.externalPartyAuthHeaderName === this.originalSandboxConfig.externalPartyAuthHeaderName
-      && this.updatedSandboxConfig.externalPartyAuthHeaderValue === this.originalSandboxConfig.externalPartyAuthHeaderValue
-    );
+    for (let additionalHeader of this.updatedSandboxConfig.externalPartyAdditionalHeaders) {
+      if (!this.headerNameRegex.test(additionalHeader.headerName)) return true;
+      if (!this.headerValueRegex.test(additionalHeader.headerValue)) return true;
+    }
+    return JSON.stringify(this.originalSandboxConfig) === JSON.stringify(this.updatedSandboxConfig);
   }
 
   async onUpdate() {
@@ -65,6 +75,7 @@ export class EditSandboxComponent {
       this.updatedSandboxConfig!.externalPartyUrl,
       this.updatedSandboxConfig!.externalPartyAuthHeaderName,
       this.updatedSandboxConfig!.externalPartyAuthHeaderValue,
+      this.updatedSandboxConfig!.externalPartyAdditionalHeaders,
     );
     this.router.navigate([
       "/sandbox", this.sandboxId

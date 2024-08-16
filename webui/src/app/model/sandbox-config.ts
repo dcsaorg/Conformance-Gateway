@@ -7,4 +7,10 @@ export interface SandboxConfig {
     externalPartyUrl: string,
     externalPartyAuthHeaderName: string,
     externalPartyAuthHeaderValue: string,
+    externalPartyAdditionalHeaders: HeaderNameAndValue[]
+}
+
+export interface HeaderNameAndValue {
+  headerName: string,
+  headerValue: string,
 }

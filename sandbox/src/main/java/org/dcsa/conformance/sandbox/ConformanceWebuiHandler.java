@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
@@ -178,16 +179,28 @@ public class ConformanceWebuiHandler {
             .findFirst()
             .orElseThrow();
 
-    return OBJECT_MAPPER
-        .createObjectNode()
-        .put("sandboxId", sandboxConfiguration.getId())
-        .put("sandboxName", sandboxConfiguration.getName())
-        .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
-        .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
-        .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
-        .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
-        .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
-        .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
+    ObjectNode jsonSandboxConfig = OBJECT_MAPPER
+      .createObjectNode()
+      .put("sandboxId", sandboxConfiguration.getId())
+      .put("sandboxName", sandboxConfiguration.getName())
+      .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
+      .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
+      .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
+      .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
+      .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
+      .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
+
+    ArrayNode jsonAdditionalHeaders = OBJECT_MAPPER.createArrayNode();
+    HttpHeaderConfiguration[] additionalHeaders =
+        externalPartyCounterpartConfig.getExternalPartyAdditionalHeaders();
+    if (additionalHeaders != null) {
+      Arrays.stream(additionalHeaders)
+          .forEach(
+              headerNameAndValue -> jsonAdditionalHeaders.add(headerNameAndValue.toJsonNode()));
+    }
+    jsonSandboxConfig.set("externalPartyAdditionalHeaders", jsonAdditionalHeaders);
+
+    return jsonSandboxConfig;
   }
 
   private JsonNode _getSandboxStatus(String userId, JsonNode requestNode) {
@@ -219,6 +232,13 @@ public class ConformanceWebuiHandler {
         requestNode.get("externalPartyAuthHeaderName").asText());
     externalPartyCounterpartConfig.setAuthHeaderValue(
         requestNode.get("externalPartyAuthHeaderValue").asText());
+    JsonNode jsonHeaders = requestNode.get("externalPartyAdditionalHeaders");
+    if (jsonHeaders.isArray()) {
+      externalPartyCounterpartConfig.setExternalPartyAdditionalHeaders(
+          StreamSupport.stream(jsonHeaders.spliterator(), false)
+              .map(HttpHeaderConfiguration::fromJsonNode)
+              .toArray(HttpHeaderConfiguration[]::new));
+    }
 
     if (!sandboxConfiguration.getOrchestrator().isActive()) {
       Arrays.stream(sandboxConfiguration.getParties())

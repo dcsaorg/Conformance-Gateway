@@ -11,6 +11,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import lombok.Setter;
@@ -205,16 +207,26 @@ public abstract class ConformanceParty implements StatefulEntity {
             partyConfiguration.getRole(),
             counterpartConfiguration.getName(),
             counterpartConfiguration.getRole(),
-            counterpartConfiguration.getAuthHeaderName().isBlank()
-                ? Map.ofEntries(
-                    Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
-                    Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
-                : Map.ofEntries(
-                    Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
-                    Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8)),
-                    Map.entry(
-                        counterpartConfiguration.getAuthHeaderName(),
-                        List.of(counterpartConfiguration.getAuthHeaderValue()))),
+            Stream.concat(
+                    Stream.concat(
+                        Stream.of(
+                            Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
+                            Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8))),
+                        counterpartConfiguration.getAuthHeaderName().isBlank()
+                            ? Stream.of()
+                            : Stream.of(
+                                Map.entry(
+                                    counterpartConfiguration.getAuthHeaderName(),
+                                    List.of(counterpartConfiguration.getAuthHeaderValue())))),
+                    counterpartConfiguration.getExternalPartyAdditionalHeaders() == null
+                        ? Stream.of()
+                        : Stream.of(counterpartConfiguration.getExternalPartyAdditionalHeaders())
+                            .map(
+                                httpHeaderConfiguration ->
+                                    Map.entry(
+                                        httpHeaderConfiguration.getHeaderName(),
+                                        List.of(httpHeaderConfiguration.getHeaderValue()))))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
             jsonBody == null
                 ? new ConformanceMessageBody("")
                 : new ConformanceMessageBody(jsonBody),

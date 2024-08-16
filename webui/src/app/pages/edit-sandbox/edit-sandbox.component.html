@@ -102,6 +102,33 @@
             </mat-form-field>
         </div>
 
+        <div class="pageSubtitle">Additional headers</div>
+        <br/>
+        <div>
+            <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            (click)="onAddHeader()"
+            ><mat-icon>add</mat-icon></button>
+
+            &nbsp;
+
+            <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            [disabled]="updatedSandboxConfig.externalPartyAdditionalHeaders.length < 1"
+            (click)="onRemoveHeader()"
+            ><mat-icon>remove</mat-icon></button>
+
+            <div *ngFor="let additionalHeader of updatedSandboxConfig.externalPartyAdditionalHeaders">
+                <app-edit-header [headerNameAndValue]="additionalHeader"></app-edit-header>
+                <hr/>
+            </div>
+        </div>
+
+        <br />
         <br />
         <div>
             <button

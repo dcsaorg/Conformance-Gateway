@@ -1,0 +1,28 @@
+<div>
+  <br />
+  <mat-form-field class="fullWidth">
+    <mat-label>Header name</mat-label>
+    <input
+      matInput
+      #headerNameInput
+      type = "text"
+      autocomplete="off"
+      name="headerNameTextField"
+      [(ngModel)]="headerNameAndValue.headerName"
+    />
+  </mat-form-field>
+</div>
+
+<div>
+  <mat-form-field class="fullWidth">
+    <mat-label>Header value</mat-label>
+    <input
+      matInput
+      #headerValueInput
+      type = "text"
+      autocomplete="off"
+      name="headerValueTextField"
+      [(ngModel)]="headerNameAndValue.headerValue"
+    />
+  </mat-form-field>
+</div>

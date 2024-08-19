@@ -19,12 +19,15 @@ public class BookingDataSets {
 
   public static final KeywordDataset INCO_TERMS_VALUES = KeywordDataset.staticDataset("EXW", "FCA", "FAS", "FOB", "CFR", "CIF", "CPT", "CIP", "DAP", "DPU", "DDP");
 
+  public static final KeywordDataset NATIONAL_COMMODITY_TYPE_CODES = KeywordDataset.staticDataset(    "NCM",    "HTS",    "Schedule B",    "TARIC",    "CN",    "CUS"  );
+
   public static final KeywordDataset CUTOFF_DATE_TIME_CODES = KeywordDataset.staticDataset("DCO", "VCO", "FCO", "LCO", "ECP", "EFC");
 
-  public static final KeywordDataset AMF_CC_MTC_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v2.0.0.csv", "/", "Country Code", "Advance Manifest Filing Type Code");
+  public static final KeywordDataset AMF_CC_MTC_TYPE_CODES = KeywordDataset.fromVersionedCSV(BookingDataSets.class, "/standards/booking/datasets/advancemanifestfilings-v%s.csv",  "Advance Manifest Filing Type Code");
+
   public static final KeywordDataset ISO_4217_CURRENCY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/currency-codes-iso-4217.csv", "CurrencyCode");
 
-  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "Customs Reference Type Code");
+  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "General Reference Type Code");
 
   public static final KeywordDataset ISO_6346_CONTAINER_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/iso-6346-container-codes.csv", "code");
 
@@ -36,9 +39,11 @@ public class BookingDataSets {
 
   public static final KeywordDataset INHALATION_ZONE_CODE = KeywordDataset.staticDataset("A", "B", "C", "D");
 
-  public static final KeywordDataset LTR_CC_T_COMBINATIONS = KeywordDataset.fromCSVCombiningColumns(BookingDataSets.class, "/standards/booking/datasets/taxandlegalreferences-v2.0.0.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
+  public static final KeywordDataset LTR_TYPE_CODES = KeywordDataset.fromVersionedCSV(BookingDataSets.class, "/standards/booking/datasets/taxandlegalreferences-v%s.csv", "/", "Tax and Legal Reference Country Code", "Tax and Legal Reference Type Code");
 
   public static final KeywordDataset ISO_3166_ALPHA2_COUNTRY_CODES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/country-codes-iso3166-alpha2.csv", "Code");
+
+  public static final KeywordDataset CUSTOMS_REFERENCE_RE_REC_TYPE_CODES = KeywordDataset.fromVersionedCSV(BookingDataSets.class, "/standards/booking/datasets/customsreferences-v%s.csv", "Customs Reference Type Code");
 
   @SneakyThrows
   private static KeywordDataset loadUNLocationCodeDataset() {

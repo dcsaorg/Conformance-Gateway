@@ -2,6 +2,8 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -19,7 +21,7 @@ import org.dcsa.conformance.standards.ebl.party.*;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public abstract class EblAction extends ConformanceAction {
-  protected final int expectedStatus;
+  protected final Set<Integer> expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
   public EblAction(
@@ -28,13 +30,22 @@ public abstract class EblAction extends ConformanceAction {
       EblAction previousAction,
       String actionTitle,
       int expectedStatus) {
+    this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
+  }
+
+  public EblAction(
+    String sourcePartyName,
+    String targetPartyName,
+    EblAction previousAction,
+    String actionTitle,
+    Set<Integer> expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     this.dspReference =
-        previousAction == null
-            ? new OverwritingReference<>(
-                null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
-            : new OverwritingReference<>(previousAction.dspReference, null);
+      previousAction == null
+        ? new OverwritingReference<>(
+        null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
+        : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override

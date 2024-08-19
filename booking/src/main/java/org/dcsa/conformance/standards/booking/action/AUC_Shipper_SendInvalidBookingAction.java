@@ -54,6 +54,9 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
         var dsp = getDspSupplier().get();
         var urlFormat = invalidBookingMessageType.getExpectedRequestUrlFormat();
         String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        if (InvalidBookingMessageType.CANCEL_BOOKING.equals(invalidBookingMessageType)){
+          reference = dsp.carrierBookingRequestReference();
+        }
         return Stream.of(
             new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), invalidBookingMessageType.getExpectedRequestMethod()),
             new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), urlFormat.formatted(reference)),

@@ -14,4 +14,5 @@ public class CounterpartConfiguration {
   private String url;
   private String authHeaderName = "";
   private String authHeaderValue = "";
+  private HttpHeaderConfiguration[] externalPartyAdditionalHeaders;
 }

@@ -196,20 +196,14 @@ public class PersistableCarrierBooking {
     setReason(reason);
   }
 
-  public void cancelEntireBooking(String bookingReference, String reason) {
+  public void cancelBookingRequest(String bookingReference, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CANCELLED);
     checkState(bookingReference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Entire booking cancelled by shipper (no reason given)";
     }
-    final var cancelReason = reason;
-    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> {
-      bookingContent.put("reason", cancelReason);
-      if (isAmendedContent) {
-        bookingContent.put(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED.wireName());
-      }
-    });
+    setReason(reason);
   }
 
   public void cancelBookingAmendment(String bookingReference, String reason) {
@@ -273,6 +267,8 @@ public class PersistableCarrierBooking {
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
+      ensureRequestedChangesExist(newBookingData);
+      ensureConfirmedBookingHasCarrierFields(newBookingData);
       setAmendedBooking(newBookingData);
     } else {
       setBooking(newBookingData);
@@ -282,6 +278,15 @@ public class PersistableCarrierBooking {
       removeRequestedChanges();
     }
     setReason(null);
+  }
+
+  private void ensureRequestedChangesExist(ObjectNode booking) {
+    booking
+      .putArray("requestedChanges")
+      .addObject()
+      .put(
+        "message",
+        "Please perform the changes requested by the Conformance orchestrator");
   }
 
   public BookingState getOriginalBookingState() {

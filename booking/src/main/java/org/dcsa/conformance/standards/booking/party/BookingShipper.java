@@ -65,7 +65,7 @@ public class BookingShipper extends ConformanceParty {
       Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
-      Map.entry(UC11_Shipper_CancelEntireBookingAction.class, this::sendCancelEntireBooking),
+      Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
       Map.entry(AUC_Shipper_SendInvalidBookingAction.class,this::sendInvalidBookingAction));
   }
 
@@ -138,9 +138,9 @@ public class BookingShipper extends ConformanceParty {
             "POD_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.podUNLocationCode()) ));
   }
 
-  private void sendCancelEntireBooking(JsonNode actionPrompt) {
-    log.info("Shipper.sendCancelEntireBooking(%s)".formatted(actionPrompt.toPrettyString()));
-    String cbrr = getBookingReference(actionPrompt);
+  private void sendCancelBookingRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendCancelBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbrr = actionPrompt.path("cbrr").asText();
     syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
       Collections.emptyMap(),
@@ -172,14 +172,11 @@ public class BookingShipper extends ConformanceParty {
       case UPDATE_BOOKING -> sendUpdatedBooking(actionPrompt);
       case SUBMIT_BOOKING_AMENDMENT  -> sendUpdatedConfirmedBooking(actionPrompt);
       case CANCEL_BOOKING_AMENDMENT  -> sendCancelBookingAmendment(actionPrompt);
-      case CANCEL_BOOKING  -> sendCancelEntireBooking(actionPrompt);
+      case CANCEL_BOOKING  -> sendCancelBookingRequest(actionPrompt);
       default -> throw new AssertionError("Missing case for " + invalidBookingMessageType.name());
     }
     addOperatorLogEntry("Sent a invalid booking action request of '%s'".formatted(cbrr));
   }
-
-
-
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {
     log.info("Shipper.sendUpdatedBooking(%s)".formatted(actionPrompt.toPrettyString()));

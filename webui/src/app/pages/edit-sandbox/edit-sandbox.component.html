@@ -1,8 +1,12 @@
 <div class="pageTitle">Sandbox settings</div>
 
-<mat-spinner *ngIf="!originalSandboxConfig || !updatedSandboxConfig"></mat-spinner>
+<app-text-waiting
+  *ngIf="!originalSandboxConfig || !updatedSandboxConfig"
+  text="Retrieving sandbox settings..."></app-text-waiting>
 
-<div *ngIf="originalSandboxConfig && updatedSandboxConfig">
+<app-text-waiting *ngIf="updatingSandbox" text="Updating sandbox settings..."></app-text-waiting>
+
+<div *ngIf="originalSandboxConfig && updatedSandboxConfig && !updatingSandbox">
     <div class="pageSubtitle">Connecting to the sandbox</div>
 
     <div class="paragraph">Sandbox URL:</div>
@@ -97,7 +101,34 @@
                 />
             </mat-form-field>
         </div>
-    
+
+        <div class="pageSubtitle">Additional headers</div>
+        <br/>
+        <div>
+            <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            (click)="onAddHeader()"
+            ><mat-icon>add</mat-icon></button>
+
+            &nbsp;
+
+            <button
+            mat-mini-fab
+            color="primary"
+            type="button"
+            [disabled]="updatedSandboxConfig.externalPartyAdditionalHeaders.length < 1"
+            (click)="onRemoveHeader()"
+            ><mat-icon>remove</mat-icon></button>
+
+            <div *ngFor="let additionalHeader of updatedSandboxConfig.externalPartyAdditionalHeaders">
+                <app-edit-header [headerNameAndValue]="additionalHeader"></app-edit-header>
+                <hr/>
+            </div>
+        </div>
+
+        <br />
         <br />
         <div>
             <button

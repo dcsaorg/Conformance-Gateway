@@ -20,33 +20,6 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 public class IssuanceChecks {
 
   private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
-    if (standardsVersion.startsWith("2.")) {
-      return JsonAttribute.customValidator(
-        "[Scenario] Validate END party presence is correct",
-        JsonAttribute.path("document", JsonAttribute.path("documentParties",
-          (documentParties, contextPath) -> {
-            var hadEndorsee = false;
-            if (!eblType.isToOrder()) {
-              return Set.of();
-            }
-            for (var party : documentParties) {
-              if (party.path("partyFunction").asText("").equals("END")) {
-                hadEndorsee = true;
-                break;
-              }
-            }
-
-            if (eblType.isBlankEbl() && hadEndorsee) {
-              return Set.of("The EBL should have been blank endorsed, but it has an END party");
-            }
-            if (!eblType.isBlankEbl() && !hadEndorsee) {
-              return Set.of("The EBL should have had a named endorsee, but it is missing the END party");
-            }
-            return Set.of();
-          }
-        ))
-      );
-    }
     return JsonAttribute.customValidator(
       "[Scenario] Validate endorsee party presence is correct",
       JsonAttribute.path("document", JsonAttribute.path("documentParties",

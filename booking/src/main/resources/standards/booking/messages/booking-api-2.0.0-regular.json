@@ -4,66 +4,173 @@
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
   "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
+  "freightPaymentTermCode": "PRE",
+  "originChargesPaymentTerm": {
+    "haulageChargesPaymentTermCode": "PRE",
+    "portChargesPaymentTermCode": "PRE",
+    "otherChargesPaymentTermCode": "PRE"
+  },
+  "destinationChargesPaymentTerm": {
+    "haulageChargesPaymentTermCode": "COL",
+    "portChargesPaymentTermCode": "PRE",
+    "otherChargesPaymentTermCode": "PRE"
+  },
   "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
-  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
+  "vessel": {
+    "name": "King of the Seas",
+    "vesselIMONumber": "9298686"
+  },
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
+  "carrierServiceCode": "TA1",
+  "universalServiceReference": "SR12345A",
+  "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
+  "universalExportVoyageReference": "2103N",
+  "declaredValue": 1231.1,
+  "declaredValueCurrency": "EUR",
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
+  "exportDeclarationReference": "ABC123123",
   "isImportLicenseRequired": true,
+  "importLicenseReference": "XYZ987987",
+  "expectedDepartureDate": "2024-10-17",
+  "expectedArrivalAtPlaceOfDeliveryStartDate": "2024-11-10",
+  "expectedArrivalAtPlaceOfDeliveryEndDate": "2024-11-15",
+  "transportDocumentTypeCode": "BOL",
+  "transportDocumentReference": "reserved-HHL123",
+  "bookingChannelReference": "X12300",
+  "incoTerms": "FCA",
   "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
-  "carrierServiceCode": "TA1",
-  "vessel": {
-    "name": "King of the Seas"
+  "invoicePayableAt": {
+    "UNLocationCode": "NLAMS"
   },
-  "requestedEquipments": [
+  "placeOfBLIssue": {
+    "locationName": "Amsterdam",
+    "UNLocationCode" : "NLAMS"
+  },
+  "references": [
     {
-      "ISOEquipmentCode": "22GP",
-      "units": 1,
-      "isShipperOwned": false,
-      "commodities": [
-        {
-          "HSCodes": ["COMMODITY_HS_CODE_1"],
-          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM"
-        }
-      ]
+      "type": "FF",
+      "value": "KN-00103004"
     }
   ],
   "documentParties": {
     "bookingAgent": {
       "partyName": "DCSA Conformance Toolkit",
       "address": {
-        "name": "Mustermann",
         "street": "Strawinskylaan 4117",
         "floor": "6",
         "postCode": "1077 ZX",
         "city": "Amsterdam",
-        "countryCode": "NL"
+        "countryCode": "NL",
+        "UNLocationCode": "NLAMS",
+        "stateRegion": "North Holland"
       },
+      "identifyingCodes" : [{
+        "codeListProvider" : "WAVE",
+        "partyCode": "MSK",
+        "codeListName": "DID"
+      },
+      {
+        "codeListProvider" : "WAVE",
+        "partyCode": "CMA",
+        "codeListName": "DID"
+      }],
+      "taxLegalReferences" : [{
+        "type": "RUC",
+        "countryCode": "EC",
+        "value": "Registro Único de Contribuyente"
+      }],
       "partyContactDetails": [
         {
           "name": "Henrik",
-          "phone": "+31611444666"
+          "phone": "+31611444666",
+          "email": "info@dcsa.org"
+        }
+      ]
+    },
+    "shipper": {
+      "partyName": "DCSA Shipper",
+      "address": {
+        "street": "Strawinskylaan 485",
+        "floor": "6",
+        "postCode": "1077 ZX",
+        "city": "Amsterdam",
+        "countryCode": "NL",
+        "UNLocationCode": "NLAMS",
+        "stateRegion": "North Holland"
+      },
+      "identifyingCodes" : [{
+        "codeListProvider" : "WAVE",
+        "partyCode": "MSK",
+        "codeListName": "DID"
+      },
+        {
+          "codeListProvider" : "WAVE",
+          "partyCode": "CMA",
+          "codeListName": "DID"
+        }],
+      "taxLegalReferences" : [{
+        "type": "RUC",
+        "countryCode": "EC",
+        "value": "Registro Único de Contribuyente"
+      }],
+      "partyContactDetails": [
+        {
+          "name": "Henrik",
+          "phone": "+31611444666",
+          "email": "info@dcsa.org"
         }
       ]
     }
   },
+  "partyContactDetails": [
+    {
+      "name": "Henrik",
+      "phone": "+31611444666",
+      "email": "info@dcsa.org"
+    }
+  ],
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POD"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "ISOEquipmentCode": "22GP",
+      "units": 1,
+      "isShipperOwned": false,
+      "equipmentReferences": [
+        "APZU4812090"
+      ],
+      "commodities": [
+        {
+          "HSCodes": ["COMMODITY_HS_CODE_1"],
+          "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
+          "cargoGrossWeight": 323.32,
+          "cargoGrossWeightUnit": "KGM",
+          "cargoGrossVolume": 14,
+          "cargoGrossVolumeUnit": "MTQ",
+          "exportLicenseIssueDate": "2021-10-10",
+          "exportLicenseExpiryDate": "2030-10-10",
+          "references": [
+            {
+              "type": "FF",
+              "value": "KN-00103004"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -63,7 +63,7 @@ public class ConformanceApplication {
         }
       };
 
-  private final String localhostAuthUrlToken = UUID.randomUUID().toString();
+  protected final String localhostAuthUrlToken = UUID.randomUUID().toString();
 
   private final LinkedList<String> homepageSandboxIds = new LinkedList<>();
 
@@ -128,6 +128,7 @@ public class ConformanceApplication {
         jsonNode ->
             executor.schedule(
                 () -> {
+                  _addSimulatedLambdaDelay();
                   try {
                     ConformanceSandbox.executeDeferredTask(
                         persistenceProvider, getDeferredSandboxTaskConsumer(), jsonNode);
@@ -199,10 +200,25 @@ public class ConformanceApplication {
         });
   }
 
+  private void _addSimulatedLambdaDelay() {
+    if (conformanceConfiguration.simulatedLambdaDelay > 0) {
+      log.info("Simulating lambda delay of {} milliseconds", conformanceConfiguration.simulatedLambdaDelay);
+      try {
+        Thread.sleep(conformanceConfiguration.simulatedLambdaDelay);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      log.info("Done simulating lambda delay");
+    } else {
+      log.debug("No simulated lambda delay");
+    }
+  }
+
   @CrossOrigin(origins = "http://localhost:4200")
   @RequestMapping(value = "/conformance/webui/**")
   public void handleWebuiRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
+    _addSimulatedLambdaDelay();
     _writeResponse(
         servletResponse,
         200,
@@ -221,7 +237,7 @@ public class ConformanceApplication {
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-
+    _addSimulatedLambdaDelay();
     String requestUrl = servletRequest.getRequestURL().toString();
     Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
     String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";
@@ -309,7 +325,7 @@ public class ConformanceApplication {
   private String _buildHomePage() {
     return String.join(
         System.lineSeparator(),
-        "<html>",
+        "<!doctype html><html lang=\"en\">",
         "<head><title>DCSA Conformance</title></head>",
         "<body style=\"font-family: sans-serif;\">",
         "<h2>DCSA Conformance</h2>",

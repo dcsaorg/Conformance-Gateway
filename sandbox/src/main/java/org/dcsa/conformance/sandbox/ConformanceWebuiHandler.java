@@ -233,7 +233,7 @@ public class ConformanceWebuiHandler {
     externalPartyCounterpartConfig.setAuthHeaderValue(
         requestNode.get("externalPartyAuthHeaderValue").asText());
     JsonNode jsonHeaders = requestNode.get("externalPartyAdditionalHeaders");
-    if (jsonHeaders.isArray()) {
+    if (jsonHeaders != null && jsonHeaders.isArray()) {
       externalPartyCounterpartConfig.setExternalPartyAdditionalHeaders(
           StreamSupport.stream(jsonHeaders.spliterator(), false)
               .map(HttpHeaderConfiguration::fromJsonNode)

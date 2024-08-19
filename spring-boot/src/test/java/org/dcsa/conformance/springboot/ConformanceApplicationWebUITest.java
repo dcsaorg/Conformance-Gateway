@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -145,7 +146,7 @@ class ConformanceApplicationWebUITest {
 
   record SandboxConfig(String sandboxId, String sandboxName, String sandboxUrl, String sandboxAuthHeaderName,
                        String sandboxAuthHeaderValue, String externalPartyUrl, String externalPartyAuthHeaderName,
-                       String externalPartyAuthHeaderValue) {
+                       String externalPartyAuthHeaderValue, HttpHeaderConfiguration[] externalPartyAdditionalHeaders) {
   }
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {

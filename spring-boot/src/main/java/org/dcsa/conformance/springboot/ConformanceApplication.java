@@ -230,9 +230,7 @@ public class ConformanceApplication {
 
   private void _addSimulatedLambdaDelay() {
     if (conformanceConfiguration.simulatedLambdaDelay > 0) {
-      log.info(
-          "Simulating lambda delay of %d milliseconds"
-              .formatted(conformanceConfiguration.simulatedLambdaDelay));
+      log.info("Simulating lambda delay of {} milliseconds", conformanceConfiguration.simulatedLambdaDelay);
       try {
         Thread.sleep(conformanceConfiguration.simulatedLambdaDelay);
       } catch (InterruptedException e) {
@@ -240,7 +238,7 @@ public class ConformanceApplication {
       }
       log.info("Done simulating lambda delay");
     } else {
-      log.info("No simulated lambda delay");
+      log.debug("No simulated lambda delay");
     }
   }
 

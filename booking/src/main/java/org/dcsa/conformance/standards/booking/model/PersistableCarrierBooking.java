@@ -196,20 +196,14 @@ public class PersistableCarrierBooking {
     setReason(reason);
   }
 
-  public void cancelEntireBooking(String bookingReference, String reason) {
+  public void cancelBookingRequest(String bookingReference, String reason) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CANCELLED);
     checkState(bookingReference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, CANCELLED);
     if (reason == null || reason.isBlank()) {
       reason = "Entire booking cancelled by shipper (no reason given)";
     }
-    final var cancelReason = reason;
-    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> {
-      bookingContent.put("reason", cancelReason);
-      if (isAmendedContent) {
-        bookingContent.put(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED.wireName());
-      }
-    });
+    setReason(reason);
   }
 
   public void cancelBookingAmendment(String bookingReference, String reason) {

@@ -202,7 +202,9 @@ public class EblCarrier extends ConformanceParty {
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
 
     var si = CarrierShippingInstructions.fromPersistentStore(persistentMap, sir);
-    si.requestChangesToShippingInstructions(documentReference, requestedChanges -> requestedChanges.addObject()
+    si.provideFeedbackToShippingInstructions(documentReference, feedbacks -> feedbacks.addObject()
+      .put("severity", "ERROR")
+      .put("code", "PROPERTY_VALUE_MUST_CHANGE")
       .put("message", "Please perform the changes requested by the Conformance orchestrator")
     );
     si.save(persistentMap);
@@ -866,7 +868,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.transport-document-notification";
+      return "org.dcsa.transport-document";
     }
 
     @Override
@@ -888,7 +890,7 @@ public class EblCarrier extends ConformanceParty {
 
     @Override
     protected String typePrefix() {
-      return "org.dcsa.shipping-instructions-notification";
+      return "org.dcsa.shipping-instructions";
     }
 
     @Override

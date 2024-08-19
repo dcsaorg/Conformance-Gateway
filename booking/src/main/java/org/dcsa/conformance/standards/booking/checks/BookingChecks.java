@@ -21,6 +21,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
+
 @UtilityClass
 public class BookingChecks {
 
@@ -86,6 +88,12 @@ public class BookingChecks {
         .map("The expected departure date '%s' can not be past date"::formatted)
         .collect(Collectors.toSet());
     }
+  );
+
+  private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'type' of 'nationalCommodityCodes' is a known code",
+    (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_ALL_BOOKING_UN_LOCATION_CODES = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -191,10 +199,10 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES)
   );
 
-  private static final JsonContentCheck TLR_CC_T_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'type' in 'taxAndLegalReferences'",
+  private static final JsonContentCheck TLR_TYPE_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' in 'taxAndLegalReferences' static data",
     mav -> mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*"),
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.LTR_CC_T_COMBINATIONS, "countryCode", "type")
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.LTR_TYPE_CODES)
   );
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -321,10 +329,22 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-  private static final JsonContentCheck AMF_CC_MTC_COMBINATION_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings'",
-    (mav) -> mav.submitAllMatching("advanceManifestFilings.*"),
-    JsonAttribute.combineAndValidateAgainstDataset(BookingDataSets.AMF_CC_MTC_COMBINATIONS, "countryCode", "manifestTypeCode")
+  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES_TYPE = (mav) -> {
+    mav.submitAllMatching("customsReferences.*.type");
+    mav.submitAllMatching("requestedEquipments.*.customsReferences.*.type");
+    mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*.type");
+  };
+
+  private static final JsonRebaseableContentCheck CR_TYPE_CODES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'type' in 'customsReferences' must be valid",
+    ALL_CUSTOMS_REFERENCES_TYPE,
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CUSTOMS_REFERENCE_RE_REC_TYPE_CODES)
+  );
+
+  private static final JsonContentCheck AMF_MTC_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'manifestTypeCode' in 'advanceManifestFilings' static data",
+    (mav) -> mav.submitAllMatching("advanceManifestFilings.*.type"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.AMF_CC_MTC_TYPE_CODES)
   );
 
   private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -340,6 +360,8 @@ public class BookingChecks {
       mav.submitAllMatching("documentParties.serviceContractOwner.address.countryCode");
       mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
       mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
+      mav.submitAllMatching("placeOfBLIssue.countryCode");
+      mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.countryCode");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
   );
@@ -618,7 +640,7 @@ public class BookingChecks {
     IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
     IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
     OUTER_PACKAGING_CODE_IS_VALID,
-    TLR_CC_T_COMBINATION_VALIDATIONS,
+    TLR_TYPE_CODE_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
@@ -626,6 +648,8 @@ public class BookingChecks {
     COUNTRY_CODE_VALIDATIONS,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
+    CR_TYPE_CODES_VALIDATIONS,
+    NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),
@@ -711,7 +735,7 @@ public class BookingChecks {
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    AMF_CC_MTC_COMBINATION_VALIDATIONS,
+    AMF_MTC_VALIDATIONS,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,

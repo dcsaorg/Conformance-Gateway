@@ -15,6 +15,7 @@ export class CreateSandboxComponent {
     "Tested party (DCSA internal use only)"
   ];
 
+  creatingSandbox: boolean = false;
   standards: Standard[] = [];
   selectedStandard: Standard | undefined;
   selectedVersion: StandardVersion | undefined;
@@ -71,6 +72,7 @@ export class CreateSandboxComponent {
 
   async onCreate() {
     if (this.cannotCreate()) return;
+    this.creatingSandbox = true;
     const sandboxId: string = await this.conformanceService.createSandbox(
       this.selectedStandard!.name,
       this.selectedVersion!.number,

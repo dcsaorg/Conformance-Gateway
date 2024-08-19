@@ -154,6 +154,7 @@ public class ConformanceApplication {
         jsonNode ->
             executor.schedule(
                 () -> {
+                  _addSimulatedLambdaDelay();
                   try {
                     ConformanceSandbox.executeDeferredTask(
                         persistenceProvider, getDeferredSandboxTaskConsumer(), jsonNode);
@@ -227,11 +228,28 @@ public class ConformanceApplication {
       persistenceProvider, deferredSandboxTaskConsumer);
   }
 
+  private void _addSimulatedLambdaDelay() {
+    if (conformanceConfiguration.simulatedLambdaDelay > 0) {
+      log.info(
+          "Simulating lambda delay of %d milliseconds"
+              .formatted(conformanceConfiguration.simulatedLambdaDelay));
+      try {
+        Thread.sleep(conformanceConfiguration.simulatedLambdaDelay);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      log.info("Done simulating lambda delay");
+    } else {
+      log.info("No simulated lambda delay");
+    }
+  }
+
   @CrossOrigin(origins = "http://localhost:4200")
   @RequestMapping(value = "/conformance/webui/**")
   public void handleWebuiRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     String requestBody = _getRequestBody(servletRequest);
     log.info("Handling webui request: {}", requestBody);
+    _addSimulatedLambdaDelay();
     _writeResponse(
       servletResponse,
       200,
@@ -243,7 +261,7 @@ public class ConformanceApplication {
   @RequestMapping(value = "/conformance/**")
   public void handleRequest(
       HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-
+    _addSimulatedLambdaDelay();
     String requestUrl = servletRequest.getRequestURL().toString();
     Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
     String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";

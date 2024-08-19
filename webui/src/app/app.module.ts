@@ -28,12 +28,15 @@ import { ScenarioComponent } from './pages/scenario/scenario.component';
 import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.component';
 import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.component';
 import { ReportComponent } from './pages/report/report.component';
+import {TextWaitingComponent} from "./text/waiting/text-waiting.component";
+import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 
 @NgModule({
   declarations: [
     AppComponent,
     ConfirmationDialog,
     CreateSandboxComponent,
+    EditHeaderComponent,
     EditSandboxComponent,
     EnvironmentComponent,
     FooterComponent,
@@ -45,6 +48,7 @@ import { ReportComponent } from './pages/report/report.component';
     SandboxComponent,
     ScenarioComponent,
     SimpleTextComponent,
+    TextWaitingComponent,
   ],
   imports: [
     BrowserAnimationsModule,

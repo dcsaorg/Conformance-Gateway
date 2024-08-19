@@ -25,6 +25,7 @@ public class CarrierShippingInstructions {
   private static final String SI_STATUS = "shippingInstructionsStatus";
   private static final String UPDATED_SI_STATUS = "updatedShippingInstructionsStatus";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
+  private static final String FEEDBACKS = "feedbacks";
 
 
   private static final String SHIPPING_INSTRUCTIONS_REFERENCE = "shippingInstructionsReference";
@@ -141,6 +142,12 @@ public class CarrierShippingInstructions {
     });
   }
 
+  private static void ensureTrue(boolean isTrue, String msg) {
+    if (!isTrue) {
+      throw new IllegalStateException(msg);
+    }
+  }
+
   private record TDField(
     String attribute,
     TriConsumer<ObjectNode, String, String> initializer,
@@ -193,9 +200,15 @@ public class CarrierShippingInstructions {
         "carrierCode",
         (o, a, v) -> {
           var identifyingPartyCode = o.path("issuingParty").path("identifyingCodes").path(0);
-          assert Objects.equals(
-              identifyingPartyCode.path("DCSAResponsibleAgencyCode").asText(), "SMDG");
-          assert Objects.equals(identifyingPartyCode.path("codeListProvider").asText(), "LCL");
+          ensureTrue(
+            Objects.equals(
+              identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
+            "Unexpected 'codeListProvider' for issuingParty"
+          );
+          ensureTrue(
+            Objects.equals(identifyingPartyCode.path("codeListName").asText(), "LCL"),
+            "Unexpected 'codeListName' for issuingParty"
+          );
           var result = identifyingPartyCode.path("partyCode");
           assert result.isTextual();
           o.set(a, result);
@@ -222,6 +235,7 @@ public class CarrierShippingInstructions {
           }
           var outerPackaging = ((ObjectNode)cargoItemNode).putObject("outerPackaging");
           outerPackaging.put("description", "Jerrican, steel")
+            .put("woodDeclaration", "Not Applicable")
             .put("imoPackagingCode", "3A1")
             .put("numberOfPackages", 400);
           var dg = outerPackaging.putArray("dangerousGoods").addObject();
@@ -256,8 +270,7 @@ public class CarrierShippingInstructions {
   }
 
   private static void unLocation(ObjectNode locationNode, String unlocationCode) {
-    locationNode.put("locationType", "UNLO")
-      .put("UNLocationCode", unlocationCode);
+    locationNode.put("UNLocationCode", unlocationCode);
   }
 
   private static void addCharge(JsonNode chargesArray) {
@@ -355,12 +368,12 @@ public class CarrierShippingInstructions {
     setReason(null);
   }
 
-  public void requestChangesToShippingInstructions(String documentReference, Consumer<ArrayNode> requestedChangesGenerator) {
+  public void provideFeedbackToShippingInstructions(String documentReference, Consumer<ArrayNode> feedbackGenerator) {
     checkState(documentReference, getShippingInstructionsState(), s -> s != SI_PENDING_UPDATE && s != SI_COMPLETED );
     clearUpdatedShippingInstructions();
     changeSIState(SI_STATUS, SI_PENDING_UPDATE);
     setReason(null);
-    mutateShippingInstructionsAndUpdate(siData -> requestedChangesGenerator.accept(siData.putArray("requestedChanges")));
+    mutateShippingInstructionsAndUpdate(siData -> feedbackGenerator.accept(siData.putArray(FEEDBACKS)));
   }
 
   public void acceptUpdatedShippingInstructions(String documentReference) {
@@ -368,7 +381,7 @@ public class CarrierShippingInstructions {
     var updated = getUpdatedShippingInstructions().orElseThrow();
     setShippingInstructions(updated);
     setReason(null);
-    mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
+    mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(SI_STATUS, SI_RECEIVED);
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CONFIRMED);
   }
@@ -377,7 +390,7 @@ public class CarrierShippingInstructions {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     clearUpdatedShippingInstructions();
     setReason(reason);
-    mutateShippingInstructionsAndUpdate(siData -> siData.remove("requestedChanges"));
+    mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_DECLINED);
   }
 
@@ -619,9 +632,9 @@ public class CarrierShippingInstructions {
     }
   }
 
-  private void removeRequestedChanges() {
-    getShippingInstructions().remove("requestedChanges");
-    getUpdatedShippingInstructions().ifPresent(amendedBooking -> amendedBooking.remove("requestedChanges"));
+  private void removeFeedbacks() {
+    getShippingInstructions().remove(FEEDBACKS);
+    getUpdatedShippingInstructions().ifPresent(amendedBooking -> amendedBooking.remove(FEEDBACKS));
   }
 
   public void putShippingInstructions(String documentReference, ObjectNode newShippingInstructionData) {
@@ -635,7 +648,7 @@ public class CarrierShippingInstructions {
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_RECEIVED);
     copyMetadataFields(getShippingInstructions(), newShippingInstructionData);
     setUpdatedShippingInstructions(newShippingInstructionData);
-    removeRequestedChanges();
+    removeFeedbacks();
   }
 
   public ShippingInstructionsStatus getOriginalShippingInstructionState() {

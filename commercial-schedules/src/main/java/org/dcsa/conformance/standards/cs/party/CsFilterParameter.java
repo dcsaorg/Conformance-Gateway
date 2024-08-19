@@ -27,9 +27,7 @@ public enum CsFilterParameter {
   UNIVERSAL_VOYAGE_REFERENCE("universalVoyageReference"),
   VESSEL_OPERATOR_CARRIER_CODE("vesselOperatorCarrierCode"),
   UN_LOCATION_CODE("UNLocationCode"),
-  FACILITY_SMDG_CODE("facilitySMDGCode"),
-  START_DATE("startDate"),
-  END_DATE("endDate")
+  FACILITY_SMDG_CODE("facilitySMDGCode")
   ;
 
   @Getter

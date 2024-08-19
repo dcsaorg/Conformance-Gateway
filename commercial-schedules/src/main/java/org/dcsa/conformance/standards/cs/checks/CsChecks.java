@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.cs.checks;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -26,11 +24,11 @@ import static org.dcsa.conformance.standards.cs.party.CsFilterParameter.*;
 @UtilityClass
 public class CsChecks {
   public static ActionCheck getPayloadChecksForPtp(UUID matchedExchangeUuid, String expectedApiVersion,Supplier<SuppliedScenarioParameters> sspSupplier) {
-    ArrayList<JsonContentCheck> checks = new ArrayList<JsonContentCheck>();
-    checks.add(createLocationCheckforPtp("placeOfReceipt"));
-    checks.add(createLocationCheckforPtp("placeOfDelivery"));
-    checks.add(createLocationCheckforPtp("arrival"));
-    checks.add(createLocationCheckforPtp("departure"));
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(createLocationCheckPtp("placeOfReceipt"));
+    checks.add(createLocationCheckPtp("placeOfDelivery"));
+    checks.add(createLocationCheckPtp("arrival"));
+    checks.add(createLocationCheckPtp("departure"));
     checks.add(VALIDATE_CUTOFF_TIME_CODE);
     if (sspSupplier.get() != null) {
       if (sspSupplier.get().getMap().containsKey(ARRIVAL_START_DATE)
@@ -49,18 +47,18 @@ public class CsChecks {
     );
   }
 
-  private static JsonContentCheck createLocationCheckforPtp(String locationType) {
+  private static JsonContentCheck createLocationCheckPtp(String locationType) {
     return JsonAttribute.customValidator(
       String.format("Check any one of the location is available for '%s'", locationType),
       body -> {
         var issues = new LinkedHashSet<String>();
-        for (JsonNode routings : body) {
+        for (JsonNode routing : body) {
           if (locationType.equals("arrival") || locationType.equals("departure")) {
-            for(JsonNode leg : routings.path("legs")){
+            for(JsonNode leg : routing.path("legs")){
               checkLocation(locationType, leg, issues);
             }
           } else {
-            checkLocation(locationType, routings, issues);
+            checkLocation(locationType, routing, issues);
           }
         }
         return issues;
@@ -69,8 +67,8 @@ public class CsChecks {
   }
 
   public static ActionCheck getPayloadChecksForPs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
-    ArrayList<JsonContentCheck> checks = new ArrayList<JsonContentCheck>();
-    checks.add(createLocationCheckforPs());
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(createLocationCheckPs());
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
     checks.add(validateDateForPs(sspSupplier));
     return JsonAttribute.contentChecks(
@@ -82,7 +80,7 @@ public class CsChecks {
     );
   }
 
-  private static JsonContentCheck createLocationCheckforPs() {
+  private static JsonContentCheck createLocationCheckPs() {
     return JsonAttribute.customValidator("Check any one of the location is available for location",
       body -> {
         var issues = new LinkedHashSet<String>();
@@ -100,8 +98,8 @@ public class CsChecks {
   }
 
   public static ActionCheck getPayloadChecksForVs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
-    ArrayList<JsonContentCheck> checks = new ArrayList<JsonContentCheck>();
-    checks.add(createLocationCheckforVs());
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(createLocationCheckVs());
     checks.add(validateUSRForVs(sspSupplier));
     checks.add(validateIMONumberForVS(sspSupplier));
     return JsonAttribute.contentChecks(
@@ -113,10 +111,10 @@ public class CsChecks {
     );
   }
 
-  private static JsonContentCheck createLocationCheckforVs() {
+  private static JsonContentCheck createLocationCheckVs() {
     return JsonAttribute.customValidator("Check any one of the location is available for location",
       body -> {
-        var issues = StreamSupport.stream(body.spliterator(), false)
+          return StreamSupport.stream(body.spliterator(), false)
           .flatMap(schedules -> StreamSupport.stream(schedules.at("/vesselSchedules").spliterator(), false))
           .flatMap(vs -> StreamSupport.stream(vs.at("/transportCalls").spliterator(), false))
           .map(tc -> tc.at("/location"))
@@ -130,7 +128,6 @@ public class CsChecks {
           })
           .map(location -> "Any one of the location should be present for location")
           .collect(Collectors.toCollection(LinkedHashSet::new));
-        return issues;
       }
     );
   }
@@ -185,34 +182,44 @@ public class CsChecks {
     }
   );
 
-  private static final JsonContentCheck validateDateRange(Supplier<SuppliedScenarioParameters> sspSupplier){
-      return JsonAttribute.customValidator(
-        "Validate the dates for routings",
+  private static JsonContentCheck validateDateRange(Supplier<SuppliedScenarioParameters> sspSupplier){
+    return JsonAttribute.customValidator(
+        "Validate the dates for point to point routing",
         body -> {
           var issues = new LinkedHashSet<String>();
           for (JsonNode schedule : body) {
-            schedule.at("/legs").forEach(leg -> {
-              JsonNode arrivalDateTime = leg.at("/arrival/dateTime");
-              JsonNode departureDateTime = leg.at("/departure/dateTime");
-              var csp = sspSupplier.get().getMap();
+            schedule
+                .at("/legs")
+                .forEach(
+                    leg -> {
+                      JsonNode arrivalDateTime = leg.at("/arrival/dateTime");
+                      JsonNode departureDateTime = leg.at("/departure/dateTime");
+                      var csp = sspSupplier.get().getMap();
 
-              if (!StringUtils.isEmpty(csp.get(ARRIVAL_START_DATE))) {
-                issues.add(compareDates(arrivalDateTime.asText(), csp.get(ARRIVAL_START_DATE), "startDate", "arrival"));
-              }
-              if (!StringUtils.isEmpty(csp.get(ARRIVAL_END_DATE))) {
-                issues.add(compareDates(arrivalDateTime.asText(), csp.get(ARRIVAL_END_DATE), "endDate", "arrival"));
-              }
-              if (!StringUtils.isEmpty(csp.get(DEPARTURE_START_DATE))) {
-                issues.add(compareDates(departureDateTime.asText(), csp.get(DEPARTURE_START_DATE), "startDate", "departure"));
-              }
-              if (!StringUtils.isEmpty(csp.get(DEPARTURE_END_DATE))) {
-                issues.add(compareDates(departureDateTime.asText(), csp.get(DEPARTURE_END_DATE), "endDate", "departure"));
-              }
-            });
+                      if (!StringUtils.isEmpty(csp.get(ARRIVAL_START_DATE))) {
+                        if (!compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_START_DATE),"startDate","arrival").isBlank()) {
+                          issues.add(compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_START_DATE),"startDate","arrival"));
+                        }
+                      }
+                      if (!StringUtils.isEmpty(csp.get(ARRIVAL_END_DATE))) {
+                        if(!compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_END_DATE),"endDate","arrival").isBlank()){
+                          issues.add(compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_END_DATE),"endDate","arrival"));
+                        }
+                      }
+                      if (!StringUtils.isEmpty(csp.get(DEPARTURE_START_DATE))) {
+                       if(!compareDates(departureDateTime.asText(),csp.get(DEPARTURE_START_DATE),"startDate","departure").isBlank()){
+                         issues.add(compareDates(departureDateTime.asText(),csp.get(DEPARTURE_START_DATE),"startDate","departure"));
+                       }
+                      }
+                      if (!StringUtils.isEmpty(csp.get(DEPARTURE_END_DATE))) {
+                        if(!compareDates(departureDateTime.asText(),csp.get(DEPARTURE_END_DATE),"endDate","departure").isBlank()){
+                          issues.add(compareDates(departureDateTime.asText(),csp.get(DEPARTURE_END_DATE),"endDate","departure"));
+                        }
+                      }
+                    });
           }
           return issues;
-        }
-      );
+        });
   }
 
   private String compareDates(String dateValue, String dateQueryParam, String dateType, String operation){
@@ -229,7 +236,7 @@ public class CsChecks {
     return "";
   }
 
-  private static final JsonContentCheck validateUSRForVs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+  private static JsonContentCheck validateUSRForVs(Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
       "Validate USR available in the response",
       body ->{
@@ -237,7 +244,7 @@ public class CsChecks {
         for(JsonNode vs : body){
           var csp = sspSupplier.get().getMap();
           if(csp.containsKey(UNIVERSAL_SERVICE_REFERENCE)){
-            if(body.at("/universalServiceReference").isMissingNode()){
+            if(vs.at("/universalServiceReference").isMissingNode()){
               issues.add("The 'universalServiceReference' needs to be provided in the response if it is given in the filter.");
             }
           }
@@ -247,7 +254,7 @@ public class CsChecks {
     );
   }
 
-  private static final JsonContentCheck validateDateForPs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+  private static JsonContentCheck validateDateForPs(Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
       "Validate date in the response",
       body ->{

@@ -19,14 +19,16 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public class CsPublisher extends ConformanceParty {
@@ -58,13 +60,87 @@ public class CsPublisher extends ConformanceParty {
     }else{
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
     }
-    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(filePath,
-      Map.ofEntries());
-
+    /*JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(filePath,
+    Map.ofEntries());*/
+    JsonNode jsonResponseBody = replacePlaceHolders(filePath, request.queryParams());
     return request.createResponse(
       200,
       Map.of("Api-Version", List.of(apiVersion)),
       new ConformanceMessageBody(jsonResponseBody));
+  }
+
+  private JsonNode replacePlaceHolders(
+      String filePath, Map<String, ? extends Collection<String>> queryParams) {
+
+    Optional<String> arrivalStartDate =
+        Optional.ofNullable(queryParams.get("arrivalStartDate"))
+            .flatMap(collection -> collection.stream().findFirst());
+
+    Optional<String> arrivalEndDate =
+        Optional.ofNullable(queryParams.get("arrivalEndDate"))
+            .flatMap(collection -> collection.stream().findFirst());
+
+    Optional<String> departureStartDate =
+        Optional.ofNullable(queryParams.get("departureStartDate"))
+            .flatMap(collection -> collection.stream().findFirst());
+
+    Optional<String> departureEndDate =
+        Optional.ofNullable(queryParams.get("departureEndDate"))
+            .flatMap(collection -> collection.stream().findFirst());
+
+    return JsonToolkit.templateFileToJsonNode(
+        filePath,
+        Map.ofEntries(
+            Map.entry("ARRIVAL_DATE", getArrivalDate(arrivalStartDate, arrivalEndDate)),
+            Map.entry("DEPARTURE_DATE", getDepartureDate(departureStartDate, departureEndDate))));
+  }
+
+  private String getArrivalDate(
+      Optional<String> arrivalStartDate, Optional<String> arrivalEndDate) {
+    if (arrivalStartDate.isPresent() && arrivalEndDate.isPresent()) {
+      return processDate(arrivalStartDate.get(), arrivalEndDate.get(), "range");
+    } else if (arrivalStartDate.isPresent() && !arrivalEndDate.isPresent()) {
+      return processDate(arrivalStartDate.get(), "", "startDate");
+    } else if (!arrivalStartDate.isPresent() && arrivalEndDate.isPresent()) {
+      return processDate("", arrivalEndDate.get(), "endDate");
+    }
+    return "";
+  }
+
+  private String getDepartureDate(
+      Optional<String> departureStartDate, Optional<String> departureEndDate) {
+    if (departureStartDate.isPresent() && departureEndDate.isPresent()) {
+      return processDate(departureStartDate.get(), departureEndDate.get(), "range");
+    } else if (departureStartDate.isPresent() && !departureEndDate.isPresent()) {
+      return processDate(departureStartDate.get(), "", "startDate");
+    } else if (!departureStartDate.isPresent() && departureEndDate.isPresent()) {
+      return processDate("", departureEndDate.get(), "endDate");
+    }
+    return "";
+  }
+
+  private String processDate(String startDate, String endDate, String type) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    if (type.equals("startDate")) {
+      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
+      return convertDateToDateTime(date);
+    }
+    if (type.equals("endDate")) {
+      LocalDate date = LocalDate.parse(endDate, formatter).minusWeeks(1);
+      return convertDateToDateTime(date);
+    }
+    if (type.equals("range")) {
+      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
+      return convertDateToDateTime(date);
+    }
+    return "";
+  }
+
+  private String convertDateToDateTime(LocalDate date) {
+    LocalDateTime dateTime = date.atStartOfDay();
+    ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+    return zonedDateTime.format(dateTimeFormatter);
   }
 
   @Override
@@ -82,40 +158,38 @@ public class CsPublisher extends ConformanceParty {
     log.info("CsPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
-      SuppliedScenarioParameters.fromMap(
-        StreamSupport.stream(
-            actionPrompt.required("csFilterParametersQueryParamNames").spliterator(),
-            false)
-          .map(
-            jsonCsFilterParameter ->
-              CsFilterParameter.byQueryParamName.get(jsonCsFilterParameter.asText()))
-          .collect(
-            Collectors.toMap(
-              Function.identity(),
-              csFilterParameter ->
-                switch (csFilterParameter) {
-                  case CARRIER_SERVICE_NAME -> "Great Lion Service";
-                  case CARRIER_SERVICE_CODE -> "FE1";
-                  case UNIVERSAL_SERVICE_REFERENCE -> "SR12345A";
-                  case VESSEL_IMO_NUMBER -> "9321483";
-                  case VESSEL_NAME -> "King of the Seas";
-                  case CARRIER_VOYAGE_NUMBER -> "2103S";
-                  case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
-                  case UN_LOCATION_CODE -> "NLAMS";
-                  case FACILITY_SMDG_CODE -> "APM";
-                  case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
-                  case START_DATE, END_DATE, DATE -> DATE_FORMAT.format(new Date());
-                  case PLACE_OF_RECEIPT -> "NLAMS";
-                  case PLACE_OF_DELIVERY -> "NLAMS";
-                  case DEPARTURE_START_DATE -> DATE_FORMAT.format(new Date());
-                  case DEPARTURE_END_DATE -> DATE_FORMAT.format(new Date());
-                  case ARRIVAL_START_DATE -> DATE_FORMAT.format(new Date());
-                  case ARRIVAL_END_DATE -> DATE_FORMAT.format(new Date());
-                  case MAX_TRANSHIPMENT -> "1";
-                  case RECEIPT_TYPE_AT_ORIGIN -> "CY";
-                  case DELIVERY_TYPE_AT_DESTINATION -> "CY";
-
-                })));
+        SuppliedScenarioParameters.fromMap(
+            StreamSupport.stream(
+                    actionPrompt.required("csFilterParametersQueryParamNames").spliterator(), false)
+                .map(
+                    jsonCsFilterParameter ->
+                        CsFilterParameter.byQueryParamName.get(jsonCsFilterParameter.asText()))
+                .collect(
+                    Collectors.toMap(
+                        Function.identity(),
+                        csFilterParameter ->
+                            switch (csFilterParameter) {
+                              case CARRIER_SERVICE_NAME -> "Great Lion Service";
+                              case CARRIER_SERVICE_CODE -> "FE1";
+                              case UNIVERSAL_SERVICE_REFERENCE -> "SR12345A";
+                              case VESSEL_IMO_NUMBER -> "9321483";
+                              case VESSEL_NAME -> "King of the Seas";
+                              case CARRIER_VOYAGE_NUMBER -> "2103S";
+                              case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
+                              case UN_LOCATION_CODE -> "NLAMS";
+                              case FACILITY_SMDG_CODE -> "APM";
+                              case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
+                              case DATE -> DATE_FORMAT.format(new Date());
+                              case PLACE_OF_RECEIPT -> "NLAMS";
+                              case PLACE_OF_DELIVERY -> "NLAMS";
+                              case DEPARTURE_START_DATE -> DATE_FORMAT.format(new Date());
+                              case DEPARTURE_END_DATE -> getEndDate();
+                              case ARRIVAL_START_DATE -> DATE_FORMAT.format(new Date());
+                              case ARRIVAL_END_DATE -> getEndDate();
+                              case MAX_TRANSHIPMENT -> "1";
+                              case RECEIPT_TYPE_AT_ORIGIN -> "CY";
+                              case DELIVERY_TYPE_AT_DESTINATION -> "CY";
+                            })));
 
     asyncOrchestratorPostPartyInput(
       new ObjectMapper()
@@ -126,5 +200,13 @@ public class CsPublisher extends ConformanceParty {
     addOperatorLogEntry(
       "Submitting SuppliedScenarioParameters: %s"
         .formatted(responseSsp.toJson().toPrettyString()));
+  }
+
+  private String getEndDate() {
+    Date currentDate = new Date();
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(currentDate);
+    calendar.add(Calendar.MONTH, 3);
+    return DATE_FORMAT.format(calendar.getTime());
   }
 }

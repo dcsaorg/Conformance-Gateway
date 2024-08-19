@@ -80,7 +80,7 @@ class ConformanceApplicationTest {
         Thread.sleep(7_000L);
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
-    assertEquals("{\"scenariosLeft\":0}", status, "Scenario '" + sandboxId + "' did not finish properly! Original start status: " + startStatus);
+    assertEquals("{\"scenariosLeft\":0}", status, "Scenario in sandbox '" + sandboxId + "' did not finish properly! Original start status: " + startStatus);
     log.info("Original start status of sandboxId: {} was: {}", sandboxId, startStatus);
   }
 

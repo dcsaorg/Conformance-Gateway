@@ -21,10 +21,24 @@ class ManualBookingTest extends ManualTestBase {
     getAllSandboxes();
     getAvailableStandards();
 
-    SandboxConfig sandbox1 = createSandbox(new Sandbox("Booking", "2.0.0",
-      "Conformance", "Carrier", true, "Carrier testing: orchestrator"));
-    SandboxConfig sandbox2 = createSandbox(new Sandbox("Booking", "2.0.0",
-      "Conformance", "Carrier", false, "Carrier testing: synthetic carrier as tested party"));
+    SandboxConfig sandbox1 =
+        createSandbox(
+            new Sandbox(
+                "Booking",
+                "2.0.0",
+                "Conformance",
+                "Carrier",
+                true,
+                "Carrier testing: orchestrator"));
+    SandboxConfig sandbox2 =
+        createSandbox(
+            new Sandbox(
+                "Booking",
+                "2.0.0",
+                "Conformance",
+                "Carrier",
+                false,
+                "Carrier testing: synthetic carrier as tested party"));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
@@ -89,5 +103,4 @@ class ManualBookingTest extends ManualTestBase {
 
     validateSandboxScenarioGroup(sandbox1, scenarioId);
   }
-
 }

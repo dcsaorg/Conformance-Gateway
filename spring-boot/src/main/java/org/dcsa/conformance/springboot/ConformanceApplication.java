@@ -246,7 +246,6 @@ public class ConformanceApplication {
   @RequestMapping(value = "/conformance/webui/**")
   public void handleWebuiRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
     String requestBody = _getRequestBody(servletRequest);
-    log.info("Handling webui request: {}", requestBody);
     _addSimulatedLambdaDelay();
     _writeResponse(
       servletResponse,
@@ -381,5 +380,10 @@ public class ConformanceApplication {
   public static void main(String[] args) {
     // System.setProperty("javax.net.debug", "ssl:all");
     SpringApplication.run(ConformanceApplication.class, args);
+  }
+
+  // For testing purposes only
+  void setSimulatedLambdaDelay(long simulatedLambdaDelay) {
+    conformanceConfiguration.setSimulatedLambdaDelay(simulatedLambdaDelay);
   }
 }

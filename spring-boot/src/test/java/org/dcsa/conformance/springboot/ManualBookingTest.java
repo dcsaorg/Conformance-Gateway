@@ -1,13 +1,19 @@
 package org.dcsa.conformance.springboot;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 class ManualBookingTest extends ManualTestBase {
+
+  public ManualBookingTest() {
+    super(log); // Make sure no log lines are logged with the Base class logger
+  }
 
   @Test
   void testManualBookingFlowFirstScenario() {
@@ -28,6 +34,8 @@ class ManualBookingTest extends ManualTestBase {
     List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
     assertTrue(sandbox2Digests.isEmpty());
 
+    runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
+    // Run for the 2nd time, and see that it still works
     runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
   }
 
@@ -78,6 +86,8 @@ class ManualBookingTest extends ManualTestBase {
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 9, "GET");
     completeAction(sandbox1);
+
+    validateSandboxScenarioGroup(sandbox1, scenarioId);
   }
 
 }

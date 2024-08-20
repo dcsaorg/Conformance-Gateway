@@ -4,28 +4,34 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class which contains all API call methods and wiring needed to perform a manual test
  */
-@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public abstract class ManualTestBase {
-  final ObjectMapper mapper = new ObjectMapper();
-  static final String USER_ID = "unit-test";
-  final long lambdaDelay = 0L;
+  private static final String USER_ID = "unit-test";
+
+  private final ObjectMapper mapper = new ObjectMapper();
+  protected final long lambdaDelay = 0L;
+  private final Logger log;
+
+  public ManualTestBase(Logger log) {
+    this.log = log;
+  }
 
   @Autowired
-  ConformanceApplication app;
+  protected ConformanceApplication app;
 
   void getAvailableStandards() {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAvailableStandards");
@@ -85,6 +91,16 @@ public abstract class ManualTestBase {
       conformanceSubReport.get("errorMessages"));
   }
 
+  void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId) {
+    log.info("Validating scenario group: {}", scenarioId);
+    JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
+    assertFalse(jsonNode.get("isRunning").asBoolean());
+    JsonNode conformanceSubReport = jsonNode.get("conformanceSubReport");
+    assertEquals("CONFORMANT", conformanceSubReport.get("status").asText());
+    assertTrue(conformanceSubReport.get("errorMessages").isEmpty(), "Should be empty, but found: " +
+      conformanceSubReport.get("errorMessages"));
+  }
+
   JsonNode getScenarioStatus(SandboxConfig sandbox, String scenarioId) {
     ObjectNode node = mapper.createObjectNode().put("operation", "getScenarioStatus")
       .put("sandboxId", sandbox.sandboxId)
@@ -114,11 +130,11 @@ public abstract class ManualTestBase {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-    } while (counter < 15 && !sandboxStatus.contains("{\"waiting\":[]}"));
-    if (counter == 15) {
+    } while (counter < 20 && !sandboxStatus.contains("{\"waiting\":[]}"));
+    log.info("Waited for {} ms for sandbox status to reach the expected state: {}", counter * 500, sandboxStatus);
+    if (counter == 20) {
       throw new RuntimeException("Sandbox status did not reach the expected state on time: " + sandboxStatus);
     }
-    log.info("Waited for {} ms for sandbox status to reach the expected state: {}", counter * 500, sandboxStatus);
   }
 
   void updateSandboxConfigBeforeStarting(SandboxConfig sandbox1, SandboxConfig sandbox2) {

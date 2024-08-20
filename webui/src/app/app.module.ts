@@ -29,12 +29,14 @@ import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.co
 import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.component';
 import { ReportComponent } from './pages/report/report.component';
 import {TextWaitingComponent} from "./text/waiting/text-waiting.component";
+import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 
 @NgModule({
   declarations: [
     AppComponent,
     ConfirmationDialog,
     CreateSandboxComponent,
+    EditHeaderComponent,
     EditSandboxComponent,
     EnvironmentComponent,
     FooterComponent,

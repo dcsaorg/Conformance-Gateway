@@ -284,7 +284,7 @@ public class CsChecks {
     LocalDate filterDate = LocalDate.parse(dateQueryParam);
     ZonedDateTime dateTime = ZonedDateTime.parse(dateValue);
     LocalDate responseDateTimeAsDate = dateTime.toLocalDate();
-    return !responseDateTimeAsDate.isBefore(filterDate);
+    return responseDateTimeAsDate.isAfter(filterDate);
   }
 
   private JsonContentCheck validateIMONumberForVS(Supplier<SuppliedScenarioParameters> sspSupplier){

@@ -6,7 +6,6 @@
     "vesselSchedules": [
       {
         "vessel": {
-          "vesselIMONumber": "9321483",
           "MMSINumber": "278111222",
           "name": "King of the Seas",
           "flag": "DE",

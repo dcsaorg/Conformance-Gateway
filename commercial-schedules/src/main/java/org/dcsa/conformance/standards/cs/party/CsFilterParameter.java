@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Getter
 public enum CsFilterParameter {
   PLACE_OF_RECEIPT("placeOfReceipt"),
   PLACE_OF_DELIVERY("placeOfDelivery"),

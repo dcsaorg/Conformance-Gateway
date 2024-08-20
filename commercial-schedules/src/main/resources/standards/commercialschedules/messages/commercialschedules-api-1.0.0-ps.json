@@ -34,7 +34,7 @@
           {
             "eventTypeCode": "ARRI",
             "eventClassifierCode": "PLN",
-            "eventDateTime": "2025-01-14T09:21:00+01:00"
+            "eventDateTime": "DATE"
           }
         ],
         "cutOffTimes": [

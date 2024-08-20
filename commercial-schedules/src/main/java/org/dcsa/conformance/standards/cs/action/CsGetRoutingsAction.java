@@ -7,8 +7,6 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 
-import java.util.ArrayList;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class CsGetRoutingsAction extends CsAction{

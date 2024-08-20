@@ -87,10 +87,7 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getPointToPointRoutings(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
       SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-
-
-    //JsonNode jsonRequestBody = replaceBookingPlaceHolders(actionPrompt);
-
+    
     syncCounterpartGet(
       "/v1/point-to-point-routes",
       ssp.getMap().entrySet().stream()

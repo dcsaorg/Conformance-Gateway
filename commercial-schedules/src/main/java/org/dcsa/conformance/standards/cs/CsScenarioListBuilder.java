@@ -10,7 +10,6 @@ import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
 import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
-import org.dcsa.conformance.standards.cs.party.CsRole;
 
 
 import java.util.LinkedHashMap;

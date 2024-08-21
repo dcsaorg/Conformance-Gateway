@@ -22,42 +22,55 @@ import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @UtilityClass
 public class CsChecks {
-  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
-    "Validate shipment cutOff Date time code",
-    (body) -> {
-      var issues = new LinkedHashSet<String>();
-      for (JsonNode routing : body) {
-        var shipmentCutOffTimes = routing.path("cutOffTimes");
-        var receiptTypeAtOrigin = routing.path("receiptTypeAtOrigin").asText("");
-        var cutOffDateTimeCodes = StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
-          .map(p -> p.path("cutOffDateTimeCode"))
-          .filter(JsonNode::isTextual)
-          .map(n -> n.asText(""))
-          .collect(Collectors.toSet());
-        if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
-          issues.add("cutOffDateTimeCode 'LCL' must be present when receiptTypeAtOrigin is CFS");
-        }
-      }
-      return issues;
-    }
-  );
-  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS = JsonAttribute.customValidator(
-    "Validate allowed shipment cutoff codes",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      for (JsonNode schedule : body) {
-        schedule.at("/vesselSchedules").forEach(vesselSchedule -> {
-          vesselSchedule.at("/cutOffTimes").forEach(cutOffTime -> {
-            JsonNode cutOffDateTimeCode = cutOffTime.at("/cutOffDateTimeCode");
-            if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(cutOffDateTimeCode.asText())) {
-              issues.add(String.format("Invalid cutOffDateTimeCode: %s", cutOffDateTimeCode.asText()));
+  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE =
+      JsonAttribute.customValidator(
+          "Validate shipment cutOff Date time code",
+          (body) -> {
+            var issues = new LinkedHashSet<String>();
+            for (JsonNode routing : body) {
+              var shipmentCutOffTimes = routing.path("cutOffTimes");
+              var receiptTypeAtOrigin = routing.path("receiptTypeAtOrigin").asText("");
+              var cutOffDateTimeCodes =
+                  StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
+                      .map(p -> p.path("cutOffDateTimeCode"))
+                      .filter(JsonNode::isTextual)
+                      .map(n -> n.asText(""))
+                      .collect(Collectors.toSet());
+              if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
+                issues.add(
+                    "cutOffDateTimeCode 'LCL' must be present when receiptTypeAtOrigin is CFS");
+              }
             }
+            return issues;
           });
-        });
-      }
-      return issues;
-    }
-  );
+  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS =
+      JsonAttribute.customValidator(
+          "Validate allowed shipment cutoff codes",
+          body -> {
+            var issues = new LinkedHashSet<String>();
+            for (JsonNode schedule : body) {
+              schedule
+                  .at("/vesselSchedules")
+                  .forEach(
+                      vesselSchedule -> {
+                        vesselSchedule
+                            .at("/cutOffTimes")
+                            .forEach(
+                                cutOffTime -> {
+                                  JsonNode cutOffDateTimeCode =
+                                      cutOffTime.at("/cutOffDateTimeCode");
+                                  if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
+                                      cutOffDateTimeCode.asText())) {
+                                    issues.add(
+                                        String.format(
+                                            "Invalid cutOffDateTimeCode: %s",
+                                            cutOffDateTimeCode.asText()));
+                                  }
+                                });
+                      });
+            }
+            return issues;
+          });
 
   public static ActionCheck getPayloadChecksForPtp(UUID matchedExchangeUuid, String expectedApiVersion,Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
@@ -71,7 +84,7 @@ public class CsChecks {
           || sspSupplier.get().getMap().containsKey(ARRIVAL_END_DATE)
           || sspSupplier.get().getMap().containsKey(DEPARTURE_START_DATE)
           || sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
-        checks.add(validateDateRange(sspSupplier));
+        checks.add(validateDateRangeforPtp(sspSupplier));
       }
     }
     return JsonAttribute.contentChecks(
@@ -85,21 +98,20 @@ public class CsChecks {
 
   private static JsonContentCheck createLocationCheckPtp(String locationType) {
     return JsonAttribute.customValidator(
-      String.format("Check any one of the location is available for '%s'", locationType),
-      body -> {
-        var issues = new LinkedHashSet<String>();
-        for (JsonNode routing : body) {
-          if (locationType.equals("arrival") || locationType.equals("departure")) {
-            for(JsonNode leg : routing.path("legs")){
-              checkLocation(locationType, leg, issues);
+        String.format("Check any one of the location is available for '%s'", locationType),
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          for (JsonNode routing : body) {
+            if (locationType.equals("arrival") || locationType.equals("departure")) {
+              for (JsonNode leg : routing.path("legs")) {
+                checkAnyLocationIsPresent(locationType, leg, issues);
+              }
+            } else {
+              checkAnyLocationIsPresent(locationType, routing, issues);
             }
-          } else {
-            checkLocation(locationType, routing, issues);
           }
-        }
-        return issues;
-      }
-    );
+          return issues;
+        });
   }
 
   public static ActionCheck getPayloadChecksForPs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
@@ -136,8 +148,14 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForVs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckVs());
-    checks.add(validateUSRForVs(sspSupplier));
-    checks.add(validateIMONumberForVS(sspSupplier));
+    if (sspSupplier.get() != null) {
+      if (sspSupplier.get().getMap().containsKey(UNIVERSAL_SERVICE_REFERENCE)) {
+        checks.add(validateUSRForVs(sspSupplier));
+      }
+      if (sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER)) {
+        checks.add(validateUSRForVs(sspSupplier));
+      }
+    }
     return JsonAttribute.contentChecks(
       CsRole::isPublisher,
       matchedExchangeUuid,
@@ -168,7 +186,8 @@ public class CsChecks {
     );
   }
 
-  private static void checkLocation(String locationType, JsonNode data, LinkedHashSet<String> issues) {
+  private static void checkAnyLocationIsPresent(
+      String locationType, JsonNode data, LinkedHashSet<String> issues) {
     String locationPath = String.format("/%s/location", locationType);
     JsonNode address = data.at(locationPath + "/address");
     JsonNode unLocationCode = data.at(locationPath + "/UNLocationCode");
@@ -178,7 +197,8 @@ public class CsChecks {
     }
   }
 
-  private static JsonContentCheck validateDateRange(Supplier<SuppliedScenarioParameters> sspSupplier){
+  private static JsonContentCheck validateDateRangeforPtp(
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
         "Validate the dates for point to point routing",
         body -> {
@@ -252,35 +272,47 @@ public class CsChecks {
 
   private static JsonContentCheck validateDateForPs(Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
-      "Validate date in the response",
-      body ->{
-        var issues = new LinkedHashSet<String>();
-        for (JsonNode schedule : body) {
-          schedule.at("/vesselSchedules").forEach(vesselSchedule -> {
-            vesselSchedule.at("/timestamps").forEach(timestamp -> {
-              JsonNode eventDateTime = timestamp.at("/eventDateTime");
-              JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
-              if (eventClassifierCode.asText().equals("EST")) {
-                if(!isAfterTheDate(eventDateTime.asText(),sspSupplier.get().getMap().get(DATE))){
-                  issues.add("The estimated arrival or departure dates should be on or after the date provided");
-                }
-              }else if(eventClassifierCode.asText().equals("PLN")){
-                if(!isAfterTheDate(eventDateTime.asText(),sspSupplier.get().getMap().get(DATE))){
-                  issues.add("The estimated arrival or departure dates should be on or after the date provided");
-                }
-              }
-            });
-          });
-        }
-        return issues;
-      }
-    );
+        "Validate date in the response",
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          for (JsonNode schedule : body) {
+            schedule
+                .at("/vesselSchedules")
+                .forEach(
+                    vesselSchedule -> {
+                      vesselSchedule
+                          .at("/timestamps")
+                          .forEach(
+                              timestamp -> {
+                                JsonNode eventDateTime = timestamp.at("/eventDateTime");
+                                JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
+                                if (eventClassifierCode.asText().equals("EST")) {
+                                  if (isBeforeTheDate(
+                                      eventDateTime.asText(),
+                                      sspSupplier.get().getMap().get(DATE))) {
+                                    issues.add(
+                                        "The estimated arrival or departure dates should be on or after the date provided");
+                                  }
+                                } else if (eventClassifierCode.asText().equals("PLN")) {
+                                  if (isBeforeTheDate(
+                                      eventDateTime.asText(),
+                                      sspSupplier.get().getMap().get(DATE))) {
+                                    issues.add(
+                                        "The estimated arrival or departure dates should be on or after the date provided");
+                                  }
+                                }
+                              });
+                    });
+          }
+          return issues;
+        });
   }
-  private boolean isAfterTheDate(String dateValue, String dateQueryParam){
+
+  private boolean isBeforeTheDate(String dateValue, String dateQueryParam) {
     LocalDate filterDate = LocalDate.parse(dateQueryParam);
     ZonedDateTime dateTime = ZonedDateTime.parse(dateValue);
     LocalDate responseDateTimeAsDate = dateTime.toLocalDate();
-    return responseDateTimeAsDate.isAfter(filterDate);
+    return !responseDateTimeAsDate.isAfter(filterDate);
   }
 
   private JsonContentCheck validateIMONumberForVS(Supplier<SuppliedScenarioParameters> sspSupplier){

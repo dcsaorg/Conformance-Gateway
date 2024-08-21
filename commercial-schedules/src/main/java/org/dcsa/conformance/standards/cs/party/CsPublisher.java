@@ -55,7 +55,6 @@ public class CsPublisher extends ConformanceParty {
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
-
     String filePath;
     if (request.url().endsWith("v1/point-to-point-routes")) {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
@@ -64,7 +63,6 @@ public class CsPublisher extends ConformanceParty {
     } else {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
     }
-
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
     return request.createResponse(
         200,
@@ -74,39 +72,55 @@ public class CsPublisher extends ConformanceParty {
 
   private JsonNode replacePlaceHolders(String filePath, ConformanceRequest request) {
     Map<String, String> entryMap = new HashMap<>();
-    if (request.url().endsWith("v1/point-to-point-routes")) {
 
-      Optional<String> arrivalStartDate = extractValue(request.queryParams(), "arrivalStartDate");
-      Optional<String> arrivalEndDate = extractValue(request.queryParams(), "arrivalEndDate");
-      Optional<String> departureStartDate =
-          extractValue(request.queryParams(), "departureStartDate");
-      Optional<String> departureEndDate = extractValue(request.queryParams(), "departureEndDate");
+    String url = request.url();
 
-      if (arrivalStartDate.isPresent() || arrivalEndDate.isPresent()) {
-        String startDate = arrivalStartDate.orElse(null);
-        String endDate = arrivalEndDate.orElse(null);
-        entryMap.put("ARRIVAL_DATE", getArrivalDate(startDate, endDate));
-      } else {
-        entryMap.put("ARRIVAL_DATE", DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
-      }
-      if (departureStartDate.isPresent() || departureEndDate.isPresent()) {
-        String startDate = departureStartDate.orElse(null);
-        String endDate = departureEndDate.orElse(null);
-        entryMap.put("DEPARTURE_DATE", getDepartureDate(startDate, endDate));
-      } else {
-        entryMap.put("DEPARTURE_DATE", DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
-      }
-      return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
-    } else if (request.url().endsWith("v1/port-schedules")) {
-      Optional<String> date = extractValue(request.queryParams(), "date");
-      if (date.isPresent()) {
-        entryMap.put("DATE", processDate(date.get(), "", "date"));
-      } else {
-        entryMap.put("DATE", DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
-      }
-      return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
+    if (url.endsWith("v1/point-to-point-routes")) {
+      handleArrivalAndDepartureDates(entryMap, request.queryParams());
+    } else if (url.endsWith("v1/port-schedules")) {
+      handleSingleDate(entryMap, request.queryParams());
     }
     return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
+
+  }
+
+  private void handleArrivalAndDepartureDates(
+      Map<String, String> entryMap, Map<String, ? extends Collection<String>> queryParams) {
+    String arrivalDate =
+        getProcessedDate(queryParams, "arrivalStartDate", "arrivalEndDate", "ARRIVAL_DATE");
+    String departureDate =
+        getProcessedDate(queryParams, "departureStartDate", "departureEndDate", "DEPARTURE_DATE");
+
+    entryMap.put("ARRIVAL_DATE", arrivalDate);
+    entryMap.put("DEPARTURE_DATE", departureDate);
+  }
+
+  private void handleSingleDate(
+      Map<String, String> entryMap, Map<String, ? extends Collection<String>> queryParams) {
+    String date =
+        extractValue(queryParams, "date")
+            .map(dateToProcess -> processDate(dateToProcess, "", "date"))
+            .orElseGet(() -> DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
+    entryMap.put("DATE", date);
+  }
+
+  private String getProcessedDate(
+      Map<String, ? extends Collection<String>> queryParams,
+      String startDateParam,
+      String endDateParam,
+      String mapKey) {
+    Optional<String> startDateOpt = extractValue(queryParams, startDateParam);
+    Optional<String> endDateOpt = extractValue(queryParams, endDateParam);
+
+    if (startDateOpt.isPresent() || endDateOpt.isPresent()) {
+      String startDate = startDateOpt.orElse(null);
+      String endDate = endDateOpt.orElse(null);
+      return "ARRIVAL_DATE".equals(mapKey)
+          ? getArrivalDateTime(startDate, endDate)
+          : getDepartureDateTime(startDate, endDate);
+    } else {
+      return DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now());
+    }
   }
 
   private Optional<String> extractValue(
@@ -115,7 +129,7 @@ public class CsPublisher extends ConformanceParty {
         .flatMap(collection -> collection.stream().findFirst());
   }
 
-  private String getArrivalDate(String arrivalStartDate, String arrivalEndDate) {
+  private String getArrivalDateTime(String arrivalStartDate, String arrivalEndDate) {
     if (arrivalStartDate != null && arrivalEndDate != null) {
       return processDate(arrivalStartDate, arrivalEndDate, "range");
     }
@@ -128,7 +142,7 @@ public class CsPublisher extends ConformanceParty {
     return "";
   }
 
-  private String getDepartureDate(String departureStartDate, String departureEndDate) {
+  private String getDepartureDateTime(String departureStartDate, String departureEndDate) {
     if (departureStartDate != null && departureEndDate != null) {
       return processDate(departureStartDate, departureEndDate, "range");
     }

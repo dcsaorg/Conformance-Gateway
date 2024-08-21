@@ -20,7 +20,7 @@ public class CsGetRoutingsAction extends CsAction{
   @Override
   public String getHumanReadablePrompt() {
     return "Send a GET point to point routings request with the following parameters: "
-      + sspSupplier.get().toJson().toPrettyString();
+        + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override

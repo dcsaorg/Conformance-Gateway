@@ -23,7 +23,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   private final LinkedHashSet<CsFilterParameter> csFilterParameters;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   public SupplyScenarioParametersAction(
     String publisherPartyName, CsFilterParameter... csFilterParameters) {
@@ -82,8 +81,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                         Function.identity(),
                         csFilterParameters ->
                             switch (csFilterParameters) {
-                              case DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
-                                  DATE_FORMAT.format(new Date());
+                              case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
+                                  DateUtils.DATE_FORMAT.format(new Date());
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE -> DateUtils.getEndDate();
                               default -> "TODO";
                             })))
@@ -100,5 +99,10 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   public void reset() {
     super.reset();
     suppliedScenarioParameters = null;
+  }
+
+  @Override
+  public boolean isInputRequired() {
+    return true;
   }
 }

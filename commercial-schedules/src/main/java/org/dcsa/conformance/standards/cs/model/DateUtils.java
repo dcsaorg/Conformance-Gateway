@@ -10,7 +10,7 @@ public class DateUtils {
   public static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
-  public static String getEndDate() {
+  public static String getEndDate() { // rename meaningfully
     Date currentDate = new Date();
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(currentDate);

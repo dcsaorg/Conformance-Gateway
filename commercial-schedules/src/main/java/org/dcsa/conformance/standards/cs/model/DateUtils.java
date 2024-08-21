@@ -8,7 +8,7 @@ import java.util.Date;
 public class DateUtils {
   public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   public static final DateTimeFormatter DATE_TIME_FORMATTER =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
   public static String getEndDate() {
     Date currentDate = new Date();

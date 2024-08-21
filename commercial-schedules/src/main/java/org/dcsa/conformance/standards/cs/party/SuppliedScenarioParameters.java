@@ -20,14 +20,6 @@ public class SuppliedScenarioParameters {
     this.map = Collections.unmodifiableMap(map);
   }
 
-  public ObjectNode toJson() {
-    ObjectNode objectNode = new ObjectMapper().createObjectNode();
-    map.forEach(
-        (csFilterParameter, value) ->
-            objectNode.put(csFilterParameter.getQueryParamName(), value));
-    return objectNode;
-  }
-
   public static SuppliedScenarioParameters fromMap(Map<CsFilterParameter, String> map) {
     return new SuppliedScenarioParameters(map);
   }
@@ -39,7 +31,14 @@ public class SuppliedScenarioParameters {
             .collect(
                 Collectors.toUnmodifiableMap(
                     Function.identity(),
-                  csFilterParameter ->
+                    csFilterParameter ->
                         jsonNode.required(csFilterParameter.getQueryParamName()).asText())));
+  }
+
+  public ObjectNode toJson() {
+    ObjectNode objectNode = new ObjectMapper().createObjectNode();
+    map.forEach(
+        (csFilterParameter, value) -> objectNode.put(csFilterParameter.getQueryParamName(), value));
+    return objectNode;
   }
 }

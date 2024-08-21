@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.cs;
 
+import java.util.*;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
-
-import java.util.*;
 
 public class CsStandard extends AbstractStandard {
   public static final CsStandard INSTANCE = new CsStandard();

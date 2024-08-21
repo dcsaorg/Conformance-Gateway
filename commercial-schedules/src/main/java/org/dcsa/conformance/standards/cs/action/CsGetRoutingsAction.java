@@ -1,13 +1,12 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.cs.party.CsRole;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
-
-import java.util.stream.Stream;
+import org.dcsa.conformance.standards.cs.party.CsRole;
 
 public class CsGetRoutingsAction extends CsAction{
 
@@ -30,14 +29,26 @@ public class CsGetRoutingsAction extends CsAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routes"),
-          new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
-          new JsonSchemaCheck(
-            CsRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator),
-          CsChecks.getPayloadChecksForPtp(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
+            new UrlPathCheck(
+                CsRole::isSubscriber, getMatchedExchangeUuid(), "/point-to-point-routes"),
+            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new JsonSchemaCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            new ApiHeaderCheck(
+                CsRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            CsChecks.getPayloadChecksForPtp(
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
       }
     };
   }

@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.cs;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.party.ConformanceParty;
@@ -11,10 +14,6 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.cs.party.CsPublisher;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 import org.dcsa.conformance.standards.cs.party.CsSubscriber;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class CsComponentFactory extends AbstractComponentFactory {
   protected CsComponentFactory(String standardName, String standardVersion, String scenarioSuite) {

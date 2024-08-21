@@ -13,18 +13,23 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class CsGetVesselSchedulesAction extends CsAction{
+public class CsGetVesselSchedulesAction extends CsAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
-  public CsGetVesselSchedulesAction(String subscriberPartyName, String publisherPartyName, ConformanceAction previousAction,JsonSchemaValidator responseSchemaValidator) {
-      super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
-      this.responseSchemaValidator = responseSchemaValidator;
+
+  public CsGetVesselSchedulesAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      ConformanceAction previousAction,
+      JsonSchemaValidator responseSchemaValidator) {
+    super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
+    this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return "Send a GET vessel schedules request with the following parameters: "
-      + sspSupplier.get().toJson().toPrettyString();
+        + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override
@@ -33,14 +38,25 @@ public class CsGetVesselSchedulesAction extends CsAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/vessel-schedules"),
-          new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
-          new JsonSchemaCheck(
-            CsRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator),
-          CsChecks.getPayloadChecksForVs(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
+            new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/vessel-schedules"),
+            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new JsonSchemaCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            new ApiHeaderCheck(
+                CsRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            CsChecks.getPayloadChecksForVs(
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
       }
     };
   }

@@ -1,15 +1,8 @@
 package org.dcsa.conformance.standards.cs.checks;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.JsonAttribute;
-import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
-import org.dcsa.conformance.standards.cs.party.CsRole;
+import static org.dcsa.conformance.standards.cs.party.CsFilterParameter.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -18,11 +11,54 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.dcsa.conformance.standards.cs.party.CsFilterParameter.*;
+import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
+import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.cs.party.CsRole;
+import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @UtilityClass
 public class CsChecks {
+  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
+    "Validate shipment cutOff Date time code",
+    (body) -> {
+      var issues = new LinkedHashSet<String>();
+      for (JsonNode routing : body) {
+        var shipmentCutOffTimes = routing.path("cutOffTimes");
+        var receiptTypeAtOrigin = routing.path("receiptTypeAtOrigin").asText("");
+        var cutOffDateTimeCodes = StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
+          .map(p -> p.path("cutOffDateTimeCode"))
+          .filter(JsonNode::isTextual)
+          .map(n -> n.asText(""))
+          .collect(Collectors.toSet());
+        if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
+          issues.add("cutOffDateTimeCode 'LCL' must be present when receiptTypeAtOrigin is CFS");
+        }
+      }
+      return issues;
+    }
+  );
+  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS = JsonAttribute.customValidator(
+    "Validate allowed shipment cutoff codes",
+    body -> {
+      var issues = new LinkedHashSet<String>();
+      for (JsonNode schedule : body) {
+        schedule.at("/vesselSchedules").forEach(vesselSchedule -> {
+          vesselSchedule.at("/cutOffTimes").forEach(cutOffTime -> {
+            JsonNode cutOffDateTimeCode = cutOffTime.at("/cutOffDateTimeCode");
+            if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(cutOffDateTimeCode.asText())) {
+              issues.add(String.format("Invalid cutOffDateTimeCode: %s", cutOffDateTimeCode.asText()));
+            }
+          });
+        });
+      }
+      return issues;
+    }
+  );
+
   public static ActionCheck getPayloadChecksForPtp(UUID matchedExchangeUuid, String expectedApiVersion,Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPtp("placeOfReceipt"));
@@ -141,46 +177,6 @@ public class CsChecks {
       issues.add(String.format("Any one of the location should be present for '%s'", locationType));
     }
   }
-
-
-  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
-    "Validate shipment cutOff Date time code",
-    (body) -> {
-      var issues = new LinkedHashSet<String>();
-      for (JsonNode routing : body) {
-        var shipmentCutOffTimes = routing.path("cutOffTimes");
-        var receiptTypeAtOrigin = routing.path("receiptTypeAtOrigin").asText("");
-        var cutOffDateTimeCodes = StreamSupport.stream(shipmentCutOffTimes.spliterator(), false)
-          .map(p -> p.path("cutOffDateTimeCode"))
-          .filter(JsonNode::isTextual)
-          .map(n -> n.asText(""))
-          .collect(Collectors.toSet());
-        if (receiptTypeAtOrigin.equals("CFS") && !cutOffDateTimeCodes.contains("LCL")) {
-          issues.add("cutOffDateTimeCode 'LCL' must be present when receiptTypeAtOrigin is CFS");
-        }
-      }
-      return issues;
-    }
-  );
-
-
-  private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE_PS = JsonAttribute.customValidator(
-    "Validate allowed shipment cutoff codes",
-    body -> {
-      var issues = new LinkedHashSet<String>();
-      for (JsonNode schedule : body) {
-        schedule.at("/vesselSchedules").forEach(vesselSchedule -> {
-          vesselSchedule.at("/cutOffTimes").forEach(cutOffTime -> {
-            JsonNode cutOffDateTimeCode = cutOffTime.at("/cutOffDateTimeCode");
-            if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(cutOffDateTimeCode.asText())) {
-              issues.add(String.format("Invalid cutOffDateTimeCode: %s", cutOffDateTimeCode.asText()));
-            }
-          });
-        });
-      }
-      return issues;
-    }
-  );
 
   private static JsonContentCheck validateDateRange(Supplier<SuppliedScenarioParameters> sspSupplier){
     return JsonAttribute.customValidator(

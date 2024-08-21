@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.cs.party;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,39 +30,46 @@ import org.dcsa.conformance.standards.cs.model.DateUtils;
 @Slf4j
 public class CsPublisher extends ConformanceParty {
 
-
-  public CsPublisher(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
-    super(apiVersion, partyConfiguration, counterpartConfiguration, persistentMap, webClient, orchestratorAuthHeader);
+  public CsPublisher(
+      String apiVersion,
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      JsonNodeMap persistentMap,
+      PartyWebClient webClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    super(
+        apiVersion,
+        partyConfiguration,
+        counterpartConfiguration,
+        persistentMap,
+        webClient,
+        orchestratorAuthHeader);
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-
-  }
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-
-  }
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
 
     String filePath;
-    if(request.url().endsWith("v1/point-to-point-routes")){
+    if (request.url().endsWith("v1/point-to-point-routes")) {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
-    }else if(request.url().endsWith("v1/port-schedules")){
+    } else if (request.url().endsWith("v1/port-schedules")) {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
-    }else{
+    } else {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
     }
 
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
     return request.createResponse(
-      200,
-      Map.of("Api-Version", List.of(apiVersion)),
-      new ConformanceMessageBody(jsonResponseBody));
+        200,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(jsonResponseBody));
   }
 
   private JsonNode replacePlaceHolders(String filePath, ConformanceRequest request) {
@@ -164,14 +170,12 @@ public class CsPublisher extends ConformanceParty {
   }
 
   @Override
-  protected void doReset() {
-
-  }
+  protected void doReset() {}
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -207,15 +211,13 @@ public class CsPublisher extends ConformanceParty {
                             })));
 
     asyncOrchestratorPostPartyInput(
-      new ObjectMapper()
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", responseSsp.toJson()));
+        new ObjectMapper()
+            .createObjectNode()
+            .put("actionId", actionPrompt.required("actionId").asText())
+            .set("input", responseSsp.toJson()));
 
     addOperatorLogEntry(
-      "Submitting SuppliedScenarioParameters: %s"
-        .formatted(responseSsp.toJson().toPrettyString()));
+        "Submitting SuppliedScenarioParameters: %s"
+            .formatted(responseSsp.toJson().toPrettyString()));
   }
-
-
 }

@@ -23,81 +23,91 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class CsSubscriber extends ConformanceParty {
-  public CsSubscriber(String apiVersion, PartyConfiguration partyConfiguration, CounterpartConfiguration counterpartConfiguration, JsonNodeMap persistentMap, PartyWebClient webClient, Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
-    super(apiVersion, partyConfiguration, counterpartConfiguration, persistentMap, webClient, orchestratorAuthHeader);
+  public CsSubscriber(
+      String apiVersion,
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      JsonNodeMap persistentMap,
+      PartyWebClient webClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    super(
+        apiVersion,
+        partyConfiguration,
+        counterpartConfiguration,
+        persistentMap,
+        webClient,
+        orchestratorAuthHeader);
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-
-  }
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-
-  }
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
 
   @Override
-  protected void doReset() {
-
-  }
+  protected void doReset() {}
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(CsGetVesselSchedulesAction.class, this::getVesselSchedules),
-      Map.entry(CsGetPortSchedulesAction.class, this::getPortSchedules),
-      Map.entry(CsGetRoutingsAction.class, this::getPointToPointRoutings));
+    return Map.ofEntries(
+        Map.entry(CsGetVesselSchedulesAction.class, this::getVesselSchedules),
+        Map.entry(CsGetPortSchedulesAction.class, this::getPortSchedules),
+        Map.entry(CsGetRoutingsAction.class, this::getPointToPointRoutings));
   }
 
   private void getVesselSchedules(JsonNode actionPrompt) {
     log.info("CsSubscriber.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
-      SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     syncCounterpartGet(
-      "/v1/vessel-schedules",
-      ssp.getMap().entrySet().stream()
-        .collect(
-          Collectors.toMap(
-            entry -> entry.getKey().getQueryParamName(),
-            entry -> Set.of(entry.getValue()))));
+        "/v1/vessel-schedules",
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue()))));
 
     addOperatorLogEntry(
-      "Sent GET vessel schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+        "Sent GET vessel schedules request with parameters %s"
+            .formatted(ssp.toJson().toPrettyString()));
   }
 
   private void getPortSchedules(JsonNode actionPrompt) {
     log.info("CsSubscriber.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
-      SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
     syncCounterpartGet(
-      "/v1/port-schedules",
-      ssp.getMap().entrySet().stream()
-        .collect(
-          Collectors.toMap(
-            entry -> entry.getKey().getQueryParamName(),
-            entry -> Set.of(entry.getValue()))));
+        "/v1/port-schedules",
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue()))));
 
     addOperatorLogEntry(
-      "Sent GET port schedules request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+        "Sent GET port schedules request with parameters %s"
+            .formatted(ssp.toJson().toPrettyString()));
   }
 
   private void getPointToPointRoutings(JsonNode actionPrompt) {
     log.info("CsSubscriber.getPointToPointRoutings(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
-      SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+
     syncCounterpartGet(
-      "/v1/point-to-point-routes",
-      ssp.getMap().entrySet().stream()
-        .collect(
-          Collectors.toMap(
-            entry -> entry.getKey().getQueryParamName(),
-            entry -> Set.of(entry.getValue()))));
+        "/v1/point-to-point-routes",
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue()))));
 
     addOperatorLogEntry(
-      "Sent GET point to point routings request with parameters %s".formatted(ssp.toJson().toPrettyString()));
+        "Sent GET point to point routings request with parameters %s"
+            .formatted(ssp.toJson().toPrettyString()));
   }
 
   @Override

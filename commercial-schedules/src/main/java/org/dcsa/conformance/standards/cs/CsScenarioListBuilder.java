@@ -2,6 +2,11 @@ package org.dcsa.conformance.standards.cs;
 
 import static org.dcsa.conformance.standards.cs.party.CsFilterParameter.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
@@ -10,14 +15,6 @@ import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
 import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
-
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 
 @Slf4j
 public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBuilder> {

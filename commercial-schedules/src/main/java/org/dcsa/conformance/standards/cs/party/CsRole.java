@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum CsRole {
-
   PUBLISHER("Publisher"),
   SUBSCRIBER("Subscriber");
 

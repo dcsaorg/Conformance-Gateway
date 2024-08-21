@@ -28,17 +28,14 @@ public enum CsFilterParameter {
   UNIVERSAL_VOYAGE_REFERENCE("universalVoyageReference"),
   VESSEL_OPERATOR_CARRIER_CODE("vesselOperatorCarrierCode"),
   UN_LOCATION_CODE("UNLocationCode"),
-  FACILITY_SMDG_CODE("facilitySMDGCode")
-  ;
-
-  @Getter
-  private final String queryParamName;
+  FACILITY_SMDG_CODE("facilitySMDGCode");
 
   public static final Map<String, CsFilterParameter> byQueryParamName =
-    Arrays.stream(values())
-      .collect(
-        Collectors.toUnmodifiableMap(
-          CsFilterParameter::getQueryParamName, Function.identity()));
+      Arrays.stream(values())
+          .collect(
+              Collectors.toUnmodifiableMap(
+                  CsFilterParameter::getQueryParamName, Function.identity()));
+  @Getter private final String queryParamName;
 
   CsFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;

@@ -1,18 +1,22 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 
-import java.util.stream.Stream;
+public class CsGetPortSchedulesAction extends CsAction {
 
-public class CsGetPortSchedulesAction extends CsAction{
+  private final JsonSchemaValidator responseSchemaValidator;
 
-  private JsonSchemaValidator responseSchemaValidator;
-  public CsGetPortSchedulesAction(String subscriberPartyName, String publisherPartyName, ConformanceAction previousAction,JsonSchemaValidator responseSchemaValidator) {
+  public CsGetPortSchedulesAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      ConformanceAction previousAction,
+      JsonSchemaValidator responseSchemaValidator) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetPortSchedules", 200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
@@ -20,7 +24,7 @@ public class CsGetPortSchedulesAction extends CsAction{
   @Override
   public String getHumanReadablePrompt() {
     return "Send a GET port schedules request with the following parameters: "
-      + sspSupplier.get().toJson().toPrettyString();
+        + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override
@@ -29,14 +33,25 @@ public class CsGetPortSchedulesAction extends CsAction{
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/port-schedules"),
-          new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
-          new JsonSchemaCheck(
-            CsRole::isPublisher,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator),
-          CsChecks.getPayloadChecksForPs(getMatchedExchangeUuid(),expectedApiVersion,sspSupplier));
+            new UrlPathCheck(CsRole::isSubscriber, getMatchedExchangeUuid(), "/port-schedules"),
+            new ResponseStatusCheck(CsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+            new JsonSchemaCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            new ApiHeaderCheck(
+                CsRole::isSubscriber,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                CsRole::isPublisher,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
+            CsChecks.getPayloadChecksForPs(
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
       }
     };
   }

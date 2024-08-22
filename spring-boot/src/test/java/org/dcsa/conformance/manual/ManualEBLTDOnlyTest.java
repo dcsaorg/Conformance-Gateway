@@ -1,4 +1,4 @@
-package org.dcsa.conformance.springboot;
+package org.dcsa.conformance.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,7 +28,7 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
                 "Conformance TD-only",
                 "Carrier",
                 true,
-                "Carrier testing: orchestrator"));
+                "Ebl-TD - Carrier testing: orchestrator"));
 
     SandboxConfig sandbox2 =
         createSandbox(
@@ -38,7 +38,7 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
                 "Conformance TD-only",
                 "Carrier",
                 false,
-                "Carrier testing: synthetic carrier as tested party"));
+                "Ebl-TD - Carrier testing: synthetic carrier as tested party"));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());

@@ -1,4 +1,4 @@
-package org.dcsa.conformance.springboot;
+package org.dcsa.conformance.manual;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ class ManualBookingTest extends ManualTestBase {
                 "Conformance",
                 "Carrier",
                 true,
-                "Carrier testing: orchestrator"));
+                "Booking - Carrier testing: orchestrator"));
     SandboxConfig sandbox2 =
         createSandbox(
             new Sandbox(
@@ -38,7 +38,7 @@ class ManualBookingTest extends ManualTestBase {
                 "Conformance",
                 "Carrier",
                 false,
-                "Carrier testing: synthetic carrier as tested party"));
+                "Booking - Carrier testing: synthetic carrier as tested party"));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());

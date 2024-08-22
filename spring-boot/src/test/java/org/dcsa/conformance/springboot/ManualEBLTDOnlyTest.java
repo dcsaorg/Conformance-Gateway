@@ -1,106 +1,103 @@
 package org.dcsa.conformance.springboot;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @Slf4j
-class ManualBookingTest extends ManualTestBase {
+class ManualEBLTDOnlyTest extends ManualTestBase {
 
-  public ManualBookingTest() {
+  public ManualEBLTDOnlyTest() {
     super(log); // Make sure no log lines are logged with the Base class logger
   }
 
   @Test
-  void testManualBookingFlowFirstScenario() {
-    app.setSimulatedLambdaDelay(lambdaDelay);
+  void testManualEBLFlowFirstScenario() {
     getAllSandboxes();
     getAvailableStandards();
 
     SandboxConfig sandbox1 =
         createSandbox(
             new Sandbox(
-                "Booking",
-                "2.0.0",
-                "Conformance",
+                "Ebl",
+                "3.0.0",
+                "Conformance TD-only",
                 "Carrier",
                 true,
                 "Carrier testing: orchestrator"));
+
     SandboxConfig sandbox2 =
         createSandbox(
             new Sandbox(
-                "Booking",
-                "2.0.0",
-                "Conformance",
+                "Ebl",
+                "3.0.0",
+                "Conformance TD-only",
                 "Carrier",
                 false,
                 "Carrier testing: synthetic carrier as tested party"));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
-    assertTrue(sandbox1Digests.size() >= 3);
+    assertEquals(2, sandbox1Digests.size());
+    assertTrue(sandbox1Digests.getFirst().scenarios().size() >= 9);
 
     updateSandboxConfigBeforeStarting(sandbox2, sandbox1);
     List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
     assertTrue(sandbox2Digests.isEmpty());
 
-    runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
-    // Run for the 2nd time, and see that it still works
-    runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
+    // Run all tests on: Supported shipment types scenarios
+    for (int i = 0; i < 9; i++) {
+      runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().get(i).id());
+    }
   }
 
   private void runScenario(SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId) {
-    // Start the scenario 1 -- Dry Cargo
     startOrStopScenario(sandbox1, scenarioId);
-    notifyAction(sandbox2);
 
-    // Get getScenarioStatus -- @Sandbox 1
+    // Get getScenarioStatus
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
     String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
     assertTrue(jsonForPromptText.length() > 250);
     String promptActionId = jsonNode.get("promptActionId").textValue();
 
-    // Send Action input -- @Sandbox 1
     handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
     if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
 
     notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 0, "UC1");
+    validateSandboxStatus(sandbox1, scenarioId, 0, "UC6");
+
     completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 1, "GET");
+    validateSandboxStatus(sandbox1, scenarioId, 1, "GET TD");
 
     notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 2, "UC2");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 3, "GET");
+    validateSandboxStatus(sandbox1, scenarioId, 2, "UC8");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 4, "UC3");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 5, "GET");
+    validateSandboxStatus(sandbox1, scenarioId, 3, "GET TD");
 
     notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 6, "UC5");
+    validateSandboxStatus(sandbox1, scenarioId, 4, "UC12");
+
     completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 7, "GET");
+    validateSandboxStatus(sandbox1, scenarioId, 5, "GET TD");
 
     notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 8, "UC12");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 9, "GET");
-    completeAction(sandbox1);
+    validateSandboxStatus(sandbox1, scenarioId, 6, "UC13a");
 
+    completeAction(sandbox1);
+    validateSandboxStatus(sandbox1, scenarioId, 7, "GET TD");
+
+    completeAction(sandbox1);
     validateSandboxScenarioGroup(sandbox1, scenarioId);
   }
 }

@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
-  private final ObjectMapper mapper = new ObjectMapper();
-  protected final long lambdaDelay = 0L;
+  protected final ObjectMapper mapper = new ObjectMapper();
+  protected long lambdaDelay = 0L;
   private final Logger log;
 
   public ManualTestBase(Logger log) {
@@ -43,17 +43,18 @@ public abstract class ManualTestBase {
   }
 
   void handleActionInput(
-      SandboxConfig sandbox, String scenarioId, String promptActionId, JsonNode jsonNode) {
+      SandboxConfig sandbox, String scenarioId, String actionId, JsonNode textInputNode) {
     ObjectNode node =
         mapper
             .createObjectNode()
             .put("operation", "handleActionInput")
             .put("sandboxId", sandbox.sandboxId)
             .put("scenarioId", scenarioId)
-            .put("actionId", promptActionId)
-            .set("actionInput", jsonNode.get("jsonForPromptText"));
-    jsonNode = app.webuiHandler.handleRequest(USER_ID, node);
+            .put("actionId", actionId)
+            .set("actionInput", textInputNode);
+    JsonNode jsonNode = app.webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
+    waitForCleanSandboxStatus(sandbox);
   }
 
   void startOrStopScenario(SandboxConfig sandbox, String scenarioId) {

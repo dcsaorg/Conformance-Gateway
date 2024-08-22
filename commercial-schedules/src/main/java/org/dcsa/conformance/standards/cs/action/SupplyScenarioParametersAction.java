@@ -3,20 +3,17 @@ package org.dcsa.conformance.standards.cs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.cs.model.DateUtils;
-import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
-import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
-
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import lombok.Getter;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.standards.cs.model.CsDateUtils;
+import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
+import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
@@ -82,8 +79,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                         csFilterParameters ->
                             switch (csFilterParameters) {
                               case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
-                                  DateUtils.DATE_FORMAT.format(new Date());
-                              case DEPARTURE_END_DATE, ARRIVAL_END_DATE -> DateUtils.getEndDate();
+                                  CsDateUtils.DATE_FORMAT.format(new Date());
+                              case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
+                                  CsDateUtils.getEndDateAfter3Months();
                               default -> "TODO";
                             })))
         .toJson();

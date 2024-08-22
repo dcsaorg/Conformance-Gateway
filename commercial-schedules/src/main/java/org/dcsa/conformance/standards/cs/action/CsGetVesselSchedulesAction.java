@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
@@ -8,8 +9,6 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
-
-import java.util.stream.Stream;
 
 @Getter
 @Slf4j

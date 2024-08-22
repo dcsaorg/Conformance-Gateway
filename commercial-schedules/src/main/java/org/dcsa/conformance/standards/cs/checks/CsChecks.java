@@ -72,7 +72,10 @@ public class CsChecks {
             return issues;
           });
 
-  public static ActionCheck getPayloadChecksForPtp(UUID matchedExchangeUuid, String expectedApiVersion,Supplier<SuppliedScenarioParameters> sspSupplier) {
+  public static ActionCheck getPayloadChecksForPtp(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPtp("placeOfReceipt"));
     checks.add(createLocationCheckPtp("placeOfDelivery"));
@@ -88,12 +91,11 @@ public class CsChecks {
       }
     }
     return JsonAttribute.contentChecks(
-      CsRole::isPublisher,
-      matchedExchangeUuid,
-      HttpMessageType.RESPONSE,
-      expectedApiVersion,
-      checks
-    );
+        CsRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
   }
 
   private static JsonContentCheck createLocationCheckPtp(String locationType) {
@@ -114,38 +116,45 @@ public class CsChecks {
         });
   }
 
-  public static ActionCheck getPayloadChecksForPs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
+  public static ActionCheck getPayloadChecksForPs(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPs());
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
     checks.add(validateDateForPs(sspSupplier));
     return JsonAttribute.contentChecks(
-      CsRole::isPublisher,
-      matchedExchangeUuid,
-      HttpMessageType.RESPONSE,
-      expectedApiVersion,
-      checks
-    );
+        CsRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
   }
 
   private static JsonContentCheck createLocationCheckPs() {
-    return JsonAttribute.customValidator("Check any one of the location is available for location",
-      body -> {
-        var issues = new LinkedHashSet<String>();
-        for (JsonNode schedule : body) {
-          JsonNode address = schedule.at( "/location/address");
-          JsonNode unLocationCode = schedule.at( "/location/UNLocationCode");
-          JsonNode facility = schedule.at( "/location/facility");
-          if (JsonAttribute.isJsonNodeAbsent(address) && JsonAttribute.isJsonNodeAbsent(unLocationCode) && JsonAttribute.isJsonNodeAbsent(facility)) {
-            issues.add("Any one of the location should be present for location");
+    return JsonAttribute.customValidator(
+        "Check any one of the location is available for location",
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          for (JsonNode schedule : body) {
+            JsonNode address = schedule.at("/location/address");
+            JsonNode unLocationCode = schedule.at("/location/UNLocationCode");
+            JsonNode facility = schedule.at("/location/facility");
+            if (JsonAttribute.isJsonNodeAbsent(address)
+                && JsonAttribute.isJsonNodeAbsent(unLocationCode)
+                && JsonAttribute.isJsonNodeAbsent(facility)) {
+              issues.add("Any one of the location should be present for location");
+            }
           }
-        }
-        return issues;
-      }
-    );
+          return issues;
+        });
   }
 
-  public static ActionCheck getPayloadChecksForVs(UUID matchedExchangeUuid, String expectedApiVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
+  public static ActionCheck getPayloadChecksForVs(
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckVs());
     if (sspSupplier.get() != null) {
@@ -157,33 +166,35 @@ public class CsChecks {
       }
     }
     return JsonAttribute.contentChecks(
-      CsRole::isPublisher,
-      matchedExchangeUuid,
-      HttpMessageType.RESPONSE,
-      expectedApiVersion,
-      checks
-    );
+        CsRole::isPublisher,
+        matchedExchangeUuid,
+        HttpMessageType.RESPONSE,
+        expectedApiVersion,
+        checks);
   }
 
   private static JsonContentCheck createLocationCheckVs() {
-    return JsonAttribute.customValidator("Check any one of the location is available for location",
-      body -> {
+    return JsonAttribute.customValidator(
+        "Check any one of the location is available for location",
+        body -> {
           return StreamSupport.stream(body.spliterator(), false)
-          .flatMap(schedules -> StreamSupport.stream(schedules.at("/vesselSchedules").spliterator(), false))
-          .flatMap(vs -> StreamSupport.stream(vs.at("/transportCalls").spliterator(), false))
-          .map(tc -> tc.at("/location"))
-          .filter(location -> {
-            JsonNode address = location.at("/address");
-            JsonNode unLocationCode = location.at("/UNLocationCode");
-            JsonNode facility = location.at("/facility");
-            return JsonAttribute.isJsonNodeAbsent(address) &&
-              JsonAttribute.isJsonNodeAbsent(unLocationCode) &&
-              JsonAttribute.isJsonNodeAbsent(facility);
-          })
-          .map(location -> "Any one of the location should be present for location")
-          .collect(Collectors.toCollection(LinkedHashSet::new));
-      }
-    );
+              .flatMap(
+                  schedules ->
+                      StreamSupport.stream(schedules.at("/vesselSchedules").spliterator(), false))
+              .flatMap(vs -> StreamSupport.stream(vs.at("/transportCalls").spliterator(), false))
+              .map(tc -> tc.at("/location"))
+              .filter(
+                  location -> {
+                    JsonNode address = location.at("/address");
+                    JsonNode unLocationCode = location.at("/UNLocationCode");
+                    JsonNode facility = location.at("/facility");
+                    return JsonAttribute.isJsonNodeAbsent(address)
+                        && JsonAttribute.isJsonNodeAbsent(unLocationCode)
+                        && JsonAttribute.isJsonNodeAbsent(facility);
+                  })
+              .map(location -> "Any one of the location should be present for location")
+              .collect(Collectors.toCollection(LinkedHashSet::new));
+        });
   }
 
   private static void checkAnyLocationIsPresent(
@@ -192,7 +203,9 @@ public class CsChecks {
     JsonNode address = data.at(locationPath + "/address");
     JsonNode unLocationCode = data.at(locationPath + "/UNLocationCode");
     JsonNode facility = data.at(locationPath + "/facility");
-    if (JsonAttribute.isJsonNodeAbsent(address) && JsonAttribute.isJsonNodeAbsent(unLocationCode) && JsonAttribute.isJsonNodeAbsent(facility)) {
+    if (JsonAttribute.isJsonNodeAbsent(address)
+        && JsonAttribute.isJsonNodeAbsent(unLocationCode)
+        && JsonAttribute.isJsonNodeAbsent(facility)) {
       issues.add(String.format("Any one of the location should be present for '%s'", locationType));
     }
   }
@@ -213,23 +226,63 @@ public class CsChecks {
                       var csp = sspSupplier.get().getMap();
 
                       if (!StringUtils.isEmpty(csp.get(ARRIVAL_START_DATE))) {
-                        if (!compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_START_DATE),"startDate","arrival").isBlank()) {
-                          issues.add(compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_START_DATE),"startDate","arrival"));
+                        if (!compareDates(
+                                arrivalDateTime.asText(),
+                                csp.get(ARRIVAL_START_DATE),
+                                "startDate",
+                                "arrival")
+                            .isBlank()) {
+                          issues.add(
+                              compareDates(
+                                  arrivalDateTime.asText(),
+                                  csp.get(ARRIVAL_START_DATE),
+                                  "startDate",
+                                  "arrival"));
                         }
                       }
                       if (!StringUtils.isEmpty(csp.get(ARRIVAL_END_DATE))) {
-                        if(!compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_END_DATE),"endDate","arrival").isBlank()){
-                          issues.add(compareDates(arrivalDateTime.asText(),csp.get(ARRIVAL_END_DATE),"endDate","arrival"));
+                        if (!compareDates(
+                                arrivalDateTime.asText(),
+                                csp.get(ARRIVAL_END_DATE),
+                                "endDate",
+                                "arrival")
+                            .isBlank()) {
+                          issues.add(
+                              compareDates(
+                                  arrivalDateTime.asText(),
+                                  csp.get(ARRIVAL_END_DATE),
+                                  "endDate",
+                                  "arrival"));
                         }
                       }
                       if (!StringUtils.isEmpty(csp.get(DEPARTURE_START_DATE))) {
-                       if(!compareDates(departureDateTime.asText(),csp.get(DEPARTURE_START_DATE),"startDate","departure").isBlank()){
-                         issues.add(compareDates(departureDateTime.asText(),csp.get(DEPARTURE_START_DATE),"startDate","departure"));
-                       }
+                        if (!compareDates(
+                                departureDateTime.asText(),
+                                csp.get(DEPARTURE_START_DATE),
+                                "startDate",
+                                "departure")
+                            .isBlank()) {
+                          issues.add(
+                              compareDates(
+                                  departureDateTime.asText(),
+                                  csp.get(DEPARTURE_START_DATE),
+                                  "startDate",
+                                  "departure"));
+                        }
                       }
                       if (!StringUtils.isEmpty(csp.get(DEPARTURE_END_DATE))) {
-                        if(!compareDates(departureDateTime.asText(),csp.get(DEPARTURE_END_DATE),"endDate","departure").isBlank()){
-                          issues.add(compareDates(departureDateTime.asText(),csp.get(DEPARTURE_END_DATE),"endDate","departure"));
+                        if (!compareDates(
+                                departureDateTime.asText(),
+                                csp.get(DEPARTURE_END_DATE),
+                                "endDate",
+                                "departure")
+                            .isBlank()) {
+                          issues.add(
+                              compareDates(
+                                  departureDateTime.asText(),
+                                  csp.get(DEPARTURE_END_DATE),
+                                  "endDate",
+                                  "departure"));
                         }
                       }
                     });
@@ -238,39 +291,42 @@ public class CsChecks {
         });
   }
 
-  private String compareDates(String dateValue, String dateQueryParam, String dateType, String operation){
+  private String compareDates(
+      String dateValue, String dateQueryParam, String dateType, String operation) {
     LocalDate date = LocalDate.parse(dateQueryParam);
     ZonedDateTime dateTime = ZonedDateTime.parse(dateValue);
     LocalDate dateTimeAsDate = dateTime.toLocalDate();
 
     // Compare the dates
-    if (dateType.equals("startDate")&& !dateTimeAsDate.isAfter(date)) {
-      return String.format("The %s date should be after the %s start date",operation,operation);
+    if (dateType.equals("startDate") && !dateTimeAsDate.isAfter(date)) {
+      return String.format("The %s date should be after the %s start date", operation, operation);
     } else if (dateType.equals("endDate") && !dateTimeAsDate.isBefore(date)) {
-      return String.format("The %s date should be before the %s end date",operation, operation);
+      return String.format("The %s date should be before the %s end date", operation, operation);
     }
     return "";
   }
 
-  private static JsonContentCheck validateUSRForVs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+  private static JsonContentCheck validateUSRForVs(
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
-      "Validate USR available in the response",
-      body ->{
-        var issues = new LinkedHashSet<String>();
-        for(JsonNode vs : body){
-          var csp = sspSupplier.get().getMap();
-          if(csp.containsKey(UNIVERSAL_SERVICE_REFERENCE)){
-            if(vs.at("/universalServiceReference").isMissingNode()){
-              issues.add("The 'universalServiceReference' needs to be provided in the response if it is given in the filter.");
+        "Validate USR available in the response",
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          for (JsonNode vs : body) {
+            var csp = sspSupplier.get().getMap();
+            if (csp.containsKey(UNIVERSAL_SERVICE_REFERENCE)) {
+              if (vs.at("/universalServiceReference").isMissingNode()) {
+                issues.add(
+                    "The 'universalServiceReference' needs to be provided in the response if it is given in the filter.");
+              }
             }
           }
-        }
-        return issues;
-      }
-    );
+          return issues;
+        });
   }
 
-  private static JsonContentCheck validateDateForPs(Supplier<SuppliedScenarioParameters> sspSupplier) {
+  private static JsonContentCheck validateDateForPs(
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
     return JsonAttribute.customValidator(
         "Validate date in the response",
         body -> {
@@ -315,20 +371,23 @@ public class CsChecks {
     return !responseDateTimeAsDate.isAfter(filterDate);
   }
 
-  private JsonContentCheck validateIMONumberForVS(Supplier<SuppliedScenarioParameters> sspSupplier){
-    return JsonAttribute.customValidator("Validate vesselIMONumber present in response",
-      body ->{
-        var issues = new LinkedHashSet<String>();
-        for(JsonNode schedule : body){
-          for(JsonNode vs : schedule.at("/vesselSchedules")){
-            if(sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER) && (vs.at("/vessel/vesselIMONumber").isMissingNode() || vs.at("/vessel/vesselIMONumber").isNull()))
-            {
-              issues.add("VesselIMONumber should be present in the response if provided in the filter.");
+  private JsonContentCheck validateIMONumberForVS(
+      Supplier<SuppliedScenarioParameters> sspSupplier) {
+    return JsonAttribute.customValidator(
+        "Validate vesselIMONumber present in response",
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          for (JsonNode schedule : body) {
+            for (JsonNode vs : schedule.at("/vesselSchedules")) {
+              if (sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER)
+                  && (vs.at("/vessel/vesselIMONumber").isMissingNode()
+                      || vs.at("/vessel/vesselIMONumber").isNull())) {
+                issues.add(
+                    "VesselIMONumber should be present in the response if provided in the filter.");
+              }
             }
           }
-        }
-        return issues;
-      });
+          return issues;
+        });
   }
-
 }

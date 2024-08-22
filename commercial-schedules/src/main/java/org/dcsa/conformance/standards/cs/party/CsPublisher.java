@@ -25,7 +25,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.cs.model.DateUtils;
+import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 
 @Slf4j
 public class CsPublisher extends ConformanceParty {
@@ -76,111 +76,11 @@ public class CsPublisher extends ConformanceParty {
     String url = request.url();
 
     if (url.endsWith("v1/point-to-point-routes")) {
-      handleArrivalAndDepartureDates(entryMap, request.queryParams());
+      CsDateUtils.handleArrivalAndDepartureDates(entryMap, request.queryParams());
     } else if (url.endsWith("v1/port-schedules")) {
-      handleSingleDate(entryMap, request.queryParams());
+      CsDateUtils.handleSingleDate(entryMap, request.queryParams());
     }
     return JsonToolkit.templateFileToJsonNode(filePath, entryMap);
-
-  }
-
-  private void handleArrivalAndDepartureDates(
-      Map<String, String> entryMap, Map<String, ? extends Collection<String>> queryParams) {
-    String arrivalDate =
-        getProcessedDate(queryParams, "arrivalStartDate", "arrivalEndDate", "ARRIVAL_DATE");
-    String departureDate =
-        getProcessedDate(queryParams, "departureStartDate", "departureEndDate", "DEPARTURE_DATE");
-
-    entryMap.put("ARRIVAL_DATE", arrivalDate);
-    entryMap.put("DEPARTURE_DATE", departureDate);
-  }
-
-  private void handleSingleDate(
-      Map<String, String> entryMap, Map<String, ? extends Collection<String>> queryParams) {
-    String date =
-        extractValue(queryParams, "date")
-            .map(dateToProcess -> processDate(dateToProcess, "", "date"))
-            .orElseGet(() -> DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now()));
-    entryMap.put("DATE", date);
-  }
-
-  private String getProcessedDate(
-      Map<String, ? extends Collection<String>> queryParams,
-      String startDateParam,
-      String endDateParam,
-      String mapKey) {
-    Optional<String> startDateOpt = extractValue(queryParams, startDateParam);
-    Optional<String> endDateOpt = extractValue(queryParams, endDateParam);
-
-    if (startDateOpt.isPresent() || endDateOpt.isPresent()) {
-      String startDate = startDateOpt.orElse(null);
-      String endDate = endDateOpt.orElse(null);
-      return "ARRIVAL_DATE".equals(mapKey)
-          ? getArrivalDateTime(startDate, endDate)
-          : getDepartureDateTime(startDate, endDate);
-    } else {
-      return DateUtils.DATE_TIME_FORMATTER.format(ZonedDateTime.now());
-    }
-  }
-
-  private Optional<String> extractValue(
-      Map<String, ? extends Collection<String>> queryParams, String key) {
-    return Optional.ofNullable(queryParams.get(key))
-        .flatMap(collection -> collection.stream().findFirst());
-  }
-
-  private String getArrivalDateTime(String arrivalStartDate, String arrivalEndDate) {
-    if (arrivalStartDate != null && arrivalEndDate != null) {
-      return processDate(arrivalStartDate, arrivalEndDate, "range");
-    }
-    if (arrivalStartDate != null) {
-      return processDate(arrivalStartDate, "", "startDate");
-    }
-    if (arrivalEndDate != null) {
-      return processDate("", arrivalEndDate, "endDate");
-    }
-    return "";
-  }
-
-  private String getDepartureDateTime(String departureStartDate, String departureEndDate) {
-    if (departureStartDate != null && departureEndDate != null) {
-      return processDate(departureStartDate, departureEndDate, "range");
-    }
-    if (departureStartDate != null) {
-      return processDate(departureStartDate, "", "startDate");
-    }
-    if (departureEndDate != null) {
-      return processDate("", departureEndDate, "endDate");
-    }
-    return "";
-  }
-
-  private String processDate(String startDate, String endDate, String type) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    if (type.equals("startDate")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
-      return convertDateToDateTime(date);
-    }
-    if (type.equals("endDate")) {
-      LocalDate date = LocalDate.parse(endDate, formatter).minusWeeks(1);
-      return convertDateToDateTime(date);
-    }
-    if (type.equals("range")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
-      return convertDateToDateTime(date);
-    }
-    if (type.equals("date")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusDays(1);
-      return convertDateToDateTime(date);
-    }
-    return "";
-  }
-
-  private String convertDateToDateTime(LocalDate date) {
-    LocalDateTime dateTime = date.atStartOfDay();
-    ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-    return zonedDateTime.format(dateTimeFormatter);
   }
 
   @Override
@@ -218,8 +118,9 @@ public class CsPublisher extends ConformanceParty {
                               case FACILITY_SMDG_CODE -> "APM";
                               case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
                               case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
-                                  DateUtils.DATE_FORMAT.format(new Date());
-                              case DEPARTURE_END_DATE, ARRIVAL_END_DATE -> DateUtils.getEndDate();
+                                  CsDateUtils.DATE_FORMAT.format(new Date());
+                              case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
+                                  CsDateUtils.getEndDateAfter3Months();
                               case MAX_TRANSHIPMENT -> "1";
                               case RECEIPT_TYPE_AT_ORIGIN, DELIVERY_TYPE_AT_DESTINATION -> "CY";
                             })));

@@ -8,14 +8,19 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
 
-public class CsGetRoutingsAction extends CsAction{
+public class CsGetRoutingsAction extends CsAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
-    public CsGetRoutingsAction(String subscriberPartyName, String publisherPartyName, ConformanceAction previousAction, JsonSchemaValidator responseSchemaValidator1) {
-      super(subscriberPartyName, publisherPartyName, previousAction, "GetRoutings", 200);
 
-        this.responseSchemaValidator = responseSchemaValidator1;
-    }
+  public CsGetRoutingsAction(
+      String subscriberPartyName,
+      String publisherPartyName,
+      ConformanceAction previousAction,
+      JsonSchemaValidator responseSchemaValidator1) {
+    super(subscriberPartyName, publisherPartyName, previousAction, "GetRoutings", 200);
+
+    this.responseSchemaValidator = responseSchemaValidator1;
+  }
 
   @Override
   public String getHumanReadablePrompt() {
@@ -56,6 +61,4 @@ public class CsGetRoutingsAction extends CsAction{
   public ObjectNode asJsonNode() {
     return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }
-
-
 }

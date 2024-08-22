@@ -1,11 +1,10 @@
 package org.dcsa.conformance.standards.cs.party;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 @Getter
 public enum CsFilterParameter {

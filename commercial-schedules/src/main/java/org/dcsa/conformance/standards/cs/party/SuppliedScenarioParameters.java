@@ -3,13 +3,12 @@ package org.dcsa.conformance.standards.cs.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 @Getter
 public class SuppliedScenarioParameters {

@@ -22,6 +22,8 @@
   },
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
   "carrierServiceCode": "TA1",
+  "carrierCode": "MMCU",
+  "carrierCodeListProvider": "NMFTA",
   "universalServiceReference": "SR12345A",
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "universalExportVoyageReference": "2103N",

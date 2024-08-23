@@ -70,11 +70,10 @@ public class ConformanceApplication {
   private static final String USER_ID = "spring-boot-env";
   private final ConformanceConfiguration conformanceConfiguration;
   private final ConformancePersistenceProvider persistenceProvider;
-  final ConformanceWebuiHandler webuiHandler;
+  @Getter private final ConformanceWebuiHandler webuiHandler;
 
   ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-  @Getter
-  private final Consumer<JsonNode> deferredSandboxTaskConsumer;
+  @Getter private final Consumer<JsonNode> deferredSandboxTaskConsumer;
 
   private final ConformanceAccessChecker accessChecker =
       new ConformanceAccessChecker() {
@@ -98,7 +97,7 @@ public class ConformanceApplication {
     log.info(
         "new ConformanceApplication(%s)"
             .formatted(
-              OBJECT_MAPPER
+                OBJECT_MAPPER
                     .valueToTree(Objects.requireNonNull(this.conformanceConfiguration))
                     .toPrettyString()));
 
@@ -383,7 +382,7 @@ public class ConformanceApplication {
   }
 
   // For testing purposes only
-  void setSimulatedLambdaDelay(long simulatedLambdaDelay) {
+  public void setSimulatedLambdaDelay(long simulatedLambdaDelay) {
     conformanceConfiguration.setSimulatedLambdaDelay(simulatedLambdaDelay);
   }
 }

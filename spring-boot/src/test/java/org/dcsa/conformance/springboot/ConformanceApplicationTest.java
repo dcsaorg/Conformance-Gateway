@@ -29,9 +29,11 @@ class ConformanceApplicationTest {
   @CsvSource({
     "booking-200-conformance-auto-all-in-one",
     "booking-200-reference-implementation-auto-all-in-one",
+    "cs-100-conformance-auto-all-in-one",
     "ebl-300-conformance-si-only-auto-all-in-one",
     "ebl-300-conformance-td-only-auto-all-in-one",
-//    "ebl-300-reference-implementation-auto-all-in-one", // Works, but takes a long time to run.
+    //    "ebl-300-reference-implementation-auto-all-in-one", // Works, but takes a long time to
+    // run.
     "eblissuance-300-conformance-auto-all-in-one",
     "eblsurrender-300-conformance-auto-all-in-one",
     "jit-120-conformance-auto-all-in-one",

@@ -30,6 +30,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
@@ -42,6 +43,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     BookingStandard.INSTANCE,
+    CsStandard.INSTANCE,
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,

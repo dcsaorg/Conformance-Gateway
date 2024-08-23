@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.cs.model;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -9,16 +8,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class CsDateUtils {
-  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
   public static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+  public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   public static String getEndDateAfter3Months() {
+    LocalDate futureDate = getLocalDate().plusMonths(3);
+    return futureDate.format(DATE_FORMAT);
+  }
+
+  public static String getCurrentDate() {
+    return getLocalDate().format(DATE_FORMAT);
+  }
+
+  private static LocalDate getLocalDate() {
     Date currentDate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(currentDate);
-    calendar.add(Calendar.MONTH, 3);
-    return DATE_FORMAT.format(calendar.getTime());
+    return currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
   }
 
   public static void handleArrivalAndDepartureDates(
@@ -93,22 +98,15 @@ public class CsDateUtils {
   }
 
   private static String processDate(String startDate, String endDate, String type) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    LocalDate date;
-    switch (type) {
-      case "startDate", "range":
-        date = LocalDate.parse(startDate, formatter).plusWeeks(1);
-        break;
-      case "endDate":
-        date = LocalDate.parse(endDate, formatter).minusWeeks(1);
-        break;
-      case "date":
-        date = LocalDate.parse(startDate, formatter).plusDays(1);
-        break;
-      default:
-        return "";
-    }
-    return convertDateToDateTime(date);
+    return switch (type) {
+      case "startDate", "range" ->
+          convertDateToDateTime(LocalDate.parse(startDate, CsDateUtils.DATE_FORMAT).plusWeeks(1));
+      case "endDate" ->
+          convertDateToDateTime(LocalDate.parse(endDate, CsDateUtils.DATE_FORMAT).minusWeeks(1));
+      case "date" ->
+          convertDateToDateTime(LocalDate.parse(startDate, CsDateUtils.DATE_FORMAT).plusDays(1));
+      default -> "";
+    };
   }
 
   private static String convertDateToDateTime(LocalDate date) {

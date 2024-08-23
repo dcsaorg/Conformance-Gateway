@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,18 +21,18 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
   public SupplyScenarioParametersAction(
-    String publisherPartyName, CsFilterParameter... csFilterParameters) {
+      String publisherPartyName, CsFilterParameter... csFilterParameters) {
     super(
-      publisherPartyName,
-      null,
-      null,
-      "SupplyScenarioParameters(%s)"
-        .formatted(
-          Arrays.stream(csFilterParameters)
-            .map(CsFilterParameter::getQueryParamName)
-            .collect(Collectors.joining(", "))));
+        publisherPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters(%s)"
+            .formatted(
+                Arrays.stream(csFilterParameters)
+                    .map(CsFilterParameter::getQueryParamName)
+                    .collect(Collectors.joining(", "))));
     this.csFilterParameters =
-      Stream.of(csFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+        Stream.of(csFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   @Override
@@ -50,7 +49,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     super.importJsonState(jsonState);
     if (jsonState.has("suppliedScenarioParameters")) {
       suppliedScenarioParameters =
-        SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
     }
   }
 
@@ -59,14 +58,14 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     ObjectNode objectNode = super.asJsonNode();
     ArrayNode jsonCsFilterParameters = objectNode.putArray("csFilterParametersQueryParamNames");
     csFilterParameters.forEach(
-      csFilterParameter -> jsonCsFilterParameters.add(csFilterParameter.getQueryParamName()));
+        csFilterParameter -> jsonCsFilterParameters.add(csFilterParameter.getQueryParamName()));
     return objectNode;
   }
 
   @Override
   public String getHumanReadablePrompt() {
     return "Use the following format to provide the values of the specified query parameters"
-      + " for which your party can successfully process a GET request:";
+        + " for which your party can successfully process a GET request:";
   }
 
   @Override
@@ -79,7 +78,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                         csFilterParameter ->
                             switch (csFilterParameter) {
                               case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
-                                  CsDateUtils.DATE_FORMAT.format(new Date());
+                                  CsDateUtils.getCurrentDate();
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
                                   CsDateUtils.getEndDateAfter3Months();
                               default -> "TODO";

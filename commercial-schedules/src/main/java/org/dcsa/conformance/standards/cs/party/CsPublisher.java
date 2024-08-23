@@ -3,11 +3,6 @@ package org.dcsa.conformance.standards.cs.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -124,7 +119,7 @@ public class CsPublisher extends ConformanceParty {
                               case FACILITY_SMDG_CODE -> "APM";
                               case VESSEL_OPERATOR_CARRIER_CODE -> "MAEU";
                               case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
-                                  CsDateUtils.DATE_FORMAT.format(new Date());
+                                  CsDateUtils.getCurrentDate();
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->
                                   CsDateUtils.getEndDateAfter3Months();
                               case MAX_TRANSHIPMENT -> "1";

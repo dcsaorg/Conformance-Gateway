@@ -115,15 +115,18 @@ public abstract class ManualTestBase {
         "Should be empty, but found: " + conformanceSubReport.get("errorMessages"));
   }
 
-  void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId) {
-    log.info("Validating scenario group: {}", scenarioId);
+  void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
+    log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-    assertFalse(jsonNode.get("isRunning").asBoolean());
+    assertTrue(jsonNode.has("isRunning"), "Did scenarioId '" + scenarioId + "' run? Can't find it's state. ");
+
     JsonNode conformanceSubReport = jsonNode.get("conformanceSubReport");
-    assertEquals("CONFORMANT", conformanceSubReport.get("status").asText());
+    String message = "Found in scenarioId: " + scenarioId + " having '" + conformanceSubReport.get("title") + "'.";
+    assertFalse(jsonNode.get("isRunning").asBoolean(), message);
+    assertEquals("CONFORMANT", conformanceSubReport.get("status").asText(), message);
     assertTrue(
         conformanceSubReport.get("errorMessages").isEmpty(),
-        "Should be empty, but found: " + conformanceSubReport.get("errorMessages"));
+        "Should be empty, but found: '" + conformanceSubReport.get("errorMessages") + "'. " + message);
   }
 
   JsonNode getScenarioStatus(SandboxConfig sandbox, String scenarioId) {

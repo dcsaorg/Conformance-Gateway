@@ -16,7 +16,7 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
   }
 
   @Test
-  void testManualEBLFlowFirstScenario() {
+  void testTDScenario() {
     getAllSandboxes();
     getAvailableStandards();
 
@@ -50,12 +50,34 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
     assertTrue(sandbox2Digests.isEmpty());
 
     // Run all tests on: Supported shipment types scenarios
-    for (int i = 0; i < 9; i++) {
-      runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().get(i).id());
-    }
+    sandbox1Digests
+        .getFirst()
+        .scenarios()
+        .forEach(
+            scenario ->
+                runSupportedShipmentScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
+
+    // Run all tests on: Shipper interactions with transport document
+    sandbox1Digests
+        .get(1)
+        .scenarios()
+        .forEach(
+            scenario ->
+                runShipperInteractionsScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
+
+    // Validate all scenarios are completed and conformant
+    // TODO: turn on when all scenarios are implemented
+    /*sandbox1Digests.forEach(
+    scenarioDigest -> {
+      log.info("Validating Module '{}' was tested properly.", scenarioDigest.moduleName());
+      scenarioDigest
+        .scenarios()
+        .forEach(scenario -> validateSandboxScenarioGroup(sandbox1, scenario.id(), scenario.name()));
+    });*/
   }
 
-  private void runScenario(SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId) {
+  private void runSupportedShipmentScenario(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     startOrStopScenario(sandbox1, scenarioId);
 
     // Get getScenarioStatus
@@ -73,7 +95,6 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 1, "GET TD");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 2, "UC8");
@@ -81,7 +102,6 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 3, "GET TD");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 4, "UC12");
@@ -89,7 +109,6 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 5, "GET TD");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 6, "UC13a");
@@ -98,6 +117,11 @@ class ManualEBLTDOnlyTest extends ManualTestBase {
     validateSandboxStatus(sandbox1, scenarioId, 7, "GET TD");
 
     completeAction(sandbox1);
-    validateSandboxScenarioGroup(sandbox1, scenarioId);
+    validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
+  }
+
+  private void runShipperInteractionsScenario(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
+    // TODO: implement all Shipper interactions with transport document scenarios.
   }
 }

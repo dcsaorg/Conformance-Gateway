@@ -47,10 +47,14 @@ public class CsPublisher extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    // no state to export
+  }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    // no state to import
+  }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
@@ -84,7 +88,9 @@ public class CsPublisher extends ConformanceParty {
   }
 
   @Override
-  protected void doReset() {}
+  protected void doReset() {
+    // no state to reset
+  }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {

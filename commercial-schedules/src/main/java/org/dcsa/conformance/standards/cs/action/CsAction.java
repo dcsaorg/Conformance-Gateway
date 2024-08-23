@@ -22,8 +22,9 @@ public abstract class CsAction extends ConformanceAction {
   }
 
   private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
-        ? supplyAvailableTdrAction::getSuppliedScenarioParameters
+    return previousAction
+            instanceof SupplyScenarioParametersAction supplyScenarioParametersActionAction
+        ? supplyScenarioParametersActionAction::getSuppliedScenarioParameters
         : previousAction == null
             ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
             : _getSspSupplier(previousAction.getPreviousAction());

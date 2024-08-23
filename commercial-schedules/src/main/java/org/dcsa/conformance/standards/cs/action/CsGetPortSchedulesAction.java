@@ -56,6 +56,7 @@ public class CsGetPortSchedulesAction extends CsAction {
     };
   }
 
+  @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }

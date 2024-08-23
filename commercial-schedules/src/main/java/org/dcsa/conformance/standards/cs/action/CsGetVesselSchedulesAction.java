@@ -60,6 +60,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
     };
   }
 
+  @Override
   public ObjectNode asJsonNode() {
     return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }

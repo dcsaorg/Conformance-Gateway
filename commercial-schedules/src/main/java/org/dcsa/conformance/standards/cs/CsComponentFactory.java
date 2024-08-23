@@ -84,17 +84,19 @@ public class CsComponentFactory extends AbstractComponentFactory {
 
   public Set<String> getReportRoleNames(PartyConfiguration[] partyConfigurations, CounterpartConfiguration[] counterpartConfigurations)
     {
-      return (partyConfigurations.length == CsRole.values().length
-        ? Arrays.stream(CsRole.values()).map(CsRole::getConfigName)
+    return (partyConfigurations.length == CsRole.values().length
+        ? CsRole.getRoleNames()
         : Arrays.stream(counterpartConfigurations)
-        .map(CounterpartConfiguration::getRole)
-        .filter(
-          counterpartRole ->
-            Arrays.stream(partyConfigurations)
-              .map(PartyConfiguration::getRole)
-              .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole))))
-        .collect(Collectors.toSet());
+            .map(CounterpartConfiguration::getRole)
+            .filter(
+                counterpartRole ->
+                    Arrays.stream(partyConfigurations)
+                        .map(PartyConfiguration::getRole)
+                        .noneMatch(partyRole -> Objects.equals(partyRole, counterpartRole)))
+            .collect(Collectors.toSet()));
     }
+
+
 
   public JsonSchemaValidator getMessageSchemaValidator(String api, String jsonSchema) {
     String schemaFilePath = "/standards/commercialschedules/schemas/commercialschedules-%s-v%s0.json"

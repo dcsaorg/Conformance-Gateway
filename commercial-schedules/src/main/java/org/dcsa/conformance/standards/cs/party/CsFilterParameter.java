@@ -34,7 +34,7 @@ public enum CsFilterParameter {
           .collect(
               Collectors.toUnmodifiableMap(
                   CsFilterParameter::getQueryParamName, Function.identity()));
-  @Getter private final String queryParamName;
+  private final String queryParamName;
 
   CsFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;

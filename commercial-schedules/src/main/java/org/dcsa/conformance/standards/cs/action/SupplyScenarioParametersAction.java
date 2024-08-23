@@ -76,8 +76,8 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
-                        csFilterParameters ->
-                            switch (csFilterParameters) {
+                        csFilterParameter ->
+                            switch (csFilterParameter) {
                               case DATE, DEPARTURE_START_DATE, ARRIVAL_START_DATE ->
                                   CsDateUtils.DATE_FORMAT.format(new Date());
                               case DEPARTURE_END_DATE, ARRIVAL_END_DATE ->

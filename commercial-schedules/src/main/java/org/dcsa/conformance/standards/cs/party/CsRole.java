@@ -2,6 +2,10 @@ package org.dcsa.conformance.standards.cs.party;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Getter
 public enum CsRole {
   PUBLISHER("Publisher"),
@@ -19,5 +23,9 @@ public enum CsRole {
 
   public static boolean isSubscriber(String configName) {
     return CsRole.SUBSCRIBER.configName.equals(configName);
+  }
+
+  public static Set<String> getRoleNames() {
+    return Arrays.stream(CsRole.values()).map(CsRole::getConfigName).collect(Collectors.toSet());
   }
 }

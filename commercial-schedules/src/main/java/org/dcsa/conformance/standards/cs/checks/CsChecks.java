@@ -25,7 +25,7 @@ public class CsChecks {
   private static final JsonContentCheck VALIDATE_CUTOFF_TIME_CODE =
       JsonAttribute.customValidator(
           "Validate shipment cutOff Date time code",
-          (body) -> {
+          body -> {
             var issues = new LinkedHashSet<String>();
             for (JsonNode routing : body) {
               var shipmentCutOffTimes = routing.path("cutOffTimes");
@@ -162,7 +162,7 @@ public class CsChecks {
         checks.add(validateUSRForVs(sspSupplier));
       }
       if (sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER)) {
-        checks.add(validateUSRForVs(sspSupplier));
+        checks.add(validateIMONumberForVS(sspSupplier));
       }
     }
     return JsonAttribute.contentChecks(
@@ -226,69 +226,51 @@ public class CsChecks {
                       var csp = sspSupplier.get().getMap();
 
                       if (!StringUtils.isEmpty(csp.get(ARRIVAL_START_DATE))) {
-                        if (!compareDates(
+                        String dateComparisonResult =
+                            compareDates(
                                 arrivalDateTime.asText(),
                                 csp.get(ARRIVAL_START_DATE),
                                 "startDate",
-                                "arrival")
-                            .isBlank()) {
-                          issues.add(
-                              compareDates(
-                                  arrivalDateTime.asText(),
-                                  csp.get(ARRIVAL_START_DATE),
-                                  "startDate",
-                                  "arrival"));
-                        }
+                                "arrival");
+                        addIfNotBlank(dateComparisonResult, issues);
                       }
                       if (!StringUtils.isEmpty(csp.get(ARRIVAL_END_DATE))) {
-                        if (!compareDates(
+                        String dateComparisonResult =
+                            compareDates(
                                 arrivalDateTime.asText(),
                                 csp.get(ARRIVAL_END_DATE),
                                 "endDate",
-                                "arrival")
-                            .isBlank()) {
-                          issues.add(
-                              compareDates(
-                                  arrivalDateTime.asText(),
-                                  csp.get(ARRIVAL_END_DATE),
-                                  "endDate",
-                                  "arrival"));
-                        }
+                                "arrival");
+                        addIfNotBlank(dateComparisonResult, issues);
                       }
                       if (!StringUtils.isEmpty(csp.get(DEPARTURE_START_DATE))) {
-                        if (!compareDates(
+                        String dateComparisonResult =
+                            compareDates(
                                 departureDateTime.asText(),
                                 csp.get(DEPARTURE_START_DATE),
                                 "startDate",
-                                "departure")
-                            .isBlank()) {
-                          issues.add(
-                              compareDates(
-                                  departureDateTime.asText(),
-                                  csp.get(DEPARTURE_START_DATE),
-                                  "startDate",
-                                  "departure"));
-                        }
+                                "departure");
+                        addIfNotBlank(dateComparisonResult, issues);
                       }
                       if (!StringUtils.isEmpty(csp.get(DEPARTURE_END_DATE))) {
-                        if (!compareDates(
+                        String dateComparisonResult =
+                            compareDates(
                                 departureDateTime.asText(),
                                 csp.get(DEPARTURE_END_DATE),
                                 "endDate",
-                                "departure")
-                            .isBlank()) {
-                          issues.add(
-                              compareDates(
-                                  departureDateTime.asText(),
-                                  csp.get(DEPARTURE_END_DATE),
-                                  "endDate",
-                                  "departure"));
-                        }
+                                "departure");
+                        addIfNotBlank(dateComparisonResult, issues);
                       }
                     });
           }
           return issues;
         });
+  }
+
+  private void addIfNotBlank(String result, LinkedHashSet<String> issues) {
+    if (!result.isBlank()) {
+      issues.add(result);
+    }
   }
 
   private String compareDates(
@@ -299,9 +281,9 @@ public class CsChecks {
 
     // Compare the dates
     if (dateType.equals("startDate") && !dateTimeAsDate.isAfter(date)) {
-      return String.format("The %s date should be after the %s start date", operation, operation);
+      return String.format("The %s date should be after the start date", operation);
     } else if (dateType.equals("endDate") && !dateTimeAsDate.isBefore(date)) {
-      return String.format("The %s date should be before the %s end date", operation, operation);
+      return String.format("The %s date should be before the end date", operation);
     }
     return "";
   }
@@ -342,14 +324,8 @@ public class CsChecks {
                               timestamp -> {
                                 JsonNode eventDateTime = timestamp.at("/eventDateTime");
                                 JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
-                                if (eventClassifierCode.asText().equals("EST")) {
-                                  if (isBeforeTheDate(
-                                      eventDateTime.asText(),
-                                      sspSupplier.get().getMap().get(DATE))) {
-                                    issues.add(
-                                        "The estimated arrival or departure dates should be on or after the date provided");
-                                  }
-                                } else if (eventClassifierCode.asText().equals("PLN")) {
+                                if (eventClassifierCode.asText().equals("EST")
+                                    || eventClassifierCode.asText().equals("PLN")) {
                                   if (isBeforeTheDate(
                                       eventDateTime.asText(),
                                       sspSupplier.get().getMap().get(DATE))) {

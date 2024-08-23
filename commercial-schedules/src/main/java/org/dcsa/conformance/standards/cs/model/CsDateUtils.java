@@ -94,23 +94,21 @@ public class CsDateUtils {
 
   private static String processDate(String startDate, String endDate, String type) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    if (type.equals("startDate")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
-      return convertDateToDateTime(date);
+    LocalDate date;
+    switch (type) {
+      case "startDate", "range":
+        date = LocalDate.parse(startDate, formatter).plusWeeks(1);
+        break;
+      case "endDate":
+        date = LocalDate.parse(endDate, formatter).minusWeeks(1);
+        break;
+      case "date":
+        date = LocalDate.parse(startDate, formatter).plusDays(1);
+        break;
+      default:
+        return "";
     }
-    if (type.equals("endDate")) {
-      LocalDate date = LocalDate.parse(endDate, formatter).minusWeeks(1);
-      return convertDateToDateTime(date);
-    }
-    if (type.equals("range")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusWeeks(1);
-      return convertDateToDateTime(date);
-    }
-    if (type.equals("date")) {
-      LocalDate date = LocalDate.parse(startDate, formatter).plusDays(1);
-      return convertDateToDateTime(date);
-    }
-    return "";
+    return convertDateToDateTime(date);
   }
 
   private static String convertDateToDateTime(LocalDate date) {

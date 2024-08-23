@@ -13,17 +13,12 @@ public class CsDateUtils {
   public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   public static String getEndDateAfter3Months() {
-    LocalDate futureDate = getLocalDate().plusMonths(3);
+    LocalDate futureDate = LocalDate.now().plusMonths(3);
     return futureDate.format(DATE_FORMAT);
   }
 
   public static String getCurrentDate() {
-    return getLocalDate().format(DATE_FORMAT);
-  }
-
-  private static LocalDate getLocalDate() {
-    Date currentDate = new Date();
-    return currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    return LocalDate.now().format(DATE_FORMAT);
   }
 
   public static void handleArrivalAndDepartureDates(

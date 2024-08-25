@@ -15,7 +15,7 @@ public class CsGetPortSchedulesAction extends CsAction {
   public CsGetPortSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
-      ConformanceAction previousAction,
+      CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetPortSchedules", 200);
     this.responseSchemaValidator = responseSchemaValidator;

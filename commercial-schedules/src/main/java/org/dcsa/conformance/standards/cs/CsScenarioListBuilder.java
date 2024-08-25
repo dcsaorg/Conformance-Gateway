@@ -10,10 +10,7 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-import org.dcsa.conformance.standards.cs.action.CsGetPortSchedulesAction;
-import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
-import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
-import org.dcsa.conformance.standards.cs.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.cs.action.*;
 import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
 
 @Slf4j
@@ -110,7 +107,14 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           noAction()
             .thenEither(
               scenarioWithParametersVs(UN_LOCATION_CODE),
-              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))))
+              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))),
+        Map.entry(
+          "Limit and Pagination",
+          noAction()
+            .thenEither(
+              scenarioWithParametersPtp(PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT),
+              scenarioWithParametersPs(UN_LOCATION_CODE, DATE,LIMIT),
+              scenarioWithParametersVs(VESSEL_IMO_NUMBER,LIMIT))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -151,7 +155,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
         new CsGetVesselSchedulesAction(
           subscriberPartyName,
           publisherPartyName,
-          previousAction,
+                (CsAction) previousAction,
           componentFactory.getMessageSchemaValidator("api","serviceSchedules")));
   }
 
@@ -164,7 +168,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
         new CsGetRoutingsAction(
           subscriberPartyName,
           publisherPartyName,
-          previousAction,
+                (CsAction) previousAction,
           componentFactory.getMessageSchemaValidator("api","pointToPointRoutings")));
   }
 
@@ -177,7 +181,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
         new CsGetPortSchedulesAction(
           subscriberPartyName,
           publisherPartyName,
-          previousAction,
+                (CsAction) previousAction,
           componentFactory.getMessageSchemaValidator("api","portSchedules")));
   }
 

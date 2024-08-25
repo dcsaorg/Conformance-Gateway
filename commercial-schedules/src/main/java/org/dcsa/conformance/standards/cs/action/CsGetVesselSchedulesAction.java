@@ -19,7 +19,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
   public CsGetVesselSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
-      ConformanceAction previousAction,
+      CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
     this.responseSchemaValidator = responseSchemaValidator;

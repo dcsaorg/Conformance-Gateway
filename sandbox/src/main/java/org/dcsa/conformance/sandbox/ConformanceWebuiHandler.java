@@ -63,7 +63,7 @@ public class ConformanceWebuiHandler {
       case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
-    log.info("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
+    log.debug("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
     return resultNode;
   }
 

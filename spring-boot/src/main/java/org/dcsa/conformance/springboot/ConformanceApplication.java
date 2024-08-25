@@ -212,7 +212,7 @@ public class ConformanceApplication {
       }
       log.info("Done simulating lambda delay");
     } else {
-      log.info("No simulated lambda delay");
+      log.debug("No simulated lambda delay");
     }
   }
 

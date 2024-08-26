@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -46,6 +45,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
     return jsonNode.put("scenarioType", getDspSupplier().get().scenarioType().name());
   }
 
+  @Override
   protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
     var body = exchange.getRequest().message().body().getJsonBody();
     return dynamicScenarioParameters.withShippingInstructions(body);

@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
 import lombok.SneakyThrows;
 
 public enum JsonToolkit {
@@ -50,9 +48,7 @@ public enum JsonToolkit {
   }
 
   public static List<String> arrayNodeToStringCollection(ArrayNode arrayNode) {
-    return StreamSupport.stream(arrayNode.spliterator(), false)
-        .map(JsonNode::asText)
-        .collect(Collectors.toList());
+    return StreamSupport.stream(arrayNode.spliterator(), false).map(JsonNode::asText).toList();
   }
 
   public static ArrayNode mapOfStringToStringCollectionToJson(

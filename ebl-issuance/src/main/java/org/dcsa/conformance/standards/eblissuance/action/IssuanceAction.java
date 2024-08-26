@@ -1,10 +1,9 @@
 package org.dcsa.conformance.standards.eblissuance.action;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
@@ -15,7 +14,7 @@ public abstract class IssuanceAction extends ConformanceAction {
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
   protected final int expectedStatus;
 
-  public IssuanceAction(
+  protected IssuanceAction(
       String sourcePartyName,
       String targetPartyName,
       IssuanceAction previousAction,

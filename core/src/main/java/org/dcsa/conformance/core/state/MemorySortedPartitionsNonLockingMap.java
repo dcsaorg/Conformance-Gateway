@@ -18,7 +18,7 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
   public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
     JsonNode valueCopy = OBJECT_MAPPER.readTree(value.toString());
     memoryMap
-        .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
+        .computeIfAbsent(partitionKey, ignoredKey -> new TreeMap<>())
         .put(sortKey, OBJECT_MAPPER.createObjectNode().set("value", valueCopy));
   }
 

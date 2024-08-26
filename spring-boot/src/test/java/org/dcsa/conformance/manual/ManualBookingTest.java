@@ -1,4 +1,4 @@
-package org.dcsa.conformance.springboot;
+package org.dcsa.conformance.manual;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ class ManualBookingTest extends ManualTestBase {
                 "Conformance",
                 "Carrier",
                 true,
-                "Carrier testing: orchestrator"));
+                "Booking - Carrier testing: orchestrator"));
     SandboxConfig sandbox2 =
         createSandbox(
             new Sandbox(
@@ -38,7 +38,7 @@ class ManualBookingTest extends ManualTestBase {
                 "Conformance",
                 "Carrier",
                 false,
-                "Carrier testing: synthetic carrier as tested party"));
+                "Booking - Carrier testing: synthetic carrier as tested party"));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
@@ -48,24 +48,60 @@ class ManualBookingTest extends ManualTestBase {
     List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
     assertTrue(sandbox2Digests.isEmpty());
 
-    runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
+    Scenario scenario1 = sandbox1Digests.getFirst().scenarios().getFirst();
+    runDryCargoScenario(sandbox1, sandbox2, scenario1.id(), scenario1.name());
+
+    // Run all tests on: Dry Cargo scenarios
+    // TODO: turn on when all scenarios are implemented. Now only the first one is implemented. Line
+    // 52 can be removed.
+    /*sandbox1Digests
+    .get(0)
+    .scenarios()
+    .forEach(
+      scenario ->
+        runDryCargoScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));*/
+
     // Run for the 2nd time, and see that it still works
-    runScenario(sandbox1, sandbox2, sandbox1Digests.getFirst().scenarios().getFirst().id());
+    runDryCargoScenario(sandbox1, sandbox2, scenario1.id(), scenario1.name());
+
+    // Run all tests on: Dangerous goods scenarios
+    sandbox1Digests
+        .get(1)
+        .scenarios()
+        .forEach(
+            scenario ->
+                runDangerousGoodsScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
+
+    // Run all tests on: Reefer containers
+    sandbox1Digests
+        .get(2)
+        .scenarios()
+        .forEach(
+            scenario ->
+                runReeferContainersScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
+
+    // Validate all scenarios are completed and conformant
+    // TODO: turn on when all scenarios are implemented
+    /*sandbox1Digests.forEach(
+    scenarioDigest -> {
+      log.info("Validating Module '{}' was tested properly.", scenarioDigest.moduleName());
+      scenarioDigest
+        .scenarios()
+        .forEach(scenario -> validateSandboxScenarioGroup(sandbox1, scenario.id(), scenario.name()));
+    });*/
   }
 
-  private void runScenario(SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId) {
-    // Start the scenario 1 -- Dry Cargo
+  private void runDryCargoScenario(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     startOrStopScenario(sandbox1, scenarioId);
     notifyAction(sandbox2);
 
-    // Get getScenarioStatus -- @Sandbox 1
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
     String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
     assertTrue(jsonForPromptText.length() > 250);
     String promptActionId = jsonNode.get("promptActionId").textValue();
 
-    // Send Action input -- @Sandbox 1
-    handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode);
+    handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
     if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
 
     notifyAction(sandbox2);
@@ -73,27 +109,23 @@ class ManualBookingTest extends ManualTestBase {
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 1, "GET");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 2, "UC2");
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 3, "GET");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 4, "UC3");
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 5, "GET");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 6, "UC5");
     completeAction(sandbox1);
     validateSandboxStatus(sandbox1, scenarioId, 7, "GET");
 
-    notifyAction(sandbox2);
     completeAction(sandbox1);
     notifyAction(sandbox2);
     validateSandboxStatus(sandbox1, scenarioId, 8, "UC12");
@@ -101,6 +133,16 @@ class ManualBookingTest extends ManualTestBase {
     validateSandboxStatus(sandbox1, scenarioId, 9, "GET");
     completeAction(sandbox1);
 
-    validateSandboxScenarioGroup(sandbox1, scenarioId);
+    validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
+  }
+
+  private void runDangerousGoodsScenario(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
+    // TODO: implement all Dangerous Goods scenarios
+  }
+
+  private void runReeferContainersScenario(
+      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
+    // TODO: implement all Reefer Containers scenarios
   }
 }

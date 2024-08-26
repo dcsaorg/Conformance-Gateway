@@ -1,6 +1,10 @@
 package org.dcsa.conformance.springboot;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -8,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -66,6 +67,7 @@ class ConformanceApplicationTest {
   }
 
   private void checkUntilScenariosAreReady(String sandboxId) throws InterruptedException {
+    StopWatch stopWatch = StopWatch.createStarted();
     String status;
     String previousStatus = "";
     String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
@@ -82,8 +84,9 @@ class ConformanceApplicationTest {
         Thread.sleep(7_000L);
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
+    stopWatch.stop();
     assertEquals("{\"scenariosLeft\":0}", status, "Scenario in sandbox '" + sandboxId + "' did not finish properly! Original start status: " + startStatus);
-    log.info("Original start status of sandboxId: {} was: {}", sandboxId, startStatus);
+    log.info("Done! Run took {}. Original start status of sandboxId: {} was: {}", stopWatch, sandboxId, startStatus);
   }
 
   private String getAppURL(String scenarioID, String urlPath) {

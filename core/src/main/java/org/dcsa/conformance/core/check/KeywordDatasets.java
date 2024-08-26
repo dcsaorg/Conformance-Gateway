@@ -54,6 +54,7 @@ class KeywordDatasets {
     private final String columnName;
     private int columnOffset = -1;
 
+    @Override
     public void setup(String resourceName, String[] headers) {
       var offset = Arrays.asList(headers).indexOf(columnName);
       if (offset < 0) {
@@ -83,6 +84,7 @@ class KeywordDatasets {
       }
     }
 
+    @Override
     public void setup(String resourceName, String[] headers) {
       var headersAsList = Arrays.asList(headers);
       this.indexes = Arrays.stream(columns).mapToInt(columnName -> {

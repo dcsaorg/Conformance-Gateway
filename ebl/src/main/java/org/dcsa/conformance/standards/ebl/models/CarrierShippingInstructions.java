@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.*;
-
 import lombok.NonNull;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
@@ -101,7 +100,7 @@ public class CarrierShippingInstructions {
 
   // Randomize the issuing carrier to avoid favouring a particular carrier
   @SuppressWarnings("unchecked")
-  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS = (Function<String, JsonNode>[]) new Function[]{
+  private static final Function<String, JsonNode>[] ISSUING_CARRIER_DEFINITIONS = new Function[]{
     // Name is from the SMDG code list
     issuingCarrier("CMA CGM", "CMA", "US"),
     issuingCarrier("Evergreen Marine Corporation", "EMC", "TW"),
@@ -169,9 +168,9 @@ public class CarrierShippingInstructions {
 
   private static final TDField[] CARRIER_PROVIDED_TD_FIELDS = {
     initialFieldValue(
-        "transportDocumentReference",
+        TRANSPORT_DOCUMENT_REFERENCE,
         () -> UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0, 20)),
-    initialFieldValue("transportDocumentStatus", TD_DRAFT.wireName()),
+    initialFieldValue(TRANSPORT_DOCUMENT_STATUS, TD_DRAFT.wireName()),
     initialFieldValue("cargoMovementTypeAtOrigin", "FCL"),
     initialFieldValue("cargoMovementTypeAtDestination", "FCL"),
     initialFieldValue("receiptTypeAtOrigin", "CY"),

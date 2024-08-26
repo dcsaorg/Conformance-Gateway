@@ -80,7 +80,7 @@ public class TntPublisher extends ConformanceParty {
                                   "CBR,BKG,SHI,SRM,TRD,ARN,VGM,CAS,CUS,DGD,OOG";
                               case CARRIER_BOOKING_REFERENCE -> "ABC709951";
                               case TRANSPORT_DOCUMENT_REFERENCE ->
-                                  UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
+                                  UUID.randomUUID().toString().replace("-", "").substring(0, 20);
                               case TRANSPORT_EVENT_TYPE_CODE -> "ARRI,DEPA";
                               case TRANSPORT_CALL_ID -> UUID.randomUUID().toString();
                               case VESSEL_IMO_NUMBER -> "9321483";

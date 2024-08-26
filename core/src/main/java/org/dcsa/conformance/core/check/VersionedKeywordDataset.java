@@ -48,7 +48,7 @@ class VersionedKeywordDataset implements KeywordDataset {
     if (!nameTemplate.contains("%s")) {
       throw new IllegalStateException("Missing a '%s' to mark where the version will be placed");
     }
-    return fromLoader((version) -> {
+    return fromLoader(version -> {
       var resourceName = nameTemplate.formatted(version);
       return loadCsvDataset(resourceClass, resourceName, rowSelector);
     });

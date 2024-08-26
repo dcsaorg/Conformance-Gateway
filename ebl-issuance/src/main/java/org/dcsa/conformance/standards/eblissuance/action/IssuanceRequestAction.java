@@ -17,8 +17,6 @@ import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblissuance.checks.IssuanceChecks;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
-import javax.xml.stream.FactoryConfigurationError;
-
 @Getter
 @Slf4j
 public class IssuanceRequestAction extends IssuanceAction {

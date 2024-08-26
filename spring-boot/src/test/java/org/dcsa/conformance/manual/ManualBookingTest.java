@@ -51,7 +51,7 @@ class ManualBookingTest extends ManualTestBase {
     Scenario scenario1 = sandbox1Digests.getFirst().scenarios().getFirst();
     runDryCargoScenario(sandbox1, sandbox2, scenario1.id(), scenario1.name());
 
-    // Run all tests on: Dangerous goods scenarios
+    // Run all tests on: Dry Cargo scenarios
     // TODO: turn on when all scenarios are implemented. Now only the first one is implemented. Line
     // 52 can be removed.
     /*sandbox1Digests

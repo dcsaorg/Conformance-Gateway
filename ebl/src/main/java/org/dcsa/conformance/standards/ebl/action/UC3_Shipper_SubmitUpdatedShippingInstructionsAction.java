@@ -37,6 +37,7 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
+  @Override
   protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
     var body = exchange.getRequest().message().body().getJsonBody();
     return dynamicScenarioParameters.withUpdatedShippingInstructions(body);

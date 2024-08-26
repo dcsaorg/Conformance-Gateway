@@ -12,18 +12,18 @@ import org.dcsa.conformance.core.report.ConformanceStatus;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 
 @Getter
-public class ConformanceCheck {
+public abstract class ConformanceCheck {
   protected final String title;
 
   private List<ConformanceCheck> _subChecks;
 
   private final List<ConformanceResult> results = new ArrayList<>();
 
-  public ConformanceCheck(String title) {
+  protected ConformanceCheck(String title) {
     this.title = title;
   }
 
-  synchronized private List<ConformanceCheck> getSubChecks() {
+  private synchronized List<ConformanceCheck> getSubChecks() {
     if (_subChecks == null) {
       this._subChecks = this.createSubChecks().collect(Collectors.toList());
     }

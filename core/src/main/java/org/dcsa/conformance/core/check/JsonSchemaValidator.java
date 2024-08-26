@@ -1,5 +1,7 @@
 package org.dcsa.conformance.core.check;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,16 +14,14 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
   private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER = new ObjectMapper(new JsonFactory());
 
   public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
-        .computeIfAbsent(filePath, (ignored) -> new HashMap<>())
-        .computeIfAbsent(schemaName, (ignored) -> new JsonSchemaValidator(filePath, schemaName));
+        .computeIfAbsent(filePath, ignored -> new HashMap<>())
+        .computeIfAbsent(schemaName, ignored -> new JsonSchemaValidator(filePath, schemaName));
   }
 
   private final JsonSchema jsonSchema;

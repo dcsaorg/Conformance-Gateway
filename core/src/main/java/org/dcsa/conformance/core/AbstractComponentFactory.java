@@ -210,9 +210,9 @@ public abstract class AbstractComponentFactory {
       String standardName, String standardVersion, String scenarioSuite) {
     return "%s-%s-%s"
         .formatted(
-            standardName.replaceAll(" ", ""),
-            standardVersion.replaceAll("\\.", "").replaceAll("-", ""),
-            scenarioSuite.replaceAll(" ", "-"))
+            standardName.replace(" ", ""),
+            standardVersion.replaceAll("\\.", "").replace("-", ""),
+            scenarioSuite.replace(" ", "-"))
         .toLowerCase();
   }
 }

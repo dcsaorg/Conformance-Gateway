@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -48,12 +47,6 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     )));
   }
 
-  private void validateAll(List<Match> matches) {
-    matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
-      .filter(s -> !s.isEmpty())
-      .forEach(validationIssues::addAll);
-  }
-
   @RequiredArgsConstructor
   private class AttributePathBuilderImpl implements AttributePathBuilder {
 
@@ -87,6 +80,12 @@ class MultiAttributeValidatorImpl implements MultiAttributeValidator {
     public MultiAttributeValidator submitPath() {
       validateAll(matchingNodes);
       return MultiAttributeValidatorImpl.this;
+    }
+
+    private void validateAll(List<Match> matches) {
+      matches.stream().map(m -> validation.validate(m.node, concatContextPath(contextPath, m.render())))
+        .filter(s -> !s.isEmpty())
+        .forEach(validationIssues::addAll);
     }
   }
 

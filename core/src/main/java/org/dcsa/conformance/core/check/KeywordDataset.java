@@ -29,7 +29,7 @@ public interface KeywordDataset {
       throw new IllegalStateException("Only (non-null) String and VersionedStaticKeywordSet allowed");
     }
     return VersionedKeywordDataset.fromLoader(
-      (version) -> {
+      version -> {
         var keywords = new HashSet<String>();
 
         for (var value : values) {

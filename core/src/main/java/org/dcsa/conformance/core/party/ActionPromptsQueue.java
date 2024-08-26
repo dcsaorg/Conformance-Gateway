@@ -1,16 +1,15 @@
 package org.dcsa.conformance.core.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.StreamSupport;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.state.StatefulEntity;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public class ActionPromptsQueue implements StatefulEntity {
   private final Set<String> allActionIds = new HashSet<>();
@@ -43,7 +42,7 @@ public class ActionPromptsQueue implements StatefulEntity {
   }
 
   @Override
-  synchronized public JsonNode exportJsonState() {
+  public synchronized JsonNode exportJsonState() {
     ObjectNode stateNode = OBJECT_MAPPER.createObjectNode();
 
     ArrayNode allActionIdsNode = stateNode.putArray("allActionIds");
@@ -57,7 +56,7 @@ public class ActionPromptsQueue implements StatefulEntity {
   }
 
   @Override
-  synchronized public void importJsonState(JsonNode jsonState) {
+  public synchronized void importJsonState(JsonNode jsonState) {
     StreamSupport.stream(jsonState.get("allActionIds").spliterator(), false)
             .map(JsonNode::asText)
             .forEach(allActionIds::add);

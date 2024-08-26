@@ -15,7 +15,7 @@ public abstract class ActionCheck extends ConformanceCheck {
   protected final UUID matchedExchangeUuid;
   protected final HttpMessageType httpMessageType;
 
-  public ActionCheck(
+  protected ActionCheck(
       String title,
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
@@ -23,7 +23,7 @@ public abstract class ActionCheck extends ConformanceCheck {
     this("", title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType);
   }
 
-  public ActionCheck(
+  protected ActionCheck(
       String titlePrefix,
       String title,
       Predicate<String> isRelevantForRoleName,

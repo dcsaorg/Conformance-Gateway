@@ -211,7 +211,7 @@ public abstract class AbstractComponentFactory {
     return "%s-%s-%s"
         .formatted(
             standardName.replace(" ", ""),
-            standardVersion.replace("\\.", "").replace("-", ""),
+            standardVersion.replace(".", "").replace("-", ""),
             scenarioSuite.replace(" ", "-"))
         .toLowerCase();
   }

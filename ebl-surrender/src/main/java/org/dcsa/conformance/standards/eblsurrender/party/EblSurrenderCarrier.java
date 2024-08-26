@@ -84,7 +84,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
         "EblSurrenderPlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
-    String tdr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
+    String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
 
     SuppliedScenarioParameters suppliedScenarioParameters =

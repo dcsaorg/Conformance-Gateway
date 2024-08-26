@@ -40,4 +40,13 @@ jobs:
       - name: Build and test Conformance-Gateway
         run: |
           cd Conformance-Gateway
-          mvn package -U -B -V --fail-at-end
+          mvn verify -U -B -V --fail-at-end
+
+      - name: Run SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
+        run: |
+          cd Conformance-Gateway
+          mvn install
+          mvn sonar:sonar -Dsonar.token=myAuthenticationToken

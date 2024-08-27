@@ -13,14 +13,14 @@ public class DynamicScenarioParameters {
   public ObjectNode toJson() {
     ObjectNode dspNode = new ObjectMapper().createObjectNode();
     if (nextPage != null) {
-      dspNode.put("nextPage", nextPage);
+      dspNode.put("next", nextPage);
     }
     return dspNode;
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     ObjectNode dspNode = (ObjectNode) jsonNode;
-    return new DynamicScenarioParameters(dspNode.path("nextPage").asText()
+    return new DynamicScenarioParameters(dspNode.path("next").asText()
     );
   }
 }

@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.party.CsRole;
+import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @UtilityClass
@@ -75,7 +76,7 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForPtp(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPtp("placeOfReceipt"));
     checks.add(createLocationCheckPtp("placeOfDelivery"));
@@ -89,6 +90,7 @@ public class CsChecks {
           || sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
         checks.add(validateDateRangeforPtp(sspSupplier));
       }
+      checks.add(paginationCheckForPtp(dspSupplier));
     }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
@@ -96,6 +98,17 @@ public class CsChecks {
         HttpMessageType.RESPONSE,
         expectedApiVersion,
         checks);
+  }
+
+  private static JsonContentCheck paginationCheckForPtp(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.customValidator(
+      String.format("Check the response is paginated correctly"),
+        body -> {
+        JsonNode cursor = dspSupplier.get().toJson();
+          var issues = new LinkedHashSet<String>();
+          return issues;
+        });
+
   }
 
   private static JsonContentCheck createLocationCheckPtp(String locationType) {

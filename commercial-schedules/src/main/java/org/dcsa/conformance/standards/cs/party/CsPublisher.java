@@ -55,15 +55,13 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
     String filePath;
-    String firstPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=first123; rel=\"First-Page\"";
-    String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"Next-Page\"";
+    String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"next\"";
     Map<String, List<String>> initialIMap = Map.of(
       "Api-Version", List.of(apiVersion)
     );
-    Map<String, Collection<String>> newMap = new HashMap<>(initialIMap);
-    Map<String, ? extends Collection<String>> headers = Map.of(
-      "Links", List.of(firstPage, nextPage, "v1.2")
-    );
+    Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
+    headers.put("Link",List.of(nextPage));
+
     if (request.url().endsWith("v1/point-to-point-routes")) {
       filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
     } else if (request.url().endsWith("v1/port-schedules")) {

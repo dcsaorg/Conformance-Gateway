@@ -2,9 +2,11 @@ package org.dcsa.conformance.standards.cs.action;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -53,15 +55,21 @@ public abstract class CsAction extends ConformanceAction {
 
   private void updateCursorFromResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dspRef = dsp.get();
-    Collection<String> linkHeaders = exchange.getResponse().message().headers().get("Links");
-    for (String header : linkHeaders) {
-      String url = header.split(";")[0];
-      String rel = header.split(";")[1];
-      String relValue = rel.split("=")[1].replace("\"", "");
-      if ("Next-Page".equals(relValue)) {
-        String cursorValue = extractCursorValue(url);
+    Collection<String> linkHeaders = exchange.getResponse().message().headers().get("Link");
+    Optional<String> link = linkHeaders.stream().findFirst();
+    if(link.isPresent()){
+      String[] links = link.get().split(",");
+      for (String value : links) {
+        String url = value.split(";")[0];
+        String rel = value.split(";")[1];
+        String relValue = rel.split("=")[1].replace("\"", "");
+        if ("next".equals(relValue)) {
+          String cursorValue = extractCursorValue(url);
+          dsp.set(new DynamicScenarioParameters(cursorValue));
+        }
       }
     }
+
   }
 
   private static String extractCursorValue(String url) {
@@ -77,5 +85,23 @@ public abstract class CsAction extends ConformanceAction {
       }
     }
     return null;
+  }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = super.exportJsonState();
+    if (dsp.hasCurrentValue()) {
+      jsonState.set("currentDsp", dsp.get().toJson());
+    }
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
+    JsonNode dspNode = jsonState.get("currentDsp");
+    if (dspNode != null) {
+      dsp.set(DynamicScenarioParameters.fromJson(dspNode));
+    }
   }
 }

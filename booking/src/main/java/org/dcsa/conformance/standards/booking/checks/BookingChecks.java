@@ -14,6 +14,7 @@ import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -397,22 +398,26 @@ public class BookingChecks {
       if("SD".equals(receiptTypeAtOrigin)) {
         var requestedEquipments = body.path("requestedEquipments");
         if (requestedEquipments.isArray()) {
+          AtomicInteger counter = new AtomicInteger(0);
           StreamSupport.stream(requestedEquipments.spliterator(), false)
             .forEach(element -> {
+              int currentCount = counter.getAndIncrement();
               if ((element.path("emptyContainerPositioningLocation").isContainerNode()
                 || (preNode != null && !preNode.isEmpty())) && element.path("emptyContainerPositioningDateTime").asText("").isEmpty()  ) {
-                issues.add("Empty container positioning DateTime must have provided.");
+                issues.add("Empty container positioning DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
               }
             });
         }
       }
       var requestedEquipments = body.path("requestedEquipments");
       if (requestedEquipments.isArray()) {
+        AtomicInteger counter = new AtomicInteger(0);
         StreamSupport.stream(requestedEquipments.spliterator(), false)
           .forEach(element -> {
+            int currentCount = counter.getAndIncrement();
             if (element.path("emptyContainerDepotReleaseLocation").isContainerNode()
               && element.path("emptyContainerPickupDateTime").asText("").isEmpty()  ) {
-              issues.add("Empty container Pickup DateTime must have provided.");
+              issues.add("Empty container Pickup DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
             }
           });
       }

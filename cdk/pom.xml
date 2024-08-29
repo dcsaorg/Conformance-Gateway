@@ -2,25 +2,20 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.dcsa.conformance</groupId>
+
+	<parent>
+		<groupId>org.dcsa.conformance</groupId>
+		<artifactId>Conformance-Gateway</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
     <artifactId>cdk</artifactId>
     <version>0.1</version>
     <name>dcsa-conformance-cdk</name>
     <description>DCSA Conformance CDK</description>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -31,6 +26,7 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>software.amazon.awscdk</groupId>

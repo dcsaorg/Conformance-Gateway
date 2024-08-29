@@ -22,6 +22,8 @@ jobs:
         with:
           path: Conformance-Gateway
           submodules: recursive
+          # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
+          fetch-depth: 0
 
       - name: Set up Java JDK
         uses: actions/setup-java@v3
@@ -40,4 +42,13 @@ jobs:
       - name: Build and test Conformance-Gateway
         run: |
           cd Conformance-Gateway
-          mvn package -U -B -V --fail-at-end
+          mvn verify -U -B -V --fail-at-end
+
+      - name: Run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          cd Conformance-Gateway
+          mvn sonar:sonar -B -Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME

@@ -1,4 +1,4 @@
-name: Conformance-Gateway CI
+name: Java CI
 
 on:
   workflow_dispatch:

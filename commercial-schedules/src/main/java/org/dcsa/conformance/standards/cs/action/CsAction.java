@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.cs.action;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,6 +58,7 @@ public abstract class CsAction extends ConformanceAction {
     DynamicScenarioParameters dspRef = dsp.get();
     Collection<String> linkHeaders = exchange.getResponse().message().headers().get("Link");
     Optional<String> link = linkHeaders.stream().findFirst();
+    var updatedDsp = dspRef;
     if(link.isPresent()){
       String[] links = link.get().split(",");
       for (String value : links) {
@@ -65,7 +67,7 @@ public abstract class CsAction extends ConformanceAction {
         String relValue = rel.split("=")[1].replace("\"", "");
         if ("next".equals(relValue)) {
           String cursorValue = extractCursorValue(url);
-          dsp.set(new DynamicScenarioParameters(cursorValue));
+          updatedDsp = updateIfNotNull(updatedDsp, cursorValue, updatedDsp::withCursor);
         }
       }
     }
@@ -86,7 +88,12 @@ public abstract class CsAction extends ConformanceAction {
     }
     return null;
   }
-
+  private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+    if (value == null) {
+      return dsp;
+    }
+    return with.apply(value);
+  }
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();

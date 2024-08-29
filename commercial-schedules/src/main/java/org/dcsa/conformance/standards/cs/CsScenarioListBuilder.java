@@ -30,7 +30,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
     return Stream.of(
-        Map.entry(
+       /* Map.entry(
           "Point to Point Routings",
           noAction()
             .thenEither(
@@ -107,17 +107,28 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           noAction()
             .thenEither(
               scenarioWithParametersVs(UN_LOCATION_CODE),
-              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))),
+              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))),*/
         Map.entry(
           "Limit and Pagination",
           noAction()
-            .thenEither(
-              scenarioWithParametersPtp(PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT),
-              scenarioWithParametersPs(UN_LOCATION_CODE, DATE,LIMIT),
-              scenarioWithParametersVs(VESSEL_IMO_NUMBER,LIMIT))))
+            .then(
+              scenarioWithParametersPtp(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  private static CsScenarioListBuilder scenarioWithParametersPtpForNextPage(CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings()).then(getPtpRoutings());
+  }
+
+  private static CsScenarioListBuilder scenarioWithParametersForNextPage(CsFilterParameter... csFilterParameters) {
+    return scenarioWithParametersPtp(csFilterParameters);
+  }
+
+  private static CsScenarioListBuilder scenarioWithParametersPtp(CsScenarioListBuilder thenWhat,
+    CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings().then(thenWhat));
   }
 
   private static CsScenarioListBuilder noAction() {

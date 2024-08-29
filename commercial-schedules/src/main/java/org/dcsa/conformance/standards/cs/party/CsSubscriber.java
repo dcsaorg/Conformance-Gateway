@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.cs.party;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -59,14 +60,17 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
+    Map qyeryParams = ssp.getMap().entrySet().stream()
+      .collect(
+        Collectors.toMap(
+          entry -> entry.getKey().getQueryParamName(),
+          entry -> Set.of(entry.getValue())));
+    qyeryParams.put("cursor",dsp.cursor());
 
     syncCounterpartGet(
-        "/v1/vessel-schedules",
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getQueryParamName(),
-                    entry -> Set.of(entry.getValue()))));
+        "/v1/vessel-schedules",qyeryParams
+        );
 
     addOperatorLogEntry(
         "Sent GET vessel schedules request with parameters %s"

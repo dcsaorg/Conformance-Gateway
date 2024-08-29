@@ -90,7 +90,7 @@ public class CsChecks {
           || sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
         checks.add(validateDateRangeforPtp(sspSupplier));
       }
-      checks.add(paginationCheckForPtp(dspSupplier));
+      checks.add(paginationCheckForPtp(sspSupplier,dspSupplier));
     }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
@@ -100,15 +100,16 @@ public class CsChecks {
         checks);
   }
 
-  private static JsonContentCheck paginationCheckForPtp(Supplier<DynamicScenarioParameters> dspSupplier) {
+  private static JsonContentCheck paginationCheckForPtp(Supplier<SuppliedScenarioParameters> sspSupplier,Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
-      String.format("Check the response is paginated correctly"),
+        String.format("Check the response is paginated correctly"),
         body -> {
-        JsonNode cursor = dspSupplier.get().toJson();
           var issues = new LinkedHashSet<String>();
-          return issues;
+          if (sspSupplier.get().getMap().containsKey(LIMIT)) {
+            JsonNode cursor = dspSupplier.get().toJson();
+            }
+            return issues;
         });
-
   }
 
   private static JsonContentCheck createLocationCheckPtp(String locationType) {

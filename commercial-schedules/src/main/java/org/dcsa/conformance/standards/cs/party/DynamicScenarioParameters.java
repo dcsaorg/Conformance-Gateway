@@ -4,23 +4,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.With;
 
-@AllArgsConstructor
-public class DynamicScenarioParameters {
-
-  String nextPage;
+@With
+public record DynamicScenarioParameters(
+  String cursor
+)  {
 
   public ObjectNode toJson() {
     ObjectNode dspNode = new ObjectMapper().createObjectNode();
-    if (nextPage != null) {
-      dspNode.put("next", nextPage);
+    if (cursor != null) {
+      dspNode.put("cursor", cursor);
     }
     return dspNode;
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     ObjectNode dspNode = (ObjectNode) jsonNode;
-    return new DynamicScenarioParameters(dspNode.path("next").asText()
+    return new DynamicScenarioParameters(dspNode.path("cursor").asText()
     );
   }
 }

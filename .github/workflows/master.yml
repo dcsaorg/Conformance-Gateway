@@ -44,9 +44,10 @@ jobs:
 
       - name: Run SonarCloud analysis
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           cd Conformance-Gateway
           mvn install
-          mvn sonar:sonar -Dsonar.token=myAuthenticationToken
+          mvn sonar:sonar -Dsonar.branch.name=$BRANCH_NAME

@@ -51,4 +51,4 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           cd Conformance-Gateway
-          mvn sonar:sonar -B -Dsonar.branch.name=$BRANCH_NAME
+          mvn sonar:sonar -B -Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME

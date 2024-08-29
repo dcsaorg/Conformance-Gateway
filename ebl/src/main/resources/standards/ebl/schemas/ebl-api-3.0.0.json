@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Electronic Bill of Lading",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\nAll of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implmented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -40,7 +40,7 @@
           "Shipping Instructions"
         ],
         "summary": "Creates a Shipping Instructions\n",
-        "description": "Creates a new `Shipping Instructions`. This endPoint corresponds with **UseCase 1 - Submit Shipping Instructions**.\n\n## Precondition\nThe consumer has information for a `Shipping Instructions`. The empty equipment has been released to the shipper. The `Booking` is in state `CONFIRMED`.\n\n## Postcondition\nThe provider has received the `Shipping Instructions`.\n\nThe consumer will receive a `201` (Created) if the payload schema validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a `Shipping Instructions`:\n1. The payload (`Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n\n   A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and stored along with the payload in the provider system.\n  \n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. A `201` (Created) response is returned with the following payload:\n    ```\n    {\n      shippingInstructionsReference: 'si-123',\n      shippingInstructionsStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `POST` `Shipping Instructions` the process ends here. The `Shipping Instructions`\n\n  - is now stored in the provider system\n  - has status `RECEIVED`\n  - awaits further processing by the provider\n  - a `201` (Created) response is sent to the consumer with a payload containing `documentStatus=RECEIVED`\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.\n",
+        "description": "Creates a new `Shipping Instructions`. This endPoint corresponds with **UseCase 1 - Submit Shipping Instructions**.\n\n## Precondition\nThe consumer has information for a `Shipping Instructions`. The empty equipment has been released to the shipper. The `Booking` is in state `CONFIRMED`.\n\n## Postcondition\nThe provider has received the `Shipping Instructions`.\n\nThe consumer will receive a `201` (Created) or a `202` (Accepted) if the payload schema validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `201` (Created) response\nThe following occurs when a provider receives a `Shipping Instructions`:\n1. The payload (`Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n\n   A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and linked to the payload in the provider system.\n  \n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. A `201` (Created) response is returned with a payload containing the `shippingInstructionsReference` and `shippingInstructionsStatus`:\n    ```\n    {\n      shippingInstructionsReference: 'si-123',\n      shippingInstructionsStatus: 'RECEIVED'\n    }\n    ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `POST` `Shipping Instructions` responding with `201` (Created) the process ends here. The `Shipping Instructions`:\n  - is now stored in the provider system\n  - has status `RECEIVED` and the status can be queried (a subsequent `GET` request will retrieve the payload)\n  - a `201` (Created) response is sent to the consumer with a payload containing the `shippingInstructionsReference` and `shippingInstructionsStatus='RECEIVED'`\n  - '_relevant_' subscribers have been notified.\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives a `Shipping Instructions`:\n1. The payload (`Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n\n   A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and linked to the payload in the provider system.\n  \n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. A `202` (Accepted) response is returned with a payload containing **only** the `shippingInstructionsReference`:\n    ```\n    {\n      shippingInstructionsReference: 'si-123'\n    }\n    ```\n\nFor `POST` `Shipping Instructions` responding with `202` (Accepted) the process ends here. The `Shipping Instructions`:\n  - is now accepted by the provider system\n  - the `Shipping Instructions` does not yet have any status and cannot be queried (no `GET` request is possible until the `Shipping Instructions` is further processed in the provider system)\n  - a `202` (Accepted) response is sent to the consumer with a payload **only** containing the `shippingInstructionsReference`\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the  status `RECEIVED` of the `Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  After the status has changed to `RECEIVED` further processing can continue and will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n",
         "operationId": "create-shipping-instructions",
         "parameters": [
           {
@@ -147,7 +147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ShippingInstructionsRefStatus"
+                  "$ref": "#/components/schemas/Shipping Instructions Response"
                 },
                 "examples": {
                   "receExample": {
@@ -156,6 +156,30 @@
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "shippingInstructionsStatus": "RECEIVED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The `Shipping Instructions` has been accepted by the provider. The `Shipping Instructions` does not yet have a `shippingInstructionsStatus` - it is not possible to call the `GET` endPoint until the `Shipping Instructions` is further processed in provider system. The consumer is now awaiting provider to process the `Shipping Instructions` asynchronously.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shipping Instructions Response_1"
+                },
+                "examples": {
+                  "receExample": {
+                    "summary": "Shipping Instructions received\n",
+                    "description": "The `shippingInstructionsReference` has been accepted (no `shippingInstructionsStatus`) and schema validated by provider\n",
+                    "value": {
+                      "shippingInstructionsReference": "si-123"
                     }
                   }
                 }
@@ -238,7 +262,7 @@
             }
           },
           "default": {
-            "description": "Unexpected error",
+            "description": "For other errors the error object should be populated with relevant information\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -283,7 +307,7 @@
           "Shipping Instructions"
         ],
         "summary": "Gets the Shipping Instructions\n",
-        "description": "Retrieves the `Shipping Instructions` with the `documentReference`. The path can contain a `shippingInstructionsReference` or a `transportDocumentReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions`, it is necessary to use the query parameter `updatedContent` and set it to `true`.\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n\nThe `status` of the \"original\" `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus`. `updatedShippingInstructionsStatus` and related content is only available after a consumer has requested an update via **UseCase 3: Submit updated Shipping Instructions** and until:\n- the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessable.\n- the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\nIf `updatedContent=true` is requested but no update has yet been provided by the consumer **or** the state of the \"original\" `Shipping Instructions` is `PENDING UPDATE`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting changes to the `Shipping Instructions`, the `feedbacks` object is used to inform the consumer what needs to change.\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n",
+        "description": "Retrieves the `Shipping Instructions` with the `documentReference`. The path can contain a `shippingInstructionsReference` or a `transportDocumentReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions`, it is necessary to use the query parameter `updatedContent` and set it to `true`.\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n\nThe `status` of the \"original\" `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus`. `updatedShippingInstructionsStatus` and related content is only available after a consumer has requested an update via **UseCase 3: Submit updated Shipping Instructions** and until:\n- the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessable.\n- the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\nIf `updatedContent=true` is requested but no update has yet been provided by the consumer **or** the state of the \"original\" `Shipping Instructions` is `PENDING UPDATE`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting changes to the `Shipping Instructions`, the `feedbacks` object is used to inform the consumer what needs to change.\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n\nIn case a previous request is being processed by the provider - a `202` (Accepted) with **no payload** can be used as a response until the processing is finished.\n",
         "operationId": "get-shipping-instructions",
         "parameters": [
           {
@@ -584,8 +608,16 @@
               }
             }
           },
+          "202": {
+            "description": "The `Shipping Instructions` is currently being processed by the provider. No payload is returned. A new `GET` request has to be made periodically to check if the provider has finished processing the `Shipping Instructions`.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
           "404": {
-            "description": "In case the consumer is requesting the content of the `UpdatedShipping Instructions`, and no update has yet been requested.\n",
+            "description": "In case the consumer is requesting the content of the `UpdatedShipping Instructions`, and no update has yet been requested.\n\nA `404` (Not Found) can also be sent in case the provider does not know of the `documentReference` used in the request (the resource does not exist)\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -597,7 +629,7 @@
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "examples": {
-                  "notFoundExample": {
+                  "notFoundUpdateExample": {
                     "summary": "Shipping Instructions update not found\n",
                     "description": "The `Update Shipping Instructions` does not exist. No updates have been requested by the consumer.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
                     "value": {
@@ -613,6 +645,63 @@
                           "errorCode": 7003,
                           "errorCodeText": "Shipping Instructions does not contain an update",
                           "errorCodeMessage": "The Shipping Instructions has not yet been updated - no update exists"
+                        }
+                      ]
+                    }
+                  },
+                  "notFoundExample": {
+                    "summary": "documentReference not found\n",
+                    "description": "The `documentReference` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                    "value": {
+                      "httpMethod": "GET",
+                      "requestUri": "/v3/shipping-instructions/si-123?updatedContent=true",
+                      "statusCode": 404,
+                      "statusCodeText": "Not Found",
+                      "statusCodeMessage": "documentReference not found",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "documentReference not found",
+                          "errorCodeMessage": "The Shipping Instructions does not exist"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "In case the provider is processing the `Shipping Instructions` - it is possible for the provider to reject new incomming requests by returning a `409` (Conflict)\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "conflictExample": {
+                    "summary": "Conflicting request\n",
+                    "description": "The provider is already processing a request and needs to finish this process before any new requests are processed\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "value": {
+                      "httpMethod": "GET",
+                      "requestUri": "/v3/shipping-instructions/si-123",
+                      "statusCode": 409,
+                      "statusCodeText": "Conflict",
+                      "statusCodeMessage": "Previous request is being processed. Please try again\nlater\n",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "Conflicting request is being processed",
+                          "errorCodeMessage": "The Shipping Instructions cannot be updated/amended while it is being processed. Please try again later\n"
                         }
                       ]
                     }
@@ -659,7 +748,7 @@
             }
           },
           "default": {
-            "description": "Unexpected error",
+            "description": "For other errors the error object should be populated with relevant information\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -671,22 +760,22 @@
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "examples": {
-                  "getError": {
-                    "summary": "GET non-existing Shipping Instructions\n",
-                    "description": "Calling\n\n    GET /v3/shipping-instructions/si-123\n    \nresults in an error as `Shipping Instructions` `si-123` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                  "tooManyRequestsExample": {
+                    "summary": "Fetching too many `Transport Document` requests\n",
+                    "description": "Calling the endPoint\n\n    GET /v3/shipping-instructions/si-123\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
                       "requestUri": "/v3/shipping-instructions/si-123",
-                      "statusCode": 404,
-                      "statusCodeText": "Not Found",
-                      "statusCodeMessage": "The requested shippingInstructionsReference does not exist",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to fetch a Shipping Instructions has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
-                          "errorCodeText": "Non existent shippingInstructionsReference",
-                          "errorCodeMessage": "shippingInstructionsReference `si-123` does not exist"
+                          "errorCodeText": "Max Shipping Instructions requests reached",
+                          "errorCodeMessage": "A maximum of 10 Shipping Instructions can be requested per hour"
                         }
                       ]
                     }
@@ -702,7 +791,7 @@
           "Shipping Instructions"
         ],
         "summary": "Updates the Shipping Instructions\n",
-        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`.\n      \n      A `200` (OK) response corresponding to the following payload is returned:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `PUT` `Shipping Instructions` the process ends here. The `Updated Shipping Instructions`\n\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a `Shipping Instructions Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \n  endPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \n  If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \n  It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
+        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`.\n      \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The updated `Shipping Instructions`:\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\n    A subsequent `GET` request to the `Shipping Instructions` will fetch the status along with the `Shipping Instructions`\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider will now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The `Shipping Instructions`:\n  - is now accepted by the provider system\n  - the status of the `Shipping Instructions` is unchanged\n  - a `202` (Accepted) response is sent with an empty payload\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:\n  - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n  - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\nThe new state will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
         "operationId": "update-shipping-instructions",
         "parameters": [
           {
@@ -859,6 +948,24 @@
               }
             }
           },
+          "202": {
+            "description": "The `Shipping Instructions` update has been successfully accepted by the provider. `shippingInstructionsStatus` does not change, `updatedShippingInstructionsStatus` is not set and response payload is empty. Further processing will be done by provider.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "examples": {
+                  "receivedExample": {
+                    "summary": "Shipping Instructions updated by consumer\n",
+                    "description": "An `Updated Shipping Instructions` received and accepted by provider, the `Updated Shipping Instructions` now awaits provider action, the `shippingInstructionStatus` does not change.\n"
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "In case the updated `Shipping Instructions` does not schema validate a `400` (Bad Request) is returned\n",
             "headers": {
@@ -889,6 +996,43 @@
                           "property": "isElectronic",
                           "errorCodeText": "mandatory property missing",
                           "errorCodeMessage": "isElectronic must be provided as part of a Shipping Instructions"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "In case the provider does not know about the `documentReference` used in the request (this could be because of a `POST` request that has not finished processing or simply because the resource does not exist) - it is possible for the provider to reject the requests by returning a `404` (Not Found)\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "conflictExample": {
+                    "summary": "Not found request\n",
+                    "description": "The provided `documentReference` could not be found. This can be because a `Post` request has not been finished processing or because the `documentReference` does not exist in the provider system.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                    "value": {
+                      "httpMethod": "PUT",
+                      "requestUri": "/v3/shipping-instructions/si-123",
+                      "statusCode": 404,
+                      "statusCodeText": "Not Found",
+                      "statusCodeMessage": "shippingInstructionsReference not found",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "shippingInstructionsReference not found",
+                          "errorCodeMessage": "The Shipping Instructions does not exist"
                         }
                       ]
                     }
@@ -1015,7 +1159,7 @@
           "Shipping Instructions"
         ],
         "summary": "Cancels an update to a Shipping Instructions\n",
-        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n",
+        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nOnce processed, the `Updated Shipping Instructions` is cancelled and a [Shipping Instructions Notification](#/ShippingInstructionsNotification) will be sent\n",
         "operationId": "patch-shipping-instructions",
         "parameters": [
           {
@@ -1102,8 +1246,26 @@
               }
             }
           },
+          "202": {
+            "description": "The cancellation of the `Updated Shipping Instructions` is accepted and is now awaiting further processing by the provider\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cancelUpdateExample": {
+                    "summary": "Cancel a Shipping Instructions update\n",
+                    "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`.\n"
+                  }
+                }
+              }
+            }
+          },
           "400": {
-            "description": "In case the Cancel payload does not schema validate a `400` (Bad Request) is returned\n",
+            "description": "In case the cancel payload does not schema validate a `400` (Bad Request) is returned\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1142,7 +1304,7 @@
             }
           },
           "404": {
-            "description": "In case the consumer is trying to cancel a `Shipping Instructions` that does not have an ongoing update request, an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n",
+            "description": "In case the consumer is trying to cancel a `Shipping Instructions` that does not have an ongoing update request, an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nA `404` (Not Found) can also be sent in case the provider does not know of the `documentReference` used in the request (the resource does not exist)\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1253,7 +1415,7 @@
             }
           },
           "default": {
-            "description": "Unexpected error",
+            "description": "For other errors the error object should be populated with relevant information\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1265,22 +1427,22 @@
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "examples": {
-                  "getError": {
-                    "summary": "GET non-existing Shipping Instructions\n",
-                    "description": "Calling\n\n    PATCH /v3/shipping-instructions/si-123\n    \nresults in an error as `Shipping Instructions` `si-123` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                  "tooManyRequestsExample": {
+                    "summary": "Patching the `Shipping Instructions` too many times\n",
+                    "description": "Calling the endPoint\n\n    PATCH /v3/shipping-instructions/si-123\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "PATCH",
                       "requestUri": "/v3/shipping-instructions/si-123",
-                      "statusCode": 404,
-                      "statusCodeText": "Not Found",
-                      "statusCodeMessage": "The requested shippingInstructionsReference does not exist",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to patch a Shipping Instructions has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
-                          "errorCodeText": "Non existent shippingInstructionsReference",
-                          "errorCodeMessage": "shippingInstructionsReference `si-123` does not exist"
+                          "errorCodeText": "Max Shipping Instructions requests reached",
+                          "errorCodeMessage": "A maximum of 10 Shipping Instructions patches can be requested per hour"
                         }
                       ]
                     }
@@ -1736,6 +1898,51 @@
               }
             }
           },
+          "202": {
+            "description": "The `Transport Document` is currently being processed by the provider. No payload is returned. A new `GET` request has to be made periodically to check if the provider has finished processing the `Transport Document`.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "404": {
+            "description": "In case the consumer is requesting a `transportDocumentReference` that does not exist.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFoundExample": {
+                    "summary": "documentReference not found\n",
+                    "description": "The `transportDocumentReference` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                    "value": {
+                      "httpMethod": "GET",
+                      "requestUri": "/v3/transport-documents/td-987",
+                      "statusCode": 404,
+                      "statusCodeText": "Not Found",
+                      "statusCodeMessage": "documentReference not found",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "documentReference not found",
+                          "errorCodeMessage": "The Transport Document does not exist"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
           "500": {
             "description": "In case a server error occurs in provider system a `500` (Internal Server Error) is returned\n",
             "headers": {
@@ -1774,7 +1981,7 @@
             }
           },
           "default": {
-            "description": "Unexpected error",
+            "description": "For other errors the error object should be populated with relevant information\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1786,22 +1993,22 @@
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "examples": {
-                  "getError": {
-                    "summary": "GET non-existing Transport Document\n",
-                    "description": "Calling\n\n    GET /v3/transport-documents/td-987\n    \nresults in an error as `Transport Document` `td-987` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                  "tooManyRequestsExample": {
+                    "summary": "Fetching too many `Transport Document` requests\n",
+                    "description": "Calling the endPoint\n\n    GET /v3/transport-documents/td-987\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
                       "requestUri": "/v3/transport-documents/td-987",
-                      "statusCode": 404,
-                      "statusCodeText": "Not Found",
-                      "statusCodeMessage": "The requested transportDocumentReference does not exist",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to fetch a Transport Document has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
-                          "errorCodeText": "Non existent transportDocumentReference",
-                          "errorCodeMessage": "transportDocumentReference `td-987` does not exist"
+                          "errorCodeText": "Max Transport Document requests reached",
+                          "errorCodeMessage": "A maximum of 10 Transport Document can be requested per hour"
                         }
                       ]
                     }
@@ -1817,7 +2024,7 @@
           "Transport Document"
         ],
         "summary": "Approve a Transport Document\n",
-        "description": "A way for the consumer to Approve the `Draft Transport Document`. This endPoint corresponds with **UseCase 7 - Approve Draft Transport Document**.\n\n## Precondition\nIn order to approve a `Draft Transport Document`, the status of the `Transport Document` needs to be in status `DRAFT`\n\n## Postcondition\nThe provider has received an approval from the consumer for a `Transport Document` that is in state `DRAFT`.\n\nThe consumer will receive a `200` (OK) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow\nThe following occurs when a provider receives an approval:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid\n3. The `transportDocumentStatus` is set to `APPROVED`.\n4. All '_relevant_' subscribers will be notified via a [Transport Document Notification](#/TransportDocumentNotification).\n\nThe provider wil now start asynchronous processing. Once processed, the new status of the `Transport Document` (`ISSUED`) will be communicated via a `Transport Document Notification`. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/transport-documents/{transportDocumentReference}\n\nendPoint to check if the `transportDocumentStatus` in the `Transport Document` has changed.\n",
+        "description": "A way for the consumer to Approve the `Draft Transport Document`. This endPoint corresponds with **UseCase 7 - Approve Draft Transport Document**.\n\n## Precondition\nIn order to approve a `Draft Transport Document`, the status of the `Transport Document` needs to be in status `DRAFT`\n\n## Postcondition\nThe provider has received an approval from the consumer for a `Transport Document` that is in state `DRAFT`.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (Ok) response\nThe following occurs when a provider receives an approval:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. The `transportDocumentStatus` is set to `APPROVED`.\n4. All '_relevant_' subscribers will be notified via a [Transport Document Notification](#/TransportDocumentNotification).\n\nThe provider will now start asynchronous processing. Once processed, the new status of the `Transport Document` (`ISSUED`) will be communicated via a [Transport Document Notification](#/TransportDocumentNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/transport-documents/{transportDocumentReference}\n\nendPoint to check if the `transportDocumentStatus` in the `Transport Document` has changed.\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives an approval:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nOnce processed, the `Transport Document` is `ISSUED` and a [Transport Document Notification](#/TransportDocumentNotification) is sent.\n",
         "operationId": "approve-transport-document",
         "parameters": [
           {
@@ -1883,6 +2090,24 @@
               }
             }
           },
+          "202": {
+            "description": "The `Transport Document` has been accepted and now awaits further processing\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "examples": {
+                  "approveExample": {
+                    "summary": "Approve Draft Transport Document\n",
+                    "description": "Consumer approves the drafted `Transport Document` and now awaits further processing by provider.\n"
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "In case the Approve payload does not schema validate a `400` (Bad Request) is returned\n",
             "headers": {
@@ -1914,6 +2139,80 @@
                           "value": "ISSUE",
                           "errorCodeText": "incorrect value",
                           "errorCodeMessage": "Only APPROVED is an allowed value: ISSUE was inserted"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "In case the consumer is requesting a `transportDocumentReference` that does not exist.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFoundExample": {
+                    "summary": "documentReference not found\n",
+                    "description": "The `transportDocumentReference` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                    "value": {
+                      "httpMethod": "PATCH",
+                      "requestUri": "/v3/transport-documents/td-987",
+                      "statusCode": 404,
+                      "statusCodeText": "Not Found",
+                      "statusCodeMessage": "documentReference not found",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "documentReference not found",
+                          "errorCodeMessage": "The Transport Document does not exist"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "In case the consumer is requesting a `transportDocumentReference` that is being processed it is possible to return a `409` (Conflict).\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFoundExample": {
+                    "summary": "documentReference is being processed\n",
+                    "description": "The `transportDocumentReference` is currently being processed - try again later.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                    "value": {
+                      "httpMethod": "PATCH",
+                      "requestUri": "/v3/transport-documents/td-987",
+                      "statusCode": 409,
+                      "statusCodeText": "Conflict",
+                      "statusCodeMessage": "documentReference being processed",
+                      "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
+                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errors": [
+                        {
+                          "errorCode": 7003,
+                          "errorCodeText": "documentReference being processed",
+                          "errorCodeMessage": "The Transport Document is currently being processed"
                         }
                       ]
                     }
@@ -1960,7 +2259,7 @@
             }
           },
           "default": {
-            "description": "Unexpected error\n",
+            "description": "For other errors the error object should be populated with relevant information\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1972,22 +2271,22 @@
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "examples": {
-                  "getError": {
-                    "summary": "GET non-existing Transport Document\n",
-                    "description": "Calling\n\n    PATCH /v3/transport-documents/td-987\n    \nresults in an error as `Transport Document` `td-987` does not exist.\n\n**NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a \"random example\".\n",
+                  "tooManyRequestsExample": {
+                    "summary": "Too many Patch `Transport Document` requests\n",
+                    "description": "Calling the endPoint\n\n    PATCH /v3/transport-documents/td-987\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "PATCH",
                       "requestUri": "/v3/transport-documents/td-987",
-                      "statusCode": 404,
-                      "statusCodeText": "Not Found",
-                      "statusCodeMessage": "The requested transportDocumentReference does not exist",
+                      "statusCode": 429,
+                      "statusCodeText": "Too Many Requests",
+                      "statusCodeMessage": "Too many request to patch a Transport Document has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
                       "errorDateTime": "2023-04-13T07:41:00+08:30",
                       "errors": [
                         {
                           "errorCode": 7003,
-                          "errorCodeText": "Non existent transportDocumentReference",
-                          "errorCodeMessage": "transportDocumentReference `td-987` does not exist"
+                          "errorCodeText": "Max Transport Document requests reached",
+                          "errorCodeMessage": "A maximum of 10 Transport Document can be patched per hour"
                         }
                       ]
                     }
@@ -3101,28 +3400,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -3318,28 +3617,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -3554,28 +3853,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -3759,7 +4058,7 @@
             "example": "Rejected because of of wrong equipmentReference"
           }
         },
-        "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus`, an optional list of `requestedChanges` to be applied to the `Shipping Instructions` and and optional `reason`field is returned.\n"
+        "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus`, an optional list of `Feedback` to be applied to the `Shipping Instructions` and and optional `reason` field is returned.\n"
       },
       "ShippingInstructionsRefCancelStatus": {
         "title": "Shipping Instructions Cancel Response",
@@ -3801,7 +4100,7 @@
             "example": "Rejected because of of wrong equipmentReference"
           }
         },
-        "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` and and optional `reason`field is returned.\n"
+        "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` and and optional `reason` field is returned.\n"
       },
       "Feedback": {
         "title": "Feedback",
@@ -3821,7 +4120,7 @@
           "code": {
             "maxLength": 50,
             "type": "string",
-            "description": "A code used to describe the feedback. Possible values are: {Descriptions for each pseudo-enum should be provided}\n- `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information) \n- `PROPERTY_WILL_BE_IGNORED` (WARN - to be used for unsupported properties/values)\n- `PROPERTY_VALUE_MUST_CHANGE` (ERROR - to be used when a wrong property/value is provided)\n- `PROPERTY_VALUE_HAS_BEEN_CHANGED` (WARN - when something has been auto-updated without consumer intervention)\n- `PROPERTY_VALUE_MAY_CHANGE` (WARN - when something is likely to change in the future)\n- `PROPERTY_HAS_BEEN_DELETED` (WARN - when something has been auto-deleted without consumer intervention)\n",
+            "description": "A code used to describe the feedback. Possible values are:\n- `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information) \n- `PROPERTY_WILL_BE_IGNORED` (WARN - to be used for unsupported properties/values)\n- `PROPERTY_VALUE_MUST_CHANGE` (ERROR - to be used when a wrong property/value is provided)\n- `PROPERTY_VALUE_HAS_BEEN_CHANGED` (WARN - when something has been auto-updated without consumer intervention)\n- `PROPERTY_VALUE_MAY_CHANGE` (WARN - when something is likely to change in the future)\n- `PROPERTY_HAS_BEEN_DELETED` (WARN - when something has been auto-deleted without consumer intervention)\n",
             "example": "PROPERTY_WILL_BE_IGNORED"
           },
           "message": {
@@ -4212,7 +4511,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -4243,14 +4541,14 @@
             }
           },
           "shippersReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper`.\n",
             "example": "HHL007"
           },
           "shippersPurchaseOrderReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper Purchase Order`.\n",
@@ -4278,7 +4576,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -4309,14 +4606,14 @@
             }
           },
           "consigneesReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee`.\n",
             "example": "HHL007"
           },
           "consigneesPurchaseOrderReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee Purchase Order`.\n",
@@ -4344,7 +4641,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -4406,6 +4702,44 @@
         },
         "description": "The party on the import side assigned by the carrier to whom the customer need to reach out to for cargo release.\n"
       },
+      "IssueToParty": {
+        "title": "Issue To Party",
+        "required": [
+          "partyName",
+          "sendToPlatform"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "Globeteam"
+          },
+          "sendToPlatform": {
+            "maxLength": 4,
+            "pattern": "^\\S+$",
+            "type": "string",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "example": "BOLE"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity.\n"
+      },
       "Party": {
         "title": "Party",
         "required": [
@@ -4444,7 +4778,7 @@
             }
           },
           "reference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Party`.\n",
@@ -4566,7 +4900,7 @@
             "example": "W3C"
           },
           "partyCode": {
-            "maxLength": 100,
+            "maxLength": 150,
             "type": "string",
             "description": "Code to identify the party as provided by the code list provider\n",
             "example": "MSK"
@@ -4604,7 +4938,7 @@
             "example": "NL"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `taxLegalReference`\n",
@@ -4628,7 +4962,8 @@
             "example": "CR"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the reference. \n",
             "example": "HHL00103004"
@@ -4721,7 +5056,6 @@
           "HSCodes",
           "cargoItems",
           "carrierBookingReference",
-          "commoditySubreference",
           "descriptionOfGoods"
         ],
         "type": "object",
@@ -4815,7 +5149,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Noemclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -4852,7 +5186,7 @@
         "required": [
           "countryCode",
           "type",
-          "value"
+          "values"
         ],
         "type": "object",
         "properties": {
@@ -4871,12 +5205,16 @@
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
             "example": "NL"
           },
-          "value": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The value of the `customsReference`\n",
-            "example": "4988470982020120017"
+          "values": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "The value of the `customsReference`\n",
+              "example": "4988470982020120017"
+            }
           }
         },
         "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
@@ -4934,6 +5272,13 @@
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
+          },
+          "nationalCommodityCodes": {
+            "type": "array",
+            "description": "A list of `National Commodity Codes` that apply to this `cargoItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/NationalCommodityCode"
+            }
           },
           "customsReferences": {
             "type": "array",
@@ -4997,6 +5342,13 @@
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackagingShipper"
+          },
+          "nationalCommodityCodes": {
+            "type": "array",
+            "description": "A list of `National Commodity Codes` that apply to this `cargoItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/NationalCommodityCode"
+            }
           },
           "customsReferences": {
             "type": "array",
@@ -5450,7 +5802,7 @@
           },
           "shippingMarks": {
             "type": "array",
-            "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+            "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
               "maxLength": 500,
               "type": "string",
@@ -5492,7 +5844,7 @@
         "properties": {
           "shippingMarks": {
             "type": "array",
-            "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+            "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
               "maxLength": 500,
               "type": "string",
@@ -5682,7 +6034,7 @@
           },
           "source": {
             "type": "string",
-            "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n",
+            "description": "The source of the seal, namely who has affixed the seal.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n\n**Condition:** Seal source may be required depending on the type of commodity being shipped.\n",
             "example": "CUS",
             "enum": [
               "CAR",
@@ -5926,28 +6278,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -6000,6 +6352,13 @@
             "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
             "format": "date",
             "example": "2020-12-12"
+          },
+          "displayedShippedOnBoardReceivedForShipment": {
+            "maxLength": 250,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.\n",
+            "example": "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier"
           },
           "termsAndConditions": {
             "maxLength": 50000,
@@ -6069,7 +6428,7 @@
           "declaredValue": {
             "minimum": 0,
             "type": "number",
-            "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n\n**Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).\n",
             "format": "float",
             "example": 1231.1
           },
@@ -6559,6 +6918,54 @@
         },
         "description": "Addresses the monetary value of freight and other service charges for a `Booking`.\n"
       },
+      "Shipping Instructions Response": {
+        "title": "Shipping Instructions Response",
+        "required": [
+          "shippingInstructionsReference",
+          "shippingInstructionsStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "shippingInstructionsReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+            "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+          },
+          "shippingInstructionsStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n",
+            "example": "RECEIVED"
+          },
+          "feedbacks": {
+            "type": "array",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
+          }
+        },
+        "description": "The `shippingInstructionsReference` along with the `shippingInstructionsStatus` and an optional `feedbacks` is returned.\n"
+      },
+      "Shipping Instructions Response_1": {
+        "title": "Shipping Instructions Response",
+        "required": [
+          "shippingInstructionsReference"
+        ],
+        "type": "object",
+        "properties": {
+          "shippingInstructionsReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+            "example": "e0559d83-00e2-438e-afd9-fdd610c1a008"
+          }
+        },
+        "description": "**Only** the `shippingInstructionsReference` is returned.\n"
+      },
       "shippinginstructions_documentReference_body": {
         "required": [
           "updatedShippingInstructionsStatus"
@@ -6739,6 +7146,9 @@
           "endorsee": {
             "$ref": "#/components/schemas/Endorsee"
           },
+          "issueTo": {
+            "$ref": "#/components/schemas/IssueToParty"
+          },
           "other": {
             "type": "array",
             "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
@@ -6840,28 +7250,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -7089,28 +7499,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -7405,28 +7815,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -7479,6 +7889,13 @@
             "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
             "format": "date",
             "example": "2020-12-12"
+          },
+          "displayedShippedOnBoardReceivedForShipment": {
+            "maxLength": 250,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.\n",
+            "example": "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier"
           },
           "termsAndConditions": {
             "maxLength": 50000,
@@ -7548,7 +7965,7 @@
           "declaredValue": {
             "minimum": 0,
             "type": "number",
-            "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n\n**Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).\n",
             "format": "float",
             "example": 1231.1
           },

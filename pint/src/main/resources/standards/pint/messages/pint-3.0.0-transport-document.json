@@ -45,7 +45,7 @@
       "locationType": "UNLO",
       "UNLocationCode": "NLRTM"
     },
-    "vesselVoyage": [
+    "vesselVoyages": [
       {
         "carrierExportVoyageNumber": "2433W",
         "vesselName": "COFFEE BEANS"

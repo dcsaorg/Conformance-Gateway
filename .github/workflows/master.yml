@@ -1,5 +1,10 @@
 name: Conformance-Gateway CI
 
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  IN_PR: ${{ (github.event_name == 'pull_request' }} # SonarCloud
+  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
+
 on:
   workflow_dispatch:
   push:
@@ -44,11 +49,15 @@ jobs:
           cd Conformance-Gateway
           mvn verify -U -B -V --fail-at-end
 
+      - name: Set Sonar settings for PR build
+        if: ${{ env.IN_PR == 'true' }}
+        run: |
+          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Run SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           cd Conformance-Gateway
-          mvn sonar:sonar -B -Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME
+          mvn sonar:sonar -B ${{env.SONAR_PARAMS}}

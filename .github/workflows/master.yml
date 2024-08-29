@@ -22,6 +22,8 @@ jobs:
         with:
           path: Conformance-Gateway
           submodules: recursive
+          # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
+          fetch-depth: 0
 
       - name: Set up Java JDK
         uses: actions/setup-java@v3

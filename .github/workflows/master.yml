@@ -2,7 +2,7 @@ name: Conformance-Gateway CI
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  IN_PR: ${{ (github.event_name == 'pull_request' }} # SonarCloud
+  IN_PR: ${{ (github.event_name == 'pull_request') }} # SonarCloud
   SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
 
 on:

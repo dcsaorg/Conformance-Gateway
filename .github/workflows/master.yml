@@ -49,5 +49,5 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           cd Conformance-Gateway
-          mvn install
-          mvn sonar:sonar -Dsonar.branch.name=$BRANCH_NAME
+          mvn install -B -DskipTests
+          mvn sonar:sonar -B -Dsonar.branch.name=$BRANCH_NAME

@@ -21,7 +21,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
   private final String tableName;
 
   public DynamoDbSortedPartitionsLockingMap(DynamoDbClient dynamoDbClient, String tableName) {
-    super(60 * 1000, 500, 60 * 1000);
+    super(60L * 1000L, 500L, 60L * 1000L);
     this.dynamoDbClient = dynamoDbClient;
     this.tableName = tableName;
   }

@@ -1,8 +1,9 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -18,13 +19,11 @@ import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.*;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 public abstract class EblAction extends ConformanceAction {
   protected final Set<Integer> expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
-  public EblAction(
+  protected EblAction(
       String sourcePartyName,
       String targetPartyName,
       EblAction previousAction,
@@ -33,7 +32,7 @@ public abstract class EblAction extends ConformanceAction {
     this(sourcePartyName, targetPartyName, previousAction, actionTitle, Set.of(expectedStatus));
   }
 
-  public EblAction(
+  protected EblAction(
     String sourcePartyName,
     String targetPartyName,
     EblAction previousAction,

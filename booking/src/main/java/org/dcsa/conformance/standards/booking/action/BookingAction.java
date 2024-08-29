@@ -25,7 +25,7 @@ public abstract class BookingAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
 
-  public BookingAction(
+  protected BookingAction(
       String sourcePartyName,
       String targetPartyName,
       BookingAction previousAction,

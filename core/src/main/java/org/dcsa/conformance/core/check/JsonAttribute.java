@@ -152,7 +152,7 @@ public class JsonAttribute {
     JsonPointer jsonPointer,
     boolean defaultValue
   ) {
-    return (baseNode) -> baseNode.at(jsonPointer).asBoolean(defaultValue);
+    return baseNode -> baseNode.at(jsonPointer).asBoolean(defaultValue);
   }
 
   public static Predicate<JsonNode> isTrue(
@@ -167,7 +167,7 @@ public class JsonAttribute {
     String path,
     boolean defaultValue
   ) {
-    return (baseNode) -> baseNode.path(path).asBoolean(defaultValue);
+    return baseNode -> baseNode.path(path).asBoolean(defaultValue);
   }
 
   public static Predicate<JsonNode> isFalse(
@@ -182,28 +182,28 @@ public class JsonAttribute {
     String path,
     boolean defaultValue
   ) {
-    return (baseNode) -> !baseNode.path(path).asBoolean(defaultValue);
+    return baseNode -> !baseNode.path(path).asBoolean(defaultValue);
   }
 
   public static Predicate<JsonNode> isEqualTo(
     @NonNull String path,
     @NonNull String expectedValue
   ) {
-    return (baseNode) -> expectedValue.equals(baseNode.path(path).asText());
+    return baseNode -> expectedValue.equals(baseNode.path(path).asText());
   }
 
   public static Predicate<JsonNode> isOneOf(
     @NonNull String path,
     @NonNull Set<String> expectedValue
   ) {
-    return (baseNode) -> expectedValue.contains(baseNode.path(path).asText());
+    return baseNode -> expectedValue.contains(baseNode.path(path).asText());
   }
 
   public static Predicate<JsonNode> isNotNull(
     @NonNull
     JsonPointer jsonPointer
   ) {
-    return (root) -> {
+    return root -> {
       var node = at(jsonPointer).apply(root);
       return !node.isMissingNode() && !node.isNull();
     };
@@ -280,7 +280,7 @@ public class JsonAttribute {
   ) {
     return unique(
       "field %s with value".formatted(field),
-      (node) -> node.path(field).asText(null)
+      node -> node.path(field).asText(null)
     );
   }
 
@@ -290,7 +290,7 @@ public class JsonAttribute {
   ) {
     return unique(
       "combination of %s/%s with value".formatted(fieldA, fieldB),
-      (node) -> {
+      node -> {
         var valueA = node.path(fieldA).asText(null);
         var valueB = node.path(fieldB).asText(null);
         if (valueA == null || valueB == null) {

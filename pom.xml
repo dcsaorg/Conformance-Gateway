@@ -10,6 +10,7 @@
     <modules>
         <module>core</module>
         <module>booking</module>
+				<module>commercial-schedules</module>
 				<module>ebl</module>
 				<module>pint</module>
         <module>ebl-issuance</module>

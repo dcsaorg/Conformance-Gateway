@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -28,6 +30,7 @@ import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 import org.dcsa.conformance.standards.booking.BookingStandard;
+import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
 import org.dcsa.conformance.standards.eblinterop.PintStandard;
 import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
@@ -40,6 +43,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     BookingStandard.INSTANCE,
+    CsStandard.INSTANCE,
     EblStandard.INSTANCE,
     EblIssuanceStandard.INSTANCE,
     EblSurrenderStandard.INSTANCE,
@@ -87,6 +91,9 @@ public class ConformanceSandbox {
                 if (originalOrchestratorState != null && !originalOrchestratorState.isEmpty()) {
                   orchestrator.importJsonState(originalOrchestratorState);
                 }
+                orchestrator.setWaitingForBiConsumer(
+                    (forWhom, toDoWhat) ->
+                        _setWaitingFor(persistenceProvider, sandboxId, "Orchestrator", forWhom, toDoWhat));
                 orchestratorConsumer.accept(orchestrator);
                 return orchestrator.exportJsonState();
               });
@@ -184,6 +191,9 @@ public class ConformanceSandbox {
                 if (originalPartyState != null && !originalPartyState.isEmpty()) {
                   party.importJsonState(originalPartyState);
                 }
+                party.setWaitingForBiConsumer(
+                    (forWhom, toDoWhat) ->
+                        _setWaitingFor(persistenceProvider, sandboxId, partyName, forWhom, toDoWhat));
                 partyConsumer.accept(party);
                 return party.exportJsonState();
               });
@@ -393,6 +403,45 @@ public class ConformanceSandbox {
     return resultReference.get();
   }
 
+  public static ObjectNode getSandboxStatus(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId) {
+    ArrayNode waitingArrayNode = OBJECT_MAPPER.createArrayNode();
+    _getWaitingFor(persistenceProvider, sandboxId)
+        .forEach(waiting -> waitingArrayNode.add(waiting.toJson()));
+    return OBJECT_MAPPER.createObjectNode().set("waiting", waitingArrayNode);
+  }
+
+  private static LinkedList<SandboxWaiting> _getWaitingFor(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId) {
+    JsonNode waitingJsonNode =
+        persistenceProvider.getNonLockingMap().getItemValue("sandbox#" + sandboxId, "waiting");
+    LinkedList<SandboxWaiting> waitingList = new LinkedList<>();
+    if (waitingJsonNode != null && waitingJsonNode.isArray()) {
+      waitingJsonNode.forEach(
+          objectNode -> waitingList.add(SandboxWaiting.fromJson((ObjectNode) objectNode)));
+    }
+    return waitingList;
+  }
+
+  private static void _setWaitingFor(
+      ConformancePersistenceProvider persistenceProvider,
+      String sandboxId,
+      String who,
+      String forWhom,
+      String toDoWhat) {
+    ArrayNode waitingArrayNode = OBJECT_MAPPER.createArrayNode();
+    Stream.concat(
+            _getWaitingFor(persistenceProvider, sandboxId).stream()
+                .filter(waiting -> !waiting.who().equals(who)),
+            Stream.of(new SandboxWaiting(who, forWhom, toDoWhat))
+                .filter(waiting -> waiting.toDoWhat() != null))
+        .forEach(waiting -> waitingArrayNode.add(waiting.toJson()));
+    log.info("Sandbox %s waiting: %s".formatted(sandboxId, waitingArrayNode.toPrettyString()));
+    persistenceProvider
+        .getNonLockingMap()
+        .setItemValue("sandbox#" + sandboxId, "waiting", waitingArrayNode);
+  }
+
   public static ObjectNode getScenarioStatus(
       ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
     AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
@@ -428,7 +477,7 @@ public class ConformanceSandbox {
     return OBJECT_MAPPER.createObjectNode();
   }
 
-  public static JsonNode startOrStopScenario(
+  public static void startOrStopScenario(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
@@ -439,10 +488,9 @@ public class ConformanceSandbox {
                 ConformanceSandbox._asyncSendOutboundWebRequest(
                     deferredSandboxTaskConsumer, conformanceWebRequest),
             sandboxId,
-            "starting in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
+            "starting or stopping in sandbox %s scenario %s".formatted(sandboxId, scenarioId),
             orchestrator -> orchestrator.startOrStopScenario(scenarioId))
         .run();
-    return OBJECT_MAPPER.createObjectNode();
   }
 
   public static JsonNode completeCurrentAction(

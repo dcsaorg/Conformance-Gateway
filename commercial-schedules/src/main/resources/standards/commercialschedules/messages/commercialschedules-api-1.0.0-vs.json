@@ -1,0 +1,58 @@
+[
+  {
+    "carrierServiceName": "Great Lion Service",
+    "carrierServiceCode": "FE1",
+    "universalServiceReference": "SR12345A",
+    "vesselSchedules": [
+      {
+        "vessel": {
+          "vesselIMONumber": "9321483",
+          "MMSINumber": "278111222",
+          "name": "King of the Seas",
+          "flag": "DE",
+          "callSign": "NCVV",
+          "operatorCarrierCode": "MAEU",
+          "operatorCarrierCodeListProvider": "NMFTA"
+        },
+        "isDummyVessel": true,
+        "transportCalls": [
+          {
+            "portVisitReference": "NLRTM1234589",
+            "transportCallReference": "SR11111X-9321483-2107W-NLRTM-HPD2-1-1",
+            "carrierImportVoyageNumber": "2103N",
+            "carrierExportVoyageNumber": "2103S",
+            "universalImportVoyageReference": "2103N",
+            "universalExportVoyageReference": "2103N",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2019-11-12T07:41:00-08:30"
+              }
+            ],
+            "location": {
+              "locationName": "Port of Amsterdam",
+              "address": {
+                "street": "Ruijggoordweg",
+                "streetNumber": "100",
+                "floor": "N/A",
+                "postCode": "1047 HM",
+                "city": "Amsterdam",
+                "stateRegion": "North Holland",
+                "countryCode": "NL"
+              },
+              "UNLocationCode": "NLAMS",
+              "facilitySMDGCode": "ACT"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2025-01-14T09:21:00+01:00"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

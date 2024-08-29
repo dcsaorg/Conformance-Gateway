@@ -75,7 +75,7 @@ public class BookingChecks {
   }
   private static final JsonContentCheck CHECK_EXPECTED_DEPARTURE_DATE = JsonAttribute.customValidator(
     "Check expected departure date can not be past date",
-    (body) -> {
+    body -> {
       String expectedDepartureDate = body.path("expectedDepartureDate").asText("");
       var invalidDates = new LinkedHashSet<String>();
       if(!expectedDepartureDate.isEmpty()) {
@@ -92,13 +92,13 @@ public class BookingChecks {
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'type' of 'nationalCommodityCodes' is a known code",
-    (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.type"),
+    mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.type"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
   private static final JsonContentCheck VALIDATE_ALL_BOOKING_UN_LOCATION_CODES = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate all booking UNLocationCodes",
-    (mav) -> {
+    mav -> {
       mav.submitAllMatching("shipmentLocations.*.location.UNLocationCode");
       mav.submitAllMatching("invoicePayableAt.UNLocationCode");
       mav.submitAllMatching("placeOfBLIssue.UNLocationCode");
@@ -119,7 +119,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
-    (body) -> {
+    body -> {
       String providedArrivalStartDate = body.path("expectedArrivalAtPlaceOfDeliveryStartDate").asText("");
       String providedArrivalEndDate = body.path("expectedArrivalAtPlaceOfDeliveryEndDate").asText("");
       var invalidDates = new LinkedHashSet<String>();
@@ -139,15 +139,15 @@ public class BookingChecks {
     }
   );
 
-  private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER = (uteNode) -> {
+  private static final Predicate<JsonNode> IS_ISO_EQUIPMENT_CONTAINER_REEFER = uteNode -> {
     var isoEquipmentNode = uteNode.path("ISOEquipmentCode");
     return isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""));
   };
-  private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = (reqEquipNode) -> {
+  private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = reqEquipNode -> {
     var isoEquipmentNode = reqEquipNode.path("ISOEquipmentCode");
     return isoEquipmentNode.isTextual();
   };
-  private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = (reqEquipNode) -> {
+  private static final Predicate<JsonNode> IS_ACTIVE_REEFER_SETTINGS_REQUIRED = reqEquipNode -> {
     var norNode = reqEquipNode.path("isNonOperatingReefer");
     if (HAS_ISO_EQUIPMENT_CODE.test(reqEquipNode) && IS_ISO_EQUIPMENT_CONTAINER_REEFER.test(reqEquipNode)) {
       return !norNode.isMissingNode() && !norNode.asBoolean(false);
@@ -155,7 +155,7 @@ public class BookingChecks {
     return false;
   };
 
-  private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP = (mav) -> mav.submitAllMatching("requestedEquipments.*");
+  private static final Consumer<MultiAttributeValidator> ALL_REQ_EQUIP = mav -> mav.submitAllMatching("requestedEquipments.*");
   private static final JsonContentCheck NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "All requested Equipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_REQ_EQUIP,
@@ -176,7 +176,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck UNIVERSAL_SERVICE_REFERENCE = JsonAttribute.customValidator(
     "Conditional Universal Service Reference",
-    (body) -> {
+    body -> {
       var universalExportVoyageReference = body.path("universalExportVoyageReference");
       var universalImportVoyageReference = body.path("universalImportVoyageReference");
       var universalServiceReference = body.path("universalServiceReference");
@@ -191,7 +191,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck REFERENCE_TYPE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate reference type field",
-    (mav) -> {
+    mav -> {
       mav.submitAllMatching("requestedEquipments.*.references.*.type");
       mav.submitAllMatching("requestedEquipments.*.commodities.*.references.*.type");
       mav.submitAllMatching("references.*.type");
@@ -207,7 +207,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck ISO_EQUIPMENT_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate ISO Equipment code",
-    (mav) -> {
+    mav -> {
       mav.submitAllMatching("requestedEquipments.*.ISOEquipmentCode");
       mav.submitAllMatching("confirmedEquipments.*.ISOEquipmentCode");
     },
@@ -216,7 +216,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'packagingCode' is a known code",
-    (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging.packageCode"),
+    mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging.packageCode"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.OUTER_PACKAGING_CODE)
   );
 
@@ -245,7 +245,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck VALIDATE_DOCUMENT_PARTY = JsonAttribute.customValidator(
     "Validate document party for address, identifyingCodes and partyContactDetails",
-    (body) -> {
+    body -> {
       var documentParties = body.path("documentParties");
       var issues = new LinkedHashSet<String>();
       Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
@@ -298,7 +298,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_CUTOFF_TIME_CODE = JsonAttribute.customValidator(
     "Validate shipment cutOff Date time code",
-    (body) -> {
+    body -> {
       var shipmentCutOffTimes = body.path("shipmentCutOffTimes");
       var receiptTypeAtOrigin = body.path("receiptTypeAtOrigin").asText("");
       var issues = new LinkedHashSet<String>();
@@ -314,14 +314,14 @@ public class BookingChecks {
     }
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_AMF = (mav) -> mav.submitAllMatching("advanceManifestFilings");
+  private static final Consumer<MultiAttributeValidator> ALL_AMF = mav -> mav.submitAllMatching("advanceManifestFilings");
 
   private static final JsonContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     ALL_AMF,
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
-  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = (mav) -> mav.submitAllMatching("shipmentCutOffTimes");
+  private static final Consumer<MultiAttributeValidator> ALL_SHIPMENT_CUTOFF_TIMES = mav -> mav.submitAllMatching("shipmentCutOffTimes");
 
   private static final JsonContentCheck SHIPMENT_CUTOFF_TIMES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "in 'shipmentCutOfftimes' cutOff date time code must be unique",
@@ -329,7 +329,7 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES_TYPE = (mav) -> {
+  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES_TYPE = mav -> {
     mav.submitAllMatching("customsReferences.*.type");
     mav.submitAllMatching("requestedEquipments.*.customsReferences.*.type");
     mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*.type");
@@ -343,13 +343,13 @@ public class BookingChecks {
 
   private static final JsonContentCheck AMF_MTC_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate 'manifestTypeCode' in 'advanceManifestFilings' static data",
-    (mav) -> mav.submitAllMatching("advanceManifestFilings.*.type"),
+    mav -> mav.submitAllMatching("advanceManifestFilings.*.type"),
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.AMF_CC_MTC_TYPE_CODES)
   );
 
   private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate field is a known ISO 3166 alpha 2 code",
-    (mav) -> {
+    mav -> {
       mav.submitAllMatching("advancedManifestFilings.*.countryCode");
       mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
 
@@ -379,7 +379,7 @@ public class BookingChecks {
       var ielNode = getShipmentLocationTypeCode(body,"IEL");
 
 
-      if (((pdeNode == null || pdeNode.isEmpty()) &&  "SD".equals(deliveryTypeAtDestination)) && (podNode == null || podNode.isEmpty()) ) {
+      if ((pdeNode == null || pdeNode.isEmpty()) && "SD".equals(deliveryTypeAtDestination) && (podNode == null || podNode.isEmpty())) {
         issues.add("Place of Delivery value must be provided");
       }
       if ((pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty()) ) {
@@ -388,7 +388,7 @@ public class BookingChecks {
       if ((preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty())) {
         issues.add("Port of Load values must be provided");
       }
-      if (((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin)) && (polNode == null || polNode.isEmpty())) {
+      if ((preNode == null || preNode.isEmpty()) && "SD".equals(receiptTypeAtOrigin) && (polNode == null || polNode.isEmpty())) {
         issues.add("Place of Receipt values must be provided");
       }
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
@@ -440,9 +440,9 @@ public class BookingChecks {
       var isPodAbsent = (pdeNode == null || pdeNode.isEmpty()) && (podNode == null || podNode.isEmpty());
       var isPolAbsent = (preNode == null || preNode.isEmpty()) && (polNode == null || polNode.isEmpty());
 
-      var poldServiceCodeAbsent = (isPolAbsent && isPodAbsent && vesselName.isEmpty() && carrierExportVoyageNumber.isEmpty())
-        || (isPolAbsent && isPodAbsent && carrierServiceCode.isEmpty() && carrierExportVoyageNumber.isEmpty())
-        || (isPolAbsent && isPodAbsent && carrierServiceName.isEmpty() && carrierExportVoyageNumber.isEmpty());
+      var poldServiceCodeAbsent = isPolAbsent && isPodAbsent && vesselName.isEmpty() && carrierExportVoyageNumber.isEmpty()
+        || isPolAbsent && isPodAbsent && carrierServiceCode.isEmpty() && carrierExportVoyageNumber.isEmpty()
+        || isPolAbsent && isPodAbsent && carrierServiceName.isEmpty() && carrierExportVoyageNumber.isEmpty();
 
       var poldExpectedDepartureDateAbsent = isPolAbsent && isPodAbsent && expectedDepartureDate.isEmpty() ;
 
@@ -464,7 +464,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck REQUESTED_CHANGES_PRESENCE = JsonAttribute.customValidator(
     "Requested changes must be present for the selected Booking Status ",
-    (body) -> {
+    body -> {
       var bookingStatus = body.path("bookingStatus").asText("");
       var issues = new LinkedHashSet<String>();
       if (PENDING_CHANGES_STATES.contains(BookingState.fromWireName(bookingStatus))) {
@@ -479,7 +479,7 @@ public class BookingChecks {
 
   private static final JsonContentCheck REASON_FIELD_PRESENCE = JsonAttribute.customValidator(
     "Reason field must be present for the selected Booking Status",
-    (body) -> {
+    body -> {
       var bookingStatus = body.path("bookingStatus");
       var amendedBookingStatus = body.path("amendedBookingStatus");
       var issues = new LinkedHashSet<String>();
@@ -495,7 +495,7 @@ public class BookingChecks {
   );
   private static final JsonContentCheck REASON_FIELD_ABSENCE = JsonAttribute.customValidator(
     "Reason field must be present for the selected Booking Status",
-    (body) -> {
+    body -> {
       var bookingStatus = body.path("bookingStatus");
       var amendedBookingStatus = body.path("amendedBookingStatus");
       var issues = new LinkedHashSet<String>();
@@ -646,7 +646,7 @@ public class BookingChecks {
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/incoTerms"), BookingDataSets.INCO_TERMS_VALUES),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
-      (mav) -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
+      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
       JsonAttribute.presenceImpliesOtherField(
         "cargoGrossVolume",
         "cargoGrossVolumeUnit"
@@ -718,17 +718,17 @@ public class BookingChecks {
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'imoClass' values must be from dataset",
-      allDg((dg) -> dg.path("imoClass").submitPath()),
+      allDg(dg -> dg.path("imoClass").submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_IMO_CLASSES)
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'segregationGroups' values must be from dataset",
-      allDg((dg) -> dg.path("segregationGroups").all().submitPath()),
+      allDg(dg -> dg.path("segregationGroups").all().submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_SEGREGATION_GROUPS)
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'inhalationZone' values must be from dataset",
-      allDg((dg) -> dg.path("inhalationZone").all().submitPath()),
+      allDg(dg -> dg.path("inhalationZone").all().submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.INHALATION_ZONE_CODE)
     ),
     JsonAttribute.allOrNoneArePresent(
@@ -779,7 +779,7 @@ public class BookingChecks {
     checks.addAll(RESPONSE_ONLY_CHECKS);
     checks.add(JsonAttribute.lostAttributeCheck(
       "Validate that shipper provided data was not altered",
-      delayedValue(dspSupplier, (dsp) -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
+      delayedValue(dspSupplier, dsp -> requestAmendedContent ? dsp.updatedBooking() : dsp.booking())
     ));
     if (CONFIRMED_BOOKING_STATES.contains(bookingStatus)) {
       checks.add(COMMODITIES_SUBREFERENCE_UNIQUE);

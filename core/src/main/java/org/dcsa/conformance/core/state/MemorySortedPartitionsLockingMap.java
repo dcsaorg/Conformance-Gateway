@@ -19,13 +19,13 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
   private final HashMap<String, TreeMap<String, MemoryMapItem>> memoryMap = new HashMap<>();
 
   public MemorySortedPartitionsLockingMap() {
-    super(60 * 1000, 100, 60 * 1000);
+    super(60L * 1000L, 100L, 60L * 1000L);
   }
 
   private MemoryMapItem _getOrCreateItem(String partitionKey, String sortKey) {
     return memoryMap
-        .computeIfAbsent(partitionKey, (ignoredKey) -> new TreeMap<>())
-        .computeIfAbsent(sortKey, (ignoredKey) -> new MemoryMapItem());
+        .computeIfAbsent(partitionKey, ignoredKey -> new TreeMap<>())
+        .computeIfAbsent(sortKey, ignoredKey -> new MemoryMapItem());
   }
 
   @Override

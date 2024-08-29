@@ -26,6 +26,7 @@ public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChan
         .formatted(getDspSupplier().get().transportDocumentReference()));
   }
 
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     var dsp = getDspSupplier().get();

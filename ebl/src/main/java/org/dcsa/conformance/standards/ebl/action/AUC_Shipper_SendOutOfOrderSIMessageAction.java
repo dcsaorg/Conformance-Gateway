@@ -7,10 +7,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
 import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
-import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j

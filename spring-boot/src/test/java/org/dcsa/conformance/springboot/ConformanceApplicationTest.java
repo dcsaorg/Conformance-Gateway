@@ -1,6 +1,10 @@
 package org.dcsa.conformance.springboot;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -8,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -29,9 +30,11 @@ class ConformanceApplicationTest {
   @CsvSource({
     "booking-200-conformance-auto-all-in-one",
     "booking-200-reference-implementation-auto-all-in-one",
+    "cs-100-conformance-auto-all-in-one",
     "ebl-300-conformance-si-only-auto-all-in-one",
     "ebl-300-conformance-td-only-auto-all-in-one",
-//    "ebl-300-reference-implementation-auto-all-in-one", // Perhaps needs fix: STNG-128
+    //    "ebl-300-reference-implementation-auto-all-in-one", // Works, but takes a long time to
+    // run.
     "eblissuance-300-conformance-auto-all-in-one",
     "eblsurrender-300-conformance-auto-all-in-one",
     "jit-120-conformance-auto-all-in-one",
@@ -40,10 +43,6 @@ class ConformanceApplicationTest {
     "tnt-220-conformance-auto-all-in-one"
   })
   void testEachSuite(final String sandboxId) throws InterruptedException {
-    if (System.currentTimeMillis() > 0) {
-      log.warn("All tests are DISABLED until framework issue STNG-131 is fixed");
-      return;
-    }
     log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed
     String rootURL = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
@@ -68,6 +67,7 @@ class ConformanceApplicationTest {
   }
 
   private void checkUntilScenariosAreReady(String sandboxId) throws InterruptedException {
+    StopWatch stopWatch = StopWatch.createStarted();
     String status;
     String previousStatus = "";
     String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
@@ -84,8 +84,9 @@ class ConformanceApplicationTest {
         Thread.sleep(7_000L);
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
-    assertEquals("{\"scenariosLeft\":0}", status, "Scenario did not finish. Original start status: " + startStatus);
-    log.info("Original start status of sandboxId: {} was: {}", sandboxId, startStatus);
+    stopWatch.stop();
+    assertEquals("{\"scenariosLeft\":0}", status, "Scenario in sandbox '" + sandboxId + "' did not finish properly! Original start status: " + startStatus);
+    log.info("Done! Run took {}. Original start status of sandboxId: {} was: {}", stopWatch, sandboxId, startStatus);
   }
 
   private String getAppURL(String scenarioID, String urlPath) {

@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
 
@@ -42,15 +41,6 @@ public enum JsonToolkit {
     return OBJECT_MAPPER.readTree(jsonString.get());
   }
 
-  public static boolean stringAttributeEquals(JsonNode jsonNode, String name, String value) {
-    return jsonNode.has(name) && Objects.equals(value, jsonNode.get(name).asText());
-  }
-
-  public static String getTextAttributeOrNull(JsonNode jsonNode, String attributeName) {
-    JsonNode attributeNode = jsonNode.get(attributeName);
-    return attributeNode == null ? null : attributeNode.asText();
-  }
-
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
     ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
     strings.forEach(arrayNode::add);
@@ -58,9 +48,7 @@ public enum JsonToolkit {
   }
 
   public static List<String> arrayNodeToStringCollection(ArrayNode arrayNode) {
-    return StreamSupport.stream(arrayNode.spliterator(), false)
-        .map(JsonNode::asText)
-        .collect(Collectors.toList());
+    return StreamSupport.stream(arrayNode.spliterator(), false).map(JsonNode::asText).toList();
   }
 
   public static ArrayNode mapOfStringToStringCollectionToJson(
@@ -70,7 +58,7 @@ public enum JsonToolkit {
         (key, values) -> {
           queryParamsNode.addObject()
             .put("key", key)
-            .set("values", JsonToolkit.stringCollectionToArrayNode(values));;
+            .set("values", JsonToolkit.stringCollectionToArrayNode(values));
         });
     return queryParamsNode;
   }

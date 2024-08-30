@@ -424,7 +424,7 @@
             "example": "W3C"
           },
           "partyCode": {
-            "maxLength": 100,
+            "maxLength": 150,
             "type": "string",
             "description": "Code to identify the party as provided by the code list provider\n",
             "example": "MSK"
@@ -462,7 +462,7 @@
             "example": "DK"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `taxLegalReference`\n",
@@ -553,28 +553,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -627,6 +627,13 @@
             "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
             "format": "date",
             "example": "2020-12-12"
+          },
+          "displayedShippedOnBoardReceivedForShipment": {
+            "maxLength": 250,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.\n",
+            "example": "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier"
           },
           "termsAndConditions": {
             "maxLength": 50000,
@@ -696,7 +703,7 @@
           "declaredValue": {
             "minimum": 0,
             "type": "number",
-            "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n\n**Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).\n",
             "format": "float",
             "example": 1231.1
           },
@@ -913,7 +920,8 @@
             "example": "CR"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the reference. \n",
             "example": "HHL00103004"
@@ -1013,7 +1021,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Noemclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -1050,7 +1058,7 @@
         "required": [
           "countryCode",
           "type",
-          "value"
+          "values"
         ],
         "type": "object",
         "properties": {
@@ -1069,12 +1077,16 @@
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
             "example": "DK"
           },
-          "value": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The value of the `customsReference`\n",
-            "example": "4988470982020120017"
+          "values": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "The value of the `customsReference`\n",
+              "example": "4988470982020120017"
+            }
           }
         },
         "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
@@ -1132,6 +1144,13 @@
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
+          },
+          "nationalCommodityCodes": {
+            "type": "array",
+            "description": "A list of `National Commodity Codes` that apply to this `cargoItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/NationalCommodityCode"
+            }
           },
           "customsReferences": {
             "type": "array",
@@ -1547,7 +1566,7 @@
           },
           "shippingMarks": {
             "type": "array",
-            "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+            "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
               "maxLength": 500,
               "type": "string",
@@ -1636,7 +1655,7 @@
           },
           "source": {
             "type": "string",
-            "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n",
+            "description": "The source of the seal, namely who has affixed the seal.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n\n**Condition:** Seal source may be required depending on the type of commodity being shipped.\n",
             "example": "CUS",
             "enum": [
               "CAR",
@@ -2301,7 +2320,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -2332,14 +2350,14 @@
             }
           },
           "shippersReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper`.\n",
             "example": "HHL007"
           },
           "shippersPurchaseOrderReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper Purchase Order`.\n",
@@ -2367,7 +2385,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -2398,14 +2415,14 @@
             }
           },
           "consigneesReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee`.\n",
             "example": "HHL007"
           },
           "consigneesPurchaseOrderReference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee Purchase Order`.\n",
@@ -2433,7 +2450,6 @@
           },
           "displayedAddress": {
             "maxItems": 999,
-            "minItems": 1,
             "type": "array",
             "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
             "items": {
@@ -2533,7 +2549,7 @@
             }
           },
           "reference": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Party`.\n",
@@ -2583,6 +2599,26 @@
         },
         "description": "Refers to a company or a legal entity.\n"
       },
+      "IssuanceError": {
+        "title": "Issuance Error",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Human readable description of the rationale for an unsuccessful issuance.\n\nThe `reason` should be omitted when the `issuanceResponseCode` is `ISSU`. If the platform for some reason chooses to deviate from this and provide the field anyway, they should use canned phrased like `Issued` that matches the meaning of the `issuanceResponseCode`.\n",
+            "example": "Cannot get..."
+          },
+          "errorCode": {
+            "maxLength": 50,
+            "pattern": "^\\S+$",
+            "type": "string",
+            "description": "A vendor provided error code.\n\nThe meaning of each code is agreed bilaterally between the vendor.\n",
+            "example": "ERR-1234"
+          }
+        }
+      },
       "IssuanceResponse": {
         "title": "Issuance Response",
         "required": [
@@ -2614,6 +2650,14 @@
             "type": "string",
             "description": "Human readable description of the rationale for an unsuccessful issuance.\n\nThe `reason` should be omitted when the `issuanceResponseCode` is `ISSU`. If the platform for some reason chooses to deviate from this and provide the field anyway, they should use canned phrased like `Issued` that matches the meaning of the `issuanceResponseCode`.\n",
             "example": "Cannot get..."
+          },
+          "errors": {
+            "maxItems": 255,
+            "type": "array",
+            "description": "A list of errors if the issuance failed for some reason.\n",
+            "items": {
+              "$ref": "#/components/schemas/IssuanceError"
+            }
           }
         }
       },

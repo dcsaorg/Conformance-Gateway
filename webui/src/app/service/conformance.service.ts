@@ -108,8 +108,8 @@ export class ConformanceService {
     });
   }
 
-  async completeCurrentAction(sandboxId: string): Promise<void> {
-    await this.apiService.call({
+  async completeCurrentAction(sandboxId: string): Promise<any> {
+    return await this.apiService.call({
       operation: "completeCurrentAction",
       sandboxId,
     });

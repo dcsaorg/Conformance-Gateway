@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -43,6 +44,18 @@ public class ConformanceWebuiHandler {
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
+    try {
+      return _doHandleRequest(userId, requestNode);
+    } catch (Exception e) {
+      if (e instanceof UserFacingException userFacingException) {
+        return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
+      } else {
+        return OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
+      }
+    }
+  }
+
+  public JsonNode _doHandleRequest(String userId, JsonNode requestNode) {
     log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
     String operation = requestNode.get("operation").asText();
     JsonNode resultNode = switch (operation) {

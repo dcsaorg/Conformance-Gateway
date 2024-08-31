@@ -97,8 +97,9 @@ public abstract class AbstractComponentFactory {
 
     ObjectNode sandboxNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();
 
-    sandboxNode.put("id", "%s-%s".formatted(sandboxIdPrefix, sandboxIdSuffix));
-    sandboxNode.put("name", sandboxIdSuffix);
+    String sandboxIdAndName = "%s-%s".formatted(sandboxIdPrefix, sandboxIdSuffix);
+    sandboxNode.put("id", sandboxIdAndName);
+    sandboxNode.put("name", sandboxIdAndName);
 
     if (!isManual) {
       sandboxNode.put("authHeaderName", "dcsa-conformance-api-key");
@@ -149,7 +150,11 @@ public abstract class AbstractComponentFactory {
                                     isAllInOneSandbox
                                         ? "all-in-one"
                                         : "%s-testing-counterparts"
-                                            .formatted(roleName.toLowerCase())));
+                                            .formatted(
+                                                (Objects.equals(testedPartyRole, roleOne)
+                                                        ? roleOne
+                                                        : roleTwo)
+                                                    .toLowerCase())));
                 if (isManual && roleName.equals(testedPartyRole))
                   rolePartyNode.put("inManualMode", true);
                 partiesNode.add(rolePartyNode);
@@ -169,9 +174,12 @@ public abstract class AbstractComponentFactory {
                                     autoOrManualInfix,
                                     isAllInOneSandbox
                                         ? "all-in-one"
-                                        : roleName.equals(testedPartyRole)
-                                            ? "tested-party"
-                                            : "testing-counterparts",
+                                        : "%s-%s"
+                                            .formatted(
+                                                testedPartyRole.toLowerCase(),
+                                                roleName.equals(testedPartyRole)
+                                                    ? "tested-party"
+                                                    : "testing-counterparts"),
                                     roleName));
                 if (isManual && roleName.equals(testedPartyRole))
                   roleCounterpartNode.put("inManualMode", true);

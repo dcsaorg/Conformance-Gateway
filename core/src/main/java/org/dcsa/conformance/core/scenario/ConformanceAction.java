@@ -104,6 +104,10 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
+  public boolean hasMatchedExchange() {
+    return matchedExchangeUuid != null;
+  }
+
   /**
    * Saves the matched UUIDs and captures dynamic parameters like document references.
    *

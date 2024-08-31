@@ -16,6 +16,7 @@ import java.util.stream.StreamSupport;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ScenarioCheck;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -320,9 +321,14 @@ public class ConformanceOrchestrator implements StatefulEntity {
     ConformanceAction nextAction = currentScenario.peekNextAction();
     if (nextAction == null) {
       log.info(
-          "Ignoring request to complete the current action: the currently active scenario '%s' has no next action"
+          "Ignoring request to complete the current action: the currently active scenario '%s' has no current action"
               .formatted(currentScenario.toString()));
       return;
+    }
+    if (!nextAction.hasMatchedExchange()) {
+      throw new UserFacingException(
+          "A required API exchange was not yet detected for action '%s'"
+              .formatted(nextAction.getActionTitle()));
     }
 
     currentScenario.popNextAction();

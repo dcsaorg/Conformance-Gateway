@@ -92,7 +92,12 @@ public class ApiHeaderCheck extends ActionCheck {
             .findFirst()
             .orElse("api-version");
     Collection<String> headerValues = headers.get(headerName);
-    if (headerValues.size() != 1) return Set.of("Duplicate Api-Version headers");
+    if (headerValues == null || headerValues.isEmpty()) {
+      return httpMessageType.equals(HttpMessageType.RESPONSE) && !isNotification
+          ? Set.of("Missing Api-Version header")
+          : Collections.emptySet();
+    }
+    if (headerValues.size() > 1) return Set.of("Duplicate Api-Version headers");
     String exchangeApiVersion = headerValues.stream().findFirst().orElseThrow();
     if (exchangeApiVersion.contains("-")) {
       exchangeApiVersion = exchangeApiVersion.substring(0, exchangeApiVersion.indexOf("-"));

@@ -8,6 +8,10 @@ public class UserFacingException extends RuntimeException {
     super(message);
   }
 
+  public UserFacingException(Throwable cause) {
+    super(cause.getMessage(), cause);
+  }
+
   public UserFacingException(String message, Throwable cause) {
     super(message, cause);
   }

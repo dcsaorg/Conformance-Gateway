@@ -31,7 +31,7 @@ public class StatefulExecutor {
     try {
       modifiedState = function.apply(originalState);
     } catch (Throwable t) {
-      log.error(
+      log.warn(
           "Execution failed, unlocking (lockedBy='%s', partitionKey='%s', sortKey='%s'): %s"
               .formatted(lockedBy, partitionKey, sortKey, t),
           t);

@@ -266,7 +266,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
     waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
 
     currentScenario.popNextAction();
-    nextAction.handlePartyInput(partyInput);
+    try {
+      nextAction.handlePartyInput(partyInput);
+    } catch (Exception e) {
+      throw new UserFacingException(e);
+    }
     notifyNextActionParty();
   }
 

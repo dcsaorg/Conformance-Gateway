@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ConformanceResult;
 import org.dcsa.conformance.core.state.StatefulEntity;
@@ -221,7 +222,7 @@ public abstract class ConformanceAction implements StatefulEntity {
     return null;
   }
 
-  public void handlePartyInput(JsonNode partyInput) {}
+  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {}
 
   public ObjectNode asJsonNode() {
     return OBJECT_MAPPER

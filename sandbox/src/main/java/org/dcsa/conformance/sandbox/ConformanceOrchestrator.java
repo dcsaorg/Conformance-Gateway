@@ -255,15 +255,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     String actionId = partyInput.get("actionId").asText();
     if (!Objects.equals(actionId, nextAction.getId().toString())) {
-      if (partyInput.has("input")) {
-        throw new IllegalStateException(
-            "Unexpected party input %s: the expected next action id is %s in current scenario %s"
-                .formatted(
-                    partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
-      } else {
-        log.info("Ignoring redundant party input %s".formatted(partyInput.toPrettyString()));
-        return;
-      }
+      log.info(
+          "Ignoring party input %s: the expected next action id is %s in current scenario %s"
+              .formatted(
+                  partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
+      return;
     }
 
     waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);

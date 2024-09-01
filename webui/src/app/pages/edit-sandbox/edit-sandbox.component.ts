@@ -62,6 +62,11 @@ export class EditSandboxComponent {
 
   cannotUpdate(): boolean {
     if (!this.originalSandboxConfig || !this.updatedSandboxConfig) return true;
+
+    if (this.updatedSandboxConfig.externalPartyAuthHeaderName) {
+      if (!this.headerNameRegex.test(this.updatedSandboxConfig.externalPartyAuthHeaderName)) return true;
+      if (!this.headerValueRegex.test(this.updatedSandboxConfig.externalPartyAuthHeaderValue)) return true;
+    }
     for (let additionalHeader of this.updatedSandboxConfig.externalPartyAdditionalHeaders) {
       if (!this.headerNameRegex.test(additionalHeader.headerName)) return true;
       if (!this.headerValueRegex.test(additionalHeader.headerValue)) return true;

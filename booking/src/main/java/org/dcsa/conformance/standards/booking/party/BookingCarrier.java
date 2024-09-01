@@ -29,7 +29,6 @@ public class BookingCarrier extends ConformanceParty {
   private static final Random RANDOM = new Random();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
-  protected boolean isShipperNotificationEnabled = true;
 
   public BookingCarrier(
       String apiVersion,
@@ -346,14 +345,8 @@ public class BookingCarrier extends ConformanceParty {
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode();
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification("/v2/booking-notifications", notification);
-    } else {
-      asyncOrchestratorPostPartyInput(
-          OBJECT_MAPPER
-              .createObjectNode()
-              .put("actionId", actionPrompt.required("actionId").asText()));
-    }
+    asyncCounterpartNotification(
+        actionPrompt.required("actionId").asText(), "/v2/booking-notifications", notification);
   }
 
   private ConformanceResponse return405(ConformanceRequest request, String... allowedMethods) {
@@ -473,16 +466,15 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     var booking = persistableCarrierBooking.getBooking();
 
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v2/booking-notifications",
-          BookingNotification.builder()
+    asyncCounterpartNotification(
+        null,
+        "/v2/booking-notifications",
+        BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(booking)
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
-    }
     return returnBookingStatusResponse(200, request, booking, cbrr);
   }
 
@@ -513,16 +505,17 @@ public class BookingCarrier extends ConformanceParty {
       return return409(request, "Booking was not in the correct state");
     }
     persistableCarrierBooking.save(persistentMap);
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
+
+    asyncCounterpartNotification(
+        null,
         "/v2/booking-notifications",
         BookingNotification.builder()
-          .apiVersion(apiVersion)
-          .booking(persistableCarrierBooking.getBooking())
-          .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
-          .build()
-          .asJsonNode());
-    }
+            .apiVersion(apiVersion)
+            .booking(persistableCarrierBooking.getBooking())
+            .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
+            .build()
+            .asJsonNode());
+
     return returnBookingStatusResponse(
         200, request, persistableCarrierBooking.getBooking(), bookingReference);
   }
@@ -608,16 +601,17 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.initializeFromBookingRequest(bookingRequestPayload);
     persistableCarrierBooking.save(persistentMap);
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v2/booking-notifications",
-          BookingNotification.builder()
+
+    asyncCounterpartNotification(
+        null,
+        "/v2/booking-notifications",
+        BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
-    }
+
     return returnBookingStatusResponse(
         201,
         request,

@@ -185,9 +185,23 @@ public abstract class ConformanceParty implements StatefulEntity {
     return conformanceResponse;
   }
 
-  protected void asyncCounterpartNotification(String path, JsonNode jsonBody) {
-    webClient.asyncRequest(
-        _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
+  protected void asyncCounterpartNotification(String actionId, String path, JsonNode jsonBody) {
+    String counterpartBaseUrl = counterpartConfiguration.getUrl();
+    if (counterpartBaseUrl != null && !counterpartBaseUrl.isEmpty()) {
+      webClient.asyncRequest(
+          _createConformanceRequest(true, "POST", path, Collections.emptyMap(), jsonBody));
+    } else {
+      if (actionId != null) {
+        log.info(
+            "Party %s notifying orchestrator that action %s is completed instead of sending notification: no counterpart URL is configured"
+                .formatted(actionId, partyConfiguration.getName()));
+        asyncOrchestratorPostPartyInput(OBJECT_MAPPER.createObjectNode().put("actionId", actionId));
+      } else {
+        log.info(
+            "Party %s NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured"
+                .formatted(partyConfiguration.getName()));
+      }
+    }
   }
 
   private ConformanceRequest _createConformanceRequest(

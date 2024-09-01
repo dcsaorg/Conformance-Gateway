@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -239,8 +240,23 @@ public class ConformanceWebuiHandler {
             .findFirst()
             .orElseThrow();
 
+    String externalPartyUrl = requestNode.get("externalPartyUrl").asText();
+    String sandboxPartyBaseUrl =
+        Stream.of(sandboxConfiguration.getCounterparts())
+            .filter(
+                counterpart ->
+                    counterpart.getName().equals(sandboxConfiguration.getParties()[0].getName()))
+            .findFirst()
+            .orElseThrow()
+            .getUrl()
+            .split("/party/")[0] + "/";
+    CounterpartConfiguration.validateUrl(
+        externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"));
+    if (externalPartyUrl.startsWith(sandboxPartyBaseUrl))
+      throw new UserFacingException("The sandbox URL cannot be used as external party URL");
+
     sandboxConfiguration.setName(requestNode.get("sandboxName").asText());
-    externalPartyCounterpartConfig.setUrl(requestNode.get("externalPartyUrl").asText());
+    externalPartyCounterpartConfig.setUrl(externalPartyUrl);
     externalPartyCounterpartConfig.setAuthHeaderName(
         requestNode.get("externalPartyAuthHeaderName").asText());
     externalPartyCounterpartConfig.setAuthHeaderValue(

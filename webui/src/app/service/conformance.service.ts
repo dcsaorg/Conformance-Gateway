@@ -149,8 +149,8 @@ export class ConformanceService {
     externalPartyAuthHeaderName: string,
     externalPartyAuthHeaderValue: string,
     externalPartyAdditionalHeaders: HeaderNameAndValue[],
-  ): Promise<void> {
-    await this.apiService.call({
+  ): Promise<any> {
+    return await this.apiService.call({
       operation: "updateSandboxConfig",
       sandboxId,
       sandboxName,

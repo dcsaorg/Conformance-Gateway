@@ -91,7 +91,7 @@ export class ScenarioComponent {
     ) {
       this.performingAction = "Marking current action as completed...";
       const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id);
-      if (response.error) {
+      if (response?.error) {
         await MessageDialog.open(
           this.dialog,
           "Error completing action",
@@ -127,7 +127,7 @@ export class ScenarioComponent {
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
       withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
-    if (response.error) {
+    if (response?.error) {
       await MessageDialog.open(
         this.dialog,
         "Error processing input",

@@ -9,10 +9,12 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -43,6 +45,18 @@ public class ConformanceWebuiHandler {
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
+    try {
+      return _doHandleRequest(userId, requestNode);
+    } catch (Exception e) {
+      if (e instanceof UserFacingException userFacingException) {
+        return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
+      } else {
+        return OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
+      }
+    }
+  }
+
+  public JsonNode _doHandleRequest(String userId, JsonNode requestNode) {
     log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
     String operation = requestNode.get("operation").asText();
     JsonNode resultNode = switch (operation) {
@@ -63,7 +77,7 @@ public class ConformanceWebuiHandler {
       case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
-    log.info("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
+    log.debug("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
     return resultNode;
   }
 
@@ -226,8 +240,23 @@ public class ConformanceWebuiHandler {
             .findFirst()
             .orElseThrow();
 
+    String externalPartyUrl = requestNode.get("externalPartyUrl").asText();
+    String sandboxPartyBaseUrl =
+        Stream.of(sandboxConfiguration.getCounterparts())
+            .filter(
+                counterpart ->
+                    counterpart.getName().equals(sandboxConfiguration.getParties()[0].getName()))
+            .findFirst()
+            .orElseThrow()
+            .getUrl()
+            .split("/party/")[0] + "/";
+    CounterpartConfiguration.validateUrl(
+        externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"));
+    if (externalPartyUrl.startsWith(sandboxPartyBaseUrl))
+      throw new UserFacingException("The sandbox URL cannot be used as external party URL");
+
     sandboxConfiguration.setName(requestNode.get("sandboxName").asText());
-    externalPartyCounterpartConfig.setUrl(requestNode.get("externalPartyUrl").asText());
+    externalPartyCounterpartConfig.setUrl(externalPartyUrl);
     externalPartyCounterpartConfig.setAuthHeaderName(
         requestNode.get("externalPartyAuthHeaderName").asText());
     externalPartyCounterpartConfig.setAuthHeaderValue(

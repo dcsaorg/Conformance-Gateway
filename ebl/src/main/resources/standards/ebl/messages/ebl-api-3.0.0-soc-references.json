@@ -41,7 +41,7 @@
     {
       "type": "CTN",
       "countryCode": "SN",
-      "value": "12345"
+      "values": ["12345"]
     }
   ],
   "utilizedTransportEquipments": [

@@ -14,6 +14,7 @@ import { ScenarioStatus } from "src/app/model/scenario-status";
 import {ConfirmationDialog} from "../../dialogs/confirmation/confirmation-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {SandboxStatus, SandboxWaiting} from "../../model/sandbox-status";
+import {MessageDialog} from "../../dialogs/message/message-dialog.component";
 
 @Component({
   selector: 'app-scenario',
@@ -89,7 +90,13 @@ export class ScenarioComponent {
       + "You cannot go back to a previous action without restarting the scenario.")
     ) {
       this.performingAction = "Marking current action as completed...";
-      await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+      const response: any = await this.conformanceService.completeCurrentAction(this.sandbox!.id);
+      if (response?.error) {
+        await MessageDialog.open(
+          this.dialog,
+          "Error completing action",
+          response.error)
+      }
       this.performingAction = "";
       await this.loadScenarioStatus();
     }
@@ -115,11 +122,17 @@ export class ScenarioComponent {
 
   async onSubmit(withInput: boolean) {
     this.performingAction = "Processing action input...";
-    await this.conformanceService.handleActionInput(
+    const response:any = await this.conformanceService.handleActionInput(
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
       withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
+    if (response?.error) {
+      await MessageDialog.open(
+        this.dialog,
+        "Error processing input",
+        response.error)
+    }
     this.performingAction = "";
     await this.loadScenarioStatus();
   }

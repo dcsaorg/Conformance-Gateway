@@ -31,8 +31,6 @@ public class EblCarrier extends ConformanceParty {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Map<String, String> tdrToSir = new HashMap<>();
 
-  protected boolean isShipperNotificationEnabled = true;
-
   public EblCarrier(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -411,12 +409,10 @@ public class EblCarrier extends ConformanceParty {
         .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
         .asJsonNode();
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification("/v3/shipping-instructions-notifications", notification);
-    } else {
-      asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
-    }
+    asyncCounterpartNotification(
+        actionPrompt.required("actionId").asText(),
+        "/v3/shipping-instructions-notifications",
+        notification);
   }
 
 
@@ -429,12 +425,10 @@ public class EblCarrier extends ConformanceParty {
         .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
         .asJsonNode();
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification("/v3/transport-document-notifications", notification);
-    } else {
-      asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.required("actionId").asText()));
-    }
+    asyncCounterpartNotification(
+        actionPrompt.required("actionId").asText(),
+        "/v3/transport-document-notifications",
+        notification);
   }
 
   private ConformanceResponse return405(ConformanceRequest request, String... allowedMethods) {
@@ -561,16 +555,17 @@ public class EblCarrier extends ConformanceParty {
     si.cancelShippingInstructionsUpdate(documentReference);
     si.save(persistentMap);
     var siData = si.getShippingInstructions();
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v3/shipping-instructions-notifications",
-          ShippingInstructionsNotification.builder()
-              .apiVersion(apiVersion)
-              .shippingInstructions(siData)
-              .subscriptionReference(si.getSubscriptionReference())
-              .build()
-              .asJsonNode());
-    }
+
+    asyncCounterpartNotification(
+        null,
+        "/v3/shipping-instructions-notifications",
+        ShippingInstructionsNotification.builder()
+            .apiVersion(apiVersion)
+            .shippingInstructions(siData)
+            .subscriptionReference(si.getSubscriptionReference())
+            .build()
+            .asJsonNode());
+
     return returnShippingInstructionsRefStatusResponse(
       200,
       request,
@@ -592,16 +587,17 @@ public class EblCarrier extends ConformanceParty {
     si.approveDraftTransportDocument(documentReference);
     si.save(persistentMap);
     var td = si.getTransportDocument().orElseThrow();
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v3/transport-document-notifications",
-          TransportDocumentNotification.builder()
-              .apiVersion(apiVersion)
-              .transportDocument(td)
-              .subscriptionReference(si.getSubscriptionReference())
-              .build()
-              .asJsonNode());
-    }
+
+    asyncCounterpartNotification(
+        null,
+        "/v3/transport-document-notifications",
+        TransportDocumentNotification.builder()
+            .apiVersion(apiVersion)
+            .transportDocument(td)
+            .subscriptionReference(si.getSubscriptionReference())
+            .build()
+            .asJsonNode());
+
     return returnTransportDocumentRefStatusResponse(
       200,
       request,
@@ -669,16 +665,17 @@ public class EblCarrier extends ConformanceParty {
       (ObjectNode) OBJECT_MAPPER.readTree(request.message().body().getJsonBody().toString());
     var si = CarrierShippingInstructions.initializeFromShippingInstructionsRequest(siPayload, apiVersion);
     si.save(persistentMap);
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v3/shipping-instructions-notifications",
-          ShippingInstructionsNotification.builder()
-              .apiVersion(apiVersion)
-              .shippingInstructions(si.getShippingInstructions())
-              .subscriptionReference(si.getSubscriptionReference())
-              .build()
-              .asJsonNode());
-    }
+
+    asyncCounterpartNotification(
+        null,
+        "/v3/shipping-instructions-notifications",
+        ShippingInstructionsNotification.builder()
+            .apiVersion(apiVersion)
+            .shippingInstructions(si.getShippingInstructions())
+            .subscriptionReference(si.getSubscriptionReference())
+            .build()
+            .asJsonNode());
+
     return returnShippingInstructionsRefStatusResponse(
       201,
       request,
@@ -702,16 +699,17 @@ public class EblCarrier extends ConformanceParty {
     var si = CarrierShippingInstructions.fromPersistentStore(siData);
     si.putShippingInstructions(sir, updatedShippingInstructions);
     si.save(persistentMap);
-    if (isShipperNotificationEnabled) {
-      asyncCounterpartNotification(
-          "/v3/shipping-instructions-notifications",
-          ShippingInstructionsNotification.builder()
-              .apiVersion(apiVersion)
-              .shippingInstructions(si.getShippingInstructions())
-              .subscriptionReference(si.getSubscriptionReference())
-              .build()
-              .asJsonNode());
-    }
+
+    asyncCounterpartNotification(
+        null,
+        "/v3/shipping-instructions-notifications",
+        ShippingInstructionsNotification.builder()
+            .apiVersion(apiVersion)
+            .shippingInstructions(si.getShippingInstructions())
+            .subscriptionReference(si.getSubscriptionReference())
+            .build()
+            .asJsonNode());
+
     return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
   }
 

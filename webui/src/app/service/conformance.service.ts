@@ -89,15 +89,14 @@ export class ConformanceService {
     return scenarioStatus;
   }
 
-  async handleActionInput(sandboxId: string, scenarioId: string, actionId: string, actionInput: any | string | undefined): Promise<ScenarioStatus> {
-    const scenarioStatus: ScenarioStatus = await this.apiService.call({
+  async handleActionInput(sandboxId: string, scenarioId: string, actionId: string, actionInput: any | string | undefined): Promise<any> {
+    return await this.apiService.call({
       operation: "handleActionInput",
       sandboxId,
       scenarioId,
       actionId,
       actionInput,
     });
-    return scenarioStatus;
   }
 
   async startOrStopScenario(sandboxId: string, scenarioId: string): Promise<void> {
@@ -108,8 +107,8 @@ export class ConformanceService {
     });
   }
 
-  async completeCurrentAction(sandboxId: string): Promise<void> {
-    await this.apiService.call({
+  async completeCurrentAction(sandboxId: string): Promise<any> {
+    return await this.apiService.call({
       operation: "completeCurrentAction",
       sandboxId,
     });
@@ -150,8 +149,8 @@ export class ConformanceService {
     externalPartyAuthHeaderName: string,
     externalPartyAuthHeaderValue: string,
     externalPartyAdditionalHeaders: HeaderNameAndValue[],
-  ): Promise<void> {
-    await this.apiService.call({
+  ): Promise<any> {
+    return await this.apiService.call({
       operation: "updateSandboxConfig",
       sandboxId,
       sandboxName,

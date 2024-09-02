@@ -1,79 +1,18 @@
 {
   "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
-
-  "termsAndConditions": "There would normally be a long legal text here.",
-  "isToOrder": false,
-  "isElectronic": true,
-  "invoicePayableAt": {
-    "locationType": "UNLO",
-    "UNLocationCode": "DKCPH"
-  },
-  "cargoMovementTypeAtOrigin": "FCL",
-  "cargoMovementTypeAtDestination": "FCL",
-  "deliveryTypeAtDestination": "CY",
-  "receiptTypeAtOrigin": "CY",
-  "transportDocumentTypeCode": "SWB",
-  "isShippedOnBoardType": true,
-  "shippedOnBoardDate": "2024-02-02",
+  "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
+  "transportDocumentTypeCode": "BOL",
   "freightPaymentTermCode": "PRE",
-  "transportDocumentStatus": "ISSUED",
+  "isElectronic": true,
+  "isToOrder": false,
   "contractQuotationReference": "12345",
-  "utilizedTransportEquipments": [
-    {
-      "equipment": {
-        "equipmentReference": "NARU3472484"
-      },
-      "cargoGrossWeightUnit": "KGM",
-      "isShipperOwned": true,
-      "seals": [
-        {
-          "number": "1234"
-        }
-      ]
-    }
-  ],
-  "transports": {
-    "vesselName": "Emma Maersk",
-    "vesselIMONumber": "1234567",
-    "plannedDepartureDate": "2024-02-02",
-    "plannedArrivalDate": "2124-02-02",
-    "portOfLoading": {
-      "locationType": "UNLO",
-      "UNLocationCode": "DKCPH"
-    },
-    "portOfDischarge": {
-      "locationType": "UNLO",
-      "UNLocationCode": "NLRTM"
-    },
-    "vesselVoyages": [
-      {
-        "carrierExportVoyageNumber": "2433W",
-        "vesselName": "COFFEE BEANS"
-      }
-    ]
+  "invoicePayableAt": {
+    "UNLocationCode": "DKAAR"
   },
   "partyContactDetails": [
     {
-      "name": "Nobody",
-      "phone": "+1234567890"
-    }
-  ],
-  "consignmentItems": [
-    {
-      "carrierBookingReference": "1234",
-      "descriptionOfGoods": "Shoes - black, 400 boxes",
-      "HSCodes": ["640510"],
-      "cargoItems": [
-        {
-          "equipmentReference": "NARU3472484",
-          "weight": 12000,
-          "weightUnit": "KGM",
-          "outerPackaging": {
-            "numberOfPackages": 400,
-            "description": "Fibreboard boxes"
-          }
-        }
-      ]
+      "name": "DCSA test person",
+      "email": "no-reply@dcsa.example.org"
     }
   ],
   "documentParties": {
@@ -95,72 +34,104 @@
         }
       ]
     },
+    "issuingParty": {
+      "partyName": "Hyundai",
+      "address": {
+        "street": "The street name would be here",
+        "city": "... and here the city",
+        "countryCode": "KR"
+      },
+      "identifyingCodes": [
+        {
+          "codeListProvider": "SMDG",
+          "codeListName": "LCL",
+          "partyCode": "HMM"
+        }
+      ]
+    },
     "other": [
       {
         "party": {
-          "partyName": "DCSA CTK Service Contract Owner",
-          "partyContactDetails": [
-            {
-              "name": "DCSA test person",
-              "email": "no-reply@dcsa.example.org"
-            }
-          ]
+          "partyName": "DCSA CTK Service Contract Owner"
         },
-        "partyFunction": "SCO",
-        "isToBeNotified": false
+        "partyFunction": "SCO"
       }
     ]
   },
-  "carrierCode": "ASDF",
-  "carrierCodeListProvider": "NMFTA",
-  "issuingParty": {
-    "partyName": "issuing party",
-    "partyContactDetails": [
-      {
-        "name": "issuing party",
-        "phone": "+01234567890"
-      }
-    ],
-    "address": {
-      "city": "Amsterdam",
-      "countryCode": "NL",
-      "street": "...some street ...",
-      "streetNumber": "... some street number ..."
-    }
-  },
-  "shippingInstruction": {
-    "shippingInstructionReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
-    "documentStatus": "RECE",
-    "shippingInstructionCreatedDateTime": "2019-11-12T07:41:00+08:30",
-    "shippingInstructionUpdatedDateTime": "2019-11-12T07:41:00+08:30",
-    "isShippedOnBoardType": true,
-    "isElectronic": true,
-    "isToOrder": false,
-    "consignmentItems": [
-      {
-        "descriptionOfGoods": "string",
-        "HSCode": "string",
-        "cargoItems": [
-          {
-            "equipmentReference": "C1234567890",
-            "weight": 123.45,
-            "weightUnit": "KGM",
-            "numberOfPackages": 123,
-            "packageCode": "ABC"
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "BOOKING_REFERENCE_PLACEHOLDER",
+      "weight": 12000,
+      "weightUnit": "KGM",
+      "descriptionOfGoods": "Shoes - black, 400 boxes",
+      "HSCodes": [
+        "640510"
+      ],
+      "cargoItems": [
+        {
+          "equipmentReference": "NARU3472484",
+          "weight": 12000,
+          "weightUnit": "KGM",
+          "outerPackaging": {
+            "numberOfPackages": 400,
+            "packageCode": "4G",
+            "description": "Fibreboard boxes"
           }
-        ]
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "seals": [
+        {
+          "number": "DCSA-CTK-1234"
+        }
+      ],
+      "cargoGrossWeight": 12000.0,
+      "cargoGrossWeightUnit": "KGM",
+      "equipment": {
+        "ISOEquipmentCode": "22G1",
+        "equipmentReference": "NARU3472484"
       }
-    ],
-    "utilizedTransportEquipments": [
+    }
+  ],
+  "isShippedOnBoardType": true,
+  "transportDocumentStatus": "ISSUED",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "receiptTypeAtOrigin": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "shippedOnBoardDate": "2023-12-19",
+  "termsAndConditions": "You agree that this transport document exist is name only for the sake of\ntesting your conformance with the DCSA EBL API. This transport document is NOT backed\nby a real shipment with ANY carrier and NONE of the requested services will be\ncarried out in real life.\n\nUnless required by applicable law or agreed to in writing, DCSA provides\nthis JSON data on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF\nANY KIND, either express or implied, including, without limitation, any\nwarranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,\nor FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for\ndetermining the appropriateness of using or redistributing this JSON\ndata and assume any risks associated with Your usage of this data.\n\nIn no event and under no legal theory, whether in tort (including negligence),\ncontract, or otherwise, unless required by applicable law (such as deliberate\nand grossly negligent acts) or agreed to in writing, shall DCSA be liable to\nYou for damages, including any direct, indirect, special, incidental, or\nconsequential damages of any character arising as a result of this terms or conditions\nor out of the use or inability to use the provided JSON data (including but not limited\nto damages for loss of goodwill, work stoppage, computer failure or malfunction, or any\nand all other commercial damages or losses), even if DCSA has been advised of the\npossibility of such damages.\n",
+  "carrierCode": "HMM",
+  "carrierCodeListProvider": "SMDG",
+  "charges": [
+    {
+      "chargeName": "Fictive transport document fee",
+      "currencyAmount": 1.0,
+      "currencyCode": "EUR",
+      "paymentTermCode": "COL",
+      "calculationBasis": "Per transport document",
+      "unitPrice": 1.0,
+      "quantity": 1
+    }
+  ],
+  "transports": {
+    "plannedDepartureDate": "2023-12-19",
+    "plannedArrivalDate": "2023-12-21",
+    "portOfLoading": {
+      "UNLocationCode": "DKAAR"
+    },
+    "portOfDischarge": {
+      "UNLocationCode": "DEBRV"
+    },
+    "vesselVoyages": [
       {
-        "equipment": {
-          "equipmentReference": "C1234567890"
-        },
-        "cargoGrossWeight": 123.45,
-        "cargoGrossWeightUnit": "KGM",
-        "isShipperOwned": true
+        "vesselName": "HMM Algeciras",
+        "carrierExportVoyageNumber": "402E"
       }
     ]
   }
-}
-
+},

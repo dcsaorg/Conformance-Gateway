@@ -23,8 +23,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           branch: ${{ inputs.environment }}
-          path: Conformance-Gateway
-          submodules: recursive
+
+      - name: Print commit sha
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "sha: $COMMIT_SHA"
 
       - name: Set up Java JDK
         uses: actions/setup-java@v3
@@ -38,6 +43,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: webui/package-lock.json
 
       - name: Install AWS CDK
         run: |
@@ -45,13 +51,12 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          cd Conformance-Gateway
           mvn package -U -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Build Web UI
         run: |
-          cd ../webui
+          cd webui
           npm install
           npm run build --configuration=${{ inputs.environment }}
 
@@ -64,10 +69,10 @@ jobs:
 
       - name: Diff ${{ inputs.environment }} Conformance-Gateway Stack
         run: |
-          cd Conformance-Gateway/cdk/
+          cd cdk/
           cdk diff ${{ inputs.environment }}ConformanceStack
 
       - name: Deploy Conformance-Gateway Stack of ${{ inputs.environment }}
         run: |
-          cd Conformance-Gateway/cdk/
+          cd cdk/
           echo Later turn on: cdk deploy ${{ inputs.environment }}ConformanceStack

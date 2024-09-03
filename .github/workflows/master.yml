@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-          cache-dependency-path: './webui/package-lock.json'
+          cache-dependency-path: webui/package-lock.json
 
       - name: Install AWS CDK
         run: |

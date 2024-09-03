@@ -59,7 +59,7 @@ public class CsPublisher extends ConformanceParty {
       "Api-Version", List.of(apiVersion)
     );
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
-    if(request.queryParams().containsKey("limit")){
+    if(request.queryParams().containsKey("limit") && !request.queryParams().containsKey("cursor")){
       String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"next\"";
       headers.put("Link",List.of(nextPage));
     }

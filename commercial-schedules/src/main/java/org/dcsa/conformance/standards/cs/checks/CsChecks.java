@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -76,7 +77,8 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForPtp(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier, Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPtp("placeOfReceipt"));
     checks.add(createLocationCheckPtp("placeOfDelivery"));
@@ -90,7 +92,9 @@ public class CsChecks {
           || sspSupplier.get().getMap().containsKey(DEPARTURE_END_DATE)) {
         checks.add(validateDateRangeforPtp(sspSupplier));
       }
-      checks.add(paginationCheckForPtp(sspSupplier,dspSupplier));
+      if (checkPagination) {
+        checks.add(paginationCheckForPtp(sspSupplier,dspSupplier));
+      }
     }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
@@ -100,16 +104,21 @@ public class CsChecks {
         checks);
   }
 
-  private static JsonContentCheck paginationCheckForPtp(Supplier<SuppliedScenarioParameters> sspSupplier,Supplier<DynamicScenarioParameters> dspSupplier) {
+  private static JsonContentCheck paginationCheckForPtp(
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
         String.format("Check the response is paginated correctly"),
         body -> {
           var issues = new LinkedHashSet<String>();
           if (sspSupplier.get().getMap().containsKey(LIMIT)) {
-            String cursor = dspSupplier.get().cursor();
-            String previousResponse = dspSupplier.get().jsonResponse();
+            String firstPageHash = dspSupplier.get().jsonResponse();
+            String secondPageHash = "dspSupplier.get().jsonResponse()"; // TODO capture second response separately
+            if (Objects.equals(firstPageHash, secondPageHash)) {
+              issues.add("The second page must be different from the first page");
             }
-            return issues;
+          }
+          return issues;
         });
   }
 

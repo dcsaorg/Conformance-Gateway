@@ -27,6 +27,17 @@ public class CsGetRoutingsAction extends CsAction {
   }
 
   @Override
+  public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode = super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
+  }
+
+  @Override
   public String getHumanReadablePrompt() {
     return "Send a GET point to point routings request with the following parameters: "
         + sspSupplier.get().toJson().toPrettyString();
@@ -57,13 +68,12 @@ public class CsGetRoutingsAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForPtp(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier()));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                sspSupplier,
+                getDspSupplier(),
+                previousAction != null && previousAction instanceof CsGetRoutingsAction));
       }
     };
-  }
-
-  @Override
-  public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }
 }

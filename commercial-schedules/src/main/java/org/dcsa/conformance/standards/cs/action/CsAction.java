@@ -49,6 +49,14 @@ public abstract class CsAction extends ConformanceAction {
   }
 
   @Override
+  public void reset() {
+    super.reset();
+    if (dsp.hasCurrentValue()) {
+      this.dsp.set(new DynamicScenarioParameters(null,null));
+    }
+  }
+
+  @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     super.doHandleExchange(exchange);
     updateCursorFromResponsePayload(exchange);
@@ -72,7 +80,14 @@ public abstract class CsAction extends ConformanceAction {
       }
     }
     String jsonResponse = exchange.getResponse().message().body().toString();
-    updatedDsp = updateIfNotNull(updatedDsp,jsonResponse,updatedDsp::withJsonResponse);
+    if (previousAction != null) {
+      if (previousAction instanceof SupplyScenarioParametersAction) {
+        // TODO set in the DSP the first page hash
+      } else {
+        updatedDsp = updateIfNotNull(updatedDsp,jsonResponse,updatedDsp::withJsonResponse);
+        // TODO will be renamed from jsonResponse to secondPageHash
+      }
+    }
 
     if (!dsp.equals(updatedDsp)) {
       dsp.set(updatedDsp);

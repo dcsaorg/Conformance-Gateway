@@ -2,10 +2,8 @@ package org.dcsa.conformance.standards.cs.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -101,19 +99,17 @@ public class CsSubscriber extends ConformanceParty {
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
-    Map qyeryParams = ssp.getMap().entrySet().stream()
+    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
       .collect(
         Collectors.toMap(
           entry -> entry.getKey().getQueryParamName(),
           entry -> Set.of(entry.getValue())));
-    if (actionPrompt.get("currentDsp") != null) {
-      DynamicScenarioParameters dsp =
-        DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
-      qyeryParams.put("cursor",dsp.cursor());
+    if (actionPrompt.has("cursor")) {
+      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
     }
     syncCounterpartGet(
         "/v1/point-to-point-routes",
-      qyeryParams);
+      queryParams);
 
     addOperatorLogEntry(
         "Sent GET point to point routings request with parameters %s"

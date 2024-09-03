@@ -62,12 +62,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Diff {{ inputs.environment }} Conformance-Gateway Stack
+      - name: Diff ${{ inputs.environment }} Conformance-Gateway Stack
         run: |
           cd Conformance-Gateway/cdk/
           cdk diff ${{ inputs.environment }}ConformanceStack
 
-      - name: Deploy Conformance-Gateway Stack of {{ inputs.environment }}
+      - name: Deploy Conformance-Gateway Stack of ${{ inputs.environment }}
         run: |
           cd Conformance-Gateway/cdk/
           echo Later turn on: cdk deploy ${{ inputs.environment }}ConformanceStack

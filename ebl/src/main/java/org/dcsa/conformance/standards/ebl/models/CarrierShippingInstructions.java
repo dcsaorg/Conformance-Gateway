@@ -133,12 +133,10 @@ public class CarrierShippingInstructions {
     return new TDField(attribute, initializer, updater);
   }
 
-  private static TDField issuingParty() {
-    return initialFieldValue("issuingParty", (o, a, v) -> {
-      int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
-      var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
-      o.set(a, choice.apply(v).deepCopy());
-    });
+  private static JsonNode issuingParty(String version) {
+    int choiceNo = RANDOM.nextInt(ISSUING_CARRIER_DEFINITIONS.length);
+    var choice = ISSUING_CARRIER_DEFINITIONS[choiceNo];
+    return choice.apply(version).deepCopy();
   }
 
   private static void ensureTrue(boolean isTrue, String msg) {
@@ -194,11 +192,10 @@ public class CarrierShippingInstructions {
     preserveIfPresent("issueDate"),
     preserveIfPresent("declaredValue"),
     preserveIfPresent("declaredValueCurrency"),
-    issuingParty(),
     initialFieldValue(
         "carrierCode",
         (o, a, v) -> {
-          var identifyingPartyCode = o.path("issuingParty").path("identifyingCodes").path(0);
+          var identifyingPartyCode = o.path("documentParties").path("issuingParty").path("identifyingCodes").path(0);
           ensureTrue(
             Objects.equals(
               identifyingPartyCode.path("codeListProvider").asText(), "SMDG"),
@@ -591,10 +588,24 @@ public class CarrierShippingInstructions {
     var siData = getShippingInstructions();
     var existingTd = getTransportDocument().orElse(null);
     copyFieldsWherePresent(siData, td, COPY_SI_INTO_TD_FIELDS);
+    ensureIssuingCarrier(existingTd, td);
     preserveOrGenerateCarrierFields(existingTd, td);
     fixupUtilizedTransportEquipments(td, scenarioType);
     fixupConsignmentItems(td, scenarioType);
     state.set(TD_DATA_FIELD, td);
+  }
+
+  private void ensureIssuingCarrier(ObjectNode existingTd, ObjectNode td) {
+    var docParties = td.path("documentParties");
+    if (!docParties.isObject()) {
+      return;
+    }
+    var docPartiesObject = (ObjectNode)docParties;
+    var issuingParty = existingTd != null ? existingTd.path("issuingParty") : null;
+    if (issuingParty == null || issuingParty.isMissingNode()) {
+      issuingParty = issuingParty(getStandardsVersion());
+    }
+    docPartiesObject.set("issuingParty", issuingParty);
   }
 
   private void changeSIState(String attributeName, ShippingInstructionsStatus newState) {

@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "DCSA OpenAPI specification for Electronic Bill of Lading",
+    "title": "DCSA specification for Shipping Instructions and Transport Document",
     "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implmented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
@@ -507,7 +507,7 @@
                         {
                           "manifestTypeCode": "AFR",
                           "countryCode": "US",
-                          "advanceManifestFilingsHouseBLPerformedBy": "SHIPPER",
+                          "advanceManifestFilingsHouseBLPerformedBy": "SELF",
                           "selfFilerCode": "HHL007"
                         }
                       ],
@@ -1238,8 +1238,7 @@
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "shippingInstructionsStatus": "PENDING UPDATE",
-                      "updatedShippingInstructionsStatus": "UPDATE CANCELLED",
-                      "reason": "Wrong update provided"
+                      "updatedShippingInstructionsStatus": "UPDATE CANCELLED"
                     }
                   }
                 }
@@ -1526,22 +1525,6 @@
                       "serviceContractReference": "SCR-1234-REGULAR",
                       "carrierCode": "MSC",
                       "carrierCodeListProvider": "SMDG",
-                      "issuingParty": {
-                        "partyName": "Mediterranean Shipping Company",
-                        "address": {
-                          "street": "Chemin Rieu",
-                          "streetNumber": "12-14",
-                          "city": "Geneva",
-                          "countryCode": "CH"
-                        },
-                        "identifyingCodes": [
-                          {
-                            "codeListProvider": "SMDG",
-                            "codeListName": "LCL",
-                            "partyCode": "MSC"
-                          }
-                        ]
-                      },
                       "transports": {
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
@@ -1588,6 +1571,22 @@
                             {
                               "name": "DCSA test person",
                               "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
+                        },
+                        "issuingParty": {
+                          "partyName": "Mediterranean Shipping Company",
+                          "address": {
+                            "street": "Chemin Rieu",
+                            "streetNumber": "12-14",
+                            "city": "Geneva",
+                            "countryCode": "CH"
+                          },
+                          "identifyingCodes": [
+                            {
+                              "codeListProvider": "SMDG",
+                              "codeListName": "LCL",
+                              "partyCode": "MSC"
                             }
                           ]
                         }
@@ -1650,22 +1649,6 @@
                       "serviceContractReference": "SCR-1234-REEFER",
                       "carrierCode": "MSC",
                       "carrierCodeListProvider": "SMDG",
-                      "issuingParty": {
-                        "partyName": "Mediterranean Shipping Company",
-                        "address": {
-                          "street": "Chemin Rieu",
-                          "streetNumber": "12-14",
-                          "city": "Geneva",
-                          "countryCode": "CH"
-                        },
-                        "identifyingCodes": [
-                          {
-                            "codeListProvider": "SMDG",
-                            "codeListName": "LCL",
-                            "partyCode": "MSC"
-                          }
-                        ]
-                      },
                       "transports": {
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
@@ -1712,6 +1695,22 @@
                             {
                               "name": "DCSA test person",
                               "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
+                        },
+                        "issuingParty": {
+                          "partyName": "Mediterranean Shipping Company",
+                          "address": {
+                            "street": "Chemin Rieu",
+                            "streetNumber": "12-14",
+                            "city": "Geneva",
+                            "countryCode": "CH"
+                          },
+                          "identifyingCodes": [
+                            {
+                              "codeListProvider": "SMDG",
+                              "codeListName": "LCL",
+                              "partyCode": "MSC"
                             }
                           ]
                         }
@@ -1779,23 +1778,6 @@
                       "serviceContractReference": "SCR-1234-DG",
                       "carrierCode": "HLC",
                       "carrierCodeListProvider": "SMDG",
-                      "issuingParty": {
-                        "partyName": "Hapag Lloyd",
-                        "address": {
-                          "street": "Ballindamm",
-                          "streetNumber": "25",
-                          "postCode": "D-20095",
-                          "city": "Hamburg",
-                          "countryCode": "DE"
-                        },
-                        "identifyingCodes": [
-                          {
-                            "codeListProvider": "SMDG",
-                            "codeListName": "LCL",
-                            "partyCode": "HLC"
-                          }
-                        ]
-                      },
                       "transports": {
                         "plannedDepartureDate": "2023-12-20",
                         "plannedArrivalDate": "2023-12-22",
@@ -1842,6 +1824,23 @@
                             {
                               "name": "DCSA test person",
                               "email": "no-reply@dcsa.example.org"
+                            }
+                          ]
+                        },
+                        "issuingParty": {
+                          "partyName": "Hapag Lloyd",
+                          "address": {
+                            "street": "Ballindamm",
+                            "streetNumber": "25",
+                            "postCode": "D-20095",
+                            "city": "Hamburg",
+                            "countryCode": "DE"
+                          },
+                          "identifyingCodes": [
+                            {
+                              "codeListProvider": "SMDG",
+                              "codeListName": "LCL",
+                              "partyCode": "HLC"
                             }
                           ]
                         }
@@ -2808,22 +2807,6 @@
                         "serviceContractReference": "SCR-1234-REGULAR",
                         "carrierCode": "MSC",
                         "carrierCodeListProvider": "SMDG",
-                        "issuingParty": {
-                          "partyName": "Mediterranean Shipping Company",
-                          "address": {
-                            "street": "Chemin Rieu",
-                            "streetNumber": "12-14",
-                            "city": "Geneva",
-                            "countryCode": "CH"
-                          },
-                          "identifyingCodes": [
-                            {
-                              "codeListProvider": "SMDG",
-                              "codeListName": "LCL",
-                              "partyCode": "MSC"
-                            }
-                          ]
-                        },
                         "transports": {
                           "plannedDepartureDate": "2023-12-20",
                           "plannedArrivalDate": "2023-12-22",
@@ -2870,6 +2853,22 @@
                               {
                                 "name": "DCSA test person",
                                 "email": "no-reply@dcsa.example.org"
+                              }
+                            ]
+                          },
+                          "issuingParty": {
+                            "partyName": "Mediterranean Shipping Company",
+                            "address": {
+                              "street": "Chemin Rieu",
+                              "streetNumber": "12-14",
+                              "city": "Geneva",
+                              "countryCode": "CH"
+                            },
+                            "identifyingCodes": [
+                              {
+                                "codeListProvider": "SMDG",
+                                "codeListName": "LCL",
+                                "partyCode": "MSC"
                               }
                             ]
                           }
@@ -2962,22 +2961,6 @@
                         "serviceContractReference": "SCR-1234-REGULAR",
                         "carrierCode": "MSC",
                         "carrierCodeListProvider": "SMDG",
-                        "issuingParty": {
-                          "partyName": "Mediterranean Shipping Company",
-                          "address": {
-                            "street": "Chemin Rieu",
-                            "streetNumber": "12-14",
-                            "city": "Geneva",
-                            "countryCode": "CH"
-                          },
-                          "identifyingCodes": [
-                            {
-                              "codeListProvider": "SMDG",
-                              "codeListName": "LCL",
-                              "partyCode": "MSC"
-                            }
-                          ]
-                        },
                         "transports": {
                           "plannedDepartureDate": "2023-12-20",
                           "plannedArrivalDate": "2023-12-22",
@@ -3024,6 +3007,22 @@
                               {
                                 "name": "DCSA test person",
                                 "email": "no-reply@dcsa.example.org"
+                              }
+                            ]
+                          },
+                          "issuingParty": {
+                            "partyName": "Mediterranean Shipping Company",
+                            "address": {
+                              "street": "Chemin Rieu",
+                              "streetNumber": "12-14",
+                              "city": "Geneva",
+                              "countryCode": "CH"
+                            },
+                            "identifyingCodes": [
+                              {
+                                "codeListProvider": "SMDG",
+                                "codeListName": "LCL",
+                                "partyCode": "MSC"
                               }
                             ]
                           }
@@ -3380,6 +3379,12 @@
           "destinationChargesPaymentTerm": {
             "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
           "isElectronic": {
             "type": "boolean",
             "description": "An indicator whether the transport document is electronically transferred.\n",
@@ -3491,6 +3496,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -3526,6 +3543,18 @@
             "description": "A list of `Advance Manifest Filings` specified by the Shipper to indicate whom is to do the Filing\n",
             "items": {
               "$ref": "#/components/schemas/AdvanceManifestFiling"
+            }
+          },
+          "isHBLIssued": {
+            "type": "boolean",
+            "description": "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
+            "example": true
+          },
+          "houseBillOfLadings": {
+            "type": "array",
+            "description": "A list of `House Bill of Ladings` specified by the Shipper.\n",
+            "items": {
+              "$ref": "#/components/schemas/HouseBillOfLading"
             }
           },
           "requestedCarrierCertificates": {
@@ -3597,6 +3626,12 @@
           "destinationChargesPaymentTerm": {
             "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
           "isElectronic": {
             "type": "boolean",
             "description": "An indicator whether the transport document is electronically transferred.\n",
@@ -3708,6 +3743,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -3743,6 +3790,18 @@
             "description": "A list of `Advance Manifest Filings` specified by the Shipper to indicate whom is to do the Filing\n",
             "items": {
               "$ref": "#/components/schemas/AdvanceManifestFiling"
+            }
+          },
+          "isHBLIssued": {
+            "type": "boolean",
+            "description": "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
+            "example": true
+          },
+          "houseBillOfLadings": {
+            "type": "array",
+            "description": "A list of `House Bill of Ladings` specified by the Shipper.\n",
+            "items": {
+              "$ref": "#/components/schemas/HouseBillOfLading"
             }
           },
           "requestedCarrierCertificates": {
@@ -3833,6 +3892,12 @@
           "destinationChargesPaymentTerm": {
             "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
           "isElectronic": {
             "type": "boolean",
             "description": "An indicator whether the transport document is electronically transferred.\n",
@@ -3944,6 +4009,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -3981,6 +4058,18 @@
               "$ref": "#/components/schemas/AdvanceManifestFiling"
             }
           },
+          "isHBLIssued": {
+            "type": "boolean",
+            "description": "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
+            "example": true
+          },
+          "houseBillOfLadings": {
+            "type": "array",
+            "description": "A list of `House Bill of Ladings` specified by the Shipper.\n",
+            "items": {
+              "$ref": "#/components/schemas/HouseBillOfLading"
+            }
+          },
           "requestedCarrierCertificates": {
             "type": "array",
             "description": "Certificate(s) requested by the Shipper for the Carrier to include as part of the shipment documentation pack\n",
@@ -3997,16 +4086,10 @@
           },
           "feedbacks": {
             "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
             "items": {
               "$ref": "#/components/schemas/Feedback"
             }
-          },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
-            "example": "Rejected because of of wrong equipmentReference"
           }
         },
         "description": "The `Shipping Instructions` as provided by the Shipper.\n"
@@ -4046,16 +4129,10 @@
           },
           "feedbacks": {
             "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
             "items": {
               "$ref": "#/components/schemas/Feedback"
             }
-          },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
-            "example": "Rejected because of of wrong equipmentReference"
           }
         },
         "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus`, an optional list of `Feedback` to be applied to the `Shipping Instructions` and and optional `reason` field is returned.\n"
@@ -4093,11 +4170,12 @@
             "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE CANCELLED`\n",
             "example": "UPDATE CANCELLED"
           },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
-            "example": "Rejected because of of wrong equipmentReference"
+          "feedbacks": {
+            "type": "array",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
           }
         },
         "description": "The `shippingInstructionsReference`, possibly the `transportDocumentReference` along with the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` and and optional `reason` field is returned.\n"
@@ -4124,7 +4202,7 @@
             "example": "PROPERTY_WILL_BE_IGNORED"
           },
           "message": {
-            "maxLength": 500,
+            "maxLength": 5000,
             "type": "string",
             "description": "A description with additional information.\n",
             "example": "Spaces not allowed in facility code"
@@ -4257,7 +4335,7 @@
             "example": "invalidData"
           },
           "errorCodeMessage": {
-            "maxLength": 200,
+            "maxLength": 5000,
             "type": "string",
             "description": "A long description corresponding to the `errorCode` with additional information.\n",
             "example": "Spaces not allowed in facility code"
@@ -4275,7 +4353,7 @@
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -4299,8 +4377,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -4332,7 +4416,7 @@
         "type": "object",
         "properties": {
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -4420,7 +4504,27 @@
           "partyFunction": {
             "maxLength": 3,
             "type": "string",
-            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n",
+            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `CSR` (Consolidator)\n- `MFR` (Manufacturer)\n- `WHK` (Warehouse Keeper)\n",
+            "example": "DDS"
+          }
+        },
+        "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.\n"
+      },
+      "OtherDocumentPartyHBL": {
+        "title": "Other Document Party",
+        "required": [
+          "party",
+          "partyFunction"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "$ref": "#/components/schemas/Party"
+          },
+          "partyFunction": {
+            "maxLength": 3,
+            "type": "string",
+            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `CSR` (Consolidator)\n- `MFR` (Manufacturer)\n- `WHK` (Warehouse Keeper)\n",
             "example": "DDS"
           }
         },
@@ -4436,7 +4540,7 @@
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -4460,8 +4564,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -4500,19 +4610,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -4540,22 +4657,69 @@
               "$ref": "#/components/schemas/PartyContactDetail"
             }
           },
-          "shippersReference": {
+          "reference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper`.\n",
             "example": "HHL007"
           },
-          "shippersPurchaseOrderReference": {
+          "purchaseOrderReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference linked to the `Shipper Purchase Order`.\n",
+            "description": "A purchase order reference linked to the `Shipper`.\n",
             "example": "HHL007"
           }
         },
         "description": "The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.\n\n**Condition:** Either the `address` or the `displayedAddress` must be included in the `Transport Document`.\n"
+      },
+      "ShipperHBL": {
+        "title": "Shipper",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "The `Shipper` on the `House Bill of Lading`.\n"
       },
       "Consignee": {
         "title": "Consignee",
@@ -4565,19 +4729,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -4605,22 +4776,69 @@
               "$ref": "#/components/schemas/PartyContactDetail"
             }
           },
-          "consigneesReference": {
+          "reference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee`.\n",
             "example": "HHL007"
           },
-          "consigneesPurchaseOrderReference": {
+          "purchaseOrderReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference linked to the `Consignee Purchase Order`.\n",
+            "description": "A purchase order reference linked to the `Consignee`.\n",
             "example": "HHL007"
           }
         },
         "description": "The party to which goods are consigned in the `Master Bill of Lading`.\n\n**Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)\n"
+      },
+      "ConsigneeHBL": {
+        "title": "Consignee",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "The ultimate recipient of the cargo. It must be different from the freight forwarder, (de)consolidator, postal operator, or customs agent.\n"
       },
       "Endorsee": {
         "title": "Endorsee",
@@ -4630,7 +4848,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -4640,9 +4858,9 @@
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -4683,7 +4901,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -4711,7 +4929,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -4740,6 +4958,198 @@
         },
         "description": "Refers to a company or a legal entity.\n"
       },
+      "NotifyParty": {
+        "title": "Notify Party",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "displayedAddress": {
+            "maxItems": 6,
+            "type": "array",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+            "items": {
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `NotifyParty`.\n",
+            "example": "HHL007"
+          }
+        },
+        "description": "The person to be notified when a shipment arrives at its destination.\n"
+      },
+      "NotifyPartyHBL": {
+        "title": "Notify Party",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          }
+        },
+        "description": "The person to be notified when a shipment arrives at its destination.\n"
+      },
+      "Seller": {
+        "title": "Seller",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "The seller is the last known entity by whom the goods are sold or agreed to be sold to the buyer. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.\n"
+      },
+      "Buyer": {
+        "title": "Buyer",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "The buyer is the last known entity to whom the goods are sold or agreed to be sold. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.\n"
+      },
       "Party": {
         "title": "Party",
         "required": [
@@ -4748,7 +5158,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -4796,7 +5206,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -4836,7 +5246,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the contact\n",
@@ -4896,7 +5306,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -4908,7 +5318,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
             "example": "DID"
           }
         }
@@ -5149,7 +5559,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -5280,6 +5690,13 @@
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
           },
+          "houseBillOfLadingReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
+            "example": "ABC123"
+          },
           "customsReferences": {
             "type": "array",
             "description": "A list of `Customs references`\n",
@@ -5350,6 +5767,13 @@
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
           },
+          "houseBillOfLadingReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
+            "example": "ABC123"
+          },
           "customsReferences": {
             "type": "array",
             "description": "A list of `Customs references`\n",
@@ -5392,8 +5816,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `Not Applicable` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `Not treated and not certified` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `Processed` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `Treated and certified` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "Treated and certified"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED AND CERTIFIED"
           }
         },
         "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.\n\n**Condition:** Mandatory for non-dangerous goods cargo.\n"
@@ -5438,8 +5862,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `Not Applicable` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `Not treated and not certified` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `Processed` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `Treated and certified` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "Treated and certified"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED AND CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -5544,7 +5968,7 @@
             "description": "Indicates if high temperature cargo is shipped.\n",
             "example": false
           },
-          "isCompetentAuthorityApprovalProvided": {
+          "isCompetentAuthorityApprovalRequired": {
             "type": "boolean",
             "description": "Indicates if the cargo require approval from authorities\n",
             "example": false
@@ -6147,7 +6571,7 @@
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The Manifest type code as defined by the provider. A list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv)\n",
-            "example": "ACE"
+            "example": "ENS"
           },
           "countryCode": {
             "maxLength": 2,
@@ -6159,10 +6583,10 @@
           },
           "advanceManifestFilingsHouseBLPerformedBy": {
             "type": "string",
-            "description": "Indicates whether the shipper (`SHIPPER`) will perform the advance manifest filing(s) for the House BL directly or if the carrier (`CARRIER`) should file them on their behalf. Allowed values are:\n\n- `SHIPPER` (the shipper does the filing)\n- `CARRIER` (the carrier does the filing)\n\nIn case of self-filing (`SHIPPER`), the shipper can provide their `selfFilerCode` for each manifest.\n\n**Condition:** The `selfFilerCode` must be provided when `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and the `advanceManifestFilingsHouseBLPerformedBy` is set to `SHIPPER`.\n",
-            "example": "SHIPPER",
+            "description": "Indicates whether the shipper (`SELF`) will perform the advance manifest filing(s) for the House BL directly or if the carrier (`CARRIER`) should file them on their behalf. Allowed values are:\n\n- `SELF` (filing done by the House filer)\n- `CARRIER` (the carrier does the filing)\n\nIn case of self-filing (`SELF`), the shipper can provide their `selfFilerCode` for each manifest.\n\n**Condition:** The `selfFilerCode` must be provided when `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and the `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.\n",
+            "example": "SELF",
             "enum": [
-              "SHIPPER",
+              "SELF",
               "CARRIER"
             ]
           },
@@ -6170,16 +6594,130 @@
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Code identifying the party who will submit the advance manifest filing(s) for the House BL.\n\n**Mandatory** if `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SHIPPER`.\n",
+            "description": "Code identifying the party who will submit the advance manifest filing(s) for the House BL.\n\n**Mandatory** if `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.\n",
             "example": "FLXP"
+          },
+          "supplementaryDeclarantEORInumber": {
+            "maxLength": 17,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The Economic Operators Registration and Identification (EORI) number of the house filer responsible for the `ENS` filing.\n\n**Conditional:** only applicable if `manifestTypeCode` is `ENS`.\n",
+            "example": "FLXP-123321"
           }
         },
-        "description": "An Advance Maifest Filing defined by a Manifest type code in combination with a country code.\n\nA list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv). A (small) subset can be seen here:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n",
+        "description": "An Advance Maifest Filing defined by a Manifest type code in combination with a country code.\n\nA list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv). A (small) subset can be seen here:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n|ENS|NL|Entry Summary Declaration|\n",
         "example": {
           "manifestTypeCode": "ACE",
           "countryCode": "US",
-          "advanceManifestFilingsHouseBLPerformedBy": "SHIPPER",
+          "advanceManifestFilingsHouseBLPerformedBy": "SELF",
           "selfFilerCode": "FLXP123"
+        }
+      },
+      "HouseBillOfLading": {
+        "title": "House Bill of Lading",
+        "required": [
+          "houseBillOfLadingReference"
+        ],
+        "type": "object",
+        "properties": {
+          "houseBillOfLadingReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A unique number allocated by the Ocean Transport Intermediary (OTI) to the `House Bill of Lading`.\n",
+            "example": "HBOL001"
+          },
+          "isToOrder": {
+            "type": "boolean",
+            "description": "Indicates whether the `House Bill of Lading` (HBL) is issued `to order` or not. If `true`, `Notify party` at `HBL` level is mandatory\n",
+            "example": false
+          },
+          "placeOfAcceptance": {
+            "$ref": "#/components/schemas/PlaceOfAcceptance"
+          },
+          "placeOfFinalDelivery": {
+            "$ref": "#/components/schemas/PlaceOfFinalDelivery"
+          },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
+          "documentParties": {
+            "$ref": "#/components/schemas/Document Parties_2"
+          }
+        },
+        "description": "A legal contract between the Ocean Transport Intermediary (OTI), such as a Non-Vessel Operating Common Carrier (NVOCC) or a freight forwarder, and the shipper that acknowledges the receipt of goods and outlines the terms of shipment.\n"
+      },
+      "PlaceOfAcceptance": {
+        "title": "Place of Acceptance",
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Acceptance` location specified as: identification of the seaport, freight terminal or other place at which the goods are taken over from the shipper by the Ocean Transport Intermediary (OTI) issuing the `House Bill of Lading`.\n\n**Condition:** Mandatory if different from `Place of Receipt` at the `Master Transport Document` level.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "UNLocationCode": "DEHAM"
+        }
+      },
+      "PlaceOfFinalDelivery": {
+        "title": "Place of Final Delivery",
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Final Delivery` location specified as: Identification of the seaport, freight terminal or other place at which the goods are handed over from the `Ocean Transport Intermediary` (OTI) issuing the `House Bill of Lading` to the `Consignee`.\n\n**Condition:** Mandatory if different from `Place of Delivery` at the `Master Transport Document` level. (**Note:** in case of carrier haulage this will be the same as the `Place of Delivery`)\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n",
+        "example": {
+          "locationName": "Hamburg",
+          "UNLocationCode": "DEHAM"
         }
       },
       "RequestedCarrierCertificate": {
@@ -6210,7 +6748,6 @@
           "isElectronic",
           "isShippedOnBoardType",
           "isToOrder",
-          "issuingParty",
           "partyContactDetails",
           "receiptTypeAtOrigin",
           "termsAndConditions",
@@ -6449,15 +6986,12 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
             "example": "NMFTA",
             "enum": [
               "SMDG",
               "NMFTA"
             ]
-          },
-          "issuingParty": {
-            "$ref": "#/components/schemas/IssuingParty"
           },
           "carrierClauses": {
             "type": "array",
@@ -6539,6 +7073,18 @@
           },
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties_1"
+          },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
           },
           "consignmentItems": {
             "minItems": 1,
@@ -6941,7 +7487,7 @@
           },
           "feedbacks": {
             "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
             "items": {
               "$ref": "#/components/schemas/Feedback"
             }
@@ -7149,6 +7695,20 @@
           "issueTo": {
             "$ref": "#/components/schemas/IssueToParty"
           },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/Buyer"
+          },
+          "notifyParties": {
+            "maxItems": 3,
+            "type": "array",
+            "description": "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
+            "items": {
+              "$ref": "#/components/schemas/NotifyParty"
+            }
+          },
           "other": {
             "type": "array",
             "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
@@ -7230,6 +7790,12 @@
           "destinationChargesPaymentTerm": {
             "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
           "isElectronic": {
             "type": "boolean",
             "description": "An indicator whether the transport document is electronically transferred.\n",
@@ -7341,6 +7907,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -7378,6 +7956,18 @@
               "$ref": "#/components/schemas/AdvanceManifestFiling"
             }
           },
+          "isHBLIssued": {
+            "type": "boolean",
+            "description": "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
+            "example": true
+          },
+          "houseBillOfLadings": {
+            "type": "array",
+            "description": "A list of `House Bill of Ladings` specified by the Shipper.\n",
+            "items": {
+              "$ref": "#/components/schemas/HouseBillOfLading"
+            }
+          },
           "requestedCarrierCertificates": {
             "type": "array",
             "description": "Certificate(s) requested by the Shipper for the Carrier to include as part of the shipment documentation pack\n",
@@ -7394,16 +7984,10 @@
           },
           "feedbacks": {
             "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
             "items": {
               "$ref": "#/components/schemas/Feedback"
             }
-          },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
-            "example": "Rejected because of of wrong equipmentReference"
           }
         },
         "description": "This property contains the shippingInstructions in case the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions then the content in this property can be ignored.\n"
@@ -7479,6 +8063,12 @@
           "destinationChargesPaymentTerm": {
             "$ref": "#/components/schemas/Destination Charges Payment Term"
           },
+          "methodOfPayment": {
+            "maxLength": 1,
+            "type": "string",
+            "description": "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
+            "example": "A"
+          },
           "isElectronic": {
             "type": "boolean",
             "description": "An indicator whether the transport document is electronically transferred.\n",
@@ -7590,6 +8180,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -7627,6 +8229,18 @@
               "$ref": "#/components/schemas/AdvanceManifestFiling"
             }
           },
+          "isHBLIssued": {
+            "type": "boolean",
+            "description": "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
+            "example": true
+          },
+          "houseBillOfLadings": {
+            "type": "array",
+            "description": "A list of `House Bill of Ladings` specified by the Shipper.\n",
+            "items": {
+              "$ref": "#/components/schemas/HouseBillOfLading"
+            }
+          },
           "requestedCarrierCertificates": {
             "type": "array",
             "description": "Certificate(s) requested by the Shipper for the Carrier to include as part of the shipment documentation pack\n",
@@ -7643,16 +8257,10 @@
           },
           "feedbacks": {
             "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n\nThis property is **conditional** on the `shippingInstructionsStatus='PENDING UPDATE'`.\n",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
             "items": {
               "$ref": "#/components/schemas/Feedback"
             }
-          },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This field can be used to explain `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus`.\n",
-            "example": "Rejected because of of wrong equipmentReference"
           }
         },
         "description": "This property contains the updated shipping instructions in case:\n  - an update is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions or no update is active - then the content in this property can be ignored.\n"
@@ -7689,11 +8297,12 @@
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
             "example": "HHL71800000"
           },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This property can be used to explain `shippingInstructionsStatus`.\n",
-            "example": "Selected vessel is overbooked - please update VesselName"
+          "feedbacks": {
+            "type": "array",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
           },
           "shippingInstructions": {
             "$ref": "#/components/schemas/Shipping Instructions"
@@ -7707,6 +8316,7 @@
       "Document Parties_1": {
         "title": "Document Parties",
         "required": [
+          "issuingParty",
           "shipper"
         ],
         "type": "object",
@@ -7720,8 +8330,19 @@
           "endorsee": {
             "$ref": "#/components/schemas/Endorsee"
           },
+          "issuingParty": {
+            "$ref": "#/components/schemas/IssuingParty"
+          },
           "carriersAgentAtDestination": {
             "$ref": "#/components/schemas/CarriersAgentAtDestination"
+          },
+          "notifyParties": {
+            "maxItems": 3,
+            "type": "array",
+            "description": "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
+            "items": {
+              "$ref": "#/components/schemas/NotifyParty"
+            }
           },
           "other": {
             "type": "array",
@@ -7747,7 +8368,6 @@
           "isElectronic",
           "isShippedOnBoardType",
           "isToOrder",
-          "issuingParty",
           "partyContactDetails",
           "receiptTypeAtOrigin",
           "termsAndConditions",
@@ -7986,15 +8606,12 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
             "example": "NMFTA",
             "enum": [
               "SMDG",
               "NMFTA"
             ]
-          },
-          "issuingParty": {
-            "$ref": "#/components/schemas/IssuingParty"
           },
           "carrierClauses": {
             "type": "array",
@@ -8077,6 +8694,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties_1"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -8137,11 +8766,12 @@
             "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
             "example": "HHL71800000"
           },
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "This property can be used to explain Transport Document Status.\n",
-            "example": "Voided because a new Transport Document has been issued"
+          "feedbacks": {
+            "type": "array",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
           },
           "transportDocument": {
             "$ref": "#/components/schemas/Transport Document"
@@ -8263,6 +8893,35 @@
           }
         },
         "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
+      },
+      "Document Parties_2": {
+        "title": "Document Parties",
+        "type": "object",
+        "properties": {
+          "shipper": {
+            "$ref": "#/components/schemas/ShipperHBL"
+          },
+          "consignee": {
+            "$ref": "#/components/schemas/ConsigneeHBL"
+          },
+          "notifyParty": {
+            "$ref": "#/components/schemas/NotifyPartyHBL"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/Buyer"
+          },
+          "other": {
+            "type": "array",
+            "description": "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
+            "items": {
+              "$ref": "#/components/schemas/OtherDocumentPartyHBL"
+            }
+          }
+        },
+        "description": "All `Parties` with associated roles for this `House Bill of Lading`.\n"
       }
     },
     "parameters": {

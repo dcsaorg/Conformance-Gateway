@@ -20,7 +20,6 @@ public class CsGetPortSchedulesAction extends CsAction {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetPortSchedules", 200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
-
   @Override
   public String getHumanReadablePrompt() {
     return "Send a GET port schedules request with the following parameters: "
@@ -58,6 +57,10 @@ public class CsGetPortSchedulesAction extends CsAction {
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+      ObjectNode node = super.asJsonNode();
+      node.set("suppliedScenarioParameters", sspSupplier.get().toJson());
+      node.put("cursor", getDspSupplier().get().cursor());
+      node.put("jsonResponse", getDspSupplier().get().jsonResponse());
+      return node;
   }
 }

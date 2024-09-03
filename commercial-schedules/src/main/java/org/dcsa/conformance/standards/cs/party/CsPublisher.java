@@ -55,19 +55,35 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
     String filePath;
-    String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"next\"";
     Map<String, List<String>> initialIMap = Map.of(
       "Api-Version", List.of(apiVersion)
     );
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
-    headers.put("Link",List.of(nextPage));
+    if(request.queryParams().containsKey("limit")){
+      String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"next\"";
+      headers.put("Link",List.of(nextPage));
+    }
+    boolean hasCursor = request.queryParams().containsKey("cursor");
 
     if (request.url().endsWith("v1/point-to-point-routes")) {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
+      if(hasCursor){
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptpnextpage.json";
+      }else{
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
+      }
+
     } else if (request.url().endsWith("v1/port-schedules")) {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
+      if(hasCursor){
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-psnextpage.json";
+      }else{
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
+      }
     } else {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
+      if(hasCursor){
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vsnextpage.json";
+      } else {
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
+      }
     }
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
     return request.createResponse(

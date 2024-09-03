@@ -31,7 +31,7 @@ public abstract class CsAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dsp =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null,null))
             : new OverwritingReference<>(previousAction.dsp, null);
   }
 
@@ -71,7 +71,12 @@ public abstract class CsAction extends ConformanceAction {
         }
       }
     }
+    String jsonResponse = exchange.getResponse().message().body().toString();
+    updatedDsp = updateIfNotNull(updatedDsp,jsonResponse,updatedDsp::withJsonResponse);
 
+    if (!dsp.equals(updatedDsp)) {
+      dsp.set(updatedDsp);
+    }
   }
 
   private static String extractCursorValue(String url) {

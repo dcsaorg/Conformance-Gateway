@@ -9,7 +9,8 @@ import lombok.With;
 
 @With
 public record DynamicScenarioParameters(
-  String cursor
+  String cursor,
+  String jsonResponse
 )  {
 
   public ObjectNode toJson() {
@@ -17,12 +18,14 @@ public record DynamicScenarioParameters(
     if (cursor != null) {
       dspNode.put("cursor", cursor);
     }
+    if(jsonResponse != null){
+      dspNode.put("jsonResponse", jsonResponse);
+    }
     return dspNode;
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     ObjectNode dspNode = (ObjectNode) jsonNode;
-    return new DynamicScenarioParameters(dspNode.path("cursor").asText()
-    );
+    return new DynamicScenarioParameters(dspNode.path("cursor").asText(),dspNode.path("jsonResponse").asText());
   }
 }

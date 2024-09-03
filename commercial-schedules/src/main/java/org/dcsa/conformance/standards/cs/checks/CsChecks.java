@@ -106,7 +106,8 @@ public class CsChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
           if (sspSupplier.get().getMap().containsKey(LIMIT)) {
-            JsonNode cursor = dspSupplier.get().toJson();
+            String cursor = dspSupplier.get().cursor();
+            String previousResponse = dspSupplier.get().jsonResponse();
             }
             return issues;
         });

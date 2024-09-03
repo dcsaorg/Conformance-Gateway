@@ -81,14 +81,15 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
+    Map qyeryParams = ssp.getMap().entrySet().stream()
+      .collect(
+        Collectors.toMap(
+          entry -> entry.getKey().getQueryParamName(),
+          entry -> Set.of(entry.getValue())));
+    qyeryParams.put("cursor",dsp.cursor());
     syncCounterpartGet(
-        "/v1/port-schedules",
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getQueryParamName(),
-                    entry -> Set.of(entry.getValue()))));
+        "/v1/port-schedules",qyeryParams);
 
     addOperatorLogEntry(
         "Sent GET port schedules request with parameters %s"
@@ -100,13 +101,19 @@ public class CsSubscriber extends ConformanceParty {
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
+    Map qyeryParams = ssp.getMap().entrySet().stream()
+      .collect(
+        Collectors.toMap(
+          entry -> entry.getKey().getQueryParamName(),
+          entry -> Set.of(entry.getValue())));
+    if (actionPrompt.get("currentDsp") != null) {
+      DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
+      qyeryParams.put("cursor",dsp.cursor());
+    }
     syncCounterpartGet(
         "/v1/point-to-point-routes",
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getQueryParamName(),
-                    entry -> Set.of(entry.getValue()))));
+      qyeryParams);
 
     addOperatorLogEntry(
         "Sent GET point to point routings request with parameters %s"

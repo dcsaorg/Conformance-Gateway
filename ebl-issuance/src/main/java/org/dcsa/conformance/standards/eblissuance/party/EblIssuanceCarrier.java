@@ -1,10 +1,10 @@
 package org.dcsa.conformance.standards.eblissuance.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +24,6 @@ import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class EblIssuanceCarrier extends ConformanceParty {
@@ -108,13 +106,13 @@ public class EblIssuanceCarrier extends ConformanceParty {
     var eblType = dsp.eblType();
     String tdr =
         actionPrompt.has("tdr")
-            ? actionPrompt.get("tdr").asText()
+            ? actionPrompt.path("tdr").asText()
             : UUID.randomUUID().toString().substring(20);
     String sir = sirsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString());
     String br =
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
 
-    boolean isCorrect = actionPrompt.get("isCorrect").asBoolean();
+    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
     var isAmended = actionPrompt.path("isAmended").asBoolean(false);
     if (isCorrect) {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
@@ -167,7 +165,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
 
     if (!isCorrect) {
-      ((ObjectNode) jsonRequestBody.get("document")).remove("issuingParty");
+      ((ObjectNode) jsonRequestBody.path("document").path("documentParties")).remove("issuingParty");
     }
     if (isAmended) {
       var sealObj = (ObjectNode)jsonRequestBody.path("document").path("utilizedTransportEquipments").path(0).path("seals").path(0);
@@ -196,8 +194,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuanceCarrier.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
-    String tdr = jsonRequest.get("transportDocumentReference").asText();
-    String irc = jsonRequest.get("issuanceResponseCode").asText();
+    String tdr = jsonRequest.path("transportDocumentReference").asText();
+    String irc = jsonRequest.path("issuanceResponseCode").asText();
 
     if (Objects.equals(EblIssuanceState.ISSUANCE_REQUESTED, eblStatesByTdr.get(tdr))) {
       if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {

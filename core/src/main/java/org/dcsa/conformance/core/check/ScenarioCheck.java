@@ -20,7 +20,7 @@ public class ScenarioCheck extends ConformanceCheck {
   protected Stream<? extends ConformanceCheck> createSubChecks() {
     return scenario
         .allActionsStream()
-        .map(action -> action.createCheck(expectedApiVersion))
+        .map(action -> action.createFullCheck(expectedApiVersion))
         .filter(Objects::nonNull);
   }
 

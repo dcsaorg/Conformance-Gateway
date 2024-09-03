@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.UserFacingException;
 
 @Slf4j
 public class StatefulExecutor {
@@ -30,11 +31,14 @@ public class StatefulExecutor {
     try {
       modifiedState = function.apply(originalState);
     } catch (Throwable t) {
-      log.error(
+      log.warn(
           "Execution failed, unlocking (lockedBy='%s', partitionKey='%s', sortKey='%s'): %s"
               .formatted(lockedBy, partitionKey, sortKey, t),
           t);
       sortedPartitionsLockingMap.unlockItem(lockedBy, partitionKey, sortKey);
+      if (t instanceof UserFacingException) {
+        throw t;
+      }
       throw new RuntimeException("Execution failed: " + t, t);
     }
 

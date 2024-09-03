@@ -259,8 +259,10 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray("requestedChanges")
+                .putArray("feedbacks")
                 .addObject()
+                .put("severity", "WARN")
+                .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
                 .put(
                     "message",
                     "Please perform the changes requested by the Conformance orchestrator");
@@ -301,8 +303,10 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray("requestedChanges")
+                .putArray("feedbacks")
                 .addObject()
+                .put("severity", "WARN")
+                .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
                 .put(
                     "message",
                     "Please perform the changes requested by the Conformance orchestrator");

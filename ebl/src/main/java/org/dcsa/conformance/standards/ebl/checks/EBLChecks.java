@@ -756,10 +756,10 @@ public class EBLChecks {
 
   private static final JsonPointer[] REFERENCE_PATHS = {
     JsonPointer.compile("/references"),
-    JsonPointer.compile("/documentParties/shipper/shippersReference"),
-    JsonPointer.compile("/documentParties/shipper/shippersPurchaseOrderReference"),
-    JsonPointer.compile("/documentParties/consignee/consigneesReference"),
-    JsonPointer.compile("/documentParties/consignee/consigneesPurchaseOrderReference")
+    JsonPointer.compile("/documentParties/shipper/reference"),
+    JsonPointer.compile("/documentParties/shipper/reference"),
+    JsonPointer.compile("/documentParties/consignee/purchaseOrderReference"),
+    JsonPointer.compile("/documentParties/consignee/reference")
   };
 
   private static JsonContentMatchedValidation scenarioReferencesCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
@@ -775,9 +775,13 @@ public class EBLChecks {
         for (int i = 0 ; i < ciCount ; i++) {
           ptrs.add(JsonPointer.compile("/consignmentItems/%d/references".formatted(i)));
         }
+        var notifyPartyCount = body.path("documentParties").path("notifyParties").size();
+        for (int i = 0 ; i < notifyPartyCount ; i++) {
+          ptrs.add(JsonPointer.compile("/documentParties/notifyParties/%d/party/reference".formatted(i)));
+        }
         var otherPartyCount = body.path("documentParties").path("other").size();
         for (int i = 0 ; i < otherPartyCount ; i++) {
-          ptrs.add(JsonPointer.compile("/documentParties/other/%d/party/references".formatted(i)));
+          ptrs.add(JsonPointer.compile("/documentParties/other/%d/party/reference".formatted(i)));
         }
       })
     );

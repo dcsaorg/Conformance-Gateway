@@ -663,7 +663,13 @@ public class JsonAttribute {
       }
       var present = ptrs
         .stream()
-        .anyMatch(p -> isJsonNodePresent(body.at(p)));
+        .anyMatch(p -> {
+          var node = body.at(p);
+          if (node.isArray()) {
+            return !node.isEmpty();
+          }
+          return !node.isMissingNode() && !node.isNull();
+        });
       if (present) {
         return Set.of();
       }

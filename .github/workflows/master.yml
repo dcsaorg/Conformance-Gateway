@@ -1,23 +1,24 @@
-name: Deploy to AWS
+name: Conformance-Gateway CI
+
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
 
 on:
   workflow_dispatch:
   push:
     branches:
       - dev
+      - test
       - master
   pull_request:
     branches:
       - dev
+      - test
       - master
-
-env:
-  AWS_REGION: "eu-north-1"
-  NG_CLI_ANALYTICS: "ci"
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -37,41 +38,20 @@ jobs:
           java-version: 21
           cache: 'maven'
 
-      - name: Set up Node.js 22.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-          cache-dependency-path: webui/package-lock.json
-
-      - name: Install AWS CDK
+      - name: Build and test Conformance-Gateway
         run: |
-          npm install -g aws-cdk
+          cd Conformance-Gateway
+          mvn package -U -B -V --fail-at-end
 
-      - name: Build Conformance-Gateway
+      - name: Set Sonar settings for PR build
+        if: ${{ (github.event_name == 'pull_request') }}
         run: |
-          mvn package -U -B -V -DskipTests
-      # No need to run tests, as they are already run in the PR workflow
+          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Build Web UI
+      - name: Run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
         run: |
-          cd webui
-          npm install
-          npm run build --configuration=dev
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Diff dev Conformance-Gateway Stack
-        run: |
-          cd cdk/
-          cdk diff devConformanceStack
-
-      - name: Deploy Conformance-Gateway Stack of dev
-        run: |
-          cd cdk/
-          echo Later turn on: cdk deploy devConformanceStack
+          cd Conformance-Gateway
+          mvn sonar:sonar -B ${{env.SONAR_PARAMS}}

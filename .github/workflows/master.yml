@@ -24,8 +24,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           branch: dev
-          path: Conformance-Gateway
-          submodules: recursive
 
       - name: Print commit sha
         shell: bash
@@ -54,7 +52,6 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          cd Conformance-Gateway
           mvn package -U -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
@@ -73,10 +70,10 @@ jobs:
 
       - name: Diff dev Conformance-Gateway Stack
         run: |
-          cd Conformance-Gateway/cdk/
+          cd cdk/
           cdk diff devConformanceStack
 
       - name: Deploy Conformance-Gateway Stack of dev
         run: |
-          cd Conformance-Gateway/cdk/
+          cd cdk/
           echo Later turn on: cdk deploy devConformanceStack

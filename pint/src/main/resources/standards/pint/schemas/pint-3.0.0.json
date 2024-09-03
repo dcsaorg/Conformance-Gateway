@@ -559,7 +559,7 @@
             "example": "invalidData"
           },
           "errorCodeMessage": {
-            "maxLength": 200,
+            "maxLength": 5000,
             "type": "string",
             "description": "A long description corresponding to the `errorCode` with additional information.\n",
             "example": "Spaces not allowed in facility code"
@@ -933,7 +933,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -973,7 +973,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -985,7 +985,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
             "example": "DID"
           }
         }
@@ -1038,7 +1038,6 @@
           "isElectronic",
           "isShippedOnBoardType",
           "isToOrder",
-          "issuingParty",
           "partyContactDetails",
           "receiptTypeAtOrigin",
           "termsAndConditions",
@@ -1277,15 +1276,12 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
             "example": "NMFTA",
             "enum": [
               "SMDG",
               "NMFTA"
             ]
-          },
-          "issuingParty": {
-            "$ref": "#/components/schemas/IssuingParty"
           },
           "carrierClauses": {
             "type": "array",
@@ -1368,6 +1364,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -1409,7 +1417,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the contact\n",
@@ -1574,7 +1582,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `Schedule B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -1705,6 +1713,13 @@
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
           },
+          "houseBillOfLadingReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
+            "example": "ABC123"
+          },
           "customsReferences": {
             "type": "array",
             "description": "A list of `Customs references`\n",
@@ -1755,8 +1770,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `Not Applicable` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `Not treated and not certified` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `Processed` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `Treated and certified` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "Treated and certified"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED AND CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -1861,7 +1876,7 @@
             "description": "Indicates if high temperature cargo is shipped.\n",
             "example": false
           },
-          "isCompetentAuthorityApprovalProvided": {
+          "isCompetentAuthorityApprovalRequired": {
             "type": "boolean",
             "description": "Indicates if the cargo require approval from authorities\n",
             "example": false
@@ -2638,7 +2653,7 @@
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -2662,8 +2677,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -2695,7 +2716,7 @@
         "type": "object",
         "properties": {
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -2782,7 +2803,7 @@
           "partyFunction": {
             "maxLength": 3,
             "type": "string",
-            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n",
+            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n",
             "example": "DDS"
           }
         },
@@ -2798,7 +2819,7 @@
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -2822,8 +2843,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -2862,19 +2889,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -2902,18 +2936,18 @@
               "$ref": "#/components/schemas/PartyContactDetail"
             }
           },
-          "shippersReference": {
+          "reference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Shipper`.\n",
             "example": "HHL007"
           },
-          "shippersPurchaseOrderReference": {
+          "purchaseOrderReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference linked to the `Shipper Purchase Order`.\n",
+            "description": "A purchase order reference linked to the `Shipper`.\n",
             "example": "HHL007"
           }
         },
@@ -2927,19 +2961,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -2967,18 +3008,18 @@
               "$ref": "#/components/schemas/PartyContactDetail"
             }
           },
-          "consigneesReference": {
+          "reference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "A reference linked to the `Consignee`.\n",
             "example": "HHL007"
           },
-          "consigneesPurchaseOrderReference": {
+          "purchaseOrderReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A reference linked to the `Consignee Purchase Order`.\n",
+            "description": "A purchase order reference linked to the `Consignee`.\n",
             "example": "HHL007"
           }
         },
@@ -2992,7 +3033,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3002,9 +3043,9 @@
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -3045,7 +3086,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3064,6 +3105,71 @@
         },
         "description": "The party on the import side assigned by the carrier to whom the customer need to reach out to for cargo release.\n"
       },
+      "NotifyParty": {
+        "title": "Notify Party",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "displayedAddress": {
+            "maxItems": 6,
+            "type": "array",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+            "items": {
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `NotifyParty`.\n",
+            "example": "HHL007"
+          }
+        },
+        "description": "The person to be notified when a shipment arrives at its destination.\n"
+      },
       "Party": {
         "title": "Party",
         "required": [
@@ -3072,7 +3178,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3120,7 +3226,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3205,6 +3311,7 @@
       "Document Parties": {
         "title": "Document Parties",
         "required": [
+          "issuingParty",
           "shipper"
         ],
         "type": "object",
@@ -3218,8 +3325,19 @@
           "endorsee": {
             "$ref": "#/components/schemas/Endorsee"
           },
+          "issuingParty": {
+            "$ref": "#/components/schemas/IssuingParty"
+          },
           "carriersAgentAtDestination": {
             "$ref": "#/components/schemas/CarriersAgentAtDestination"
+          },
+          "notifyParties": {
+            "maxItems": 3,
+            "type": "array",
+            "description": "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
+            "items": {
+              "$ref": "#/components/schemas/NotifyParty"
+            }
           },
           "other": {
             "type": "array",

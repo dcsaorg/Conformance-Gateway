@@ -153,7 +153,7 @@ public class EblIssuancePlatform extends ConformanceParty {
     var state = eblStatesByTdr.get(tdr);
 
     ConformanceResponse response;
-    if (tdr == null || !jsonRequest.path("document").has("issuingParty")) {
+    if (tdr == null || !jsonRequest.path("document").path("documentParties").has("issuingParty")) {
       addOperatorLogEntry(
         "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
           .formatted(tdr));

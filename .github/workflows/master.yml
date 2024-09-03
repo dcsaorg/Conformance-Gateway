@@ -55,7 +55,7 @@ jobs:
 
       - name: Build Web UI
         run: |
-          cd ../webui
+          cd webui
           npm install
           npm run build --configuration=dev
 

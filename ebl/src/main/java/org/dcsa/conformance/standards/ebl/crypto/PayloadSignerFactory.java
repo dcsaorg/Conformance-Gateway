@@ -123,9 +123,10 @@ public class PayloadSignerFactory {
     private static final PayloadSignerWithKey CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
     private static final PayloadSignerWithKey CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_CARRIER_RSA_KEY_PAIR);
     private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_RECEIVER_RSA_KEY_PAIR);
-    private static final SignatureVerifierWithKey CTK_SENDER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_SENDER_RSA_KEY_PAIR.getPublic());
-    private static final SignatureVerifierWithKey CTK_RECEIVER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_RECEIVER_RSA_KEY_PAIR.getPublic());
-    private static final SignatureVerifierWithKey CTK_CARRIER_SIGNATURE_VERIFIER = (SignatureVerifierWithKey) verifierFromPublicKey(CTK_CARRIER_RSA_KEY_PAIR.getPublic());
+
+    public static String getCarrierPublicKeyInPemFormat() {
+        return pemEncodeKey((RSAPublicKey) CTK_CARRIER_RSA_KEY_PAIR.getPublic());
+    }
 
     public static PayloadSignerWithKey senderPayloadSigner() {
         return CTK_SENDER_KEY_PAYLOAD_SIGNER;
@@ -139,18 +140,6 @@ public class PayloadSignerFactory {
         return CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER;
     }
 
-    public static SignatureVerifierWithKey senderKeySignatureVerifier() {
-        return CTK_SENDER_SIGNATURE_VERIFIER;
-    }
-
-    public static SignatureVerifierWithKey receiverKeySignatureVerifier() {
-    return CTK_RECEIVER_SIGNATURE_VERIFIER;
-  }
-
-    public static SignatureVerifierWithKey carrierKeySignatureVerifier() {
-    return CTK_CARRIER_SIGNATURE_VERIFIER;
-  }
-
     private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
         return new RSAPayloadSigner(
                 new JWSSignerDetails(
@@ -159,10 +148,6 @@ public class PayloadSignerFactory {
                 ),
               (RSAPublicKey) keyPair.getPublic()
         );
-    }
-
-    public static SignatureVerifier fromJWSVerifier(JWSVerifier jwsVerifier) {
-      return new SingleKeySignatureVerifier(jwsVerifier);
     }
 
     @SneakyThrows
@@ -221,7 +206,6 @@ public class PayloadSignerFactory {
     }
 
     private record SingleExportableKeySignatureVerifier(JWSVerifier jwsVerifier, RSAPublicKey rsaPublicKey) implements SignatureVerifierWithKey {
-
 
       @SneakyThrows
       @Override

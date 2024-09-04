@@ -446,9 +446,9 @@ public class BookingChecks {
       var bookingStatus = body.path("bookingStatus").asText("");
       var issues = new LinkedHashSet<String>();
       if (PENDING_CHANGES_STATES.contains(BookingState.fromWireName(bookingStatus))) {
-        var requestedChanges = body.get("requestedChanges");
-        if (requestedChanges == null) {
-          issues.add("requestedChanges is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
+        var feedbacks = body.get("feedbacks");
+        if (feedbacks == null) {
+          issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
         }
       }
       return issues;

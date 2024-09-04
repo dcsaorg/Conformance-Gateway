@@ -64,7 +64,7 @@
     "shipper": {
 
       "partyName": "DCSA CTK",
-      "shippersReference": "SI-REF-1234",
+      "reference": "SI-REF-1234",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

@@ -50,17 +50,19 @@ public class CsGetPortSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForPs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(),previousAction != null && previousAction instanceof CsGetRoutingsAction));
       }
     };
   }
 
   @Override
   public ObjectNode asJsonNode() {
-      ObjectNode node = super.asJsonNode();
-      node.set("suppliedScenarioParameters", sspSupplier.get().toJson());
-      node.put("cursor", getDspSupplier().get().cursor());
-      node.put("jsonResponse", getDspSupplier().get().jsonResponse());
-      return node;
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode = super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
   }
 }

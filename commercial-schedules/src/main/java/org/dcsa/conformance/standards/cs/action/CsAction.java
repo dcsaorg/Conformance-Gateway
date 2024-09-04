@@ -1,6 +1,9 @@
 package org.dcsa.conformance.standards.cs.action;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -8,12 +11,14 @@ import java.util.function.Supplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
-
+@Slf4j
 public abstract class CsAction extends ConformanceAction {
 
   protected final Supplier<SuppliedScenarioParameters> sspSupplier;
@@ -31,7 +36,7 @@ public abstract class CsAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dsp =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null,null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null,null, null))
             : new OverwritingReference<>(previousAction.dsp, null);
   }
 
@@ -52,7 +57,7 @@ public abstract class CsAction extends ConformanceAction {
   public void reset() {
     super.reset();
     if (dsp.hasCurrentValue()) {
-      this.dsp.set(new DynamicScenarioParameters(null,null));
+      this.dsp.set(new DynamicScenarioParameters(null,null,null));
     }
   }
 
@@ -65,33 +70,48 @@ public abstract class CsAction extends ConformanceAction {
   private void updateCursorFromResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dspRef = dsp.get();
     Collection<String> linkHeaders = exchange.getResponse().message().headers().get("Link");
-    Optional<String> link = linkHeaders.stream().findFirst();
     var updatedDsp = dspRef;
-    if(link.isPresent()){
-      String[] links = link.get().split(",");
-      for (String value : links) {
-        String url = value.split(";")[0];
-        String rel = value.split(";")[1];
-        String relValue = rel.split("=")[1].replace("\"", "");
-        if ("next".equals(relValue)) {
-          String cursorValue = extractCursorValue(url);
-          updatedDsp = updateIfNotNull(updatedDsp, cursorValue, updatedDsp::withCursor);
+    if (linkHeaders != null) {
+      Optional<String> link = linkHeaders.stream().findFirst();
+      if (link.isPresent()) {
+        String[] links = link.get().split(",");
+        for (String value : links) {
+          String url = value.split(";")[0];
+          String rel = value.split(";")[1];
+          String relValue = rel.split("=")[1].replace("\"", "");
+          if ("next".equals(relValue)) {
+            String cursorValue = extractCursorValue(url);
+            updatedDsp = updateIfNotNull(updatedDsp, cursorValue, updatedDsp::withCursor);
+          }
         }
       }
     }
     String jsonResponse = exchange.getResponse().message().body().toString();
     if (previousAction != null) {
       if (previousAction instanceof SupplyScenarioParametersAction) {
-        // TODO set in the DSP the first page hash
+        String firstPageHash = getHashString(jsonResponse);
+        updatedDsp = updateIfNotNull(updatedDsp, firstPageHash, updatedDsp::withFirstPage);
       } else {
-        updatedDsp = updateIfNotNull(updatedDsp,jsonResponse,updatedDsp::withJsonResponse);
-        // TODO will be renamed from jsonResponse to secondPageHash
+        String secondPageHash = getHashString(jsonResponse);
+        updatedDsp = updateIfNotNull(updatedDsp, secondPageHash, updatedDsp::withSecondPage);
       }
     }
 
     if (!dsp.equals(updatedDsp)) {
       dsp.set(updatedDsp);
     }
+  }
+
+  private String getHashString(String actualResponse) {
+    String responseHash = "";
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashBytes = digest.digest(actualResponse.getBytes());
+      responseHash = HexFormat.of().formatHex(hashBytes);
+    } catch (NoSuchAlgorithmException e) {
+      log.error("Hashing of the response failed." + e);
+    }
+    return responseHash;
   }
 
   private static String extractCursorValue(String url) {

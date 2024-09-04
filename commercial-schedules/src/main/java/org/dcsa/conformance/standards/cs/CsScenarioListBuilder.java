@@ -112,31 +112,28 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           "Limit and Pagination",
           noAction()
             .then(
-              scenarioWithParametersPtp(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT))))
+              scenarioWithParametersPtpForPagination(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT))))
+      //scenarioWithParametersPsForPagination(getPortSchedules(),UN_LOCATION_CODE,DATE,LIMIT) -- will add after testing ptp
+      //scenarioWithParametersVsForPagination(getVesselSchedules(),VESSEL_IMO_NUMBER,LIMIT)
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private static CsScenarioListBuilder scenarioWithParametersPtpForNextPage(CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings()).then(getPtpRoutings());
-  }
 
-  private static CsScenarioListBuilder scenarioWithParametersForNextPage(CsFilterParameter... csFilterParameters) {
-    return scenarioWithParametersPtp(csFilterParameters);
-  }
-
-  private static CsScenarioListBuilder scenarioWithParametersPtp(CsScenarioListBuilder thenWhat,
+  private static CsScenarioListBuilder scenarioWithParametersPtpForPagination(CsScenarioListBuilder thenWhat,
     CsFilterParameter... csFilterParameters) {
     return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings().then(thenWhat));
   }
-
-  private static CsScenarioListBuilder noAction() {
-    return new CsScenarioListBuilder(null);
+  private static CsScenarioListBuilder scenarioWithParametersPsForPagination(CsScenarioListBuilder thenWhat,
+                                                                              CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules().then(thenWhat));
   }
-
-  private static CsScenarioListBuilder scenarioWithParametersPtp(
-    CsFilterParameter... csFilterParameters) {
+  private static CsScenarioListBuilder scenarioWithParametersVsForPagination(CsScenarioListBuilder thenWhat,
+                                                                              CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules().then(thenWhat));
+  }
+  private static CsScenarioListBuilder scenarioWithParametersPtp(CsFilterParameter... csFilterParameters) {
     return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings());
   }
 
@@ -155,6 +152,10 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     return new CsScenarioListBuilder(
       previousAction ->
         new SupplyScenarioParametersAction(publisherPartyName, csFilterParameters));
+  }
+
+  private static CsScenarioListBuilder noAction() {
+    return new CsScenarioListBuilder(null);
   }
 
   private static CsScenarioListBuilder getVesselSchedules() {

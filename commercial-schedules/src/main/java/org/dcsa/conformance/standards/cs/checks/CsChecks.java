@@ -93,7 +93,7 @@ public class CsChecks {
         checks.add(validateDateRangeforPtp(sspSupplier));
       }
       if (checkPagination) {
-        checks.add(paginationCheckForPtp(sspSupplier,dspSupplier));
+        checks.add(paginationCheck(sspSupplier,dspSupplier));
       }
     }
     return JsonAttribute.contentChecks(
@@ -104,7 +104,7 @@ public class CsChecks {
         checks);
   }
 
-  private static JsonContentCheck paginationCheckForPtp(
+  private static JsonContentCheck paginationCheck(
       Supplier<SuppliedScenarioParameters> sspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.customValidator(
@@ -112,8 +112,8 @@ public class CsChecks {
         body -> {
           var issues = new LinkedHashSet<String>();
           if (sspSupplier.get().getMap().containsKey(LIMIT)) {
-            String firstPageHash = dspSupplier.get().jsonResponse();
-            String secondPageHash = "dspSupplier.get().jsonResponse()"; // TODO capture second response separately
+            String firstPageHash = dspSupplier.get().firstPage();
+            String secondPageHash = dspSupplier.get().secondPage();
             if (Objects.equals(firstPageHash, secondPageHash)) {
               issues.add("The second page must be different from the first page");
             }
@@ -143,11 +143,16 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForPs(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPs());
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
     checks.add(validateDateForPs(sspSupplier));
+    if(checkPagination){
+      checks.add(paginationCheck(sspSupplier,dspSupplier));
+    }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
         matchedExchangeUuid,
@@ -178,7 +183,9 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForVs(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckVs());
     if (sspSupplier.get() != null) {
@@ -187,6 +194,9 @@ public class CsChecks {
       }
       if (sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER)) {
         checks.add(validateIMONumberForVS(sspSupplier));
+      }
+      if(checkPagination){
+        checks.add(paginationCheck(sspSupplier,dspSupplier));
       }
     }
     return JsonAttribute.contentChecks(

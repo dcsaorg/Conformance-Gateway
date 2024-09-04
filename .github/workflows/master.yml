@@ -1,4 +1,4 @@
-name: Conformance-Gateway CI
+name: Java CI
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -24,17 +24,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          path: Conformance-Gateway
-          submodules: recursive
           # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
           fetch-depth: 0
-
-      - name: Set up Java JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 21
-          cache: 'maven'
 
       - name: Print commit sha
         shell: bash
@@ -43,9 +34,15 @@ jobs:
         run: |
           echo "sha: $COMMIT_SHA"
 
+      - name: Set up Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'maven'
+
       - name: Build and test Conformance-Gateway
         run: |
-          cd Conformance-Gateway
           mvn package -U -B -V --fail-at-end
 
       - name: Set Sonar settings for PR build
@@ -58,5 +55,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
         run: |
-          cd Conformance-Gateway
           mvn sonar:sonar -B ${{env.SONAR_PARAMS}}

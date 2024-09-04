@@ -865,11 +865,13 @@ public class EBLChecks {
         }
         seen.add(value);
         var expectedReferenceValue = expectedValues.get(value);
+        var refNode = node.path(referenceAttributeName);
         if (expectedReferenceValue == null) {
-          issues.add("Unexpected %s '%s' at %s".formatted(attributeName, value, pathBuilder.toString()));
+          if (!refNode.isMissingNode()) {
+            issues.add("The '%s' attribute must be absent".formatted(refPath));
+          }
           continue;
         }
-        var refNode = node.path(referenceAttributeName);
         if (refNode.isMissingNode() || !refNode.isTextual()) {
           continue;
         }

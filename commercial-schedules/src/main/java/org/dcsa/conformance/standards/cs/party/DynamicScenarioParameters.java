@@ -20,7 +20,7 @@ public record DynamicScenarioParameters(
       dspNode.put("cursor", cursor);
     }
     if(firstPage != null){
-      dspNode.put("jsonResponse", firstPage);
+      dspNode.put("firstPage", firstPage);
     }
     if(secondPage != null){
       dspNode.put("secondPage", secondPage);

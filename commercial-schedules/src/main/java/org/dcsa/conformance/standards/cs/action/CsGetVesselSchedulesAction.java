@@ -55,7 +55,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(),previousAction != null && previousAction instanceof CsGetRoutingsAction));
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(),previousAction != null && previousAction instanceof CsGetVesselSchedulesAction));
       }
     };
   }

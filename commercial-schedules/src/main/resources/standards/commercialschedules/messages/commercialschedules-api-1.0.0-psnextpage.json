@@ -1,129 +1,48 @@
 [
   {
-    "placeOfReceipt": {
-      "facilityTypeCode": "POTE",
-      "location": {
-        "locationName": "Port of Amsterdam",
-        "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
-          "floor": "N/A",
-          "postCode": "1047 HM",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
-        },
-        "UNLocationCode": "NLAMS",
-        "facility": {
-          "facilityCode": "ADT",
-          "facilityCodeListProvider": "SMDG"
-        }
-      },
-      "dateTime": "2025-01-14T09:21:00+01:00"
+    "location": {
+      "locationName": "Port of Amsterdam",
+      "UNLocationCode": "NLAMS",
+      "facilitySMDGCode": "ACT"
     },
-    "placeOfDelivery": {
-      "facilityTypeCode": "POTE",
-      "location": {
-        "locationName": "Port of Amsterdam",
-        "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
-          "floor": "N/A",
-          "postCode": "1047 HM",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
-        },
-        "UNLocationCode": "NLAMS",
-        "facility": {
-          "facilityCode": "ADT",
-          "facilityCodeListProvider": "SMDG"
-        }
-      },
-      "dateTime": "2025-01-14T09:21:00+01:00"
-    },
-    "receiptTypeAtOrigin": "CY",
-    "deliveryTypeAtDestination": "CY",
-    "cutOffTimes": [
+    "vesselSchedules": [
       {
-        "cutOffDateTimeCode": "DCO",
-        "cutOffDateTime": "2019-11-12T07:41:00-08:30"
-      }
-    ],
-    "solutionNumber": 1,
-    "transitTime": 10,
-    "legs": [
-      {
-        "sequenceNumber": 0,
-        "transport": {
-          "modeOfTransport": "VESSEL",
-          "portVisitReference": "NLAMS1234589",
-          "transportCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
-          "servicePartners": [
-            {
-              "carrierCode": "MAEU",
-              "carrierCodeListProvider": "NMFTA",
-              "carrierServiceName": "Great Lion Service",
-              "carrierServiceCode": "FE1",
-              "carrierImportVoyageNumber": "2103S",
-              "carrierExportVoyageNumber": "2103N"
-            }
-          ],
-          "universalServiceReference": "SR12345A",
-          "universalExportVoyageReference": "2103N",
-          "universalImportVoyageReference": "2103N",
-          "vessel": {
-            "vesselIMONumber": "9321483",
-            "MMSINumber": "278111222",
-            "name": "King of the Seas",
-            "flag": "DE",
-            "callSign": "NCVV",
-            "operatorCarrierCode": "MAEU",
-            "operatorCarrierCodeListProvider": "NMFTA"
+        "universalServiceReference": "SR12345A",
+        "servicePartners": [
+          {
+            "carrierCode": "MAEU",
+            "carrierCodeListProvider": "NMFTA",
+            "carrierServiceName": "Great Lion Service",
+            "carrierServiceCode": "FE1",
+            "carrierImportVoyageNumber": "2103S",
+            "carrierExportVoyageNumber": "2103N"
           }
+        ],
+        "vessel": {
+          "vesselIMONumber": "9321483",
+          "MMSINumber": "278111222",
+          "name": "King of the Seas",
+          "flag": "DE",
+          "callSign": "NCVV",
+          "operatorCarrierCode": "MAEU",
+          "operatorCarrierCodeListProvider": "NMFTA"
         },
-        "departure": {
-          "facilityTypeCode": "POTE",
-          "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
-            "facility": {
-              "facilityCode": "ADT",
-              "facilityCodeListProvider": "SMDG"
-            }
-          },
-          "dateTime": "DEPARTURE_DATE"
-        },
-        "arrival": {
-          "facilityTypeCode": "POTE",
-          "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
-            "facility": {
-              "facilityCode": "ADT",
-              "facilityCodeListProvider": "SMDG"
-            }
-          },
-          "dateTime": "ARRIVAL_DATE"
-        }
+        "isDummyVessel": true,
+        "universalImportVoyageReference": "2103N",
+        "universalExportVoyageReference": "2103N",
+        "timestamps": [
+          {
+            "eventTypeCode": "ARRI",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2019-11-12T07:41:00-08:30"
+          }
+        ]
       }
     ]
   }

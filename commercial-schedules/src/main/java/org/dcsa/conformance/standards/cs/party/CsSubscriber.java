@@ -58,16 +58,16 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
-    Map qyeryParams = ssp.getMap().entrySet().stream()
+    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
       .collect(
         Collectors.toMap(
           entry -> entry.getKey().getQueryParamName(),
           entry -> Set.of(entry.getValue())));
-    qyeryParams.put("cursor",dsp.cursor());
-
+    if (actionPrompt.has("cursor")) {
+      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
+    }
     syncCounterpartGet(
-        "/v1/vessel-schedules",qyeryParams
+        "/v1/vessel-schedules",queryParams
         );
 
     addOperatorLogEntry(
@@ -79,15 +79,16 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.get("currentDsp"));
-    Map qyeryParams = ssp.getMap().entrySet().stream()
+    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
       .collect(
         Collectors.toMap(
           entry -> entry.getKey().getQueryParamName(),
           entry -> Set.of(entry.getValue())));
-    qyeryParams.put("cursor",dsp.cursor());
+    if (actionPrompt.has("cursor")) {
+      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
+    }
     syncCounterpartGet(
-        "/v1/port-schedules",qyeryParams);
+        "/v1/port-schedules",queryParams);
 
     addOperatorLogEntry(
         "Sent GET port schedules request with parameters %s"

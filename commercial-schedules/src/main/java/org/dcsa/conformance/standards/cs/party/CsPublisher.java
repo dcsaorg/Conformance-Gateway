@@ -67,9 +67,9 @@ public class CsPublisher extends ConformanceParty {
 
     if (request.url().endsWith("v1/point-to-point-routes")) {
       if(hasCursor){
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptpnextpage.json";
-      }else{
         filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
+      }else{
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptpnextpage.json";
       }
 
     } else if (request.url().endsWith("v1/port-schedules")) {

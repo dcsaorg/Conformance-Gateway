@@ -30,7 +30,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     threadLocalPublisherPartyName.set(publisherPartyName);
     threadLocalSubscriberPartyName.set(subscriberPartyName);
     return Stream.of(
-       /* Map.entry(
+       Map.entry(
           "Point to Point Routings",
           noAction()
             .thenEither(
@@ -107,14 +107,14 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           noAction()
             .thenEither(
               scenarioWithParametersVs(UN_LOCATION_CODE),
-              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))),*/
+              scenarioWithParametersVs(UN_LOCATION_CODE, FACILITY_SMDG_CODE))),
         Map.entry(
           "Limit and Pagination",
           noAction()
-            .then(
-              scenarioWithParametersPtpForPagination(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT))))
-      //scenarioWithParametersPsForPagination(getPortSchedules(),UN_LOCATION_CODE,DATE,LIMIT) -- will add after testing ptp
-      //scenarioWithParametersVsForPagination(getVesselSchedules(),VESSEL_IMO_NUMBER,LIMIT)
+            .thenEither(
+              scenarioWithParametersPtpForPagination(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT),
+              scenarioWithParametersPsForPagination(getPortSchedules(),UN_LOCATION_CODE,DATE,LIMIT),
+              scenarioWithParametersVsForPagination(getVesselSchedules(),VESSEL_IMO_NUMBER,LIMIT))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

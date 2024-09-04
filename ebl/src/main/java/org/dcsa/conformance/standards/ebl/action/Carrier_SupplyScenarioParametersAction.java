@@ -77,6 +77,20 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         "Fibreboard boxes"
       );
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
+        "Booking Reference",
+        null,
+        null,
+        // Any valid regular equipment reference will do as an example.
+        "NARU3472484",
+        null,
+        "DKAAR",
+        "640510",
+        null,
+        "Shoes - black, 400 boxes",
+        null,
+        "Fibreboard boxes"
+      );
       case ACTIVE_REEFER -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for cargo requiring an *active* reefer",

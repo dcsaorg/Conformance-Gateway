@@ -100,6 +100,20 @@ public class EblCarrier extends ConformanceParty {
           null,
           "Fibreboard boxes"
         );
+        case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
+          "CBR_123_NO_SUBREF",
+          null,
+          null,
+          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "NARU3472484",
+          null,
+          "DKAAR",
+          "640510",
+          null,
+          "Shoes - black, 400 boxes",
+          null,
+          "Fibreboard boxes"
+        );
         case ACTIVE_REEFER -> new CarrierScenarioParameters(
           "CBR_123_REEFER",
           "Some reefer Commodity Subreference 123",

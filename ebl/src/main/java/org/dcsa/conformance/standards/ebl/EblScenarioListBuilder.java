@@ -293,25 +293,18 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 "",
                 noAction()
                     .thenEither(
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB)
-                            .thenAllPathsFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.ACTIVE_REEFER)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.NON_OPERATING_REEFER)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.DG)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_1E)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_2C_2U_2E)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(
-                                ScenarioType.REGULAR_SWB_SOC_AND_REFERENCES)
-                            .thenHappyPathFrom(SI_START, TD_START, false),
-                        carrier_SupplyScenarioParameters(ScenarioType.REGULAR_SWB_AMF)
-                            .thenHappyPathFrom(SI_START, TD_START, false))))
+                      Arrays.stream(ScenarioType.values())
+                          .map(st -> {
+                            if (st == ScenarioType.REGULAR_SWB) {
+                              return  carrier_SupplyScenarioParameters(st)
+                              .thenAllPathsFrom(SI_START, TD_START, false);
+                              }
+                            return carrier_SupplyScenarioParameters(st)
+                              .thenHappyPathFrom(SI_START, TD_START, false);
+                            }
+                          )
+                        .toList()
+                        .toArray(new EblScenarioListBuilder[] {}))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

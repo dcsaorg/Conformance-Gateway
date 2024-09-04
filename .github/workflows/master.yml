@@ -45,7 +45,7 @@ jobs:
       - name: Set Sonar settings for PR build
         if: ${{ (github.event_name == 'pull_request') }}
         run: |
-          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME -Dsonar.pullrequest.provider=GitHub" >> $GITHUB_ENV
+          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME -Dsonar.pullrequest.provider=GitHub -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=90" >> $GITHUB_ENV
 
       - name: Run SonarCloud analysis
         env:
@@ -54,10 +54,3 @@ jobs:
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}
 
-      - name: SonarQube Quality Gate check
-        if: ${{ (github.event_name == 'pull_request') }}
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        # Force to fail step after specific time.
-        timeout-minutes: 3
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

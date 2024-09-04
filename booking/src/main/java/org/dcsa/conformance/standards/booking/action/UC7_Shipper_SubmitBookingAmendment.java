@@ -12,6 +12,7 @@ import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Getter
@@ -28,7 +29,7 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7", Set.of(200, 202));
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;

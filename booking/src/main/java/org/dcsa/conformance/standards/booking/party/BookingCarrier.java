@@ -648,7 +648,7 @@ public class BookingCarrier extends ConformanceParty {
       }
       if (apiVersion != null) {
         var majorVersion = String.valueOf(apiVersion.charAt(0));
-        return "org.dcsa.booking-notification.v" + majorVersion;
+        return "org.dcsa.booking.v" + majorVersion;
       }
       return null;
     }

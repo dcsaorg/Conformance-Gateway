@@ -20,13 +20,19 @@
       "weight": 12000,
       "weightUnit": "KGM",
       "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "nationalCommodityCodes": [
+        {
+          "type": "NCM",
+          "countryCode": "BR",
+          "values": ["1515"]
+        }
+      ],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
-      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
       "cargoItems": [
         {
-          "equipmentReference": "ABCU7341935",
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
           "weight": 12000,
           "weightUnit": "KGM",
           "outerPackaging": {
@@ -37,22 +43,10 @@
       ]
     }
   ],
-  "customsReferences": [
-    {
-      "type": "CTN",
-      "countryCode": "SN",
-      "values": ["12345"]
-    }
-  ],
   "utilizedTransportEquipments": [
     {
-      "isShipperOwned": true,
-      "equipment": {
-        "equipmentReference": "ABCU7341935",
-        "ISOEquipmentCode": "45G1",
-        "tareWeight": 4030,
-        "weightUnit": "KGM"
-      },
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
       "seals": [
         {
           "number": "NSL13386"
@@ -62,9 +56,7 @@
   ],
   "documentParties": {
     "shipper": {
-
       "partyName": "DCSA CTK",
-      "reference": "SI-REF-1234",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

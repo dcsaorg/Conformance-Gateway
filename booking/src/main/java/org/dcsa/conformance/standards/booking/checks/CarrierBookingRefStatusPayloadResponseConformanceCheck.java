@@ -43,8 +43,8 @@ public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends Abst
         this::ensureCarrierBookingReferenceCompliance
       ),
       createSubCheck(
-        "Validate 'requestedChanges' is only present on states where it is allowed",
-        requiredOrExcludedByState(PENDING_CHANGES_STATES, "requestedChanges")
+        "Validate 'feedbacks' is only present on states where it is allowed",
+        requiredOrExcludedByState(PENDING_CHANGES_STATES, "feedbacks")
       ),
       createSubCheck(
         "Validate 'reason' is only present on states where it is allowed",

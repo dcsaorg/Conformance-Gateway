@@ -94,7 +94,7 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
-    removeRequestedChanges();
+    removeFeedbacks();
     setReason(null);
   }
 
@@ -108,7 +108,7 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
-    removeRequestedChanges();
+    removeFeedbacks();
     setReason(reason);
   }
 
@@ -237,9 +237,9 @@ public class PersistableCarrierBooking {
     }
   }
 
-  private void removeRequestedChanges() {
-    getBooking().remove("requestedChanges");
-    getAmendedBooking().ifPresent(amendedBooking -> amendedBooking.remove("requestedChanges"));
+  private void removeFeedbacks() {
+    getBooking().remove("feedbacks");
+    getAmendedBooking().ifPresent(amendedBooking -> amendedBooking.remove("feedbacks"));
   }
 
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
@@ -267,7 +267,7 @@ public class PersistableCarrierBooking {
     }
     copyMetadataFields(getBooking(), newBookingData);
     if (isAmendment) {
-      ensureRequestedChangesExist(newBookingData);
+      ensureFeedbacksExist(newBookingData);
       ensureConfirmedBookingHasCarrierFields(newBookingData);
       setAmendedBooking(newBookingData);
     } else {
@@ -275,15 +275,17 @@ public class PersistableCarrierBooking {
     }
     var bookingState = getOriginalBookingState();
     if(!(PENDING_UPDATE.equals(bookingState) || PENDING_AMENDMENT.equals(bookingState) )) {
-      removeRequestedChanges();
+      removeFeedbacks();
     }
     setReason(null);
   }
 
-  private void ensureRequestedChangesExist(ObjectNode booking) {
+  private void ensureFeedbacksExist(ObjectNode booking) {
     booking
-      .putArray("requestedChanges")
+      .putArray("feedbacks")
       .addObject()
+      .put("severity", "WARN")
+      .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
       .put(
         "message",
         "Please perform the changes requested by the Conformance orchestrator");

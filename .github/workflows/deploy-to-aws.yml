@@ -1,0 +1,74 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: ["dev"]
+
+env:
+  AWS_REGION: "eu-north-1"
+  NG_CLI_ANALYTICS: "ci"
+  AWS_ENVIRONMENT: "dev"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AWS_ENVIRONMENT }}
+          # Enforces only AWS env name matching branches are checkout and deployed.
+
+      - name: Print commit sha
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "sha: $COMMIT_SHA"
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Set up Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: webui/package-lock.json
+
+      - name: Build Conformance-Gateway
+        run: |
+          mvn package -U -B -V -DskipTests
+      # No need to run tests, as they are already run in the PR workflow
+
+      - name: Build Web UI
+        run: |
+          cd webui
+          echo Install AWS CDK
+          npm install -g aws-cdk
+          echo Install dependencies
+          npm install
+          echo Build Web UI
+          npm run build --configuration=${{ env.AWS_ENVIRONMENT }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Diff Conformance-Gateway Stack of ${{ env.AWS_ENVIRONMENT }}
+        run: |
+          cd cdk/
+          cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
+
+      - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
+        run: |
+          cd cdk/
+          cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack

@@ -8,6 +8,7 @@ public enum ScenarioType {
   DG,
   REGULAR_2C_2U_1E,
   REGULAR_2C_2U_2E,
+  REGULAR_NO_COMMODITY_SUBREFERENCE,
   REGULAR_SWB_SOC_AND_REFERENCES,
   REGULAR_SWB_AMF,
   ;
@@ -24,6 +25,7 @@ public enum ScenarioType {
     String suffix = switch (this) {
       case REGULAR_2C_2U_1E -> "2c2u1e";
       case REGULAR_2C_2U_2E -> "2c2u2e";
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> "no-commodity-subreference";
       case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
       case REGULAR_SWB_AMF -> "amf";
       case DG -> "dg";

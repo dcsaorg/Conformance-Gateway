@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
+import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -58,10 +60,25 @@ public abstract class AbstractComponentFactory {
    *    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new))
    * </code>
    */
-  public abstract LinkedHashMap<String, ? extends ScenarioListBuilder<?>>
+  protected abstract LinkedHashMap<String, ? extends ScenarioListBuilder<?>>
       createModuleScenarioListBuilders(
           PartyConfiguration[] partyConfigurations,
           CounterpartConfiguration[] counterpartConfigurations);
+
+  public void generateConformanceScenarios(
+    Map<String, List<ConformanceScenario>> scenariosByModuleName,
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations
+  ) {
+    LinkedHashMap<String, ? extends ScenarioListBuilder<?>> moduleScenarioListBuilders =
+      this.createModuleScenarioListBuilders(partyConfigurations, counterpartConfigurations);
+    AtomicInteger nextModuleIndex = new AtomicInteger();
+    moduleScenarioListBuilders.forEach(
+      (moduleName, scenarioListBuilder) -> {
+        var moduleScenarios = new ArrayList<ConformanceScenario>(scenarioListBuilder.buildScenarioList(nextModuleIndex.getAndIncrement()));
+        scenariosByModuleName.put(moduleName, moduleScenarios);
+      });
+  }
 
   public abstract SortedSet<String> getRoleNames();
 
@@ -97,8 +114,9 @@ public abstract class AbstractComponentFactory {
 
     ObjectNode sandboxNode = JsonToolkit.OBJECT_MAPPER.createObjectNode();
 
-    sandboxNode.put("id", "%s-%s".formatted(sandboxIdPrefix, sandboxIdSuffix));
-    sandboxNode.put("name", sandboxIdSuffix);
+    String sandboxIdAndName = "%s-%s".formatted(sandboxIdPrefix, sandboxIdSuffix);
+    sandboxNode.put("id", sandboxIdAndName);
+    sandboxNode.put("name", sandboxIdAndName);
 
     if (!isManual) {
       sandboxNode.put("authHeaderName", "dcsa-conformance-api-key");
@@ -149,7 +167,11 @@ public abstract class AbstractComponentFactory {
                                     isAllInOneSandbox
                                         ? "all-in-one"
                                         : "%s-testing-counterparts"
-                                            .formatted(roleName.toLowerCase())));
+                                            .formatted(
+                                                (Objects.equals(testedPartyRole, roleOne)
+                                                        ? roleOne
+                                                        : roleTwo)
+                                                    .toLowerCase())));
                 if (isManual && roleName.equals(testedPartyRole))
                   rolePartyNode.put("inManualMode", true);
                 partiesNode.add(rolePartyNode);
@@ -169,9 +191,12 @@ public abstract class AbstractComponentFactory {
                                     autoOrManualInfix,
                                     isAllInOneSandbox
                                         ? "all-in-one"
-                                        : roleName.equals(testedPartyRole)
-                                            ? "tested-party"
-                                            : "testing-counterparts",
+                                        : "%s-%s"
+                                            .formatted(
+                                                testedPartyRole.toLowerCase(),
+                                                roleName.equals(testedPartyRole)
+                                                    ? "tested-party"
+                                                    : "testing-counterparts"),
                                     roleName));
                 if (isManual && roleName.equals(testedPartyRole))
                   roleCounterpartNode.put("inManualMode", true);

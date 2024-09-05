@@ -42,8 +42,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
                           builder ->
                               actionList.addLast(
                                   builder.actionBuilder.apply(actionList.peekLast())));
-                  return new ConformanceScenario(
-                      new UUID(moduleIndex, nextScenarioIndex.getAndIncrement()), actionList);
+                  return new ConformanceScenario(moduleIndex, nextScenarioIndex.getAndIncrement(), actionList);
                 })
             .toList();
   }

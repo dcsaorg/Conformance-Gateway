@@ -181,7 +181,7 @@
             "example": "BOLE"
           },
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -301,11 +301,11 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
-            "maxLength": 100,
+            "maxLength": 150,
             "type": "string",
             "description": "Code to identify the party as provided by the `codeListProvider`\n",
             "example": "MSK"
@@ -313,7 +313,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
             "example": "DID"
           }
         }
@@ -343,7 +343,7 @@
             "example": "DK"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `taxLegalReference`\n",
@@ -465,7 +465,7 @@
             "example": "invalidData"
           },
           "errorCodeMessage": {
-            "maxLength": 200,
+            "maxLength": 5000,
             "type": "string",
             "description": "A long description corresponding to the `errorCode` with additional information.\n",
             "example": "Spaces not allowed in facility code"

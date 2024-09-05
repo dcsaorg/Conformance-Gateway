@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 import { SandboxConfig } from "src/app/model/sandbox-config";
 import { Subscription } from "rxjs";
+import {MessageDialog} from "../../dialogs/message/message-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-edit-sandbox',
@@ -23,6 +25,7 @@ export class EditSandboxComponent {
     public authService: AuthService,
     public conformanceService: ConformanceService,
     private router: Router,
+    private dialog: MatDialog,
   ) {}
 
   async ngOnInit() {
@@ -59,6 +62,11 @@ export class EditSandboxComponent {
 
   cannotUpdate(): boolean {
     if (!this.originalSandboxConfig || !this.updatedSandboxConfig) return true;
+
+    if (this.updatedSandboxConfig.externalPartyAuthHeaderName) {
+      if (!this.headerNameRegex.test(this.updatedSandboxConfig.externalPartyAuthHeaderName)) return true;
+      if (!this.headerValueRegex.test(this.updatedSandboxConfig.externalPartyAuthHeaderValue)) return true;
+    }
     for (let additionalHeader of this.updatedSandboxConfig.externalPartyAdditionalHeaders) {
       if (!this.headerNameRegex.test(additionalHeader.headerName)) return true;
       if (!this.headerValueRegex.test(additionalHeader.headerValue)) return true;
@@ -69,7 +77,7 @@ export class EditSandboxComponent {
   async onUpdate() {
     if (this.cannotUpdate()) return;
     this.updatingSandbox = true;
-    await this.conformanceService.updateSandboxConfig(
+    const response: any = await this.conformanceService.updateSandboxConfig(
       this.sandboxId,
       this.updatedSandboxConfig!.sandboxName,
       this.updatedSandboxConfig!.externalPartyUrl,
@@ -77,9 +85,17 @@ export class EditSandboxComponent {
       this.updatedSandboxConfig!.externalPartyAuthHeaderValue,
       this.updatedSandboxConfig!.externalPartyAdditionalHeaders,
     );
-    this.router.navigate([
-      "/sandbox", this.sandboxId
-    ]);
+    if (response?.error) {
+      await MessageDialog.open(
+        this.dialog,
+        "Error completing action",
+        response.error);
+      this.updatingSandbox = false;
+    } else {
+      this.router.navigate([
+        "/sandbox", this.sandboxId
+      ]);
+    }
   }
 
   onCancel() {

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,13 +15,13 @@ import java.util.stream.StreamSupport;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.ScenarioCheck;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.report.ConformanceReport;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ConformanceScenario;
-import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
 import org.dcsa.conformance.core.traffic.*;
@@ -34,7 +33,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
   private final TrafficRecorder trafficRecorder;
   private final JsonNodeMap persistentMap;
   private final Consumer<ConformanceWebRequest> asyncWebClient;
-  private final LinkedHashMap<String, ArrayList<ConformanceScenario>> scenariosByModuleName =
+  private final LinkedHashMap<String, List<ConformanceScenario>> scenariosByModuleName =
       new LinkedHashMap<>();
   private final LinkedHashMap<UUID, ConformanceScenario> _scenariosById = new LinkedHashMap<>();
   private final Map<UUID, UUID> latestRunIdsByScenarioId = new HashMap<>();
@@ -53,22 +52,16 @@ public class ConformanceOrchestrator implements StatefulEntity {
     this.persistentMap = persistentMap;
     this.asyncWebClient = asyncWebClient;
 
-    LinkedHashMap<String, ? extends ScenarioListBuilder<?>> moduleScenarioListBuilders =
-        componentFactory.createModuleScenarioListBuilders(
-            sandboxConfiguration.getParties(), sandboxConfiguration.getCounterparts());
-    AtomicInteger nextModuleIndex = new AtomicInteger();
-    moduleScenarioListBuilders.forEach(
-        (moduleName, scenarioListBuilder) -> {
-          ArrayList<ConformanceScenario> moduleScenarios = new ArrayList<>();
-          scenariosByModuleName.put(moduleName, moduleScenarios);
-          scenarioListBuilder
-              .buildScenarioList(nextModuleIndex.getAndIncrement())
-              .forEach(
-                  scenario -> {
-                    moduleScenarios.add(scenario);
-                    this._scenariosById.put(scenario.getId(), scenario);
-                  });
-        });
+    componentFactory.generateConformanceScenarios(
+      this.scenariosByModuleName,
+      sandboxConfiguration.getParties(),
+      sandboxConfiguration.getCounterparts()
+    );
+    for (var scenarios : this.scenariosByModuleName.values()) {
+      for (var scenario : scenarios) {
+        _scenariosById.put(scenario.getId(), scenario);
+      }
+    }
   }
 
   @Override
@@ -255,21 +248,21 @@ public class ConformanceOrchestrator implements StatefulEntity {
 
     String actionId = partyInput.get("actionId").asText();
     if (!Objects.equals(actionId, nextAction.getId().toString())) {
-      if (partyInput.has("input")) {
-        throw new IllegalStateException(
-            "Unexpected party input %s: the expected next action id is %s in current scenario %s"
-                .formatted(
-                    partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
-      } else {
-        log.info("Ignoring redundant party input %s".formatted(partyInput.toPrettyString()));
-        return;
-      }
+      log.info(
+          "Ignoring party input %s: the expected next action id is %s in current scenario %s"
+              .formatted(
+                  partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
+      return;
     }
 
     waitingForBiConsumer.accept(nextAction.getSourcePartyName(), null);
 
     currentScenario.popNextAction();
-    nextAction.handlePartyInput(partyInput);
+    try {
+      nextAction.handlePartyInput(partyInput);
+    } catch (Exception e) {
+      throw new UserFacingException(e);
+    }
     notifyNextActionParty();
   }
 
@@ -324,9 +317,14 @@ public class ConformanceOrchestrator implements StatefulEntity {
     ConformanceAction nextAction = currentScenario.peekNextAction();
     if (nextAction == null) {
       log.info(
-          "Ignoring request to complete the current action: the currently active scenario '%s' has no next action"
+          "Ignoring request to complete the current action: the currently active scenario '%s' has no current action"
               .formatted(currentScenario.toString()));
       return;
+    }
+    if (!nextAction.hasMatchedExchange()) {
+      throw new UserFacingException(
+          "A required API exchange was not yet detected for action '%s'"
+              .formatted(nextAction.getActionTitle()));
     }
 
     currentScenario.popNextAction();
@@ -377,7 +375,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
             .map(
               moduleNameAndScenarios -> {
                 String moduleName = moduleNameAndScenarios.getKey();
-                ArrayList<ConformanceScenario> scenarios = moduleNameAndScenarios.getValue();
+                var scenarios = moduleNameAndScenarios.getValue();
                 return new ConformanceCheck(
                   moduleName.isBlank() ? "All scenarios" : moduleName) { // module check
                   @Override

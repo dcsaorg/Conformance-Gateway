@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA eBL Platform Interoperability API",
-    "description": "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support non-repudiable transfer of eBL document and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2>\n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300B2).\nPlease [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support non-repudiable transfer of eBL document and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n0. Optionally, using the [**'Receiver Validation'**](#/Receiver%20validation/post-receiver-validation) endpoint to allow the sending user to validate the identity of the receiver,  before they transfer the eBL.\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2>\n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300).\nPlease [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -12,15 +12,19 @@
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "3.0.0-Beta-3"
+    "version": "3.0.0"
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_PINT/3.0.0-Beta-3",
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_PINT/3.0.0",
       "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "tags": [
+    {
+      "name": "Receiver validation",
+      "description": "Receiver validation"
+    },
     {
       "name": "Start envelope transfer",
       "description": "Start envelope transfer"
@@ -439,7 +443,7 @@
         "minLength": 64,
         "pattern": "^[0-9a-f]+$",
         "type": "string",
-        "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).  The transport document must be in the [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785) canonical form before the checksum is computed.\n",
+        "description": "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234). The transport document must be in the [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785) canonical form before the checksum is computed.\n",
         "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
       },
       "ErrorResponse": {
@@ -508,27 +512,60 @@
             "type": "array",
             "description": "An array of errors providing more detail about the root cause.\n",
             "items": {
-              "$ref": "#/components/schemas/Detailed Error"
+              "$ref": "#/components/schemas/DetailedError"
             }
           }
         },
         "description": "Unexpected error"
       },
-      "ReceiverValidationResponse": {
+      "DetailedError": {
+        "title": "Detailed Error",
         "required": [
-          "partyName"
+          "errorCodeMessage",
+          "errorCodeText"
         ],
         "type": "object",
         "properties": {
-          "partyName": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "property": {
             "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Name of the party.\n",
-            "example": "Globeteam"
+            "description": "The name of the property causing the error.\n",
+            "example": "facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value of the property causing the error serialised as a string exactly as in the original request.\n",
+            "example": "SG SIN WHS"
+          },
+          "jsonPath": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
+            "example": "$.location.facilityCode"
+          },
+          "errorCodeText": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A standard short description corresponding to the `errorCode`.\n",
+            "example": "invalidData"
+          },
+          "errorCodeMessage": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "A long description corresponding to the `errorCode` with additional information.\n",
+            "example": "Spaces not allowed in facility code"
           }
         },
-        "description": "Response to a receiver validation response, where the party code could successfully identified.\n"
+        "description": "A detailed description of what has caused the error.\n"
       },
       "EblEnvelope": {
         "required": [
@@ -552,6 +589,22 @@
             }
           }
         }
+      },
+      "ReceiverValidationResponse": {
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "Globeteam"
+          }
+        },
+        "description": "Response to a receiver validation response, where the party code could successfully identified.\n"
       },
       "EnvelopeManifest": {
         "required": [
@@ -641,9 +694,9 @@
         "properties": {
           "eblPlatform": {
             "maxLength": 4,
-            "pattern": "\\S+",
+            "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-3.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
             "example": "BOLE"
           },
           "transportDocumentChecksum": {
@@ -662,18 +715,10 @@
             "nullable": true,
             "example": "20a0257b313ae08417e07f6555c4ec829a512c083f3ead16b41158018a22abe9"
           },
-          "eBLVisualisationByCarrier": {
-            "description": "actual type: [`DocumentMetadata`](#\\DocumentMetadata)\n\nThis attribute is used to transfer metadata of the **'Digital copy of the original physical B/L document' document** a.k.a. **eBLVisualisationByCarrier document**. If this attribute is defined with the initial eBL envelope transfer(in the first `EnvelopeTransferChainEntrySignedContent` entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list), eBLVisualisationByCarrier document **must** be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document (in other words, for each `EnvelopeTransferChainEntrySignedContent` entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, JWS-signed payload `EnvelopeTransferChainEntry.eBLVisualisationByCarrier` attribute must have the identical value).\n",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DocumentMetadata"
-              }
-            ]
-          },
-          "IssuanceManifestSignedContent": {
+          "issuanceManifestSignedContent": {
             "pattern": "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]+)$",
             "type": "string",
-            "description": "JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [IssuanceManifest](#/IssuanceManifest).\n\nThe field is conditional and must be provided in the first EnvelopeTransferChainEntry. The value must be signed by the carrier.\n",
+            "description": "JWS content with compact serialization according to [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515#section-7.1). JWS-signed payload is defined in schema [IssuanceManifest](#/IssuanceManifest).\nThe field is conditional and must be provided in the first EnvelopeTransferChainEntry. The value must be signed by the carrier.\n",
             "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
           },
           "transactions": {
@@ -807,6 +852,7 @@
         "type": "object",
         "properties": {
           "name": {
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "example": "Carrier rendered copy of the original B/L document.pdf"
           },
@@ -840,6 +886,7 @@
           "action": {
             "type": "string",
             "description": "Action denotes the transaction type, which can have one of the following values:\n- `ISSU` (Issuance)\n- `TRNS` (Transfer of possession)\n- `ENDO` (Endorsement a.k.a. Transfer of title)\n- `RESD` (Request to surrender for delivery)\n- `RESA` (Request to surrender for amendment)\n- `SACC` (Surrender accepted)\n- `SREJ` (Surrender rejected)\n\nThe `ISSU` `action` is used for the eBL issuance transaction from the carrier party to the shipper party, and must appear exactly once in the first transaction of the first [`EnvelopeTransferChainEntry`](#/EnvelopeTransferChainEntry) entry (as JWS payload of [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry) in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list. If the eBL document is issued to the shipper party that resides on the different eBL Platform from the carrier's platform, initial envelope transfer should contain envelope transfer chain where first entry's first transaction has `ISSU` `action` type. \n\nThe `TRNS` `action` is used for the transfer of possession of the eBL from the current possessor party to the new possessor party.\n\nThe `ENDO` `action` is used for the endorsement (a.k.a. transfer of title, or the right to take the delivery of the goods) of To-order eBL documents, where the new endorsee party is not named in the eBL document. The endorsement should always happen on the platform of the user that is not only the current endorsee, but also the current possessor of the eBL document. If the new endorsee party resides on the different eBL Platform from the current endorsee's platform, the envelope transfer process is used to notify the new endorsee of the `ENDO` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. \n\nIf the party is the current possessor, and the party is the current consignee/endorsee/shipper (or eBL document is blank-endorsed), the party may request to surrender the eBL to the carrier. This is done by using one of the Request to surrender action types (`RESD` `action` or `RESA` `action`) and with the issuing carrier or the relevant carrier agent as the `recipient` of the action. \n \n The `RESD` `action` is used when the party wants to request the delivery of the goods. If the request is accepted (for details see `SACC` `action`), the carrier and the party submitting the surrender request will negotiate how the goods will be delivered (e.g. via DCSA shipment release API).\n \n The `RESA` `action` is used when the party wants to surrender the eBL document, so that the carrier can issue an amended eBL document. If the request is accepted (for details see `SACC` `action` resonse), the alignment on the exact change(s) that need to be made to the eBL document is done outside of the PINT API (e.g. via the DCSA EBL API). If the request is accepted, the existing eBL document is voided along with its envelope transfer chain, and the amended eBL document must be reissued with a new envelope transfer chain (for details see the `ISSU` `action` type description paragraph above). The `RESA` `action` is also used for switch to paper as the DCSA process flow for switching to paper is part of the amendment process (e.g. to note how many originals and copies with and without charges should be issued).\n\nIf a surrender request (`RESD` `action` or `RESA` `action`) is not addressed to the carrier that issued the eBL document or to their legal representative, then the receiving platform should reject the envelope transfer with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse).\n\nThe `SACC` `action` is used by the carrier to asynchronously accept the surrender request initiated via `RESD` `action` or `RESA` `action`. If the party that submitted the surrender request is on the different platform, the envelope transfer process is used to notify the (surrender request submitter) party of the `SACC` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. No transactions may occur after a `SACC` `action` transaction. Any envelope transfer chain changes with new transactions after a `SACC` `action` transaction are invalid and should be answered with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse). \n\nThe `SREJ` `action` is used by the carrier to asynchronously reject the surrender request initiated via `RESD` `action` or `RESA` `action`, and return the eBL document possession to the party that submitted the surrender request.\n\nWhen the transaction recipient is residing on the different platform from the transaction actor's platform, the transaction should be followed by the envelope transfer from the actor's (sending) platform to the recipient's (receiving) platform. If the envelope transfer is caused by either `ENDO` `action` or `SACC` `action` transaction (where the recipient is on the different platform), the envelope transfer process is NOT causing transfer of possession of the eBL document, but is merely used as notificaiton for the non-repudiation purposes.\n",
+            "example": "ISSU",
             "enum": [
               "ISSU",
               "ENDO",
@@ -870,6 +917,7 @@
           },
           "comments": {
             "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Free text comment for the party receiving the transaction.",
             "example": "The B/L has been issued."
@@ -885,7 +933,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -895,7 +943,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-3.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
             "example": "BOLE"
           },
           "identifyingCodes": {
@@ -925,11 +973,11 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
-            "maxLength": 100,
+            "maxLength": 150,
             "type": "string",
             "description": "Code to identify the party as provided by the code list provider\n",
             "example": "MSK"
@@ -937,7 +985,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
             "example": "DID"
           }
         }
@@ -967,7 +1015,7 @@
             "example": "DK"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the `taxLegalReference`\n",
@@ -990,7 +1038,6 @@
           "isElectronic",
           "isShippedOnBoardType",
           "isToOrder",
-          "issuingParty",
           "partyContactDetails",
           "receiptTypeAtOrigin",
           "termsAndConditions",
@@ -1058,28 +1105,28 @@
           "numberOfCopiesWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfCopiesWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "The requested number of copies of the Transport document to be issued by the carrier **NOT** including charges. Only applicable for physical (paper) documents",
+            "description": "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.",
             "format": "int32",
             "example": 2
           },
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer with charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the bill of lading that has been requested by the customer without charges. Only applicable for physical documents.\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -1132,6 +1179,13 @@
             "description": "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
             "format": "date",
             "example": "2020-12-12"
+          },
+          "displayedShippedOnBoardReceivedForShipment": {
+            "maxLength": 250,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.\n",
+            "example": "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier"
           },
           "termsAndConditions": {
             "maxLength": 50000,
@@ -1201,7 +1255,7 @@
           "declaredValue": {
             "minimum": 0,
             "type": "number",
-            "description": "The value of the cargo that the shipper declares to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e. freight which is calculated based on the value of the goods declared by the shipper.\n",
+            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n\n**Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).\n",
             "format": "float",
             "example": 1231.1
           },
@@ -1222,15 +1276,12 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association) _includes SPLC (Standard Point Location Code)_\n",
+            "description": "The code list provider for the carrier code. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
             "example": "NMFTA",
             "enum": [
               "SMDG",
               "NMFTA"
             ]
-          },
-          "issuingParty": {
-            "$ref": "#/components/schemas/IssuingParty"
           },
           "carrierClauses": {
             "type": "array",
@@ -1261,45 +1312,7 @@
             }
           },
           "placeOfIssue": {
-            "title": "Place of Issue",
-            "type": "object",
-            "description": "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
-            "oneOf": [
-              {
-                "title": "UN Location Code",
-                "required": [
-                  "UNLocationCode"
-                ],
-                "type": "object",
-                "properties": {
-                  "UNLocationCode": {
-                    "maxLength": 5,
-                    "minLength": 5,
-                    "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-                    "type": "string",
-                    "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-                    "example": "NLAMS"
-                  }
-                }
-              },
-              {
-                "title": "Country Code",
-                "required": [
-                  "countryCode"
-                ],
-                "type": "object",
-                "properties": {
-                  "countryCode": {
-                    "maxLength": 2,
-                    "minLength": 2,
-                    "pattern": "^[A-Z]{2}$",
-                    "type": "string",
-                    "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                    "example": "NL"
-                  }
-                }
-              }
-            ]
+            "$ref": "#/components/schemas/Place of Issue"
           },
           "invoicePayableAt": {
             "title": "Invoice Payable At",
@@ -1351,6 +1364,18 @@
           "documentParties": {
             "$ref": "#/components/schemas/Document Parties"
           },
+          "routingOfConsignmentCountries": {
+            "type": "array",
+            "description": "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "items": {
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string",
+              "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+              "example": "NL"
+            }
+          },
           "consignmentItems": {
             "minItems": 1,
             "type": "array",
@@ -1392,7 +1417,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "maxLength": 100,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the contact\n",
@@ -1452,11 +1477,12 @@
           "type": {
             "maxLength": 3,
             "type": "string",
-            "description": "The reference type codes defined by DCSA. Possible values are:\n- `FF` (Freight Forwarder’s Reference)\n- `SI` (Shipper’s Reference)\n- `SPO` (Shippers Purchase Order Reference)\n- `CPO` (Consignees Purchase Order Reference)\n- `CR` (Customer’s Reference)\n- `AAO` (Consignee’s Reference)\n- `ECR` (Empty container release reference)\n- `CSI` (Customer shipment ID)\n- `BPR` (Booking party reference number)\n- `BID` (Booking Request ID)\n- `SAC` (Shipping Agency Code)\n",
-            "example": "FF"
+            "description": "The reference type codes defined by DCSA. Possible values are:\n- `CR` (Customer’s Reference)\n- `AKG` (Vehicle Identification Number)\n",
+            "example": "CR"
           },
           "value": {
-            "maxLength": 100,
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The value of the reference. \n",
             "example": "HHL00103004"
@@ -1501,6 +1527,13 @@
               "example": "851713"
             }
           },
+          "nationalCommodityCodes": {
+            "type": "array",
+            "description": "A list of `National Commodity Codes` that apply to this `commodity`\n",
+            "items": {
+              "$ref": "#/components/schemas/NationalCommodityCode"
+            }
+          },
           "shippingMarks": {
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
@@ -1536,12 +1569,57 @@
         },
         "description": "Defines a list of `CargoItems` belonging together and the associated `Booking`. A `ConsignmentItem` can be split across multiple containers (`UtilizedTransportEquipment`) by referencing multiple `CargoItems`\n"
       },
+      "NationalCommodityCode": {
+        "title": "National Commodity Code",
+        "required": [
+          "countryCode",
+          "type",
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 10,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "example": "NCM"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string",
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "BR"
+          },
+          "values": {
+            "minItems": 1,
+            "type": "array",
+            "description": "A list of `national commodity codes` values.\n",
+            "example": [
+              "1515",
+              "2106",
+              "2507",
+              "2512"
+            ],
+            "items": {
+              "maxLength": 10,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "The value of the `National Commodity Code`\n",
+              "example": "1515"
+            }
+          }
+        },
+        "description": "The national commodity classification code linked to a country with a value.\n\nAn example could look like this:\n\n| Type  | Country | Value |\n|-------|:-------:|-------------|\n|NCM|BR|['1515', '2106', '2507', '2512']|\n"
+      },
       "CustomsReference": {
         "title": "Customs Reference",
         "required": [
           "countryCode",
           "type",
-          "value"
+          "values"
         ],
         "type": "object",
         "properties": {
@@ -1560,12 +1638,16 @@
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
             "example": "DK"
           },
-          "value": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The value of the `customsReference`\n",
-            "example": "4988470982020120017"
+          "values": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "The value of the `customsReference`\n",
+              "example": "4988470982020120017"
+            }
           }
         },
         "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
@@ -1624,6 +1706,20 @@
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
           },
+          "nationalCommodityCodes": {
+            "type": "array",
+            "description": "A list of `National Commodity Codes` that apply to this `cargoItem`\n",
+            "items": {
+              "$ref": "#/components/schemas/NationalCommodityCode"
+            }
+          },
+          "houseBillOfLadingReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
+            "example": "ABC123"
+          },
           "customsReferences": {
             "type": "array",
             "description": "A list of `Customs references`\n",
@@ -1670,6 +1766,12 @@
             "type": "string",
             "description": "Description of the outer packaging/overpack.\n",
             "example": "Drum, steel"
+          },
+          "woodDeclaration": {
+            "maxLength": 30,
+            "type": "string",
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED AND CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -1774,7 +1876,7 @@
             "description": "Indicates if high temperature cargo is shipped.\n",
             "example": false
           },
-          "isCompetentAuthorityApprovalProvided": {
+          "isCompetentAuthorityApprovalRequired": {
             "type": "boolean",
             "description": "Indicates if the cargo require approval from authorities\n",
             "example": false
@@ -2032,7 +2134,7 @@
           },
           "shippingMarks": {
             "type": "array",
-            "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+            "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
               "maxLength": 500,
               "type": "string",
@@ -2121,7 +2223,7 @@
           },
           "source": {
             "type": "string",
-            "description": "The source of the seal, namely who has affixed the seal. This attribute links to the Seal Source ID defined in the Seal Source reference data entity.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n",
+            "description": "The source of the seal, namely who has affixed the seal.\n- `CAR` (Carrier)\n- `SHI` (Shipper)\n- `VET` (Veterinary)\n- `CUS` (Customs)\n\n**Condition:** Seal source may be required depending on the type of commodity being shipped.\n",
             "example": "CUS",
             "enum": [
               "CAR",
@@ -2227,7 +2329,7 @@
           "plannedDepartureDate",
           "portOfDischarge",
           "portOfLoading",
-          "vesselVoyage"
+          "vesselVoyages"
         ],
         "type": "object",
         "properties": {
@@ -2246,13 +2348,13 @@
           "preCarriageBy": {
             "maxLength": 50,
             "type": "string",
-            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:\n- `VESSEL` (Vessel)\n- `RAIL` (Rail)\n- `TRUCK` (Truck)\n- `BARGE` (Barge)\n",
+            "description": "Mode of transportation for pre-carriage when transport to the port of loading is organized by the carrier. If this attributes is populated, then a Place of Receipt must also be defined. The currently supported values include:\n- `VESSEL` (Vessel)\n- `RAIL` (Rail)\n- `TRUCK` (Truck)\n- `BARGE` (Barge)\n- `MULTIMODAL` (if multiple modes are used)\n",
             "example": "RAIL"
           },
           "onCarriageBy": {
             "maxLength": 50,
             "type": "string",
-            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- `VESSEL` (Vessel)\n- `RAIL` (Rail)\n- `TRUCK` (Truck)\n- `BARGE` (Barge)\n",
+            "description": "Mode of transportation for on-carriage when transport from the port of discharge is organized by the carrier. If this attributes is populated, then a Place of Delivery must also be defined. The currently supported values include:\n- `VESSEL` (Vessel)\n- `RAIL` (Rail)\n- `TRUCK` (Truck)\n- `BARGE` (Barge)\n- `MULTIMODAL` (if multiple modes are used)\n",
             "example": "TRUCK"
           },
           "placeOfReceipt": {
@@ -2316,139 +2418,162 @@
       "PlaceOfReceipt": {
         "title": "Place of Receipt",
         "type": "object",
-        "description": "General purpose object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PortOfLoading": {
         "title": "Port of Loading",
         "type": "object",
-        "description": "General purpose object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "CITY": "#/components/schemas/CityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/CityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PortOfDischarge": {
         "title": "Port of Discharge",
         "type": "object",
-        "description": "General purpose object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **one** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "CITY": "#/components/schemas/CityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/CityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "PlaceOfDelivery": {
         "title": "Place of Delivery",
         "type": "object",
-        "description": "General purpose object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          },
+          "geoCoordinate": {
+            "$ref": "#/components/schemas/GeoCoordinate"
+          }
+        },
+        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "OnwardInlandRouting": {
         "title": "Onward Inland Routing",
         "type": "object",
-        "description": "General purpose object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **one** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/Facility"
+          },
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
         "example": {
           "locationName": "Hamburg",
-          "locationType": "UNLO",
           "UNLocationCode": "DEHAM"
-        },
-        "discriminator": {
-          "propertyName": "locationType",
-          "mapping": {
-            "ADDR": "#/components/schemas/AddressLocation",
-            "FACI": "#/components/schemas/FacilityLocation",
-            "UNLO": "#/components/schemas/UNLocationLocation"
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AddressLocation"
-          },
-          {
-            "$ref": "#/components/schemas/FacilityLocation"
-          },
-          {
-            "$ref": "#/components/schemas/UNLocationLocation"
-          }
-        ]
+        }
       },
       "Charge": {
         "title": "Charge",
@@ -2518,45 +2643,17 @@
         },
         "description": "Addresses the monetary value of freight and other service charges for a `Booking`.\n"
       },
-      "AddressLocation": {
-        "title": "Address Location",
-        "required": [
-          "address",
-          "locationType"
-        ],
-        "type": "object",
-        "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as an `Address` location interface.",
-            "example": "ADDR"
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          }
-        },
-        "description": "An interface used to express a location using an `Address` object."
-      },
       "Address": {
         "title": "Address",
         "required": [
           "city",
           "countryCode",
-          "street",
-          "streetNumber"
+          "street"
         ],
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -2580,8 +2677,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -2604,63 +2707,46 @@
         },
         "description": "An object for storing address related information\n"
       },
-      "CityLocation": {
-        "title": "City Location",
+      "City": {
+        "title": "City",
         "required": [
           "city",
-          "locationType"
+          "countryCode"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
+          "city": {
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
+            "description": "The city name of the party’s address.\n",
+            "example": "Amsterdam"
           },
-          "locationType": {
-            "maxLength": 4,
+          "stateRegion": {
+            "maxLength": 65,
             "type": "string",
-            "description": "Discriminator used to identify this as a `City Location` interface\n",
-            "example": "CITY"
+            "description": "The state/region of the party’s address.\n",
+            "example": "North Holland"
           },
-          "city": {
-            "$ref": "#/components/schemas/CityLocation_city"
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string",
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "NL"
           }
         },
-        "description": "An interface used to express a location using a `City`, `state/region` and `country`\n"
+        "description": "An object for storing city, state/region and country related information\n"
       },
-      "FacilityLocation": {
-        "title": "Facility Location",
+      "Facility": {
+        "title": "Facility",
         "required": [
           "facilityCode",
-          "facilityCodeListProvider",
-          "locationType"
+          "facilityCodeListProvider"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          },
-          "locationType": {
-            "maxLength": 4,
-            "type": "string",
-            "description": "Discriminator used to identify this as a `Facility Location` interface\n",
-            "example": "FACI"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n\nThis field is **conditionally mandatory** depending on the value of the `facilityCodeListProvider` field.",
-            "example": "NLAMS"
-          },
           "facilityCode": {
             "maxLength": 6,
             "pattern": "^\\S(?:.*\\S)?$",
@@ -2678,40 +2764,30 @@
             ]
           }
         },
-        "description": "An interface used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
+        "description": "An object used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.\n"
       },
-      "UNLocationLocation": {
-        "title": "UNLocation Location",
+      "GeoCoordinate": {
+        "title": "Geo Coordinate",
         "required": [
-          "UNLocationCode",
-          "locationType"
+          "latitude",
+          "longitude"
         ],
         "type": "object",
         "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
+          "latitude": {
+            "maxLength": 10,
             "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
+            "description": "Geographic coordinate that specifies the north–south position of a point on the Earth's surface.",
+            "example": "48.8585500"
           },
-          "locationType": {
-            "maxLength": 4,
+          "longitude": {
+            "maxLength": 11,
             "type": "string",
-            "description": "Discriminator used to identify this as a `UNLocation` location interface.",
-            "example": "UNLO"
-          },
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-            "example": "NLAMS"
+            "description": "Geographic coordinate that specifies the east–west position of a point on the Earth's surface.",
+            "example": "2.294492036"
           }
         },
-        "additionalProperties": false,
-        "description": "An interface used to express a location using a `Un Location Code`."
+        "description": "An object used to express a location using `latitude` and `longitude`.\n"
       },
       "OtherDocumentParty": {
         "title": "Other Document Party",
@@ -2727,7 +2803,7 @@
           "partyFunction": {
             "maxLength": 3,
             "type": "string",
-            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n- `N1` (First Notify Party)\n- `N2` (Second Notify Party)\n- `NI` (Other Notify Party)\n",
+            "description": "Specifies the role of the party in a given context. Possible values are:\n\n- `SCO` (Service Contract Owner)\n- `DDR` (Consignor's freight forwarder)\n- `DDS` (Consignee's freight forwarder)\n- `COW` (Invoice payer on behalf of the consignor (shipper))\n- `COX` (Invoice payer on behalf of the consignee)\n",
             "example": "DDS"
           }
         },
@@ -2738,13 +2814,12 @@
         "required": [
           "city",
           "countryCode",
-          "street",
-          "streetNumber"
+          "street"
         ],
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
             "description": "The name of the street of the party’s address.",
             "example": "Ruijggoordweg"
@@ -2768,8 +2843,14 @@
             "description": "The post code of the party’s address.",
             "example": "1047 HM"
           },
+          "PObox": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "A numbered box at a post office where a person or business can have mail or parcels delivered.",
+            "example": "123"
+          },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "The city name of the party’s address.\n",
@@ -2808,20 +2889,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
-            "minItems": 1,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -2848,6 +2935,20 @@
             "items": {
               "$ref": "#/components/schemas/PartyContactDetail"
             }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Shipper`.\n",
+            "example": "HHL007"
+          },
+          "purchaseOrderReference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A purchase order reference linked to the `Shipper`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.\n\n**Condition:** Either the `address` or the `displayedAddress` must be included in the `Transport Document`.\n"
@@ -2860,20 +2961,26 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
             "example": "IKEA Denmark"
           },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
-            "minItems": 1,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -2900,6 +3007,20 @@
             "items": {
               "$ref": "#/components/schemas/PartyContactDetail"
             }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Consignee`.\n",
+            "example": "HHL007"
+          },
+          "purchaseOrderReference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A purchase order reference linked to the `Consignee`.\n",
+            "example": "HHL007"
           }
         },
         "description": "The party to which goods are consigned in the `Master Bill of Lading`.\n\n**Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)\n"
@@ -2912,7 +3033,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -2922,10 +3043,9 @@
             "$ref": "#/components/schemas/PartyAddress"
           },
           "displayedAddress": {
-            "maxItems": 999,
-            "minItems": 1,
+            "maxItems": 6,
             "type": "array",
-            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`. For physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters. No limit for electronic BL (`isElectronic=true`).\n\n**Condition:** if provided, the displayed address must be included in the Transport Document.\n",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
             "items": {
               "maxLength": 35,
               "type": "string",
@@ -2966,7 +3086,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -2985,6 +3105,71 @@
         },
         "description": "The party on the import side assigned by the carrier to whom the customer need to reach out to for cargo release.\n"
       },
+      "NotifyParty": {
+        "title": "Notify Party",
+        "required": [
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "IKEA Denmark"
+          },
+          "typeOfPerson": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL PERSON"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PartyAddress"
+          },
+          "displayedAddress": {
+            "maxItems": 6,
+            "type": "array",
+            "description": "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+            "items": {
+              "maxLength": 35,
+              "type": "string",
+              "description": "A single address line\n",
+              "example": "Strawinskylaan 4117"
+            }
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          },
+          "partyContactDetails": {
+            "type": "array",
+            "description": "A list of contact details\n",
+            "items": {
+              "$ref": "#/components/schemas/PartyContactDetail"
+            }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `NotifyParty`.\n",
+            "example": "HHL007"
+          }
+        },
+        "description": "The person to be notified when a shipment arrives at its destination.\n"
+      },
       "Party": {
         "title": "Party",
         "required": [
@@ -2993,7 +3178,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3021,6 +3206,13 @@
             "items": {
               "$ref": "#/components/schemas/PartyContactDetail"
             }
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference linked to the `Party`.\n",
+            "example": "HHL007"
           }
         },
         "description": "Refers to a company or a legal entity.\n"
@@ -3034,7 +3226,7 @@
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -3066,57 +3258,60 @@
         },
         "description": "Refers to a company or a legal entity.\n"
       },
-      "Detailed Error": {
-        "title": "Detailed Error",
-        "required": [
-          "errorCodeMessage",
-          "errorCodeText"
-        ],
+      "Place of Issue": {
+        "title": "Place of Issue",
         "type": "object",
         "properties": {
-          "errorCode": {
-            "maximum": 9999,
-            "minimum": 7000,
-            "type": "integer",
-            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).\n",
-            "format": "int32",
-            "example": 7003
-          },
-          "property": {
+          "locationName": {
             "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The name of the property causing the error.\n",
-            "example": "facilityCode"
-          },
-          "value": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "The value of the property causing the error serialised as a string exactly as in the original request.\n",
-            "example": "SG SIN WHS"
-          },
-          "jsonPath": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
-            "example": "$.location.facilityCode"
-          },
-          "errorCodeText": {
-            "maxLength": 100,
-            "type": "string",
-            "description": "A standard short description corresponding to the `errorCode`.\n",
-            "example": "invalidData"
-          },
-          "errorCodeMessage": {
-            "maxLength": 200,
-            "type": "string",
-            "description": "A long description corresponding to the `errorCode` with additional information.\n",
-            "example": "Spaces not allowed in facility code"
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
           }
-        }
+        },
+        "description": "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
+        "oneOf": [
+          {
+            "title": "UN Location Code",
+            "required": [
+              "UNLocationCode"
+            ],
+            "type": "object",
+            "properties": {
+              "UNLocationCode": {
+                "maxLength": 5,
+                "minLength": 5,
+                "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+                "type": "string",
+                "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+                "example": "NLAMS"
+              }
+            }
+          },
+          {
+            "title": "Country Code",
+            "required": [
+              "countryCode"
+            ],
+            "type": "object",
+            "properties": {
+              "countryCode": {
+                "maxLength": 2,
+                "minLength": 2,
+                "pattern": "^[A-Z]{2}$",
+                "type": "string",
+                "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                "example": "NL"
+              }
+            }
+          }
+        ]
       },
       "Document Parties": {
         "title": "Document Parties",
         "required": [
+          "issuingParty",
           "shipper"
         ],
         "type": "object",
@@ -3130,8 +3325,19 @@
           "endorsee": {
             "$ref": "#/components/schemas/Endorsee"
           },
+          "issuingParty": {
+            "$ref": "#/components/schemas/IssuingParty"
+          },
           "carriersAgentAtDestination": {
             "$ref": "#/components/schemas/CarriersAgentAtDestination"
+          },
+          "notifyParties": {
+            "maxItems": 3,
+            "type": "array",
+            "description": "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
+            "items": {
+              "$ref": "#/components/schemas/NotifyParty"
+            }
           },
           "other": {
             "type": "array",
@@ -3257,37 +3463,6 @@
           }
         },
         "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
-      },
-      "CityLocation_city": {
-        "required": [
-          "city",
-          "countryCode"
-        ],
-        "type": "object",
-        "properties": {
-          "city": {
-            "maxLength": 65,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The city name of the party’s address.\n",
-            "example": "Amsterdam"
-          },
-          "stateRegion": {
-            "maxLength": 65,
-            "type": "string",
-            "description": "The state/region of the party’s address.\n",
-            "example": "North Holland"
-          },
-          "countryCode": {
-            "maxLength": 2,
-            "minLength": 2,
-            "pattern": "^[A-Z]{2}$",
-            "type": "string",
-            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "NL"
-          }
-        },
-        "description": "An object for storing city, state/region and coutry related information\n"
       }
     },
     "parameters": {
@@ -3339,7 +3514,7 @@
         "explode": false,
         "schema": {
           "type": "string",
-          "example": "3.0.0-Beta-3"
+          "example": "3.0.0"
         }
       }
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.dcsa.conformance</groupId>
@@ -9,26 +9,25 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-    <artifactId>ebl-surrender</artifactId>
-    <name>dcsa-conformance-ebl-surrender</name>
-    <description>DCSA Conformance eBL Surrender</description>
+	<artifactId>ebl-surrender</artifactId>
+	<name>dcsa-conformance-ebl-surrender</name>
+	<description>DCSA Conformance eBL Surrender</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.dcsa.conformance</groupId>
-            <artifactId>core</artifactId>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.dcsa.conformance</groupId>
+			<artifactId>core</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.networknt/json-schema-validator -->
-        <dependency>
-            <groupId>com.networknt</groupId>
-            <artifactId>json-schema-validator</artifactId>
-            <version>1.0.86</version>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.networknt</groupId>
+			<artifactId>json-schema-validator</artifactId>
+			<version>1.0.86</version>
+		</dependency>
+	</dependencies>
 </project>

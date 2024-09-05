@@ -100,6 +100,21 @@ public class EBLChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.UN_LOCODE_DATASET)
   );
 
+  private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT = JsonAttribute.ifThen(
+    "Validate displayed address length for EBLs",
+      td -> td.path("isElectronic").asBoolean(false),
+      JsonAttribute.allIndividualMatchesMustBeValid(
+      "(not used)",
+      mav -> {
+        mav.submitAllMatching("documentParties.shipper.displayedAddress");
+        mav.submitAllMatching("documentParties.consignee.displayedAddress");
+        mav.submitAllMatching("documentParties.endorsee.displayedAddress");
+        mav.submitAllMatching("documentParties.notifyParties.*.displayedAddress");
+      },
+      JsonAttribute.matchedMaxLength(2)
+    )
+  );
+
   private static final Consumer<MultiAttributeValidator> ALL_UTE = mav -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
   private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = uteNode -> {
@@ -504,6 +519,7 @@ public class EBLChecks {
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
+    EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
@@ -603,6 +619,7 @@ public class EBLChecks {
         "airExchangeSetpoint",
         "airExchangeUnit"
       )),
+    EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,

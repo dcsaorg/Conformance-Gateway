@@ -559,6 +559,17 @@ public class JsonAttribute {
       };
   }
 
+  public static JsonContentMatchedValidation matchedMaxLength(int length) {
+    return (node, context) -> {
+      if (node.isArray() && node.size() > length) {
+        return Set.of(
+          "The array '%s' had %d elements, which is longer than the limit of %d"
+            .formatted(context, node.size(), length));
+      }
+      return Collections.emptySet();
+    };
+  }
+
   public static JsonRebaseableContentCheck mustBeAbsent(
     JsonPointer jsonPointer
   ) {

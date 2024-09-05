@@ -532,6 +532,18 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation matchedMustBeTrue() {
+    return (nodeToValidate, contextPath) -> {
+      var actualValue = nodeToValidate.asBoolean(false);
+      if (!actualValue) {
+        return Set.of(
+          "The value of '%s' was '%s' instead of 'true'"
+            .formatted(contextPath, renderValue(nodeToValidate)));
+      }
+      return Collections.emptySet();
+    };
+  }
+
   public static JsonRebaseableContentCheck mustBePresent(JsonPointer jsonPointer) {
     return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
   }
@@ -743,6 +755,17 @@ public class JsonAttribute {
     Predicate<JsonNode> when,
     @NonNull
     JsonRebaseableContentCheck then
+  ) {
+    return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
+  }
+
+  public static JsonRebaseableContentCheck ifThen(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    JsonContentMatchedValidation then
   ) {
     return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
   }

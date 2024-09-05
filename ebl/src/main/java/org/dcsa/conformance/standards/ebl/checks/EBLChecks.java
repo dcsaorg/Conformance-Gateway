@@ -690,7 +690,23 @@ public class EBLChecks {
       mav -> mav.submitAllMatching("consignmentItems.*.carrierBookingReference"),
       JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
-    if (!isTD) {
+    if (isTD) {
+      checks.add(
+        JsonAttribute.ifThen(
+          "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
+          ignored -> {
+            var dsp = dspSupplier.get();
+            return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
+          },
+          JsonAttribute.path("documentParties", JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
+      ));
+    } else {
+      checks.add(
+        JsonAttribute.ifThen(
+          "[Scenario] Verify that the shippingInstructions had 'isCarriersAgentAtDestinationRequired' as true if scenario requires it",
+          ignored -> dspSupplier.get().scenarioType().isCarriersAgentAtDestinationRequired(),
+          JsonAttribute.path("isCarriersAgentAtDestinationRequired", JsonAttribute.matchedMustBeTrue())
+        ));
       checks.add(
         JsonAttribute.customValidator(
           "[Scenario] Verify that the correct 'commoditySubreference' is used",

@@ -11,6 +11,7 @@ public enum ScenarioType {
   REGULAR_NO_COMMODITY_SUBREFERENCE,
   REGULAR_SWB_SOC_AND_REFERENCES,
   REGULAR_SWB_AMF,
+  REGULAR_CLAD,
   ;
 
   public String transportDocumentTypeCode() {
@@ -30,6 +31,7 @@ public enum ScenarioType {
       case REGULAR_SWB_AMF -> "amf";
       case DG -> "dg";
       case REGULAR_SWB, REGULAR_BOL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+      case REGULAR_CLAD -> "clad";
     };
     return "ebl-api-" + version.toLowerCase() + "-" + suffix + ".json";
   }
@@ -44,5 +46,9 @@ public enum ScenarioType {
 
   public boolean hasDG() {
     return this == DG;
+  }
+
+  public boolean isCarriersAgentAtDestinationRequired() {
+    return this == REGULAR_CLAD;
   }
 }

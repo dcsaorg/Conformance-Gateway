@@ -14,6 +14,7 @@ import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -61,6 +62,7 @@ public class BookingChecks {
 
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
+  private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
   public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
@@ -393,6 +395,39 @@ public class BookingChecks {
       }
       if(!"SD".equals(receiptTypeAtOrigin) && ielNode != null) {
         issues.add("Container intermediate export stop-off location should not be provided");
+      }
+      if("SD".equals(receiptTypeAtOrigin)) {
+        var requestedEquipments = body.path("requestedEquipments");
+        if (requestedEquipments.isArray()) {
+          AtomicInteger counter = new AtomicInteger(0);
+          StreamSupport.stream(requestedEquipments.spliterator(), false)
+            .forEach(element -> {
+              int currentCount = counter.getAndIncrement();
+              var containerPositionings = element.path("containerPositionings");
+              var containerPositionsDateTime = StreamSupport.stream(containerPositionings.spliterator(), false)
+                .filter(o ->  !o.path("dateTime").asText("").isEmpty())
+                .findFirst()
+                .orElse(null);
+              if ((preNode == null || preNode.isEmpty()) || containerPositionsDateTime == null){
+                issues.add("Empty container positioning DateTime at requestedEquipments position %s must be provided.".formatted(currentCount));
+              }
+            });
+        }
+      }
+      if("CY".equals(receiptTypeAtOrigin)) {
+        var requestedEquipments = body.path("requestedEquipments");
+        if (requestedEquipments.isArray()) {
+          AtomicInteger counter = new AtomicInteger(0);
+          StreamSupport.stream(requestedEquipments.spliterator(), false)
+            .forEach(element -> {
+              int currentCount = counter.getAndIncrement();
+              if (element.path(RE_EMPTY_CONTAINER_PICKUP).isContainerNode()
+                && element.path(RE_EMPTY_CONTAINER_PICKUP).path("dateTime").asText("").isEmpty()
+                && element.path(RE_EMPTY_CONTAINER_PICKUP).path("depotReleaseLocation").asText("").isEmpty()) {
+                issues.add("Empty container Pickup DateTime/depotReleaseLocation  at requestedEquipments position %s must be provided.".formatted(currentCount));
+              }
+            });
+        }
       }
       return issues;
     });
@@ -729,8 +764,7 @@ public class BookingChecks {
         }
         return Set.of();
       }
-    )
-    );
+    ));
 
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,

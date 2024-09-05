@@ -589,6 +589,7 @@ public class CarrierShippingInstructions {
     var existingTd = getTransportDocument().orElse(null);
     copyFieldsWherePresent(siData, td, COPY_SI_INTO_TD_FIELDS);
     ensureIssuingCarrier(existingTd, td);
+    provideCarriersAgentAtDestinationIfNecessary(td);
     preserveOrGenerateCarrierFields(existingTd, td);
     fixupUtilizedTransportEquipments(td, scenarioType);
     fixupConsignmentItems(td, scenarioType);
@@ -606,6 +607,30 @@ public class CarrierShippingInstructions {
       issuingParty = issuingParty(getStandardsVersion());
     }
     docPartiesObject.set("issuingParty", issuingParty);
+  }
+
+  private void provideCarriersAgentAtDestinationIfNecessary(ObjectNode td) {
+    var docParties = td.path("documentParties");
+    var isCarriersAgentAtDestinationRequiredNode = this.getShippingInstructions().path("isCarriersAgentAtDestinationRequired");
+    if (!docParties.isObject()) {
+      return;
+    }
+    final var key = "carriersAgentAtDestination";
+    var docPartiesObject = (ObjectNode)docParties;
+    if (!isCarriersAgentAtDestinationRequiredNode.asBoolean(false)) {
+      docPartiesObject.remove(key);
+      return;
+    }
+    var carrierAgent = docPartiesObject.putObject(key);
+    carrierAgent.put("partyName", "Local Agent in Bremerhaven");
+    carrierAgent.putObject("address")
+      .put("street", "Street and number of the agent")
+      .put("city", "Bremerhaven")
+      .put("countryCode", "DE");
+    carrierAgent.putArray("partyContactDetails")
+      .addObject()
+      .put("name", "Jane Doe")
+      .put("email", "no-one.local.agent@example.org");
   }
 
   private void changeSIState(String attributeName, ShippingInstructionsStatus newState) {

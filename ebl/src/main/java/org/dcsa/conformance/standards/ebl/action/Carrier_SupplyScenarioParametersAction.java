@@ -133,21 +133,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         null,
         null
       );
-      case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
-        "Booking Reference",
-        "Commodity Subreference for regular cargo 1",
-        "Commodity Subreference for regular cargo 2",
-        // Any valid reefer equipment reference will do as an example.
-        "MSKU3963442",
-        "MSKU7895860",
-        "DKAAR",
-        "691110",
-        "732391",
-        "Tableware and kitchenware",
-        "Kitchen pots and pans",
-        "Fibreboard boxes"
-      );
-      case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
+      case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity Subreference for regular cargo 1",
         "Commodity Subreference for regular cargo 2",

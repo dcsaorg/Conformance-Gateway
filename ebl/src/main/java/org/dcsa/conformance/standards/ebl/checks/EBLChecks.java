@@ -886,7 +886,7 @@ public class EBLChecks {
       for (var node : nodes) {
         pathBuilder.setLength(contextPath.length());
         pathBuilder.append('[').append(index).append(']');
-        var refPath = pathBuilder.toString() + "." + referenceAttributeName;
+        var refPath = pathBuilder + "." + referenceAttributeName;
         var valueNode = resolveValue != null ? resolveValue.apply(node, pathBuilder) : node;
         index++;
         if (valueNode == null || !valueNode.isTextual()) {
@@ -1167,6 +1167,7 @@ public class EBLChecks {
     jsonContentChecks.add(updatedStatusCheck);
     return JsonAttribute.contentChecks(
       titlePrefix,
+      null,
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
@@ -1184,6 +1185,7 @@ public class EBLChecks {
     ));
     return JsonAttribute.contentChecks(
       titlePrefix,
+      null,
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,

@@ -52,22 +52,20 @@ public class CsChecks {
               schedule
                   .at("/vesselSchedules")
                   .forEach(
-                      vesselSchedule -> {
-                        vesselSchedule
-                            .at("/cutOffTimes")
-                            .forEach(
-                                cutOffTime -> {
-                                  JsonNode cutOffDateTimeCode =
-                                      cutOffTime.at("/cutOffDateTimeCode");
-                                  if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
-                                      cutOffDateTimeCode.asText())) {
-                                    issues.add(
-                                        String.format(
-                                            "Invalid cutOffDateTimeCode: %s",
-                                            cutOffDateTimeCode.asText()));
-                                  }
-                                });
-                      });
+                      vesselSchedule -> vesselSchedule
+                          .at("/cutOffTimes")
+                          .forEach(
+                              cutOffTime -> {
+                                JsonNode cutOffDateTimeCode =
+                                    cutOffTime.at("/cutOffDateTimeCode");
+                                if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
+                                    cutOffDateTimeCode.asText())) {
+                                  issues.add(
+                                      String.format(
+                                          "Invalid cutOffDateTimeCode: %s",
+                                          cutOffDateTimeCode.asText()));
+                                }
+                              }));
             }
             return issues;
           });
@@ -176,25 +174,23 @@ public class CsChecks {
   private static JsonContentCheck createLocationCheckVs() {
     return JsonAttribute.customValidator(
         "Check any one of the location is available for location",
-        body -> {
-          return StreamSupport.stream(body.spliterator(), false)
-              .flatMap(
-                  schedules ->
-                      StreamSupport.stream(schedules.at("/vesselSchedules").spliterator(), false))
-              .flatMap(vs -> StreamSupport.stream(vs.at("/transportCalls").spliterator(), false))
-              .map(tc -> tc.at("/location"))
-              .filter(
-                  location -> {
-                    JsonNode address = location.at("/address");
-                    JsonNode unLocationCode = location.at("/UNLocationCode");
-                    JsonNode facility = location.at("/facility");
-                    return JsonAttribute.isJsonNodeAbsent(address)
-                        && JsonAttribute.isJsonNodeAbsent(unLocationCode)
-                        && JsonAttribute.isJsonNodeAbsent(facility);
-                  })
-              .map(location -> "Any one of the location should be present for location")
-              .collect(Collectors.toCollection(LinkedHashSet::new));
-        });
+        body -> StreamSupport.stream(body.spliterator(), false)
+            .flatMap(
+                schedules ->
+                    StreamSupport.stream(schedules.at("/vesselSchedules").spliterator(), false))
+            .flatMap(vs -> StreamSupport.stream(vs.at("/transportCalls").spliterator(), false))
+            .map(tc -> tc.at("/location"))
+            .filter(
+                location -> {
+                  JsonNode address = location.at("/address");
+                  JsonNode unLocationCode = location.at("/UNLocationCode");
+                  JsonNode facility = location.at("/facility");
+                  return JsonAttribute.isJsonNodeAbsent(address)
+                      && JsonAttribute.isJsonNodeAbsent(unLocationCode)
+                      && JsonAttribute.isJsonNodeAbsent(facility);
+                })
+            .map(location -> "Any one of the location should be present for location")
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
   }
 
   private static void checkAnyLocationIsPresent(
@@ -317,24 +313,22 @@ public class CsChecks {
             schedule
                 .at("/vesselSchedules")
                 .forEach(
-                    vesselSchedule -> {
-                      vesselSchedule
-                          .at("/timestamps")
-                          .forEach(
-                              timestamp -> {
-                                JsonNode eventDateTime = timestamp.at("/eventDateTime");
-                                JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
-                                if (eventClassifierCode.asText().equals("EST")
-                                    || eventClassifierCode.asText().equals("PLN")) {
-                                  if (isBeforeTheDate(
-                                      eventDateTime.asText(),
-                                      sspSupplier.get().getMap().get(DATE))) {
-                                    issues.add(
-                                        "The estimated arrival or departure dates should be on or after the date provided");
-                                  }
+                    vesselSchedule -> vesselSchedule
+                        .at("/timestamps")
+                        .forEach(
+                            timestamp -> {
+                              JsonNode eventDateTime = timestamp.at("/eventDateTime");
+                              JsonNode eventClassifierCode = timestamp.at("/eventClassifierCode");
+                              if (eventClassifierCode.asText().equals("EST")
+                                  || eventClassifierCode.asText().equals("PLN")) {
+                                if (isBeforeTheDate(
+                                    eventDateTime.asText(),
+                                    sspSupplier.get().getMap().get(DATE))) {
+                                  issues.add(
+                                      "The estimated arrival or departure dates should be on or after the date provided");
                                 }
-                              });
-                    });
+                              }
+                            }));
           }
           return issues;
         });

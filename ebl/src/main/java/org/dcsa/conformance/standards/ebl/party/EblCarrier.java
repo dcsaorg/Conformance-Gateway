@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -23,8 +25,6 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
-
-import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
 
 @Slf4j
 public class EblCarrier extends ConformanceParty {
@@ -156,21 +156,7 @@ public class EblCarrier extends ConformanceParty {
           null,
           null
         );
-        case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
-          "RG-2C-2U-1E",
-          "Commodity Subreference 123",
-          "Commodity Subreference 456",
-          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "MSKU3963442",
-          "MSKU7895860",
-          "DKAAR",
-          "691110",
-          "732391",
-          "Tableware and kitchenware",
-          "Kitchen pots and pans",
-          "Fibreboard boxes"
-        );
-        case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
+        case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
           "RG-2C-2U-1E",
           "Commodity Subreference 123",
           "Commodity Subreference 456",

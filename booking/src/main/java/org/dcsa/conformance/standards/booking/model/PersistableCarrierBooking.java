@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -14,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.StreamSupport;
-
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -170,9 +168,7 @@ public class PersistableCarrierBooking {
       rejectReason = "default message of rejection(reason not provided by carrier)";
     }
     final var reason = rejectReason;
-    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> {
-      bookingContent.put("reason", reason);
-    });
+    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> bookingContent.put("reason", reason));
   }
 
   public void confirmBookingCompleted(String reference, boolean resetAmendedBooking) {

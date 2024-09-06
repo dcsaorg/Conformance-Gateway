@@ -19,19 +19,7 @@ public class JsonAttribute {
     String standardsVersion,
     JsonContentCheck ... checks
   ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
-  }
-
-  @Deprecated
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    String standardsVersion,
-    JsonContentCheck ... checks
-  ) {
-    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
+    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
   public static ActionCheck contentChecks(
@@ -46,7 +34,6 @@ public class JsonAttribute {
     return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
-
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -54,27 +41,7 @@ public class JsonAttribute {
     String standardsVersion,
     List<JsonContentCheck> checks
   ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
-  }
-
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    String standardVersion,
-    List<JsonContentCheck> checks
-  ) {
-    return contentChecks(
-      titlePrefix,
-      "The HTTP %s has valid content (conditional validation rules)"
-        .formatted(httpMessageType.name().toLowerCase()),
-      isRelevantForRoleName,
-      matchedExchangeUuid,
-      httpMessageType,
-      standardVersion,
-      checks
-    );
+    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
   }
 
   public static ActionCheck contentChecks(
@@ -86,6 +53,10 @@ public class JsonAttribute {
     String standardsVersion,
     List<JsonContentCheck> checks
   ) {
+    if (title == null) {
+      title = "The HTTP %s has valid content (conditional validation rules)"
+        .formatted(httpMessageType.name().toLowerCase());
+    }
     return new JsonAttributeBasedCheck(
       titlePrefix,
       title,
@@ -811,7 +782,7 @@ public class JsonAttribute {
     @NonNull
     JsonRebaseableContentCheck elseCheck
   ) {
-    return ifThenElse(name, when, (BiFunction<JsonNode, String, Set<String>>) then::validate, elseCheck::validate);
+    return ifThenElse(name, when, then::validate, elseCheck::validate);
   }
 
   public static JsonContentMatchedValidation ifMatchedThen(
@@ -859,7 +830,7 @@ public class JsonAttribute {
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
-    return (refNode) -> refNode.at(jsonPointer);
+    return refNode -> refNode.at(jsonPointer);
   }
 
   private static Function<JsonNode, Set<String>> at(JsonPointer jsonPointer, Function<JsonNode, Set<String>> validator) {

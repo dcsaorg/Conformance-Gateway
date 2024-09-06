@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.booking.action;
 
 
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
@@ -82,7 +81,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus, requestAmendedContent))
+            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, requestAmendedContent))
         ;
       }
     };

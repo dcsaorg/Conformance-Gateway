@@ -55,11 +55,9 @@ public enum JsonToolkit {
       Map<String, ? extends Collection<String>> map) {
     ArrayNode queryParamsNode = OBJECT_MAPPER.createArrayNode();
     map.forEach(
-        (key, values) -> {
-          queryParamsNode.addObject()
-            .put("key", key)
-            .set("values", JsonToolkit.stringCollectionToArrayNode(values));
-        });
+        (key, values) -> queryParamsNode.addObject()
+          .put("key", key)
+          .set("values", JsonToolkit.stringCollectionToArrayNode(values)));
     return queryParamsNode;
   }
 

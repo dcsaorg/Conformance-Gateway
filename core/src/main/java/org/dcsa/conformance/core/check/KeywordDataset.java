@@ -56,15 +56,6 @@ public interface KeywordDataset {
     return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SelectColumn.withName(columnName)));
   }
 
-  static KeywordDataset fromCSVCombiningColumns(Class<?> resourceClass, String resourceName, String delimiter, String ... columnNames) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, new CombineColumnSelector(delimiter, columnNames)));
-  }
-
-  static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, SELECT_FIRST_COLUMN);
-  }
-
   static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String columnName) {
     return VersionedKeywordDataset.of(resourceClass, nameTemplate, SelectColumn.withName(columnName));
   }

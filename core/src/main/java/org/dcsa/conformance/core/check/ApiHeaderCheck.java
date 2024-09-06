@@ -47,21 +47,6 @@ public class ApiHeaderCheck extends ActionCheck {
     this("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, expectedVersion, false);
   }
 
-  public ApiHeaderCheck(
-      String titlePrefix,
-      Predicate<String> isRelevantForRoleName,
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      String expectedVersion) {
-    this(
-        titlePrefix,
-        isRelevantForRoleName,
-        matchedExchangeUuid,
-        httpMessageType,
-        expectedVersion,
-        false);
-  }
-
   private ApiHeaderCheck(
       String titlePrefix,
       Predicate<String> isRelevantForRoleName,

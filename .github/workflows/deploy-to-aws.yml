@@ -54,7 +54,7 @@ jobs:
           echo Install dependencies
           npm install
           echo Build Web UI
-          ng build --configuration=${{ env.AWS_ENVIRONMENT }}
+          npm run build -- --configuration=${{ env.AWS_ENVIRONMENT }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

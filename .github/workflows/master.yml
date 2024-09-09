@@ -1,32 +1,29 @@
 name: Java CI
 
-env:
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
-
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - dev
-      - test
-      - master
-    paths-ignore:
-      - "**.md"
   pull_request:
     types: [opened, synchronize, reopened]
     paths-ignore:
       - "**.md"
 
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
+  AWS_REGION: "eu-north-1"
+  NG_CLI_ANALYTICS: "ci"
+  AWS_ENVIRONMENT: "dev"
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
-          fetch-depth: 0
+          ref: ${{ env.AWS_ENVIRONMENT }}
+          # Enforces only AWS env name matching branches are checkout and deployed.
 
       - name: Print commit sha
         shell: bash
@@ -39,22 +36,44 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: '21'
           cache: 'maven'
 
-      - name: Build and test Conformance-Gateway
-        run: |
-          mvn package -U -B -V --fail-at-end
+      - name: Set up Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: webui/package-lock.json
 
-      - name: Set Sonar settings for PR build
-        if: ${{ (github.event_name == 'pull_request') }}
+      - name: Build Conformance-Gateway
         run: |
-          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME -Dsonar.pullrequest.provider=GitHub -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=90" >> $GITHUB_ENV
+          mvn package -U -B -V -DskipTests
+      # No need to run tests, as they are already run in the PR workflow
 
-      - name: Run SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
+      - name: Build Web UI
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}
+          cd webui
+          echo Install AWS CDK
+          npm install -g aws-cdk
+          echo Install dependencies
+          npm install
+          echo Build Web UI
+          npm build -- --configuration=${{ env.AWS_ENVIRONMENT }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Diff Conformance-Gateway Stack of ${{ env.AWS_ENVIRONMENT }}
+        run: |
+          cd cdk/
+          cdk diff ${{ env.AWS_ENVIRONMENT }}ConformanceStack
+
+      - name: Deploy Conformance-Gateway Stack to ${{ env.AWS_ENVIRONMENT }}
+        run: |
+          cd cdk/
+          cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack

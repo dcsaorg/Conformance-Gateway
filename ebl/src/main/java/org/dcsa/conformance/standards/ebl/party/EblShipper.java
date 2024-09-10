@@ -98,9 +98,8 @@ public class EblShipper extends ConformanceParty {
         ));
 
     // Cannot substitute this because it is a boolean
-    jsonRequestBody.put("isToOrder", scenarioType.isToOrder());
     if (!scenarioType.isToOrder()) {
-      // Cannot substitute this because it is an array element
+      // Cannot substitute this because it is a full element
       var parties = (ObjectNode) jsonRequestBody.path("documentParties");
       parties.putObject("consignee")
         .put("partyName", "DCSA CTK Consignee")

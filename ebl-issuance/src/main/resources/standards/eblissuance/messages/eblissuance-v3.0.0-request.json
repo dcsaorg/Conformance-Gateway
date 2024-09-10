@@ -42,6 +42,17 @@
           }
         ]
       },
+      "notifyParties": [
+        {
+          "partyName": "DCSA CTK",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
+        }
+      ],
       "issuingParty": {
         "partyName": "Hyundai",
         "address": {

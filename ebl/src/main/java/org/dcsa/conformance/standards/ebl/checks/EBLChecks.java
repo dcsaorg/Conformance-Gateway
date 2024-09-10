@@ -42,6 +42,12 @@ public class EBLChecks {
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
   );
 
+  private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
+    "The 'documentParties.notifyParties' attribute is mandatory for negotiable B/Ls",
+    JsonAttribute.isTrue("isToOrder"),
+    JsonAttribute.at(JsonPointer.compile("/documentParties/notifyParties"), JsonAttribute.matchedMustBeNonEmpty())
+  );
+
   private static final Consumer<MultiAttributeValidator> ALL_REFERENCE_TYPES = mav -> {
     mav.submitAllMatching("references.*.type");
     mav.submitAllMatching("utilizedTransportEquipments.*.references.*.type");
@@ -530,6 +536,7 @@ public class EBLChecks {
     VOLUME_IMPLIES_VOLUME_UNIT,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
     CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
+    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
     TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE
   );
@@ -665,6 +672,7 @@ public class EBLChecks {
       },
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
     ),
+    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
     TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE,
     TD_UN_LOCATION_CODES_VALID

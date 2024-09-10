@@ -21,6 +21,12 @@
       "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
+      "emptyContainerPickup": {
+        "dateTime" : "2024-07-05T09:03:00-02:00",
+        "depotReleaseLocation": {
+          "UNLocationCode" : "DKAAR"
+        }
+      },
       "commodities": [
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
@@ -53,14 +59,12 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POD"

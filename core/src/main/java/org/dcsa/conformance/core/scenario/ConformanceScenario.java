@@ -26,6 +26,10 @@ public class ConformanceScenario implements StatefulEntity {
 
   @Getter private ConformanceStatus latestComputedStatus = ConformanceStatus.NO_TRAFFIC;
 
+  public ConformanceScenario(long moduleIndex, long scenarioIndex, Collection<ConformanceAction> actions) {
+    this(new UUID(moduleIndex, scenarioIndex), actions);
+  }
+
   public ConformanceScenario(UUID id, Collection<ConformanceAction> actions) {
     this.id = id;
     this.allActions.addAll(actions);

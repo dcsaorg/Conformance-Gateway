@@ -21,6 +21,12 @@
       "ISOEquipmentCode": "22GP",
       "units": 1,
       "isShipperOwned": false,
+      "containerPositionings": [{
+        "dateTime":"2024-07-05T09:03:00-02:00",
+        "location": {
+          "UNLocationCode" : "DKAAR"
+        }
+      }],
       "commodities": [
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
@@ -35,7 +41,6 @@
     "bookingAgent": {
       "partyName": "DCSA Conformance Toolkit",
       "address": {
-        "name": "Mustermann",
         "street": "Strawinskylaan 4117",
         "floor": "6",
         "postCode": "1077 ZX",
@@ -53,16 +58,13 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "ADDR",
         "address" : {
-          "name" : "Henrik",
           "street": "Taylorweg",
           "streetNumber": "5",
           "postCode": "5466",
@@ -71,6 +73,18 @@
         }
       },
       "locationTypeCode": "POD"
+    },
+    {
+      "location": {
+        "address" : {
+          "street": "Taylorweg",
+          "streetNumber": "5",
+          "postCode": "5466",
+          "city": "AE Veghel",
+          "countryCode": "NL"
+        }
+      },
+      "locationTypeCode": "PRE"
     }
   ]
 }

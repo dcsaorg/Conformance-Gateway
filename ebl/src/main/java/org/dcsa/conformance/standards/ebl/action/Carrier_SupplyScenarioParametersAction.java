@@ -63,9 +63,23 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
-      case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF -> new CarrierScenarioParameters(
+      case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF, REGULAR_CLAD -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
+        null,
+        // Any valid regular equipment reference will do as an example.
+        "NARU3472484",
+        null,
+        "DKAAR",
+        "640510",
+        null,
+        "Shoes - black, 400 boxes",
+        null,
+        "Fibreboard boxes"
+      );
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
+        "Booking Reference",
+        null,
         null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",

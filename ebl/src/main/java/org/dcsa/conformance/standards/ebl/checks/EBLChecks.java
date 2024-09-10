@@ -100,6 +100,21 @@ public class EBLChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.UN_LOCODE_DATASET)
   );
 
+  private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT = JsonAttribute.ifThen(
+    "Validate displayed address length for EBLs",
+      td -> td.path("isElectronic").asBoolean(false),
+      JsonAttribute.allIndividualMatchesMustBeValid(
+      "(not used)",
+      mav -> {
+        mav.submitAllMatching("documentParties.shipper.displayedAddress");
+        mav.submitAllMatching("documentParties.consignee.displayedAddress");
+        mav.submitAllMatching("documentParties.endorsee.displayedAddress");
+        mav.submitAllMatching("documentParties.notifyParties.*.displayedAddress");
+      },
+      JsonAttribute.matchedMaxLength(2)
+    )
+  );
+
   private static final Consumer<MultiAttributeValidator> ALL_UTE = mav -> mav.submitAllMatching("utilizedTransportEquipments.*");
 
   private static final Predicate<JsonNode> HAS_ISO_EQUIPMENT_CODE = uteNode -> {
@@ -504,6 +519,7 @@ public class EBLChecks {
     VALID_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
+    EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
@@ -603,6 +619,7 @@ public class EBLChecks {
         "airExchangeSetpoint",
         "airExchangeUnit"
       )),
+    EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     COUNTRY_CODE_VALIDATIONS,
@@ -690,7 +707,23 @@ public class EBLChecks {
       mav -> mav.submitAllMatching("consignmentItems.*.carrierBookingReference"),
       JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
-    if (!isTD) {
+    if (isTD) {
+      checks.add(
+        JsonAttribute.ifThen(
+          "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
+          ignored -> {
+            var dsp = dspSupplier.get();
+            return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
+          },
+          JsonAttribute.path("documentParties", JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
+      ));
+    } else {
+      checks.add(
+        JsonAttribute.ifThen(
+          "[Scenario] Verify that the shippingInstructions had 'isCarriersAgentAtDestinationRequired' as true if scenario requires it",
+          ignored -> dspSupplier.get().scenarioType().isCarriersAgentAtDestinationRequired(),
+          JsonAttribute.path("isCarriersAgentAtDestinationRequired", JsonAttribute.matchedMustBeTrue())
+        ));
       checks.add(
         JsonAttribute.customValidator(
           "[Scenario] Verify that the correct 'commoditySubreference' is used",
@@ -865,11 +898,13 @@ public class EBLChecks {
         }
         seen.add(value);
         var expectedReferenceValue = expectedValues.get(value);
+        var refNode = node.path(referenceAttributeName);
         if (expectedReferenceValue == null) {
-          issues.add("Unexpected %s '%s' at %s".formatted(attributeName, value, pathBuilder.toString()));
+          if (!refNode.isMissingNode()) {
+            issues.add("The '%s' attribute must be absent".formatted(refPath));
+          }
           continue;
         }
-        var refNode = node.path(referenceAttributeName);
         if (refNode.isMissingNode() || !refNode.isTextual()) {
           continue;
         }

@@ -48,7 +48,7 @@
                 "isEmptyUncleanedResidue":  false,
                 "isWaste":  false,
                 "isHot":  false,
-                "isCompetentAuthorityApprovalProvided" : false,
+                "isCompetentAuthorityApprovalRequired" : false,
                 "competentAuthorityApproval": "Transport Authority",
                 "segregationGroups": ["12"],
                 "innerPackagings" : [{
@@ -104,7 +104,7 @@
                 "isEmptyUncleanedResidue":  false,
                 "isWaste":  false,
                 "isHot":  false,
-                "isCompetentAuthorityApprovalProvided" : false,
+                "isCompetentAuthorityApprovalRequired" : false,
                 "competentAuthorityApproval": "Transport Authority",
                 "segregationGroups": ["12"],
                 "innerPackagings" : [{
@@ -185,14 +185,12 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POD"

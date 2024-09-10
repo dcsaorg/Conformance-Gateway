@@ -532,6 +532,18 @@ public class JsonAttribute {
     };
   }
 
+  public static JsonContentMatchedValidation matchedMustBeTrue() {
+    return (nodeToValidate, contextPath) -> {
+      var actualValue = nodeToValidate.asBoolean(false);
+      if (!actualValue) {
+        return Set.of(
+          "The value of '%s' was '%s' instead of 'true'"
+            .formatted(contextPath, renderValue(nodeToValidate)));
+      }
+      return Collections.emptySet();
+    };
+  }
+
   public static JsonRebaseableContentCheck mustBePresent(JsonPointer jsonPointer) {
     return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
   }
@@ -545,6 +557,17 @@ public class JsonAttribute {
         }
         return Collections.emptySet();
       };
+  }
+
+  public static JsonContentMatchedValidation matchedMaxLength(int length) {
+    return (node, context) -> {
+      if (node.isArray() && node.size() > length) {
+        return Set.of(
+          "The array '%s' had %d elements, which is longer than the limit of %d"
+            .formatted(context, node.size(), length));
+      }
+      return Collections.emptySet();
+    };
   }
 
   public static JsonRebaseableContentCheck mustBeAbsent(
@@ -743,6 +766,17 @@ public class JsonAttribute {
     Predicate<JsonNode> when,
     @NonNull
     JsonRebaseableContentCheck then
+  ) {
+    return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
+  }
+
+  public static JsonRebaseableContentCheck ifThen(
+    @NonNull
+    String name,
+    @NonNull
+    Predicate<JsonNode> when,
+    @NonNull
+    JsonContentMatchedValidation then
   ) {
     return ifThenElse(name, when, then::validate, EMPTY_VALIDATOR);
   }

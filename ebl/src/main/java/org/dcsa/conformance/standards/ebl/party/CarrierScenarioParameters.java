@@ -22,12 +22,14 @@ public record CarrierScenarioParameters(
     var node = OBJECT_MAPPER
         .createObjectNode()
         .put("carrierBookingReference", carrierBookingReference)
-        .put("commoditySubreference", commoditySubreference)
         .put("equipmentReference", equipmentReference)
         .put("invoicePayableAtUNLocationCode", invoicePayableAtUNLocationCode)
         .put("consignmentItemHSCode", consignmentItemHSCode)
         .put("descriptionOfGoods", descriptionOfGoods);
 
+    if (commoditySubreference != null) {
+      node.put("commoditySubreference", commoditySubreference);
+    }
     if (commoditySubreference2 != null) {
       node.put("commoditySubreference2", commoditySubreference2);
     }
@@ -52,7 +54,7 @@ public record CarrierScenarioParameters(
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
     return new CarrierScenarioParameters(
       jsonNode.required("carrierBookingReference").asText(),
-      jsonNode.required("commoditySubreference").asText(),
+      jsonNode.path("commoditySubreference").asText(null),
       jsonNode.path("commoditySubreference2").asText(null),
       jsonNode.path("equipmentReference").asText(null),
       jsonNode.path("equipmentReference2").asText(null),

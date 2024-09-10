@@ -60,7 +60,6 @@
     "bookingAgent": {
       "partyName": "DCSA Conformance Toolkit",
       "address": {
-        "name": "Mustermann",
         "street": "Strawinskylaan 4117",
         "floor": "6",
         "postCode": "1077 ZX",
@@ -78,14 +77,12 @@
   "shipmentLocations": [
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POL_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POL"
     },
     {
       "location": {
-        "locationType": "UNLO",
         "UNLocationCode": "POD_UNLOCATION_CODE_PLACEHOLDER"
       },
       "locationTypeCode": "POD"

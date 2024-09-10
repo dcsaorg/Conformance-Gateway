@@ -86,9 +86,23 @@ public class EblCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
       switch (scenarioType) {
-        case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF -> new CarrierScenarioParameters(
+        case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF, REGULAR_CLAD -> new CarrierScenarioParameters(
           "CBR_123_" + scenarioType.name(),
           "Some Commodity Subreference 123",
+          null,
+          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+          "NARU3472484",
+          null,
+          "DKAAR",
+          "640510",
+          null,
+          "Shoes - black, 400 boxes",
+          null,
+          "Fibreboard boxes"
+        );
+        case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
+          "CBR_123_NO_SUBREF",
+          null,
           null,
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
           "NARU3472484",

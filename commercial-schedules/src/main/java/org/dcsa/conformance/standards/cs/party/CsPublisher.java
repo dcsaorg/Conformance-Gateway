@@ -55,41 +55,29 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
     String filePath;
-    Map<String, List<String>> initialIMap = Map.of(
-      "Api-Version", List.of(apiVersion)
-    );
+    Map<String, List<String>> initialIMap = Map.of("Api-Version", List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
-    if(request.queryParams().containsKey("limit") && !request.queryParams().containsKey("cursor")){
-      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA=";
-      headers.put("Next-Page-Cursor",List.of(cursor));
+    if (request.queryParams().containsKey("limit")
+        && !request.queryParams().containsKey("cursor")) {
+      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA";
+      headers.put("Next-Page-Cursor", List.of(cursor));
     }
     boolean hasCursor = request.queryParams().containsKey("cursor");
 
-    if (request.url().endsWith("v1/point-to-point-routes")) {
-      if(hasCursor){
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptpnextpage.json";
-      }else{
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
-      }
+    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-";
+    String suffix = hasCursor ? "nextpage.json" : ".json";
+    String routeType = "vs";
 
+    if (request.url().endsWith("v1/point-to-point-routes")) {
+      routeType = "ptp";
     } else if (request.url().endsWith("v1/port-schedules")) {
-      if(hasCursor){
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-psnextpage.json";
-      }else{
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
-      }
-    } else {
-      if(hasCursor){
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vsnextpage.json";
-      } else {
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
-      }
+      routeType = "ps";
     }
+
+    filePath = baseFilePath + routeType + suffix;
+
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
-    return request.createResponse(
-        200,
-      headers,
-        new ConformanceMessageBody(jsonResponseBody));
+    return request.createResponse(200, headers, new ConformanceMessageBody(jsonResponseBody));
   }
 
   private JsonNode replacePlaceHolders(String filePath, ConformanceRequest request) {

@@ -55,7 +55,11 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(),previousAction != null && previousAction instanceof CsGetVesselSchedulesAction));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                sspSupplier,
+                getDspSupplier(),
+                previousAction != null && previousAction instanceof CsGetVesselSchedulesAction));
       }
     };
   }
@@ -63,7 +67,8 @@ public class CsGetVesselSchedulesAction extends CsAction {
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    ObjectNode jsonActionNode = super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    ObjectNode jsonActionNode =
+        super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
     String cursor = dsp.cursor();
     if (cursor != null && !cursor.isEmpty()) {
       jsonActionNode.put("cursor", cursor);

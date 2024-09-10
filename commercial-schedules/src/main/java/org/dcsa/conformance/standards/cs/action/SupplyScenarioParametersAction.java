@@ -30,7 +30,8 @@ public class SupplyScenarioParametersAction extends CsAction {
             .formatted(
                 Arrays.stream(csFilterParameters)
                     .map(CsFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))),-1);
+                    .collect(Collectors.joining(", "))),
+        -1);
     this.csFilterParameters =
         Stream.of(csFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
   }

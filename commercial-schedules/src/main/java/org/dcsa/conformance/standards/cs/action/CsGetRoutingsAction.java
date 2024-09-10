@@ -14,22 +14,21 @@ public class CsGetRoutingsAction extends CsAction {
 
   private final JsonSchemaValidator responseSchemaValidator;
 
-
   public CsGetRoutingsAction(
-          String subscriberPartyName,
-          String publisherPartyName,
-          CsAction previousAction,
-          JsonSchemaValidator responseSchemaValidator1) {
+      String subscriberPartyName,
+      String publisherPartyName,
+      CsAction previousAction,
+      JsonSchemaValidator responseSchemaValidator1) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetRoutings", 200);
 
     this.responseSchemaValidator = responseSchemaValidator1;
-
   }
 
   @Override
   public ObjectNode asJsonNode() {
     var dsp = getDspSupplier().get();
-    ObjectNode jsonActionNode = super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    ObjectNode jsonActionNode =
+        super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
     String cursor = dsp.cursor();
     if (cursor != null && !cursor.isEmpty()) {
       jsonActionNode.put("cursor", cursor);

@@ -35,7 +35,7 @@ public abstract class CsAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dsp =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null,null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null))
             : new OverwritingReference<>(previousAction.dsp, null);
   }
 
@@ -56,7 +56,7 @@ public abstract class CsAction extends ConformanceAction {
   public void reset() {
     super.reset();
     if (dsp.hasCurrentValue()) {
-      this.dsp.set(new DynamicScenarioParameters(null,null,null));
+      this.dsp.set(new DynamicScenarioParameters(null, null, null));
     }
   }
 
@@ -68,7 +68,8 @@ public abstract class CsAction extends ConformanceAction {
 
   private void updateCursorFromResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dspRef = dsp.get();
-    Collection<String> paginationHeaders = exchange.getResponse().message().headers().get("Next-Page-Cursor");
+    Collection<String> paginationHeaders =
+        exchange.getResponse().message().headers().get("Next-Page-Cursor");
     var updatedDsp = dspRef;
     if (paginationHeaders != null) {
       Optional<String> cursor = paginationHeaders.stream().findFirst();
@@ -102,12 +103,14 @@ public abstract class CsAction extends ConformanceAction {
     return responseHash;
   }
 
-  private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
+  private <T> DynamicScenarioParameters updateIfNotNull(
+      DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;
     }
     return with.apply(value);
   }
+
   @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();

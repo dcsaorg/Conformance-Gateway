@@ -57,37 +57,34 @@ public class CsSubscriber extends ConformanceParty {
     log.info("CsSubscriber.getVesselSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
-      .collect(
-        Collectors.toMap(
-          entry -> entry.getKey().getQueryParamName(),
-          entry -> Set.of(entry.getValue())));
-    if (actionPrompt.has("cursor")) {
-      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
-    }
-    syncCounterpartGet(
-        "/v1/vessel-schedules",queryParams
-        );
+    Map<String, Collection<String>> queryParams = getQueryParams(actionPrompt, ssp);
+    syncCounterpartGet("/v1/vessel-schedules", queryParams);
 
     addOperatorLogEntry(
         "Sent GET vessel schedules request with parameters %s"
             .formatted(ssp.toJson().toPrettyString()));
   }
 
+  private static Map<String, Collection<String>> getQueryParams(
+      JsonNode actionPrompt, SuppliedScenarioParameters ssp) {
+    Map<String, Collection<String>> queryParams =
+        ssp.getMap().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().getQueryParamName(),
+                    entry -> Set.of(entry.getValue())));
+    if (actionPrompt.has("cursor")) {
+      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
+    }
+    return queryParams;
+  }
+
   private void getPortSchedules(JsonNode actionPrompt) {
     log.info("CsSubscriber.getPortSchedules(%s)".formatted(actionPrompt.toPrettyString()));
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
-      .collect(
-        Collectors.toMap(
-          entry -> entry.getKey().getQueryParamName(),
-          entry -> Set.of(entry.getValue())));
-    if (actionPrompt.has("cursor")) {
-      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
-    }
-    syncCounterpartGet(
-        "/v1/port-schedules",queryParams);
+    Map<String, Collection<String>> queryParams = getQueryParams(actionPrompt, ssp);
+    syncCounterpartGet("/v1/port-schedules", queryParams);
 
     addOperatorLogEntry(
         "Sent GET port schedules request with parameters %s"
@@ -99,17 +96,8 @@ public class CsSubscriber extends ConformanceParty {
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
-    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
-      .collect(
-        Collectors.toMap(
-          entry -> entry.getKey().getQueryParamName(),
-          entry -> Set.of(entry.getValue())));
-    if (actionPrompt.has("cursor")) {
-      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
-    }
-    syncCounterpartGet(
-        "/v1/point-to-point-routes",
-      queryParams);
+    Map<String, Collection<String>> queryParams = getQueryParams(actionPrompt, ssp);
+    syncCounterpartGet("/v1/point-to-point-routes", queryParams);
 
     addOperatorLogEntry(
         "Sent GET point to point routings request with parameters %s"

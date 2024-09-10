@@ -59,7 +59,7 @@ public class CsPublisher extends ConformanceParty {
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
     if (request.queryParams().containsKey("limit")
         && !request.queryParams().containsKey("cursor")) {
-      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA";
+      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA"; //example value for a cursor
       headers.put("Next-Page-Cursor", List.of(cursor));
     }
     boolean hasCursor = request.queryParams().containsKey("cursor");

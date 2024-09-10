@@ -16,7 +16,8 @@ import lombok.SneakyThrows;
 
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
-  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER = new ObjectMapper(new JsonFactory());
+  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER =
+      new ObjectMapper(new JsonFactory());
 
   public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
@@ -45,6 +46,12 @@ public class JsonSchemaValidator {
             JsonMetaSchema.getV4(),
             jsonSchemaFactory,
             schemaValidatorsConfig);
+    // Prevent warnings on unknown keywords
+    Map<String, Keyword> keywords = validationContext.getMetaSchema().getKeywords();
+    keywords.put("example", new NonValidationKeyword("example"));
+    keywords.put("discriminator", new NonValidationKeyword("discriminator"));
+    keywords.put("exclusiveMinimum", new NonValidationKeyword("exclusiveMinimum"));
+
     jsonSchema =
         jsonSchemaFactory.create(
             validationContext,

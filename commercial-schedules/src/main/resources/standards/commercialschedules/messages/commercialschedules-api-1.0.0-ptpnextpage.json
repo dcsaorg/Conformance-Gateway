@@ -1,103 +1,111 @@
 [
   {
     "placeOfReceipt": {
-      "facilityTypeCode": "POTE",
+      "facilityTypeCode": "RAMP",
       "location": {
-        "locationName": "Port of Amsterdam",
-        "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
-          "floor": "N/A",
-          "postCode": "1047 HM",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
-        },
-        "UNLocationCode": "NLAMS",
-        "facility": {
-          "facilityCode": "ADT",
-          "facilityCodeListProvider": "SMDG"
-        }
+        "locationName": "COLBERT, WA",
+        "UNLocationCode": "USCOL"
       },
-      "dateTime": "2025-01-14T09:21:00+01:00"
+      "dateTime": "2024-09-09T05:00:00-07:00"
     },
     "placeOfDelivery": {
-      "facilityTypeCode": "POTE",
+      "facilityTypeCode": "RAMP",
       "location": {
-        "locationName": "Port of Amsterdam",
-        "address": {
-          "street": "Ruijggoordweg",
-          "streetNumber": "100",
-          "floor": "N/A",
-          "postCode": "1047 HM",
-          "city": "Amsterdam",
-          "stateRegion": "North Holland",
-          "countryCode": "NL"
-        },
-        "UNLocationCode": "NLAMS",
-        "facility": {
-          "facilityCode": "ADT",
-          "facilityCodeListProvider": "SMDG"
-        }
+        "locationName": "MADRID",
+        "UNLocationCode": "ESMAD"
       },
-      "dateTime": "2025-01-14T09:21:00+01:00"
+      "dateTime": "2024-12-06T11:00:00+01:00"
     },
-    "receiptTypeAtOrigin": "CY",
-    "deliveryTypeAtDestination": "CY",
     "cutOffTimes": [
       {
+        "cutOffDateTimeCode": "PCO",
+        "cutOffDateTime": "2024-09-12T16:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "VCO",
+        "cutOffDateTime": "2024-09-13T12:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "STA",
+        "cutOffDateTime": "2024-09-11T13:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "SPA",
+        "cutOffDateTime": "2024-09-11T13:00:00-07:00"
+      },
+      {
         "cutOffDateTimeCode": "DCO",
-        "cutOffDateTime": "2019-11-12T07:41:00-08:30"
+        "cutOffDateTime": "2024-09-11T17:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "CUA",
+        "cutOffDateTime": "2024-09-13T10:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "AFC",
+        "cutOffDateTime": "2024-09-12T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "DGC",
+        "cutOffDateTime": "2024-09-11T12:00:00-07:00"
       }
     ],
     "solutionNumber": 1,
-    "transitTime": 10,
+    "transitTime": 87,
     "legs": [
       {
-        "sequenceNumber": 0,
+        "sequenceNumber": 1,
+        "transport": {
+          "modeOfTransport": "TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "COLBERT, WA",
+            "UNLocationCode": "USCOL"
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
+            "facility": {
+              "facilityCode": "SSA18",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 2,
         "transport": {
           "modeOfTransport": "VESSEL",
-          "portVisitReference": "NLAMS1234589",
-          "transportCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
           "servicePartners": [
             {
-              "carrierCode": "MAEU",
-              "carrierCodeListProvider": "NMFTA",
-              "carrierServiceName": "Great Lion Service",
-              "carrierServiceCode": "FE1",
-              "carrierImportVoyageNumber": "2103S",
-              "carrierExportVoyageNumber": "2103N"
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "CPNW",
+              "carrierImportVoyageNumber": "0TNDMN1MA",
+              "carrierExportVoyageNumber": "0TNDMN1MA"
             }
           ],
-          "universalServiceReference": "SR12345A",
-          "universalExportVoyageReference": "2103N",
-          "universalImportVoyageReference": "2103N",
           "vessel": {
-            "vesselIMONumber": "9321483",
-            "MMSINumber": "278111222",
-            "name": "King of the Seas",
-            "flag": "DE",
-            "callSign": "NCVV",
-            "operatorCarrierCode": "MAEU",
-            "operatorCarrierCodeListProvider": "NMFTA"
+            "vesselIMONumber": "9364992",
+            "name": "CMA CGM ORFEO",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
           }
         },
         "departure": {
           "facilityTypeCode": "POTE",
           "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
             "facility": {
-              "facilityCode": "ADT",
+              "facilityCode": "SSA18",
               "facilityCodeListProvider": "SMDG"
             }
           },
@@ -106,21 +114,479 @@
         "arrival": {
           "facilityTypeCode": "POTE",
           "location": {
-            "locationName": "Port of Amsterdam",
-            "address": {
-              "street": "Ruijggoordweg",
-              "streetNumber": "100",
-              "floor": "N/A",
-              "postCode": "1047 HM",
-              "city": "Amsterdam",
-              "stateRegion": "North Holland",
-              "countryCode": "NL"
-            },
-            "UNLocationCode": "NLAMS",
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
             "facility": {
-              "facilityCode": "ADT",
+              "facilityCode": "SHENG",
               "facilityCodeListProvider": "SMDG"
             }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 3,
+        "transport": {
+          "modeOfTransport": "VESSEL",
+          "servicePartners": [
+            {
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "MEX",
+              "carrierImportVoyageNumber": "0MEJ9W1MA",
+              "carrierExportVoyageNumber": "0MEJ9W1MA"
+            }
+          ],
+          "vessel": {
+            "vesselIMONumber": "9867827",
+            "name": "CMA CGM BALI",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
+          }
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
+            "facility": {
+              "facilityCode": "SHENG",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 4,
+        "transport": {
+          "modeOfTransport": "RAIL_TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "MADRID",
+            "UNLocationCode": "ESMAD"
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      }
+    ]
+  },
+  {
+    "placeOfReceipt": {
+      "facilityTypeCode": "RAMP",
+      "location": {
+        "locationName": "COLBERT, WA",
+        "UNLocationCode": "USCOL"
+      },
+      "dateTime": "2024-09-16T05:00:00-07:00"
+    },
+    "placeOfDelivery": {
+      "facilityTypeCode": "RAMP",
+      "location": {
+        "locationName": "MADRID",
+        "UNLocationCode": "ESMAD"
+      },
+      "dateTime": "2024-12-13T11:00:00+01:00"
+    },
+    "cutOffTimes": [
+      {
+        "cutOffDateTimeCode": "PCO",
+        "cutOffDateTime": "2024-09-20T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "VCO",
+        "cutOffDateTime": "2024-09-20T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "STA",
+        "cutOffDateTime": "2024-09-19T13:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "SPA",
+        "cutOffDateTime": "2024-09-19T13:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "DCO",
+        "cutOffDateTime": "2024-09-19T17:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "CUA",
+        "cutOffDateTime": "2024-09-20T10:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "AFC",
+        "cutOffDateTime": "2024-09-19T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "DGC",
+        "cutOffDateTime": "2024-09-18T12:00:00-07:00"
+      }
+    ],
+    "solutionNumber": 1,
+    "transitTime": 87,
+    "legs": [
+      {
+        "sequenceNumber": 1,
+        "transport": {
+          "modeOfTransport": "TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "COLBERT, WA",
+            "UNLocationCode": "USCOL"
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
+            "facility": {
+              "facilityCode": "SSA18",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 2,
+        "transport": {
+          "modeOfTransport": "VESSEL",
+          "servicePartners": [
+            {
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "CPNW",
+              "carrierImportVoyageNumber": "0TNDON1MA",
+              "carrierExportVoyageNumber": "0TNDON1MA"
+            }
+          ],
+          "vessel": {
+            "vesselIMONumber": "9951549",
+            "name": "CMA CGM ENDURANCE",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
+          }
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
+            "facility": {
+              "facilityCode": "SSA18",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
+            "facility": {
+              "facilityCode": "SHENG",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 3,
+        "transport": {
+          "modeOfTransport": "VESSEL",
+          "servicePartners": [
+            {
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "MEX",
+              "carrierImportVoyageNumber": "0MEJBW1MA",
+              "carrierExportVoyageNumber": "0MEJBW1MA"
+            }
+          ],
+          "vessel": {
+            "vesselIMONumber": "9894985",
+            "name": "CMA CGM EVERGLADE",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
+          }
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
+            "facility": {
+              "facilityCode": "SHENG",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 4,
+        "transport": {
+          "modeOfTransport": "RAIL_TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "MADRID",
+            "UNLocationCode": "ESMAD"
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      }
+    ]
+  },
+  {
+    "placeOfReceipt": {
+      "facilityTypeCode": "RAMP",
+      "location": {
+        "locationName": "COLBERT, WA",
+        "UNLocationCode": "USCOL"
+      },
+      "dateTime": "2024-09-23T08:00:00-07:00"
+    },
+    "placeOfDelivery": {
+      "facilityTypeCode": "RAMP",
+      "location": {
+        "locationName": "MADRID",
+        "UNLocationCode": "ESMAD"
+      },
+      "dateTime": "2024-12-20T11:00:00+01:00"
+    },
+    "cutOffTimes": [
+      {
+        "cutOffDateTimeCode": "PCO",
+        "cutOffDateTime": "2024-09-27T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "VCO",
+        "cutOffDateTime": "2024-09-27T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "STA",
+        "cutOffDateTime": "2024-09-26T13:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "SPA",
+        "cutOffDateTime": "2024-09-26T13:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "DCO",
+        "cutOffDateTime": "2024-09-26T17:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "CUA",
+        "cutOffDateTime": "2024-09-27T10:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "AFC",
+        "cutOffDateTime": "2024-09-26T15:00:00-07:00"
+      },
+      {
+        "cutOffDateTimeCode": "DGC",
+        "cutOffDateTime": "2024-09-25T12:00:00-07:00"
+      }
+    ],
+    "solutionNumber": 1,
+    "transitTime": 87,
+    "legs": [
+      {
+        "sequenceNumber": 1,
+        "transport": {
+          "modeOfTransport": "TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "COLBERT, WA",
+            "UNLocationCode": "USCOL"
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
+            "facility": {
+              "facilityCode": "SSA18",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 2,
+        "transport": {
+          "modeOfTransport": "VESSEL",
+          "servicePartners": [
+            {
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "CPNW",
+              "carrierImportVoyageNumber": "0TNDQN1MA",
+              "carrierExportVoyageNumber": "0TNDQN1MA"
+            }
+          ],
+          "vessel": {
+            "vesselIMONumber": "9969390",
+            "name": "ALS LUNA",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
+          }
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "SSA TERMINAL 18, SEATTLE, WA",
+            "UNLocationCode": "USSEA",
+            "facility": {
+              "facilityCode": "SSA18",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
+            "facility": {
+              "facilityCode": "SHENG",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 3,
+        "transport": {
+          "modeOfTransport": "VESSEL",
+          "servicePartners": [
+            {
+              "carrierCode": "CMA",
+              "carrierCodeListProvider": "SMDG",
+              "carrierServiceCode": "MEX",
+              "carrierImportVoyageNumber": "0MEJDW1MA",
+              "carrierExportVoyageNumber": "0MEJDW1MA"
+            }
+          ],
+          "vessel": {
+            "vesselIMONumber": "9938133",
+            "name": "CMA CGM CAPE COD",
+            "operatorCarrierCode": "CMA",
+            "operatorCarrierCodeListProvider": "SMDG"
+          }
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "YANGSHAN DEEP WATER PORT PHASE1 TER, SHANGHAI",
+            "UNLocationCode": "CNSGH",
+            "facility": {
+              "facilityCode": "SHENG",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "ARRIVAL_DATE"
+        }
+      },
+      {
+        "sequenceNumber": 4,
+        "transport": {
+          "modeOfTransport": "RAIL_TRUCK"
+        },
+        "departure": {
+          "facilityTypeCode": "POTE",
+          "location": {
+            "locationName": "CSP IBERIAN VALENCIA TERMINAL SAU, VALENCIA",
+            "UNLocationCode": "ESVLC",
+            "facility": {
+              "facilityCode": "NOATV",
+              "facilityCodeListProvider": "SMDG"
+            }
+          },
+          "dateTime": "DEPARTURE_DATE"
+        },
+        "arrival": {
+          "facilityTypeCode": "RAMP",
+          "location": {
+            "locationName": "MADRID",
+            "UNLocationCode": "ESMAD"
           },
           "dateTime": "ARRIVAL_DATE"
         }

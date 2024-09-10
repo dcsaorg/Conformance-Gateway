@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.cs.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -8,16 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
+
 @Slf4j
 public abstract class CsAction extends ConformanceAction {
 
@@ -69,21 +68,12 @@ public abstract class CsAction extends ConformanceAction {
 
   private void updateCursorFromResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dspRef = dsp.get();
-    Collection<String> linkHeaders = exchange.getResponse().message().headers().get("Link");
+    Collection<String> paginationHeaders = exchange.getResponse().message().headers().get("Next-Page-Cursor");
     var updatedDsp = dspRef;
-    if (linkHeaders != null) {
-      Optional<String> link = linkHeaders.stream().findFirst();
-      if (link.isPresent()) {
-        String[] links = link.get().split(",");
-        for (String value : links) {
-          String url = value.split(";")[0];
-          String rel = value.split(";")[1];
-          String relValue = rel.split("=")[1].replace("\"", "");
-          if ("next".equals(relValue)) {
-            String cursorValue = extractCursorValue(url);
-            updatedDsp = updateIfNotNull(updatedDsp, cursorValue, updatedDsp::withCursor);
-          }
-        }
+    if (paginationHeaders != null) {
+      Optional<String> cursor = paginationHeaders.stream().findFirst();
+      if (cursor.isPresent()) {
+        updatedDsp = updateIfNotNull(updatedDsp, cursor.get(), updatedDsp::withCursor);
       }
     }
     String jsonResponse = exchange.getResponse().message().body().toString();
@@ -97,9 +87,7 @@ public abstract class CsAction extends ConformanceAction {
       }
     }
 
-    if (!dsp.equals(updatedDsp)) {
-      dsp.set(updatedDsp);
-    }
+    if (!dsp.equals(updatedDsp)) dsp.set(updatedDsp);
   }
 
   private String getHashString(String actualResponse) {
@@ -114,20 +102,6 @@ public abstract class CsAction extends ConformanceAction {
     return responseHash;
   }
 
-  private static String extractCursorValue(String url) {
-    String[] urlParts = url.split("\\?");
-    if (urlParts.length > 1) {
-      String query = urlParts[1];
-      String[] parameters = query.split("&");
-      for (String param : parameters) {
-        String[] keyValue = param.split("=");
-        if (keyValue.length == 2 && "cursor".equals(keyValue[0])) {
-          return keyValue[1];
-        }
-      }
-    }
-    return null;
-  }
   private <T> DynamicScenarioParameters updateIfNotNull(DynamicScenarioParameters dsp, T value, Function<T, DynamicScenarioParameters> with) {
     if (value == null) {
       return dsp;

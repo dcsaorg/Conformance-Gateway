@@ -60,16 +60,16 @@ public class CsPublisher extends ConformanceParty {
     );
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
     if(request.queryParams().containsKey("limit") && !request.queryParams().containsKey("cursor")){
-      String nextPage = "https://api.dcsa.org/v1/point-to-point-routes?limit=20&cursor=next123; rel=\"next\"";
-      headers.put("Link",List.of(nextPage));
+      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA=";
+      headers.put("Next-Page-Cursor",List.of(cursor));
     }
     boolean hasCursor = request.queryParams().containsKey("cursor");
 
     if (request.url().endsWith("v1/point-to-point-routes")) {
       if(hasCursor){
-        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
-      }else{
         filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptpnextpage.json";
+      }else{
+        filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
       }
 
     } else if (request.url().endsWith("v1/port-schedules")) {

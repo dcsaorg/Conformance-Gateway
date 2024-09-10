@@ -316,189 +316,6 @@ public class EBLChecks {
     }
   );
 
-  private static final JsonRebaseableContentCheck VOLUME_IMPLIES_VOLUME_UNIT = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The use of 'volume' implies 'volumeUnit'",
-    mav -> {
-      mav.submitAllMatching("consignmentItems.*");
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*");
-    },
-    JsonAttribute.presenceImpliesOtherField(
-      "volume",
-      "volumeUnit"
-    )
-  );
-
-  private static void utilizedTransportEquipmentCargoItemAlignment(
-    JsonNode consignmentItems,
-    String equipmentReference,
-    String uteContextPath,
-    double uteNumber,
-    String uteUnit,
-    String numberFieldName,
-    String numberUnitFieldName,
-    Map<String, Double> conversionTable,
-    Set<String> issues
-  ) {
-    boolean converted = false;
-    var sum = 0.0;
-    boolean matchedEquipmentReference = false;
-    for (var consignmentItem : consignmentItems) {
-      for (var cargoItem : consignmentItem.path("cargoItems")) {
-        var cargoItemEquipmentReference = cargoItem.path("equipmentReference").asText(null);
-        if (!Objects.equals(equipmentReference, cargoItemEquipmentReference)) {
-          continue;
-        }
-        matchedEquipmentReference = true;
-        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
-        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
-        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(uteUnit)) {
-          var conversionFactor = conversionTable.get(uteUnit + "->" + cargoItemWeightUnit);
-          if (conversionFactor != null) {
-            converted = true;
-            cargoItemWeight *= conversionFactor;
-          }
-        }
-        sum += cargoItemWeight;
-      }
-    }
-    if (!matchedEquipmentReference) {
-      // Another validation gets to complain about this
-      return;
-    }
-    var delta = Math.abs(sum - uteNumber);
-    // Give some leeway when converting.
-    var e = converted ? 0.99 : 0.0001;
-    if (delta < e) {
-      return;
-    }
-    issues.add(
-      "The utilizedTransportEquipment at '%s' had '%s' of %.2f %s but the cargoItems '%s' for it sums to %.2f %s%s"
-        .formatted(
-          uteContextPath,
-          numberFieldName,
-          uteNumber,
-          uteUnit,
-          numberFieldName,
-          sum,
-          uteUnit,
-          converted
-            ? " ('cargoItems' values were normalized to the utilizedTransportEquipment unit)"
-            : ""));
-  }
-
-  private static JsonContentMatchedValidation allUtilizedTransportEquipmentCargoItemAreAligned(
-    String uteNumberFieldName,
-    String uteNumberUnitFieldName,
-    String cargoItemNumberFieldName,
-    String cargoItemNumberUnitFieldName,
-    Map<String, Double> conversionTable
-  ) {
-    return (tdRoot, contextPath) -> {
-      var consignmentItems = tdRoot.path("consignmentItems");
-      var issues = new LinkedHashSet<String>();
-      var index = 0;
-      var key = "utilizedTransportEquipments";
-      for (var ute : tdRoot.path(key)) {
-        var uteContextPath = concatContextPath(contextPath, key + "[" + index + "]");
-        ++index;
-        var equipmentReference = ute.path("equipment").path("equipmentReference").asText(null);
-        var uteNumberNode = ute.path(uteNumberFieldName);
-        var uteUnit = ute.path(uteNumberUnitFieldName).asText("");
-        if (equipmentReference == null || uteNumberNode.isMissingNode() || !uteNumberNode.isNumber()) {
-          // Another validation will complain if applicable
-          continue;
-        }
-        utilizedTransportEquipmentCargoItemAlignment(
-          consignmentItems,
-          equipmentReference,
-          uteContextPath,
-          uteNumberNode.asDouble(),
-          uteUnit,
-          cargoItemNumberFieldName,
-          cargoItemNumberUnitFieldName,
-          conversionTable,
-          issues
-        );
-      }
-      return issues;
-    };
-  }
-
-
-  private static JsonContentMatchedValidation consignmentItemCargoItemAlignment(
-    String numberFieldName,
-    String numberUnitFieldName,
-    Map<String, Double> conversionTable
-  ) {
-    return (consignmentItem, contextPath) -> {
-      boolean converted = false;
-      var sum = 0.0;
-      var unit = consignmentItem.path(numberUnitFieldName).asText(null);
-      if (unit == null) {
-        // Some other validation will complain about this if relevant.
-        return Set.of();
-      }
-      for (var cargoItem : consignmentItem.path("cargoItems")) {
-        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
-        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
-        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(unit)) {
-          var conversionFactor = conversionTable.get(unit + "->" + cargoItemWeightUnit);
-          if (conversionFactor != null) {
-            converted = true;
-            cargoItemWeight *= conversionFactor;
-          }
-        }
-        sum += cargoItemWeight;
-      }
-      var expected = consignmentItem.path(numberFieldName).asDouble(0.0);
-      var delta = Math.abs(sum - expected);
-      // Give some leeway when converting.
-      var e = converted ? 0.99 : 0.0001;
-      if (delta < e) {
-        return Set.of();
-      }
-      return Set.of(
-          "The consignmentItem at '%s' had '%s' of %.2f %s but the cargoItem '%s' sums to %.2f %s%s"
-              .formatted(
-                  contextPath,
-                  numberFieldName,
-                  expected,
-                  unit,
-                  numberFieldName,
-                  sum,
-                  unit,
-                  converted
-                      ? " ('cargoItems' values were normalized to the consignmentItem unit)"
-                      : ""));
-    };
-  }
-
-  private static final Map<String, Double> RATIO_WEIGHT = Map.of(
-    "KGM->LBR", 0.45359237,
-    "LBR->KGM", 2.2046226218
-  );
-
-  private static final Map<String, Double> RATIO_VOLUME = Map.of(
-    "MTQ->FTQ", 0.02831685,
-    "FTQ->MTQ",  35.3146667
-  );
-
-  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'consignmentItem' weight is aligned with its 'cargoItems'",
-    mav -> mav.submitAllMatching("consignmentItems.*"),
-    consignmentItemCargoItemAlignment("weight",
-      "weightUnit",
-      RATIO_WEIGHT
-  ));
-
-  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'consignmentItem' volume is aligned with its 'cargoItems'",
-    mav -> mav.submitAllMatching("consignmentItems.*"),
-    consignmentItemCargoItemAlignment("volume",
-      "volumeUnit",
-      RATIO_VOLUME
-    ));
-
   private static final JsonRebaseableContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     JsonAttribute.unique("countryCode", "manifestTypeCode")
@@ -533,9 +350,6 @@ public class EBLChecks {
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
     OUTER_PACKAGING_CODE_IS_VALID,
-    VOLUME_IMPLIES_VOLUME_UNIT,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
     NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
     TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE
@@ -633,37 +447,7 @@ public class EBLChecks {
     CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
     AMF_TYPE_CODES_VALIDATION,
-    VOLUME_IMPLIES_VOLUME_UNIT,
     OUTER_PACKAGING_CODE_IS_VALID,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
-      mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
-      JsonAttribute.presenceImpliesOtherField(
-        "cargoGrossVolume",
-        "cargoGrossVolumeUnit"
-    )),
-    JsonAttribute.customValidator(
-      "Validate that 'utilizedTransportEquipment' weight is aligned with its 'cargoItems'",
-      allUtilizedTransportEquipmentCargoItemAreAligned(
-        "cargoGrossWeight",
-        "cargoGrossWeightUnit",
-        "weight",
-        "weightUnit",
-        RATIO_WEIGHT
-      )
-    ),
-    JsonAttribute.customValidator(
-      "Validate that 'utilizedTransportEquipment' volume is aligned with its 'cargoItems'",
-      allUtilizedTransportEquipmentCargoItemAreAligned(
-        "cargoGrossVolume",
-        "cargoGrossVolumeUnit",
-        "volume",
-        "volumeUnit",
-        RATIO_VOLUME
-      )
-    ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "Validate mode of transport type",
       mav -> {
@@ -866,22 +650,6 @@ public class EBLChecks {
   private static JsonContentMatchedValidation checkCSPValueBasedOnOtherValue(
     String attributeName,
     String referenceAttributeName,
-    Supplier<Map<String, String>> expectedValuesSupplier
-  ) {
-    return checkCSPValueBasedOnOtherValue(
-      attributeName,
-      referenceAttributeName,
-      expectedValuesSupplier,
-      (node, pathBuilder) -> {
-        pathBuilder.append(".").append(attributeName);
-        return node.path(attributeName);
-      }
-    );
-  }
-
-  private static JsonContentMatchedValidation checkCSPValueBasedOnOtherValue(
-    String attributeName,
-    String referenceAttributeName,
     Supplier<Map<String, String>> expectedValuesSupplier,
     BiFunction<JsonNode, StringBuilder, JsonNode> resolveValue
   ) {
@@ -1033,10 +801,20 @@ public class EBLChecks {
       }
       return m;
     };
+    BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
+      var hsCodes = consignmentItem.path("descriptionOfGoods");
+      if (!hsCodes.isArray()) {
+        return null;
+      }
+      // TODO: We should support more descriptionOfGoods some other day.
+      pathBuilder.append(".descriptionOfGoods[0]");
+      return hsCodes.path(0);
+    };
     return checkCSPValueBasedOnOtherValue(
       "descriptionOfGoods",
       "commoditySubreference",
-      expectedValueSupplier
+      expectedValueSupplier,
+      resolver
     );
   }
 
@@ -1053,7 +831,7 @@ public class EBLChecks {
       return m;
     };
     BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
-      var hsCodes = consignmentItem.get("HSCodes");
+      var hsCodes = consignmentItem.path("HSCodes");
       if (!hsCodes.isArray()) {
         return null;
       }

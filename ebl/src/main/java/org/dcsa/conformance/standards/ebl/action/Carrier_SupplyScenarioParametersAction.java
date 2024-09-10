@@ -115,7 +115,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "DKAAR",
         "220299",
         null,
-        "Non alcoholic beverages, 40,000 cans",
+        "Non alcoholic beverages",
         null,
         "Bottles"
       );
@@ -129,7 +129,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "DKAAR",
         "293499",
         null,
-        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        "Environmentally hazardous substance",
         null,
         null
       );

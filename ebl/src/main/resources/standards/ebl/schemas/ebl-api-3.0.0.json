@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA specification for Shipping Instructions and Transport Document",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implmented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Electronic Bill of Lading API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implemented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -99,7 +99,9 @@
                     "consignmentItems": [
                       {
                         "carrierBookingReference": "CBR_123_REGULAR",
-                        "descriptionOfGoods": "Shoes - black",
+                        "descriptionOfGoods": [
+                          "Shoes - black"
+                        ],
                         "HSCodes": [
                           "640510"
                         ],
@@ -107,8 +109,10 @@
                         "cargoItems": [
                           {
                             "equipmentReference": "NARU3472484",
-                            "weight": 12000,
-                            "weightUnit": "KGM",
+                            "grossWeight": {
+                              "value": 12000,
+                              "unit": "KGM"
+                            },
                             "outerPackaging": {
                               "numberOfPackages": 400,
                               "packageCode": "4G",
@@ -209,7 +213,7 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "isElectronic not found - it is a mandatory property in Shipping Instructions",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-10-03T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -247,7 +251,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while processing Booking request",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -284,7 +288,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to create a Shipping Instructions has been requested. Please try again in 1 hour",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -307,7 +311,7 @@
           "Shipping Instructions"
         ],
         "summary": "Gets the Shipping Instructions\n",
-        "description": "Retrieves the `Shipping Instructions` with the `documentReference`. The path can contain a `shippingInstructionsReference` or a `transportDocumentReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions`, it is necessary to use the query parameter `updatedContent` and set it to `true`.\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n\nThe `status` of the \"original\" `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus`. `updatedShippingInstructionsStatus` and related content is only available after a consumer has requested an update via **UseCase 3: Submit updated Shipping Instructions** and until:\n- the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessable.\n- the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\nIf `updatedContent=true` is requested but no update has yet been provided by the consumer **or** the state of the \"original\" `Shipping Instructions` is `PENDING UPDATE`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting changes to the `Shipping Instructions`, the `feedbacks` object is used to inform the consumer what needs to change.\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n\nIn case a previous request is being processed by the provider - a `202` (Accepted) with **no payload** can be used as a response until the processing is finished.\n",
+        "description": "Retrieves the `Shipping Instructions` with the `documentReference`. The path can contain a `shippingInstructionsReference` or a `transportDocumentReference`. It is recommended to use this endPoint to `GET` data before an update is made to make sure latest version is being updated.\n\nThe default payload when calling this endPoint is the \"original\" `Shipping Instructions`. It is also possible to get the latest update to a `Shipping Instructions` called the `Updated Shipping Instructions`. In order to get the `Update Shipping Instructions`, it is necessary to use the query parameter `updatedContent` and set it to `true`.\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n\nThe `status` of the \"original\" `Shipping Instructions` is included in both payloads as `shippingInstructionsStatus`. `updatedShippingInstructionsStatus` and related content is only available after a consumer has requested an update via **UseCase 3: Submit updated Shipping Instructions** and until:\n- the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible.\n- the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\nIf `updatedContent=true` is requested but no update has yet been provided by the consumer **or** the state of the \"original\" `Shipping Instructions` is `PENDING_UPDATE`, then a `404` (Not Found) is returned.\n\nIf the provider is requesting changes to the `Shipping Instructions`, the `feedbacks` object is used to inform the consumer what needs to change.\n\nIn case no subscription (`Notification`) has been set up - it is possible to use this endPoint to poll on in order to detect if `shippingInstructionsStatus` and/or `updatedShippingInstructionsStatus` has changed.\n\nIn case a previous request is being processed by the provider - a `202` (Accepted) with **no payload** can be used as a response until the processing is finished.\n",
         "operationId": "get-shipping-instructions",
         "parameters": [
           {
@@ -403,7 +407,9 @@
                           "carrierBookingReference": "CBR_123_REGULAR",
                           "weight": 12000,
                           "weightUnit": "KGM",
-                          "descriptionOfGoods": "Shoes - black",
+                          "descriptionOfGoods": [
+                            "Shoes - black"
+                          ],
                           "HSCodes": [
                             "640510"
                           ],
@@ -411,8 +417,10 @@
                           "cargoItems": [
                             {
                               "equipmentReference": "NARU3472484",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "packageCode": "4G",
@@ -441,7 +449,7 @@
                     "value": {
                       "transportDocumentReference": "D8931B95625E4B339F2A",
                       "shippingInstructionsReference": "9051da7d-4099-4930-af35-7add4e68c635",
-                      "shippingInstructionsStatus": "PENDING UPDATE",
+                      "shippingInstructionsStatus": "PENDING_UPDATE",
                       "transportDocumentTypeCode": "BOL",
                       "isShippedOnBoardType": true,
                       "freightPaymentTermCode": "PRE",
@@ -473,7 +481,9 @@
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REEFER",
-                          "descriptionOfGoods": "Dairy products",
+                          "descriptionOfGoods": [
+                            "Dairy products"
+                          ],
                           "HSCodes": [
                             "04052090"
                           ],
@@ -481,8 +491,10 @@
                           "cargoItems": [
                             {
                               "equipmentReference": "KKFU6671914",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "packageCode": "BQ",
@@ -531,12 +543,12 @@
                   },
                   "dgExample": {
                     "summary": "Updated Shipping Instructions with DG cargo\n",
-                    "description": "A `Shipping Instructions` with `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jarricans.\n\nThe `Shipping Instructions` has already been applied an update which has been confirmed by the provider (`updatedShippingInstructions='UPDATE CONFIRMED'`). The `Shipping Instructions` is now waiting for the provider to `DRAFT` a `Transport Document`.\n\n**Notice** that there are no DG (Dangerous Goods) info in the `Shipping Instructions`. If any DG info need to be modified - then a `Booking` amendment must be applied to booking: `RTM1234567`.\n",
+                    "description": "A `Shipping Instructions` with `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jarricans.\n\nThe `Shipping Instructions` has already been applied an update which has been confirmed by the provider (`updatedShippingInstructions='UPDATE_CONFIRMED'`). The `Shipping Instructions` is now waiting for the provider to `DRAFT` a `Transport Document`.\n\n**Notice** that there are no DG (Dangerous Goods) info in the `Shipping Instructions`. If any DG info need to be modified - then a `Booking` amendment must be applied to booking: `RTM1234567`.\n",
                     "value": {
                       "transportDocumentReference": "4AD3FA470BB541B980CE",
                       "shippingInstructionsReference": "b36484d0-1115-43c2-93e4-a378823a8386",
                       "shippingInstructionsStatus": "RECEIVED",
-                      "updatedShippingInstructionsStatus": "UPDATE CONFIRMED",
+                      "updatedShippingInstructionsStatus": "UPDATE_CONFIRMED",
                       "transportDocumentTypeCode": "BOL",
                       "isShippedOnBoardType": true,
                       "freightPaymentTermCode": "PRE",
@@ -568,7 +580,10 @@
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "RTM1234567",
-                          "descriptionOfGoods": "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+                          "descriptionOfGoods": [
+                            "Environmentally hazardous substance",
+                            "liquid, N.O.S (Propiconazole)"
+                          ],
                           "HSCodes": [
                             "293499"
                           ],
@@ -576,8 +591,10 @@
                           "cargoItems": [
                             {
                               "equipmentReference": "HLXU1234567",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "description": "Jerrican, steel"
@@ -595,7 +612,7 @@
                             }
                           ],
                           "equipment": {
-                            "ISOEquipmentCode": "22GP",
+                            "ISOEquipmentCode": "22G1",
                             "equipmentReference": "HLXU1234567",
                             "tareWeight": 2370,
                             "weightUnit": "KGM"
@@ -637,9 +654,9 @@
                       "requestUri": "/v3/shipping-instructions/si-123?updatedContent=true",
                       "statusCode": 404,
                       "statusCodeText": "Not Found",
-                      "statusCodeMessage": "No update accessable",
+                      "statusCodeMessage": "No update accessible",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -659,7 +676,7 @@
                       "statusCodeText": "Not Found",
                       "statusCodeMessage": "documentReference not found",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -674,7 +691,7 @@
             }
           },
           "409": {
-            "description": "In case the provider is processing the `Shipping Instructions` - it is possible for the provider to reject new incomming requests by returning a `409` (Conflict)\n",
+            "description": "In case the provider is processing the `Shipping Instructions` - it is possible for the provider to reject new incoming requests by returning a `409` (Conflict)\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -696,7 +713,7 @@
                       "statusCodeText": "Conflict",
                       "statusCodeMessage": "Previous request is being processed. Please try again\nlater\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -733,7 +750,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while fetching the Shipping Instructions",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -762,7 +779,7 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Fetching too many `Transport Document` requests\n",
-                    "description": "Calling the endPoint\n\n    GET /v3/shipping-instructions/si-123\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    GET /v3/shipping-instructions/si-123\n    \ntoo many times within a time period.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
                       "requestUri": "/v3/shipping-instructions/si-123",
@@ -770,7 +787,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to fetch a Shipping Instructions has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -791,7 +808,7 @@
           "Shipping Instructions"
         ],
         "summary": "Updates the Shipping Instructions\n",
-        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`\n    \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE RECEIVED`.\n      \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING UPDATE',\n        updatedShippingInstructionsStatus: 'UPDATE RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The updated `Shipping Instructions`:\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\n    A subsequent `GET` request to the `Shipping Instructions` will fetch the status along with the `Shipping Instructions`\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider will now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The `Shipping Instructions`:\n  - is now accepted by the provider system\n  - the status of the `Shipping Instructions` is unchanged\n  - a `202` (Accepted) response is sent with an empty payload\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:\n  - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n  - `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\nThe new state will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
+        "description": "Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**\n\n### Precondition\nIn order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:\n\n- `RECEIVED` in case the consumer has updated information for the `Shipping Instructions`\n- `PENDING_UPDATE` in case the provider has requested the consumer to update the `Shipping Instructions` (a result of **UseCase 2 - Request to update Shipping Instructions**)\n\n## Postcondition\nThe provider has received an update to the `Shipping Instructions` (**UseCase 3 - Submit updated Shipping Instructions**), from now on called the `Updated Shipping Instructions`.\n\nThe `Updated Shipping Instructions` and the \"original\" `Shipping Instructions` **co-exist** until a new update is submitted by the consumer (via **UseCase 3: Submit updated Shipping Instructions**) or until the provider requests an update (sets the `shippingInstructionsStatus='PENDING_UPDATE'` via **UseCase 2: Request to update Shipping Instructions**). The `Updated Shipping Instructions` always represents the latest version of an update received by the provider.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n  \n    The `Updated Shipping Instructions` is stored in the provider system alongside the \"original\" `Shipping Instructions`.\n\n   **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**\n\n3. The response depends on which use case is the reason for calling this endPoint (what the `shippingInstructionsStatus` is):\n\n    - If `shippingInstructionsStatus` **is** `RECEIVED`, then this endPoint is being used in addition to **UseCase 1 - Submit Shipping Instructions**. In this case the consumer would like to make an update to an already sent `Shipping Instructions`. This is done via **UseCase 3 - Submit updated Shipping Instructions**. The `shippingInstructionsStatus` stays as `RECEIVED`, `updatedShippingInstructionsStatus` is set to `UPDATE_RECEIVED`\n    \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'RECEIVED',\n        updatedShippingInstructionsStatus: 'UPDATE_RECEIVED'\n      }\n      ```\n\n    - If `shippingInstructionsStatus` is `PENDING_UPDATE`, then this endPoint is being used as a response to **UseCase 2 - Request to update Shipping Instructions** in this case the provider has requested an update to a `Shipping Instructions`. The `shippingInstructionsStatus` remains `PENDING_UPDATE`, `updatedShippingInstructionsStatus` is set to `UPDATE_RECEIVED`.\n      \n      A `200` (OK) response is returned with the following payload:\n      ```\n      {\n        shippingInstructionsReference: 'si-123',\n        shippingInstructionsStatus: 'PENDING_UPDATE',\n        updatedShippingInstructionsStatus: 'UPDATE_RECEIVED'\n      }\n      ```\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The updated `Shipping Instructions`:\n  - is now stored in the provider system\n  - a `200` (OK) response is sent to the consumer with the status of the `Shipping Instructions` and the `Updated Shipping Instructions` with one of the following combinations (depending on the use case):\n    - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n    - `shippingInstructionsStatus='PENDING_UPDATE'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\n    A subsequent `GET` request to the `Shipping Instructions` will fetch the status along with the `Shipping Instructions`\n  - awaits further processing by the provider\n  - '_relevant_' subscribers have been notified.\n\nThe provider will now start asynchronous processing. Once processed, the new status of the `Shipping Instructions` and `Updated Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives an **update** to a `Shipping Instructions`\n1. The payload (`Updated Shipping Instructions`) is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nFor `PUT` `Shipping Instructions` responding with `200` (OK) the process ends here. The `Shipping Instructions`:\n  - is now accepted by the provider system\n  - the status of the `Shipping Instructions` is unchanged\n  - a `202` (Accepted) response is sent with an empty payload\n  - awaits further processing by the provider\n\nThe provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:\n  - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n  - `shippingInstructionsStatus='PENDING_UPDATE'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\nThe new state will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/shipping-instructions/{documentReference}\n    \nendPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.\n  \nIf the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n  \n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n    \nIt is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:\n  - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the \"old update\" is no longer accessible\n  - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the \"new update\" provided **replaces** the \"old update\".\n",
         "operationId": "update-shipping-instructions",
         "parameters": [
           {
@@ -865,7 +882,9 @@
                     "consignmentItems": [
                       {
                         "carrierBookingReference": "CBR_123_REGULAR",
-                        "descriptionOfGoods": "Shoes - black",
+                        "descriptionOfGoods": [
+                          "Shoes - black"
+                        ],
                         "HSCodes": [
                           "640510"
                         ],
@@ -873,8 +892,10 @@
                         "cargoItems": [
                           {
                             "equipmentReference": "NARU3472484",
-                            "weight": 12000,
-                            "weightUnit": "KGM",
+                            "grossWeight": {
+                              "value": 12000,
+                              "unit": "KGM"
+                            },
                             "outerPackaging": {
                               "numberOfPackages": 400,
                               "packageCode": "4G",
@@ -904,7 +925,7 @@
         },
         "responses": {
           "200": {
-            "description": "The `Updated Shipping Instructions` has been successfully stored in the provider system with one of the following combinations (depending on the use case):\n- `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n- `shippingInstructionsStatus='PENDING UPDATE'` and `updatedShippingInstructionsStatus='UPDATE RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\nThe status of the `Updated Shipping Instructions` can be monitored on the\n\n    GET /v3/shipping-instructions/{documentReference}\n\nendPoint where the \"original\" `Shipping Instructions` is returned by the consumer.\n\nIf the consumer wants to get the content of the `Update Shipping Instructions`  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n",
+            "description": "The `Updated Shipping Instructions` has been successfully stored in the provider system with one of the following combinations (depending on the use case):\n- `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)\n- `shippingInstructionsStatus='PENDING_UPDATE'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)\n\nThe status of the `Updated Shipping Instructions` can be monitored on the\n\n    GET /v3/shipping-instructions/{documentReference}\n\nendPoint where the \"original\" `Shipping Instructions` is returned by the consumer.\n\nIf the consumer wants to get the content of the `Update Shipping Instructions`  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:\n\n    GET /v3/shipping-instructions/{documentReference}?updatedContent=true\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -918,30 +939,30 @@
                 "examples": {
                   "receivedExample": {
                     "summary": "Shipping Instructions updated by consumer\n",
-                    "description": "An `Updated Shipping Instructions` is received and stored in provider system, the `Updated Shipping Instructions` now awaits provider action.\n\n    shippingInstructionsStatus='RECEIVED'\n    updatedShippingInstructionsStatus='UPDATE RECEIVED'\n",
+                    "description": "An `Updated Shipping Instructions` is received and stored in provider system, the `Updated Shipping Instructions` now awaits provider action.\n\n    shippingInstructionsStatus='RECEIVED'\n    updatedShippingInstructionsStatus='UPDATE_RECEIVED'\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "shippingInstructionsStatus": "RECEIVED",
-                      "updatedShippingInstructionsStatus": "UPDATE RECEIVED"
+                      "updatedShippingInstructionsStatus": "UPDATE_RECEIVED"
                     }
                   },
                   "pendingUpdateExample": {
                     "summary": "Shipping Instructions updated because of consumer requirement\n",
-                    "description": "An updated `Shipping Instructions` received and stored in provider system as a response to a provider initiated update request (a response to **UseCase 2 - Request to update Shipping Instructions**). The `Updated Shipping Instructions` now awaits provider action\n\n    shippingInstructionsStatus='PENDING UPDATE'\n    updatedShippingInstructionsStatus='UPDATE RECEIVED'\n",
+                    "description": "An updated `Shipping Instructions` received and stored in provider system as a response to a provider initiated update request (a response to **UseCase 2 - Request to update Shipping Instructions**). The `Updated Shipping Instructions` now awaits provider action\n\n    shippingInstructionsStatus='PENDING_UPDATE'\n    updatedShippingInstructionsStatus='UPDATE_RECEIVED'\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
-                      "shippingInstructionsStatus": "PENDING UPDATE",
-                      "updatedShippingInstructionsStatus": "UPDATE RECEIVED"
+                      "shippingInstructionsStatus": "PENDING_UPDATE",
+                      "updatedShippingInstructionsStatus": "UPDATE_RECEIVED"
                     }
                   },
                   "amendmentExample": {
                     "summary": "Request amendment to Transport Document\n",
-                    "description": "An `Updated Shipping Instructions` received and stored in provider system as an amendment to a `Transport Document` with `transportDocumentReference='td-987'`. The `Updated Shipping Instructions` now awaits provider action\n\n    shippingInstructionsStatus='RECEIVED'\n    updatedShippingInstructionsStatus='UPDATE RECEIVED'\n",
+                    "description": "An `Updated Shipping Instructions` received and stored in provider system as an amendment to a `Transport Document` with `transportDocumentReference='td-987'`. The `Updated Shipping Instructions` now awaits provider action\n\n    shippingInstructionsStatus='RECEIVED'\n    updatedShippingInstructionsStatus='UPDATE_RECEIVED'\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "transportDocumentReference": "td-987",
                       "shippingInstructionsStatus": "RECEIVED",
-                      "updatedShippingInstructionsStatus": "UPDATE RECEIVED"
+                      "updatedShippingInstructionsStatus": "UPDATE_RECEIVED"
                     }
                   }
                 }
@@ -989,7 +1010,7 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "isElectronic not found - it is a mandatory property in Shipping Instructions",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1027,7 +1048,7 @@
                       "statusCodeText": "Not Found",
                       "statusCodeMessage": "shippingInstructionsReference not found",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1064,7 +1085,7 @@
                       "statusCodeText": "Conflict",
                       "statusCodeMessage": "Is being processed",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1101,7 +1122,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while processing Shipping Instructions",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1138,7 +1159,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to update a Shipping Instructions has been requested. Please try again in 1 hour",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1159,7 +1180,7 @@
           "Shipping Instructions"
         ],
         "summary": "Cancels an update to a Shipping Instructions\n",
-        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nOnce processed, the `Updated Shipping Instructions` is cancelled and a [Shipping Instructions Notification](#/ShippingInstructionsNotification) will be sent\n",
+        "description": "A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.\n\n## Precondition\nIn order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE_RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING_UPDATE`.\n\n## Postcondition\nThe provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE_RECEIVED`.\n\nThe consumer will receive a `200` (OK) or a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for a `200` (OK) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. The `updatedShippingInstructionsStatus` is set to `UPDATE_CANCELLED`.\n4. All '_relevant_' subscribers will be notified via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).\n\n## Flow for a `202` (Accepted) response\nThe following occurs when a provider receives a cancellation:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nOnce processed, the `Updated Shipping Instructions` is cancelled and a [Shipping Instructions Notification](#/ShippingInstructionsNotification) will be sent\n",
         "operationId": "patch-shipping-instructions",
         "parameters": [
           {
@@ -1199,9 +1220,9 @@
               "examples": {
                 "cancelUpdateExample": {
                   "summary": "Cancel a Shipping Instructions update\n",
-                  "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. The `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`\n",
+                  "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. The `updatedShippingInstructionsStatus` is set to `UPDATE_CANCELLED`\n",
                   "value": {
-                    "updatedShippingInstructionsStatus": "UPDATE CANCELLED"
+                    "updatedShippingInstructionsStatus": "UPDATE_CANCELLED"
                   }
                 }
               }
@@ -1211,7 +1232,7 @@
         },
         "responses": {
           "200": {
-            "description": "The `Updated Shipping Instructions` is now cancelled. The `updatedShippingInstructionsStatus` is now `UPDATE CANCELLED`. The `shippingInstructionsStatus` is left unchanged.\n",
+            "description": "The `Updated Shipping Instructions` is now cancelled. The `updatedShippingInstructionsStatus` is now `UPDATE_CANCELLED`. The `shippingInstructionsStatus` is left unchanged.\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1225,20 +1246,20 @@
                 "examples": {
                   "cancelUpdateExample": {
                     "summary": "Cancel a Shipping Instructions update\n",
-                    "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. In this case the `shippingInstructionsStatus` stays as `RECEIVED` and the `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`. An optional `reason` can be provided.\n",
+                    "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. In this case the `shippingInstructionsStatus` stays as `RECEIVED` and the `updatedShippingInstructionsStatus` is set to `UPDATE_CANCELLED`. An optional `reason` can be provided.\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
                       "shippingInstructionsStatus": "RECEIVED",
-                      "updatedShippingInstructionsStatus": "UPDATE CANCELLED"
+                      "updatedShippingInstructionsStatus": "UPDATE_CANCELLED"
                     }
                   },
                   "cancelRequestedUpdateExample": {
                     "summary": "Cancel a Shipping Instructions update requested by provider\n",
-                    "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. The update was requested by the provider. The `shippingInstructionsStatus` stays as `PENDING UPDATE` and the `updatedShippingInstructionsStatus` is set to `UPDATE CANCELLED`. An optional `reason` can be provided.\n",
+                    "description": "Consumer wants to cancel an update provided to a `Shipping Instructions`. The update was requested by the provider. The `shippingInstructionsStatus` stays as `PENDING_UPDATE` and the `updatedShippingInstructionsStatus` is set to `UPDATE_CANCELLED`. An optional `reason` can be provided.\n",
                     "value": {
                       "shippingInstructionsReference": "si-123",
-                      "shippingInstructionsStatus": "PENDING UPDATE",
-                      "updatedShippingInstructionsStatus": "UPDATE CANCELLED"
+                      "shippingInstructionsStatus": "PENDING_UPDATE",
+                      "updatedShippingInstructionsStatus": "UPDATE_CANCELLED"
                     }
                   }
                 }
@@ -1286,14 +1307,14 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "APPROVE is not a valid status to set",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-10-03T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
                           "property": "updatedShippingInstructionsStatus",
                           "value": "APPROVE",
                           "errorCodeText": "incorrect value",
-                          "errorCodeMessage": "Only UPDATE CANCELLED is an allowed value: APPROVE was inserted"
+                          "errorCodeMessage": "Only UPDATE_CANCELLED is an allowed value: APPROVE was inserted"
                         }
                       ]
                     }
@@ -1303,7 +1324,7 @@
             }
           },
           "404": {
-            "description": "In case the consumer is trying to cancel a `Shipping Instructions` that does not have an ongoing update request, an `Updated Shipping Instructions` that is in state `UPDATE RECEIVED`.\n\nA `404` (Not Found) can also be sent in case the provider does not know of the `documentReference` used in the request (the resource does not exist)\n",
+            "description": "In case the consumer is trying to cancel a `Shipping Instructions` that does not have an ongoing update request, an `Updated Shipping Instructions` that is in state `UPDATE_RECEIVED`.\n\nA `404` (Not Found) can also be sent in case the provider does not know of the `documentReference` used in the request (the resource does not exist)\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -1325,7 +1346,7 @@
                       "statusCodeText": "Not Found",
                       "statusCodeMessage": "No update exists",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1362,7 +1383,7 @@
                       "statusCodeText": "Conflict",
                       "statusCodeMessage": "Is being processed",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1399,7 +1420,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while cancelling the Shipping Instructions",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1428,7 +1449,7 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Patching the `Shipping Instructions` too many times\n",
-                    "description": "Calling the endPoint\n\n    PATCH /v3/shipping-instructions/si-123\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    PATCH /v3/shipping-instructions/si-123\n\ntoo many times within a time period.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "PATCH",
                       "requestUri": "/v3/shipping-instructions/si-123",
@@ -1436,7 +1457,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to patch a Shipping Instructions has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1594,15 +1615,19 @@
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REGULAR",
-                          "descriptionOfGoods": "Shoes - black",
+                          "descriptionOfGoods": [
+                            "Shoes - black"
+                          ],
                           "HSCodes": [
                             "640510"
                           ],
                           "cargoItems": [
                             {
                               "equipmentReference": "NARU3472484",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "packageCode": "4G",
@@ -1718,15 +1743,19 @@
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "CBR_123_REEFER",
-                          "descriptionOfGoods": "Dairy products",
+                          "descriptionOfGoods": [
+                            "Dairy products"
+                          ],
                           "HSCodes": [
                             "04052090"
                           ],
                           "cargoItems": [
                             {
                               "equipmentReference": "KKFU6671914",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "packageCode": "BQ",
@@ -1848,15 +1877,20 @@
                       "consignmentItems": [
                         {
                           "carrierBookingReference": "RTM1234567",
-                          "descriptionOfGoods": "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+                          "descriptionOfGoods": [
+                            "Environmentally hazardous substance",
+                            "liquid, N.O.S (Propiconazole)"
+                          ],
                           "HSCodes": [
                             "293499"
                           ],
                           "cargoItems": [
                             {
                               "equipmentReference": "HLXU1234567",
-                              "weight": 12000,
-                              "weightUnit": "KGM",
+                              "grossWeight": {
+                                "value": 12000,
+                                "unit": "KGM"
+                              },
                               "outerPackaging": {
                                 "numberOfPackages": 400,
                                 "imoPackagingCode": "3A1",
@@ -1886,7 +1920,7 @@
                           "cargoGrossWeight": 12000,
                           "cargoGrossWeightUnit": "KGM",
                           "equipment": {
-                            "ISOEquipmentCode": "22GP",
+                            "ISOEquipmentCode": "22G1",
                             "equipmentReference": "HLXU1234567"
                           }
                         }
@@ -1928,7 +1962,7 @@
                       "statusCodeText": "Not Found",
                       "statusCodeMessage": "documentReference not found",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1965,7 +1999,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while fetching the Transport Document",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -1994,7 +2028,7 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Fetching too many `Transport Document` requests\n",
-                    "description": "Calling the endPoint\n\n    GET /v3/transport-documents/td-987\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    GET /v3/transport-documents/td-987\n    \ntoo many times within a time period.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "GET",
                       "requestUri": "/v3/transport-documents/td-987",
@@ -2002,7 +2036,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to fetch a Transport Document has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2130,7 +2164,7 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "ISSUE is not a valid status to set",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-10-03T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2169,7 +2203,7 @@
                       "statusCodeText": "Not Found",
                       "statusCodeMessage": "documentReference not found",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2206,7 +2240,7 @@
                       "statusCodeText": "Conflict",
                       "statusCodeMessage": "documentReference being processed",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2243,7 +2277,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while approving the Transport Document",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2272,7 +2306,7 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Too many Patch `Transport Document` requests\n",
-                    "description": "Calling the endPoint\n\n    PATCH /v3/transport-documents/td-987\n    \ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    PATCH /v3/transport-documents/td-987\n    \ntoo many times within a time period.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "PATCH",
                       "requestUri": "/v3/transport-documents/td-987",
@@ -2280,7 +2314,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to patch a Transport Document has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2303,7 +2337,7 @@
           "Notifications"
         ],
         "summary": "Send a new Shipping Instructions Notification",
-        "description": "Creates a new [`Shipping Instructions Notification`](#/ShippingInstructionsNotification). This endPoint is called whenever a `Shipping Instructions` that a cosumer has subscribed to changes state or is updated.\n\n**This endPoint is to be implemented by a consumer of the EBL API in order to receive Notifications**\n",
+        "description": "Creates a new [`Shipping Instructions Notification`](#/ShippingInstructionsNotification). This endPoint is called whenever a `Shipping Instructions` that a consumer has subscribed to changes state or is updated.\n\n**This endPoint is to be implemented by a consumer of the EBL API in order to receive Notifications**\n",
         "operationId": "shipping-instructions-notifications",
         "parameters": [
           {
@@ -2394,7 +2428,9 @@
                             "carrierBookingReference": "CBR_123_REGULAR",
                             "weight": 12000,
                             "weightUnit": "KGM",
-                            "descriptionOfGoods": "Shoes - black",
+                            "descriptionOfGoods": [
+                              "Shoes - black"
+                            ],
                             "HSCodes": [
                               "640510"
                             ],
@@ -2402,8 +2438,10 @@
                             "cargoItems": [
                               {
                                 "equipmentReference": "NARU3472484",
-                                "weight": 12000,
-                                "weightUnit": "KGM",
+                                "grossWeight": {
+                                  "value": 12000,
+                                  "unit": "KGM"
+                                },
                                 "outerPackaging": {
                                   "numberOfPackages": 400,
                                   "packageCode": "4G",
@@ -2430,7 +2468,7 @@
                 },
                 "declinedLightweightExample": {
                   "summary": "Shipping Instructions update declined (Lightweight)\n",
-                  "description": "A lightweight notification explaining that an update to a `Shipping Instructions`, that was pending an update by the consumer (`shippingInstructionsStatus='PENDING UPDATE'`), has been declined (`updatedShippingInstructionsStatus='UPDATE DECLINED'`)\n",
+                  "description": "A lightweight notification explaining that an update to a `Shipping Instructions`, that was pending an update by the consumer (`shippingInstructionsStatus='PENDING_UPDATE'`), has been declined (`updatedShippingInstructionsStatus='UPDATE_DECLINED'`)\n",
                   "value": {
                     "specversion": "1.0",
                     "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
@@ -2440,15 +2478,15 @@
                     "datacontenttype": "application/json",
                     "subscriptionReference": "SI001",
                     "data": {
-                      "shippingInstructionsStatus": "PENDING UPDATE",
-                      "updatedShippingInstructionsStatus": "UPDATE DECLINED",
+                      "shippingInstructionsStatus": "PENDING_UPDATE",
+                      "updatedShippingInstructionsStatus": "UPDATE_DECLINED",
                       "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008"
                     }
                   }
                 },
                 "declinedFullStateTransferExample": {
                   "summary": "Shipping Instructions update declined (Full State Transfer)\n",
-                  "description": "A full state transfer notification explaining that an update to a `Shipping Instructions`, that was pending an update by the consumer (`shippingInstructionsStatus='PENDING UPDATE'`), has been declined (`updatedShippingInstructionsStatus='UPDATE DECLINED'`)\n\nThe example shows an original `ShippingInstructions` with a wrong weight on `consignmentItem` and `cargoItem`. The updated weight is also wrong!\n",
+                  "description": "A full state transfer notification explaining that an update to a `Shipping Instructions`, that was pending an update by the consumer (`shippingInstructionsStatus='PENDING_UPDATE'`), has been declined (`updatedShippingInstructionsStatus='UPDATE_DECLINED'`)\n\nThe example shows an original `ShippingInstructions` with a wrong weight on `consignmentItem` and `cargoItem`. The updated weight is also wrong!\n",
                   "value": {
                     "specversion": "1.0",
                     "id": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
@@ -2458,13 +2496,13 @@
                     "datacontenttype": "application/json",
                     "subscriptionReference": "SI001",
                     "data": {
-                      "shippingInstructionsStatus": "PENDING UPDATE",
-                      "updatedShippingInstructionsStatus": "UPDATE DECLINED",
+                      "shippingInstructionsStatus": "PENDING_UPDATE",
+                      "updatedShippingInstructionsStatus": "UPDATE_DECLINED",
                       "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008",
                       "shippingInstructions": {
                         "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                        "shippingInstructionsStatus": "PENDING UPDATE",
-                        "updatedShippingInstructionsStatus": "UPDATE DECLINED",
+                        "shippingInstructionsStatus": "PENDING_UPDATE",
+                        "updatedShippingInstructionsStatus": "UPDATE_DECLINED",
                         "transportDocumentTypeCode": "BOL",
                         "isShippedOnBoardType": true,
                         "freightPaymentTermCode": "PRE",
@@ -2498,7 +2536,9 @@
                             "carrierBookingReference": "CBR_123_REGULAR",
                             "weight": 12,
                             "weightUnit": "KGM",
-                            "descriptionOfGoods": "Shoes - black",
+                            "descriptionOfGoods": [
+                              "Shoes - black"
+                            ],
                             "HSCodes": [
                               "640510"
                             ],
@@ -2506,8 +2546,10 @@
                             "cargoItems": [
                               {
                                 "equipmentReference": "NARU3472484",
-                                "weight": 12,
-                                "weightUnit": "KGM",
+                                "grossWeight": {
+                                  "value": 12,
+                                  "unit": "KGM"
+                                },
                                 "outerPackaging": {
                                   "numberOfPackages": 400,
                                   "packageCode": "4G",
@@ -2531,8 +2573,8 @@
                       },
                       "updatedShippingInstructions": {
                         "shippingInstructionsReference": "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                        "shippingInstructionsStatus": "PENDING UPDATE",
-                        "updatedShippingInstructionsStatus": "UPDATE DECLINED",
+                        "shippingInstructionsStatus": "PENDING_UPDATE",
+                        "updatedShippingInstructionsStatus": "UPDATE_DECLINED",
                         "transportDocumentTypeCode": "BOL",
                         "isShippedOnBoardType": true,
                         "freightPaymentTermCode": "PRE",
@@ -2566,7 +2608,9 @@
                             "carrierBookingReference": "CBR_123_REGULAR",
                             "weight": 120000,
                             "weightUnit": "KGM",
-                            "descriptionOfGoods": "Shoes - black",
+                            "descriptionOfGoods": [
+                              "Shoes - black"
+                            ],
                             "HSCodes": [
                               "640510"
                             ],
@@ -2574,8 +2618,10 @@
                             "cargoItems": [
                               {
                                 "equipmentReference": "NARU3472484",
-                                "weight": 120000,
-                                "weightUnit": "KGM",
+                                "grossWeight": {
+                                  "value": 120000,
+                                  "unit": "KGM"
+                                },
                                 "outerPackaging": {
                                   "numberOfPackages": 400,
                                   "packageCode": "4G",
@@ -2636,7 +2682,7 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "shippingInstructionsReference not found - mandatory to provide in a Notification\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2674,7 +2720,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while processing Shipping Instructions\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2711,7 +2757,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to create a Notification has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -2876,15 +2922,19 @@
                         "consignmentItems": [
                           {
                             "carrierBookingReference": "CBR_123_REGULAR",
-                            "descriptionOfGoods": "Shoes - black",
+                            "descriptionOfGoods": [
+                              "Shoes - black"
+                            ],
                             "HSCodes": [
                               "640510"
                             ],
                             "cargoItems": [
                               {
                                 "equipmentReference": "NARU3472484",
-                                "weight": 12000,
-                                "weightUnit": "KGM",
+                                "grossWeight": {
+                                  "value": 12000,
+                                  "unit": "KGM"
+                                },
                                 "outerPackaging": {
                                   "numberOfPackages": 400,
                                   "packageCode": "4G",
@@ -3030,15 +3080,19 @@
                         "consignmentItems": [
                           {
                             "carrierBookingReference": "CBR_123_REGULAR",
-                            "descriptionOfGoods": "Shoes - black",
+                            "descriptionOfGoods": [
+                              "Shoes - black"
+                            ],
                             "HSCodes": [
                               "640510"
                             ],
                             "cargoItems": [
                               {
                                 "equipmentReference": "NARU3472484",
-                                "weight": 12000,
-                                "weightUnit": "KGM",
+                                "grossWeight": {
+                                  "value": 12000,
+                                  "unit": "KGM"
+                                },
                                 "outerPackaging": {
                                   "numberOfPackages": 400,
                                   "packageCode": "4G",
@@ -3102,7 +3156,7 @@
                       "statusCodeText": "Bad Request",
                       "statusCodeMessage": "transportDocumentReference not found - mandatory to provide in a Notification\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -3140,7 +3194,7 @@
                       "statusCodeText": "Internal Server Error",
                       "statusCodeMessage": "Internal Server Error occurred while processing Transport Document\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -3169,7 +3223,7 @@
                 "examples": {
                   "tooManyRequestsExample": {
                     "summary": "Making too many Notifications\n",
-                    "description": "Calling the endPoint\n\n    POST /v3/transport-document-notifications\n\ntoo many times within a timeperiod.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
+                    "description": "Calling the endPoint\n\n    POST /v3/transport-document-notifications\n\ntoo many times within a time period.\n\n**NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a \"random example\"\n",
                     "value": {
                       "httpMethod": "POST",
                       "requestUri": "/v3/transport-document-notifications",
@@ -3177,7 +3231,7 @@
                       "statusCodeText": "Too Many Requests",
                       "statusCodeMessage": "Too many request to create a Notification has been requested. Please try again in 1 hour\n",
                       "providerCorrelationReference": "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                      "errorDateTime": "2023-04-13T07:41:00+08:30",
+                      "errorDateTime": "2024-09-04T09:41:00Z",
                       "errors": [
                         {
                           "errorCode": 7003,
@@ -3261,7 +3315,7 @@
             "example": "30675492-50ff-4e17-a7df-7a487a8ad343"
           },
           "data": {
-            "$ref": "#/components/schemas/ShippingInstructionsNotification_data"
+            "$ref": "#/components/schemas/Data"
           }
         },
         "description": "`CloudEvent` specific properties for the `Notification`.\n"
@@ -3330,7 +3384,7 @@
             "example": "30675492-50ff-4e17-a7df-7a487a8ad343"
           },
           "data": {
-            "$ref": "#/components/schemas/TransportDocumentNotification_data"
+            "$ref": "#/components/schemas/Data_1"
           }
         },
         "description": "`CloudEvent` specific properties for the `Notification`.\n"
@@ -3394,7 +3448,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -3641,7 +3695,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -3854,14 +3908,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-            "example": "UPDATE RECEIVED"
+            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+            "example": "UPDATE_RECEIVED"
           },
           "transportDocumentTypeCode": {
             "type": "string",
@@ -3907,7 +3961,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -4118,14 +4172,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-            "example": "UPDATE RECEIVED"
+            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+            "example": "UPDATE_RECEIVED"
           },
           "feedbacks": {
             "type": "array",
@@ -4161,14 +4215,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE CANCELLED`\n",
-            "example": "UPDATE CANCELLED"
+            "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE_CANCELLED`\n",
+            "example": "UPDATE_CANCELLED"
           },
           "feedbacks": {
             "type": "array",
@@ -4281,7 +4335,7 @@
             "type": "string",
             "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n",
             "format": "date-time",
-            "example": "2019-11-12T07:41:00+08:30"
+            "example": "2024-09-04T09:41:00Z"
           },
           "errors": {
             "minItems": 1,
@@ -4457,7 +4511,7 @@
           },
           "facilityCodeListProvider": {
             "type": "string",
-            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code) - `SMDG` (Requires a UN Location Code)\n",
+            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code)\n- `SMDG` (Requires a UN Location Code)\n",
             "example": "SMDG",
             "enum": [
               "BIC",
@@ -4620,8 +4674,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -4692,8 +4746,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -4739,8 +4793,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -4811,8 +4865,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -4939,7 +4993,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n",
             "example": "BOLE"
           },
           "identifyingCodes": {
@@ -4956,7 +5010,7 @@
             }
           }
         },
-        "description": "Refers to a company or a legal entity.\n"
+        "description": "The party to whom the electronic Bill of Lading (eBL) must be issued.\n\n**Condition:** Mandatory for eBL (Is Electronic = TRUE).\n"
       },
       "NotifyParty": {
         "title": "Notify Party",
@@ -4976,8 +5030,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -5041,8 +5095,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -5088,8 +5142,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -5128,8 +5182,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -5345,7 +5399,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "NL"
+            "example": "IN"
           },
           "value": {
             "maxLength": 35,
@@ -5355,7 +5409,7 @@
             "example": "AAAAA0000A"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\nA list of examples:\n| Type  | Country | Description | |-------|:-------:|-------------| |PAN|IN|Goods and Services Tax Identification Number in India| |GSTIN|IN|Goods and Services Tax Identification Number in India| |IEC|IN|Importer-Exported Code in India| |RUC|EC|Registro Único del Contribuyente in Ecuador| |RUC|PE|Registro Único del Contribuyente in Peru| |NIF|MG|Numéro d’Identification Fiscal in Madagascar| |NIF|DZ|Numéro d’Identification Fiscal in Algeria|\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n"
       },
       "Reference": {
         "title": "Reference",
@@ -5399,11 +5453,16 @@
             "example": "ABC709951"
           },
           "descriptionOfGoods": {
-            "maxLength": 5000,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
-            "example": "blue shoes size 47"
+            "maxItems": 150,
+            "type": "array",
+            "description": "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "A line describing the cargo",
+              "example": "blue shoes size 47"
+            }
           },
           "HSCodes": {
             "minItems": 1,
@@ -5414,7 +5473,7 @@
               "minLength": 6,
               "pattern": "^\\d{6,10}$",
               "type": "string",
-              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).\n",
               "example": "851713"
             }
           },
@@ -5426,10 +5485,11 @@
             }
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -5485,11 +5545,16 @@
             "example": "COM-001"
           },
           "descriptionOfGoods": {
-            "maxLength": 5000,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
-            "example": "blue shoes size 47"
+            "maxItems": 150,
+            "type": "array",
+            "description": "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "A line describing the cargo",
+              "example": "blue shoes size 47"
+            }
           },
           "HSCodes": {
             "minItems": 1,
@@ -5500,7 +5565,7 @@
               "minLength": 6,
               "pattern": "^\\d{6,10}$",
               "type": "string",
-              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).\n",
               "example": "851713"
             }
           },
@@ -5512,10 +5577,11 @@
             }
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -5559,7 +5625,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE_B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -5613,7 +5679,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "NL"
+            "example": "EG"
           },
           "values": {
             "minItems": 1,
@@ -5627,15 +5693,14 @@
             }
           }
         },
-        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n"
       },
       "CargoItem": {
         "title": "Cargo Item",
         "required": [
           "equipmentReference",
-          "outerPackaging",
-          "weight",
-          "weightUnit"
+          "grossWeight",
+          "outerPackaging"
         ],
         "type": "object",
         "properties": {
@@ -5646,39 +5711,11 @@
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
           },
-          "weight": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
-            "format": "float",
-            "example": 13000.3
+          "grossWeight": {
+            "$ref": "#/components/schemas/Gross Weight"
           },
-          "weightUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          },
-          "volume": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
-            "format": "float",
-            "example": 12
-          },
-          "volumeUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** Mandatory to provide if `volume` is provided\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
+          "grossVolume": {
+            "$ref": "#/components/schemas/Gross Volume"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
@@ -5689,13 +5726,6 @@
             "items": {
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
-          },
-          "houseBillOfLadingReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
-            "example": "ABC123"
           },
           "customsReferences": {
             "type": "array",
@@ -5711,8 +5741,7 @@
         "title": "Cargo Item (Shipper)",
         "required": [
           "equipmentReference",
-          "weight",
-          "weightUnit"
+          "grossWeight"
         ],
         "type": "object",
         "properties": {
@@ -5723,39 +5752,11 @@
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
           },
-          "weight": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
-            "format": "float",
-            "example": 13000.3
+          "grossWeight": {
+            "$ref": "#/components/schemas/Gross Weight"
           },
-          "weightUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          },
-          "volume": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
-            "format": "float",
-            "example": 12
-          },
-          "volumeUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** Mandatory to provide if `volume` is provided\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
+          "grossVolume": {
+            "$ref": "#/components/schemas/Gross Volume"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackagingShipper"
@@ -5797,7 +5798,7 @@
             "minLength": 2,
             "pattern": "^[A-Z0-9]{2}$",
             "type": "string",
-            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
             "example": "5H"
           },
           "numberOfPackages": {
@@ -5816,8 +5817,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "TREATED AND CERTIFIED"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT_APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED_AND_CERTIFIED"
           }
         },
         "description": "Object for outer packaging/overpack specification. Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping or placed in a protective outer packaging such as a box or crate to form one unit for the convenience of handling and stowage during transport.\n\n**Condition:** Mandatory for non-dangerous goods cargo.\n"
@@ -5835,7 +5836,7 @@
             "minLength": 2,
             "pattern": "^[A-Z0-9]{2}$",
             "type": "string",
-            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
             "example": "5H"
           },
           "imoPackagingCode": {
@@ -5843,7 +5844,7 @@
             "minLength": 1,
             "pattern": "^[A-Z0-9]{1,5}$",
             "type": "string",
-            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the IMO IMDG code amendment version 41-22. If not available, the package code as per UN recommendation 21 should be used.\n",
+            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.\n",
             "example": "1A2"
           },
           "numberOfPackages": {
@@ -5862,8 +5863,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "TREATED AND CERTIFIED"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT_APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED_AND_CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -5906,7 +5907,7 @@
           "imoClass": {
             "maxLength": 4,
             "type": "string",
-            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
+            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n",
             "example": "1.4S"
           },
           "subsidiaryRisk1": {
@@ -6016,7 +6017,7 @@
             "type": "string",
             "description": "Date & time when the container was fumigated\n",
             "format": "date-time",
-            "example": "2021-09-03T09:03:00-02:00"
+            "example": "2024-09-04T09:41:00Z"
           },
           "isReportableQuantity": {
             "type": "boolean",
@@ -6031,7 +6032,7 @@
             "example": "A"
           },
           "grossWeight": {
-            "$ref": "#/components/schemas/Gross Weight"
+            "$ref": "#/components/schemas/Gross Weight_1"
           },
           "netWeight": {
             "$ref": "#/components/schemas/Net Weight"
@@ -6039,8 +6040,8 @@
           "netExplosiveContent": {
             "$ref": "#/components/schemas/Net Explosive Content"
           },
-          "volume": {
-            "$ref": "#/components/schemas/Volume"
+          "netVolume": {
+            "$ref": "#/components/schemas/Net Volume"
           },
           "limits": {
             "$ref": "#/components/schemas/Limits"
@@ -6109,7 +6110,7 @@
             "maxLength": 100,
             "type": "string",
             "description": "Description of the packaging.\n",
-            "example": "Wowen plastic water resistant Bag"
+            "example": "Woven plastic water resistant Bag"
           }
         },
         "description": "Object for inner packaging specification\n"
@@ -6168,7 +6169,7 @@
           },
           "flashPoint": {
             "type": "number",
-            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
+            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.\n",
             "format": "float",
             "example": 42
           },
@@ -6225,10 +6226,11 @@
             "$ref": "#/components/schemas/ActiveReeferSettings"
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -6267,10 +6269,11 @@
         "type": "object",
         "properties": {
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -6376,8 +6379,8 @@
             "maxLength": 4,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
-            "example": "22GP"
+            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.\n",
+            "example": "22G1"
           },
           "tareWeight": {
             "minimum": 0,
@@ -6420,8 +6423,8 @@
             "maxLength": 4,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
-            "example": "22GP"
+            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.\n",
+            "example": "22G1"
           },
           "tareWeight": {
             "minimum": 0,
@@ -6536,7 +6539,7 @@
           },
           "isDrainholesOpen": {
             "type": "boolean",
-            "description": "Is drainholes open on the container\n",
+            "description": "Is drain holes open on the container\n",
             "example": true
           },
           "isBulbMode": {
@@ -6570,7 +6573,7 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The Manifest type code as defined by the provider. A list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv)\n",
+            "description": "The Manifest type code as defined by the provider.\n",
             "example": "ENS"
           },
           "countryCode": {
@@ -6597,7 +6600,7 @@
             "description": "Code identifying the party who will submit the advance manifest filing(s) for the House BL.\n\n**Mandatory** if `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.\n",
             "example": "FLXP"
           },
-          "supplementaryDeclarantEORInumber": {
+          "supplementaryDeclarantEORINumber": {
             "maxLength": 17,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
@@ -6605,7 +6608,7 @@
             "example": "FLXP-123321"
           }
         },
-        "description": "An Advance Maifest Filing defined by a Manifest type code in combination with a country code.\n\nA list of `manifestTypeCodes` together with `countryCode` is maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/advancemanifestfilings-v300.csv). A (small) subset can be seen here:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n|ENS|NL|Entry Summary Declaration|\n",
+        "description": "An Advance Manifest Filing defined by a Manifest type code in combination with a country code.\n\nA small list of **potential** examples:\n\n| manifestTypeCode | countryCode | Description |\n|-----------------------|:-------------:|-------------|\n|ACI|EG|Advance Cargo Information in Egypt|\n|ACE|US|Automated Commercial Environment in the United States|\n|AFR|JP|Cargo Summary Notification (CSN)|\n|ENS|NL|Entry Summary Declaration|\n",
         "example": {
           "manifestTypeCode": "ACE",
           "countryCode": "US",
@@ -6679,7 +6682,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Acceptance` location specified as: identification of the seaport, freight terminal or other place at which the goods are taken over from the shipper by the Ocean Transport Intermediary (OTI) issuing the `House Bill of Lading`.\n\n**Condition:** Mandatory if different from `Place of Receipt` at the `Master Transport Document` level.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n",
+        "description": "An object to capture `Place of Acceptance` location specified as: identification of the seaport, freight terminal or other place at which the goods are taken over from the shipper by the Ocean Transport Intermediary (OTI) issuing the `House Bill of Lading`.\n\n**Condition:** Mandatory if different from `Place of Receipt` at the `Master Transport Document` level.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -6714,7 +6717,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Final Delivery` location specified as: Identification of the seaport, freight terminal or other place at which the goods are handed over from the `Ocean Transport Intermediary` (OTI) issuing the `House Bill of Lading` to the `Consignee`.\n\n**Condition:** Mandatory if different from `Place of Delivery` at the `Master Transport Document` level. (**Note:** in case of carrier haulage this will be the same as the `Place of Delivery`)\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n",
+        "description": "An object to capture `Place of Final Delivery` location specified as: Identification of the seaport, freight terminal or other place at which the goods are handed over from the `Ocean Transport Intermediary` (OTI) issuing the `House Bill of Lading` to the `Consignee`.\n\n**Condition:** Mandatory if different from `Place of Delivery` at the `Master Transport Document` level. (**Note:** in case of carrier haulage this will be the same as the `Place of Delivery`)\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, an `Address` or a `GeoCoordinate`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -6724,14 +6727,14 @@
         "title": "Requested Carrier Certificate",
         "maxLength": 100,
         "type": "string",
-        "description": "Name of the certificate. Detailed information about carrier certificates can be found [here](https://dcsa.org/wp-content/uploads/2023/12/28-12-2023_Carrier-Certificates-shipment-voyage-particulars-and-vessel-particulars.pdf). Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/carriercertificates.csv).\n",
+        "description": "Name of the certificate. Detailed information about carrier certificates can be found [here](https://dcsa.org/wp-content/uploads/2023/12/28-12-2023_Carrier-Certificates-shipment-voyage-particulars-and-vessel-particulars.pdf). Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n",
         "example": "VESSEL_PARTICULARS_1"
       },
       "RequestedCarrierClause": {
         "title": "Requested Carrier Clause",
         "maxLength": 100,
         "type": "string",
-        "description": "A clause to request from the carrier. Detailed information about the carrier clauses can be found [here](https://dcsa.org/wp-content/uploads/2023/12/202312-Standardised-Clauses-BL.pdf). Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures / Mixed loads)\n\nMore infomation can be read [here](https://dcsa.org/wp-content/uploads/2023/12/202312-Standardised-Clauses-BL.pdf)\n",
+        "description": "A clause to request from the carrier. Detailed information about the carrier clauses can be found [here](https://dcsa.org/wp-content/uploads/2023/12/202312-Standardised-Clauses-BL.pdf). Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures / Mixed loads)\n",
         "example": "CARGO_CARGOSPECIFICS"
       },
       "TransportDocument": {
@@ -6776,7 +6779,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
             "example": "DRAFT"
           },
           "transportDocumentTypeCode": {
@@ -6974,7 +6977,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
             "example": "DKK"
           },
           "carrierCode": {
@@ -7137,7 +7140,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
             "example": "DRAFT"
           }
         },
@@ -7265,7 +7268,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -7294,7 +7297,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -7323,7 +7326,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -7358,7 +7361,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -7390,7 +7393,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -7428,7 +7431,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)).\n",
+            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).\n",
             "example": "DKK"
           },
           "paymentTermCode": {
@@ -7521,8 +7524,8 @@
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE CANCELLED`\n",
-            "example": "UPDATE CANCELLED"
+            "description": "The status of the `Updated Shipping Instructions`. It can only be `UPDATE_CANCELLED`\n",
+            "example": "UPDATE_CANCELLED"
           }
         }
       },
@@ -7752,14 +7755,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-            "example": "UPDATE RECEIVED"
+            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+            "example": "UPDATE_RECEIVED"
           },
           "transportDocumentTypeCode": {
             "type": "string",
@@ -7805,7 +7808,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -8025,14 +8028,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-            "example": "UPDATE RECEIVED"
+            "description": "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+            "example": "UPDATE_RECEIVED"
           },
           "transportDocumentTypeCode": {
             "type": "string",
@@ -8078,7 +8081,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0-Beta-2.csv).\n",
+            "description": "Indicates the shipper’s platform on which the eBL should be issued. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Mandatory for electronic Bill of Lading (`isElectronic=true`).\n",
             "example": "WAVE"
           },
           "isToOrder": {
@@ -8265,7 +8268,8 @@
         },
         "description": "This property contains the updated shipping instructions in case:\n  - an update is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions or no update is active - then the content in this property can be ignored.\n"
       },
-      "ShippingInstructionsNotification_data": {
+      "Data": {
+        "title": "Data",
         "required": [
           "shippingInstructionsStatus"
         ],
@@ -8274,14 +8278,14 @@
           "shippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Shipping Instructions`. Possible values are:\n\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "description": "The status of the `Shipping Instructions`. Possible values are:\n\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
             "example": "RECEIVED"
           },
           "updatedShippingInstructionsStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this property is empty. Possible values are:\n\n- `UPDATE RECEIVED` (An update to a Shipping Instructions has been recieved and is awaiting to be processed)\n- `UPDATE CONFIRMED` (Update is confirmed)\n- `UPDATE CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
-            "example": "UPDATE RECEIVED"
+            "description": "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this property is empty. Possible values are:\n\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions has been received and is awaiting to be processed)\n- `UPDATE_CONFIRMED` (Update is confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+            "example": "UPDATE_RECEIVED"
           },
           "shippingInstructionsReference": {
             "maxLength": 100,
@@ -8396,7 +8400,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
             "example": "DRAFT"
           },
           "transportDocumentTypeCode": {
@@ -8594,7 +8598,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
             "example": "DKK"
           },
           "carrierCode": {
@@ -8739,7 +8743,8 @@
         },
         "description": "This property contains the transportDocument in case the subscriber is subscribing to the `Full State Transfer` of the Transport Document.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Transport Document then the content in this property can be ignored.\n"
       },
-      "TransportDocumentNotification_data": {
+      "Data_1": {
+        "title": "Data",
         "required": [
           "transportDocumentReference",
           "transportDocumentStatus"
@@ -8749,7 +8754,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n\n- `DRAFT` (Transport Document is Drafted)\n- `APPROVED` (Transport Document has been Approved by consumer)\n- `ISSUED` (Transport Document has been Issued by provider)\n- `PENDING SURRENDER FOR AMENDMENT` (Transport Document is Pending for Surrender for an Amendment)\n- `SURRENDER FOR AMENDMENT` (Transport Document Surrendered for an Amendment)\n- `VOID` (the Transport Document has been Voided)\n- `PENDING SURRENDER FOR DELIVERY` (Transport Document pending surrender for Delivery)\n- `SURRENDERED FOR DELIVERY` (Transport Document surrendered for Delivery)\n\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-Edocumentation/blob/master/edocumentation-domain/src/main/resources/validations/eblstatuses.csv).\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n\n- `DRAFT` (Transport Document is Drafted)\n- `APPROVED` (Transport Document has been Approved by consumer)\n- `ISSUED` (Transport Document has been Issued by provider)\n- `PENDING_SURRENDER_FOR_AMENDMENT` (Transport Document is Pending for Surrender for an Amendment)\n- `SURRENDER_FOR_AMENDMENT` (Transport Document Surrendered for an Amendment)\n- `VOID` (the Transport Document has been Voided)\n- `PENDING_SURRENDER_FOR_DELIVERY` (Transport Document pending surrender for Delivery)\n- `SURRENDER_FOR_DELIVERY` (Transport Document surrendered for Delivery)\n",
             "example": "DRAFT"
           },
           "shippingInstructionsReference": {
@@ -8780,6 +8785,62 @@
         "description": "`Transport Document` specific properties for the `Notification`\n"
       },
       "Gross Weight": {
+        "title": "Gross Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "Total weight of the goods carried, including packaging. Excludes the tare weight of the container(s).\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n"
+      },
+      "Gross Volume": {
+        "title": "Gross Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          }
+        },
+        "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n"
+      },
+      "Gross Weight_1": {
         "title": "Gross Weight",
         "required": [
           "unit",
@@ -8865,8 +8926,8 @@
         },
         "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
       },
-      "Volume": {
-        "title": "Volume",
+      "Net Volume": {
+        "title": "Net Volume",
         "required": [
           "unit",
           "value"

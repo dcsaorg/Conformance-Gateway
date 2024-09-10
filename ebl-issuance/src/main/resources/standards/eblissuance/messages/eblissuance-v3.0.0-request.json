@@ -80,17 +80,17 @@
     "consignmentItems": [
       {
         "carrierBookingReference": "BOOKING_REFERENCE_PLACEHOLDER",
-        "weight": 12000,
-        "weightUnit": "KGM",
-        "descriptionOfGoods": "Shoes - black, 400 boxes",
+        "descriptionOfGoods": ["Shoes - black, 400 boxes"],
         "HSCodes": [
           "640510"
         ],
         "cargoItems": [
           {
             "equipmentReference": "NARU3472484",
-            "weight": 12000,
-            "weightUnit": "KGM",
+            "grossWeight": {
+              "value": 12000,
+              "unit": "KGM"
+            },
             "outerPackaging": {
               "numberOfPackages": 400,
               "packageCode": "4G",

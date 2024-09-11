@@ -71,7 +71,7 @@ public class CsGetRoutingsAction extends CsAction {
                 expectedApiVersion,
                 sspSupplier,
                 getDspSupplier(),
-                previousAction != null && previousAction instanceof CsGetRoutingsAction));
+                previousAction instanceof CsGetRoutingsAction));
       }
     };
   }

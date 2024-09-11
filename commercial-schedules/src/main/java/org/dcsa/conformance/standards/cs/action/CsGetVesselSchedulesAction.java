@@ -59,7 +59,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 expectedApiVersion,
                 sspSupplier,
                 getDspSupplier(),
-                previousAction != null && previousAction instanceof CsGetVesselSchedulesAction));
+                previousAction instanceof CsGetVesselSchedulesAction));
       }
     };
   }

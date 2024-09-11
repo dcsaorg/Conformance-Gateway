@@ -20,6 +20,7 @@ import org.dcsa.conformance.standards.cs.action.CsGetVesselSchedulesAction;
 
 @Slf4j
 public class CsSubscriber extends ConformanceParty {
+  private static final String CURSOR = "cursor";
   public CsSubscriber(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -73,8 +74,8 @@ public class CsSubscriber extends ConformanceParty {
                 Collectors.toMap(
                     entry -> entry.getKey().getQueryParamName(),
                     entry -> Set.of(entry.getValue())));
-    if (actionPrompt.has("cursor")) {
-      queryParams.put("cursor", List.of(actionPrompt.get("cursor").asText()));
+    if (actionPrompt.has(CURSOR)) {
+      queryParams.put(CURSOR, List.of(actionPrompt.get(CURSOR).asText()));
     }
     return queryParams;
   }

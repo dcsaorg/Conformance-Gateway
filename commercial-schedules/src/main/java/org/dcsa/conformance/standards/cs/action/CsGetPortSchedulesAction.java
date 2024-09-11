@@ -49,7 +49,7 @@ public class CsGetPortSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForPs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(),previousAction != null && previousAction instanceof CsGetPortSchedulesAction));
+                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier,getDspSupplier(), previousAction instanceof CsGetPortSchedulesAction));
       }
     };
   }

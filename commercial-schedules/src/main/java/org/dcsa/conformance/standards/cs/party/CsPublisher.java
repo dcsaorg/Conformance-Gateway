@@ -64,7 +64,7 @@ public class CsPublisher extends ConformanceParty {
     }
     boolean hasCursor = request.queryParams().containsKey("cursor");
 
-    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-";
+    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-"; // NOSONAR
     String suffix = hasCursor ? "nextpage.json" : ".json";
     String routeType = "vs";
 

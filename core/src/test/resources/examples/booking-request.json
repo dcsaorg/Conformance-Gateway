@@ -1,0 +1,91 @@
+{
+  "receiptTypeAtOrigin": "CY",
+  "deliveryTypeAtDestination": "CY",
+  "cargoMovementTypeAtOrigin": "FCL",
+  "cargoMovementTypeAtDestination": "FCL",
+  "serviceContractReference": "HHL51800000",
+  "freightPaymentTermCode": "PRE",
+  "originChargesPaymentTerm": {
+    "haulageChargesPaymentTermCode": "PRE",
+    "portChargesPaymentTermCode": "PRE"
+  },
+  "destinationChargesPaymentTerm": {
+    "haulageChargesPaymentTermCode": "COL",
+    "portChargesPaymentTermCode": "PRE",
+    "otherChargesPaymentTermCode": "PRE"
+  },
+  "contractQuotationReference": "HHL1401",
+  "vessel": {
+    "name": "MAERSK IOWA",
+    "vesselIMONumber": "9298686"
+  },
+  "carrierServiceCode": "TA1",
+  "carrierExportVoyageNumber": "403W",
+  "isPartialLoadAllowed": false,
+  "isExportDeclarationRequired": false,
+  "isImportLicenseRequired": false,
+  "expectedDepartureDate": "2024-01-20",
+  "incoTerms": "EXW",
+  "communicationChannelCode": "AO",
+  "isEquipmentSubstitutionAllowed": false,
+  "references": [
+    {
+      "type": "CR",
+      "value": "KN-00103004"
+    }
+  ],
+  "documentParties": {
+    "bookingAgent": {
+      "partyName": "KN Bremerhaven",
+      "address": {
+        "street": "Amerikaring",
+        "streetNumber": "40",
+        "postCode": "27568",
+        "city": "Bremerhaven",
+        "countryCode": "DE"
+      },
+      "partyContactDetails": [
+        {
+          "name": "Export operations department",
+          "phone": "+49 471 945410"
+        }
+      ]
+    }
+  },
+  "partyContactDetails": [
+    {
+      "name": "Diane",
+      "phone": "+49 471 945410"
+    }
+  ],
+  "shipmentLocations": [
+    {
+      "location": {
+        "locationName": "Bremerhaven",
+        "UNLocationCode": "DEBRV"
+      },
+      "locationTypeCode": "POL"
+    },
+    {
+      "location": {
+        "locationName": "Norfolk",
+        "UNLocationCode": "USORF"
+      },
+      "locationTypeCode": "POD"
+    }
+  ],
+  "requestedEquipments": [
+    {
+      "isShipperOwned": false,
+      "ISOEquipmentCode": "42GP",
+      "units": 3,
+      "commodities": [
+        {
+          "commodityType": "Dry cargo, Freight all kinds",
+          "cargoGrossWeight": 36000,
+          "cargoGrossWeightUnit": "KGM"
+        }
+      ]
+    }
+  ]
+}

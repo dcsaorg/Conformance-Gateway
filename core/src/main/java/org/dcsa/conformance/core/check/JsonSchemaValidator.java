@@ -5,7 +5,18 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.*;
+import com.networknt.schema.JsonMetaSchema;
+import com.networknt.schema.JsonNodePath;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.Keyword;
+import com.networknt.schema.NonValidationKeyword;
+import com.networknt.schema.PathType;
+import com.networknt.schema.SchemaLocation;
+import com.networknt.schema.SchemaValidatorsConfig;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationContext;
+import com.networknt.schema.ValidationMessage;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +66,8 @@ public class JsonSchemaValidator {
     jsonSchema =
         jsonSchemaFactory.create(
             validationContext,
-            "#/components/schemas/" + schemaName,
+          SchemaLocation.of("classpath:" + filePath + "#/components/schemas/" + schemaName),
+          new JsonNodePath(PathType.LEGACY),
             rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
             rootJsonSchema);
     jsonSchema.initializeValidators();

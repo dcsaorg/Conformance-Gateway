@@ -1,12 +1,12 @@
 package org.dcsa.conformance.manual;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @Slf4j
 class ManualBookingTest extends ManualTestBase {
@@ -15,8 +15,9 @@ class ManualBookingTest extends ManualTestBase {
     super(log); // Make sure no log lines are logged with the Base class logger
   }
 
-  @Test
-  void testManualBookingFlowFirstScenario() {
+  @ParameterizedTest
+  @CsvSource({"Carrier", "Shipper"})
+  void testManualBooking(String testedParty) {
     app.setSimulatedLambdaDelay(lambdaDelay);
     getAllSandboxes();
     getAvailableStandards();
@@ -27,18 +28,19 @@ class ManualBookingTest extends ManualTestBase {
                 "Booking",
                 "2.0.0",
                 "Conformance",
-                "Carrier",
+                testedParty,
                 true,
-                "Booking - Carrier testing: orchestrator"));
+                "Booking - %s testing: orchestrator".formatted(testedParty)));
     SandboxConfig sandbox2 =
         createSandbox(
             new Sandbox(
                 "Booking",
                 "2.0.0",
                 "Conformance",
-                "Carrier",
+                testedParty,
                 false,
-                "Booking - Carrier testing: synthetic carrier as tested party"));
+                "Booking - %s testing: synthetic %s as tested party"
+                    .formatted(testedParty, testedParty)));
 
     updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
@@ -48,101 +50,49 @@ class ManualBookingTest extends ManualTestBase {
     List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
     assertTrue(sandbox2Digests.isEmpty());
 
-    Scenario scenario1 = sandbox1Digests.getFirst().scenarios().getFirst();
-    runDryCargoScenario(sandbox1, sandbox2, scenario1.id(), scenario1.name());
+    // Run all tests for all scenarios
+    runAllTests(sandbox1Digests, sandbox1, sandbox2);
 
-    // Run all tests on: Dry Cargo scenarios
-    // TODO: turn on when all scenarios are implemented. Now only the first one is implemented. Line
-    // 52 can be removed.
-    /*sandbox1Digests
-    .get(0)
-    .scenarios()
-    .forEach(
-      scenario ->
-        runDryCargoScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));*/
-
-    // Run for the 2nd time, and see that it still works
-    runDryCargoScenario(sandbox1, sandbox2, scenario1.id(), scenario1.name());
-
-    // Run all tests on: Dangerous goods scenarios
-    sandbox1Digests
-        .get(1)
-        .scenarios()
-        .forEach(
-            scenario ->
-                runDangerousGoodsScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
-
-    // Run all tests on: Reefer containers
-    sandbox1Digests
-        .get(2)
-        .scenarios()
-        .forEach(
-            scenario ->
-                runReeferContainersScenario(sandbox1, sandbox2, scenario.id(), scenario.name()));
-
-    // Validate all scenarios are completed and conformant
-    // TODO: turn on when all scenarios are implemented
-    /*sandbox1Digests.forEach(
-    scenarioDigest -> {
-      log.info("Validating Module '{}' was tested properly.", scenarioDigest.moduleName());
-      scenarioDigest
-        .scenarios()
-        .forEach(scenario -> validateSandboxScenarioGroup(sandbox1, scenario.id(), scenario.name()));
-    });*/
+    log.info("Run for the 2nd time, and see that it still works");
+    runAllTests(sandbox1Digests, sandbox1, sandbox2);
   }
 
-  private void runDryCargoScenario(
+  private void runAllTests(
+      List<ScenarioDigest> sandbox1Digests, SandboxConfig sandbox1, SandboxConfig sandbox2) {
+    sandbox1Digests.forEach(
+        scenarioDigest ->
+            scenarioDigest
+                .scenarios()
+                .forEach(
+                    scenario -> runScenario(sandbox1, sandbox2, scenario.id(), scenario.name())));
+  }
+
+  private void runScenario(
       SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
+
     startOrStopScenario(sandbox1, scenarioId);
     notifyAction(sandbox2);
 
-    JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-    String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
-    assertTrue(jsonForPromptText.length() > 250);
-    String promptActionId = jsonNode.get("promptActionId").textValue();
+    boolean isRunning;
+    do {
+      JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
+      boolean inputRequired = jsonNode.get("inputRequired").booleanValue();
+      boolean hasPromptText = jsonNode.has("promptText");
+      isRunning = jsonNode.get("isRunning").booleanValue();
+      if (inputRequired) {
+        String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
+        assertTrue(jsonForPromptText.length() > 250);
+        String promptActionId = jsonNode.get("promptActionId").textValue();
 
-    handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
-    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
-
-    notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 0, "UC1");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 1, "GET");
-
-    completeAction(sandbox1);
-    notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 2, "UC2");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 3, "GET");
-
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 4, "UC3");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 5, "GET");
-
-    completeAction(sandbox1);
-    notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 6, "UC5");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 7, "GET");
-
-    completeAction(sandbox1);
-    notifyAction(sandbox2);
-    validateSandboxStatus(sandbox1, scenarioId, 8, "UC12");
-    completeAction(sandbox1);
-    validateSandboxStatus(sandbox1, scenarioId, 9, "GET");
-    completeAction(sandbox1);
-
+        handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
+        if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
+        continue;
+      }
+      if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
+        notifyAction(sandbox2);
+      }
+      if (isRunning) completeAction(sandbox1);
+    } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
-  }
-
-  private void runDangerousGoodsScenario(
-      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
-    // TODO: implement all Dangerous Goods scenarios
-  }
-
-  private void runReeferContainersScenario(
-      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
-    // TODO: implement all Reefer Containers scenarios
   }
 }

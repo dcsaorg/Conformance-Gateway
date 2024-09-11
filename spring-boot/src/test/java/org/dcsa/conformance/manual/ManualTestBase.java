@@ -148,7 +148,7 @@ public abstract class ManualTestBase {
   }
 
   void waitForCleanSandboxStatus(SandboxConfig sandbox) {
-    String sandboxStatus = "";
+    String sandboxStatus;
     int counter = 0;
     do {
       ObjectNode node =
@@ -160,16 +160,16 @@ public abstract class ManualTestBase {
       if (sandboxStatus.contains("[]")) return;
       try {
         counter++;
-        Thread.sleep(500L); // Wait for the scenario to finish
+        Thread.sleep(300L); // Wait for the scenario to finish
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-    } while (counter < 20 && !sandboxStatus.contains("{\"waiting\":[]}"));
-    log.info(
+    } while (counter < 30 && !sandboxStatus.contains("{\"waiting\":[]}"));
+    log.warn(
         "Waited for {} ms for sandbox status to reach the expected state: {}",
-        counter * 500,
+        counter * 300,
         sandboxStatus);
-    if (counter == 20) {
+    if (counter == 30) {
       throw new RuntimeException(
           "Sandbox status did not reach the expected state on time: " + sandboxStatus);
     }

@@ -439,6 +439,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
       }
       scenarioNode.put("confirmationRequired", nextAction.isConfirmationRequired());
       scenarioNode.put("inputRequired", nextAction.isInputRequired());
+    } else {
+      scenarioNode.put("inputRequired", false);
     }
 
     ConformanceCheck conformanceCheck = _createScenarioConformanceCheck();

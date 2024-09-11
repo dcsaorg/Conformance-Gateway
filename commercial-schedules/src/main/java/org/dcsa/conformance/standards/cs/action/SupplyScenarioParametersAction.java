@@ -9,7 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;

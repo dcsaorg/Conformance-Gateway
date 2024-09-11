@@ -216,6 +216,7 @@ public abstract class ManualTestBase {
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.has("sandboxId"), "SandboxId not found, maybe not created? Response: " + jsonNode);
     String sandboxId = jsonNode.get("sandboxId").asText();
+    log.info("Created sandbox: {}, v{}, suite: {}, role: {}, defaultType: {}", sandbox.standardName, sandbox.versionNumber, sandbox.scenarioSuite, sandbox.testedPartyRole, sandbox.isDefaultType);
 
     // Get the sandbox config
     node =

@@ -55,18 +55,29 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
     String filePath;
-    if (request.url().endsWith("v1/point-to-point-routes")) {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ptp.json";
-    } else if (request.url().endsWith("v1/port-schedules")) {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-ps.json";
-    } else {
-      filePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-vs.json";
+    Map<String, List<String>> initialIMap = Map.of("Api-Version", List.of(apiVersion));
+    Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
+    if (request.queryParams().containsKey("limit")
+        && !request.queryParams().containsKey("cursor")) {
+      String cursor = "fE9mZnNldHw9MTAmbGltaXQ9MTA"; //example value for a cursor
+      headers.put("Next-Page-Cursor", List.of(cursor));
     }
+    boolean hasCursor = request.queryParams().containsKey("cursor");
+
+    String baseFilePath = "/standards/commercialschedules/messages/commercialschedules-api-1.0.0-"; // NOSONAR
+    String suffix = hasCursor ? "nextpage.json" : ".json";
+    String routeType = "vs";
+
+    if (request.url().endsWith("v1/point-to-point-routes")) {
+      routeType = "ptp";
+    } else if (request.url().endsWith("v1/port-schedules")) {
+      routeType = "ps";
+    }
+
+    filePath = baseFilePath + routeType + suffix;
+
     JsonNode jsonResponseBody = replacePlaceHolders(filePath, request);
-    return request.createResponse(
-        200,
-        Map.of("Api-Version", List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+    return request.createResponse(200, headers, new ConformanceMessageBody(jsonResponseBody));
   }
 
   private JsonNode replacePlaceHolders(String filePath, ConformanceRequest request) {
@@ -124,6 +135,7 @@ public class CsPublisher extends ConformanceParty {
                                   CsDateUtils.getEndDateAfter3Months();
                               case MAX_TRANSHIPMENT -> "1";
                               case RECEIPT_TYPE_AT_ORIGIN, DELIVERY_TYPE_AT_DESTINATION -> "CY";
+                              case LIMIT -> "100";
                             })));
 
     asyncOrchestratorPostPartyInput(

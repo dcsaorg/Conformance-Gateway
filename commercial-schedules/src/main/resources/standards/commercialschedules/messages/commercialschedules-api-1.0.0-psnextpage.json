@@ -1,0 +1,328 @@
+[
+  {
+    "location": {
+      "locationName": "DEDICATED DELTA SOUTH TERMINAL, ROTTERDAM",
+      "UNLocationCode": "NLRTM",
+      "facilitySMDGCode": "DDE"
+    },
+    "vesselSchedules": [
+      {
+        "servicePartners": [
+          {
+            "carrierCode": "CMA",
+            "carrierCodeListProvider": "SMDG",
+            "carrierServiceName": "West Coast Sweden Service 4",
+            "carrierServiceCode": "WCSWE4",
+            "carrierImportVoyageNumber": "339SWR",
+            "carrierExportVoyageNumber": "339SWR"
+          }
+        ],
+        "vessel": {
+          "vesselIMONumber": "9349215",
+          "name": "ELBSPRINTER",
+          "operatorCarrierCode": "XPF",
+          "operatorCarrierCodeListProvider": "SMDG"
+        },
+        "isDummyVessel": false,
+        "timestamps": [
+          {
+            "eventTypeCode": "DEPA",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "PCO",
+            "cutOffDateTime": "2024-09-03T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "VCO",
+            "cutOffDateTime": "2024-09-03T12:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "STA",
+            "cutOffDateTime": "2024-08-30T15:45:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "SPA",
+            "cutOffDateTime": "2024-08-30T15:45:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2024-09-02T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "CUA",
+            "cutOffDateTime": "2024-09-03T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "AFC",
+            "cutOffDateTime": "2024-09-03T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DGC",
+            "cutOffDateTime": "2024-09-02T12:15:00+02:00"
+          }
+        ]
+      },
+      {
+        "servicePartners": [
+          {
+            "carrierCode": "CMA",
+            "carrierCodeListProvider": "SMDG",
+            "carrierServiceName": "West Coast UK Feeder 6",
+            "carrierServiceCode": "WCUKS6",
+            "carrierImportVoyageNumber": "98S8CN",
+            "carrierExportVoyageNumber": "98S8CN"
+          }
+        ],
+        "vessel": {
+          "vesselIMONumber": "9483671",
+          "name": "X-PRESS AGILITY",
+          "operatorCarrierCode": "XPF",
+          "operatorCarrierCodeListProvider": "SMDG"
+        },
+        "isDummyVessel": false,
+        "timestamps": [
+          {
+            "eventTypeCode": "DEPA",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "PCO",
+            "cutOffDateTime": "2024-09-03T05:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "VCO",
+            "cutOffDateTime": "2024-09-02T14:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "STA",
+            "cutOffDateTime": "2024-08-30T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "SPA",
+            "cutOffDateTime": "2024-08-30T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2024-09-02T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "CUA",
+            "cutOffDateTime": "2024-09-03T05:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "AFC",
+            "cutOffDateTime": "2024-09-03T05:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DGC",
+            "cutOffDateTime": "2024-08-30T14:15:00+02:00"
+          }
+        ]
+      },
+      {
+        "servicePartners": [
+          {
+            "carrierCode": "CMA",
+            "carrierCodeListProvider": "SMDG",
+            "carrierServiceName": "Finland Kotka Helsinki Service 3",
+            "carrierServiceCode": "FINL3",
+            "carrierImportVoyageNumber": "171AVR",
+            "carrierExportVoyageNumber": "171AVR"
+          }
+        ],
+        "vessel": {
+          "name": "SSL TBN 17",
+          "operatorCarrierCode": "CMA",
+          "operatorCarrierCodeListProvider": "SMDG"
+        },
+        "isDummyVessel": true,
+        "timestamps": [
+          {
+            "eventTypeCode": "DEPA",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "PCO",
+            "cutOffDateTime": "2024-09-03T10:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "VCO",
+            "cutOffDateTime": "2024-09-02T15:15:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "STA",
+            "cutOffDateTime": "2024-08-30T10:45:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "SPA",
+            "cutOffDateTime": "2024-08-30T10:45:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2024-09-02T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "CUA",
+            "cutOffDateTime": "2024-09-03T10:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "AFC",
+            "cutOffDateTime": "2024-09-03T10:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DGC",
+            "cutOffDateTime": "2024-08-30T15:30:00+02:00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "location": {
+      "locationName": "ECT EUROMAX ROTTERDAM, ROTTERDAM",
+      "UNLocationCode": "NLRTM",
+      "facilitySMDGCode": "EMX"
+    },
+    "vesselSchedules": [
+      {
+        "servicePartners": [
+          {
+            "carrierCode": "CMA",
+            "carrierCodeListProvider": "SMDG",
+            "carrierServiceName": "French Asia Line 6",
+            "carrierServiceCode": "FAL6",
+            "carrierImportVoyageNumber": "0LAHUE1MA",
+            "carrierExportVoyageNumber": "0LAHUE1MA"
+          }
+        ],
+        "vessel": {
+          "vesselIMONumber": "9893993",
+          "name": "EVER ATOP",
+          "operatorCarrierCode": "EMC",
+          "operatorCarrierCodeListProvider": "SMDG"
+        },
+        "isDummyVessel": false,
+        "timestamps": [
+          {
+            "eventTypeCode": "DEPA",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "PCO",
+            "cutOffDateTime": "2024-09-01T08:25:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "VCO",
+            "cutOffDateTime": "2024-08-30T14:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "STA",
+            "cutOffDateTime": "2024-08-28T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "SPA",
+            "cutOffDateTime": "2024-08-28T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2024-08-29T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "CUA",
+            "cutOffDateTime": "2024-09-01T08:25:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "AFC",
+            "cutOffDateTime": "2024-09-01T14:25:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DGC",
+            "cutOffDateTime": "2024-08-29T14:15:00+02:00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "location": {
+      "locationName": "HUTCHISON PORT DELTA II, ROTTERDAM",
+      "UNLocationCode": "NLRTM",
+      "facilitySMDGCode": "HPD2"
+    },
+    "vesselSchedules": [
+      {
+        "servicePartners": [
+          {
+            "carrierCode": "CMA",
+            "carrierCodeListProvider": "SMDG",
+            "carrierServiceName": "St Laurent 1",
+            "carrierServiceCode": "SL1",
+            "carrierImportVoyageNumber": "0EDHTW1MA",
+            "carrierExportVoyageNumber": "0EDHTW1MA"
+          }
+        ],
+        "vessel": {
+          "vesselIMONumber": "9334351",
+          "name": "EM KEA",
+          "operatorCarrierCode": "CMA",
+          "operatorCarrierCodeListProvider": "SMDG"
+        },
+        "isDummyVessel": false,
+        "timestamps": [
+          {
+            "eventTypeCode": "ARRI",
+            "eventClassifierCode": "PLN",
+            "eventDateTime": "DATE"
+          }
+        ],
+        "cutOffTimes": [
+          {
+            "cutOffDateTimeCode": "PCO",
+            "cutOffDateTime": "2024-09-04T03:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "VCO",
+            "cutOffDateTime": "2024-09-03T14:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "STA",
+            "cutOffDateTime": "2024-09-02T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "SPA",
+            "cutOffDateTime": "2024-09-02T09:30:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DCO",
+            "cutOffDateTime": "2024-09-03T15:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "CUA",
+            "cutOffDateTime": "2024-09-04T03:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "AFC",
+            "cutOffDateTime": "2024-09-04T03:00:00+02:00"
+          },
+          {
+            "cutOffDateTimeCode": "DGC",
+            "cutOffDateTime": "2024-09-02T14:15:00+02:00"
+          }
+        ]
+      }
+    ]
+  }
+]

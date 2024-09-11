@@ -27,7 +27,8 @@ public enum CsFilterParameter {
   UNIVERSAL_VOYAGE_REFERENCE("universalVoyageReference"),
   VESSEL_OPERATOR_CARRIER_CODE("vesselOperatorCarrierCode"),
   UN_LOCATION_CODE("UNLocationCode"),
-  FACILITY_SMDG_CODE("facilitySMDGCode");
+  FACILITY_SMDG_CODE("facilitySMDGCode"),
+  LIMIT("limit");
 
   public static final Map<String, CsFilterParameter> byQueryParamName =
       Arrays.stream(values())

@@ -51,7 +51,11 @@ public class ConformanceWebuiHandler {
       if (e instanceof UserFacingException userFacingException) {
         return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
       } else {
-        return OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
+        return OBJECT_MAPPER
+            .createObjectNode()
+            .put("error", "Internal Server Error")
+            .put("exception", e.getClass().getName())
+            .put("message", e.getMessage());
       }
     }
   }

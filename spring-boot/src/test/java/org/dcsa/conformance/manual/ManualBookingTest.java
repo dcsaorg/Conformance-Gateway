@@ -2,7 +2,6 @@ package org.dcsa.conformance.manual;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,42 +56,4 @@ class ManualBookingTest extends ManualTestBase {
     runAllTests(sandbox1Digests, sandbox1, sandbox2);
   }
 
-  private void runAllTests(
-      List<ScenarioDigest> sandbox1Digests, SandboxConfig sandbox1, SandboxConfig sandbox2) {
-    sandbox1Digests.forEach(
-        scenarioDigest ->
-            scenarioDigest
-                .scenarios()
-                .forEach(
-                    scenario -> runScenario(sandbox1, sandbox2, scenario.id(), scenario.name())));
-  }
-
-  private void runScenario(
-      SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
-
-    startOrStopScenario(sandbox1, scenarioId);
-    notifyAction(sandbox2);
-
-    boolean isRunning;
-    do {
-      JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-      boolean inputRequired = jsonNode.get("inputRequired").booleanValue();
-      boolean hasPromptText = jsonNode.has("promptText");
-      isRunning = jsonNode.get("isRunning").booleanValue();
-      if (inputRequired) {
-        String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
-        assertTrue(jsonForPromptText.length() > 250);
-        String promptActionId = jsonNode.get("promptActionId").textValue();
-
-        handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
-        if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
-        continue;
-      }
-      if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
-        notifyAction(sandbox2);
-      }
-      if (isRunning) completeAction(sandbox1);
-    } while (isRunning);
-    validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
-  }
 }

@@ -17,9 +17,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 12000,
-      "weightUnit": "KGM",
-      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
@@ -27,8 +25,10 @@
       "cargoItems": [
         {
           "equipmentReference": "ABCU7341935",
-          "weight": 12000,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 12000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 400

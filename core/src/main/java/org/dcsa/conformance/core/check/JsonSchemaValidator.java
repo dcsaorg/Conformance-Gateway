@@ -5,8 +5,17 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.*;
+import com.networknt.schema.JsonMetaSchema;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.Keyword;
+import com.networknt.schema.NonValidationKeyword;
+import com.networknt.schema.SchemaValidatorsConfig;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationContext;
+import com.networknt.schema.ValidationMessage;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +25,8 @@ import lombok.SneakyThrows;
 
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
-  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER = new ObjectMapper(new JsonFactory());
+  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER =
+      new ObjectMapper(new JsonFactory());
 
   public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
@@ -45,10 +55,17 @@ public class JsonSchemaValidator {
             JsonMetaSchema.getV4(),
             jsonSchemaFactory,
             schemaValidatorsConfig);
+    // Prevent warnings on unknown keywords
+    Map<String, Keyword> keywords = validationContext.getMetaSchema().getKeywords();
+    Arrays.asList(
+            "example",
+            "discriminator",
+            "exclusiveMinimum")
+        .forEach(keyword -> keywords.put(keyword, new NonValidationKeyword(keyword)));
     jsonSchema =
         jsonSchemaFactory.create(
             validationContext,
-            "#/components/schemas/" + schemaName,
+          "#/components/schemas/" + schemaName,
             rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
             rootJsonSchema);
     jsonSchema.initializeValidators();

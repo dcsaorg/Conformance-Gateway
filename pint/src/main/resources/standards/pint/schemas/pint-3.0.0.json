@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA eBL Platform Interoperability API",
-    "description": "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support non-repudiable transfer of eBL document and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n0. Optionally, using the [**'Receiver Validation'**](#/Receiver%20validation/post-receiver-validation) endpoint to allow the sending user to validate the identity of the receiver,  before they transfer the eBL.\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2>\n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300).\nPlease [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support transfer of eBL documents with non-repudiation and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n0. Optionally, using the [**'Receiver Validation'**](#/Receiver%20validation/post-receiver-validation) endpoint to allow the sending user to validate the identity of the receiver,  before they transfer the eBL.\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2> \n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300).\nPlease [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -73,7 +73,7 @@
         },
         "responses": {
           "200": {
-            "description": "The Receiving platform either accepts the envelope transfer immediately (if there are no additional documents to be transferred, or if it concludes that it is already in the possesion of all the additional documents mentioned in the [`EnvelopeManifest`](#/EnvelopeManifest)), or concludes that in has previously accepted the envelope transfer with the same contents.\n\nThe signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) that signals the accepted envelope transfer (`RECE` or `DUPE`).\n",
+            "description": "The Receiving platform either accepts the envelope transfer immediately (if there are no additional documents to be transferred, or if it concludes that it is already in the possession of all the additional documents mentioned in the [`EnvelopeManifest`](#/EnvelopeManifest)), or concludes that in has previously accepted the envelope transfer with the same contents.\n\nThe signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) JWS-signed payload must contain [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse) that signals the accepted envelope transfer (`RECE` or `DUPE`).\n",
             "headers": {
               "API-Version": {
                 "$ref": "#/components/headers/API-Version"
@@ -505,7 +505,7 @@
             "type": "string",
             "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n",
             "format": "date-time",
-            "example": "2019-11-12T07:41:00+08:30"
+            "example": "2024-09-04T09:41:00Z"
           },
           "errors": {
             "minItems": 1,
@@ -568,6 +568,7 @@
         "description": "A detailed description of what has caused the error.\n"
       },
       "EblEnvelope": {
+        "title": "Ebl Envelope",
         "required": [
           "envelopeManifestSignedContent",
           "envelopeTransferChain",
@@ -591,13 +592,14 @@
         }
       },
       "ReceiverValidationResponse": {
+        "title": "Receiver Validation Response",
         "required": [
           "partyName"
         ],
         "type": "object",
         "properties": {
           "partyName": {
-            "maxLength": 100,
+            "maxLength": 70,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
             "description": "Name of the party.\n",
@@ -607,6 +609,7 @@
         "description": "Response to a receiver validation response, where the party code could successfully identified.\n"
       },
       "EnvelopeManifest": {
+        "title": "Envelope Manifest",
         "required": [
           "lastEnvelopeTransferChainEntrySignedContentChecksum",
           "supportingDocuments",
@@ -617,6 +620,7 @@
           "transportDocumentChecksum": {
             "maxLength": 64,
             "minLength": 64,
+            "pattern": "^[0-9a-f]+$",
             "type": "string",
             "description": "The checksum of the eBL document (a.k.a. transport document) computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n\nIn order to guard itself against different types of MITM attacks (e.g. 'replay attack' where last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list is replaced with the similar entry extracted from the another envelope transfer previously sent by the same sending platform), upon start of the envelope transfer the receiving platform should validate that the [`EnvelopeManifest.transportDocumentChecksum`](#/EnvelopeManifest) attribute and the [`EnvelopeTransferChainEntry.transportDocumentChecksum`](#/EnvelopeTransferChainEntry) attribute of the last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list have the same value.\n\nThe checksum is computed on the [canonical form of the JSON object](https://gibson042.github.io/canonicaljson-spec/).\n",
             "example": "583c29ab3e47f2d80899993200d3fbadb9f8a367f3a39f715935c46d7a283006"
@@ -652,10 +656,12 @@
         "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
       },
       "IssuanceManifest": {
+        "title": "Issuance Manifest",
         "required": [
           "documentChecksum",
           "issueToChecksum"
         ],
+        "type": "object",
         "properties": {
           "documentChecksum": {
             "maxLength": 64,
@@ -665,7 +671,7 @@
             "description": "The checksum of the transport document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234). The transport document must be in the [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785) canonical form before the checksum is computed.\n",
             "example": "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f"
           },
-          "eBLVisualisationByCarrier": {
+          "eBLVisualisationByCarrierChecksum": {
             "maxLength": 64,
             "minLength": 64,
             "pattern": "^[0-9a-f]+$",
@@ -685,6 +691,7 @@
         "description": "Checksums of the carrier provided documents from the issuance time.\n"
       },
       "EnvelopeTransferChainEntry": {
+        "title": "Envelope Transfer Chain Entry",
         "required": [
           "eblPlatform",
           "transactions",
@@ -696,12 +703,13 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n",
             "example": "BOLE"
           },
           "transportDocumentChecksum": {
             "maxLength": 64,
             "minLength": 64,
+            "pattern": "^[0-9a-f]+$",
             "type": "string",
             "description": "The checksum of the eBL document (a.k.a. transport document) computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n\nIn order to guard itself against different types of MITM attacks (e.g. 'replay attack' where last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list is replaced with the similar entry extracted from the another envelope transfer previously sent by the same sending platform), upon start of the envelope transfer the receiving platform should validate that the [`EnvelopeManifest.transportDocumentChecksum`](#/EnvelopeManifest) attribute and the [`EnvelopeTransferChainEntry.transportDocumentChecksum`](#/EnvelopeTransferChainEntry) attribute of the last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list have the same value.\n\nThe checksum is computed on the [canonical form of the JSON object](https://gibson042.github.io/canonicaljson-spec/).\n",
             "example": "583c29ab3e47f2d80899993200d3fbadb9f8a367f3a39f715935c46d7a283006"
@@ -736,6 +744,7 @@
         "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
       },
       "EnvelopeTransferStartedResponse": {
+        "title": "Envelope Transfer Started Response",
         "required": [
           "envelopeReference",
           "lastEnvelopeTransferChainEntrySignedContentChecksum",
@@ -753,6 +762,7 @@
           "transportDocumentChecksum": {
             "maxLength": 64,
             "minLength": 64,
+            "pattern": "^[0-9a-f]+$",
             "type": "string",
             "description": "The checksum of the eBL document (a.k.a. transport document) computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n\nIn order to guard itself against different types of MITM attacks (e.g. 'replay attack' where last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list is replaced with the similar entry extracted from the another envelope transfer previously sent by the same sending platform), upon start of the envelope transfer the receiving platform should validate that the [`EnvelopeManifest.transportDocumentChecksum`](#/EnvelopeManifest) attribute and the [`EnvelopeTransferChainEntry.transportDocumentChecksum`](#/EnvelopeTransferChainEntry) attribute of the last entry in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list have the same value.\n\nThe checksum is computed on the [canonical form of the JSON object](https://gibson042.github.io/canonicaljson-spec/).\n",
             "example": "583c29ab3e47f2d80899993200d3fbadb9f8a367f3a39f715935c46d7a283006"
@@ -791,7 +801,7 @@
           },
           "responseCode": {
             "type": "string",
-            "description": "The response code can have one of the following values:\n- `RECE` (Received)\n- `DUPE` (Duplicated Envelope)\n- `BSIG` (Bad Signature)\n- `BENV` (Bad Envelope)\n- `INCD` (Inconclusive Document)\n- `MDOC` (Missing Document)\n- `DISE` (Disputed Envelope)\n\nThe `RECE` `responseCode` is used when the receiving platform acknowledges that the envelope transfer is accepted. \nThis response code can also be used when replying to [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request if and only if the receiving platform is already in possesion of all the additional documents listed in the `EnvelopeManifest`, and is ready to commit to accepting the envelope transfer.  This should only happen in special cases (e.g. Platform A which has performed the intial envelope transfer with additional documents to platform B later during the lifetime of the same eBL receives [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request from some other Platform C with `EnvelopeManifest` listing additional documents, for which it concludes (based on checksum comparison) that they are identical to the addition documents from the intial envelope transfer). The `RECE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `DUPE` `responseCode` is used in place of `RECE` `responseCode` when the receiving platform has already previously acknowledged and accepted the transfer of this envelope. In this case, the receiving platform asserts that this envelope transfer request is invalid but the prior envelope transfer was successful.  The receiving platform should include accepted version of last `EnvelopeTransferChainEntrySignedContent` entry in `EblEnvelope.envelopeTransferChain` list in the `duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent` field. The receiving platform is only required to detect DUPE `responseCode` if the EnvelopeTransferChainEntrySignedContentChecksum is the same between the two transfer attempt and the sending platform is expected to reuse the same envelope. The `DUPE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `BSIG` `responseCode` is used when the receiving platform could not process the envelope related to a signature and rejects the concrete transfer request. This response code should be used when the receiving platform decides to reject envelope transfer due to the issues with the signature used to create JWS content when starting envelope transfer (`EblEnvelope.envelopeManifestSignedContent`, and/or one or more `EnvelopeTransferChainEntrySignedContentChecksum` entries in the `EblEnvelope.envelopeTransferChain` list). Example use cases: the signature was made by an unknown key, the key or signature expired, the signed content does not match the EnvelopeTransferChainEntrySignedContentChecksum, etc. In this case, the receiving platform makes no assertions about the validity of the envelope contents. The sending platform may attempt to resolve the signature issue and retry with the same EnvelopeTransferChainEntrySignedContentChecksum. The `BSIG` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `BENV` `responseCode` is used when the receiving platform can not process the envelope and rejects the concrete envelope transfer request. This response code can be used when the receiving platform knows the transfer cannot succeed in the future and the sending platform should retain the eBL. Example use cases could be that the envelope does not list the receiving platform as the intended recipient, the transferee ID is unknown, an invalid action code was used in the transactions for this envelope transfer, etc. In this case, the receiving platform is asserting that the envelope itself is not acceptable. Basically any use case where the receiving platform decides to reject the envelope transfer for technical reasons that are not covered by `BSIG` `responseCode`. The `BENV` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `INCD` `responseCode` is used when the receiving platform concludes that the transferred additional document's checksum or size does not match the document checksum or size provided either directly in URL path or in `EnvelopeManifest` sent in the start envelope transfer request. The `INCD` `responseCode` does *not* reject the envelope transfer. The sending platform should try to either resend the correct document, or attempt to start new envelope transfer request with changed `EnvelopeManifest` that will contain correct document checksum and/or size for the inconclusive document. The `INCD` `responseCode` is not valid as a response to the start of a envelope transfer.  The `INCD` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `MDOC` `responseCode` is used when the receiving platform cannot accept the envelope transfer due to a missing additional document.  The `MDOC` `responseCode` does *not* reject the envelope transfer. The sending platform should resend relevant documents (provided in `missingAdditionalDocumentChecksums`) and then retry finishing the envelope transfer. The `MDOC` `responseCode` is not valid as a response to the start of a envelope transfer.  The `MDOC` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `DISE` `responseCode` is used when the receiving platform has successfully parsed the envelope and validated the signatures.  However, the receiving platform believes the envelope contradicts its current knowledge of the envelope transfer chain for the eBL document and there is a risk of double spending. The concrete detection method is implementation-specific. However, a method would be for the receiving platform to confirm whether it has `EnvelopeTransferChainEntrySignedContentChecksum` for the document, which are not listed in the transferred eBL envelope. Dispute resolution is not covered in the API and must be handled in via out of band process. The `DISE` `responseCode` should be used together with the HTTP `409 Conflict` response status code.\n\nUnless otherwise stated for a given response code, receiving platform will reject the active envelope transfer (if any). Some failures that result in receiving platform rejecting the envelope transfer may be retriable, in which case the sending platform can attempt a new envelope transfer for the same envelope.\n\nThe sending platform must not rely on the HTTP response status code alone as it is not covered by the signature. When there is a mismatch between the HTTP response status code and the signed response `EnvelopeTransferFinishedResponseSignedResponse` JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse), [`responseCode`](#/EnvelopeTransferFinishedResponse) decides the outcome.\n",
+            "description": "The response code can have one of the following values:\n- `RECE` (Received)\n- `DUPE` (Duplicated Envelope)\n- `BSIG` (Bad Signature)\n- `BENV` (Bad Envelope)\n- `INCD` (Inconclusive Document)\n- `MDOC` (Missing Document)\n- `DISE` (Disputed Envelope)\n\nThe `RECE` `responseCode` is used when the receiving platform acknowledges that the envelope transfer is accepted. \nThis response code can also be used when replying to [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request if and only if the receiving platform is already in possession of all the additional documents listed in the `EnvelopeManifest`, and is ready to commit to accepting the envelope transfer.  This should only happen in special cases (e.g. Platform A which has performed the initial envelope transfer with additional documents to platform B later during the lifetime of the same eBL receives [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request from some other Platform C with `EnvelopeManifest` listing additional documents, for which it concludes (based on checksum comparison) that they are identical to the addition documents from the initial envelope transfer). The `RECE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `DUPE` `responseCode` is used in place of `RECE` `responseCode` when the receiving platform has already previously acknowledged and accepted the transfer of this envelope. In this case, the receiving platform asserts that this envelope transfer request is invalid but the prior envelope transfer was successful.  The receiving platform should include accepted version of last `EnvelopeTransferChainEntrySignedContent` entry in `EblEnvelope.envelopeTransferChain` list in the `duplicateOfAcceptedEnvelopeTransferChainEntrySignedContent` field. The receiving platform is only required to detect DUPE `responseCode` if the EnvelopeTransferChainEntrySignedContentChecksum is the same between the two transfer attempt and the sending platform is expected to reuse the same envelope. The `DUPE` `responseCode` should be used together with the HTTP `200 Ok` response status code.\n\nThe `BSIG` `responseCode` is used when the receiving platform could not process the envelope related to a signature and rejects the concrete transfer request. This response code should be used when the receiving platform decides to reject envelope transfer due to the issues with the signature used to create JWS content when starting envelope transfer (`EblEnvelope.envelopeManifestSignedContent`, and/or one or more `EnvelopeTransferChainEntrySignedContentChecksum` entries in the `EblEnvelope.envelopeTransferChain` list). Example use cases: the signature was made by an unknown key, the key or signature expired, the signed content does not match the EnvelopeTransferChainEntrySignedContentChecksum, etc. In this case, the receiving platform makes no assertions about the validity of the envelope contents. The sending platform may attempt to resolve the signature issue and retry with the same EnvelopeTransferChainEntrySignedContentChecksum. The `BSIG` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `BENV` `responseCode` is used when the receiving platform can not process the envelope and rejects the concrete envelope transfer request. This response code can be used when the receiving platform knows the transfer cannot succeed in the future and the sending platform should retain the eBL. Example use cases could be that the envelope does not list the receiving platform as the intended recipient, the transferee ID is unknown, an invalid action code was used in the transactions for this envelope transfer, etc. In this case, the receiving platform is asserting that the envelope itself is not acceptable. Basically any use case where the receiving platform decides to reject the envelope transfer for technical reasons that are not covered by `BSIG` `responseCode`. The `BENV` `responseCode` should be used together with a HTTP `422 Unprocessable Content` response status code.\n\nThe `INCD` `responseCode` is used when the receiving platform concludes that the transferred additional document's checksum or size does not match the document checksum or size provided either directly in URL path or in `EnvelopeManifest` sent in the start envelope transfer request. The `INCD` `responseCode` does *not* reject the envelope transfer. The sending platform should try to either resend the correct document, or attempt to start new envelope transfer request with changed `EnvelopeManifest` that will contain correct document checksum and/or size for the inconclusive document. The `INCD` `responseCode` is not valid as a response to the start of a envelope transfer.  The `INCD` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `MDOC` `responseCode` is used when the receiving platform cannot accept the envelope transfer due to a missing additional document.  The `MDOC` `responseCode` does *not* reject the envelope transfer. The sending platform should resend relevant documents (provided in `missingAdditionalDocumentChecksums`) and then retry finishing the envelope transfer. The `MDOC` `responseCode` is not valid as a response to the start of a envelope transfer.  The `MDOC` `responseCode` should be used together with a HTTP `409 Conflict` response status code.\n\nThe `DISE` `responseCode` is used when the receiving platform has successfully parsed the envelope and validated the signatures.  However, the receiving platform believes the envelope contradicts its current knowledge of the envelope transfer chain for the eBL document and there is a risk of double spending. The concrete detection method is implementation-specific. However, a method would be for the receiving platform to confirm whether it has `EnvelopeTransferChainEntrySignedContentChecksum` for the document, which are not listed in the transferred eBL envelope. Dispute resolution is not covered in the API and must be handled in via out of band process. The `DISE` `responseCode` should be used together with the HTTP `409 Conflict` response status code.\n\nUnless otherwise stated for a given response code, receiving platform will reject the active envelope transfer (if any). Some failures that result in receiving platform rejecting the envelope transfer may be retriable, in which case the sending platform can attempt a new envelope transfer for the same envelope.\n\nThe sending platform must not rely on the HTTP response status code alone as it is not covered by the signature. When there is a mismatch between the HTTP response status code and the signed response `EnvelopeTransferFinishedResponseSignedResponse` JWS-signed payload [`EnvelopeTransferFinishedResponse.responseCode`](#/EnvelopeTransferFinishedResponse), [`responseCode`](#/EnvelopeTransferFinishedResponse) decides the outcome.\n",
             "example": "RECE",
             "enum": [
               "RECE",
@@ -885,7 +895,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "description": "Action denotes the transaction type, which can have one of the following values:\n- `ISSU` (Issuance)\n- `TRNS` (Transfer of possession)\n- `ENDO` (Endorsement a.k.a. Transfer of title)\n- `RESD` (Request to surrender for delivery)\n- `RESA` (Request to surrender for amendment)\n- `SACC` (Surrender accepted)\n- `SREJ` (Surrender rejected)\n\nThe `ISSU` `action` is used for the eBL issuance transaction from the carrier party to the shipper party, and must appear exactly once in the first transaction of the first [`EnvelopeTransferChainEntry`](#/EnvelopeTransferChainEntry) entry (as JWS payload of [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry) in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list. If the eBL document is issued to the shipper party that resides on the different eBL Platform from the carrier's platform, initial envelope transfer should contain envelope transfer chain where first entry's first transaction has `ISSU` `action` type. \n\nThe `TRNS` `action` is used for the transfer of possession of the eBL from the current possessor party to the new possessor party.\n\nThe `ENDO` `action` is used for the endorsement (a.k.a. transfer of title, or the right to take the delivery of the goods) of To-order eBL documents, where the new endorsee party is not named in the eBL document. The endorsement should always happen on the platform of the user that is not only the current endorsee, but also the current possessor of the eBL document. If the new endorsee party resides on the different eBL Platform from the current endorsee's platform, the envelope transfer process is used to notify the new endorsee of the `ENDO` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. \n\nIf the party is the current possessor, and the party is the current consignee/endorsee/shipper (or eBL document is blank-endorsed), the party may request to surrender the eBL to the carrier. This is done by using one of the Request to surrender action types (`RESD` `action` or `RESA` `action`) and with the issuing carrier or the relevant carrier agent as the `recipient` of the action. \n \n The `RESD` `action` is used when the party wants to request the delivery of the goods. If the request is accepted (for details see `SACC` `action`), the carrier and the party submitting the surrender request will negotiate how the goods will be delivered (e.g. via DCSA shipment release API).\n \n The `RESA` `action` is used when the party wants to surrender the eBL document, so that the carrier can issue an amended eBL document. If the request is accepted (for details see `SACC` `action` resonse), the alignment on the exact change(s) that need to be made to the eBL document is done outside of the PINT API (e.g. via the DCSA EBL API). If the request is accepted, the existing eBL document is voided along with its envelope transfer chain, and the amended eBL document must be reissued with a new envelope transfer chain (for details see the `ISSU` `action` type description paragraph above). The `RESA` `action` is also used for switch to paper as the DCSA process flow for switching to paper is part of the amendment process (e.g. to note how many originals and copies with and without charges should be issued).\n\nIf a surrender request (`RESD` `action` or `RESA` `action`) is not addressed to the carrier that issued the eBL document or to their legal representative, then the receiving platform should reject the envelope transfer with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse).\n\nThe `SACC` `action` is used by the carrier to asynchronously accept the surrender request initiated via `RESD` `action` or `RESA` `action`. If the party that submitted the surrender request is on the different platform, the envelope transfer process is used to notify the (surrender request submitter) party of the `SACC` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL documment contained in the envelope. No transactions may occur after a `SACC` `action` transaction. Any envelope transfer chain changes with new transactions after a `SACC` `action` transaction are invalid and should be answered with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse). \n\nThe `SREJ` `action` is used by the carrier to asynchronously reject the surrender request initiated via `RESD` `action` or `RESA` `action`, and return the eBL document possession to the party that submitted the surrender request.\n\nWhen the transaction recipient is residing on the different platform from the transaction actor's platform, the transaction should be followed by the envelope transfer from the actor's (sending) platform to the recipient's (receiving) platform. If the envelope transfer is caused by either `ENDO` `action` or `SACC` `action` transaction (where the recipient is on the different platform), the envelope transfer process is NOT causing transfer of possession of the eBL document, but is merely used as notificaiton for the non-repudiation purposes.\n",
+            "description": "Action denotes the transaction type, which can have one of the following values:\n- `ISSU` (Issuance)\n- `TRNS` (Transfer of possession)\n- `ENDO` (Endorsement a.k.a. Transfer of title)\n- `RESD` (Request to surrender for delivery)\n- `RESA` (Request to surrender for amendment)\n- `SACC` (Surrender accepted)\n- `SREJ` (Surrender rejected)\n\nThe `ISSU` `action` is used for the eBL issuance transaction from the carrier party to the shipper party, and must appear exactly once in the first transaction of the first [`EnvelopeTransferChainEntry`](#/EnvelopeTransferChainEntry) entry (as JWS payload of [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry) in the [`EblEnvelope.envelopeTransferChain`](#/EblEnvelope) list. If the eBL document is issued to the shipper party that resides on the different eBL Platform from the carrier's platform, initial envelope transfer should contain envelope transfer chain where first entry's first transaction has `ISSU` `action` type. \n\nThe `TRNS` `action` is used for the transfer of possession of the eBL from the current possessor party to the new possessor party.\n\nThe `ENDO` `action` is used for the endorsement (a.k.a. transfer of title, or the right to take the delivery of the goods) of To-order eBL documents, where the new endorsee party is not named in the eBL document. The endorsement should always happen on the platform of the user that is not only the current endorsee, but also the current possessor of the eBL document. If the new endorsee party resides on the different eBL Platform from the current endorsee's platform, the envelope transfer process is used to notify the new endorsee of the `ENDO` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL document contained in the envelope. \n\nIf the party is the current possessor, and the party is the current consignee/endorsee/shipper (or eBL document is blank-endorsed), the party may request to surrender the eBL to the carrier. This is done by using one of the Request to surrender action types (`RESD` `action` or `RESA` `action`) and with the issuing carrier or the relevant carrier agent as the `recipient` of the action. \n \n The `RESD` `action` is used when the party wants to request the delivery of the goods. If the request is accepted (for details see `SACC` `action`), the carrier and the party submitting the surrender request will negotiate how the goods will be delivered (e.g. via DCSA shipment release API).\n \n The `RESA` `action` is used when the party wants to surrender the eBL document, so that the carrier can issue an amended eBL document. If the request is accepted (for details see `SACC` `action` response), the alignment on the exact change(s) that need to be made to the eBL document is done outside of the PINT API (e.g. via the DCSA EBL API). If the request is accepted, the existing eBL document is voided along with its envelope transfer chain, and the amended eBL document must be reissued with a new envelope transfer chain (for details see the `ISSU` `action` type description paragraph above). The `RESA` `action` is also used for switch to paper as the DCSA process flow for switching to paper is part of the amendment process (e.g. to note how many originals and copies with and without charges should be issued).\n\nIf a surrender request (`RESD` `action` or `RESA` `action`) is not addressed to the carrier that issued the eBL document or to their legal representative, then the receiving platform should reject the envelope transfer with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse).\n\nThe `SACC` `action` is used by the carrier to asynchronously accept the surrender request initiated via `RESD` `action` or `RESA` `action`. If the party that submitted the surrender request is on the different platform, the envelope transfer process is used to notify the (surrender request submitter) party of the `SACC` `action` transaction for non-repudiation purposes, and will NOT result in the transfer of possession of the eBL document contained in the envelope. No transactions may occur after a `SACC` `action` transaction. Any envelope transfer chain changes with new transactions after a `SACC` `action` transaction are invalid and should be answered with the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) containing `BENV` [`responseCode`](#/EnvelopeTransferFinishedResponse). \n\nThe `SREJ` `action` is used by the carrier to asynchronously reject the surrender request initiated via `RESD` `action` or `RESA` `action`, and return the eBL document possession to the party that submitted the surrender request.\n\nWhen the transaction recipient is residing on the different platform from the transaction actor's platform, the transaction should be followed by the envelope transfer from the actor's (sending) platform to the recipient's (receiving) platform. If the envelope transfer is caused by either `ENDO` `action` or `SACC` `action` transaction (where the recipient is on the different platform), the envelope transfer process is NOT causing transfer of possession of the eBL document, but is merely used as notification for the non-repudiation purposes.\n",
             "example": "ISSU",
             "enum": [
               "ISSU",
@@ -943,7 +953,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n",
             "example": "BOLE"
           },
           "identifyingCodes": {
@@ -1012,7 +1022,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "IN"
           },
           "value": {
             "maxLength": 35,
@@ -1022,7 +1032,7 @@
             "example": "AAAAA0000A"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n"
       },
       "TransportDocument": {
         "title": "Transport Document",
@@ -1066,7 +1076,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
             "example": "DRAFT"
           },
           "transportDocumentTypeCode": {
@@ -1264,7 +1274,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
             "example": "DKK"
           },
           "carrierCode": {
@@ -1508,11 +1518,16 @@
             "example": "ABC709951"
           },
           "descriptionOfGoods": {
-            "maxLength": 5000,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
-            "example": "blue shoes size 47"
+            "maxItems": 150,
+            "type": "array",
+            "description": "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "A line describing the cargo",
+              "example": "blue shoes size 47"
+            }
           },
           "HSCodes": {
             "minItems": 1,
@@ -1523,7 +1538,7 @@
               "minLength": 6,
               "pattern": "^\\d{6,10}$",
               "type": "string",
-              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).\n",
               "example": "851713"
             }
           },
@@ -1535,10 +1550,11 @@
             }
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -1582,7 +1598,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE_B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -1636,7 +1652,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "EG"
           },
           "values": {
             "minItems": 1,
@@ -1650,15 +1666,14 @@
             }
           }
         },
-        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n"
       },
       "CargoItem": {
         "title": "Cargo Item",
         "required": [
           "equipmentReference",
-          "outerPackaging",
-          "weight",
-          "weightUnit"
+          "grossWeight",
+          "outerPackaging"
         ],
         "type": "object",
         "properties": {
@@ -1669,39 +1684,11 @@
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
           },
-          "weight": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
-            "format": "float",
-            "example": 13000.3
+          "grossWeight": {
+            "$ref": "#/components/schemas/Gross Weight"
           },
-          "weightUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          },
-          "volume": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
-            "format": "float",
-            "example": 12
-          },
-          "volumeUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** Mandatory to provide if `volume` is provided\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
+          "grossVolume": {
+            "$ref": "#/components/schemas/Gross Volume"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
@@ -1712,13 +1699,6 @@
             "items": {
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
-          },
-          "houseBillOfLadingReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
-            "example": "ABC123"
           },
           "customsReferences": {
             "type": "array",
@@ -1743,7 +1723,7 @@
             "minLength": 2,
             "pattern": "^[A-Z0-9]{2}$",
             "type": "string",
-            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
             "example": "5H"
           },
           "imoPackagingCode": {
@@ -1751,7 +1731,7 @@
             "minLength": 1,
             "pattern": "^[A-Z0-9]{1,5}$",
             "type": "string",
-            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the IMO IMDG code amendment version 41-22. If not available, the package code as per UN recommendation 21 should be used.\n",
+            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.\n",
             "example": "1A2"
           },
           "numberOfPackages": {
@@ -1770,8 +1750,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "TREATED AND CERTIFIED"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT_APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED_AND_CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -1814,7 +1794,7 @@
           "imoClass": {
             "maxLength": 4,
             "type": "string",
-            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
+            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n",
             "example": "1.4S"
           },
           "subsidiaryRisk1": {
@@ -1924,7 +1904,7 @@
             "type": "string",
             "description": "Date & time when the container was fumigated\n",
             "format": "date-time",
-            "example": "2021-09-03T09:03:00-02:00"
+            "example": "2024-09-04T09:41:00Z"
           },
           "isReportableQuantity": {
             "type": "boolean",
@@ -1939,7 +1919,7 @@
             "example": "A"
           },
           "grossWeight": {
-            "$ref": "#/components/schemas/Gross Weight"
+            "$ref": "#/components/schemas/Gross Weight_1"
           },
           "netWeight": {
             "$ref": "#/components/schemas/Net Weight"
@@ -1947,8 +1927,8 @@
           "netExplosiveContent": {
             "$ref": "#/components/schemas/Net Explosive Content"
           },
-          "volume": {
-            "$ref": "#/components/schemas/Volume"
+          "netVolume": {
+            "$ref": "#/components/schemas/Net Volume"
           },
           "limits": {
             "$ref": "#/components/schemas/Limits"
@@ -2017,7 +1997,7 @@
             "maxLength": 100,
             "type": "string",
             "description": "Description of the packaging.\n",
-            "example": "Wowen plastic water resistant Bag"
+            "example": "Woven plastic water resistant Bag"
           }
         },
         "description": "Object for inner packaging specification\n"
@@ -2076,7 +2056,7 @@
           },
           "flashPoint": {
             "type": "number",
-            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
+            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.\n",
             "format": "float",
             "example": 42
           },
@@ -2133,10 +2113,11 @@
             "$ref": "#/components/schemas/ActiveReeferSettings"
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -2185,7 +2166,7 @@
             "maxLength": 4,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
+            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.\n",
             "example": "22GP"
           },
           "tareWeight": {
@@ -2301,7 +2282,7 @@
           },
           "isDrainholesOpen": {
             "type": "boolean",
-            "description": "Is drainholes open on the container\n",
+            "description": "Is drain holes open on the container\n",
             "example": true
           },
           "isBulbMode": {
@@ -2444,7 +2425,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2473,7 +2454,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2502,7 +2483,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2537,7 +2518,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2569,7 +2550,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2607,7 +2588,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)).\n",
+            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).\n",
             "example": "DKK"
           },
           "paymentTermCode": {
@@ -2756,7 +2737,7 @@
           },
           "facilityCodeListProvider": {
             "type": "string",
-            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code) - `SMDG` (Requires a UN Location Code)\n",
+            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code)\n- `SMDG` (Requires a UN Location Code)\n",
             "example": "SMDG",
             "enum": [
               "BIC",
@@ -2899,8 +2880,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -2971,8 +2952,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -3123,8 +3104,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -3361,6 +3342,62 @@
             "minimum": 0,
             "exclusiveMinimum": true,
             "type": "number",
+            "description": "Total weight of the goods carried, including packaging. Excludes the tare weight of the container(s).\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n"
+      },
+      "Gross Volume": {
+        "title": "Gross Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          }
+        },
+        "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n"
+      },
+      "Gross Weight_1": {
+        "title": "Gross Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
             "description": "The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
             "format": "float",
             "example": 12000.3
@@ -3435,8 +3472,8 @@
         },
         "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
       },
-      "Volume": {
-        "title": "Volume",
+      "Net Volume": {
+        "title": "Net Volume",
         "required": [
           "unit",
           "value"

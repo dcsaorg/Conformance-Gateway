@@ -2,7 +2,8 @@ package org.dcsa.conformance.standards.ebl.checks;
 
 public enum ScenarioType {
   REGULAR_SWB,
-  REGULAR_BOL,
+  REGULAR_STRAIGHT_BL,
+  REGULAR_NEGOTIABLE_BL,
   ACTIVE_REEFER,
   NON_OPERATING_REEFER,
   DG,
@@ -15,11 +16,11 @@ public enum ScenarioType {
   ;
 
   public String transportDocumentTypeCode() {
-    return this == REGULAR_BOL ? "BOL" : "SWB";
+    return this == REGULAR_STRAIGHT_BL || this == REGULAR_NEGOTIABLE_BL ? "BOL" : "SWB";
   }
 
   public boolean isToOrder() {
-    return false;
+    return this == REGULAR_NEGOTIABLE_BL;
   }
 
   public String shipperTemplate(String version) {
@@ -30,7 +31,8 @@ public enum ScenarioType {
       case REGULAR_SWB_SOC_AND_REFERENCES -> "soc-references";
       case REGULAR_SWB_AMF -> "amf";
       case DG -> "dg";
-      case REGULAR_SWB, REGULAR_BOL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+      case REGULAR_SWB, REGULAR_STRAIGHT_BL, ACTIVE_REEFER, NON_OPERATING_REEFER -> "request";
+      case REGULAR_NEGOTIABLE_BL -> "negotiable-bl";
       case REGULAR_CLAD -> "clad";
     };
     return "ebl-api-" + version.toLowerCase() + "-" + suffix + ".json";

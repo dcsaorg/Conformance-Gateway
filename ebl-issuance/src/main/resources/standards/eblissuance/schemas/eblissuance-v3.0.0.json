@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Issuance an EBL to an EBL platform.\n",
-    "description": "This API is intended as an API between a carrier and a EBL Solution Platform.\n\nThe EBL Solution Provider is to implement\n\n    /v3/ebl-issuance-requests\n\nfor the carrier to call and the carrier is to implement\n\n    /v3/ebl-issuance-responses\n\nfor the EBL Solution Provider to call.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA EBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0) API.\n\nAPI specification issued by DCSA.org.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "This API is intended as an API between a carrier and a EBL Solution Platform.\n\nThe EBL Solution Provider is to implement\n\n    /v3/ebl-issuance-requests\n\nfor the carrier to call and the carrier is to implement\n\n    /v3/ebl-issuance-responses\n\nfor the EBL Solution Provider to call.\n\nWhen the document is to be surrendered, it should happen via a version of the [DCSA EBL Surrender](https://app.swaggerhub.com/apis-docs/dcsaorg/DCSA_EBL_SUR/3.0.0) API.\n\nAPI specification issued by DCSA.org.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -226,7 +226,7 @@
             "type": "string",
             "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n",
             "format": "date-time",
-            "example": "2019-11-12T07:41:00+08:30"
+            "example": "2024-09-04T09:41:00Z"
           },
           "errors": {
             "minItems": 1,
@@ -313,7 +313,7 @@
             "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6IlVhRVdLNmt2ZkRITzNZT2NwUGl2M1RCT2JQTzk2SFZhR2U0czFhUUxBZU0ifQ.eyJkb2N1bWVudEhhc2giOiI4ZGM5OWQ4YWM5MjIyNDBjNTVjMDM4NDVmNDlkZWY2NDE4NzE0NjY1MWJhZTRmOWE2MzEzMTI3N2NmMDBkOWRmIiwicHJldmlvdXNFbnZlbG9wZUhhc2giOm51bGwsInRyYW5zYWN0aW9ucyI6W3siYWN0aW9uIjoiSVNTVSIsImNvbW1lbnRzIjoiVGhlIEIvTCBoYXMgYmVlbiBpc3N1ZWQuIiwidGltZXN0YW1wIjoxNjU4Mzg1MTY2MzAyNDQyMjAwLCJpc1RvT3JkZXIiOnRydWUsInBsYXRmb3JtSG9zdCI6ImxvY2FsaG9zdDo4NDQzIiwidHJhbnNmZXJlZSI6IjQzNTQ5ODUwMjQ4QGxvY2FsaG9zdDo4NDQzIn1dfQ.c4SJ9-61fE6RmeIuZ3EI-TSM0M6qXuOudtr3YhpDjqVMaYk_RYpaWYvw75ssTbjgGFKTBKCy5lpmOfb8Fq--Qu2k0MWbH6qdX5jTYwl0DX946RQg-hnmVTg9np3bmqVeKqKURyV-UUdG-KK_XCGzPZ-lZkeUlpMcIthQFs0pCODR9GPytv7ZXLPZFOmHM9fn3FD2yRqVhQzcs7HdcxMjCx6hkBW8Z-jW4qteVy2_E9uqjkKwlu_cQLoY83Z0mcjn0PZNQvKF10x7q1_Jjf_Su19UigTUu3pFMrzo4iPS_jcrFoIb3TSZNSzbgAwtujSBFOufPDyEmxlx1sH0ZowMvA"
           }
         },
-        "description": "Details of the eBL that the carrier requests to have issued.\n\nThe `eBLVisualisationByCarrier` is an optional document, where the carrier can provide its own visualization of the eBL for the end user.  The carrier is the sole responsible party for ensuring there are no discrepencies between the eBL (the `document` attribute) and the provided visualization (the `eBLVisualisationByCarrier` attribute).\n"
+        "description": "Details of the eBL that the carrier requests to have issued.\n\nThe `eBLVisualisationByCarrier` is an optional document, where the carrier can provide its own visualization of the eBL for the end user.  The carrier is the sole responsible party for ensuring there are no discrepancies between the eBL (the `document` attribute) and the provided visualization (the `eBLVisualisationByCarrier` attribute).\n"
       },
       "SupportingDocument": {
         "title": "Supporting Document",
@@ -390,7 +390,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "description": "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n",
             "example": "BOLE"
           },
           "identifyingCodes": {
@@ -407,7 +407,7 @@
             }
           }
         },
-        "description": "Refers to a company or a legal entity.\n"
+        "description": "The party to whom the electronic Bill of Lading (eBL) must be issued.\n"
       },
       "IdentifyingCode": {
         "title": "Identifying Code",
@@ -459,7 +459,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "IN"
           },
           "value": {
             "maxLength": 35,
@@ -469,7 +469,7 @@
             "example": "AAAAA0000A"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n"
       },
       "TransportDocument": {
         "title": "Transport Document",
@@ -513,7 +513,7 @@
           "transportDocumentStatus": {
             "maxLength": 50,
             "type": "string",
-            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING SURRENDER FOR AMENDMENT\n- SURRENDER FOR AMENDMENT\n- PENDING SURRENDER FOR DELIVERY\n- SURRENDER FOR DELIVERY\n- VOIDED\n",
+            "description": "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
             "example": "DRAFT"
           },
           "transportDocumentTypeCode": {
@@ -566,14 +566,14 @@
           "numberOfOriginalsWithCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
           "numberOfOriginalsWithoutCharges": {
             "minimum": 0,
             "type": "integer",
-            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n        \n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
+            "description": "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
             "format": "int32",
             "example": 1
           },
@@ -711,7 +711,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217).\n",
+            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
             "example": "DKK"
           },
           "carrierCode": {
@@ -955,11 +955,16 @@
             "example": "ABC709951"
           },
           "descriptionOfGoods": {
-            "maxLength": 5000,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The cargo description are details which accurately and properly describe the cargo being shipped in the container(s) as provided by the shipper.",
-            "example": "blue shoes size 47"
+            "maxItems": 150,
+            "type": "array",
+            "description": "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+            "items": {
+              "maxLength": 35,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string",
+              "description": "A line describing the cargo",
+              "example": "blue shoes size 47"
+            }
           },
           "HSCodes": {
             "minItems": 1,
@@ -970,7 +975,7 @@
               "minLength": 6,
               "pattern": "^\\d{6,10}$",
               "type": "string",
-              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature 2022 edition](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools/hs-nomenclature-2022-edition/hs-nomenclature-2022-edition.aspx ).\n\nThis standard is based on the 2022 revision.\n",
+              "description": "Used by customs to classify the product being shipped. The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.\n\nMore information can be found here: [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools).\n",
               "example": "851713"
             }
           },
@@ -982,10 +987,11 @@
             }
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -1029,7 +1035,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
+            "description": "The national commodity classification code, which can be one of the following values defined by DCSA:\n- `NCM` (Nomenclatura Comum do Mercosul)\n- `HTS` (Harmonized Tariff Schedule)\n- `SCHEDULE_B` ( Schedule B)\n- `TARIC` (Integrated Tariff of the European Communities)\n- `CN` (Combined Nomenclature)\n- `CUS` (Customs Union and Statistics)\n",
             "example": "NCM"
           },
           "countryCode": {
@@ -1083,7 +1089,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "EG"
           },
           "values": {
             "minItems": 1,
@@ -1097,15 +1103,14 @@
             }
           }
         },
-        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA (small) list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/customsreferences-v300.csv).\n"
+        "description": "Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export, or transit of the goods.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|ACID|EG|Advance Cargo Information Declaration in Egypt|\n|CERS|CA|Canadian Export Reporting System|\n|ITN|US|Internal Transaction Number in US|\n|PEB|ID|PEB reference number|\n|CSN|IN|Cargo Summary Notification (CSN)|\n"
       },
       "CargoItem": {
         "title": "Cargo Item",
         "required": [
           "equipmentReference",
-          "outerPackaging",
-          "weight",
-          "weightUnit"
+          "grossWeight",
+          "outerPackaging"
         ],
         "type": "object",
         "properties": {
@@ -1116,39 +1121,11 @@
             "description": "The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.\nAccording to [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).\n\nIf a container does not comply with [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346), it is suggested to follow [Recommendation #2: Containers with non-ISO identification](https://smdg.org/documents/smdg-recommendations) from SMDG.\n",
             "example": "APZU4812090"
           },
-          "weight": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n",
-            "format": "float",
-            "example": 13000.3
+          "grossWeight": {
+            "$ref": "#/components/schemas/Gross Weight"
           },
-          "weightUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          },
-          "volume": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
-            "format": "float",
-            "example": 12
-          },
-          "volumeUnit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n\n**Condition:** Mandatory to provide if `volume` is provided\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
+          "grossVolume": {
+            "$ref": "#/components/schemas/Gross Volume"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
@@ -1159,13 +1136,6 @@
             "items": {
               "$ref": "#/components/schemas/NationalCommodityCode"
             }
-          },
-          "houseBillOfLadingReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Link to the House Bill of Lading this cargoItem is connected to.\n",
-            "example": "ABC123"
           },
           "customsReferences": {
             "type": "array",
@@ -1190,7 +1160,7 @@
             "minLength": 2,
             "pattern": "^[A-Z0-9]{2}$",
             "type": "string",
-            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21 - Revision 12  Annexes V and VI](https://unece.org/sites/default/files/2021-06/rec21_Rev12e_Annex-V-VI_2021.xls)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
+            "description": "A code identifying the outer packaging/overpack. `PackageCode` must follow the codes specified in [Recommendation N°21](https://unece.org/trade/uncefact/cl-recommendations)\n\n**Condition:** only applicable to dangerous goods if the `IMO packaging code` is not available.\n",
             "example": "5H"
           },
           "imoPackagingCode": {
@@ -1198,7 +1168,7 @@
             "minLength": 1,
             "pattern": "^[A-Z0-9]{1,5}$",
             "type": "string",
-            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the IMO IMDG code amendment version 41-22. If not available, the package code as per UN recommendation 21 should be used.\n",
+            "description": "The code of the packaging as per IMO.\n\n**Condition:** only applicable to dangerous goods if specified in the [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx). If not available, the `packageCode` as per UN recommendation 21 should be used.\n",
             "example": "1A2"
           },
           "numberOfPackages": {
@@ -1217,8 +1187,8 @@
           "woodDeclaration": {
             "maxLength": 30,
             "type": "string",
-            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT TREATED AND NOT CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED AND CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
-            "example": "TREATED AND CERTIFIED"
+            "description": "Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:\n- `NOT_APPLICABLE` (if no wood or any other wood product such as packaging and supports are being shipped)\n- `NOT_TREATED_AND_NOT_CERTIFIED` (if the wood or wooden materials have not been treated nor fumigated and do not include a certificate)\n- `PROCESSED` (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board, sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)\n- `TREATED_AND_CERTIFIED` (if the wood or wooden materials have been treated and/or fumigated and include a certificate)\n",
+            "example": "TREATED_AND_CERTIFIED"
           },
           "dangerousGoods": {
             "type": "array",
@@ -1261,7 +1231,7 @@
           "imoClass": {
             "maxLength": 4,
             "type": "string",
-            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n\nThe value must comply with one of the values in the [DG IMO Class value table](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/dcsa/reference-data/imoclasses-v3.1.0.csv)\n",
+            "description": "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n",
             "example": "1.4S"
           },
           "subsidiaryRisk1": {
@@ -1371,7 +1341,7 @@
             "type": "string",
             "description": "Date & time when the container was fumigated\n",
             "format": "date-time",
-            "example": "2021-09-03T09:03:00-02:00"
+            "example": "2024-09-04T09:41:00Z"
           },
           "isReportableQuantity": {
             "type": "boolean",
@@ -1386,7 +1356,7 @@
             "example": "A"
           },
           "grossWeight": {
-            "$ref": "#/components/schemas/Gross Weight"
+            "$ref": "#/components/schemas/Gross Weight_1"
           },
           "netWeight": {
             "$ref": "#/components/schemas/Net Weight"
@@ -1394,8 +1364,8 @@
           "netExplosiveContent": {
             "$ref": "#/components/schemas/Net Explosive Content"
           },
-          "volume": {
-            "$ref": "#/components/schemas/Volume"
+          "netVolume": {
+            "$ref": "#/components/schemas/Net Volume"
           },
           "limits": {
             "$ref": "#/components/schemas/Limits"
@@ -1464,7 +1434,7 @@
             "maxLength": 100,
             "type": "string",
             "description": "Description of the packaging.\n",
-            "example": "Wowen plastic water resistant Bag"
+            "example": "Woven plastic water resistant Bag"
           }
         },
         "description": "Object for inner packaging specification\n"
@@ -1523,7 +1493,7 @@
           },
           "flashPoint": {
             "type": "number",
-            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code amendment version 41-22.\n",
+            "description": "Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.\n\n**Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.\n",
             "format": "float",
             "example": 42
           },
@@ -1580,10 +1550,11 @@
             "$ref": "#/components/schemas/ActiveReeferSettings"
           },
           "shippingMarks": {
+            "maxItems": 50,
             "type": "array",
             "description": "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
             "items": {
-              "maxLength": 500,
+              "maxLength": 35,
               "type": "string",
               "description": "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
               "example": "Made in China"
@@ -1632,8 +1603,8 @@
             "maxLength": 4,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://en.wikipedia.org/wiki/ISO_6346) standard.\n",
-            "example": "22GP"
+            "description": "Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.\n",
+            "example": "22G1"
           },
           "tareWeight": {
             "minimum": 0,
@@ -1748,7 +1719,7 @@
           },
           "isDrainholesOpen": {
             "type": "boolean",
-            "description": "Is drainholes open on the container\n",
+            "description": "Is drain holes open on the container\n",
             "example": true
           },
           "isBulbMode": {
@@ -1891,7 +1862,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Receipt` location specified as: the location where the cargo is handed over by the shipper, or his agent, to the shipping line. This indicates the point at which the shipping line takes on responsibility for carriage of the container.\n\n**Condition:** Only when pre-carriage is done by the carrier.\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -1920,7 +1891,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Loading` location specified as: the location where the cargo is loaded onto a first sea-going vessel for water transportation.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -1949,7 +1920,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n",
+        "description": "An object to capture `Port of Discharge` location specified as: the location where the cargo is discharged from the last sea-going vessel.\n\nThe location can be specified in **any** of the following ways: `UN Location Code` or `City and Country`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `UN Location Code` and as a `City and Country`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -1984,7 +1955,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2016,7 +1987,7 @@
             "example": "NLAMS"
           }
         },
-        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n",
+        "description": "An object to capture `Onward Inland Routing` location specified as the end location of the inland movement that takes place after the container(s) being delivered to the port of discharge/place of delivery for account and risk of merchant (merchant haulage).\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Hamburg",
           "UNLocationCode": "DEHAM"
@@ -2054,7 +2025,7 @@
             "minLength": 3,
             "pattern": "^[A-Z]{3}$",
             "type": "string",
-            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)).\n",
+            "description": "The currency for the charge, using a 3-character code ([ISO 4217](https://www.iso.org/iso-4217-currency-codes.html)).\n",
             "example": "DKK"
           },
           "paymentTermCode": {
@@ -2203,7 +2174,7 @@
           },
           "facilityCodeListProvider": {
             "type": "string",
-            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code) - `SMDG` (Requires a UN Location Code)\n",
+            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`\n- `BIC` (Requires a UN Location Code)\n- `SMDG` (Requires a UN Location Code)\n",
             "example": "SMDG",
             "enum": [
               "BIC",
@@ -2346,8 +2317,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -2418,8 +2389,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -2570,8 +2541,8 @@
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL PERSON` (A person that is an individual living human being)\n- `LEGAL PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION OF PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
-            "example": "NATURAL PERSON"
+            "description": "Can be one of the following values as per the Union Customs Code art. 5(4):\n- `NATURAL_PERSON` (A person that is an individual living human being)\n- `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)\n- `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)\n",
+            "example": "NATURAL_PERSON"
           },
           "address": {
             "$ref": "#/components/schemas/PartyAddress"
@@ -2742,7 +2713,7 @@
           },
           "issuanceResponseCode": {
             "type": "string",
-            "description": "The platforms verdict on the issuance of the EBL  identified by the `transportDocumentReference`\n\nOptions are:\n  - `ISSU`: The document was successfully `ISSU` and successfully delivered to the initial possessor.\n  - `BREQ`: The platform reviewed the document and believe they cannot issue the document due to an error/issue with the content of the issuance request.\n  - `REFU`: The eBL issuance is rejected for a reason that the issuing eBL platform cannot resolve (for example when an Interoperable transfer fails, due to a reject of the receiving eBL platform via the `BENV` code from the interoperability standard). One reason could be that the `issueTo` referenced a valid eBL platform but the receiving platform did not recognise the recipient specified.\n\nRegardless of the response code, the issuance request is now considered handled. In case of successful issuance, the platform will still have some responsiblity but that is covered by other processes and APIs (e.g., the DCSA_SUR API mentioned in the description of this API). In case of failed issuance, it is up to the carrier to resolve the issue and, if needed, submit a revised issuance request.\n",
+            "description": "The platforms verdict on the issuance of the EBL  identified by the `transportDocumentReference`\n\nOptions are:\n  - `ISSU`: The document was successfully `ISSU` and successfully delivered to the initial possessor.\n  - `BREQ`: The platform reviewed the document and believe they cannot issue the document due to an error/issue with the content of the issuance request.\n  - `REFU`: The eBL issuance is rejected for a reason that the issuing eBL platform cannot resolve (for example when an Interoperable transfer fails, due to a reject of the receiving eBL platform via the `BENV` code from the interoperability standard). One reason could be that the `issueTo` referenced a valid eBL platform but the receiving platform did not recognise the recipient specified.\n\nRegardless of the response code, the issuance request is now considered handled. In case of successful issuance, the platform will still have some responsibility but that is covered by other processes and APIs (e.g., the DCSA_SUR API mentioned in the description of this API). In case of failed issuance, it is up to the carrier to resolve the issue and, if needed, submit a revised issuance request.\n",
             "example": "ISSU",
             "enum": [
               "ISSU",
@@ -2870,6 +2841,62 @@
             "minimum": 0,
             "exclusiveMinimum": true,
             "type": "number",
+            "description": "Total weight of the goods carried, including packaging. Excludes the tare weight of the container(s).\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The total weight of the cargo including packaging items being carried in the container(s). Excludes the tare weight of the container(s).\n"
+      },
+      "Gross Volume": {
+        "title": "Gross Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          }
+        },
+        "description": "Calculated by multiplying the width, height, and length of the packed cargo.\n"
+      },
+      "Gross Weight_1": {
+        "title": "Gross Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
             "description": "The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
             "format": "float",
             "example": 12000.3
@@ -2944,8 +2971,8 @@
         },
         "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
       },
-      "Volume": {
-        "title": "Volume",
+      "Net Volume": {
+        "title": "Net Volume",
         "required": [
           "unit",
           "value"

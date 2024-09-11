@@ -86,7 +86,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                             .toArray(new EblScenarioListBuilder[] {}))),
             Map.entry(
                 "Carrier requested update scenarios",
-                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
+                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
                     .then(
                         _uc1_get(
                             SI_RECEIVED,
@@ -95,7 +95,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                                 _uc3_andAllSiOnlyPathsFrom(SI_PENDING_UPDATE))))),
             Map.entry(
                 "Shipper initiated update scenarios",
-                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
+                carrier_SupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
                     .then(_uc1_get(SI_RECEIVED, _uc3_andAllSiOnlyPathsFrom(SI_RECEIVED)))))
         .collect(
             Collectors.toMap(
@@ -118,7 +118,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 .toArray(new EblScenarioListBuilder[] {}))),
         Map.entry(
           "Shipper interactions with transport document",
-          carrier_SupplyScenarioParameters(ScenarioType.REGULAR_BOL)
+          carrier_SupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
             .then(_uc6_get(true, _uc7_get(_uc8_get(_uc12_get(_uc13_get()))),
                 _uc8_get(_uc12_get(_uc13_get())),
                 _oob_amendment(_uc6_get(false, _uc8_get(_uc12_get(_uc13_get())))),

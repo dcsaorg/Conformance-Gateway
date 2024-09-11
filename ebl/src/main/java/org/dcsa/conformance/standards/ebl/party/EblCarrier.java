@@ -86,7 +86,7 @@ public class EblCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
       switch (scenarioType) {
-        case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF, REGULAR_CLAD -> new CarrierScenarioParameters(
+        case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
           "CBR_123_" + scenarioType.name(),
           "Some Commodity Subreference 123",
           null,
@@ -138,7 +138,7 @@ public class EblCarrier extends ConformanceParty {
           "DKAAR",
           "220299",
           null,
-          "Non alcoholic beverages, 40,000 cans",
+          "Non alcoholic beverages",
           null,
           "Bottles"
         );
@@ -152,7 +152,7 @@ public class EblCarrier extends ConformanceParty {
           "DKAAR",
           "293499",
           null,
-          "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+          "Environmentally hazardous substance",
           null,
           null
         );
@@ -171,7 +171,7 @@ public class EblCarrier extends ConformanceParty {
           "Fibreboard boxes"
         );
         case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
-          "RG-2C-2U-1E",
+          "RG-2C-2U-2E",
           "Commodity Subreference 123",
           "Commodity Subreference 456",
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()

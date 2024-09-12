@@ -134,7 +134,7 @@ public abstract class ManualTestBase {
     assertTrue(
         subReport.errorMessages.isEmpty(),
         "Should be empty, but found: '"
-            + subReport.errorMessages.getFirst()
+            + subReport.errorMessages
             + "'.\n"
             + message);
   }

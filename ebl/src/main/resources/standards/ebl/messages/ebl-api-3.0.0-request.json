@@ -2,7 +2,6 @@
   "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
   "isToOrder": false,
-  "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
@@ -58,6 +57,16 @@
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "sendToPlatform": "BOLE",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

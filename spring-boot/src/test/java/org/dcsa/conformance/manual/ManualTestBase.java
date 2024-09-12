@@ -255,7 +255,7 @@ public abstract class ManualTestBase {
     boolean isRunning;
     do {
       JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-      boolean inputRequired = jsonNode.get("inputRequired").booleanValue();
+      boolean inputRequired = jsonNode.has("inputRequired") && jsonNode.get("inputRequired").asBoolean();
       boolean hasPromptText = jsonNode.has("promptText");
       isRunning = jsonNode.get("isRunning").booleanValue();
       if (inputRequired) {

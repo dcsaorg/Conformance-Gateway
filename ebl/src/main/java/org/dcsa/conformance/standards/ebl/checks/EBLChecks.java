@@ -31,7 +31,8 @@ public class EBLChecks {
   private static final JsonPointer TD_NOTIFICATION_TD_STATUS_PTR = JsonPointer.compile("/data/transportDocumentStatus");
 
   private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
-  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/sendToPlatform");
+  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/documentParties/issueTo/sendToPlatform");
+  private static final JsonPointer ISSUE_TO_PARTY = JsonPointer.compile("/documentParties/issueTo");
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
@@ -332,10 +333,10 @@ public class EBLChecks {
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     JsonAttribute.ifThenElse(
-      "'isElectronic' implies 'sendToPlatform'",
+      "'isElectronic' implies 'issueTo' party",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
-      JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform")),
-      JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
+      JsonAttribute.mustBePresent(ISSUE_TO_PARTY),
+      JsonAttribute.mustBeAbsent(ISSUE_TO_PARTY)
     ),
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,

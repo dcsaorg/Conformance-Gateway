@@ -16,9 +16,9 @@ class ManualPINTTest extends ManualTestBase {
     super(log); // Make sure no log lines are logged with the Base class logger
   }
 
-  @Disabled("Strange error while running: Unknown TD Reference: {@rDW'^/25kL_j!ahb5")
+  @Disabled("Postponed, until it has non-RI impls. Also: strange error while running: Unknown TD Reference: {@rDW'^/25kL_j!ahb5")
   @ParameterizedTest
-  @CsvSource({"ReceivingPlatform", "SubscribingPlatform"})
+  @CsvSource({"ReceivingPlatform", "SendingPlatform"})
   void testManualPINT(String testedParty) {
     app.setSimulatedLambdaDelay(lambdaDelay);
     getAllSandboxes();

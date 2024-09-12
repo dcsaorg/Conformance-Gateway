@@ -98,24 +98,6 @@ public abstract class ManualTestBase {
     waitForCleanSandboxStatus(sandbox);
   }
 
-  void validateSandboxStatus(
-      SandboxConfig sandbox1, String scenarioId, int useCaseIndex, String expectedTitle) {
-    log.info("Validating scenario status for use case: {} (#{})", expectedTitle, useCaseIndex + 1);
-    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
-    JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-    assertTrue(jsonNode.get("isRunning").asBoolean());
-    JsonNode conformanceSubReport =
-        jsonNode.get("conformanceSubReport").get("subReports").get(useCaseIndex);
-    assertEquals(
-        "CONFORMANT",
-        conformanceSubReport.get("status").asText(),
-        "Found in use case #" + useCaseIndex + " with title '" + expectedTitle + "'. ");
-    assertEquals(expectedTitle, conformanceSubReport.get("title").asText());
-    assertTrue(
-        conformanceSubReport.get("errorMessages").isEmpty(),
-        "Should be empty, but found: " + conformanceSubReport.get("errorMessages"));
-  }
-
   void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
     log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
@@ -129,6 +111,9 @@ public abstract class ManualTestBase {
       StringBuilder messageBuilder = new StringBuilder();
       buildErrorMessage(subReport, messageBuilder);
       log.error("Scenario '{}' is not conformant. Details: {}", scenarioName, messageBuilder);
+
+      // Note: developers can uncomment the next line, if they like to use the WebUI, at this point
+      // waitForAsyncCalls(10 * 60 * 1000L);
       fail();
     }
     assertTrue(

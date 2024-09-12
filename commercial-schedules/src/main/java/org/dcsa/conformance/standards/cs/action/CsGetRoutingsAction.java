@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.cs.action;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
@@ -15,11 +14,23 @@ public class CsGetRoutingsAction extends CsAction {
   public CsGetRoutingsAction(
       String subscriberPartyName,
       String publisherPartyName,
-      ConformanceAction previousAction,
+      CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator1) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetRoutings", 200);
 
     this.responseSchemaValidator = responseSchemaValidator1;
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode =
+        super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
   }
 
   @Override
@@ -53,13 +64,12 @@ public class CsGetRoutingsAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForPtp(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                sspSupplier,
+                getDspSupplier(),
+                previousAction instanceof CsGetRoutingsAction));
       }
     };
-  }
-
-  @Override
-  public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
   }
 }

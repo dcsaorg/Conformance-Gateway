@@ -1,0 +1,299 @@
+[
+  {
+    "carrierServiceName": "French Asia Line 1",
+    "carrierServiceCode": "FAL",
+    "vesselSchedules": [
+      {
+        "vessel": {
+          "vesselIMONumber": "9280603",
+          "name": "CMA CGM CHOPIN",
+          "flag": "MT",
+          "callSign": "9HA3373"
+        },
+        "isDummyVessel": false,
+        "transportCalls": [
+          {
+            "transportCallReference": "50003840595",
+            "carrierImportVoyageNumber": "0FLZNW1MA",
+            "carrierExportVoyageNumber": "0FLZNW1MA",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "PCO",
+                "cutOffDateTime": "2024-08-07T23:10:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "VCO",
+                "cutOffDateTime": "2024-08-07T23:10:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "STA",
+                "cutOffDateTime": "2024-08-07T23:10:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "SPA",
+                "cutOffDateTime": "2024-08-05T23:10:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2024-08-06T09:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "CUA",
+                "cutOffDateTime": "2024-08-05T09:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "AFC",
+                "cutOffDateTime": "2024-08-02T14:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "DGC",
+                "cutOffDateTime": "2024-08-01T09:00:00+08:00"
+              }
+            ],
+            "location": {
+              "locationName": "NINGBO MEISHAN ISLAND INTERNATIONAL, NINGBO",
+              "UNLocationCode": "CNNBO",
+              "facilitySMDGCode": "BLCT6"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "ACT",
+                "eventDateTime": "2024-08-08T23:10:00+08:00"
+              },
+              {
+                "eventTypeCode": "DEPA",
+                "eventClassifierCode": "ACT",
+                "eventDateTime": "2024-08-05T10:10:00+08:00"
+              }
+            ]
+          },
+          {
+            "transportCallReference": "50003840597",
+            "carrierImportVoyageNumber": "0FLZNW1MA",
+            "carrierExportVoyageNumber": "0FLZNW1MA",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "PCO",
+                "cutOffDateTime": "2024-08-08T12:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "VCO",
+                "cutOffDateTime": "2024-08-08T12:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "STA",
+                "cutOffDateTime": "2024-08-09T23:38:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "SPA",
+                "cutOffDateTime": "2024-08-08T23:38:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2024-08-11T07:38:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "CUA",
+                "cutOffDateTime": "2024-08-09T09:00:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "AFC",
+                "cutOffDateTime": "2024-08-11T11:38:00+08:00"
+              },
+              {
+                "cutOffDateTimeCode": "DGC",
+                "cutOffDateTime": "2024-08-07T09:00:00+08:00"
+              }
+            ],
+            "location": {
+              "locationName": "YANTIAN INTERNATIONAL CONT TERMINAL, YANTIAN",
+              "UNLocationCode": "CNYTN",
+              "facilitySMDGCode": "YICT"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "ACT",
+                "eventDateTime": "2024-08-11T23:38:00+08:00"
+              },
+              {
+                "eventTypeCode": "DEPA",
+                "eventClassifierCode": "ACT",
+                "eventDateTime": "2024-08-12T13:40:00+08:00"
+              }
+            ]
+          },
+          {
+            "transportCallReference": "50003840720",
+            "carrierImportVoyageNumber": "0FLZOE1MA",
+            "carrierExportVoyageNumber": "0FLZOE1MA",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "PCO",
+                "cutOffDateTime": "2024-09-11T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "VCO",
+                "cutOffDateTime": "2024-09-11T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "STA",
+                "cutOffDateTime": "2024-09-06T14:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "SPA",
+                "cutOffDateTime": "2024-09-06T12:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2024-09-09T21:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "CUA",
+                "cutOffDateTime": "2024-09-11T13:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "AFC",
+                "cutOffDateTime": "2024-09-10T15:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DGC",
+                "cutOffDateTime": "2024-09-09T15:00:00+02:00"
+              }
+            ],
+            "location": {
+              "locationName": "TERMINAL DE FRANCE, LE HAVRE",
+              "UNLocationCode": "FRLEH",
+              "facilitySMDGCode": "TDF"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-12T15:00:00+02:00"
+              },
+              {
+                "eventTypeCode": "DEPA",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-13T15:00:00+02:00"
+              }
+            ]
+          },
+          {
+            "transportCallReference": "50003840727",
+            "carrierImportVoyageNumber": "0FLZOE1MA",
+            "carrierExportVoyageNumber": "0FLZOE1MA",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "PCO",
+                "cutOffDateTime": "2024-09-13T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "VCO",
+                "cutOffDateTime": "2024-09-13T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "STA",
+                "cutOffDateTime": "2024-09-10T14:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "SPA",
+                "cutOffDateTime": "2024-09-10T12:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2024-09-11T21:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "CUA",
+                "cutOffDateTime": "2024-09-13T09:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "AFC",
+                "cutOffDateTime": "2024-09-12T15:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DGC",
+                "cutOffDateTime": "2024-09-11T11:30:00+02:00"
+              }
+            ],
+            "location": {
+              "locationName": "TERMINAL DE FLANDRES, DUNKERQUE",
+              "UNLocationCode": "FRDKK",
+              "facilitySMDGCode": "TDF"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-14T05:00:00+02:00"
+              },
+              {
+                "eventTypeCode": "DEPA",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-14T23:00:00+02:00"
+              }
+            ]
+          },
+          {
+            "transportCallReference": "50003840728",
+            "carrierImportVoyageNumber": "0FLZOE1MA",
+            "carrierExportVoyageNumber": "0FLZOE1MA",
+            "cutOffTimes": [
+              {
+                "cutOffDateTimeCode": "PCO",
+                "cutOffDateTime": "2024-09-12T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "VCO",
+                "cutOffDateTime": "2024-09-12T11:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "STA",
+                "cutOffDateTime": "2024-09-11T16:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "SPA",
+                "cutOffDateTime": "2024-09-09T15:00:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DCO",
+                "cutOffDateTime": "2024-09-12T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "CUA",
+                "cutOffDateTime": "2024-09-12T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "AFC",
+                "cutOffDateTime": "2024-09-12T16:30:00+02:00"
+              },
+              {
+                "cutOffDateTimeCode": "DGC",
+                "cutOffDateTime": "2024-09-10T15:30:00+02:00"
+              }
+            ],
+            "location": {
+              "locationName": "ANTWERP GATEWAY 1700, ANTWERP",
+              "UNLocationCode": "BEANR",
+              "facilitySMDGCode": "1700"
+            },
+            "timestamps": [
+              {
+                "eventTypeCode": "ARRI",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-15T04:00:00+02:00"
+              },
+              {
+                "eventTypeCode": "DEPA",
+                "eventClassifierCode": "PLN",
+                "eventDateTime": "2024-09-15T04:00:00+02:00"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

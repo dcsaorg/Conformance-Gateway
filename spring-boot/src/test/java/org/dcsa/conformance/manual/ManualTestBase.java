@@ -3,6 +3,7 @@ package org.dcsa.conformance.manual;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -121,12 +122,34 @@ public abstract class ManualTestBase {
     assertTrue(jsonNode.has("isRunning"), "Did scenarioId '" + scenarioId + "' run? Can't find it's state. ");
 
     JsonNode conformanceSubReport = jsonNode.get("conformanceSubReport");
-    String message = "Found in scenarioId: " + scenarioId + " having '" + conformanceSubReport.get("title") + "'.";
+    SubReport subReport = mapper.convertValue(conformanceSubReport, SubReport.class);
+    String message = "Found in scenarioId: " + scenarioId + " having '" + subReport.title + "'.";
     assertFalse(jsonNode.get("isRunning").asBoolean(), message);
-    assertEquals("CONFORMANT", conformanceSubReport.get("status").asText(), message);
+    if (!subReport.status.equals("CONFORMANT")) {
+      StringBuilder messageBuilder = new StringBuilder();
+      buildErrorMessage(subReport, messageBuilder);
+      log.error("Scenario '{}' is not conformant. Details: {}", scenarioName, messageBuilder);
+      fail();
+    }
     assertTrue(
-        conformanceSubReport.get("errorMessages").isEmpty(),
-        "Should be empty, but found: '" + conformanceSubReport.get("errorMessages") + "'. " + message);
+        subReport.errorMessages.isEmpty(),
+        "Should be empty, but found: '"
+            + subReport.errorMessages.getFirst()
+            + "'.\n"
+            + message);
+  }
+
+  private void buildErrorMessage(SubReport subReport, StringBuilder messageBuilder) {
+    if (subReport.status.equals("CONFORMANT")) {
+      return;
+    }
+    messageBuilder.append(subReport.title).append(": ").append(subReport.status).append("\n");
+    for (String errorMessage : subReport.errorMessages) {
+      messageBuilder.append(" - Error message: ").append(errorMessage).append("\n");
+    }
+    for (SubReport subReport1 : subReport.subReports) {
+      buildErrorMessage(subReport1, messageBuilder);
+    }
   }
 
   JsonNode getScenarioStatus(SandboxConfig sandbox, String scenarioId) {
@@ -298,4 +321,6 @@ public abstract class ManualTestBase {
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 
   record Scenario(String id, String name, boolean isRunning, String conformanceStatus) {}
+
+  record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 }

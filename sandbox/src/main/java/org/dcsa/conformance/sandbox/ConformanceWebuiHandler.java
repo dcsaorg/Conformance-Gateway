@@ -43,7 +43,7 @@ public class ConformanceWebuiHandler {
     this.environmentBaseUrl = environmentBaseUrl;
     this.persistenceProvider = persistenceProvider;
     this.deferredSandboxTaskConsumer = deferredSandboxTaskConsumer;
-    developerMode = environmentBaseUrl.contains("http://localhost");
+    developerMode = environmentBaseUrl.startsWith("http://localhost");
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {

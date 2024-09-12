@@ -47,6 +47,10 @@
     {
       "isShipperOwned": false,
       "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "shippingMarks":  [
+        "Made in some Country",
+        "こんにちはこんにちはこんにちはこんにちはこんにちはこんにちはこんにちは"
+      ],
       "seals": [
         {
           "number": "NSL13386"

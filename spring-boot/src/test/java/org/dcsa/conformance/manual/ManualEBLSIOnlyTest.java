@@ -10,10 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 @Slf4j
 class ManualEBLSIOnlyTest extends ManualTestBase {
 
-  public ManualEBLSIOnlyTest() {
-    super(log); // Make sure no log lines are logged with the Base class logger
-  }
-
+  //Note: this class can be deleted when 'Conformance TD-only' is working. Standard can be added to ManualScenarioTest
   @ParameterizedTest
   @CsvSource({"Carrier", "Shipper"})
   void testManualEblSI(String testedParty) {

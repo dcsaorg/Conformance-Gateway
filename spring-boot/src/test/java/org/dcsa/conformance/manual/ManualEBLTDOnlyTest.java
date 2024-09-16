@@ -11,10 +11,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 @Slf4j
 class ManualEBLTDOnlyTest extends ManualTestBase {
 
-  public ManualEBLTDOnlyTest() {
-    super(log); // Make sure no log lines are logged with the Base class logger
-  }
-
   @Disabled("A required API exchange was not yet detected for action 'TD Change (Out of Band)'")
   @ParameterizedTest
   @CsvSource({"Carrier", "Shipper"})

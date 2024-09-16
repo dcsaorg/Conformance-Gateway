@@ -9,27 +9,24 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /** Base class which contains all API call methods and wiring needed to perform a manual test */
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
   protected final ObjectMapper mapper = new ObjectMapper();
   protected long lambdaDelay = 0L;
-  private final Logger log;
-
-  public ManualTestBase(Logger log) {
-    this.log = log;
-  }
 
   @Autowired protected ConformanceApplication app;
   private ConformanceWebuiHandler webuiHandler;
@@ -39,16 +36,36 @@ public abstract class ManualTestBase {
     webuiHandler = app.getWebuiHandler();
   }
 
-  void getAvailableStandards() {
+  List<Standard> getAvailableStandards() {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAvailableStandards");
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
-    assertTrue(jsonNode.size() >= 6);
+    List<Standard> standards = mapper.convertValue(jsonNode, new TypeReference<>() {});
+    assertTrue(standards.size() >= 6);
+    return standards;
   }
 
-  void getAllSandboxes() {
+  List<SandboxItem> getAllSandboxes() {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAllSandboxes");
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.size() >= 6);
+    // Workaround because of inconsistent data is returned.
+    List<SandboxItem> sandboxItems = new ArrayList<>();
+    jsonNode.forEach(
+        jsonNode1 -> {
+          if (jsonNode1.has("operatorLog")) {
+            sandboxItems.add(
+                new SandboxItem(
+                    jsonNode1.get("id").asText(),
+                    jsonNode1.get("name").asText(),
+                    jsonNode1.get("operatorLog").asText(),
+                    jsonNode1.get("canNotifyParty").asBoolean()));
+          } else {
+            sandboxItems.add(
+                new SandboxItem(
+                    jsonNode1.get("id").asText(), jsonNode1.get("name").asText(), null, false));
+          }
+        });
+    return sandboxItems;
   }
 
   void handleActionInput(
@@ -172,15 +189,14 @@ public abstract class ManualTestBase {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-    } while (counter < 30 && !sandboxStatus.contains("{\"waiting\":[]}"));
+    } while (counter < 30);
+
     log.warn(
         "Waited for {} ms for sandbox status to reach the expected state: {}",
         counter * 300,
         sandboxStatus);
-    if (counter == 30) {
-      throw new RuntimeException(
+    throw new RuntimeException(
           "Sandbox status did not reach the expected state on time: " + sandboxStatus);
-    }
   }
 
   void updateSandboxConfigBeforeStarting(SandboxConfig sandbox1, SandboxConfig sandbox2) {
@@ -226,9 +242,26 @@ public abstract class ManualTestBase {
     String sandboxId = jsonNode.get("sandboxId").asText();
     log.info("Created sandbox: {}, v{}, suite: {}, role: {}, defaultType: {}", sandbox.standardName, sandbox.versionNumber, sandbox.scenarioSuite, sandbox.testedPartyRole, sandbox.isDefaultType);
 
+    return getSandboxConfig(sandboxId);
+  }
+
+  SandboxConfig getSandboxByName(String sandboxName) {
+    SandboxItem sandboxItem1 =
+        getAllSandboxes().stream()
+            .filter(sandboxItem -> sandboxItem.name().equals(sandboxName))
+            .findFirst()
+            .orElse(null);
+    if (sandboxItem1 == null) {
+      return null;
+    }
+    return getSandboxConfig(sandboxItem1.id());
+  }
+
+  SandboxConfig getSandboxConfig(String sandboxId) {
+    JsonNode node;
+    JsonNode jsonNode;
     // Get the sandbox config
-    node =
-        mapper.createObjectNode().put("operation", "getSandboxConfig").put("sandboxId", sandboxId);
+    node = mapper.createObjectNode().put("operation", "getSandboxConfig").put("sandboxId", sandboxId);
     jsonNode = webuiHandler.handleRequest(USER_ID, node);
     return mapper.convertValue(jsonNode, SandboxConfig.class);
   }
@@ -292,6 +325,9 @@ public abstract class ManualTestBase {
       boolean isDefaultType,
       String sandboxName) {}
 
+  // Possible result of getAllSandboxes
+  record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
+
   record SandboxConfig(
       String sandboxId,
       String sandboxName,
@@ -308,4 +344,8 @@ public abstract class ManualTestBase {
   record Scenario(String id, String name, boolean isRunning, String conformanceStatus) {}
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
+
+  record Standard(String name, List<StandardVersion> versions) {}
+
+  record StandardVersion(String number, List<String> suites, List<String> roles) {}
 }

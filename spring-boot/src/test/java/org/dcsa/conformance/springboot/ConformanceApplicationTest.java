@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -27,7 +27,7 @@ class ConformanceApplicationTest {
   private TestRestTemplate restTemplate;
 
   @ParameterizedTest
-  @CsvSource({
+  @ValueSource(strings = {
     "booking-200-conformance-auto-all-in-one",
     "booking-200-reference-implementation-auto-all-in-one",
     "cs-100-conformance-auto-all-in-one",

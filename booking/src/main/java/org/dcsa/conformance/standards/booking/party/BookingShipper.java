@@ -66,6 +66,7 @@ public class BookingShipper extends ConformanceParty {
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
       Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
+      Map.entry(UC13_Shipper_CancelConfirmedBookingAction.class, this::sendCancelConfirmedBookingRequest),
       Map.entry(AUC_Shipper_SendInvalidBookingAction.class,this::sendInvalidBookingAction));
   }
 
@@ -149,6 +150,19 @@ public class BookingShipper extends ConformanceParty {
             .put("bookingStatus", BookingState.CANCELLED.wireName()));
 
     addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
+  }
+
+  private void sendCancelConfirmedBookingRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendCancelConfirmedBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+    String cbr = actionPrompt.path("cbr").asText();
+    syncCounterpartPatch(
+      "/v2/bookings/%s".formatted(cbr),
+      Collections.emptyMap(),
+      new ObjectMapper()
+        .createObjectNode()
+        .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.wireName()));
+
+    addOperatorLogEntry("Sent a confirmed booking cancellation of '%s'".formatted(cbr));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {

@@ -6,10 +6,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -778,7 +775,7 @@ public class BookingChecks {
     REASON_FIELD_ABSENCE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState, Boolean requestAmendedContent) {
+  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState, BookingCancellationState cancelledBookingState, Boolean requestAmendedContent) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       CARRIER_BOOKING_REQUEST_REFERENCE,

@@ -78,7 +78,8 @@ public class BookingCarrier extends ConformanceParty {
             this::requestToAmendConfirmedBooking),
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
-        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
+        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
+        Map.entry(UC14_Carrier_ProcessBookingCancellationAction.class, this::processConfirmedBookingCancellation));
   }
 
   private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
@@ -194,6 +195,30 @@ public class BookingCarrier extends ConformanceParty {
     } else {
       persistableCarrierBooking.declineBookingAmendment(
           cbr, "Declined as required by the conformance scenario");
+    }
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
+  }
+
+  private void processConfirmedBookingCancellation(JsonNode actionPrompt) {
+    log.info("Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbr = actionPrompt.required("cbr").asText();
+    boolean isCancellationConfirmed = actionPrompt.path("isCancellationConfirmed").asBoolean(true);
+    addOperatorLogEntry(
+      "Cancellation of Confirmed booking with CBR '%s'"
+        .formatted(cbr));
+
+    // bookingReference can either be a CBR or CBRR.
+    var cbrr = cbrToCbrr.getOrDefault(cbr, cbr);
+
+    var persistableCarrierBooking =
+      PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    if (isCancellationConfirmed) {
+      persistableCarrierBooking.cancelConfirmedBooking(cbr, "Cancelled as required by the conformance scenario");
+    } else {
+      persistableCarrierBooking.declineConfirmedBookingCancellation(
+        cbr, "Declined as required by the conformance scenario");
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -433,6 +458,9 @@ public class BookingCarrier extends ConformanceParty {
     if(cancelJsonBody.get("amendedBookingStatus") != null ) {
       return "cancelAmendment";
     }
+    if(cancelJsonBody.get("bookingCancellationStatus") != null ) {
+      return "cancelConfirmedBooking";
+    }
     return "#INVALID";
   }
 
@@ -484,11 +512,13 @@ public class BookingCarrier extends ConformanceParty {
 
   private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
-    if (!cancelOperation.equals("cancelBooking") && !cancelOperation.equals("cancelAmendment")) {
+    if (!cancelOperation.equals("cancelBooking")
+      && !cancelOperation.equals("cancelAmendment")
+      && !cancelOperation.equals("cancelConfirmedBooking")) {
       return return400(
           request,
           "The 'operation' query parameter must be given exactly one and have"
-              + " value either 'cancelBooking' OR 'cancelAmendment'");
+              + " value either 'cancelBooking' OR 'cancelAmendment' OR 'cancelConfirmedBooking'");
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
@@ -503,8 +533,11 @@ public class BookingCarrier extends ConformanceParty {
     try {
       if (cancelOperation.equals("cancelBooking")) {
         persistableCarrierBooking.cancelBookingRequest(bookingReference, reason);
-      } else {
+      } else if (cancelOperation.equals("cancelAmendment")){
         persistableCarrierBooking.cancelBookingAmendment(bookingReference, reason);
+      }
+      else {
+        persistableCarrierBooking.cancelConfirmedBooking(bookingReference, reason);
       }
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");

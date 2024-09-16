@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking.model;
 
+import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.CANCELLATION_RECEIVED;
 import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +17,7 @@ import java.util.function.*;
 import java.util.stream.StreamSupport;
 
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class PersistableCarrierBooking {
@@ -43,7 +45,7 @@ public class PersistableCarrierBooking {
 
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
-
+  private static final String CANCELLATION_BOOKING_STATUS = "bookingCancellationStatus";
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
@@ -54,6 +56,8 @@ public class PersistableCarrierBooking {
     BOOKING_STATUS,
     AMENDED_BOOKING_STATUS,
   };
+
+
 
   private static final String BOOKING_DATA_FIELD = "booking";
   private static final String AMENDED_BOOKING_DATA_FIELD = "amendedBooking";
@@ -215,8 +219,30 @@ public class PersistableCarrierBooking {
     setReason(reason);
   }
 
+  public void cancelConfirmedBooking(String bookingReference, String reason) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(BookingCancellationState.CANCELLATION_CONFIRMED);
+    if (reason == null || reason.isBlank()) {
+      reason = "Confirmed booking cancelled by shipper (no reason given)";
+    }
+    setReason(reason);
+  }
+
+  public void declineConfirmedBookingCancellation(String bookingReference, String reason) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(BookingCancellationState.CANCELLATION_DECLINED);
+    if (reason == null || reason.isBlank()) {
+      reason = "Confirmed booking cancelled by shipper (no reason given)";
+    }
+    setReason(reason);
+  }
+
   private void changeState(String attributeName, BookingState newState) {
     mutateBookingAndAmendment(b -> b.put(attributeName, newState.wireName()));
+  }
+
+  private void changeState(BookingCancellationState newState) {
+    mutateBookingAndAmendment(b -> b.put(CANCELLATION_BOOKING_STATUS, newState.wireName()));
   }
 
   private void mutateBookingAndAmendment(Consumer<ObjectNode> mutator) {
@@ -231,6 +257,14 @@ public class PersistableCarrierBooking {
 
   private static void checkState(
     String reference, BookingState currentState, Predicate<BookingState> expectedState) {
+    if (!expectedState.test(currentState)) {
+      throw new IllegalStateException(
+        "Booking '%s' is in state '%s'".formatted(reference, currentState));
+    }
+  }
+
+  private static void checkState(
+    String reference, BookingCancellationState currentState, Predicate<BookingCancellationState> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
         "Booking '%s' is in state '%s'".formatted(reference, currentState));
@@ -300,6 +334,12 @@ public class PersistableCarrierBooking {
     var booking = getBooking();
     var s = booking.path(AMENDED_BOOKING_STATUS);
     return !s.asText("").isEmpty()? BookingState.fromWireName(s.asText()) : null;
+  }
+
+  public BookingCancellationState getBookingCancellationState() {
+    var booking = getBooking();
+    var s = booking.path(CANCELLATION_BOOKING_STATUS);
+    return !s.asText("").isEmpty()? BookingCancellationState.fromWireName(s.asText()) : null;
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {

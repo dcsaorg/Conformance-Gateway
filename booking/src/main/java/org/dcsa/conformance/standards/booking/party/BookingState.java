@@ -14,7 +14,7 @@ public enum BookingState {
     AMENDMENT_CONFIRMED,
     AMENDMENT_DECLINED,
     AMENDMENT_CANCELLED,
-    COMPLETED,
+    COMPLETED
   ;
 
   public String wireName() {

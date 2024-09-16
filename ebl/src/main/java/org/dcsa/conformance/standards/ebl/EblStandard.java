@@ -17,7 +17,7 @@ public class EblStandard extends AbstractStandard {
         Map.ofEntries(
             Map.entry(
                 "3.0.0",
-                new TreeSet<>(EblScenarioListBuilder.SCENARIOS))));
+                new TreeSet<>(EBLScenarioBuilder.SCENARIOS.keySet()))));
   }
 
   @Override

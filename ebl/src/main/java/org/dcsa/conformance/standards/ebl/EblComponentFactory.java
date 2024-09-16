@@ -8,11 +8,13 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
+import org.dcsa.conformance.core.scenario.ConformanceScenario;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.ebl.party.EblCarrier;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.EblShipper;
+import org.dcsa.conformance.standards.ebl.sb.ScenarioManager;
 
 class EblComponentFactory extends AbstractComponentFactory {
 
@@ -64,16 +66,29 @@ class EblComponentFactory extends AbstractComponentFactory {
     return parties;
   }
 
+  @Override
+  public void generateConformanceScenarios(
+    Map<String, List<ConformanceScenario>> scenariosByModuleName,
+    PartyConfiguration[] partyConfigurations,
+    CounterpartConfiguration[] counterpartConfigurations
+  ) {
+    try (var sm = ScenarioManager.newInstance(scenariosByModuleName)) {
+      var scenarioBuilder = new EBLScenarioBuilder(
+        sm,
+        this.standardVersion,
+        _findPartyOrCounterpartName(
+          partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
+        _findPartyOrCounterpartName(
+          partyConfigurations, counterpartConfigurations, EblRole::isShipper)
+      );
+      scenarioBuilder.createScenarioSuite(this.getScenarioSuite());
+    }
+  }
+
   public LinkedHashMap<String, ? extends ScenarioListBuilder<?>> createModuleScenarioListBuilders(
       PartyConfiguration[] partyConfigurations,
       CounterpartConfiguration[] counterpartConfigurations) {
-    return EblScenarioListBuilder.createModuleScenarioListBuilders(
-        this,
-        this.standardVersion,
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblRole::isCarrier),
-        _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, EblRole::isShipper));
+    throw new AssertionError("Should not be called!");
   }
 
   @Override

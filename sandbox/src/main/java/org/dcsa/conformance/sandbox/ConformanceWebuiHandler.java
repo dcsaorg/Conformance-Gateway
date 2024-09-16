@@ -27,6 +27,7 @@ public class ConformanceWebuiHandler {
   private final String environmentBaseUrl;
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<JsonNode> deferredSandboxTaskConsumer;
+  private final boolean developerMode;
 
   private final SortedMap<String, ? extends AbstractStandard> standardsByName =
       new TreeMap<>(
@@ -42,6 +43,7 @@ public class ConformanceWebuiHandler {
     this.environmentBaseUrl = environmentBaseUrl;
     this.persistenceProvider = persistenceProvider;
     this.deferredSandboxTaskConsumer = deferredSandboxTaskConsumer;
+    developerMode = environmentBaseUrl.startsWith("http://localhost");
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
@@ -51,7 +53,13 @@ public class ConformanceWebuiHandler {
       if (e instanceof UserFacingException userFacingException) {
         return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
       } else {
-        return OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
+        ObjectNode node = OBJECT_MAPPER
+          .createObjectNode().put("error", "Internal Server Error");
+          if (developerMode) {
+            node.put("exception", e.getClass().getName())
+              .put("message", e.getMessage());
+          }
+          return node;
       }
     }
   }

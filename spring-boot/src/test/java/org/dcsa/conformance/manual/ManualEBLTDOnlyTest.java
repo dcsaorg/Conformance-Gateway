@@ -4,14 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 @Slf4j
 class ManualEBLTDOnlyTest extends ManualTestBase {
 
-  @Disabled("A required API exchange was not yet detected for action 'TD Change (Out of Band)'")
   @ParameterizedTest
   @CsvSource({"Carrier", "Shipper"})
   void testManualEblTD(String testedParty) {

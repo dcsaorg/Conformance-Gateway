@@ -27,6 +27,8 @@ class ManualScenarioTest extends ManualTestBase {
 //        Arguments.of("OVS", true),
 //        Arguments.of("TnT", false),
 //        Arguments.of("TnT", true),
+//        Arguments.of("Ebl", false),
+//        Arguments.of("Ebl", true),
 
       // eBL Issuance: 1) Carrier issue: Signature of the issuanceManifestSignedContent is valid.
       // eBL Issuance: 2) Platform issue: STRAIGHT_EBL -> Response status '409' does not match the expected value '204'

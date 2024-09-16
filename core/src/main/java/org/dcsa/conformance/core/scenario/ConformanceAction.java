@@ -105,8 +105,8 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
-  public boolean hasMatchedExchange() {
-    return matchedExchangeUuid != null;
+  public boolean isMissingMatchedExchange() {
+    return matchedExchangeUuid == null;
   }
 
   /**

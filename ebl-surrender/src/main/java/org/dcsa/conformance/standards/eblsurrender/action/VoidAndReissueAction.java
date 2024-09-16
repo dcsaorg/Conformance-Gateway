@@ -48,4 +48,9 @@ public class VoidAndReissueAction extends EblSurrenderAction {
   public Supplier<String> getSrrSupplier() {
     return null;
   }
+
+  @Override
+  public boolean isMissingMatchedExchange() {
+    return false;
+  }
 }

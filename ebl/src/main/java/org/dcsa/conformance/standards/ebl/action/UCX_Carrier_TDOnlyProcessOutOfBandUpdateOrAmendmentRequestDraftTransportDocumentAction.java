@@ -28,4 +28,10 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
     node.set("csp", getCspSupplier().get().toJson());
     return node;
   }
+
+  @Override
+  public boolean isMissingMatchedExchange() {
+    return false;
+  }
+
 }

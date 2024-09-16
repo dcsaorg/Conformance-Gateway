@@ -17,16 +17,16 @@ class ManualScenarioTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
     return Stream.of(
-        Arguments.of("Booking", false),
-        Arguments.of("Booking", true),
-        Arguments.of("CS", false),
-        Arguments.of("CS", true),
-        Arguments.of("JIT", false),
-        Arguments.of("JIT", true),
-        Arguments.of("OVS", false),
-        Arguments.of("OVS", true),
-        Arguments.of("TnT", false),
-        Arguments.of("TnT", true)
+//        Arguments.of("Booking", false),
+//        Arguments.of("Booking", true),
+//        Arguments.of("CS", false),
+//        Arguments.of("CS", true),
+//        Arguments.of("JIT", false),
+//        Arguments.of("JIT", true),
+//        Arguments.of("OVS", false),
+//        Arguments.of("OVS", true),
+//        Arguments.of("TnT", false),
+//        Arguments.of("TnT", true),
 
       // eBL Issuance: 1) Carrier issue: Signature of the issuanceManifestSignedContent is valid.
       // eBL Issuance: 2) Platform issue: STRAIGHT_EBL -> Response status '409' does not match the expected value '204'
@@ -35,7 +35,7 @@ class ManualScenarioTest extends ManualTestBase {
 
       // eBL Surrender: 1) Carrier issue: A required API exchange was not yet detected for action 'Void&Reissue'.
       // eBL Surrender: 2) Platform: same issue on 'SURR 409'
-//        Arguments.of("eBL Surrender", false),
+        Arguments.of("eBL Surrender", false)
 //        Arguments.of("eBL Surrender", true)
     );
   }

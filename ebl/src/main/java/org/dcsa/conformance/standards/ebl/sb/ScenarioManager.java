@@ -48,13 +48,9 @@ public class ScenarioManager implements AutoCloseable {
     ++this.moduleIndex;
   }
 
-  public synchronized <A extends ConformanceAction> void addScenario(ScenarioState<A, ?> state) {
+  /* package private */ static <A extends ConformanceAction> List<ConformanceAction> generateAction(ScenarioState<A, ?> state) {
     var currentState = state;
     List<Function<A, A>> actionGenerators = new LinkedList<>();
-
-    if (currentScenarioModuleName == null) {
-      throw new IllegalStateException("Cannot add a scenario between modules, call nextModule() first");
-    }
     while (currentState != null) {
       var actionGenerator = currentState.getConformanceActionGenerator();
       if (actionGenerator != null) {
@@ -72,13 +68,20 @@ public class ScenarioManager implements AutoCloseable {
       assert currentAction != null;
       actions.add(currentAction);
     }
-    synchronized (this) {
-      var idx = this.pendingScenarios.size();
-      pendingScenarios.add(new ConformanceScenario(
-        this.moduleIndex,
-        idx,
-        actions
-      ));
+    return actions;
+  }
+
+  public synchronized <A extends ConformanceAction> void addScenario(ScenarioState<A, ?> state) {
+    if (currentScenarioModuleName == null) {
+      throw new IllegalStateException("Cannot add a scenario between modules, call nextModule() first");
     }
+    var actions = generateAction(state);
+
+    var idx = this.pendingScenarios.size();
+    pendingScenarios.add(new ConformanceScenario(
+      this.moduleIndex,
+      idx,
+      actions
+    ));
   }
 }

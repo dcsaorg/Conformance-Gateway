@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.ebl.sb;
 
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-
-import java.util.function.Function;
 
 public interface BranchBuilder<A extends ConformanceAction, S extends ScenarioState<A, S>> {
   BranchBuilder<A, S> then(Function<ScenarioSingleStateStepHandler<A, S>, ScenarioStepHandler<A, S>> step);
@@ -14,7 +13,8 @@ public interface BranchBuilder<A extends ConformanceAction, S extends ScenarioSt
 
 @RequiredArgsConstructor
 class BranchBuilderImpl<A extends ConformanceAction, S extends ScenarioState<A, S>> implements BranchBuilder<A, S> {
-  private final ScenarioBranchingStateBuilder<A, S> builder;
+  private final ScenarioBranchingStateBuilderImpl<A, S> builder;
+  private final boolean isActive;
   private Function<ScenarioSingleStateStepHandler<A, S>, ScenarioStepHandler<A, S>> combinedStep = (sh) -> sh;
   private boolean isSpent = false;
   private boolean hasSteps = false;
@@ -34,12 +34,18 @@ class BranchBuilderImpl<A extends ConformanceAction, S extends ScenarioState<A, 
 
   public ScenarioBranchingStateBuilder<A, S> finishBranch() {
     spend();
-    return this.builder.branch(this.combinedStep);
+    if (this.isActive) {
+      return this.builder.branch(this.combinedStep);
+    }
+    return this.builder;
   }
 
   public ScenarioBranchingStateBuilder<A, S> endScenario() {
     spend();
-    return this.builder.scenarioEndingBranch(this.combinedStep);
+    if (this.isActive) {
+      return this.builder.scenarioEndingBranch(this.combinedStep);
+    }
+    return this.builder;
   }
 
   private void spend() {
@@ -49,6 +55,7 @@ class BranchBuilderImpl<A extends ConformanceAction, S extends ScenarioState<A, 
     if (!hasSteps) {
       throw new IllegalStateException("No steps were added to the branch! (Either a bug, or the branch builder is redundant, or it can be replaced with a simple step like scenarioEndingBranch)");
     }
+    builder.builderFinished();
     this.isSpent = true;
   }
 }

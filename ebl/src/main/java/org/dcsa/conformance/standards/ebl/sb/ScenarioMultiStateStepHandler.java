@@ -61,6 +61,13 @@ final class ScenarioMultiStateStepHandler<A extends ConformanceAction, S extends
     return FinishedScenarioStepHandler.instance();
   }
 
+  @Override
+  public void assertScenariosAreFinished() {
+    var actions = ScenarioManager.generateAction(states.getFirst());
+    var path = actions.getLast().getActionPath();
+    throw new IllegalStateException("At %d scenarios were not finished. Example being: %s".formatted(states.size(), path));
+  }
+
   private void spend() {
     if (actionTaken) {
       throw new IllegalArgumentException("Incorrect usage of the step handler; Only one action can be taken. Use the branch methods for branching");

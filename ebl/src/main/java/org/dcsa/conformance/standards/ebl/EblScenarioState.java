@@ -22,26 +22,45 @@ public class EblScenarioState implements SIScenarioState<EblAction, EblScenarioS
   private final ScenarioManager scenarioManager;
   @NonNull
   private final ScenarioType scenarioType;
-  @NonNull
+  /**
+   * The value of the `shippingInstructionsStatus` to be returned in the next GET request.
+   */
   private final ShippingInstructionsStatus shippingInstructionsStatus;
+  /**
+   * The value of the `updatedShippingInstructionsStatus` to be returned in the next GET request.
+   */
   private final ShippingInstructionsStatus updatedShippingInstructionsStatus;
+  /**
+   * This is a pseudo status used when the status is reset via the "cancel update" request.
+   *
+   * <p>The cancel request
+   */
   private final ShippingInstructionsStatus memorizedShippingInstructionsStatus;
+  /**
+   * This is a pseudo status used by the RI generator to determine where to go next.
+   */
+  @NonNull
+  private final ShippingInstructionsStatus stateGeneratorShippingInstructionsStatus;
   @NonNull
   private final TransportDocumentStatus currentTransportDocumentStatus;
+  private final boolean isAlsoRequestingAmendedSI;
   private final boolean usingTDRRefInGetDefault;
-  private final boolean usingHappyPathOnly;
+  @Getter
+  private final boolean areUnhappyPathsAvailable;
 
   private static EblScenarioState INITIAL_STATE = new EblScenarioState(
     null,
     null,
     null,
     ScenarioType.REGULAR_SWB,
+    null,
+    null,
+    null,
     ShippingInstructionsStatus.SI_START,
-    null,
-    null,
     TransportDocumentStatus.TD_START,
     false,
-    false
+    false,
+    true
   );
 
   private static EblScenarioState initialState(ScenarioManager sm) {

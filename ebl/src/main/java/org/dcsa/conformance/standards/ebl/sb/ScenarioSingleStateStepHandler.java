@@ -46,7 +46,16 @@ public final class ScenarioSingleStateStepHandler<A extends ConformanceAction, S
   public ScenarioStepHandler<A, S> then(Function<ScenarioSingleStateStepHandler<A, S>, ScenarioStepHandler<A, S>> stepImplementor) {
     spend();
     // We explicit clone here because if we passed "this" then the st
-    return stepImplementor.apply(new ScenarioSingleStateStepHandler<>(this.state));
+    try {
+      return stepImplementor.apply(new ScenarioSingleStateStepHandler<>(this.state));
+    } catch (StackOverflowError e) {
+      try {
+        var action = ScenarioManager.generateAction(state).getLast();
+        throw new Error("Stack overflow trying to generate scenario. Highest point where we can generate the scenario is: " + action.getActionPath(), e);
+      } catch (StackOverflowError ignored) {
+        throw e;
+      }
+    }
   }
 
   public ScenarioSingleStateStepHandler<A, S> thenStep(Function<S, S> singleStepImplementor) {
@@ -57,6 +66,13 @@ public final class ScenarioSingleStateStepHandler<A extends ConformanceAction, S
   public ScenarioStepHandler<A, S> finishScenario() {
     spend();
     return FinishedScenarioStepHandler.instance();
+  }
+
+  @Override
+  public void assertScenariosAreFinished() {
+    var actions = ScenarioManager.generateAction(state);
+    var path = actions.getLast().getActionPath();
+    throw new IllegalStateException("At least one scenario was not finished. Example being: %s".formatted(path));
   }
 
   private void spend() {

@@ -12,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.standards.ebl.action.*;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
+import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 import org.dcsa.conformance.standards.ebl.sb.ScenarioManager;
 import org.dcsa.conformance.standards.ebl.sb.ScenarioSingleStateStepHandler;
 import org.dcsa.conformance.standards.ebl.sb.ScenarioStepHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class EBLScenarioBuilder {
@@ -50,6 +53,7 @@ public class EBLScenarioBuilder {
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE =
       new ConcurrentHashMap<>();
+  private static final Logger log = LoggerFactory.getLogger(EBLScenarioBuilder.class);
 
   private final ScenarioManager scenarioManager;
   private final String standardVersion;
@@ -97,7 +101,7 @@ public class EBLScenarioBuilder {
         .then((s) -> _uc6_get(s, true))
         .then(this::_uc8_get)
         .then(this::_uc12_get)
-        .then(this::_uc13_get)
+        .then(this::_uc13a_get)
         .finishScenario();
 
     scenarioManager.openScenarioModule("Shipper interactions with transport document");
@@ -116,13 +120,13 @@ public class EBLScenarioBuilder {
             .then(this::_uc8_get)
             .then(this::_oob_amendment)
             .then(this::_uc9_get)
-            .then(this::_uc10_get)
+            .then(this::_uc10a_get)
             .then(this::_uc11_get)
             .finishBranch();
           return bs.build();
         })
         .then(this::_uc12_get)
-        .then(this::_uc13_get)
+        .then(this::_uc13a_get)
         .finishScenario();
   }
 
@@ -134,7 +138,12 @@ public class EBLScenarioBuilder {
         .then(this::_uc14_get)
         .finishScenario();
 
-    // TODO: Port the state sequence diagram
+
+    scenarioManager.openScenarioModule("State sequence scenarios");
+    EblScenarioState.initialScenarioState(scenarioManager, s -> s.withAlsoRequestingAmendedSI(true))
+      .thenStep((s) -> this.carrier_SupplyScenarioParameters(s, ScenarioType.REGULAR_SWB))
+      .then(this::_generateSISteps)
+      .assertScenariosAreFinished();
   }
 
   private EblScenarioState carrier_SupplyScenarioParameters(
@@ -159,10 +168,16 @@ public class EBLScenarioBuilder {
       .thenStep(this::shipper_GetShippingInstructions);
   }
 
-  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc3_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+  private ScenarioStepHandler<EblAction, EblScenarioState> _uc3_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
     return stepHandler
       .thenStep(s -> uc3_shipper_submitUpdatedShippingInstructions(s, s.isUsingTDRRefInGetDefault()))
-      .thenStep(this::shipper_GetShippingInstructions);
+      .then(sh -> {
+        sh = sh.thenStep(this::shipper_GetShippingInstructions);
+        if (sh.getState().isAlsoRequestingAmendedSI()) {
+          return sh.thenStep(s -> this.shipper_GetShippingInstructions(s, true, false, s.isUsingTDRRefInGetDefault()));
+        }
+        return sh;
+      });
   }
 
   private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc4a_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
@@ -187,10 +202,15 @@ public class EBLScenarioBuilder {
     return stepHandler.then(s -> _uc6_get(s, false));
   }
 
-  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc6_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler, boolean skipSISteps) {
+  private ScenarioStepHandler<EblAction, EblScenarioState> _uc6_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler, boolean skipSISteps) {
     return stepHandler
       .thenStep(s -> uc6_carrier_publishDraftTransportDocument(s, skipSISteps))
-      .thenStep(this::shipper_GetTransportDocument);
+      .then(sh -> {
+        if (!skipSISteps) {
+          sh = sh.thenStep(s -> shipper_GetShippingInstructions(s, false, true, false));
+        }
+        return sh.thenStep(this::shipper_GetTransportDocument);
+      });
   }
 
   private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc7_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
@@ -211,11 +231,19 @@ public class EBLScenarioBuilder {
       .thenStep(this::shipper_GetTransportDocument);
   }
 
-  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc10_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc10a_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
     return stepHandler
       .thenStep(this::uc10a_carrier_acceptSurrenderRequestForAmendment)
       .thenStep(this::shipper_GetTransportDocument);
   }
+
+
+  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc10r_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    return stepHandler
+      .thenStep(this::uc10r_carrier_rejectSurrenderRequestForAmendment)
+      .thenStep(this::shipper_GetTransportDocument);
+  }
+
 
   private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc11_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
     return stepHandler
@@ -230,9 +258,15 @@ public class EBLScenarioBuilder {
       .thenStep(this::shipper_GetTransportDocument);
   }
 
-  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc13_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc13a_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
     return stepHandler
       .thenStep(this::uc13a_carrier_acceptSurrenderRequestForDelivery)
+      .thenStep(this::shipper_GetTransportDocument);
+  }
+
+  private ScenarioSingleStateStepHandler<EblAction, EblScenarioState> _uc13r_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    return stepHandler
+      .thenStep(this::uc13r_carrier_rejectSurrenderRequestForDelivery)
       .thenStep(this::shipper_GetTransportDocument);
   }
 
@@ -259,42 +293,33 @@ public class EBLScenarioBuilder {
                 bs.inlineBranchBuilder()
                     .then(this::_uc2_get)
                     .then(this::_uc3_get)
-                    .then(this::_uc4a_uc14)
                     .finishBranch();
 
                 bs.inlineBranchBuilder()
                     .then(this::_uc4a_get)
                     .then(this::_uc2_get)
                     .then(this::_uc3_get)
-                    .then(this::_uc4a_uc14)
                     .finishBranch();
 
                 bs.inlineBranchBuilder()
                     .then(this::_uc4a_get)
                     .then(this::_uc3_get)
-                    .then(this::_uc4a_uc14)
                     .finishBranch();
 
-
-                bs.inlineBranchBuilder()
-                  .then(this::_uc4a_get)
-                    .then(this::_uc14_get)
-                    .finishBranch();
+                bs.emptyBranch();
 
                 bs.inlineBranchBuilder()
                     .then(this::_uc4d_get)
                     .then(this::_uc3_get)
-                    .then(this::_uc4a_uc14)
                     .finishBranch();
 
                 bs.inlineBranchBuilder()
                     .then(this::_uc5_get)
                     .then(this::_uc3_get)
-                    .then(this::_uc4a_uc14)
                     .finishBranch();
 
                 return bs.build();
-            });
+            }).then(this::_uc4a_uc14);
   }
 
   private EblScenarioState uc1_shipper_submitShippingInstructions(EblScenarioState state) {
@@ -311,6 +336,7 @@ public class EBLScenarioBuilder {
                     resolveMessageSchemaValidator(
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)))
         .shippingInstructionsStatus(SI_RECEIVED)
+        .stateGeneratorShippingInstructionsStatus(SI_RECEIVED)
         .build();
   }
 
@@ -326,6 +352,7 @@ public class EBLScenarioBuilder {
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)))
         .shippingInstructionsStatus(SI_PENDING_UPDATE)
         .updatedShippingInstructionsStatus(null)
+        .stateGeneratorShippingInstructionsStatus(SI_PENDING_UPDATE)
         .build();
   }
 
@@ -344,6 +371,8 @@ public class EBLScenarioBuilder {
                     resolveMessageSchemaValidator(
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)))
         .updatedShippingInstructionsStatus(SI_UPDATE_RECEIVED)
+        .memorizedShippingInstructionsStatus(state.getShippingInstructionsStatus())
+        .stateGeneratorShippingInstructionsStatus(SI_UPDATE_RECEIVED)
         .build();
   }
 
@@ -360,6 +389,8 @@ public class EBLScenarioBuilder {
                     true))
         .shippingInstructionsStatus(SI_RECEIVED)
         .updatedShippingInstructionsStatus(SI_UPDATE_CONFIRMED)
+        .memorizedShippingInstructionsStatus(null)
+        .stateGeneratorShippingInstructionsStatus(SI_UPDATE_CONFIRMED)
         .build();
   }
 
@@ -375,6 +406,9 @@ public class EBLScenarioBuilder {
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
                     false))
         .updatedShippingInstructionsStatus(SI_UPDATE_DECLINED)
+        .shippingInstructionsStatus(state.getMemorizedShippingInstructionsStatus())
+        .memorizedShippingInstructionsStatus(null)
+        .stateGeneratorShippingInstructionsStatus(state.getMemorizedShippingInstructionsStatus())
         .build();
   }
 
@@ -393,6 +427,8 @@ public class EBLScenarioBuilder {
                     resolveMessageSchemaValidator(
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)))
         .updatedShippingInstructionsStatus(SI_UPDATE_CANCELLED)
+        .memorizedShippingInstructionsStatus(null)
+        .stateGeneratorShippingInstructionsStatus(state.getMemorizedShippingInstructionsStatus())
         .build();
   }
 
@@ -573,6 +609,7 @@ public class EBLScenarioBuilder {
                         EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)))
         .shippingInstructionsStatus(SI_COMPLETED)
         .updatedShippingInstructionsStatus(null)
+        .stateGeneratorShippingInstructionsStatus(SI_COMPLETED)
         .build();
   }
 
@@ -617,13 +654,333 @@ public class EBLScenarioBuilder {
                 carrierPartyName, shipperPartyName, previousAction));
   }
 
+  private EblScenarioState auc_shipper_sendOutOfOrderSIMessage(EblScenarioState state, OutOfOrderMessageType outOfOrderMessageType) {
+    return nextState(
+      state,
+      previousAction -> {
+        var schema = switch (outOfOrderMessageType) {
+          case SUBMIT_SI_UPDATE -> PUT_EBL_SCHEMA_NAME;
+          case CANCEL_SI_UPDATE -> PATCH_SI_SCHEMA_NAME;
+          case APPROVE_TD -> PATCH_TD_SCHEMA_NAME;
+        };
+        return new AUC_Shipper_SendOutOfOrderSIMessageAction(
+          carrierPartyName,
+          shipperPartyName,
+          previousAction,
+          outOfOrderMessageType,
+          outOfOrderMessageType.isTDRequest() || state.isUsingTDRRefInGetDefault(),
+          resolveMessageSchemaValidator(
+            EBL_API, schema));
+      });
+  }
+
+  private ScenarioStepHandler<EblAction, EblScenarioState> _auc_get(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepper, OutOfOrderMessageType outOfOrderMessageType) {
+    return stepper
+      .thenStep(s -> auc_shipper_sendOutOfOrderSIMessage(s, outOfOrderMessageType))
+      .then(sh -> {
+        if (outOfOrderMessageType == OutOfOrderMessageType.APPROVE_TD) {
+          return sh.thenStep(this::shipper_GetTransportDocument);
+        }
+        return sh.thenStep(this::shipper_GetShippingInstructions);
+      });
+  }
+
   private EblScenarioState _onlyHappyPathsFromHere(EblScenarioState state) {
     return nextStateBuilder(
       state,
       null
-    ).usingHappyPathOnly(true)
+    )
+      .areUnhappyPathsAvailable(false)
       .build();
   }
+
+  private ScenarioStepHandler<EblAction, EblScenarioState> _chainFromSIToTD(
+    ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    var state = stepHandler.getState();
+    var transportDocumentStatus = state.getCurrentTransportDocumentStatus();
+    return switch (transportDocumentStatus) {
+      case TD_START -> stepHandler.then(this::_uc6_get).then(this::_generateTDSteps);
+      case TD_DRAFT -> stepHandler.then(this::_uc6_get).thenStep(this::_onlyHappyPathsFromHere).then(this::_generateTDSteps);
+      case TD_ISSUED -> stepHandler.then(this::_uc9_get).thenStep(this::_onlyHappyPathsFromHere).then(this::_generateTDSteps);
+      default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
+    };
+  }
+
+  private ScenarioStepHandler<EblAction, EblScenarioState> _generateSISteps(
+      ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    var state = stepHandler.getState();
+    var shippingInstructionsStatus = state.getStateGeneratorShippingInstructionsStatus();
+    return switch (shippingInstructionsStatus) {
+      case SI_START -> stepHandler.then(this::_uc1_get).then(this::_generateSISteps);
+      case SI_RECEIVED ->
+          stepHandler.branchingStep(
+              bs -> {
+//                bs.branch(this::_chainFromSIToTD);
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_uc2_get)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_uc3_get)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(s -> _auc_get(s, OutOfOrderMessageType.CANCEL_SI_UPDATE))
+                  .thenStep(this::_onlyHappyPathsFromHere)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                bs.inlineBranchBuilder().then(this::_uc14_get).then(this::_generateSISteps).finishBranch();
+
+                return bs.build();
+              });
+      case SI_UPDATE_RECEIVED -> stepHandler.branchingStep(bs -> {
+         bs.branch(this::_uc4a_get);
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc2_get)
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc4d_get)
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc4d_get)
+          .then(sh -> _auc_get(sh, OutOfOrderMessageType.CANCEL_SI_UPDATE))
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc5_get)
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc5_get)
+          .then(sh -> _auc_get(sh, OutOfOrderMessageType.CANCEL_SI_UPDATE))
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .finishBranch();
+
+        return bs.build();
+      }).then(this::_generateSISteps);
+      case SI_PENDING_UPDATE ->
+          stepHandler
+            .then(this::_uc3_get)
+            .branchingStep(bs -> {
+              bs.emptyBranch();
+
+              bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_uc5_get)
+                  .finishBranch();
+
+              // Special-case: UC2 (current state) -> UC3 (emitted earlier)  -> UC5 -> ...
+              // - Doing _generateSISteps with unhappy paths from UC2 would cause UC3 -> UC2 -> UC3 ->
+              // UC2 -> UC3 -> ...
+              //   patterns (it eventually resolves, but it is unhelpful many cases)
+              // To ensure that UC2 -> UC3 -> UC5 -> UC3 -> ... works properly we manually do
+              // the subtree here.
+              // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> UC3 -> ... flow
+              // because neither UC2 and UC3
+              // are considered happy paths.
+              bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                .then(this::_uc5_get)
+                .then(this::_uc3_get)
+                .finishBranch();
+
+              bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                .then(sh -> _auc_get(sh, OutOfOrderMessageType.CANCEL_SI_UPDATE))
+                .finishBranch();
+              bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                .then(sh -> _auc_get(sh, OutOfOrderMessageType.APPROVE_TD))
+                .finishBranch();
+
+              return bs.build();
+            })
+            .thenStep(this::_onlyHappyPathsFromHere)
+            .then(this::_generateSISteps);
+      case SI_UPDATE_CONFIRMED -> stepHandler.branchingStep(bs -> {
+        //bs.branch(this::_chainFromSIToTD);
+        bs.inlineBranchBuilder().then(this::_uc14_get).then(this::_generateSISteps).finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc2_get)
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .then(this::_generateSISteps)
+          .finishBranch();
+
+        bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+          .then(this::_uc3_get)
+          .thenStep(this::_onlyHappyPathsFromHere)
+          .then(this::_generateSISteps)
+          .finishBranch();
+
+        return bs.build();
+      });
+      case SI_UPDATE_CANCELLED, SI_UPDATE_DECLINED ->
+          throw new AssertionError(
+              "Please use the black state rather than " + shippingInstructionsStatus.name());
+      case SI_ANY -> throw new AssertionError("Not a real/reachable state");
+      case SI_COMPLETED -> stepHandler.branchingStep(
+              bs -> {
+                // For the "happy case"
+                bs.emptyBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(s -> _auc_get(s, OutOfOrderMessageType.APPROVE_TD))
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(s -> _auc_get(s, OutOfOrderMessageType.SUBMIT_SI_UPDATE))
+                  .finishBranch();
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(s -> _auc_get(s, OutOfOrderMessageType.CANCEL_SI_UPDATE))
+                  .finishBranch();
+
+                return bs.build();
+              })
+          .finishScenario();
+    };
+  }
+
+  private ScenarioStepHandler<EblAction, EblScenarioState> _withoutAndWithUsingTDRef(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    return stepHandler.branchingStep(bs -> {
+      bs.singleStepBranch(s -> s.withUsingTDRRefInGetDefault(false));
+      bs.singleStepBranch(s -> s.withUsingTDRRefInGetDefault(true));
+      return bs.build();
+    });
+  }
+
+  private static Function<ScenarioSingleStateStepHandler<EblAction, EblScenarioState>, ScenarioStepHandler<EblAction, EblScenarioState>> _usingTDRef(boolean useBoth) {
+    return sh -> sh.thenStep(s -> s.withUsingTDRRefInGetDefault(useBoth));
+  }
+
+  private ScenarioStepHandler<EblAction, EblScenarioState> _generateTDSteps(ScenarioSingleStateStepHandler<EblAction, EblScenarioState> stepHandler) {
+    var state = stepHandler.getState();
+    var transportDocumentStatus = state.getCurrentTransportDocumentStatus();
+    return switch (transportDocumentStatus) {
+      case TD_DRAFT ->
+          stepHandler.branchingStep(
+              bs -> {
+                bs.inlineBranchBuilder()
+                    .then(this::_uc8_get)
+                    .then(this::_generateTDSteps)
+                    .finishBranch();
+
+                bs.inlineBranchBuilder()
+                    .then(this::_uc7_get)
+                    .then(this::_generateTDSteps)
+                    .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_withoutAndWithUsingTDRef)
+                  .then(this::_uc3_get)
+                  .then(this::_uc4a_get)
+                  .thenStep(this::_onlyHappyPathsFromHere)
+                  .then(this::_generateTDSteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_withoutAndWithUsingTDRef)
+                  .then(this::_uc3_get)
+                  .then(this::_uc2_get)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_withoutAndWithUsingTDRef)
+                  .then(this::_uc3_get)
+                  .then(this::_uc4d_get)
+                  .thenStep(this::_onlyHappyPathsFromHere)
+                  .then(this::_generateTDSteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_withoutAndWithUsingTDRef)
+                  .then(this::_uc3_get)
+                  .then(this::_uc5_get)
+                  .thenStep(this::_onlyHappyPathsFromHere)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                return bs.build();
+              });
+      case TD_APPROVED -> stepHandler.then(this::_uc8_get).then(this::_generateTDSteps);
+      case TD_ISSUED ->
+          stepHandler.branchingStep(
+              bs -> {
+                bs.inlineBranchBuilder()
+                    .then(this::_uc12_get)
+                    .then(this::_generateTDSteps)
+                    .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .thenStep(this::_onlyHappyPathsFromHere)
+                  .then(this::_withoutAndWithUsingTDRef)
+                  .then(this::_uc3_get)
+                  .then(this::_generateSISteps)
+                  .finishBranch();
+
+                bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                  .then(this::_uc9_get)
+                  .then(this::_generateTDSteps)
+                  .finishBranch();
+                return bs.build();
+              });
+      case TD_PENDING_SURRENDER_FOR_AMENDMENT ->
+          stepHandler
+              .branchingStep(
+                  bs -> {
+                    bs.branch(this::_uc10a_get);
+
+                    bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                      .then(this::_uc10r_get)
+                      .thenStep(this::_onlyHappyPathsFromHere)
+                      .finishBranch();
+                    return bs.build();
+                  })
+              .then(this::_generateTDSteps);
+      case TD_SURRENDERED_FOR_AMENDMENT ->
+          stepHandler
+              .then(this::_uc11_get)
+              .thenStep(this::_onlyHappyPathsFromHere)
+              .then(this::_generateTDSteps);
+      case TD_PENDING_SURRENDER_FOR_DELIVERY ->
+          stepHandler
+              .branchingStep(
+                  bs -> {
+                    bs.branch(this::_uc13a_get);
+                    bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                      .then(this::_uc13r_get)
+                      .thenStep(this::_onlyHappyPathsFromHere)
+                      .finishBranch();
+
+                    bs.conditionalBranchBuilder(EblScenarioState::isAreUnhappyPathsAvailable)
+                      .then(
+                        sh ->
+                          _auc_get(
+                            sh, OutOfOrderMessageType.APPROVE_TD))
+                      .thenStep(this::_onlyHappyPathsFromHere)
+                      .finishBranch();
+
+                    return bs.build();
+                  })
+              .then(this::_generateTDSteps);
+      case TD_SURRENDERED_FOR_DELIVERY ->
+          stepHandler
+              .then(this::_withoutAndWithUsingTDRef)
+              .then(this::_uc14_get)
+              .then(this::_generateSISteps);
+      case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
+      case TD_VOIDED -> throw new AssertionError("Not a visible state");
+    };
+  }
+
 
   private EblScenarioState nextState(
       EblScenarioState previousState, Function<EblAction, EblAction> actionGenerator) {

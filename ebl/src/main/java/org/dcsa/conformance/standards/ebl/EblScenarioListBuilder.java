@@ -46,7 +46,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
   private static final String PUT_EBL_SCHEMA_NAME = "UpdateShippingInstructions";
   private static final String PATCH_SI_SCHEMA_NAME = "shippinginstructions_documentReference_body";
   private static final String PATCH_TD_SCHEMA_NAME = "transportdocuments_transportDocumentReference_body";
-  private static final String EBL_REF_STATUS_SCHEMA_NAME = "ShippingInstructionsRefStatus";
+  private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "Shipping Instructions Response_1";
   private static final String TD_REF_STATUS_SCHEMA_NAME = "TransportDocumentRefStatus";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
@@ -178,7 +178,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
       EblScenarioListBuilder... thenEither) {
-    return uc3_shipper_submitUpdatedShippingInstructions(false)
+    return uc3_shipper_submitUpdatedShippingInstructions(originalSiState, false)
         .then(
             shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
                 .thenEither(thenEither));
@@ -198,7 +198,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
       EblScenarioListBuilder... thenEither) {
-    return uc4d_carrier_declineUpdatedShippingInstructions()
+    return uc4d_carrier_declineUpdatedShippingInstructions(originalSiState)
         .then(
             shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
                 .thenEither(thenEither));
@@ -212,7 +212,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
       EblScenarioListBuilder... thenEither) {
-    return uc5_shipper_cancelUpdateToShippingInstructions(false)
+    return uc5_shipper_cancelUpdateToShippingInstructions(originalSiState, false)
         .then(
             shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
                 .thenEither(thenEither));
@@ -336,7 +336,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
               .then(
                   shipper_GetShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                       .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)),
-          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+          uc3_shipper_submitUpdatedShippingInstructions(SI_RECEIVED, useTDRef)
               .then(
                   shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, useTDRef)
                       .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, useTDRef)
@@ -376,7 +376,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                           .then(shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CONFIRMED, useTDRef)
                             .thenHappyPathFrom(SI_RECEIVED, transportDocumentStatus, useTDRef))
                       )),
-            uc4d_carrier_declineUpdatedShippingInstructions()
+            uc4d_carrier_declineUpdatedShippingInstructions(memoryState)
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
                       .thenEither(
@@ -385,7 +385,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                           .then(shipper_GetShippingInstructions(memoryState, SI_UPDATE_DECLINED, useTDRef)
                             .thenHappyPathFrom(memoryState, transportDocumentStatus, useTDRef))
                       )),
-            uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
+            uc5_shipper_cancelUpdateToShippingInstructions(memoryState, useTDRef)
                 .then(
                     shipper_GetShippingInstructions(memoryState, SI_UPDATE_CANCELLED, useTDRef)
                       .thenEither(
@@ -398,7 +398,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       case SI_PENDING_UPDATE -> {
         if (transportDocumentStatus != TD_START) {
           yield thenEither(
-            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+            uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
               .then(
                 shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
                   .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
@@ -413,13 +413,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                     // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
                     // because neither UC2 and UC3
                     // are considered happy paths.
-                    uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
+                    uc5_shipper_cancelUpdateToShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                       .then(
                         shipper_GetShippingInstructions(
                           SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
                           .thenEither(
                             noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
-                            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+                            uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                               .then(
                                 shipper_GetShippingInstructions(
                                   SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
@@ -440,7 +440,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
           );
         }
         yield thenEither(
-          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+          uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
             .then(
               shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
                 .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
@@ -455,13 +455,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                   // Otherwise, we would never test the UC2 -> UC3 -> UC5 -> ... flow
                   // because neither UC2 and UC3
                   // are considered happy paths.
-                  uc5_shipper_cancelUpdateToShippingInstructions(useTDRef)
+                  uc5_shipper_cancelUpdateToShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                     .then(
                       shipper_GetShippingInstructions(
                         SI_PENDING_UPDATE, SI_UPDATE_CANCELLED, useTDRef)
                         .thenEither(
                           noAction().thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef),
-                          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+                          uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                             .then(
                               shipper_GetShippingInstructions(
                                 SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
@@ -483,7 +483,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
               .then(
                   shipper_GetShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                       .thenHappyPathFrom(SI_PENDING_UPDATE, transportDocumentStatus, useTDRef)),
-          uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+          uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
               .then(
                   shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
                     .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
@@ -530,7 +530,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
           default -> throw new IllegalStateException("Unexpected transportDocumentStatus: " + transportDocumentStatus.name());
         });
       case SI_PENDING_UPDATE -> then(
-            uc3_shipper_submitUpdatedShippingInstructions(useTDRef)
+            uc3_shipper_submitUpdatedShippingInstructions(SI_PENDING_UPDATE, useTDRef)
                 .then(
                     shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, useTDRef)
                       .then(shipper_GetShippingInstructions(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, true, useTDRef)
@@ -560,7 +560,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                     // https://github.com/dcsaorg/Conformance-Gateway/pull/29#discussion_r1421732797
                     .thenHappyPathFrom(TD_ISSUED)),
 
-        uc3_shipper_submitUpdatedShippingInstructions(true).then(
+        uc3_shipper_submitUpdatedShippingInstructions(SI_RECEIVED, true).then(
           shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true).then(
             shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, true)
               .thenEither(
@@ -577,13 +577,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                   .then(
                     shipper_GetShippingInstructions(SI_PENDING_UPDATE, true)
                       .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, true)),
-                uc5_shipper_cancelUpdateToShippingInstructions(true)
+                uc5_shipper_cancelUpdateToShippingInstructions(SI_RECEIVED, true)
                   .then(
                     shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CANCELLED, true)
                       .thenHappyPathFrom(transportDocumentStatus))
               )
           )),
-        uc3_shipper_submitUpdatedShippingInstructions(false).then(
+        uc3_shipper_submitUpdatedShippingInstructions(SI_RECEIVED, false).then(
           shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, false).then(
             shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_RECEIVED, true, false)
               .thenEither(
@@ -600,11 +600,11 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                   .then(
                     shipper_GetShippingInstructions(SI_PENDING_UPDATE, false)
                       .thenAllPathsFrom(SI_PENDING_UPDATE, transportDocumentStatus, false)),
-                uc4d_carrier_declineUpdatedShippingInstructions()
+                uc4d_carrier_declineUpdatedShippingInstructions(SI_RECEIVED)
                   .then(
                     shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_DECLINED, false)
                       .thenHappyPathFrom(transportDocumentStatus)),
-                uc5_shipper_cancelUpdateToShippingInstructions(false)
+                uc5_shipper_cancelUpdateToShippingInstructions(SI_RECEIVED, false)
                   .then(
                     shipper_GetShippingInstructions(SI_RECEIVED, SI_UPDATE_CANCELLED, false)
                       .thenHappyPathFrom(transportDocumentStatus))
@@ -619,9 +619,9 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
               .thenAllPathsFrom(TD_ISSUED))
       );
       case TD_ISSUED -> thenEither(
-        uc3_shipper_submitUpdatedShippingInstructions(true)
+        uc3_shipper_submitUpdatedShippingInstructions(SI_RECEIVED, true)
           .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_ISSUED, true),
-        uc3_shipper_submitUpdatedShippingInstructions(false)
+        uc3_shipper_submitUpdatedShippingInstructions(SI_RECEIVED, false)
           .thenHappyPathFrom(SI_UPDATE_RECEIVED, TD_ISSUED, false),
         uc9_carrier_awaitSurrenderRequestForAmendment()
           .then(shipper_GetTransportDocument(TD_PENDING_SURRENDER_FOR_AMENDMENT)
@@ -809,11 +809,14 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
           shipperPartyName,
           (EblAction) previousAction,
           resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
-          resolveMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
+          resolveMessageSchemaValidator(EBL_API, RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
           resolveMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
 
-  private static EblScenarioListBuilder uc3_shipper_submitUpdatedShippingInstructions(boolean useTDRef) {
+  private static EblScenarioListBuilder uc3_shipper_submitUpdatedShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    boolean useTDRef
+  ) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -822,9 +825,9 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
+                expectedSiStatus,
                 useTDRef,
                 resolveMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
-                resolveMessageSchemaValidator(EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }
@@ -851,12 +854,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
+                SI_RECEIVED,
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
               true));
   }
 
-  private static EblScenarioListBuilder uc4d_carrier_declineUpdatedShippingInstructions() {
+  private static EblScenarioListBuilder uc4d_carrier_declineUpdatedShippingInstructions(ShippingInstructionsStatus shippingInstructionsStatus) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -865,12 +869,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 carrierPartyName,
                 shipperPartyName,
                 (EblAction) previousAction,
+                shippingInstructionsStatus,
                 resolveMessageSchemaValidator(
                     EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
               false));
   }
 
-  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions(boolean useTDRef) {
+  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions(ShippingInstructionsStatus expectedSIStatus, boolean useTDRef) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String shipperPartyName = threadLocalShipperPartyName.get();
     return new EblScenarioListBuilder(
@@ -879,11 +884,10 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
           carrierPartyName,
           shipperPartyName,
           (EblAction) previousAction,
+          expectedSIStatus,
           useTDRef,
           resolveMessageSchemaValidator(
             EBL_API, PATCH_SI_SCHEMA_NAME),
-          resolveMessageSchemaValidator(
-            EBL_API, EBL_REF_STATUS_SCHEMA_NAME),
           resolveMessageSchemaValidator(
             EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
   }

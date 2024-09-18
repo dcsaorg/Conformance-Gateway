@@ -895,10 +895,6 @@ public class EBLChecks {
     );
   }
 
-  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, JsonContentCheck ... extraChecks) {
-    return siRefStatusContentChecks(matched, standardsVersion, shippingInstructionsStatus, null, extraChecks);
-  }
-
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
       ? JsonAttribute.mustEqual(

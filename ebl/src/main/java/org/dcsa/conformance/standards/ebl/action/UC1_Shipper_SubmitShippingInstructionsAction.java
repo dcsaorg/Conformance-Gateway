@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", Set.of(201, 202));
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -90,19 +89,12 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
             EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
           primaryExchangeChecks,
-          Stream.concat(
-              EBLChecks.siRefStatusContentChecks(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                ShippingInstructionsStatus.SI_RECEIVED,
-                EBLChecks.SIR_REQUIRED_IN_REF_STATUS
-              ),
-              getSINotificationChecks(
-                getMatchedNotificationExchangeUuid(),
-                expectedApiVersion,
-                notificationSchemaValidator,
-                ShippingInstructionsStatus.SI_RECEIVED,
-                EBLChecks.SIR_REQUIRED_IN_NOTIFICATION))
+          getSINotificationChecks(
+            getMatchedNotificationExchangeUuid(),
+            expectedApiVersion,
+            notificationSchemaValidator,
+            ShippingInstructionsStatus.SI_RECEIVED,
+            EBLChecks.SIR_REQUIRED_IN_NOTIFICATION)
           );
       }
     };

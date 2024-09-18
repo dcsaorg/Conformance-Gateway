@@ -17,9 +17,6 @@ public record DynamicScenarioParameters(
     String transportDocumentReference,
     JsonNode shippingInstructions,
     JsonNode updatedShippingInstructions,
-    ShippingInstructionsStatus shippingInstructionsStatus,
-    ShippingInstructionsStatus updatedShippingInstructionsStatus,
-    TransportDocumentStatus transportDocumentStatus,
     boolean newTransportDocumentContent,
     JsonNode transportDocument,
     JsonNode previousTransportDocument) {
@@ -28,9 +25,6 @@ public record DynamicScenarioParameters(
       .put("scenarioType", scenarioType.name())
       .put("shippingInstructionsReference", shippingInstructionsReference)
       .put("transportDocumentReference", transportDocumentReference)
-      .put("shippingInstructionsStatus", serializeEnum(shippingInstructionsStatus, ShippingInstructionsStatus::wireName))
-      .put("updatedShippingInstructionsStatus", serializeEnum(updatedShippingInstructionsStatus, ShippingInstructionsStatus::wireName))
-      .put("transportDocumentStatus", serializeEnum(transportDocumentStatus, TransportDocumentStatus::wireName))
       .put("newTransportDocumentContent", newTransportDocumentContent);
     node.replace("shippingInstructions", shippingInstructions);
     node.replace("updatedShippingInstructions", updatedShippingInstructions);
@@ -60,9 +54,6 @@ public record DynamicScenarioParameters(
         jsonNode.path("transportDocumentReference").asText(null),
         jsonNode.path("shippingInstructions"),
         jsonNode.path("updatedShippingInstructions"),
-        readEnum(jsonNode.required("shippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
-        readEnum(jsonNode.required("updatedShippingInstructionsStatus").asText(null), ShippingInstructionsStatus::fromWireName),
-        readEnum(jsonNode.required("transportDocumentStatus").asText(null), TransportDocumentStatus::fromWireName),
         jsonNode.path("newTransportDocumentContent").asBoolean(false),
         jsonNode.path("transportDocument"),
         jsonNode.path("previousTransportDocument")

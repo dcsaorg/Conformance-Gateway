@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_ARRAY_ORDER_DEFINITIONS;
+import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -21,10 +24,9 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.checks.ArrayOrderHelper;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
-
-import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
 
 @Slf4j
 public class EblCarrier extends ConformanceParty {
@@ -521,6 +523,8 @@ public class EblCarrier extends ConformanceParty {
       } else {
         body = si.getShippingInstructions();
       }
+      body = body.deepCopy();
+      SI_ARRAY_ORDER_DEFINITIONS.accept(body, ArrayOrderHelper::shuffleArrayOrder);
       ConformanceResponse response =
         request.createResponse(
           200,

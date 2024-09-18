@@ -67,14 +67,6 @@ public class EBLChecks {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
-  private static final JsonRebaseableContentCheck TLR_TYPES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' against 'taxAndLegalReferences'",
-    mav -> {
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*.type");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.type");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.LTR_TYPES)
-   );
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each document party can be used at most once",
@@ -85,27 +77,7 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_UN_LOCATION_CODES = mav -> {
-    mav.submitAllMatching("invoicePayableAt.UNLocationCode");
-    mav.submitAllMatching("transports.placeOfReceipt.UNLocationCode");
-    mav.submitAllMatching("transports.portOfLoading.UNLocationCode");
-    mav.submitAllMatching("transports.portOfDischarge.UNLocationCode");
-    mav.submitAllMatching("transports.placeOfDelivery.UNLocationCode");
-    mav.submitAllMatching("transports.onwardInlandRouting.UNLocationCode");
 
-    // Beta-2 only
-    mav.submitAllMatching("issuingParty.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
-  };
-
-  private static final JsonRebaseableContentCheck TD_UN_LOCATION_CODES_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
-    "UN Location are valid",
-      ALL_UN_LOCATION_CODES,
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.UN_LOCODE_DATASET)
-  );
 
   private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT = JsonAttribute.ifThen(
     "Validate displayed address length for EBLs",
@@ -175,23 +147,6 @@ public class EBLChecks {
   );
 
 
-  private static final JsonRebaseableContentCheck AMF_TYPE_CODES_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'manifestTypeCode' in 'advanceManifestFilings' against data set",
-    mav -> mav.submitAllMatching("advanceManifestFilings.*"),
-    JsonAttribute.path("manifestTypeCode", JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.AMF_TYPE_CODES))
-  );
-
-  private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' against known customs reference type codes",
-    mav -> {
-      mav.submitAllMatching("customsReferences.*.type");
-      mav.submitAllMatching("consignmentItems.*.customsReferences.*.type");
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.type");
-      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.type");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.CUSTOMS_REFERENCE_TYPE_CODES)
-  );
-
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
     mav -> {
@@ -203,27 +158,6 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
-  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate field is a known ISO 3166 alpha 2 code",
-    mav -> {
-      mav.submitAllMatching("placeOfIssue.countryCode");
-      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
-      mav.submitAllMatching("customsReferences.*.countryCode");
-      mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.countryCode");
-
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
-      mav.submitAllMatching("issuingParty.address.countryCode");
-      mav.submitAllMatching("documentParties.shippers.address.countryCode");
-      mav.submitAllMatching("documentParties.consignee.address.countryCode");
-      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
-      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
-  );
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'type' of 'nationalCommodityCodes' is a known code",
@@ -231,11 +165,6 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
-  private static final JsonRebaseableContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'packagingCode' is a known code",
-    mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.packageCode"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.OUTER_PACKAGING_CODE)
-  );
 
   private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
@@ -324,10 +253,6 @@ public class EBLChecks {
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
-      SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
-      EblDatasets.UN_LOCODE_DATASET
-    ),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
@@ -346,13 +271,8 @@ public class EBLChecks {
     EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    COUNTRY_CODE_VALIDATIONS,
-    AMF_TYPE_CODES_VALIDATION,
-    CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    OUTER_PACKAGING_CODE_IS_VALID,
     NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_TYPES_VALIDATIONS,
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
@@ -412,11 +332,6 @@ public class EBLChecks {
       }
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'imoClass' values must be from dataset",
-      allDg(dg -> dg.path("imoClass").submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_IMO_CLASSES)
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'inhalationZone' values must be from dataset",
       allDg(dg -> dg.path("inhalationZone").submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_INHALATION_ZONES)
@@ -444,11 +359,7 @@ public class EBLChecks {
     EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    COUNTRY_CODE_VALIDATIONS,
-    CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    AMF_TYPE_CODES_VALIDATION,
-    OUTER_PACKAGING_CODE_IS_VALID,
     JsonAttribute.allIndividualMatchesMustBeValid(
       "Validate mode of transport type",
       mav -> {
@@ -458,9 +369,7 @@ public class EBLChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
     ),
     NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_TYPES_VALIDATIONS,
-    TLR_CC_T_COMBINATION_UNIQUE,
-    TD_UN_LOCATION_CODES_VALID
+    TLR_CC_T_COMBINATION_UNIQUE
   );
 
   public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);

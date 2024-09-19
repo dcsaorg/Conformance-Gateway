@@ -1,0 +1,65 @@
+name: Web UI Testing
+
+on:
+  push:
+    branches: ["dev"]
+
+# Temporary to check if it works, before merging
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - "**.md"
+
+env:
+  NG_CLI_ANALYTICS: "ci"
+
+jobs:
+  test-webui:
+    name: Build and test Web UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Print commit sha
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "sha: $COMMIT_SHA"
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Set up Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: webui/package-lock.json
+
+      - name: Build Conformance-Gateway
+        run: |
+          mvn test-compile -U -B -V -DskipTests
+      # No need to run tests, as they are already run in the PR workflow
+
+      - name: Start Web UI
+        run: |
+          cd webui
+          echo Install dependencies
+          npm install
+          echo Start NPM with Web UI
+          npm run ng serve & echo $! > ngserve.pid
+          echo "Web UI is running on http://localhost:4200"
+
+      - name: Test Conformance-Gateway
+        run: |
+          mvn test -B -V -Djunit.includedTags=WebUI
+
+      - name: Stop Web UI
+        run: |
+          kill $(cat ngserve.pid) || true

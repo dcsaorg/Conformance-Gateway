@@ -261,6 +261,7 @@ public class ConformanceApplication {
     String requestUrl = servletRequest.getRequestURL().toString();
     Map<String, List<String>> requestHeaders = _getRequestHeaders(servletRequest);
     String uriAuthPrefix = "/conformance/" + localhostAuthUrlToken + "/sandbox/";
+    ConformanceWebResponse conformanceWebResponse = null;
     if (requestUrl.contains(uriAuthPrefix)) {
       int sandboxIdStart = requestUrl.indexOf(uriAuthPrefix) + uriAuthPrefix.length();
       int sandboxIdEnd = requestUrl.indexOf("/", sandboxIdStart);
@@ -276,18 +277,31 @@ public class ConformanceApplication {
             sandboxConfiguration.getAuthHeaderName(),
             List.of(sandboxConfiguration.getAuthHeaderValue()));
       }
+    } else if (requestUrl.contains("/conformance/")
+        && requestUrl.contains("/sandbox/")
+        && !requestUrl.contains("/conformance/sandbox/")) {
+      conformanceWebResponse =
+          new ConformanceWebResponse(
+              404,
+              JsonToolkit.JSON_UTF_8,
+              Collections.emptyMap(),
+              OBJECT_MAPPER
+                  .createObjectNode()
+                  .put("error", "Forgot to refresh the Spring Boot home page?")
+                  .toPrettyString());
     }
 
-    ConformanceWebResponse conformanceWebResponse =
-        ConformanceSandbox.handleRequest(
-            persistenceProvider,
-            new ConformanceWebRequest(
-                servletRequest.getMethod(),
-                requestUrl,
-                _getQueryParameters(servletRequest),
-                requestHeaders,
-                _getRequestBody(servletRequest)),
-            deferredSandboxTaskConsumer);
+    if (conformanceWebResponse == null) {
+      conformanceWebResponse = ConformanceSandbox.handleRequest(
+          persistenceProvider,
+          new ConformanceWebRequest(
+              servletRequest.getMethod(),
+              requestUrl,
+              _getQueryParameters(servletRequest),
+              requestHeaders,
+              _getRequestBody(servletRequest)),
+          deferredSandboxTaskConsumer);
+    }
 
     _writeResponse(
         servletResponse,

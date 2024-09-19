@@ -15,5 +15,5 @@
 *ngFor="let sandbox of sandboxes"
 [ngClass]="'entityCard withContentPadding withPointerCursor'"
 (click)="onSandboxClick(sandbox)">
-    <div>{{sandbox.name}}</div>
+    <div class="wrappingText">{{sandbox.name}}</div>
 </mat-card>

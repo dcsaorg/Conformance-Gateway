@@ -3,17 +3,11 @@ package org.dcsa.conformance.core.check;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonMetaSchema;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.Keyword;
-import com.networknt.schema.NonValidationKeyword;
-import com.networknt.schema.SchemaValidatorsConfig;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationContext;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.*;
+
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,7 +16,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
   private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER =
@@ -73,7 +69,13 @@ public class JsonSchemaValidator {
 
   @SneakyThrows
   public Set<String> validate(String jsonString) {
-    return validate(OBJECT_MAPPER.readTree(jsonString));
+    try {
+      return validate(OBJECT_MAPPER.readTree(jsonString));
+    } catch (JsonProcessingException e) {
+      String errorMessage = "Failed to parse JSON string: %s".formatted(e);
+      log.info(errorMessage, e);
+      return new TreeSet<>(Set.of(errorMessage));
+    }
   }
 
   public Set<String> validate(JsonNode jsonNode) {

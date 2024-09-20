@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          mvn package -U -B -V -DskipTests
+          mvn package -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Build Web UI

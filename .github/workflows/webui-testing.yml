@@ -2,13 +2,7 @@ name: Web UI Testing
 
 on:
   push:
-    branches: ["dev"]
-
-# Temporary to check if it works, before merging
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths-ignore:
-      - "**.md"
+    branches: ["dev", "test", "master"]
 
 env:
   NG_CLI_ANALYTICS: "ci"
@@ -29,7 +23,7 @@ jobs:
           echo "sha: $COMMIT_SHA"
 
       - name: Set up Java JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'

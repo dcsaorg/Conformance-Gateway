@@ -44,7 +44,7 @@ jobs:
 
       - name: Build and test Conformance-Gateway
         run: |
-          mvn package -U -B -V --fail-at-end
+          mvn package -B -V --fail-at-end
 
       - name: Set Sonar settings for PR build
         if: ${{ (github.event_name == 'pull_request') }}

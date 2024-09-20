@@ -15,7 +15,7 @@ env:
 
 jobs:
   test-webui:
-    name: Build and test Web UI
+    name: Test Web UI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

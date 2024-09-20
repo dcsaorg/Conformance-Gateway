@@ -196,7 +196,7 @@ class SeleniumTest extends ManualTestBase {
         // notify tab 2.
         switchToTab(1);
         driver.findElement(By.id("notifyPartyButton")).click();
-        log.info("Notify party");
+        log.debug("Notify party");
         switchToTab(0);
         // refresh page 1
         driver.findElement(By.id("refreshStatusButton")).click();
@@ -216,7 +216,7 @@ class SeleniumTest extends ManualTestBase {
   }
 
   private static void completeAction() {
-    log.info("Completing action");
+    log.debug("Completing action");
     wait.until(
         ExpectedConditions.visibilityOfElementLocated(By.id("completeCurrentActionButton")));
     driver.findElement(By.id("completeCurrentActionButton")).click();

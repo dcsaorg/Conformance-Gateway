@@ -11,6 +11,7 @@
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<log4j.version>2.20.0</log4j.version>
@@ -152,7 +153,7 @@
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
-					<release>${maven.compiler.target}</release>
+					<release>${maven.compiler.release}</release>
 				</configuration>
 			</plugin>
 			<plugin>

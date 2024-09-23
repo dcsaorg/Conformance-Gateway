@@ -19,15 +19,18 @@ public class CsGetVesselSchedulesAction extends CsAction {
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
+      String actionTitle,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
+    super(subscriberPartyName, publisherPartyName, previousAction, actionTitle, 200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET vessel schedules request with the following parameters: "
-        + sspSupplier.get().toJson().toPrettyString();
+    return previousAction instanceof CsGetVesselSchedulesAction
+        ? "Send a GET vessel schedules request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
+        : "Send a GET vessel schedules request with the following parameters: "
+            + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override

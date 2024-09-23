@@ -181,6 +181,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
+    jsonRequestBody.put("eBLVisualisationByCarrier",getSupportingDocumentObject());
+
     syncCounterpartPost(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
@@ -190,6 +192,34 @@ public class EblIssuanceCarrier extends ConformanceParty {
             .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
   }
 
+  private ObjectNode getSupportingDocumentObject(){
+    var document = generateDocument();
+    var supportingDocument = OBJECT_MAPPER.createObjectNode()
+    .put("name","test-iss-document")
+      .put("content",document)
+      .put("mediatype","application/octet-stream");
+    return supportingDocument;
+  }
+
+  private static byte[] generateDocument() {
+    var uuid = UUID.randomUUID();
+    var doc = new byte[256 + 16];
+    for (int i = 0 ; i < 256 ; i++) {
+      // Include every byte so that we are certain that nothing corrupts the transfer.
+      doc[i] = (byte)i;
+    }
+    // Add a UUID to ensure it is unique, such that the testers do not have to "remove" the
+    // document between every test.
+    putLong(uuid.getMostSignificantBits(), doc, 256);
+    putLong(uuid.getLeastSignificantBits(), doc, 256 + 8);
+    return doc;
+  }
+
+  private static void putLong(long value, byte[] array, int offset) {
+    for (int i = 0 ; i < 8 ; i++) {
+      array[offset + i] = (byte)((value >>> i) & 0xff);
+    }
+  }
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuanceCarrier.handleRequest(%s)".formatted(request));

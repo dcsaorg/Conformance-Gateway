@@ -15,11 +15,15 @@ public class CsGetPortSchedulesAction extends CsAction {
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
-      String actionTitle,
       JsonSchemaValidator responseSchemaValidator) {
-
-    super(subscriberPartyName, publisherPartyName, previousAction, actionTitle
-      , 200);
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetPortSchedulesAction)
+            ? "GetPortSchedules (second page)"
+            : "GetPortSchedules",
+        200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 

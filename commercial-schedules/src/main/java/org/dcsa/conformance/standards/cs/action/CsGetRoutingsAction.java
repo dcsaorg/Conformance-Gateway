@@ -15,10 +15,13 @@ public class CsGetRoutingsAction extends CsAction {
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
-      String actionTitle,
       JsonSchemaValidator responseSchemaValidator1) {
-    super(subscriberPartyName, publisherPartyName, previousAction, actionTitle, 200);
-
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetRoutingsAction) ? "GetRoutings (second page)" : "GetRoutings",
+        200);
     this.responseSchemaValidator = responseSchemaValidator1;
   }
 

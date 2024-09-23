@@ -135,9 +135,9 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
           "Limit and Pagination",
           noAction()
             .thenEither(
-              scenarioWithParametersPtpForPagination(getPtpRoutings(true),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT),
-              scenarioWithParametersPsForPagination(getPortSchedules(true),UN_LOCATION_CODE,DATE,LIMIT),
-              scenarioWithParametersVsForPagination(getVesselSchedules(true),VESSEL_IMO_NUMBER,LIMIT))))
+              scenarioWithParametersPtpForPagination(getPtpRoutings(),PLACE_OF_RECEIPT,PLACE_OF_DELIVERY,LIMIT),
+              scenarioWithParametersPsForPagination(getPortSchedules(),UN_LOCATION_CODE,DATE,LIMIT),
+              scenarioWithParametersVsForPagination(getVesselSchedules(),VESSEL_IMO_NUMBER,LIMIT))))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -145,32 +145,32 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
 
   private static CsScenarioListBuilder scenarioWithParametersPtpForPagination(
       CsScenarioListBuilder nextRoutingsAction, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings(true).then(nextRoutingsAction));
+    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings().then(nextRoutingsAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPsForPagination(
       CsScenarioListBuilder nextPortSchedulesAction, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules(true).then(nextPortSchedulesAction));
+    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules().then(nextPortSchedulesAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersVsForPagination(
       CsScenarioListBuilder nextVesselSchedulesAction, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules(true).then(nextVesselSchedulesAction));
+    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules().then(nextVesselSchedulesAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPtp(
       CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings(false));
+    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings());
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPs(
       CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules(false));
+    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules());
   }
 
   private static CsScenarioListBuilder scenarioWithParametersVs(
       CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules(false));
+    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules());
   }
 
   private static CsScenarioListBuilder supplyScenarioParameters(
@@ -185,7 +185,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
     return new CsScenarioListBuilder(null);
   }
 
-  private static CsScenarioListBuilder getVesselSchedules(boolean hasNextAction) {
+  private static CsScenarioListBuilder getVesselSchedules() {
     CsComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -195,11 +195,10 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                getActionTitleVs(hasNextAction, (CsAction) previousAction),
                 componentFactory.getMessageSchemaValidator("api", "serviceSchedules")));
   }
 
-  private static CsScenarioListBuilder getPtpRoutings(boolean hasNextAction) {
+  private static CsScenarioListBuilder getPtpRoutings() {
     CsComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -209,44 +208,10 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                getActionTitlePtp(hasNextAction, (CsAction) previousAction),
                 componentFactory.getMessageSchemaValidator("api", "pointToPointRoutings")));
   }
 
-  private static String getActionTitlePs(boolean hasNextAction, CsAction previousAction) {
-    if (hasNextAction) {
-      if (previousAction instanceof CsGetPortSchedulesAction) {
-        return "GetPortSchedulesSecondPage";
-      } else {
-        return "GetPortSchedulesFirstPage";
-      }
-    }
-    return "GetPortSchedules";
-  }
-
-  private static String getActionTitleVs(boolean hasNextAction, CsAction previousAction) {
-    if (hasNextAction) {
-      if (previousAction instanceof CsGetVesselSchedulesAction) {
-        return "GetVesselSchedulesSecondPage";
-      } else {
-        return "GetVesselSchedulesFirstPage";
-      }
-    }
-    return "GetVesselSchedules";
-  }
-
-  private static String getActionTitlePtp(boolean hasNextAction, CsAction previousAction) {
-    if (hasNextAction) {
-      if (previousAction instanceof CsGetRoutingsAction) {
-        return "GetRoutingsSecondPage";
-      } else {
-        return "GetRoutingsFirstPage";
-      }
-    }
-    return "GetRoutings";
-  }
-
-  private static CsScenarioListBuilder getPortSchedules(boolean hasNextAction) {
+  private static CsScenarioListBuilder getPortSchedules() {
     CsComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
     String subscriberPartyName = threadLocalSubscriberPartyName.get();
@@ -256,7 +221,6 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                getActionTitlePs(hasNextAction, (CsAction) previousAction),
                 componentFactory.getMessageSchemaValidator("api", "portSchedules")));
   }
 }

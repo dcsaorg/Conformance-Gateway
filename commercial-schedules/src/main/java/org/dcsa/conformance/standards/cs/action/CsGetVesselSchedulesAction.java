@@ -19,11 +19,18 @@ public class CsGetVesselSchedulesAction extends CsAction {
       String subscriberPartyName,
       String publisherPartyName,
       CsAction previousAction,
-      String actionTitle,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, actionTitle, 200);
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetVesselSchedulesAction)
+            ? "GetVesselSchedules (second page)"
+            : "GetVesselSchedules",
+        200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
+
 
   @Override
   public String getHumanReadablePrompt() {

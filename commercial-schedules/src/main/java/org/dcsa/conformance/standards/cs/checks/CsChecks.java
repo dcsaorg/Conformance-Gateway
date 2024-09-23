@@ -64,8 +64,7 @@ public class CsChecks {
                                     if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
                                         cutOffDateTimeCode.asText())) {
                                       issues.add(
-                                          String.format(
-                                              "Invalid cutOffDateTimeCode: %s",
+                                              "Invalid cutOffDateTimeCode: %s".formatted(
                                               cutOffDateTimeCode.asText()));
                                     }
                                   }));
@@ -120,7 +119,7 @@ public class CsChecks {
 
   private static JsonContentCheck createLocationCheckPtp(String locationType) {
     return JsonAttribute.customValidator(
-        String.format("Check any one of the location is available for '%s'", locationType),
+        "Check any one of the location is available for '%s'".formatted(locationType),
         body -> {
           var issues = new LinkedHashSet<String>();
           for (JsonNode routing : body) {
@@ -228,14 +227,14 @@ public class CsChecks {
 
   private static void checkAnyLocationIsPresent(
       String locationType, JsonNode data, LinkedHashSet<String> issues) {
-    String locationPath = String.format("/%s/location", locationType);
+    String locationPath = "/%s/location".formatted(locationType);
     JsonNode address = data.at(locationPath + "/address");
     JsonNode unLocationCode = data.at(locationPath + "/UNLocationCode");
     JsonNode facility = data.at(locationPath + "/facility");
     if (JsonAttribute.isJsonNodeAbsent(address)
         && JsonAttribute.isJsonNodeAbsent(unLocationCode)
         && JsonAttribute.isJsonNodeAbsent(facility)) {
-      issues.add(String.format("Any one of the location should be present for '%s'", locationType));
+      issues.add("Any one of the location should be present for '%s'".formatted(locationType));
     }
   }
 
@@ -310,9 +309,9 @@ public class CsChecks {
 
     // Compare the dates
     if (dateType.equals("startDate") && !dateTimeAsDate.isAfter(date)) {
-      return String.format("The %s date should be after the start date", operation);
+      return "The %s date should be after the start date".formatted(operation);
     } else if (dateType.equals("endDate") && !dateTimeAsDate.isBefore(date)) {
-      return String.format("The %s date should be before the end date", operation);
+      return "The %s date should be before the end date".formatted(operation);
     }
     return "";
   }

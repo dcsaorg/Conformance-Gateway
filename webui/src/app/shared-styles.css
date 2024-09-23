@@ -52,6 +52,10 @@
     cursor: pointer;
 }
 
+.wrappingText {
+    white-space: normal;
+}
+
 .text-with-spinner {
   display: flex;
   align-items: center;

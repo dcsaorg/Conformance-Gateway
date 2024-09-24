@@ -175,13 +175,14 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
+    jsonRequestBody.put("eBLVisualisationByCarrier",getSupportingDocumentObject());
+    var eBLVisualisationByCarrier = Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
     var issuanceManifest = OBJECT_MAPPER.createObjectNode()
         .put("documentChecksum", tdChecksum)
-        .put("issueToChecksum", issueToChecksum);
+        .put("issueToChecksum", issueToChecksum)
+      .put("eBLVisualisationByCarrierChecksum",eBLVisualisationByCarrier);
 
     jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
-
-    jsonRequestBody.put("eBLVisualisationByCarrier",getSupportingDocumentObject());
 
     syncCounterpartPost(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),

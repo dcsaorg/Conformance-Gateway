@@ -16,12 +16,12 @@ import java.util.stream.Stream;
 
 @Getter
 @Slf4j
-public class UC13_Shipper_CancelConfirmedBookingAction extends StateChangingBookingAction {
+public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
-  public UC13_Shipper_CancelConfirmedBookingAction(
+  public UC13ShipperCancelConfirmedBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,

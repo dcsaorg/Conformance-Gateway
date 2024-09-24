@@ -65,6 +65,7 @@ public class PersistableCarrierBooking {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
+  private static final String REASON_INFO = "Confirmed booking cancelled by shipper (no reason given)";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -239,7 +240,7 @@ public class PersistableCarrierBooking {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
     if (reason == null || reason.isBlank()) {
-      reason = "Confirmed booking cancelled by shipper (no reason given)";
+      reason = REASON_INFO;
     }
     setReason(reason);
   }
@@ -251,7 +252,7 @@ public class PersistableCarrierBooking {
     }
     mutateBookingAndAmendment(b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
     if (reason == null || reason.isBlank()) {
-      reason = "Confirmed booking cancelled by shipper (no reason given)";
+      reason = REASON_INFO;
     }
     setReason(reason);
   }
@@ -260,7 +261,7 @@ public class PersistableCarrierBooking {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_DECLINED);
     if (reason == null || reason.isBlank()) {
-      reason = "Confirmed booking cancelled by shipper (no reason given)";
+      reason = REASON_INFO;
     }
     setReason(reason);
   }

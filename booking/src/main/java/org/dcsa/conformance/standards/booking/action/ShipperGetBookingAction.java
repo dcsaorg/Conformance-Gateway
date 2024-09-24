@@ -11,7 +11,7 @@ import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-public class Shipper_GetBookingAction extends BookingAction {
+public class ShipperGetBookingAction extends BookingAction {
 
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
@@ -19,7 +19,7 @@ public class Shipper_GetBookingAction extends BookingAction {
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedContent;
 
-  public Shipper_GetBookingAction(
+  public ShipperGetBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,

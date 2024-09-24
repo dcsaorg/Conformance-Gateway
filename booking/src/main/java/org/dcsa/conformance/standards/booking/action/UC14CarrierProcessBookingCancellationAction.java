@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Getter
-public class UC14_Carrier_ProcessBookingCancellationAction extends StateChangingBookingAction {
+public class UC14CarrierProcessBookingCancellationAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isCancellationConfirmed;
 
-  public UC14_Carrier_ProcessBookingCancellationAction(
+  public UC14CarrierProcessBookingCancellationAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,

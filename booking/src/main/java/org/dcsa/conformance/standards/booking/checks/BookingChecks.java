@@ -67,8 +67,8 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
-  private static final JsonPointer AMENDED_BOOKING_STATUS = JsonPointer.compile("/amendedBookingStatus");
-  private static final JsonPointer BOOKING_CANCELLATION_STATUS = JsonPointer.compile("/bookingCancellationStatus");
+  private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
+  private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
 
   public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
@@ -500,8 +500,8 @@ public class BookingChecks {
     "Reason field must be present for the selected Booking Status",
     body -> {
       var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path("amendedBookingStatus");
-      var bookingCancellationStatus = body.path("bookingCancellationStatus");
+      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
+      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
       var reason = body.get("reason");
@@ -521,8 +521,8 @@ public class BookingChecks {
     "Reason field must be present for the selected Booking Status",
     body -> {
       var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path("amendedBookingStatus");
-      var bookingCancellationStatus = body.path("bookingCancellationStatus");
+      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
+      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
       if (REASON_ABSENCE_STATES.contains(BookingState.valueOf(status.asText())) && bookingCancellationStatus == null) {
@@ -806,7 +806,7 @@ public class BookingChecks {
     checks.add(JsonAttribute.customValidator(
       "Validate Amended Booking Status",
       body -> {
-        String amendedBookingStatus = body.path("amendedBookingStatus").asText("");
+        String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
         if(!amendedBookingStatus.isEmpty()
           && expectedAmendedBookingStatus!= null
           && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
@@ -818,7 +818,7 @@ public class BookingChecks {
     checks.add(JsonAttribute.customValidator(
       "Validate Booking Cancellation Status",
       body -> {
-        String bookingCancellationStatus = body.path("bookingCancellationStatus").asText("");
+        String bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
         if(!bookingCancellationStatus.isEmpty()
           && expectedCancelledBookingStatus!= null
           && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {

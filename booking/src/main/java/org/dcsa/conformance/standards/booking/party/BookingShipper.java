@@ -60,13 +60,13 @@ public class BookingShipper extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(UC1_Shipper_SubmitBookingRequestAction.class, this::sendBookingRequest),
-      Map.entry(Shipper_GetBookingAction.class, this::getBookingRequest),
+      Map.entry(ShipperGetBookingAction.class, this::getBookingRequest),
       Map.entry(Shipper_GetAmendedBooking404Action.class, this::getBookingRequest),
       Map.entry(UC3_Shipper_SubmitUpdatedBookingRequestAction.class, this::sendUpdatedBooking),
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
       Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
-      Map.entry(UC13_Shipper_CancelConfirmedBookingAction.class, this::sendConfirmedBookingCancellationRequest),
+      Map.entry(UC13ShipperCancelConfirmedBookingAction.class, this::sendConfirmedBookingCancellationRequest),
       Map.entry(AUC_Shipper_SendInvalidBookingAction.class,this::sendInvalidBookingAction));
   }
 

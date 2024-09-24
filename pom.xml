@@ -11,10 +11,12 @@
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<log4j.version>2.20.0</log4j.version>
 		<junit.version>5.11.0</junit.version>
+		<lombok.version>1.18.34</lombok.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
@@ -122,8 +124,8 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.18.34</version>
-				<optional>true</optional>
+				<version>${lombok.version}</version>
+				<scope>provided</scope>
 			</dependency>
 
 			<!-- test scoped dependencies -->
@@ -152,7 +154,14 @@
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
-					<release>${maven.compiler.target}</release>
+					<release>${maven.compiler.release}</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -173,6 +182,26 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.8</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

@@ -1,8 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +15,8 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 @Getter
 @Slf4j
 public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateChangingSIAction {
+  private final ShippingInstructionsStatus expectedSiStatus;
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean useTDRef;
 
@@ -26,14 +24,14 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
+      ShippingInstructionsStatus expectedSiStatus,
       boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), Set.of(200, 202));
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3" + (useTDRef ? " [TDR]" : ""), 202);
     this.useTDRef = useTDRef;
+    this.expectedSiStatus = expectedSiStatus;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
@@ -71,10 +69,6 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var currentState = Objects.requireNonNullElse(
-          dsp.shippingInstructionsStatus(),
-          ShippingInstructionsStatus.SI_RECEIVED  // Placeholder to avoid NPE
-        );
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PUT"),
@@ -96,29 +90,17 @@ public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateCh
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator),
-            new JsonSchemaCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
             EBLChecks.siRequestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier())
         );
         return Stream.concat(
           primaryExchangeChecks,
-          Stream.concat(
-              EBLChecks.siRefStatusContentChecks(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                currentState,
-                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
-                EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())),
-              getSINotificationChecks(
-                getMatchedNotificationExchangeUuid(),
-                expectedApiVersion,
-                notificationSchemaValidator,
-                currentState,
-                ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
-                EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())))
+          getSINotificationChecks(
+            getMatchedNotificationExchangeUuid(),
+            expectedApiVersion,
+            notificationSchemaValidator,
+            expectedSiStatus,
+            ShippingInstructionsStatus.SI_UPDATE_RECEIVED,
+            EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier()))
           );
       }
     };

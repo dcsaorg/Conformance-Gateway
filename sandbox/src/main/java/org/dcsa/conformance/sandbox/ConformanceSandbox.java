@@ -243,9 +243,11 @@ public class ConformanceSandbox {
 
     String expectedPrefix = "/conformance/sandbox/";
     int expectedPrefixStart = webRequest.url().indexOf(expectedPrefix);
-    if (expectedPrefixStart < 0)
-      throw new IllegalArgumentException(
-          "Missing '%s' in: %s".formatted(expectedPrefix, webRequest.url()));
+    if (expectedPrefixStart < 0) {
+      log.info(
+          "Rejecting request with missing '%s' in: %s".formatted(expectedPrefix, webRequest.url()));
+      return new ConformanceWebResponse(404, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+    }
     String remainingUri = webRequest.url().substring(expectedPrefixStart + expectedPrefix.length());
 
     int endOfSandboxId = remainingUri.indexOf("/");

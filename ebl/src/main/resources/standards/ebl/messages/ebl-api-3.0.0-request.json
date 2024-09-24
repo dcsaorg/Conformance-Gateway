@@ -2,7 +2,6 @@
   "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
   "isToOrder": false,
-  "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
@@ -17,9 +16,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 12000,
-      "weightUnit": "KGM",
-      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
       "nationalCommodityCodes": [
         {
           "type": "NCM",
@@ -34,8 +31,10 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 12000,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 12000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 400
@@ -48,6 +47,10 @@
     {
       "isShipperOwned": false,
       "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "shippingMarks":  [
+        "Made in some Country",
+        "こんにちはこんにちはこんにちはこんにちはこんにちはこんにちはこんにちは"
+      ],
       "seals": [
         {
           "number": "NSL13386"
@@ -58,6 +61,16 @@
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "sendToPlatform": "BOLE",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

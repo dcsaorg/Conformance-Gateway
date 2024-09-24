@@ -2,7 +2,6 @@
   "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
   "isToOrder": false,
-  "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
@@ -17,9 +16,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 12000,
-      "weightUnit": "KGM",
-      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
@@ -27,8 +24,10 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 12000,
-          "weightUnit": "KGM"
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          }
         }
       ]
     }
@@ -48,6 +47,16 @@
     "shipper": {
 
       "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "sendToPlatform": "BOLE",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

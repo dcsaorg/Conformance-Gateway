@@ -86,7 +86,7 @@ public class EblCarrier extends ConformanceParty {
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
       switch (scenarioType) {
-        case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF, REGULAR_CLAD -> new CarrierScenarioParameters(
+        case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
           "CBR_123_" + scenarioType.name(),
           "Some Commodity Subreference 123",
           null,
@@ -138,7 +138,7 @@ public class EblCarrier extends ConformanceParty {
           "DKAAR",
           "220299",
           null,
-          "Non alcoholic beverages, 40,000 cans",
+          "Non alcoholic beverages",
           null,
           "Bottles"
         );
@@ -152,7 +152,7 @@ public class EblCarrier extends ConformanceParty {
           "DKAAR",
           "293499",
           null,
-          "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+          "Environmentally hazardous substance",
           null,
           null
         );
@@ -171,7 +171,7 @@ public class EblCarrier extends ConformanceParty {
           "Fibreboard boxes"
         );
         case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
-          "RG-2C-2U-1E",
+          "RG-2C-2U-2E",
           "Commodity Subreference 123",
           "Commodity Subreference 456",
           // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
@@ -580,8 +580,7 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnShippingInstructionsRefStatusResponse(
-      200,
+    return returnEmpty202Response(
       request,
       siData,
       documentReference
@@ -620,27 +619,15 @@ public class EblCarrier extends ConformanceParty {
     );
   }
 
-  private ConformanceResponse returnShippingInstructionsRefStatusResponse(
+  private ConformanceResponse returnShippingInstructionsReferenceResponse(
     int responseCode, ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
     var sir = shippingInstructions.required("shippingInstructionsReference").asText();
     var siStatus = shippingInstructions.required("shippingInstructionsStatus").asText();
     var statusObject =
       OBJECT_MAPPER
         .createObjectNode()
-        .put("shippingInstructionsStatus", siStatus)
         .put("shippingInstructionsReference", sir);
-    var tdr = shippingInstructions.path("transportDocumentReference");
-    var updatedSiStatus = shippingInstructions.path("updatedShippingInstructionsStatus");
-    var reason = shippingInstructions.path("reason");
-    if (tdr.isTextual()) {
-      statusObject.set("transportDocumentReference", tdr);
-    }
-    if (updatedSiStatus.isTextual()) {
-      statusObject.set("updatedShippingInstructionsStatus", updatedSiStatus);
-    }
-    if (reason.isTextual()) {
-      statusObject.set("reason", reason);
-    }
+
     ConformanceResponse response =
       request.createResponse(
         responseCode,
@@ -649,6 +636,20 @@ public class EblCarrier extends ConformanceParty {
     addOperatorLogEntry(
       "Responded %d to %s SI '%s' (resulting state '%s')"
         .formatted(responseCode, request.method(), documentReference, siStatus));
+    return response;
+  }
+
+  private ConformanceResponse returnEmpty202Response(ConformanceRequest request, ObjectNode shippingInstructions, String documentReference) {
+    var siStatus = shippingInstructions.required("shippingInstructionsStatus").asText();
+
+    ConformanceResponse response =
+      request.createResponse(
+        202,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(""));
+    addOperatorLogEntry(
+      "Responded %d to %s SI '%s' (resulting state '%s')"
+        .formatted(202, request.method(), documentReference, siStatus));
     return response;
   }
 
@@ -690,8 +691,8 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnShippingInstructionsRefStatusResponse(
-      201,
+    return returnShippingInstructionsReferenceResponse(
+      202,
       request,
       siPayload,
       si.getShippingInstructionsReference()
@@ -724,7 +725,11 @@ public class EblCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnShippingInstructionsRefStatusResponse(200, request, si.getShippingInstructions(), documentReference);
+    return returnEmpty202Response(
+      request,
+      si.getShippingInstructions(),
+      documentReference
+    );
   }
 
   @Override

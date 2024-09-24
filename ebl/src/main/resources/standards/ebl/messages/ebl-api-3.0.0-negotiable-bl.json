@@ -1,0 +1,92 @@
+{
+  "transportDocumentTypeCode": "BOL",
+  "isElectronic": true,
+  "isToOrder": true,
+  "freightPaymentTermCode": "PRE",
+  "isShippedOnBoardType": true,
+  "invoicePayableAt": {
+    "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
+  },
+  "partyContactDetails": [
+    {
+      "name": "DCSA test person",
+      "email": "no-reply@dcsa.example.org"
+    }
+  ],
+  "consignmentItems": [
+    {
+      "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
+      "nationalCommodityCodes": [
+        {
+          "type": "NCM",
+          "countryCode": "BR",
+          "values": ["1515"]
+        }
+      ],
+      "HSCodes": [
+        "CONSIGNMENT_ITEM_HS_CODE"
+      ],
+      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "cargoItems": [
+        {
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
+          "outerPackaging": {
+            "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+            "numberOfPackages": 400
+          }
+        }
+      ]
+    }
+  ],
+  "utilizedTransportEquipments": [
+    {
+      "isShipperOwned": false,
+      "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+      "seals": [
+        {
+          "number": "NSL13386"
+        }
+      ]
+    }
+  ],
+  "documentParties": {
+    "shipper": {
+      "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "endorsee": {
+      "partyName": "To Order of Shipper"
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "sendToPlatform": "BOLE",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "notifyParties": [
+      {
+        "partyName": "DCSA CTK",
+        "partyContactDetails": [
+          {
+            "name": "DCSA test person",
+            "email": "no-reply@dcsa.example.org"
+          }
+        ]
+      }
+    ]
+  }
+}

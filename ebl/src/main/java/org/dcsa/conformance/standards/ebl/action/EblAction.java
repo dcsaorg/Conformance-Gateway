@@ -43,7 +43,7 @@ public abstract class EblAction extends ConformanceAction {
     this.dspReference =
       previousAction == null
         ? new OverwritingReference<>(
-        null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
+        null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
         : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -105,14 +105,6 @@ public abstract class EblAction extends ConformanceAction {
         responseJsonNode.path("shippingInstructionsReference").asText(null);
     var newTransportDocumentReference =
         responseJsonNode.path("transportDocumentReference").asText(null);
-    var newShippingInstructionsStatus =
-        parseShippingInstructionsStatus(
-            responseJsonNode.path("shippingInstructionsStatus").asText(null));
-    var newUpdatedShippingInstructionsStatus =
-        parseShippingInstructionsStatus(
-            responseJsonNode.path("updatedShippingInstructionsStatus").asText(null));
-    var newTransportDocumentStatus =
-        parseTransportDocumentStatus(responseJsonNode.path("transportDocumentStatus").asText(null));
 
     var updatedDsp = dsp;
     updatedDsp =
@@ -123,46 +115,11 @@ public abstract class EblAction extends ConformanceAction {
     updatedDsp =
         updateIfNotNull(
             updatedDsp, newTransportDocumentReference, updatedDsp::withTransportDocumentReference);
-    updatedDsp =
-        updateIfNotNull(
-            updatedDsp, newShippingInstructionsStatus, updatedDsp::withShippingInstructionsStatus);
-    updatedDsp =
-        updateIfNotNull(
-            updatedDsp,
-            newUpdatedShippingInstructionsStatus,
-            updatedDsp::withUpdatedShippingInstructionsStatus);
-    updatedDsp =
-        updateIfNotNull(
-            updatedDsp, newTransportDocumentStatus, updatedDsp::withTransportDocumentStatus);
 
     updatedDsp = updateDSPFromSIHook(exchange, updatedDsp);
 
     if (!dsp.equals(updatedDsp)) {
       dspReference.set(updatedDsp);
-    }
-  }
-
-  private static ShippingInstructionsStatus parseShippingInstructionsStatus(String v) {
-    if (v == null) {
-      return null;
-    }
-    try {
-      return ShippingInstructionsStatus.fromWireName(v);
-    } catch (IllegalArgumentException e) {
-      // Do not assume conformant payload.
-      return null;
-    }
-  }
-
-  private static TransportDocumentStatus parseTransportDocumentStatus(String v) {
-    if (v == null) {
-      return null;
-    }
-    try {
-      return TransportDocumentStatus.fromWireName(v);
-    } catch (IllegalArgumentException e) {
-      // Do not assume conformant payload.
-      return null;
     }
   }
 

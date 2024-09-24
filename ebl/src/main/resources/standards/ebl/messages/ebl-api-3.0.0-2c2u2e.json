@@ -2,7 +2,6 @@
   "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
   "isToOrder": false,
-  "sendToPlatform": "BOLE",
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {
@@ -17,9 +16,7 @@
   "consignmentItems": [
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 5000,
-      "weightUnit": "KGM",
-      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_PLACEHOLDER"],
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
@@ -27,8 +24,10 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 2500,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 100
@@ -36,8 +35,10 @@
         },
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-          "weight": 2500,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 100
@@ -47,9 +48,7 @@
     },
     {
       "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-      "weight": 10000,
-      "weightUnit": "KGM",
-      "descriptionOfGoods": "DESCRIPTION_OF_GOODS_2_PLACEHOLDER",
+      "descriptionOfGoods": ["DESCRIPTION_OF_GOODS_2_PLACEHOLDER"],
       "HSCodes": [
         "CONSIGNMENT_ITEM_2_HS_CODE"
       ],
@@ -57,8 +56,10 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "weight": 5000,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 100
@@ -66,8 +67,10 @@
         },
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-          "weight": 5000,
-          "weightUnit": "KGM",
+          "grossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "description": "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
             "numberOfPackages": 200
@@ -100,6 +103,16 @@
     "shipper": {
 
       "partyName": "DCSA CTK",
+      "partyContactDetails": [
+        {
+          "name": "DCSA test person",
+          "email": "no-reply@dcsa.example.org"
+        }
+      ]
+    },
+    "issueTo": {
+      "partyName": "DCSA CTK",
+      "sendToPlatform": "BOLE",
       "partyContactDetails": [
         {
           "name": "DCSA test person",

@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
@@ -19,7 +18,7 @@ public class CsGetVesselSchedulesAction extends CsAction {
   public CsGetVesselSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
-      ConformanceAction previousAction,
+      CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
     super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
     this.responseSchemaValidator = responseSchemaValidator;
@@ -55,13 +54,24 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                sspSupplier,
+                getDspSupplier(),
+                previousAction instanceof CsGetVesselSchedulesAction));
       }
     };
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode =
+        super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
   }
 }

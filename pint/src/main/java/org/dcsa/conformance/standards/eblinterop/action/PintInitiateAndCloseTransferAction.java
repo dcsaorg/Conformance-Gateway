@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -13,8 +15,6 @@ import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
-
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 
 @Getter
 @Slf4j

@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Objects;
+
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -12,6 +12,7 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends StateChangingSIAction {
+  private final ShippingInstructionsStatus expectedSIStatus;
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean acceptChanges;
 
@@ -19,11 +20,14 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
+      ShippingInstructionsStatus expectedSIStatus,
       JsonSchemaValidator requestSchemaValidator,
       boolean acceptChanges) {
     super(carrierPartyName, shipperPartyName, previousAction, acceptChanges ? "UC4a" : "UC4d", 204);
+    this.expectedSIStatus = expectedSIStatus;
     this.requestSchemaValidator = requestSchemaValidator;
     this.acceptChanges = acceptChanges;
+    assert !acceptChanges || expectedSIStatus == ShippingInstructionsStatus.SI_RECEIVED;
   }
 
   @Override
@@ -56,16 +60,11 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
-        var currentState = Objects.requireNonNullElse(
-          dsp.shippingInstructionsStatus(),
-          ShippingInstructionsStatus.SI_RECEIVED  // Placeholder to avoid NPE
-        );
         return getSINotificationChecks(
           getMatchedExchangeUuid(),
           expectedApiVersion,
           requestSchemaValidator,
-          acceptChanges ? ShippingInstructionsStatus.SI_RECEIVED : currentState,
+          expectedSIStatus,
           acceptChanges ? ShippingInstructionsStatus.SI_UPDATE_CONFIRMED : ShippingInstructionsStatus.SI_UPDATE_DECLINED,
           EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())
         );

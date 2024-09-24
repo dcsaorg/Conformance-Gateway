@@ -43,6 +43,21 @@ public class EBLChecks {
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
   );
 
+  public static final Predicate<JsonNode> IS_AN_EBL = td -> td.path("isElectronic").asBoolean(false)
+    && td.path("transportDocumentTypeCode").asText("").equals("BOL");
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies with charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies without charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
     "The 'documentParties.notifyParties' attribute is mandatory for negotiable B/Ls",
     JsonAttribute.isTrue("isToOrder"),
@@ -257,6 +272,8 @@ public class EBLChecks {
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isElectronic' implies 'issueTo' party",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
@@ -278,6 +295,8 @@ public class EBLChecks {
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),

@@ -66,7 +66,7 @@ public class BookingShipper extends ConformanceParty {
       Map.entry(UC7_Shipper_SubmitBookingAmendment.class, this::sendUpdatedConfirmedBooking),
       Map.entry(UC9_Shipper_CancelBookingAmendment.class, this::sendCancelBookingAmendment),
       Map.entry(UC11_Shipper_CancelBookingRequestAction.class, this::sendCancelBookingRequest),
-      Map.entry(UC13_Shipper_CancelConfirmedBookingAction.class, this::sendCancelConfirmedBookingRequest),
+      Map.entry(UC13_Shipper_CancelConfirmedBookingAction.class, this::sendConfirmedBookingCancellationRequest),
       Map.entry(AUC_Shipper_SendInvalidBookingAction.class,this::sendInvalidBookingAction));
   }
 
@@ -147,20 +147,21 @@ public class BookingShipper extends ConformanceParty {
       Collections.emptyMap(),
         new ObjectMapper()
             .createObjectNode()
-            .put("bookingStatus", BookingState.CANCELLED.wireName()));
+            .put("bookingStatus", BookingState.CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
   }
 
-  private void sendCancelConfirmedBookingRequest(JsonNode actionPrompt) {
-    log.info("Shipper.sendCancelConfirmedBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
+  private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
+    log.info("Shipper.sendConfirmedBookingCancellationRequest(%s)".formatted(actionPrompt.toPrettyString()));
     String cbr = actionPrompt.path("cbr").asText();
     syncCounterpartPatch(
       "/v2/bookings/%s".formatted(cbr),
       Collections.emptyMap(),
       new ObjectMapper()
         .createObjectNode()
-        .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.wireName()));
+        .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
+        .put("reason", "Cancelling due to internal issues"));
 
     addOperatorLogEntry("Sent a confirmed booking cancellation of '%s'".formatted(cbr));
   }
@@ -173,7 +174,7 @@ public class BookingShipper extends ConformanceParty {
       Collections.emptyMap(),
       new ObjectMapper()
         .createObjectNode()
-        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.wireName()));
+        .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
     addOperatorLogEntry("Sent a cancel amendment request of '%s'".formatted(reference));
   }

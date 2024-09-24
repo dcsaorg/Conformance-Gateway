@@ -5,9 +5,10 @@ import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.BookingState;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Getter
@@ -28,7 +29,7 @@ public class UC14_Carrier_ProcessBookingCancellationAction extends StateChanging
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC12: Complete the booking request with CBR '%s'"
+    return ("UC14: Process the confirmed booking cancellation  CBR '%s'"
         .formatted(
             getDspSupplier().get().carrierBookingReference()));
   }
@@ -38,7 +39,6 @@ public class UC14_Carrier_ProcessBookingCancellationAction extends StateChanging
     ObjectNode jsonNode = super.asJsonNode();
     var dsp = getDspSupplier().get();
     return jsonNode
-        .put("cbrr", dsp.carrierBookingRequestReference())
         .put("cbr", dsp.carrierBookingReference())
         .put("isCancellationConfirmed", isCancellationConfirmed);
   }
@@ -51,17 +51,18 @@ public class UC14_Carrier_ProcessBookingCancellationAction extends StateChanging
         var dsp = getDspSupplier().get();
         var bookingStatus = dsp.bookingStatus();
         var amendedBookingStatus = dsp.amendedBookingStatus();
+        var isCancelled = isCancellationConfirmed ?
+          BookingCancellationState.CANCELLATION_CONFIRMED : BookingCancellationState.CANCELLATION_DECLINED;
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedExchangeUuid(),
-                isCancellationConfirmed ? BookingState.CANCELLED : bookingStatus,
-                isCancellationConfirmed
-                  ? BookingState.AMENDMENT_CANCELLED
-                  : amendedBookingStatus),
+            bookingStatus == null ? null: new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+              getMatchedExchangeUuid(),
+              bookingStatus,
+              amendedBookingStatus,
+              isCancelled),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
@@ -76,7 +77,8 @@ public class UC14_Carrier_ProcessBookingCancellationAction extends StateChanging
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator));
+                requestSchemaValidator)
+          ).filter(Objects::nonNull);
       }
     };
   }

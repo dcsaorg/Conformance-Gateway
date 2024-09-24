@@ -245,25 +245,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
-
-  private BookingScenarioListBuilder thenAllPathsFrom(BookingCancellationState cancellationStatus, BookingState bookingStatus, BookingState amendedBookingStatus) {
-    return switch (cancellationStatus) {
-      case CANCELLATION_RECEIVED -> then (
-          shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_RECEIVED).thenEither(
-            uc14_carrier_bookingCancellationConfirmed().thenAllPathsFrom(CANCELLATION_CONFIRMED,bookingStatus,amendedBookingStatus),
-            uc14_carrier_bookingCancellationDeclined().thenAllPathsFrom(CANCELLATION_DECLINED,bookingStatus,amendedBookingStatus))
-      );
-      case CANCELLATION_CONFIRMED -> then (
-        shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_CONFIRMED).then(
-        noAction().thenHappyPathFrom(CANCELLED)
-      ));
-      case CANCELLATION_DECLINED -> then(
-        shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_DECLINED)
-      );
-    };
-  }
-
-  private BookingScenarioListBuilder thenAllPathsFrom(BookingState bookingState) {
+    private BookingScenarioListBuilder thenAllPathsFrom(BookingState bookingState) {
     return thenAllPathsFrom(bookingState, null);
   }
 
@@ -326,7 +308,8 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                     .thenAllPathsFrom(UPDATE_RECEIVED),
                 uc4_carrier_rejectBookingRequest().thenAllPathsFrom(REJECTED),
                 uc5_carrier_confirmBookingRequest().thenAllPathsFrom(CONFIRMED),
-                uc11_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)));
+                uc11_shipper_cancelBooking().thenAllPathsFrom(CANCELLED)
+              ));
       case START -> thenEither(
         uc1_shipper_SubmitBookingRequest().thenAllPathsFrom(RECEIVED));
       case PENDING_AMENDMENT -> then(
@@ -336,17 +319,17 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                 uc7_shipper_submitBookingAmendment()
                     .thenAllPathsFrom(AMENDMENT_RECEIVED, PENDING_AMENDMENT),
                 uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
-                uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED)/*,
-                uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, PENDING_AMENDMENT,null)*/));
+                uc11_shipper_cancelBooking().thenHappyPathFrom(CANCELLED),
+                uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, PENDING_AMENDMENT,null)));
       case AMENDMENT_RECEIVED -> then(
         shipper_GetBooking(originalBookingState, AMENDMENT_RECEIVED,null,true)
           .thenEither(
             uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(PENDING_AMENDMENT),
-            uc8a_carrier_approveBookingAmendment().thenAllPathsFrom(AMENDMENT_CONFIRMED, originalBookingState),
+            uc8a_carrier_approveBookingAmendment().thenAllPathsFrom(AMENDMENT_CONFIRMED, CONFIRMED),
             uc8b_carrier_declineBookingAmendment().thenAllPathsFrom(AMENDMENT_DECLINED, originalBookingState),
             uc9_shipper_cancelBookingAmendment().thenAllPathsFrom(AMENDMENT_CANCELLED, originalBookingState),
-            uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED)/*,
-            uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, originalBookingState, AMENDMENT_RECEIVED )*/
+            uc10_carrier_declineBooking().thenHappyPathFrom(DECLINED),
+            uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, originalBookingState, AMENDMENT_RECEIVED )
         )
       );
       case AMENDMENT_CONFIRMED -> then(
@@ -355,8 +338,8 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
             auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT)
               .then(shipper_GetBooking(CONFIRMED,bookingState)),
             uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
-            uc12_carrier_confirmBookingCompleted().then(shipper_GetBooking(COMPLETED))/*,
-            uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, originalBookingState, AMENDMENT_CONFIRMED )*/
+            uc12_carrier_confirmBookingCompleted().then(shipper_GetBooking(COMPLETED)),
+            uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, originalBookingState, AMENDMENT_CONFIRMED )
           )
       );
       case AMENDMENT_CANCELLED, AMENDMENT_DECLINED -> then(
@@ -365,16 +348,31 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
           noAction().thenHappyPathFrom(originalBookingState),
           uc6_carrier_requestToAmendConfirmedBooking().thenHappyPathFrom(originalBookingState),
           auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT)
-            .then(shipper_GetBooking(PENDING_AMENDMENT,bookingState))/*,
-          uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, PENDING_AMENDMENT, bookingState )*/
+            .then(shipper_GetBooking(PENDING_AMENDMENT,bookingState)),
+          uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, PENDING_AMENDMENT, bookingState )
         ):
         shipper_GetBooking(CONFIRMED,bookingState).thenEither(
           noAction().thenHappyPathFrom(originalBookingState),
           uc5_carrier_confirmBookingRequest().thenHappyPathFrom(CONFIRMED),
           auc_shipper_sendInvalidBookingAction(CANCEL_BOOKING_AMENDMENT)
-            .then(shipper_GetBooking(CONFIRMED,bookingState))/*,
-          uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, CONFIRMED, bookingState )*/
+            .then(shipper_GetBooking(CONFIRMED,bookingState)),
+          uc13_shipper_cancelConfirmedBooking().thenAllPathsFrom(CANCELLATION_RECEIVED, CONFIRMED, bookingState )
         )
+      );
+    };
+  }
+
+  private BookingScenarioListBuilder thenAllPathsFrom(BookingCancellationState cancellationStatus, BookingState bookingStatus, BookingState amendedBookingStatus) {
+    return switch (cancellationStatus) {
+      case CANCELLATION_RECEIVED -> then (
+        shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_RECEIVED).thenEither(
+          uc14_carrier_bookingCancellationConfirmed().thenAllPathsFrom(CANCELLATION_CONFIRMED,bookingStatus,amendedBookingStatus),
+          uc14_carrier_bookingCancellationDeclined().thenAllPathsFrom(CANCELLATION_DECLINED,bookingStatus,amendedBookingStatus))
+      );
+      case CANCELLATION_CONFIRMED -> then (
+        shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_CONFIRMED));
+      case CANCELLATION_DECLINED -> then(
+        shipper_GetBooking(bookingStatus, amendedBookingStatus, CANCELLATION_DECLINED)
       );
     };
   }

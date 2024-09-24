@@ -233,7 +233,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     var bookingStatus = persistableCarrierBooking.getBooking().get("bookingStatus").asText();
-    if (bookingStatus.equals(BookingState.CONFIRMED.wireName())) {
+    if (bookingStatus.equals(BookingState.CONFIRMED.name())) {
       persistableCarrierBooking
           .getBooking()
           .put("importLicenseReference", "importLicenseRefUpdate");
@@ -537,7 +537,7 @@ public class BookingCarrier extends ConformanceParty {
         persistableCarrierBooking.cancelBookingAmendment(bookingReference, reason);
       }
       else {
-        persistableCarrierBooking.cancelConfirmedBooking(bookingReference, reason);
+        persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference, reason);
       }
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
@@ -569,12 +569,16 @@ public class BookingCarrier extends ConformanceParty {
             .put("carrierBookingRequestReference", cbrr);
     var cbr = booking.get("carrierBookingReference");
     var amendedBookingStatus = booking.get("amendedBookingStatus");
+    var bookingCancellationStatus = booking.get("bookingCancellationStatus");
     var reason = booking.get("reason");
     if (cbr != null) {
       statusObject.set("carrierBookingReference", cbr);
     }
     if (amendedBookingStatus != null) {
       statusObject.set("amendedBookingStatus", amendedBookingStatus);
+    }
+    if (bookingCancellationStatus != null) {
+      statusObject.set("bookingCancellationStatus", bookingCancellationStatus);
     }
     if (reason != null) {
       statusObject.set("reason", reason);
@@ -626,7 +630,7 @@ public class BookingCarrier extends ConformanceParty {
           "Responded to GET booking request '%s' (in state '%s')"
               .formatted(
                   bookingReference,
-                  persistableCarrierBooking.getOriginalBookingState().wireName()));
+                  persistableCarrierBooking.getOriginalBookingState()));
       return response;
     }
     return return404(request);
@@ -669,6 +673,7 @@ public class BookingCarrier extends ConformanceParty {
     private String carrierBookingRequestReference;
     private String bookingStatus;
     private String amendedBookingStatus;
+    private String bookingCancellationStatus;
     private String reason;
 
     private JsonNode booking;
@@ -708,6 +713,7 @@ public class BookingCarrier extends ConformanceParty {
       }
       setBookingProvidedField(data, "bookingStatus", bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
+      setBookingProvidedField(data, "bookingCancellationStatus", bookingCancellationStatus);
       setBookingProvidedField(data, "reason", reason);
       notification.set("data", data);
 

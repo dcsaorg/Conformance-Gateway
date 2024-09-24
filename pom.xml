@@ -18,6 +18,8 @@
 		<junit.version>5.11.0</junit.version>
 		<lombok.version>1.18.34</lombok.version>
 
+		<junit.includedTags>!WebUI</junit.includedTags>
+
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
 		<sonar.projectKey>Conformance-Gateway</sonar.projectKey>
@@ -213,6 +215,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.5.0</version>
+					<configuration>
+						<groups>${junit.includedTags}</groups>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

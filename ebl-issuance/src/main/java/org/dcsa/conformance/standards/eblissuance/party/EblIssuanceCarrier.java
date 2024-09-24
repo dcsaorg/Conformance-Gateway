@@ -175,7 +175,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
-    jsonRequestBody.put("eBLVisualisationByCarrier",getSupportingDocumentObject());
+    jsonRequestBody.set("eBLVisualisationByCarrier",getSupportingDocumentObject());
     var eBLVisualisationByCarrier = Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
     var issuanceManifest = OBJECT_MAPPER.createObjectNode()
         .put("documentChecksum", tdChecksum)
@@ -195,11 +195,10 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
   private ObjectNode getSupportingDocumentObject(){
     var document = generateDocument();
-    var supportingDocument = OBJECT_MAPPER.createObjectNode()
+    return OBJECT_MAPPER.createObjectNode()
     .put("name","test-iss-document")
       .put("content",document)
       .put("mediatype","application/octet-stream");
-    return supportingDocument;
   }
 
   private static byte[] generateDocument() {

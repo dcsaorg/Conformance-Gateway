@@ -17,6 +17,7 @@ public record DynamicScenarioParameters(
     String carrierBookingReference,
     BookingState bookingStatus,
     BookingState amendedBookingStatus,
+    BookingCancellationState bookingCancellationStatus,
     JsonNode booking,
     JsonNode updatedBooking
     ) {
@@ -30,10 +31,13 @@ public record DynamicScenarioParameters(
       dspNode.put("carrierBookingReference", carrierBookingReference);
     }
     if (bookingStatus != null) {
-      dspNode.put("bookingStatus", bookingStatus.wireName());
+      dspNode.put("bookingStatus", bookingStatus.name());
     }
     if (amendedBookingStatus != null) {
-      dspNode.put("amendedBookingStatus", amendedBookingStatus.wireName());
+      dspNode.put("amendedBookingStatus", amendedBookingStatus.name());
+    }
+    if (bookingCancellationStatus != null) {
+      dspNode.put("bookingCancellationStatus", bookingCancellationStatus.name());
     }
     if (booking != null) {
       dspNode.replace("booking", booking);
@@ -48,7 +52,14 @@ public record DynamicScenarioParameters(
     if (value == null) {
       return null;
     }
-    return BookingState.fromWireName(value);
+    return BookingState.valueOf(value);
+  }
+
+  private static BookingCancellationState bookingCancellationState(String value) {
+    if (value == null) {
+      return null;
+    }
+    return BookingCancellationState.valueOf(value);
   }
 
   private static <E> E readEnum(String value, Function<String, E> mapper) {
@@ -66,6 +77,7 @@ public record DynamicScenarioParameters(
         dspNode.path("carrierBookingReference").asText(null),
         bookingState(dspNode.path("bookingStatus").asText(null)),
         bookingState(dspNode.path("amendedBookingStatus").asText(null)),
+        bookingCancellationState(dspNode.path("bookingCancellationStatus").asText(null)),
         dspNode.path("booking"),
         dspNode.path("updatedBooking")
       );

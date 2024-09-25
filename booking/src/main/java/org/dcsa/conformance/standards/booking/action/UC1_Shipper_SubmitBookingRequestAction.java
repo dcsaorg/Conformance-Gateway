@@ -63,44 +63,30 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        Stream<ActionCheck> primaryExchangeChecks =
+
+        return Stream.concat(
           Stream.of(
-            new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "POST"),
-            new UrlPathCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings"),
-            new ResponseStatusCheck(
-                BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-            new ApiHeaderCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                expectedApiVersion),
-            new ApiHeaderCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                expectedApiVersion),
             new CarrierBookingRefStatusPayloadResponseConformanceCheck(
               getMatchedExchangeUuid(),
               BookingState.RECEIVED
             ),
             BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()),
             new JsonSchemaCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                requestSchemaValidator),
+              BookingRole::isShipper,
+              getMatchedExchangeUuid(),
+              HttpMessageType.REQUEST,
+              requestSchemaValidator),
             new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator));
-        return Stream.concat(
-          primaryExchangeChecks,
+              BookingRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              responseSchemaValidator)),
+          Stream.concat(createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,
             BookingState.RECEIVED,
-            null));
+            null)));
       }
     };
   }

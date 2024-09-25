@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.*;
@@ -13,16 +14,22 @@ public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends Abst
     super(matchedExchangeUuid, HttpMessageType.RESPONSE, bookingStatus);
   }
 
+  public CarrierBookingRefStatusPayloadResponseConformanceCheck(UUID matchedExchangeUuid, BookingState bookingStatus, BookingState amendedBookingStatus) {
+    super(matchedExchangeUuid, HttpMessageType.RESPONSE, bookingStatus, amendedBookingStatus, null,false);
+  }
+
   public CarrierBookingRefStatusPayloadResponseConformanceCheck(
     UUID matchedExchangeUuid,
     BookingState bookingStatus,
-    BookingState expectedAmendedBookingStatus
+    BookingState expectedAmendedBookingStatus,
+    BookingCancellationState expectedBookingCancellationState
   ) {
     super(
       matchedExchangeUuid,
       HttpMessageType.RESPONSE,
       bookingStatus,
       expectedAmendedBookingStatus,
+      expectedBookingCancellationState,
       false
     );
   }
@@ -44,11 +51,11 @@ public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends Abst
       ),
       createSubCheck(
         "Validate 'feedbacks' is only present on states where it is allowed",
-        requiredOrExcludedByState(PENDING_CHANGES_STATES, "feedbacks")
+        requiredOrExcludedByState(PENDING_CHANGES_STATES, CANCELLATION_REASON_STATES,"feedbacks")
       ),
       createSubCheck(
         "Validate 'reason' is only present on states where it is allowed",
-        requiredOrExcludedByState(REASON_STATES, "reason")
+        reasonFieldRequiredForCancellation(REASON_STATES, CANCELLATION_REASON_STATES, "reason")
       )
     );
   }

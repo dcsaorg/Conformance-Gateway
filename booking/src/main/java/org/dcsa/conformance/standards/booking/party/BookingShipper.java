@@ -20,6 +20,8 @@ import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Slf4j
 public class BookingShipper extends ConformanceParty {
 
@@ -145,7 +147,7 @@ public class BookingShipper extends ConformanceParty {
     syncCounterpartPatch(
         "/v2/bookings/%s".formatted(cbrr),
       Collections.emptyMap(),
-        new ObjectMapper()
+      OBJECT_MAPPER
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.name()));
 
@@ -158,7 +160,7 @@ public class BookingShipper extends ConformanceParty {
     syncCounterpartPatch(
       "/v2/bookings/%s".formatted(cbr),
       Collections.emptyMap(),
-      new ObjectMapper()
+      OBJECT_MAPPER
         .createObjectNode()
         .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
         .put("reason", "Cancelling due to internal issues"));
@@ -172,7 +174,7 @@ public class BookingShipper extends ConformanceParty {
     syncCounterpartPatch(
       "/v2/bookings/%s".formatted(reference),
       Collections.emptyMap(),
-      new ObjectMapper()
+      OBJECT_MAPPER
         .createObjectNode()
         .put("amendedBookingStatus", BookingState.AMENDMENT_CANCELLED.name()));
 
@@ -229,7 +231,7 @@ public class BookingShipper extends ConformanceParty {
         request.createResponse(
             204,
             Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(new ObjectMapper().createObjectNode()));
+            new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));

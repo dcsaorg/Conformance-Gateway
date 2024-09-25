@@ -23,9 +23,10 @@ import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Random RANDOM = new Random();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();

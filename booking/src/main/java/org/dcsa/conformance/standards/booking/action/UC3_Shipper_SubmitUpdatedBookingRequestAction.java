@@ -61,40 +61,21 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var cbrr = getDspSupplier().get().carrierBookingRequestReference();
-        Stream<ActionCheck> primaryExchangeChecks =
-            Stream.of(
-                new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-                new UrlPathCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    "/v2/bookings/%s".formatted(cbrr)),
-                new ResponseStatusCheck(
-                    BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
           Stream.of(
+          new JsonSchemaCheck(
+            BookingRole::isShipper,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator),
           new JsonSchemaCheck(
             BookingRole::isCarrier,
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
-            responseSchemaValidator)),
+            responseSchemaValidator),
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier())),
           Stream.concat(
-            primaryExchangeChecks,
+            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,

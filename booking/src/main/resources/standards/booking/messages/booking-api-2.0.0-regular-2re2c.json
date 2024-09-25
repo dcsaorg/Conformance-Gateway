@@ -10,7 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "isImportLicenseRequired": true,
-  "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "carrierServiceCode": "TA1",
   "vessel": {

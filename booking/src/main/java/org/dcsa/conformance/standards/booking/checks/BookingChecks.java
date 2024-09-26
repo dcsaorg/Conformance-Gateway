@@ -6,10 +6,7 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -55,6 +52,12 @@ public class BookingChecks {
     BookingState.AMENDMENT_DECLINED
   );
 
+  private static final Set<BookingCancellationState> REASON_PRESENCE_CANCELLATION_STATES = Set.of(
+    BookingCancellationState.CANCELLATION_RECEIVED,
+    BookingCancellationState.CANCELLATION_CONFIRMED,
+    BookingCancellationState.CANCELLATION_DECLINED
+  );
+
   private static final Set<BookingState> REASON_ABSENCE_STATES = Set.of(
     BookingState.RECEIVED,
     BookingState.CONFIRMED
@@ -64,6 +67,9 @@ public class BookingChecks {
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
   private static final JsonPointer BOOKING_STATUS = JsonPointer.compile("/bookingStatus");
+  private static final String ATTR_AMENDED_BOOKING_STATUS = "amendedBookingStatus";
+  private static final String ATTR_BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+
   public static ActionCheck requestContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier) {
     var checks = new ArrayList<>(STATIC_BOOKING_CHECKS);
     generateScenarioRelatedChecks(checks, cspSupplier, dspSupplier);
@@ -480,7 +486,7 @@ public class BookingChecks {
     body -> {
       var bookingStatus = body.path("bookingStatus").asText("");
       var issues = new LinkedHashSet<String>();
-      if (PENDING_CHANGES_STATES.contains(BookingState.fromWireName(bookingStatus))) {
+      if (PENDING_CHANGES_STATES.contains(BookingState.valueOf(bookingStatus))) {
         var feedbacks = body.get("feedbacks");
         if (feedbacks == null) {
           issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
@@ -494,15 +500,20 @@ public class BookingChecks {
     "Reason field must be present for the selected Booking Status",
     body -> {
       var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path("amendedBookingStatus");
+      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
+      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      if (REASON_PRESENCE_STATES.contains(BookingState.fromWireName(status.asText()))) {
-        var reason = body.get("reason");
-        if (reason == null) {
+      var reason = body.get("reason");
+      if (REASON_PRESENCE_STATES.contains(BookingState.valueOf(status.asText())) && reason == null) {
           issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_STATES));
         }
-      }
+      if(!bookingCancellationStatus.isMissingNode() && REASON_PRESENCE_CANCELLATION_STATES
+        .contains(BookingCancellationState.valueOf(bookingCancellationStatus.asText()))
+        && reason == null) {
+          issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_CANCELLATION_STATES));
+        }
+
       return issues;
     }
   );
@@ -510,10 +521,11 @@ public class BookingChecks {
     "Reason field must be present for the selected Booking Status",
     body -> {
       var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path("amendedBookingStatus");
+      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
+      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      if (REASON_ABSENCE_STATES.contains(BookingState.fromWireName(status.asText()))) {
+      if (REASON_ABSENCE_STATES.contains(BookingState.valueOf(status.asText())) && bookingCancellationStatus == null) {
         if (body.hasNonNull("reason")) {
           issues.add("reason must not be in the Booking States %s".formatted(REASON_ABSENCE_STATES));
         }
@@ -528,7 +540,7 @@ public class BookingChecks {
     body -> {
       var issues = new LinkedHashSet<String>();
       var bookingStatus = body.path("bookingStatus").asText("");
-      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromWireName(bookingStatus))) {
+      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.valueOf(bookingStatus))) {
         if (body.hasNonNull("termsAndConditions")) {
           issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
         }
@@ -559,7 +571,7 @@ public class BookingChecks {
     body -> {
       var issues = new LinkedHashSet<String>();
       var bookingStatus = body.path("bookingStatus").asText("");
-      if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromWireName(bookingStatus))) {
+      if (CONFIRMED_BOOKING_STATES.contains(BookingState.valueOf(bookingStatus))) {
         if (body.path("confirmedEquipments").isEmpty()) {
           issues.add("confirmedEquipments for confirmed booking is not present");
         }
@@ -770,7 +782,10 @@ public class BookingChecks {
     REASON_FIELD_ABSENCE
   );
 
-  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus, BookingState amendedBookingState, Boolean requestAmendedContent) {
+  public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,
+                                                  Supplier<DynamicScenarioParameters> dspSupplier, BookingState bookingStatus,
+                                                  BookingState expectedAmendedBookingStatus, BookingCancellationState expectedCancelledBookingStatus,
+                                                  Boolean requestAmendedContent) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -778,8 +793,36 @@ public class BookingChecks {
     ));
     checks.add(JsonAttribute.mustEqual(
       BOOKING_STATUS,
-      bookingStatus.wireName()
+      bookingStatus.name()
     ));
+    checks.add(JsonAttribute.customValidator(
+      "Validate Amended Booking Status",
+      body -> {
+        String amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
+        if(!amendedBookingStatus.isEmpty()
+          && expectedAmendedBookingStatus!= null
+          && !expectedAmendedBookingStatus.name().equals(amendedBookingStatus)) {
+          return Set.of("The expected amendedBookingStatus %s is not equal to response AmendedBookingStatus %s", expectedAmendedBookingStatus.name(), amendedBookingStatus);
+        }
+        return Set.of();
+      }
+    ));
+    checks.add(JsonAttribute.customValidator(
+      "Validate Booking Cancellation Status",
+      body -> {
+        String bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS).asText("");
+        if(!bookingCancellationStatus.isEmpty()
+          && expectedCancelledBookingStatus!= null
+          && !expectedCancelledBookingStatus.name().equals(bookingCancellationStatus)) {
+          return Set.of("The expected bookingCancellationStatus %s is not equal to response bookingCancellationStatus %s", expectedCancelledBookingStatus.name(), bookingCancellationStatus);
+        }
+        return Set.of();
+      }
+    ));
+
+
+
+
     checks.addAll(STATIC_BOOKING_CHECKS);
     checks.addAll(RESPONSE_ONLY_CHECKS);
     checks.add(JsonAttribute.lostAttributeCheck(

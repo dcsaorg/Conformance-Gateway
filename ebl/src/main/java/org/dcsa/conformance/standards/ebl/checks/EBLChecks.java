@@ -159,8 +159,9 @@ public class EBLChecks {
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
   );
 
-  public static final Predicate<JsonNode> IS_AN_EBL = td -> td.path("isElectronic").asBoolean(false)
-    && td.path("transportDocumentTypeCode").asText("").equals("BOL");
+  public static final Predicate<JsonNode> IS_ELECTRONIC = td -> td.path("isElectronic").asBoolean(false);
+
+  public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
 
   private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
     "EBLs cannot have copies with charges",
@@ -172,6 +173,30 @@ public class EBLChecks {
     "EBLs cannot have copies without charges",
     IS_AN_EBL,
     JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy with charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
   );
 
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
@@ -388,6 +413,10 @@ public class EBLChecks {
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
@@ -411,6 +440,10 @@ public class EBLChecks {
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(

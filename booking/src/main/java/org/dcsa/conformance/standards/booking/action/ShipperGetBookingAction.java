@@ -7,22 +7,25 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
-public class Shipper_GetBookingAction extends BookingAction {
+public class ShipperGetBookingAction extends BookingAction {
 
   private final BookingState expectedBookingStatus;
   private final BookingState expectedAmendedBookingStatus;
+  private final BookingCancellationState expectedCancelledBookingStatus;
   private final JsonSchemaValidator responseSchemaValidator;
   private final boolean requestAmendedContent;
 
-  public Shipper_GetBookingAction(
+  public ShipperGetBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
       BookingState expectedBookingStatus,
       BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedCancelledBookingStatus,
       JsonSchemaValidator responseSchemaValidator,
       boolean requestAmendedStatus) {
     super(
@@ -33,6 +36,7 @@ public class Shipper_GetBookingAction extends BookingAction {
         200);
     this.expectedBookingStatus = expectedBookingStatus;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
+    this.expectedCancelledBookingStatus = expectedCancelledBookingStatus;
     this.responseSchemaValidator = responseSchemaValidator;
     this.requestAmendedContent = requestAmendedStatus;
   }
@@ -82,7 +86,7 @@ public class Shipper_GetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus, requestAmendedContent))
+            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus,requestAmendedContent))
         ;
       }
     };

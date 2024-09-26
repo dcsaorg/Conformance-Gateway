@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.eblsurrender.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -24,7 +25,6 @@ import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblSurrenderCarrier(
       String apiVersion,
@@ -44,11 +44,10 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    ArrayNode arrayNode = objectMapper.createArrayNode();
+    ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
     eblStatesById.forEach(
         (key, value) -> {
-          ObjectNode entryNode = objectMapper.createObjectNode();
+          ObjectNode entryNode = OBJECT_MAPPER.createObjectNode();
           entryNode.put("key", key);
           entryNode.put("value", value.name());
           arrayNode.add(entryNode);
@@ -88,10 +87,11 @@ public class EblSurrenderCarrier extends ConformanceParty {
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
 
     SuppliedScenarioParameters suppliedScenarioParameters =
-        new SuppliedScenarioParameters(tdr, "XMPL",  "Example carrier party code", "Example party code", "Example code list");
+        new SuppliedScenarioParameters(
+            tdr, "XMPL", "Example carrier party code", "Example party code", "Example code list");
 
     asyncOrchestratorPostPartyInput(
-        objectMapper
+        OBJECT_MAPPER
             .createObjectNode()
             .put("actionId", actionPrompt.required("actionId").asText())
             .set("input", suppliedScenarioParameters.toJson()));
@@ -111,7 +111,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
-        objectMapper.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
     addOperatorLogEntry(
         "Voided and reissued the eBL with transportDocumentReference '%s'".formatted(tdr));
   }
@@ -141,7 +141,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     syncCounterpartPost(
         "/v%s/ebl-surrender-responses".formatted(apiVersion.charAt(0)),
-        objectMapper
+        OBJECT_MAPPER
             .createObjectNode()
             .put("surrenderRequestReference", srr)
             .put("action", accept ? "SURR" : "SREJ"));
@@ -179,18 +179,18 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
       return request.createResponse(
           204,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(
-              objectMapper
+              OBJECT_MAPPER
                   .createObjectNode()
                   .put("surrenderRequestReference", srr)
                   .put("transportDocumentReference", tdr)));
     } else {
       return request.createResponse(
           409,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(
-              objectMapper
+              OBJECT_MAPPER
                   .createObjectNode()
                   .put(
                       "comments",

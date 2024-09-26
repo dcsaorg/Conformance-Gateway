@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -19,8 +20,6 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.InvalidBookingMessageType;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class BookingShipper extends ConformanceParty {
@@ -230,7 +229,7 @@ public class BookingShipper extends ConformanceParty {
     ConformanceResponse response =
         request.createResponse(
             204,
-            Map.of("Api-Version", List.of(apiVersion)),
+            Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(

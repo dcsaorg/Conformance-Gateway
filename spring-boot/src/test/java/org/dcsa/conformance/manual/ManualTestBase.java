@@ -1,5 +1,6 @@
 package org.dcsa.conformance.manual;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
-  protected final ObjectMapper mapper = new ObjectMapper();
+  protected final ObjectMapper mapper = OBJECT_MAPPER;
   protected long lambdaDelay = 0L;
 
   @Autowired protected ConformanceApplication app;
@@ -326,7 +327,7 @@ public abstract class ManualTestBase {
       String sandboxName) {}
 
   // Possible result of getAllSandboxes
-  record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
+  protected record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
 
   public record SandboxConfig(
       String sandboxId,

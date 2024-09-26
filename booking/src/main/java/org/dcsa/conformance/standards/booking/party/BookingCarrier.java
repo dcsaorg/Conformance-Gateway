@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -22,8 +23,6 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
@@ -57,8 +56,8 @@ public class BookingCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrrToCbr));
-    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrToCbrr));
+    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(cbrrToCbr));
+    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(cbrToCbrr));
   }
 
   @Override
@@ -89,18 +88,6 @@ public class BookingCarrier extends ConformanceParty {
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
         Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
         Map.entry(UC14CarrierProcessBookingCancellationAction.class, this::processConfirmedBookingCancellation));
-  }
-
-  private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
-    int sum = 0;
-    assert vesselIMONumberSansCheckDigit.length() == 6;
-    for (int i = 0; i < 6; i++) {
-      char c = vesselIMONumberSansCheckDigit.charAt(i);
-      assert c >= '0' && c <= '9';
-      sum += (7 - i) * Character.getNumericValue(c);
-    }
-    String s = String.valueOf(sum);
-    return s.charAt(s.length() - 1);
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -391,7 +378,7 @@ public class BookingCarrier extends ConformanceParty {
     return request.createResponse(
         405,
         Map.of(
-            "Api-Version", List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
+            API_VERSION, List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
         new ConformanceMessageBody(
             OBJECT_MAPPER
                 .createObjectNode()
@@ -401,7 +388,7 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
         400,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -412,14 +399,14 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
         404,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -595,7 +582,7 @@ public class BookingCarrier extends ConformanceParty {
     ConformanceResponse response =
         request.createResponse(
             responseCode,
-            Map.of("Api-Version", List.of(apiVersion)),
+            Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
         "Responded %d to %s booking '%s' (resulting state '%s')"
@@ -634,7 +621,7 @@ public class BookingCarrier extends ConformanceParty {
       }
       ConformanceResponse response =
           request.createResponse(
-              200, Map.of("Api-Version", List.of(apiVersion)), new ConformanceMessageBody(body));
+              200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
               .formatted(

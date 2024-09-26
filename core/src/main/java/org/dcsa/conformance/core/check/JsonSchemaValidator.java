@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.*;
-
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,8 +33,12 @@ public class JsonSchemaValidator {
 
   @SneakyThrows
   private JsonSchemaValidator(String filePath, String schemaName) {
+    log.info("Loading schema: {} with schemaName: {}", filePath, schemaName);
     // https://github.com/networknt/json-schema-validator/issues/579#issuecomment-1488269135
     InputStream schemaFileInputStream = JsonSchemaValidator.class.getResourceAsStream(filePath);
+    if (schemaFileInputStream == null || schemaFileInputStream.available() == 0) {
+      throw new IllegalArgumentException("Schema file not found: " + filePath);
+    }
     JsonSchemaFactory jsonSchemaFactory =
         JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
             .objectMapper(JSON_FACTORY_OBJECT_MAPPER)
@@ -44,6 +47,7 @@ public class JsonSchemaValidator {
     schemaValidatorsConfig.setTypeLoose(false);
     JsonSchema rootJsonSchema =
         jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
+    schemaFileInputStream.close();
     ValidationContext validationContext =
         new ValidationContext(
             jsonSchemaFactory.getUriFactory(),

@@ -422,7 +422,7 @@ public class PintSendingPlatform extends ConformanceParty {
     log.info("EblInteropSendingPlatform.handleRequest(%s)".formatted(request));
     return request.createResponse(
       404,
-      Map.of("Api-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(
         OBJECT_MAPPER
           .createObjectNode()

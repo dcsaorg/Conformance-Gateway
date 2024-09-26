@@ -256,7 +256,7 @@ public class EblShipper extends ConformanceParty {
     ConformanceResponse response =
         request.createResponse(
             204,
-            Map.of("Api-Version", List.of(apiVersion)),
+            Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(

@@ -1,16 +1,16 @@
 package org.dcsa.conformance.lambda;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
@@ -25,7 +25,7 @@ public class ApiLambda
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
       System.out.println("event = " + event + ", context = " + context);
-      JsonNode jsonEvent = new ObjectMapper().valueToTree(event);
+      JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
       log.info("jsonEvent = " + jsonEvent.toPrettyString());
 
       ConformancePersistenceProvider persistenceProvider =

@@ -1,9 +1,10 @@
 package org.dcsa.conformance.lambda;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +35,7 @@ public class SandboxTaskLambda implements RequestStreamHandler {
           LambdaToolkit.createDeferredSandboxTaskConsumer(persistenceProvider),
           jsonInput);
 
-      ObjectNode jsonOutput = new ObjectMapper().createObjectNode();
+      ObjectNode jsonOutput = OBJECT_MAPPER.createObjectNode();
       log.info("jsonOutput = " + jsonOutput.toPrettyString());
       try (BufferedWriter writer =
           new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {

@@ -11,7 +11,7 @@
 
 	<artifactId>adoption</artifactId>
 	<name>dcsa-conformance-adoption</name>
-	<description>DCSA Conformance Adaption</description>
+	<description>DCSA Conformance Adoption</description>
 	<url>https://app.swaggerhub.com/apis/dcsaorg/DCSA_ADOPT/1.0.0_with_push</url>
 
 	<dependencies>

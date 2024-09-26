@@ -6,7 +6,7 @@ import org.dcsa.conformance.core.AbstractStandard;
 
 public class AdoptionStandard extends AbstractStandard {
   public static final AdoptionStandard INSTANCE = new AdoptionStandard();
-  public static final String ADOPTION_STATS_EXAMPLE = "/standards/adoption/messages/adopt-%s-example.json";
+  public static final String ADOPTION_STATS_EXAMPLE = "/standards/adoption/messages/adoption-%s-example.json";
 
   private AdoptionStandard() {
     super("Adoption");

@@ -16,7 +16,6 @@ import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 @Slf4j
 public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangingSIAction {
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC7_Shipper_ApproveDraftTransportDocumentAction(
@@ -24,11 +23,9 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
       String shipperPartyName,
       EblAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
     super(shipperPartyName, carrierPartyName, previousAction, "UC7", Set.of(200, 202));
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
@@ -82,18 +79,11 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
-            // TODO: Add Carrier Ref Status Payload response check
-            // TODO: Add Shipper content conformance check
             new JsonSchemaCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator),
-            new JsonSchemaCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
                 EBLChecks.tdRefStatusChecks(getMatchedExchangeUuid(), expectedApiVersion, getDspSupplier(), TransportDocumentStatus.TD_APPROVED));
         return Stream.concat(
           primaryExchangeChecks,

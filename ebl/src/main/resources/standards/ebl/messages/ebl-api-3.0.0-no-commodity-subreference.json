@@ -30,7 +30,7 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "grossWeight": {
+          "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },

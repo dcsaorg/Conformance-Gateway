@@ -14,13 +14,13 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
 @Slf4j
-public class UC3_Shipper_SubmitUpdatedShippingInstructionsAction extends StateChangingSIAction {
+public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChangingSIAction {
   private final ShippingInstructionsStatus expectedSiStatus;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean useTDRef;
 
-  public UC3_Shipper_SubmitUpdatedShippingInstructionsAction(
+  public UC3ShipperSubmitUpdatedShippingInstructionsAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,

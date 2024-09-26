@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -197,40 +198,38 @@ public class EblIssuanceCarrier extends ConformanceParty {
             .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
   }
 
-  private ObjectNode getSupportingDocumentObject(){
+  private ObjectNode getSupportingDocumentObject() {
     var document = generateDocument();
-    return OBJECT_MAPPER.createObjectNode()
-    .put("name","test-iss-document")
-      .put("content",document)
-      .put("mediatype","application/octet-stream");
+    return OBJECT_MAPPER
+        .createObjectNode()
+        .put("name", "test-iss-document")
+        .put("content", document)
+        .put("mediatype", "application/octet-stream");
   }
 
   @SneakyThrows
   private static byte[] generateDocument() {
-    var uuid = UUID.randomUUID();
     byte[] pdf;
     String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
     try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
       if (inputStream == null) {
-        throw new IllegalArgumentException("Could not resolve " + filepath);
+        throw new IllegalArgumentException("File not found: " + filepath);
       }
       pdf = inputStream.readAllBytes();
     }
-    var docWithUuid = new byte[pdf.length + 16];
+    String uuidHex = UUID.randomUUID().toString();
+    String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);
+    String title = "/Title (DCSA - Driving digitalisation in container shipping)";
+    int titleStart = pdfString.indexOf(title);
 
-    // Add a UUID to ensure it is unique, such that the testers do not have to "remove" the
-    // document between every test.
-    System.arraycopy(pdf, 0, docWithUuid, 0, pdf.length);
-    putLong(uuid.getMostSignificantBits(), docWithUuid, pdf.length);
-    putLong(uuid.getLeastSignificantBits(), docWithUuid, pdf.length + 8);
-    return docWithUuid;
+    int titleEnd = pdfString.indexOf(")", titleStart);
+    String newTitle = "DCSA - " + uuidHex + " shipping";
+
+    String updatedPdfContent =
+        pdfString.substring(0, titleStart + 7) + newTitle + ")" + pdfString.substring(titleEnd + 1);
+    return updatedPdfContent.getBytes(StandardCharsets.ISO_8859_1);
   }
 
-  private static void putLong(long value, byte[] array, int offset) {
-    for (int i = 0 ; i < 8 ; i++) {
-      array[offset + i] = (byte)((value >>> i) & 0xff);
-    }
-  }
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuanceCarrier.handleRequest(%s)".formatted(request));

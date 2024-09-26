@@ -35,19 +35,24 @@ public class JsonSchemaValidator {
   private JsonSchemaValidator(String filePath, String schemaName) {
     log.info("Loading schema: {} with schemaName: {}", filePath, schemaName);
     // https://github.com/networknt/json-schema-validator/issues/579#issuecomment-1488269135
-    InputStream schemaFileInputStream = JsonSchemaValidator.class.getResourceAsStream(filePath);
-    if (schemaFileInputStream == null || schemaFileInputStream.available() == 0) {
-      throw new IllegalArgumentException("Schema file not found: " + filePath);
-    }
+
     JsonSchemaFactory jsonSchemaFactory =
         JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
             .objectMapper(JSON_FACTORY_OBJECT_MAPPER)
             .build();
     SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
     schemaValidatorsConfig.setTypeLoose(false);
-    JsonSchema rootJsonSchema =
-        jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
-    schemaFileInputStream.close();
+
+    JsonSchema rootJsonSchema;
+    try (InputStream schemaFileInputStream =
+        JsonSchemaValidator.class.getResourceAsStream(filePath)) {
+
+      if (schemaFileInputStream == null || schemaFileInputStream.available() == 0) {
+        throw new IllegalArgumentException("Schema file not found: " + filePath);
+      }
+      rootJsonSchema = jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
+    }
+
     ValidationContext validationContext =
         new ValidationContext(
             jsonSchemaFactory.getUriFactory(),
@@ -57,15 +62,12 @@ public class JsonSchemaValidator {
             schemaValidatorsConfig);
     // Prevent warnings on unknown keywords
     Map<String, Keyword> keywords = validationContext.getMetaSchema().getKeywords();
-    Arrays.asList(
-            "example",
-            "discriminator",
-            "exclusiveMinimum")
+    Arrays.asList("example", "discriminator", "exclusiveMinimum")
         .forEach(keyword -> keywords.put(keyword, new NonValidationKeyword(keyword)));
     jsonSchema =
         jsonSchemaFactory.create(
             validationContext,
-          "#/components/schemas/" + schemaName,
+            "#/components/schemas/" + schemaName,
             rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
             rootJsonSchema);
     jsonSchema.initializeValidators();

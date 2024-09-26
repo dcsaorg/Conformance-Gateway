@@ -88,9 +88,7 @@ public abstract class ConformanceParty implements StatefulEntity {
     return jsonPartyState;
   }
 
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    // By default, nothing to export. Overwrite if needed
-  }
+  protected abstract void exportPartyJsonState(ObjectNode targetObjectNode);
 
   @Override
   public void importJsonState(JsonNode jsonState) {
@@ -100,9 +98,7 @@ public abstract class ConformanceParty implements StatefulEntity {
     importPartyJsonState((ObjectNode) jsonState);
   }
 
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    // By default, nothing to import. Overwrite if needed
-  }
+  protected abstract void importPartyJsonState(ObjectNode sourceObjectNode);
 
   protected void addOperatorLogEntry(String logEntry) {
     operatorLog.addFirst(logEntry);

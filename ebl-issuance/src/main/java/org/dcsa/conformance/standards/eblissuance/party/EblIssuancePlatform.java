@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.eblissuance.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -19,12 +20,9 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
@@ -94,8 +92,8 @@ public class EblIssuancePlatform extends ConformanceParty {
   private void sendIssuanceResponse(JsonNode actionPrompt) {
     log.info(
         "EblIssuancePlatform.sendIssuanceResponse(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.get("tdr").asText();
-    String irc = actionPrompt.get("irc").asText();
+    String tdr = actionPrompt.path("tdr").asText();
+    String irc = actionPrompt.path("irc").asText();
 
     if (eblStatesByTdr.containsKey(tdr)) {
       if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {
@@ -106,13 +104,22 @@ public class EblIssuancePlatform extends ConformanceParty {
         knownChecksums.remove(checksum);
       }
     }
+    var response = OBJECT_MAPPER
+      .createObjectNode()
+      .put("transportDocumentReference", tdr)
+      .put("issuanceResponseCode", irc);
+
+    if (irc.equals("BREQ")) {
+      response.putArray("errors")
+        .addObject()
+        .put("reason", "Rejected as required by the conformance scenario")
+        .put("errorCode", "CTK-1234");
+    }
 
     syncCounterpartPost(
         "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)),
-      OBJECT_MAPPER
-            .createObjectNode()
-            .put("transportDocumentReference", tdr)
-            .put("issuanceResponseCode", irc));
+        response
+   );
 
     addOperatorLogEntry(
         "Sent issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"

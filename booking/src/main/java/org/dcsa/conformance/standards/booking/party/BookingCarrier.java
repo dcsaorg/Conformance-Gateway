@@ -81,18 +81,6 @@ public class BookingCarrier extends ConformanceParty {
         Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
   }
 
-  private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
-    int sum = 0;
-    assert vesselIMONumberSansCheckDigit.length() == 6;
-    for (int i = 0; i < 6; i++) {
-      char c = vesselIMONumberSansCheckDigit.charAt(i);
-      assert c >= '0' && c <= '9';
-      sum += (7 - i) * Character.getNumericValue(c);
-    }
-    String s = String.valueOf(sum);
-    return s.charAt(s.length() - 1);
-  }
-
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());

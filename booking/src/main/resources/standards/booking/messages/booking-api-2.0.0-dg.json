@@ -24,8 +24,10 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 12000,
-          "cargoGrossWeightUnit": "KGM",
+          "cargoGrossWeight": {
+            "value": 12000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "packageCode" : "5H",
             "imoPackagingCode": "3A1",

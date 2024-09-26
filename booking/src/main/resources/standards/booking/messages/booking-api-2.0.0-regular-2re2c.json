@@ -24,14 +24,18 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 5000,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          }
         },
         {
           "HSCodes": ["COMMODITY_HS_CODE_2"],
           "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
-          "cargoGrossWeight": 10000 ,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 10000,
+            "unit": "KGM"
+          }
         }
       ]
     },
@@ -43,14 +47,18 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 5000,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 5000,
+            "unit": "KGM"
+          }
         },
         {
           "HSCodes": ["COMMODITY_HS_CODE_2"],
           "commodityType": "COMMODITY_TYPE_2_PLACEHOLDER",
-          "cargoGrossWeight": 10000,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 20000,
+            "unit": "KGM"
+          }
         }
       ]
     }

@@ -24,8 +24,10 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE"],
           "commodityType": "COMMODITY_TYPE_PLACEHOLDER",
-          "cargoGrossWeight": 3750,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 3750,
+            "unit": "KGM"
+          }
         }
       ]
     }

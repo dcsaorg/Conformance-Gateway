@@ -24,8 +24,10 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 15000,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 15000,
+            "unit": "KGM"
+          }
         }
       ],
       "isNonOperatingReefer": true

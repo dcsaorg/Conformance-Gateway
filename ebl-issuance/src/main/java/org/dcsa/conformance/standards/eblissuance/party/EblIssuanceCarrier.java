@@ -5,8 +5,12 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.Consumer;
+
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -201,18 +205,25 @@ public class EblIssuanceCarrier extends ConformanceParty {
       .put("mediatype","application/octet-stream");
   }
 
+  @SneakyThrows
   private static byte[] generateDocument() {
     var uuid = UUID.randomUUID();
-    var doc = new byte[256 + 16];
-    for (int i = 0 ; i < 256 ; i++) {
-      // Include every byte so that we are certain that nothing corrupts the transfer.
-      doc[i] = (byte)i;
+    byte[] pdf;
+    String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
+    try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
+      if (inputStream == null) {
+        throw new IllegalArgumentException("Could not resolve " + filepath);
+      }
+      pdf = inputStream.readAllBytes();
     }
+    var docWithUuid = new byte[pdf.length + 16];
+
     // Add a UUID to ensure it is unique, such that the testers do not have to "remove" the
     // document between every test.
-    putLong(uuid.getMostSignificantBits(), doc, 256);
-    putLong(uuid.getLeastSignificantBits(), doc, 256 + 8);
-    return doc;
+    System.arraycopy(pdf, 0, docWithUuid, 0, pdf.length);
+    putLong(uuid.getMostSignificantBits(), docWithUuid, pdf.length);
+    putLong(uuid.getLeastSignificantBits(), docWithUuid, pdf.length + 8);
+    return docWithUuid;
   }
 
   private static void putLong(long value, byte[] array, int offset) {

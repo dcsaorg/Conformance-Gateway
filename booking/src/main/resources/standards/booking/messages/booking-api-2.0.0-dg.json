@@ -74,7 +74,7 @@
                   "value": 104.5,
                   "unit": "KGM"
                 },
-                "volume": {
+                "netVolume": {
                   "value": 10.5,
                   "unit": "MTQ"
                 },
@@ -142,7 +142,7 @@
                   "value": 104.5,
                   "unit": "KGM"
                 },
-                "volume": {
+                "netVolume": {
                   "value": 10.5,
                   "unit": "MTQ"
                 },

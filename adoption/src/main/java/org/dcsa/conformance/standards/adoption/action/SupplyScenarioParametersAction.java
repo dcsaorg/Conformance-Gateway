@@ -2,15 +2,17 @@ package org.dcsa.conformance.standards.adoption.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.adoption.party.FilterParameter;
 import org.dcsa.conformance.standards.adoption.party.SuppliedScenarioParameters;
@@ -33,8 +35,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                 Arrays.stream(filterParameters)
                     .map(FilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
-    this.filterParameters =
-        Stream.of(filterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+    this.filterParameters = new LinkedHashSet<>(Arrays.asList(filterParameters));
   }
 
   @Override
@@ -99,6 +100,24 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
-    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
+    try {
+      JsonNode input = partyInput.get("input");
+
+      // This should not be needed, but somehow it uses the SupplyScenarioParametersAction also on
+      // DCSA role
+      if (input instanceof NullNode) {
+        return;
+      }
+      String interval = input.required("interval").asText();
+      if (interval == null
+          || !(interval.equals("day") || interval.equals("week") || interval.equals("month"))) {
+        throw new UserFacingException("Invalid interval supplied: %s".formatted(interval));
+      }
+      String date = input.required("date").asText();
+      DATE_FORMAT.parse(date);
+      suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(input);
+    } catch (IllegalArgumentException | DateTimeParseException e) {
+      throw new UserFacingException("Invalid input: %s".formatted(e.getMessage()));
+    }
   }
 }

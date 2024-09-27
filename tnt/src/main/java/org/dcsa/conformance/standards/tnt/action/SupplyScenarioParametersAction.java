@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
@@ -18,21 +17,20 @@ import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final LinkedHashSet<TntFilterParameter> TntFilterParameters;
+  private final LinkedHashSet<TntFilterParameter> tntFilterParameters;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, TntFilterParameter... TntFilterParameters) {
+      String publisherPartyName, TntFilterParameter... tntFilterParameters) {
     super(
         publisherPartyName,
         null,
         null,
         "SupplyScenarioParameters(%s)"
             .formatted(
-                Arrays.stream(TntFilterParameters)
+                Arrays.stream(tntFilterParameters)
                     .map(TntFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
-    this.TntFilterParameters =
-        Stream.of(TntFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+    this.tntFilterParameters = new LinkedHashSet<>(Arrays.asList(tntFilterParameters));
   }
 
   @Override
@@ -63,7 +61,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
     ArrayNode jsonTntFilterParameters = objectNode.putArray("tntFilterParametersQueryParamNames");
-    TntFilterParameters.forEach(
+    tntFilterParameters.forEach(
         TntFilterParameter -> jsonTntFilterParameters.add(TntFilterParameter.getQueryParamName()));
     return objectNode;
   }
@@ -77,12 +75,12 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return SuppliedScenarioParameters.fromMap(
-            TntFilterParameters.stream()
+            tntFilterParameters.stream()
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
-                        TntFilterParameter ->
-                            switch (TntFilterParameter) {
+                        tntFilterParameter ->
+                            switch (tntFilterParameter) {
                               case LIMIT -> "100";
                               case EVENT_CREATED_DATE_TIME,
                                       EVENT_CREATED_DATE_TIME_EQ,

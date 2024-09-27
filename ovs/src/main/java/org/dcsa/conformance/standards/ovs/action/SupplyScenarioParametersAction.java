@@ -34,8 +34,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                 Arrays.stream(ovsFilterParameters)
                     .map(OvsFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
-    this.ovsFilterParameters =
-        Stream.of(ovsFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+    this.ovsFilterParameters = new LinkedHashSet<>(Arrays.asList(ovsFilterParameters));
   }
 
   @Override

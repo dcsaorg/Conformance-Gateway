@@ -245,7 +245,7 @@
                   "type" : "string"
                },
                "supplementaryDeclarantEORINumber" : {
-                  "description" : "The Economic Operators Registration and Identification (EORI) number of the house filer responsible for the `ENS` filing.\n\n**Conditional:** only applicable if `manifestTypeCode` is `ENS`.\n",
+                  "description" : "The Economic Operators Registration and Identification (EORI) number of the house filer responsible for the `ENS` filing.\n\n**Condition:** Only applicable if `manifestTypeCode` is `ENS`.\n",
                   "example" : "FLXP-123321",
                   "maxLength" : 17,
                   "pattern" : "^\\S(?:.*\\S)?$",
@@ -258,6 +258,21 @@
                "manifestTypeCode"
             ],
             "title" : "Advance Manifest Filing",
+            "type" : "object"
+         },
+         "ApproveTransportDocument" : {
+            "properties" : {
+               "transportDocumentStatus" : {
+                  "description" : "The status of the `Transport Document`. It can only be `APPROVED`\n",
+                  "example" : "APPROVED",
+                  "maxLength" : 50,
+                  "type" : "string"
+               }
+            },
+            "required" : [
+               "transportDocumentStatus"
+            ],
+            "title" : "Approve Transport Document",
             "type" : "object"
          },
          "Buyer" : {
@@ -300,7 +315,22 @@
             "title" : "Buyer",
             "type" : "object"
          },
-         "Cargo Gross Volume" : {
+         "CancelShippingInstructionsUpdate" : {
+            "properties" : {
+               "updatedShippingInstructionsStatus" : {
+                  "description" : "The status of the `Updated Shipping Instructions`. It can only be `UPDATE_CANCELLED`\n",
+                  "example" : "UPDATE_CANCELLED",
+                  "maxLength" : 50,
+                  "type" : "string"
+               }
+            },
+            "required" : [
+               "updatedShippingInstructionsStatus"
+            ],
+            "title" : "Cancel Shipping Instructions Update",
+            "type" : "object"
+         },
+         "CargoGrossVolume" : {
             "description" : "Calculated by multiplying the width, height, and length of the packed cargo.\n",
             "properties" : {
                "unit" : {
@@ -328,7 +358,7 @@
             "title" : "Cargo Gross Volume",
             "type" : "object"
          },
-         "Cargo Gross Weight" : {
+         "CargoGrossWeight" : {
             "description" : "The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container.\n",
             "properties" : {
                "unit" : {
@@ -356,76 +386,20 @@
             "title" : "Cargo Gross Weight",
             "type" : "object"
          },
-         "Cargo Net Volume" : {
-            "description" : "Calculated by multiplying the width, height, and length of the packed cargo, excluding packaging.\n",
-            "properties" : {
-               "unit" : {
-                  "description" : "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
-                  "enum" : [
-                     "MTQ",
-                     "FTQ"
-                  ],
-                  "example" : "MTQ",
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "Calculated by multiplying the width, height, and length of the packed cargo, excluding packaging.\n",
-                  "example" : 2.4,
-                  "exclusiveMinimum" : true,
-                  "format" : "float",
-                  "minimum" : 0,
-                  "type" : "number"
-               }
-            },
-            "required" : [
-               "unit",
-               "value"
-            ],
-            "title" : "Cargo Net Volume",
-            "type" : "object"
-         },
-         "Cargo Net Weight" : {
-            "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container.\n",
-            "properties" : {
-               "unit" : {
-                  "description" : "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-                  "enum" : [
-                     "KGM",
-                     "LBR"
-                  ],
-                  "example" : "KGM",
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.\n",
-                  "example" : 2400,
-                  "exclusiveMinimum" : true,
-                  "format" : "float",
-                  "minimum" : 0,
-                  "type" : "number"
-               }
-            },
-            "required" : [
-               "unit",
-               "value"
-            ],
-            "title" : "Cargo Net Weight",
-            "type" : "object"
-         },
          "CargoItem" : {
             "description" : "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n",
             "properties" : {
                "cargoGrossVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Volume"
+                  "$ref" : "#/components/schemas/CargoGrossVolume"
                },
                "cargoGrossWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Weight"
+                  "$ref" : "#/components/schemas/CargoGrossWeight"
                },
                "cargoNetVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Net Volume"
+                  "$ref" : "#/components/schemas/CargoNetVolume"
                },
                "cargoNetWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Net Weight"
+                  "$ref" : "#/components/schemas/CargoNetWeight"
                },
                "customsReferences" : {
                   "description" : "A list of `Customs references`\n",
@@ -464,16 +438,16 @@
             "description" : "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n",
             "properties" : {
                "cargoGrossVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Volume"
+                  "$ref" : "#/components/schemas/CargoGrossVolume"
                },
                "cargoGrossWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Weight"
+                  "$ref" : "#/components/schemas/CargoGrossWeight"
                },
                "cargoNetVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Net Volume"
+                  "$ref" : "#/components/schemas/CargoNetVolume"
                },
                "cargoNetWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Net Weight"
+                  "$ref" : "#/components/schemas/CargoNetWeight"
                },
                "customsReferences" : {
                   "description" : "A list of `Customs references`\n",
@@ -512,6 +486,62 @@
                "equipmentReference"
             ],
             "title" : "Cargo Item (Shipper)",
+            "type" : "object"
+         },
+         "CargoNetVolume" : {
+            "description" : "Calculated by multiplying the width, height, and length of the cargo, excluding packaging.\n",
+            "properties" : {
+               "unit" : {
+                  "description" : "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+                  "enum" : [
+                     "MTQ",
+                     "FTQ"
+                  ],
+                  "example" : "MTQ",
+                  "type" : "string"
+               },
+               "value" : {
+                  "description" : "Calculated by multiplying the width, height, and length of the cargo, excluding packaging.\n",
+                  "example" : 2.4,
+                  "exclusiveMinimum" : true,
+                  "format" : "float",
+                  "minimum" : 0,
+                  "type" : "number"
+               }
+            },
+            "required" : [
+               "unit",
+               "value"
+            ],
+            "title" : "Cargo Net Volume",
+            "type" : "object"
+         },
+         "CargoNetWeight" : {
+            "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container.\n",
+            "properties" : {
+               "unit" : {
+                  "description" : "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+                  "enum" : [
+                     "KGM",
+                     "LBR"
+                  ],
+                  "example" : "KGM",
+                  "type" : "string"
+               },
+               "value" : {
+                  "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.\n",
+                  "example" : 2400,
+                  "exclusiveMinimum" : true,
+                  "format" : "float",
+                  "minimum" : 0,
+                  "type" : "number"
+               }
+            },
+            "required" : [
+               "unit",
+               "value"
+            ],
+            "title" : "Cargo Net Weight",
             "type" : "object"
          },
          "CarriersAgentAtDestination" : {
@@ -650,7 +680,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -805,7 +835,7 @@
                   "type" : "array"
                },
                "descriptionOfGoods" : {
-                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line describing the cargo",
                      "example" : "blue shoes size 47",
@@ -831,7 +861,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -897,7 +927,7 @@
                   "type" : "array"
                },
                "descriptionOfGoods" : {
-                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line describing the cargo",
                      "example" : "blue shoes size 47",
@@ -923,7 +953,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -972,7 +1002,7 @@
                   "$ref" : "#/components/schemas/DestinationChargesPaymentTerm"
                },
                "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -983,7 +1013,7 @@
                   "type" : "array"
                },
                "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -994,7 +1024,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -1005,7 +1035,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -1016,7 +1046,7 @@
                   "type" : "array"
                },
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
+                  "$ref" : "#/components/schemas/DocumentPartiesShippingInstructions"
                },
                "freightPaymentTermCode" : {
                   "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
@@ -1035,7 +1065,7 @@
                   "type" : "array"
                },
                "invoicePayableAt" : {
-                  "$ref" : "#/components/schemas/Invoice Payable At"
+                  "$ref" : "#/components/schemas/InvoicePayableAtShippingInstructions"
                },
                "isCarriersAgentAtDestinationRequired" : {
                   "description" : "Indicates whether the Carrier's agent at destination name, address and contact details should be included in the `Transport Document`.\n",
@@ -1108,7 +1138,7 @@
                   "type" : "array"
                },
                "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
+                  "$ref" : "#/components/schemas/PlaceOfIssue"
                },
                "references" : {
                   "description" : "A list of `References`\n",
@@ -1138,7 +1168,7 @@
                   "type" : "array"
                },
                "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
                      "example" : "NL",
@@ -1179,6 +1209,23 @@
                "utilizedTransportEquipments"
             ],
             "title" : "Create Shipping Instructions",
+            "type" : "object"
+         },
+         "CreateShippingInstructionsResponse" : {
+            "description" : "**Only** the `shippingInstructionsReference` is returned.\n",
+            "properties" : {
+               "shippingInstructionsReference" : {
+                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
+                  "maxLength" : 100,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               }
+            },
+            "required" : [
+               "shippingInstructionsReference"
+            ],
+            "title" : "Create Shipping Instructions Response",
             "type" : "object"
          },
          "CustomsReference" : {
@@ -1295,7 +1342,7 @@
                   "type" : "string"
                },
                "grossWeight" : {
-                  "$ref" : "#/components/schemas/Gross Weight"
+                  "$ref" : "#/components/schemas/GrossWeight"
                },
                "imoClass" : {
                   "description" : "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n",
@@ -1366,13 +1413,13 @@
                   "$ref" : "#/components/schemas/Limits"
                },
                "netExplosiveContent" : {
-                  "$ref" : "#/components/schemas/Net Explosive Content"
+                  "$ref" : "#/components/schemas/NetExplosiveContent"
                },
                "netVolume" : {
-                  "$ref" : "#/components/schemas/Net Volume"
+                  "$ref" : "#/components/schemas/NetVolume"
                },
                "netWeight" : {
-                  "$ref" : "#/components/schemas/Net Weight"
+                  "$ref" : "#/components/schemas/NetWeight"
                },
                "packingGroup" : {
                   "description" : "The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.\n",
@@ -1426,96 +1473,6 @@
                "properShippingName"
             ],
             "title" : "Dangerous Goods",
-            "type" : "object"
-         },
-         "Data" : {
-            "description" : "`Shipping Instructions` specific properties for the `Notification`\n",
-            "properties" : {
-               "feedbacks" : {
-                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Feedback"
-                  },
-                  "type" : "array"
-               },
-               "shippingInstructions" : {
-                  "$ref" : "#/components/schemas/Shipping Instructions"
-               },
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n\n**Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "shippingInstructionsStatus" : {
-                  "description" : "The status of the `Shipping Instructions`. Possible values are:\n\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
-                  "example" : "RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "updatedShippingInstructions" : {
-                  "$ref" : "#/components/schemas/Updated Shipping Instructions"
-               },
-               "updatedShippingInstructionsStatus" : {
-                  "description" : "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this property is empty. Possible values are:\n\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions has been received and is awaiting to be processed)\n- `UPDATE_CONFIRMED` (Update is confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-                  "example" : "UPDATE_RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "shippingInstructionsStatus"
-            ],
-            "title" : "Data",
-            "type" : "object"
-         },
-         "Data_1" : {
-            "description" : "`Transport Document` specific properties for the `Notification`\n",
-            "properties" : {
-               "feedbacks" : {
-                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Feedback"
-                  },
-                  "type" : "array"
-               },
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocument" : {
-                  "$ref" : "#/components/schemas/Transport Document"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocumentStatus" : {
-                  "description" : "The status of the `Transport Document`. Possible values are:\n\n- `DRAFT` (Transport Document is Drafted)\n- `APPROVED` (Transport Document has been Approved by consumer)\n- `ISSUED` (Transport Document has been Issued by provider)\n- `PENDING_SURRENDER_FOR_AMENDMENT` (Transport Document is Pending for Surrender for an Amendment)\n- `SURRENDER_FOR_AMENDMENT` (Transport Document Surrendered for an Amendment)\n- `VOID` (the Transport Document has been Voided)\n- `PENDING_SURRENDER_FOR_DELIVERY` (Transport Document pending surrender for Delivery)\n- `SURRENDER_FOR_DELIVERY` (Transport Document surrendered for Delivery)\n",
-                  "example" : "DRAFT",
-                  "maxLength" : 50,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "transportDocumentReference",
-               "transportDocumentStatus"
-            ],
-            "title" : "Data",
             "type" : "object"
          },
          "DestinationChargesPaymentTerm" : {
@@ -1601,50 +1558,7 @@
             "title" : "Detailed Error",
             "type" : "object"
          },
-         "Document Parties" : {
-            "description" : "All `Parties` with associated roles.\n",
-            "properties" : {
-               "buyer" : {
-                  "$ref" : "#/components/schemas/Buyer"
-               },
-               "consignee" : {
-                  "$ref" : "#/components/schemas/Consignee"
-               },
-               "endorsee" : {
-                  "$ref" : "#/components/schemas/Endorsee"
-               },
-               "issueTo" : {
-                  "$ref" : "#/components/schemas/IssueToParty"
-               },
-               "notifyParties" : {
-                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/NotifyParty"
-                  },
-                  "maxItems" : 3,
-                  "type" : "array"
-               },
-               "other" : {
-                  "description" : "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
-                  "items" : {
-                     "$ref" : "#/components/schemas/OtherDocumentParty"
-                  },
-                  "type" : "array"
-               },
-               "seller" : {
-                  "$ref" : "#/components/schemas/Seller"
-               },
-               "shipper" : {
-                  "$ref" : "#/components/schemas/Shipper"
-               }
-            },
-            "required" : [
-               "shipper"
-            ],
-            "title" : "Document Parties",
-            "type" : "object"
-         },
-         "Document Parties_1" : {
+         "DocumentParties" : {
             "description" : "All `Parties` with associated roles.\n",
             "properties" : {
                "carriersAgentAtDestination" : {
@@ -1660,7 +1574,7 @@
                   "$ref" : "#/components/schemas/IssuingParty"
                },
                "notifyParties" : {
-                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
+                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** If provided:\n  - Mandatory for To Order BLs, `isToOrder=true`\n  - The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "$ref" : "#/components/schemas/NotifyParty"
                   },
@@ -1685,7 +1599,7 @@
             "title" : "Document Parties",
             "type" : "object"
          },
-         "Document Parties_2" : {
+         "DocumentPartiesHouseBL" : {
             "description" : "All `Parties` with associated roles for this `House Bill of Lading`.\n",
             "properties" : {
                "buyer" : {
@@ -1714,6 +1628,49 @@
             "title" : "Document Parties",
             "type" : "object"
          },
+         "DocumentPartiesShippingInstructions" : {
+            "description" : "All `Parties` with associated roles.\n",
+            "properties" : {
+               "buyer" : {
+                  "$ref" : "#/components/schemas/Buyer"
+               },
+               "consignee" : {
+                  "$ref" : "#/components/schemas/Consignee"
+               },
+               "endorsee" : {
+                  "$ref" : "#/components/schemas/Endorsee"
+               },
+               "issueTo" : {
+                  "$ref" : "#/components/schemas/IssueToParty"
+               },
+               "notifyParties" : {
+                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** If provided:\n  - Mandatory for To Order BLs, `isToOrder=true`\n  - The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
+                  "items" : {
+                     "$ref" : "#/components/schemas/NotifyParty"
+                  },
+                  "maxItems" : 3,
+                  "type" : "array"
+               },
+               "other" : {
+                  "description" : "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
+                  "items" : {
+                     "$ref" : "#/components/schemas/OtherDocumentParty"
+                  },
+                  "type" : "array"
+               },
+               "seller" : {
+                  "$ref" : "#/components/schemas/Seller"
+               },
+               "shipper" : {
+                  "$ref" : "#/components/schemas/Shipper"
+               }
+            },
+            "required" : [
+               "shipper"
+            ],
+            "title" : "Document Parties",
+            "type" : "object"
+         },
          "EmergencyContactDetails" : {
             "description" : "24 hr emergency contact details\n",
             "properties" : {
@@ -1724,7 +1681,7 @@
                   "type" : "string"
                },
                "phone" : {
-                  "description" : "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+                  "description" : "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
                   "example" : "+45 70262970",
                   "maxLength" : 30,
                   "pattern" : "^\\S(?:.*\\S)?$",
@@ -1757,7 +1714,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -1819,7 +1776,7 @@
                   "type" : "string"
                },
                "tareWeight" : {
-                  "$ref" : "#/components/schemas/Tare Weight"
+                  "$ref" : "#/components/schemas/TareWeight"
                }
             },
             "required" : [
@@ -1993,7 +1950,7 @@
             "title" : "Geo Coordinate",
             "type" : "object"
          },
-         "Gross Weight" : {
+         "GrossWeight" : {
             "description" : "Total weight of the goods carried, including packaging.\n",
             "properties" : {
                "unit" : {
@@ -2025,7 +1982,7 @@
             "description" : "A legal contract between the Ocean Transport Intermediary (OTI), such as a Non-Vessel Operating Common Carrier (NVOCC) or a freight forwarder, and the shipper that acknowledges the receipt of goods and outlines the terms of shipment.\n",
             "properties" : {
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties_2"
+                  "$ref" : "#/components/schemas/DocumentPartiesHouseBL"
                },
                "houseBillOfLadingReference" : {
                   "description" : "A unique number allocated by the Ocean Transport Intermediary (OTI) to the `House Bill of Lading`.\n",
@@ -2116,7 +2073,46 @@
             "title" : "Inner Packaging",
             "type" : "object"
          },
-         "Invoice Payable At" : {
+         "InvoicePayableAt" : {
+            "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location can be provided as a `UN Location Code` or as a fallback - a `freeText` field\n",
+            "oneOf" : [
+               {
+                  "properties" : {
+                     "UNLocationCode" : {
+                        "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+                        "example" : "NLAMS",
+                        "maxLength" : 5,
+                        "minLength" : 5,
+                        "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "UNLocationCode"
+                  ],
+                  "title" : "UN Location Code",
+                  "type" : "object"
+               },
+               {
+                  "properties" : {
+                     "freeText" : {
+                        "description" : "The name of the location where payment will be rendered by the customer.\n",
+                        "example" : "DCSA Headquarters",
+                        "maxLength" : 35,
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "freeText"
+                  ],
+                  "title" : "Free text",
+                  "type" : "object"
+               }
+            ],
+            "title" : "Invoice Payable At",
+            "type" : "object"
+         },
+         "InvoicePayableAtShippingInstructions" : {
             "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location must be provided as a `UN Location Code`\n",
             "properties" : {
                "UNLocationCode" : {
@@ -2151,7 +2147,7 @@
                   "type" : "string"
                },
                "sendToPlatform" : {
-                  "description" : "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Conditional:** only applicable when `isElectronic=true` and `transportDocumentTypeCode=BOL`. The property **must** be absent for paper B/Ls (`isElectronic=false`)\n",
+                  "description" : "The EBL platform of the transaction party. \nThe value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\n**Condition:** Only applicable when `isElectronic=true` and `transportDocumentTypeCode=BOL`. The property **MUST** be absent for paper B/Ls (`isElectronic=false`)\n",
                   "example" : "BOLE",
                   "maxLength" : 4,
                   "pattern" : "^\\S+$",
@@ -2306,7 +2302,7 @@
             "title" : "National Commodity Code",
             "type" : "object"
          },
-         "Net Explosive Content" : {
+         "NetExplosiveContent" : {
             "description" : "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
             "properties" : {
                "unit" : {
@@ -2336,7 +2332,7 @@
             "title" : "Net Explosive Content",
             "type" : "object"
          },
-         "Net Volume" : {
+         "NetVolume" : {
             "description" : "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n",
             "properties" : {
                "unit" : {
@@ -2365,7 +2361,7 @@
             "title" : "Net Volume",
             "type" : "object"
          },
-         "Net Weight" : {
+         "NetWeight" : {
             "description" : "Total weight of the goods carried, excluding packaging.\n",
             "properties" : {
                "unit" : {
@@ -2400,7 +2396,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -2829,7 +2825,7 @@
                   "description" : "`Phone` is mandatory to provide\n",
                   "properties" : {
                      "phone" : {
-                        "description" : "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+                        "description" : "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
                         "example" : "+45 70262970",
                         "maxLength" : 30,
                         "pattern" : "^\\S(?:.*\\S)?$",
@@ -2878,56 +2874,6 @@
                "name"
             ],
             "title" : "Party Contact Detail",
-            "type" : "object"
-         },
-         "Place of Issue" : {
-            "description" : "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
-            "oneOf" : [
-               {
-                  "properties" : {
-                     "UNLocationCode" : {
-                        "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-                        "example" : "NLAMS",
-                        "maxLength" : 5,
-                        "minLength" : 5,
-                        "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
-                        "type" : "string"
-                     }
-                  },
-                  "required" : [
-                     "UNLocationCode"
-                  ],
-                  "title" : "UN Location Code",
-                  "type" : "object"
-               },
-               {
-                  "properties" : {
-                     "countryCode" : {
-                        "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                        "example" : "NL",
-                        "maxLength" : 2,
-                        "minLength" : 2,
-                        "pattern" : "^[A-Z]{2}$",
-                        "type" : "string"
-                     }
-                  },
-                  "required" : [
-                     "countryCode"
-                  ],
-                  "title" : "Country Code",
-                  "type" : "object"
-               }
-            ],
-            "properties" : {
-               "locationName" : {
-                  "description" : "The name of the location.",
-                  "example" : "Port of Amsterdam",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "title" : "Place of Issue",
             "type" : "object"
          },
          "PlaceOfAcceptance" : {
@@ -3033,6 +2979,56 @@
                }
             },
             "title" : "Place of Final Delivery",
+            "type" : "object"
+         },
+         "PlaceOfIssue" : {
+            "description" : "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
+            "oneOf" : [
+               {
+                  "properties" : {
+                     "UNLocationCode" : {
+                        "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+                        "example" : "NLAMS",
+                        "maxLength" : 5,
+                        "minLength" : 5,
+                        "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "UNLocationCode"
+                  ],
+                  "title" : "UN Location Code",
+                  "type" : "object"
+               },
+               {
+                  "properties" : {
+                     "countryCode" : {
+                        "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                        "example" : "NL",
+                        "maxLength" : 2,
+                        "minLength" : 2,
+                        "pattern" : "^[A-Z]{2}$",
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "countryCode"
+                  ],
+                  "title" : "Country Code",
+                  "type" : "object"
+               }
+            ],
+            "properties" : {
+               "locationName" : {
+                  "description" : "The name of the location.",
+                  "example" : "Port of Amsterdam",
+                  "maxLength" : 100,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               }
+            },
+            "title" : "Place of Issue",
             "type" : "object"
          },
          "PlaceOfReceipt" : {
@@ -3199,7 +3195,7 @@
                   "type" : "string"
                },
                "tareWeight" : {
-                  "$ref" : "#/components/schemas/Tare Weight"
+                  "$ref" : "#/components/schemas/TareWeight"
                }
             },
             "required" : [
@@ -3284,7 +3280,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -3400,295 +3396,6 @@
             "title" : "Shipper",
             "type" : "object"
          },
-         "Shipping Instructions" : {
-            "description" : "This property contains the shippingInstructions in case the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions then the content in this property can be ignored.\n",
-            "properties" : {
-               "advanceManifestFilings" : {
-                  "description" : "A list of `Advance Manifest Filings` specified by the Shipper to indicate whom is to do the Filing\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/AdvanceManifestFiling"
-                  },
-                  "type" : "array"
-               },
-               "consignmentItems" : {
-                  "description" : "A list of `ConsignmentItems`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/ConsignmentItemShipper"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "customsReferences" : {
-                  "description" : "A list of `Customs references`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/CustomsReference"
-                  },
-                  "type" : "array"
-               },
-               "destinationChargesPaymentTerm" : {
-                  "$ref" : "#/components/schemas/DestinationChargesPaymentTerm"
-               },
-               "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
-               },
-               "feedbacks" : {
-                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Feedback"
-                  },
-                  "type" : "array"
-               },
-               "freightPaymentTermCode" : {
-                  "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
-                  "enum" : [
-                     "PRE",
-                     "COL"
-                  ],
-                  "example" : "PRE",
-                  "type" : "string"
-               },
-               "houseBillOfLadings" : {
-                  "description" : "A list of `House Bill of Ladings` specified by the Shipper.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/HouseBillOfLading"
-                  },
-                  "type" : "array"
-               },
-               "invoicePayableAt" : {
-                  "$ref" : "#/components/schemas/Invoice Payable At"
-               },
-               "isCarriersAgentAtDestinationRequired" : {
-                  "description" : "Indicates whether the Carrier's agent at destination name, address and contact details should be included in the `Transport Document`.\n",
-                  "example" : false,
-                  "type" : "boolean"
-               },
-               "isElectronic" : {
-                  "description" : "An indicator whether the transport document is electronically transferred.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isHBLIssued" : {
-                  "description" : "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isShippedOnBoardType" : {
-                  "description" : "Specifies whether the Transport Document is a received for shipment, or shipped on board.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isToOrder" : {
-                  "description" : "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n\n`isToOrder` must be `false` if `transportDocumentTypeCode='SWB'` (Sea Waybill).\n",
-                  "example" : false,
-                  "type" : "boolean"
-               },
-               "methodOfPayment" : {
-                  "description" : "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
-                  "example" : "A",
-                  "maxLength" : 1,
-                  "type" : "string"
-               },
-               "numberOfCopiesWithCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier with charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfCopiesWithoutCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithoutCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier without charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should NOT be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges NOT should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithoutCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "originChargesPaymentTerm" : {
-                  "$ref" : "#/components/schemas/OriginChargesPaymentTerm"
-               },
-               "partyContactDetails" : {
-                  "description" : "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) \n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/PartyContactDetail"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
-               },
-               "references" : {
-                  "description" : "A list of `References`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Reference"
-                  },
-                  "type" : "array"
-               },
-               "requestedCarrierCertificates" : {
-                  "description" : "Certificate(s) requested by the Shipper for the Carrier to include as part of the shipment documentation pack\n",
-                  "items" : {
-                     "description" : "Name of the certificate. Detailed information about carrier certificates can be found [here](https://dcsa.org/wp-content/uploads/2023/12/28-12-2023_Carrier-Certificates-shipment-voyage-particulars-and-vessel-particulars.pdf). Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n",
-                     "example" : "VESSEL_PARTICULARS_1",
-                     "maxLength" : 100,
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "requestedCarrierClauses" : {
-                  "description" : "Clauses requested by the Shipper for the Carrier to include in the `Transport Document` `Carrier clauses`\n",
-                  "items" : {
-                     "description" : "A clause to request from the carrier. Detailed information about the carrier clauses can be found [here](https://dcsa.org/wp-content/uploads/2023/12/202312-Standardised-Clauses-BL.pdf). Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures/Mixed loads)\n",
-                     "example" : "CARGO_CARGOSPECIFICS",
-                     "maxLength" : 100,
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                  "items" : {
-                     "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                     "example" : "NL",
-                     "maxLength" : 2,
-                     "minLength" : 2,
-                     "pattern" : "^[A-Z]{2}$",
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "shippingInstructionsStatus" : {
-                  "description" : "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
-                  "example" : "RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocumentTypeCode" : {
-                  "description" : "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)\n",
-                  "enum" : [
-                     "BOL",
-                     "SWB"
-                  ],
-                  "example" : "SWB",
-                  "type" : "string"
-               },
-               "updatedShippingInstructionsStatus" : {
-                  "description" : "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-                  "example" : "UPDATE_RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "utilizedTransportEquipments" : {
-                  "description" : "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/UtilizedTransportEquipmentShipper"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               }
-            },
-            "required" : [
-               "consignmentItems",
-               "documentParties",
-               "freightPaymentTermCode",
-               "isElectronic",
-               "isShippedOnBoardType",
-               "isToOrder",
-               "partyContactDetails",
-               "shippingInstructionsStatus",
-               "transportDocumentTypeCode",
-               "utilizedTransportEquipments"
-            ],
-            "title" : "Shipping Instructions",
-            "type" : "object"
-         },
-         "Shipping Instructions Response" : {
-            "description" : "**Only** the `shippingInstructionsReference` is returned.\n",
-            "properties" : {
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "shippingInstructionsReference"
-            ],
-            "title" : "Shipping Instructions Response",
-            "type" : "object"
-         },
          "ShippingInstructions" : {
             "description" : "The `Shipping Instructions` as provided by the Shipper.\n",
             "properties" : {
@@ -3718,7 +3425,7 @@
                   "$ref" : "#/components/schemas/DestinationChargesPaymentTerm"
                },
                "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -3729,7 +3436,7 @@
                   "type" : "array"
                },
                "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -3740,7 +3447,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -3751,7 +3458,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -3762,7 +3469,7 @@
                   "type" : "array"
                },
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
+                  "$ref" : "#/components/schemas/DocumentPartiesShippingInstructions"
                },
                "feedbacks" : {
                   "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
@@ -3788,7 +3495,7 @@
                   "type" : "array"
                },
                "invoicePayableAt" : {
-                  "$ref" : "#/components/schemas/Invoice Payable At"
+                  "$ref" : "#/components/schemas/InvoicePayableAtShippingInstructions"
                },
                "isCarriersAgentAtDestinationRequired" : {
                   "description" : "Indicates whether the Carrier's agent at destination name, address and contact details should be included in the `Transport Document`.\n",
@@ -3861,7 +3568,7 @@
                   "type" : "array"
                },
                "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
+                  "$ref" : "#/components/schemas/PlaceOfIssue"
                },
                "references" : {
                   "description" : "A list of `References`\n",
@@ -3891,7 +3598,7 @@
                   "type" : "array"
                },
                "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
                      "example" : "NL",
@@ -3961,11 +3668,70 @@
             "title" : "Shipping Instructions",
             "type" : "object"
          },
+         "ShippingInstructionsData" : {
+            "description" : "`Shipping Instructions` specific properties for the `Notification`\n",
+            "properties" : {
+               "feedbacks" : {
+                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+                  "items" : {
+                     "$ref" : "#/components/schemas/Feedback"
+                  },
+                  "type" : "array"
+               },
+               "shippingInstructions" : {
+                  "$ref" : "#/components/schemas/ShippingInstructionsFullNotification"
+               },
+               "shippingInstructionsReference" : {
+                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n\n**Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
+                  "maxLength" : 100,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               },
+               "shippingInstructionsStatus" : {
+                  "description" : "The status of the `Shipping Instructions`. Possible values are:\n\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
+                  "example" : "RECEIVED",
+                  "maxLength" : 50,
+                  "type" : "string"
+               },
+               "transportDocumentReference" : {
+                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n\n**Condition:** `shippingInstructionsReference` and/or `transportDocumentReference` is required to provide\n",
+                  "example" : "HHL71800000",
+                  "maxLength" : 20,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               },
+               "updatedShippingInstructions" : {
+                  "$ref" : "#/components/schemas/UpdatedShippingInstructionsFullNotification"
+               },
+               "updatedShippingInstructionsStatus" : {
+                  "description" : "The status of latest update to the `Shipping Instructions`. If no update has been requested - then this property is empty. Possible values are:\n\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions has been received and is awaiting to be processed)\n- `UPDATE_CONFIRMED` (Update is confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
+                  "example" : "UPDATE_RECEIVED",
+                  "maxLength" : 50,
+                  "type" : "string"
+               }
+            },
+            "required" : [
+               "shippingInstructionsStatus"
+            ],
+            "title" : "Data",
+            "type" : "object"
+         },
+         "ShippingInstructionsFullNotification" : {
+            "allOf" : [
+               {
+                  "$ref" : "#/components/schemas/ShippingInstructions"
+               }
+            ],
+            "description" : "This property contains the shippingInstructions in case the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions then the content in this property can be ignored.\n",
+            "title" : "Shipping Instructions",
+            "type" : "object"
+         },
          "ShippingInstructionsNotification" : {
             "description" : "`CloudEvent` specific properties for the `Notification`.\n",
             "properties" : {
                "data" : {
-                  "$ref" : "#/components/schemas/Data"
+                  "$ref" : "#/components/schemas/ShippingInstructionsData"
                },
                "datacontenttype" : {
                   "description" : "Content type of `data` value. This attribute enables `data` to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, an event rendered using the [JSON envelope](formats/json-format.md#3-envelope) format might carry an XML payload in `data`, and the consumer is informed by this attribute being set to \"application/xml\". The rules for how `data` content is rendered for different `datacontenttype` values are defined in the event format specifications; for example, the JSON event format defines the relationship in [section 3.1](formats/json-format.md#31-handling-of-data).\n\nFor some binary mode protocol bindings, this field is directly mapped to the respective protocol's content-type metadata property. Normative rules for the binary mode and the content-type metadata mapping can be found in the respective protocol.\n\nIn some event formats the `datacontenttype` attribute MAY be omitted. For example, if a JSON format event has no `datacontenttype` attribute, then it is implied that the `data` is a JSON value conforming to the \"application/json\" media type. In other words: a JSON-format event with no `datacontenttype` is exactly equivalent to one with `datacontenttype=\"application/json\"`.\n\nWhen translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.\n",
@@ -4030,7 +3796,7 @@
             "title" : "Shipping Instructions Notification",
             "type" : "object"
          },
-         "Tare Weight" : {
+         "TareWeight" : {
             "description" : "The weight of an empty container (gross container weight).\n",
             "properties" : {
                "unit" : {
@@ -4090,391 +3856,6 @@
                "value"
             ],
             "title" : "Tax & Legal Reference",
-            "type" : "object"
-         },
-         "Transport Document" : {
-            "description" : "This property contains the transportDocument in case the subscriber is subscribing to the `Full State Transfer` of the Transport Document.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Transport Document then the content in this property can be ignored.\n",
-            "properties" : {
-               "cargoMovementTypeAtDestination" : {
-                  "description" : "Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:\n\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-                  "example" : "FCL",
-                  "maxLength" : 3,
-                  "type" : "string"
-               },
-               "cargoMovementTypeAtOrigin" : {
-                  "description" : "Refers to the shipment term at the **loading** of the cargo into the container. Possible values are:\n\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-                  "example" : "FCL",
-                  "maxLength" : 3,
-                  "type" : "string"
-               },
-               "carrierClauses" : {
-                  "description" : "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
-                  "items" : {
-                     "description" : "The content of the clause.\n",
-                     "example" : "It is not allowed to...",
-                     "maxLength" : 20000,
-                     "pattern" : "^\\S(?:.*\\S)?$",
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "carrierCode" : {
-                  "description" : "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the issuing carrier of the `Transport Document`. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.\n",
-                  "example" : "MMCU",
-                  "maxLength" : 4,
-                  "pattern" : "^\\S+$",
-                  "type" : "string"
-               },
-               "carrierCodeListProvider" : {
-                  "description" : "The code list provider for the `carrierCode`. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
-                  "enum" : [
-                     "SMDG",
-                     "NMFTA"
-                  ],
-                  "example" : "NMFTA",
-                  "type" : "string"
-               },
-               "charges" : {
-                  "description" : "A list of `Charges`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Charge"
-                  },
-                  "type" : "array"
-               },
-               "consignmentItems" : {
-                  "description" : "A list of `ConsignmentItems`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/ConsignmentItem"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "contractQuotationReference" : {
-                  "description" : "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n",
-                  "example" : "HHL1401",
-                  "maxLength" : 35,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "customsReferences" : {
-                  "description" : "A list of `Customs references`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/CustomsReference"
-                  },
-                  "type" : "array"
-               },
-               "declaredValue" : {
-                  "description" : "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n\n**Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).\n",
-                  "example" : 1231.1,
-                  "format" : "float",
-                  "minimum" : 0,
-                  "type" : "number"
-               },
-               "declaredValueCurrency" : {
-                  "description" : "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
-                  "example" : "DKK",
-                  "maxLength" : 3,
-                  "minLength" : 3,
-                  "pattern" : "^[A-Z]{3}$",
-                  "type" : "string"
-               },
-               "deliveryTypeAtDestination" : {
-                  "description" : "Indicates the type of service offered at `Destination`. The options are:\n\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-                  "enum" : [
-                     "CY",
-                     "SD",
-                     "CFS"
-                  ],
-                  "example" : "CY",
-                  "maxLength" : 3,
-                  "type" : "string"
-               },
-               "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedShippedOnBoardReceivedForShipment" : {
-                  "description" : "The text to be displayed on the `Transport Document` as evidence that the goods have been received for shipment or shipped on board.\n",
-                  "example" : "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier",
-                  "maxLength" : 250,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties_1"
-               },
-               "freightPaymentTermCode" : {
-                  "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
-                  "enum" : [
-                     "PRE",
-                     "COL"
-                  ],
-                  "example" : "PRE",
-                  "type" : "string"
-               },
-               "invoicePayableAt" : {
-                  "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location can be provided as a `UN Location Code` or as a fallback - a `freeText` field\n",
-                  "oneOf" : [
-                     {
-                        "properties" : {
-                           "UNLocationCode" : {
-                              "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-                              "example" : "NLAMS",
-                              "maxLength" : 5,
-                              "minLength" : 5,
-                              "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "UNLocationCode"
-                        ],
-                        "title" : "UN Location Code",
-                        "type" : "object"
-                     },
-                     {
-                        "properties" : {
-                           "freeText" : {
-                              "description" : "The name of the location where payment will be rendered by the customer.\n",
-                              "example" : "DCSA Headquarters",
-                              "maxLength" : 35,
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "freeText"
-                        ],
-                        "title" : "Free text",
-                        "type" : "object"
-                     }
-                  ],
-                  "title" : "Invoice Payable At",
-                  "type" : "object"
-               },
-               "isElectronic" : {
-                  "description" : "An indicator whether the transport document is electronically transferred.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isShippedOnBoardType" : {
-                  "description" : "Specifies whether the Transport Document is a received for shipment, or shipped on board.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isToOrder" : {
-                  "description" : "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n\n`isToOrder` must be `false` if `transportDocumentTypeCode='SWB'` (Sea Waybill).\n",
-                  "example" : false,
-                  "type" : "boolean"
-               },
-               "issueDate" : {
-                  "description" : "Local date when the transport document has been issued.\n\nCan be omitted on draft transport documents, but must be provided when the document has been issued.\n",
-                  "example" : "2020-12-12",
-                  "format" : "date",
-                  "type" : "string"
-               },
-               "numberOfCopiesWithCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier with charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfCopiesWithoutCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithoutCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier without charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should NOT be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges NOT should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithoutCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfRiderPages" : {
-                  "description" : "The number of additional pages required to contain the goods description on a transport document. Only applicable for physical transport documents.\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "partyContactDetails" : {
-                  "description" : "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) \n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/PartyContactDetail"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
-               },
-               "receiptTypeAtOrigin" : {
-                  "description" : "Indicates the type of service offered at `Origin`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-                  "enum" : [
-                     "CY",
-                     "SD",
-                     "CFS"
-                  ],
-                  "example" : "CY",
-                  "maxLength" : 3,
-                  "type" : "string"
-               },
-               "receivedForShipmentDate" : {
-                  "description" : "Date when the last container linked to the transport document is physically in the terminal (customers cleared against the intended vessel).\n\nWhen provided on a transport document, the transportDocument is a `Received For Shipment` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
-                  "example" : "2020-12-12",
-                  "format" : "date",
-                  "type" : "string"
-               },
-               "references" : {
-                  "description" : "A list of `References`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Reference"
-                  },
-                  "type" : "array"
-               },
-               "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                  "items" : {
-                     "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                     "example" : "NL",
-                     "maxLength" : 2,
-                     "minLength" : 2,
-                     "pattern" : "^[A-Z]{2}$",
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "serviceContractReference" : {
-                  "description" : "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n",
-                  "example" : "HHL51800000",
-                  "maxLength" : 30,
-                  "type" : "string"
-               },
-               "shippedOnBoardDate" : {
-                  "description" : "Date when the last container that is linked to the transport document is physically loaded onboard the vessel indicated on the transport document.\n\nWhen provided on a transport document, the transportDocument is a `Shipped On Board` B/L.\n\nExactly one of `shippedOnBoard` and `receiveForShipmentDate` must be provided on an issued B/L.\n",
-                  "example" : "2020-12-12",
-                  "format" : "date",
-                  "type" : "string"
-               },
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "termsAndConditions" : {
-                  "description" : "Carrier terms and conditions of transport.\n",
-                  "example" : "Any reference in...",
-                  "maxLength" : 50000,
-                  "type" : "string"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocumentStatus" : {
-                  "description" : "The status of the `Transport Document`. Possible values are:\n- DRAFT\n- APPROVED\n- ISSUED\n- PENDING_SURRENDER_FOR_AMENDMENT\n- SURRENDERED_FOR_AMENDMENT\n- PENDING_SURRENDER_FOR_DELIVERY\n- SURRENDERED_FOR_DELIVERY\n- VOIDED\n",
-                  "example" : "DRAFT",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "transportDocumentTypeCode" : {
-                  "description" : "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)\n",
-                  "enum" : [
-                     "BOL",
-                     "SWB"
-                  ],
-                  "example" : "SWB",
-                  "type" : "string"
-               },
-               "transports" : {
-                  "$ref" : "#/components/schemas/Transports"
-               },
-               "utilizedTransportEquipments" : {
-                  "description" : "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/UtilizedTransportEquipment"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               }
-            },
-            "required" : [
-               "cargoMovementTypeAtDestination",
-               "cargoMovementTypeAtOrigin",
-               "carrierCode",
-               "carrierCodeListProvider",
-               "consignmentItems",
-               "deliveryTypeAtDestination",
-               "documentParties",
-               "invoicePayableAt",
-               "isElectronic",
-               "isShippedOnBoardType",
-               "isToOrder",
-               "partyContactDetails",
-               "receiptTypeAtOrigin",
-               "termsAndConditions",
-               "transportDocumentReference",
-               "transportDocumentStatus",
-               "transportDocumentTypeCode",
-               "transports",
-               "utilizedTransportEquipments"
-            ],
-            "title" : "Transport Document",
             "type" : "object"
          },
          "TransportDocument" : {
@@ -4575,7 +3956,7 @@
                   "type" : "string"
                },
                "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -4586,7 +3967,7 @@
                   "type" : "array"
                },
                "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -4597,7 +3978,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -4608,7 +3989,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -4626,7 +4007,7 @@
                   "type" : "string"
                },
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties_1"
+                  "$ref" : "#/components/schemas/DocumentParties"
                },
                "freightPaymentTermCode" : {
                   "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
@@ -4638,43 +4019,7 @@
                   "type" : "string"
                },
                "invoicePayableAt" : {
-                  "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location can be provided as a `UN Location Code` or as a fallback - a `freeText` field\n",
-                  "oneOf" : [
-                     {
-                        "properties" : {
-                           "UNLocationCode" : {
-                              "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-                              "example" : "NLAMS",
-                              "maxLength" : 5,
-                              "minLength" : 5,
-                              "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "UNLocationCode"
-                        ],
-                        "title" : "UN Location Code",
-                        "type" : "object"
-                     },
-                     {
-                        "properties" : {
-                           "freeText" : {
-                              "description" : "The name of the location where payment will be rendered by the customer.\n",
-                              "example" : "DCSA Headquarters",
-                              "maxLength" : 35,
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "freeText"
-                        ],
-                        "title" : "Free text",
-                        "type" : "object"
-                     }
-                  ],
-                  "title" : "Invoice Payable At",
-                  "type" : "object"
+                  "$ref" : "#/components/schemas/InvoicePayableAt"
                },
                "isElectronic" : {
                   "description" : "An indicator whether the transport document is electronically transferred.\n",
@@ -4741,7 +4086,7 @@
                   "type" : "array"
                },
                "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
+                  "$ref" : "#/components/schemas/PlaceOfIssue"
                },
                "receiptTypeAtOrigin" : {
                   "description" : "Indicates the type of service offered at `Origin`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
@@ -4768,7 +4113,7 @@
                   "type" : "array"
                },
                "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
                      "example" : "NL",
@@ -4862,11 +4207,62 @@
             "title" : "Transport Document",
             "type" : "object"
          },
+         "TransportDocumentData" : {
+            "description" : "`Transport Document` specific properties for the `Notification`\n",
+            "properties" : {
+               "feedbacks" : {
+                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+                  "items" : {
+                     "$ref" : "#/components/schemas/Feedback"
+                  },
+                  "type" : "array"
+               },
+               "shippingInstructionsReference" : {
+                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
+                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
+                  "maxLength" : 100,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               },
+               "transportDocument" : {
+                  "$ref" : "#/components/schemas/TransportDocumentFullNotification"
+               },
+               "transportDocumentReference" : {
+                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+                  "example" : "HHL71800000",
+                  "maxLength" : 20,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               },
+               "transportDocumentStatus" : {
+                  "description" : "The status of the `Transport Document`. Possible values are:\n\n- `DRAFT` (Transport Document is Drafted)\n- `APPROVED` (Transport Document has been Approved by consumer)\n- `ISSUED` (Transport Document has been Issued by provider)\n- `PENDING_SURRENDER_FOR_AMENDMENT` (Transport Document is Pending for Surrender for an Amendment)\n- `SURRENDER_FOR_AMENDMENT` (Transport Document Surrendered for an Amendment)\n- `VOID` (the Transport Document has been Voided)\n- `PENDING_SURRENDER_FOR_DELIVERY` (Transport Document pending surrender for Delivery)\n- `SURRENDER_FOR_DELIVERY` (Transport Document surrendered for Delivery)\n",
+                  "example" : "DRAFT",
+                  "maxLength" : 50,
+                  "type" : "string"
+               }
+            },
+            "required" : [
+               "transportDocumentReference",
+               "transportDocumentStatus"
+            ],
+            "title" : "Data",
+            "type" : "object"
+         },
+         "TransportDocumentFullNotification" : {
+            "allOf" : [
+               {
+                  "$ref" : "#/components/schemas/TransportDocument"
+               }
+            ],
+            "description" : "This property contains the `transportDocument` in case the subscriber is subscribing to the `Full State Transfer` of the `Transport Document`.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the `Transport Document` then the content in this property can be ignored.\n\n**Condition:** Once the `Transport Document` has been Issued (`transportDocumentStatus='ISSUED'`) - the order of **ALL** lists/arrays in this property **MUST** be aligned with the order of the\n\n    GET /v3/transport-documents/{transportDocumentReference}\n\npayload implemented by the provider of the **Shipping Instructions and Transport Document** API.\n",
+            "title" : "Transport Document",
+            "type" : "object"
+         },
          "TransportDocumentNotification" : {
             "description" : "`CloudEvent` specific properties for the `Notification`.\n",
             "properties" : {
                "data" : {
-                  "$ref" : "#/components/schemas/Data_1"
+                  "$ref" : "#/components/schemas/TransportDocumentData"
                },
                "datacontenttype" : {
                   "description" : "Content type of `data` value. This attribute enables `data` to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, an event rendered using the [JSON envelope](formats/json-format.md#3-envelope) format might carry an XML payload in `data`, and the consumer is informed by this attribute being set to \"application/xml\". The rules for how `data` content is rendered for different `datacontenttype` values are defined in the event format specifications; for example, the JSON event format defines the relationship in [section 3.1](formats/json-format.md#31-handling-of-data).\n\nFor some binary mode protocol bindings, this field is directly mapped to the respective protocol's content-type metadata property. Normative rules for the binary mode and the content-type metadata mapping can be found in the respective protocol.\n\nIn some event formats the `datacontenttype` attribute MAY be omitted. For example, if a JSON format event has no`datacontenttype` attribute, then it is implied that the `data` is a JSON value conforming to the \"application/json\" media type. In other words: a JSON-format event with no `datacontenttype` is exactly equivalent to one with `datacontenttype=\"application/json\"`.\n\nWhen translating an event message with no `datacontenttype` attribute to a different format or protocol binding, the target `datacontenttype` SHOULD be set explicitly to the implied `datacontenttype` of the source.\n",
@@ -5062,7 +4458,7 @@
                   "$ref" : "#/components/schemas/DestinationChargesPaymentTerm"
                },
                "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -5073,7 +4469,7 @@
                   "type" : "array"
                },
                "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -5084,7 +4480,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -5095,7 +4491,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -5106,7 +4502,7 @@
                   "type" : "array"
                },
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
+                  "$ref" : "#/components/schemas/DocumentPartiesShippingInstructions"
                },
                "freightPaymentTermCode" : {
                   "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
@@ -5125,7 +4521,7 @@
                   "type" : "array"
                },
                "invoicePayableAt" : {
-                  "$ref" : "#/components/schemas/Invoice Payable At"
+                  "$ref" : "#/components/schemas/InvoicePayableAtShippingInstructions"
                },
                "isCarriersAgentAtDestinationRequired" : {
                   "description" : "Indicates whether the Carrier's agent at destination name, address and contact details should be included in the `Transport Document`.\n",
@@ -5198,7 +4594,7 @@
                   "type" : "array"
                },
                "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
+                  "$ref" : "#/components/schemas/PlaceOfIssue"
                },
                "references" : {
                   "description" : "A list of `References`\n",
@@ -5228,7 +4624,7 @@
                   "type" : "array"
                },
                "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
                      "example" : "NL",
@@ -5279,275 +4675,13 @@
             "title" : "Update Shipping Instructions",
             "type" : "object"
          },
-         "Updated Shipping Instructions" : {
-            "description" : "This property contains the updated shipping instructions in case:\n  - an update is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions or no update is active - then the content in this property can be ignored.\n",
-            "properties" : {
-               "advanceManifestFilings" : {
-                  "description" : "A list of `Advance Manifest Filings` specified by the Shipper to indicate whom is to do the Filing\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/AdvanceManifestFiling"
-                  },
-                  "type" : "array"
-               },
-               "consignmentItems" : {
-                  "description" : "A list of `ConsignmentItems`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/ConsignmentItemShipper"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "customsReferences" : {
-                  "description" : "A list of `Customs references`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/CustomsReference"
-                  },
-                  "type" : "array"
-               },
-               "destinationChargesPaymentTerm" : {
-                  "$ref" : "#/components/schemas/DestinationChargesPaymentTerm"
-               },
-               "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
-                  "items" : {
-                     "description" : "A line of the address to be displayed on the transport document.\n",
-                     "example" : "Strawinskylaan 4117",
-                     "maxLength" : 35,
-                     "type" : "string"
-                  },
-                  "maxItems" : 5,
-                  "type" : "array"
-               },
-               "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
-               },
-               "feedbacks" : {
-                  "description" : "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Feedback"
-                  },
-                  "type" : "array"
-               },
-               "freightPaymentTermCode" : {
-                  "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
-                  "enum" : [
-                     "PRE",
-                     "COL"
-                  ],
-                  "example" : "PRE",
-                  "type" : "string"
-               },
-               "houseBillOfLadings" : {
-                  "description" : "A list of `House Bill of Ladings` specified by the Shipper.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/HouseBillOfLading"
-                  },
-                  "type" : "array"
-               },
-               "invoicePayableAt" : {
-                  "$ref" : "#/components/schemas/Invoice Payable At"
-               },
-               "isCarriersAgentAtDestinationRequired" : {
-                  "description" : "Indicates whether the Carrier's agent at destination name, address and contact details should be included in the `Transport Document`.\n",
-                  "example" : false,
-                  "type" : "boolean"
-               },
-               "isElectronic" : {
-                  "description" : "An indicator whether the transport document is electronically transferred.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isHBLIssued" : {
-                  "description" : "Indicates whether one or more `House Bill of Lading(s)` have been issued. This property is used by the carrier to identify which `ENS` filing type must be submitted (`F10` or `F11`, `F12` or `F13`) to comply with `ICS2` customs regulations\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isShippedOnBoardType" : {
-                  "description" : "Specifies whether the Transport Document is a received for shipment, or shipped on board.\n",
-                  "example" : true,
-                  "type" : "boolean"
-               },
-               "isToOrder" : {
-                  "description" : "Indicates whether the B/L is issued `to order` or not. If `true`, the B/L is considered negotiable and an Endorsee party can be defined in the Document parties. If no Endorsee is defined, the B/L is blank endorsed. If `false`, the B/L is considered non-negotiable (also referred to as `straight`).\n\n`isToOrder` must be `false` if `transportDocumentTypeCode='SWB'` (Sea Waybill).\n",
-                  "example" : false,
-                  "type" : "boolean"
-               },
-               "methodOfPayment" : {
-                  "description" : "Method used for the payment of prepaid charges. It can be one of the following values: \n- `A` (Cash)\n- `B` (Credit Card)\n- `C` (Cheque)\n- `D` (Other)\n- `H` (Electronic funds transfer)\n- `Y` (Account holder with carrier)\n- `Z` (Not prepaid)\n",
-                  "example" : "A",
-                  "maxLength" : 1,
-                  "type" : "string"
-               },
-               "numberOfCopiesWithCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier with charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfCopiesWithoutCharges" : {
-                  "description" : "The requested number of copies of the `Transport Document` to be issued by the carrier **NOT** including charges.\n\n**Conditions:** The following table defines the conditions for the `numberOfCopiesWithoutCharges` property:\n| Transport Document Type Code | Is Electronic | Meaning |\n|-------|:-------:|-------|\n|`BOL`|`false`|How many paper copies of the Original BL to be issued by the carrier without charges|\n|`BOL`|`true`|Not applicable, there are no copies|\n|`SWB`|`false`|Indicates that charges should NOT be included in the `SWB` (pdf or other formats)|\n|`SWB`|`true`|Indicates that charges NOT should be included in the electronic `SWB`|\n",
-                  "example" : 2,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer with charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "numberOfOriginalsWithoutCharges" : {
-                  "description" : "Number of originals of the Bill of Lading that has been requested by the customer without charges.\n\n**Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)\n",
-                  "example" : 1,
-                  "format" : "int32",
-                  "minimum" : 0,
-                  "type" : "integer"
-               },
-               "originChargesPaymentTerm" : {
-                  "$ref" : "#/components/schemas/OriginChargesPaymentTerm"
-               },
-               "partyContactDetails" : {
-                  "description" : "The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) \n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/PartyContactDetail"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
-               },
-               "references" : {
-                  "description" : "A list of `References`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/Reference"
-                  },
-                  "type" : "array"
-               },
-               "requestedCarrierCertificates" : {
-                  "description" : "Certificate(s) requested by the Shipper for the Carrier to include as part of the shipment documentation pack\n",
-                  "items" : {
-                     "description" : "Name of the certificate. Detailed information about carrier certificates can be found [here](https://dcsa.org/wp-content/uploads/2023/12/28-12-2023_Carrier-Certificates-shipment-voyage-particulars-and-vessel-particulars.pdf). Possible values are:\n- `SHIPMENT_VOYAGE_PARTICULARS_1` (Shipment-Voyage Particulars 1)\n- `SHIPMENT_VOYAGE_PARTICULARS_2` (Shipment-Voyage Particulars 2)\n- `SHIPMENT_VOYAGE_PARTICULARS_3` (Shipment-Voyage Particulars 3)\n- `SHIPMENT_VOYAGE_PARTICULARS_4` (Shipment-Voyage Particulars 4)\n- `SHIPMENT_VOYAGE_PARTICULARS_5` (Shipment-Voyage Particulars 5)\n- `SHIPMENT_VOYAGE_PARTICULARS_6` (Shipment-Voyage Particulars 6)\n- `SHIPMENT_VOYAGE_PARTICULARS_7` (Shipment-Voyage Particulars 7)\n- `VESSEL_PARTICULARS_1` (Vessel Particulars 1)\n- `VESSEL_PARTICULARS_2` (Vessel Particulars 2)\n- `VESSEL_PARTICULARS_3` (Vessel Particulars 3)\n- `VESSEL_PARTICULARS_4` (Vessel Particulars 4)\n- `VESSEL_PARTICULARS_5` (Vessel Particulars 5)\n- `VESSEL_PARTICULARS_6` (Vessel Particulars 6)\n- `VESSEL_PARTICULARS_7` (Vessel Particulars 7)\n- `VESSEL_PARTICULARS_8` (Vessel Particulars 8)\n- `VESSEL_PARTICULARS_9` (Vessel Particulars 9)\n- `VESSEL_PARTICULARS_10` (Vessel Particulars 10)\n- `VESSEL_PARTICULARS_11` (Vessel Particulars 11)\n- `VESSEL_PARTICULARS_12` (Vessel Particulars 12)\n- `VESSEL_PARTICULARS_13` (Vessel Particulars 13)\n- `VESSEL_PARTICULARS_14` (Vessel Particulars 14)\n- `VESSEL_PARTICULARS_15` (Vessel Particulars 15)\n- `VESSEL_PARTICULARS_16` (Vessel Particulars 16)\n- `VESSEL_PARTICULARS_17` (Vessel Particulars 17)\n- `VESSEL_PARTICULARS_18` (Vessel Particulars 18)\n",
-                     "example" : "VESSEL_PARTICULARS_1",
-                     "maxLength" : 100,
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "requestedCarrierClauses" : {
-                  "description" : "Clauses requested by the Shipper for the Carrier to include in the `Transport Document` `Carrier clauses`\n",
-                  "items" : {
-                     "description" : "A clause to request from the carrier. Detailed information about the carrier clauses can be found [here](https://dcsa.org/wp-content/uploads/2023/12/202312-Standardised-Clauses-BL.pdf). Possible values are:\n- `CARGO_CARGOSPECIFICS` (Cargo/Cargo specifics)\n- `VESSELCONVEYANCE_COUNTRYSPECIFIC` (Vessel conveyance/Country Specific)\n- `CARGO_RETURNOFEMPTYCONTAINER` (Cargo/Return of Empty Container)\n- `CARGO_CARGOVALUE` (Cargo/Cargo value)\n- `CARGO_REEFERTEMPERATURE` (Cargo/Reefer temperature)\n- `CARGO_CONFLICTINGTEMPERATURES_MIXEDLOADS` (Cargo/Conflicting temperatures/Mixed loads)\n",
-                     "example" : "CARGO_CARGOSPECIFICS",
-                     "maxLength" : 100,
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                  "items" : {
-                     "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                     "example" : "NL",
-                     "maxLength" : 2,
-                     "minLength" : 2,
-                     "pattern" : "^[A-Z]{2}$",
-                     "type" : "string"
-                  },
-                  "type" : "array"
-               },
-               "shippingInstructionsReference" : {
-                  "description" : "The identifier for a `Shipping Instructions` provided by the carrier for system purposes.\n",
-                  "example" : "e0559d83-00e2-438e-afd9-fdd610c1a008",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "shippingInstructionsStatus" : {
-                  "description" : "The status of the `Shipping Instructions`. Possible values are:\n- `RECEIVED` (Shipping Instructions has been received)\n- `PENDING_UPDATE` (An update is required to the Shipping Instructions)\n- `COMPLETED` (The Shipping Instructions can no longer be modified - the related Transport Document has been surrendered for delivery)\n",
-                  "example" : "RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocumentTypeCode" : {
-                  "description" : "Specifies the type of the transport document\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)\n",
-                  "enum" : [
-                     "BOL",
-                     "SWB"
-                  ],
-                  "example" : "SWB",
-                  "type" : "string"
-               },
-               "updatedShippingInstructionsStatus" : {
-                  "description" : "The status of the latest update to the `Shipping Instructions`. If no update has been requested - then this field is empty. Possible values are:\n- `UPDATE_RECEIVED` (An update to a Shipping Instructions is waiting to be processed)\n- `UPDATE_CONFIRMED` (An update to a Shipping Instructions has been confirmed)\n- `UPDATE_CANCELLED` (An update to a Shipping Instructions is discontinued by consumer)\n- `UPDATE_DECLINED` (An update to a Shipping Instructions is discontinued by provider)\n",
-                  "example" : "UPDATE_RECEIVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "utilizedTransportEquipments" : {
-                  "description" : "A list of `Utilized Transport Equipments` describing the equipment being used.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/UtilizedTransportEquipmentShipper"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
+         "UpdatedShippingInstructionsFullNotification" : {
+            "allOf" : [
+               {
+                  "$ref" : "#/components/schemas/ShippingInstructions"
                }
-            },
-            "required" : [
-               "consignmentItems",
-               "documentParties",
-               "freightPaymentTermCode",
-               "isElectronic",
-               "isShippedOnBoardType",
-               "isToOrder",
-               "partyContactDetails",
-               "shippingInstructionsStatus",
-               "transportDocumentTypeCode",
-               "utilizedTransportEquipments"
             ],
+            "description" : "This property contains the updated shipping instructions in case:\n  - an update is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Shipping Instructions\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Shipping Instructions or no update is active - then the content in this property can be ignored.\n",
             "title" : "Updated Shipping Instructions",
             "type" : "object"
          },
@@ -5593,7 +4727,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -5653,7 +4787,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -5702,34 +4836,6 @@
             ],
             "title" : "Vessel/Voyage",
             "type" : "object"
-         },
-         "shippinginstructions_documentReference_body" : {
-            "properties" : {
-               "updatedShippingInstructionsStatus" : {
-                  "description" : "The status of the `Updated Shipping Instructions`. It can only be `UPDATE_CANCELLED`\n",
-                  "example" : "UPDATE_CANCELLED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "updatedShippingInstructionsStatus"
-            ],
-            "type" : "object"
-         },
-         "transportdocuments_transportDocumentReference_body" : {
-            "properties" : {
-               "transportDocumentStatus" : {
-                  "description" : "The status of the `Transport Document`. It can only be `APPROVED`\n",
-                  "example" : "APPROVED",
-                  "maxLength" : 50,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "transportDocumentStatus"
-            ],
-            "type" : "object"
          }
       }
    },
@@ -5739,12 +4845,12 @@
          "name" : "Digital Container Shipping Association (DCSA)",
          "url" : "https://dcsa.org"
       },
-      "description" : "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model v2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3) to address this. **All use cases mentioned in this API specification refer to use cases defined in the eBL IFS**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implemented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+      "description" : "<h1>DCSA OpenAPI specification for the Shipping Instructions and Transport Document process</h1>\n\nThis API is intended as an API between a carrier and anyone creating a `Shipping Instructions` and approving a `Transport Document`. The process includes:\n\n- Shipping Instructions submission\n- Shipping Instructions update\n- Draft Transport Document publication\n- Draft Transport Document update\n- Draft Transport Document approval\n\nFor explanation of specific values or objects please refer to the [Information Model](https://developer.dcsa.org/documentation/information_models). This API specification does not define the allowable updates and their timing in accordance with the established business rules. **All use cases mentioned in this API specification refer to use cases defined in [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3)**.\n\nAll other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)\n\n### EBL (Implemented by provider)\n\nIt is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:\n\n    GET /v3/shipping-instructions/{documentReference}  # For Shipping Instructions status\n    GET /v3/transport-documents/{transportDocumentReference}  # For Transport Document status\n\nin order to poll information about status changes.\n\n**Note:** All `/v3/shipping-instructions` and `/v3/transport-documents` endPoints must be implemented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Shipping Instructions Notification endPoint](#/ShippingInstructionsNotification) or the [Transport Document Notification endPoint](#/TransportDocumentNotification).\n\n    POST /v3/shipping-instructions-notifications\n    POST /v3/transport-document-notifications\n\nThe endPoints support both a lightweight Notification and a full State transfer. How much data is sent via this Notification depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** All of these endPoint is to be implemented by the consumers of the `Shipping Instructions API` and `Transport Document API` in order to receive push events.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
       "license" : {
          "name" : "Apache 2.0",
          "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
       },
-      "title" : "DCSA specification for Shipping Instructions and Transport Document",
+      "title" : "DCSA Shipping Instructions and Transport Document API",
       "version" : "3.0.0"
    },
    "openapi" : "3.0.3",
@@ -5865,7 +4971,7 @@
                            }
                         },
                         "schema" : {
-                           "$ref" : "#/components/schemas/Shipping Instructions Response"
+                           "$ref" : "#/components/schemas/CreateShippingInstructionsResponse"
                         }
                      }
                   },
@@ -6974,7 +6080,7 @@
                         }
                      },
                      "schema" : {
-                        "$ref" : "#/components/schemas/shippinginstructions_documentReference_body"
+                        "$ref" : "#/components/schemas/CancelShippingInstructionsUpdate"
                      }
                   }
                },
@@ -7997,7 +7103,7 @@
       },
       "/v3/transport-documents/{transportDocumentReference}" : {
          "get" : {
-            "description" : "Retrieves the `Transport Document` with the `transportDocumentReference` in the path.\n",
+            "description" : "Retrieves the `Transport Document` with the `transportDocumentReference` in the path.\n\n**Condition:** Once the `Transport Document` has been Issued (`transportDocumentStatus='ISSUED'`) - the order of **ALL** lists/arrays in this payload **MUST** be preserved as by the provider of the API.\n",
             "operationId" : "get-transport-document",
             "parameters" : [
                {
@@ -8575,7 +7681,34 @@
             "description" : "A way for the consumer to Approve the `Draft Transport Document`. This endPoint corresponds with **UseCase 7 - Approve Draft Transport Document**.\n\n## Precondition\nIn order to approve a `Draft Transport Document`, the status of the `Transport Document` needs to be in status `DRAFT`\n\n## Postcondition\nThe provider has received an approval from the consumer for a `Transport Document` that is in state `DRAFT`.\n\nThe consumer will receive a `202` (Accepted) if the payload schema-validates or a `400` (Bad Request) if it does not.\n\n## Flow for the `202` (Accepted) response\nThe following occurs when a provider receives an approval:\n1. The payload is schema-validated. In case the payload **is invalid** a `400` (Bad Request) is returned.\n\n   **The process stops here!**\n2. The payload is schema-valid which means:\n    - all required properties are provided.\n    - all values provided have correct data type.\n3. An empty response is returned and the consumer now awaits further processing by the provider.\n\nOnce processed, the `Transport Document` is `ISSUED` and a [Transport Document Notification](#/TransportDocumentNotification) is sent. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the\n\n    GET /v3/transport-documents/{transportDocumentReference}\n    \nendPoint to check if the `transportDocumentStatus` of the `Transport Document` has changed.\n",
             "operationId" : "approve-transport-document",
             "parameters" : [
-               {
+              {
+                "in": "query",
+                "name": "NewParameter",
+                "description": "New parameter",
+                "required": "true",
+                "schema": {
+                  "": ""
+                }
+              },
+              {
+                "in": "query",
+                "name": "NewParameter",
+                "description": "New parameter",
+                "required": "true",
+                "schema": {
+                  "": ""
+                }
+              },
+              {
+                "in": "query",
+                "name": "NewParameter",
+                "description": "New parameter",
+                "required": "true",
+                "schema": {
+                  "": ""
+                }
+              },
+              {
                   "description" : "The `transportDocumentReference` of the `Transport Document`\n",
                   "explode" : false,
                   "in" : "path",
@@ -8607,7 +7740,7 @@
                "content" : {
                   "application/json" : {
                      "schema" : {
-                        "$ref" : "#/components/schemas/transportdocuments_transportDocumentReference_body"
+                        "$ref" : "#/components/schemas/ApproveTransportDocument"
                      }
                   }
                }
@@ -8828,7 +7961,8 @@
    },
    "servers" : [
       {
-         "url" : "/"
+         "description" : "SwaggerHub API Auto Mocking",
+         "url" : "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL/3.0.0"
       }
    ],
    "tags" : [

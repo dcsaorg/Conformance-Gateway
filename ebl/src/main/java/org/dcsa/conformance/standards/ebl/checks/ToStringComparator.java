@@ -54,6 +54,6 @@ public class ToStringComparator implements Comparator<JsonNode> {
         builder.append("}");
       }
       default -> builder.append(node);
-    };
+    }
   }
 }

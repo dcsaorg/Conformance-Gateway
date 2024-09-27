@@ -24,7 +24,7 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
-          "grossWeight": {
+          "cargoGrossWeight": {
             "value": 15000,
             "unit": "KGM"
           },
@@ -45,7 +45,7 @@
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-          "grossWeight": {
+          "cargoGrossWeight": {
             "value": 20000,
             "unit": "KGM"
           },

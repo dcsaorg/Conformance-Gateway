@@ -57,8 +57,8 @@ public class BookingCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrrToCbr));
-    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrToCbrr));
+    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(cbrrToCbr));
+    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(cbrToCbrr));
   }
 
   @Override
@@ -389,7 +389,7 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
         400,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -400,14 +400,14 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
         404,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -622,7 +622,7 @@ public class BookingCarrier extends ConformanceParty {
       }
       ConformanceResponse response =
           request.createResponse(
-              200, Map.of("Api-Version", List.of(apiVersion)), new ConformanceMessageBody(body));
+              200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
               .formatted(

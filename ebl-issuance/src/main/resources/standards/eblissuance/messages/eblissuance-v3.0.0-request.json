@@ -87,7 +87,7 @@
         "cargoItems": [
           {
             "equipmentReference": "NARU3472484",
-            "grossWeight": {
+            "cargoGrossWeight": {
               "value": 12000,
               "unit": "KGM"
             },

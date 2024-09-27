@@ -150,7 +150,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),
-        Map.of("API-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(signedPayloadJsonNode)
       );
     }
@@ -168,7 +168,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     receiveState.save(persistentMap);
     return request.createResponse(
       201,
-      Map.of("API-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(unsignedPayload)
     );
   }
@@ -177,7 +177,7 @@ public class PintReceivingPlatform extends ConformanceParty {
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
       "envelopeReferences",
-      StateManagementUtil.storeMap(OBJECT_MAPPER, envelopeReferences));
+      StateManagementUtil.storeMap(envelopeReferences));
   }
 
   @Override
@@ -218,19 +218,19 @@ public class PintReceivingPlatform extends ConformanceParty {
           var payload = receiveState.generateSignedResponse(INCD, payloadSigner);
           return request.createResponse(
             INCD.getHttpResponseCode(),
-            Map.of("API-Version", List.of(apiVersion)),
+            Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(payload)
           );
         }
         receiveState.save(persistentMap);
         return request.createResponse(
           204,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody("")
         );
       }
       return request.createResponse(404,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(
           OBJECT_MAPPER
             .createObjectNode()
@@ -253,13 +253,13 @@ public class PintReceivingPlatform extends ConformanceParty {
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),
-        Map.of("API-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(signedPayloadJsonNode)
       );
     }
 
     return request.createResponse(404,
-      Map.of("Api-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(
         OBJECT_MAPPER
           .createObjectNode()
@@ -281,7 +281,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     } else {
       response = request.createResponse(
         404,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(
           OBJECT_MAPPER
             .createObjectNode()

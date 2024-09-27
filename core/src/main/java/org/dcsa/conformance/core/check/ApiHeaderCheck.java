@@ -3,6 +3,7 @@ package org.dcsa.conformance.core.check;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
@@ -47,21 +48,6 @@ public class ApiHeaderCheck extends ActionCheck {
     this("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, expectedVersion, false);
   }
 
-  public ApiHeaderCheck(
-      String titlePrefix,
-      Predicate<String> isRelevantForRoleName,
-      UUID matchedExchangeUuid,
-      HttpMessageType httpMessageType,
-      String expectedVersion) {
-    this(
-        titlePrefix,
-        isRelevantForRoleName,
-        matchedExchangeUuid,
-        httpMessageType,
-        expectedVersion,
-        false);
-  }
-
   private ApiHeaderCheck(
       String titlePrefix,
       Predicate<String> isRelevantForRoleName,
@@ -71,8 +57,8 @@ public class ApiHeaderCheck extends ActionCheck {
       boolean isNotification) {
     super(
         titlePrefix,
-        "The HTTP %s has a correct Api-Version header"
-            .formatted(httpMessageType.name().toLowerCase()),
+        "The HTTP %s has a correct %s header"
+            .formatted(httpMessageType.name().toLowerCase(), ConformanceParty.API_VERSION),
         isRelevantForRoleName,
         matchedExchangeUuid,
         httpMessageType);
@@ -88,16 +74,16 @@ public class ApiHeaderCheck extends ActionCheck {
         exchange.getMessage(httpMessageType).headers();
     String headerName =
         headers.keySet().stream()
-            .filter(key -> key.equalsIgnoreCase("api-version"))
+            .filter(key -> key.equalsIgnoreCase(ConformanceParty.API_VERSION))
             .findFirst()
-            .orElse("api-version");
+            .orElse(ConformanceParty.API_VERSION);
     Collection<String> headerValues = headers.get(headerName);
     if (headerValues == null || headerValues.isEmpty()) {
       return httpMessageType.equals(HttpMessageType.RESPONSE) && !isNotification
-          ? Set.of("Missing Api-Version header")
+          ? Set.of("Missing %s header".formatted(ConformanceParty.API_VERSION))
           : Collections.emptySet();
     }
-    if (headerValues.size() > 1) return Set.of("Duplicate Api-Version headers");
+    if (headerValues.size() > 1) return Set.of("Duplicate %s headers".formatted(ConformanceParty.API_VERSION));
     String exchangeApiVersion = headerValues.stream().findFirst().orElseThrow();
     if (exchangeApiVersion.contains("-")) {
       exchangeApiVersion = exchangeApiVersion.substring(0, exchangeApiVersion.indexOf("-"));
@@ -132,6 +118,8 @@ public class ApiHeaderCheck extends ActionCheck {
   private Set<String> _checkApiVersionHeaderValue(String expectedValue, String actualValue) {
     return Objects.equals(expectedValue, actualValue)
         ? Set.of()
-        : Set.of("Expected Api-Version '%s' but found '%s'".formatted(expectedValue, actualValue));
+        : Set.of(
+            "Expected %s '%s' but found '%s'"
+                .formatted(ConformanceParty.API_VERSION, expectedValue, actualValue));
   }
 }

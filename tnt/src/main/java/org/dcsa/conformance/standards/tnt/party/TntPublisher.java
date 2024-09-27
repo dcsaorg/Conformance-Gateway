@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.tnt.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,8 +67,8 @@ public class TntPublisher extends ConformanceParty {
                     actionPrompt.required("tntFilterParametersQueryParamNames").spliterator(),
                     false)
                 .map(
-                    jsonOvsFilterParameter ->
-                        TntFilterParameter.byQueryParamName.get(jsonOvsFilterParameter.asText()))
+                    jsonTntFilterParameter ->
+                        TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.asText()))
                 .collect(
                     Collectors.toMap(
                         Function.identity(),
@@ -102,7 +103,7 @@ public class TntPublisher extends ConformanceParty {
                             })));
 
     asyncOrchestratorPostPartyInput(
-        new ObjectMapper()
+        OBJECT_MAPPER
             .createObjectNode()
             .put("actionId", actionPrompt.required("actionId").asText())
             .set("input", responseSsp.toJson()));
@@ -122,7 +123,7 @@ public class TntPublisher extends ConformanceParty {
 
     return request.createResponse(
         200,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(jsonResponseBody));
   }
 }

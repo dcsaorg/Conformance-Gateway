@@ -33,11 +33,5 @@
 			<version>2.159.1</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>software.constructs</groupId>
-			<artifactId>constructs</artifactId>
-			<version>10.3.0</version>
-			<scope>compile</scope>
-		</dependency>
 	</dependencies>
 </project>

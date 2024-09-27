@@ -1,13 +1,13 @@
 package org.dcsa.conformance.lambda;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import java.util.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceAccessException;
@@ -24,7 +24,7 @@ public class WebuiLambda
       System.out.println("event = " + event + ", context = " + context);
       log.info("event.getPath() = " + event.getPath());
 
-      JsonNode jsonEvent = new ObjectMapper().valueToTree(event);
+      JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
       log.info("JSON event = " + jsonEvent.toString());
 
       String cognitoIdAsEnvironmentId =

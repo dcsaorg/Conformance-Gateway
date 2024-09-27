@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.cs.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.With;
 
@@ -17,7 +18,7 @@ public record DynamicScenarioParameters(String cursor, String firstPage, String 
   }
 
   public ObjectNode toJson() {
-    ObjectNode dspNode = new ObjectMapper().createObjectNode();
+    ObjectNode dspNode = OBJECT_MAPPER.createObjectNode();
     if (cursor != null) {
       dspNode.put("cursor", cursor);
     }

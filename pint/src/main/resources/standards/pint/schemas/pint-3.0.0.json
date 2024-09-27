@@ -205,7 +205,7 @@
             "title" : "Address",
             "type" : "object"
          },
-         "Cargo Gross Volume" : {
+         "CargoGrossVolume" : {
             "description" : "Calculated by multiplying the width, height, and length of the packed cargo.\n",
             "properties" : {
                "unit" : {
@@ -233,7 +233,7 @@
             "title" : "Cargo Gross Volume",
             "type" : "object"
          },
-         "Cargo Gross Weight" : {
+         "CargoGrossWeight" : {
             "description" : "The weight of the cargo item including packaging being carried in the container. Excludes the tare weight of the container.\n",
             "properties" : {
                "unit" : {
@@ -261,76 +261,20 @@
             "title" : "Cargo Gross Weight",
             "type" : "object"
          },
-         "Cargo Net Volume" : {
-            "description" : "Calculated by multiplying the width, height, and length of the packed cargo, excluding packaging.\n",
-            "properties" : {
-               "unit" : {
-                  "description" : "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
-                  "enum" : [
-                     "MTQ",
-                     "FTQ"
-                  ],
-                  "example" : "MTQ",
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "Calculated by multiplying the width, height, and length of the packed cargo, excluding packaging.\n",
-                  "example" : 2.4,
-                  "exclusiveMinimum" : true,
-                  "format" : "float",
-                  "minimum" : 0,
-                  "type" : "number"
-               }
-            },
-            "required" : [
-               "unit",
-               "value"
-            ],
-            "title" : "Cargo Net Volume",
-            "type" : "object"
-         },
-         "Cargo Net Weight" : {
-            "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container.\n",
-            "properties" : {
-               "unit" : {
-                  "description" : "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-                  "enum" : [
-                     "KGM",
-                     "LBR"
-                  ],
-                  "example" : "KGM",
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.\n",
-                  "example" : 2400,
-                  "exclusiveMinimum" : true,
-                  "format" : "float",
-                  "minimum" : 0,
-                  "type" : "number"
-               }
-            },
-            "required" : [
-               "unit",
-               "value"
-            ],
-            "title" : "Cargo Net Weight",
-            "type" : "object"
-         },
          "CargoItem" : {
             "description" : "A `cargoItem` is the smallest unit used by stuffing. A `cargoItem` cannot be split across containers.\n",
             "properties" : {
                "cargoGrossVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Volume"
+                  "$ref" : "#/components/schemas/CargoGrossVolume"
                },
                "cargoGrossWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Gross Weight"
+                  "$ref" : "#/components/schemas/CargoGrossWeight"
                },
                "cargoNetVolume" : {
-                  "$ref" : "#/components/schemas/Cargo Net Volume"
+                  "$ref" : "#/components/schemas/CargoNetVolume"
                },
                "cargoNetWeight" : {
-                  "$ref" : "#/components/schemas/Cargo Net Weight"
+                  "$ref" : "#/components/schemas/CargoNetWeight"
                },
                "customsReferences" : {
                   "description" : "A list of `Customs references`\n",
@@ -363,6 +307,62 @@
                "outerPackaging"
             ],
             "title" : "Cargo Item",
+            "type" : "object"
+         },
+         "CargoNetVolume" : {
+            "description" : "Calculated by multiplying the width, height, and length of the cargo, excluding packaging.\n",
+            "properties" : {
+               "unit" : {
+                  "description" : "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+                  "enum" : [
+                     "MTQ",
+                     "FTQ"
+                  ],
+                  "example" : "MTQ",
+                  "type" : "string"
+               },
+               "value" : {
+                  "description" : "Calculated by multiplying the width, height, and length of the cargo, excluding packaging.\n",
+                  "example" : 2.4,
+                  "exclusiveMinimum" : true,
+                  "format" : "float",
+                  "minimum" : 0,
+                  "type" : "number"
+               }
+            },
+            "required" : [
+               "unit",
+               "value"
+            ],
+            "title" : "Cargo Net Volume",
+            "type" : "object"
+         },
+         "CargoNetWeight" : {
+            "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container.\n",
+            "properties" : {
+               "unit" : {
+                  "description" : "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+                  "enum" : [
+                     "KGM",
+                     "LBR"
+                  ],
+                  "example" : "KGM",
+                  "type" : "string"
+               },
+               "value" : {
+                  "description" : "The weight of the cargo item excluding packaging being carried in the container. Excludes the tare weight of the container. A maximum of 3 decimals should be provided.\n",
+                  "example" : 2400,
+                  "exclusiveMinimum" : true,
+                  "format" : "float",
+                  "minimum" : 0,
+                  "type" : "number"
+               }
+            },
+            "required" : [
+               "unit",
+               "value"
+            ],
+            "title" : "Cargo Net Weight",
             "type" : "object"
          },
          "CarriersAgentAtDestination" : {
@@ -501,7 +501,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -609,7 +609,7 @@
                   "type" : "array"
                },
                "descriptionOfGoods" : {
-                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n",
+                  "description" : "An array of lines accurately and properly describing the cargo being shipped in the container(s) as provided by the shipper.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line describing the cargo",
                      "example" : "blue shoes size 47",
@@ -635,7 +635,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `consignmentItem`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -769,7 +769,7 @@
                   "type" : "string"
                },
                "grossWeight" : {
-                  "$ref" : "#/components/schemas/Gross Weight"
+                  "$ref" : "#/components/schemas/GrossWeight"
                },
                "imoClass" : {
                   "description" : "The hazard class code of the referenced dangerous goods according to the specified regulation. Examples of possible values are:\n\n- `1.1A` (Substances and articles which have a mass explosion hazard)\n- `1.6N` (Extremely insensitive articles which do not have a mass explosion hazard)\n- `2.1` (Flammable gases)\n- `8` (Corrosive substances)\n",
@@ -840,13 +840,13 @@
                   "$ref" : "#/components/schemas/Limits"
                },
                "netExplosiveContent" : {
-                  "$ref" : "#/components/schemas/Net Explosive Content"
+                  "$ref" : "#/components/schemas/NetExplosiveContent"
                },
                "netVolume" : {
-                  "$ref" : "#/components/schemas/Net Volume"
+                  "$ref" : "#/components/schemas/NetVolume"
                },
                "netWeight" : {
-                  "$ref" : "#/components/schemas/Net Weight"
+                  "$ref" : "#/components/schemas/NetWeight"
                },
                "packingGroup" : {
                   "description" : "The packing group according to the UN Recommendations on the Transport of Dangerous Goods and IMO IMDG Code.\n",
@@ -951,47 +951,6 @@
             "title" : "Detailed Error",
             "type" : "object"
          },
-         "Document Parties" : {
-            "description" : "All `Parties` with associated roles.\n",
-            "properties" : {
-               "carriersAgentAtDestination" : {
-                  "$ref" : "#/components/schemas/CarriersAgentAtDestination"
-               },
-               "consignee" : {
-                  "$ref" : "#/components/schemas/Consignee"
-               },
-               "endorsee" : {
-                  "$ref" : "#/components/schemas/Endorsee"
-               },
-               "issuingParty" : {
-                  "$ref" : "#/components/schemas/IssuingParty"
-               },
-               "notifyParties" : {
-                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Condition:** Mandatory for To Order BLs, `isToOrder=true`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/NotifyParty"
-                  },
-                  "maxItems" : 3,
-                  "type" : "array"
-               },
-               "other" : {
-                  "description" : "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
-                  "items" : {
-                     "$ref" : "#/components/schemas/OtherDocumentParty"
-                  },
-                  "type" : "array"
-               },
-               "shipper" : {
-                  "$ref" : "#/components/schemas/Shipper"
-               }
-            },
-            "required" : [
-               "issuingParty",
-               "shipper"
-            ],
-            "title" : "Document Parties",
-            "type" : "object"
-         },
          "DocumentChecksum" : {
             "description" : "The checksum of the document computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234). The transport document must be in the [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785) canonical form before the checksum is computed.\n",
             "example" : "76a7d14c83d7268d643ae7345c448de60701f955d264a743e6928a0b8268b24f",
@@ -1033,6 +992,47 @@
             "title" : "Document Metadata",
             "type" : "object"
          },
+         "DocumentParties" : {
+            "description" : "All `Parties` with associated roles.\n",
+            "properties" : {
+               "carriersAgentAtDestination" : {
+                  "$ref" : "#/components/schemas/CarriersAgentAtDestination"
+               },
+               "consignee" : {
+                  "$ref" : "#/components/schemas/Consignee"
+               },
+               "endorsee" : {
+                  "$ref" : "#/components/schemas/Endorsee"
+               },
+               "issuingParty" : {
+                  "$ref" : "#/components/schemas/IssuingParty"
+               },
+               "notifyParties" : {
+                  "description" : "List of up to 3 `Notify Parties`. The first item in the list is the **First Notify Party** (`N1`), the second item is the **Second Notify Party** (`N2`) and the last item is the **Other Notify Party** (`NI`).\n\n**Conditions:** If provided:\n  - mandatory for To Order BLs, `isToOrder=true`\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
+                  "items" : {
+                     "$ref" : "#/components/schemas/NotifyParty"
+                  },
+                  "maxItems" : 3,
+                  "type" : "array"
+               },
+               "other" : {
+                  "description" : "A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.",
+                  "items" : {
+                     "$ref" : "#/components/schemas/OtherDocumentParty"
+                  },
+                  "type" : "array"
+               },
+               "shipper" : {
+                  "$ref" : "#/components/schemas/Shipper"
+               }
+            },
+            "required" : [
+               "issuingParty",
+               "shipper"
+            ],
+            "title" : "Document Parties",
+            "type" : "object"
+         },
          "EblEnvelope" : {
             "properties" : {
                "envelopeManifestSignedContent" : {
@@ -1067,7 +1067,7 @@
                   "type" : "string"
                },
                "phone" : {
-                  "description" : "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+                  "description" : "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
                   "example" : "+45 70262970",
                   "maxLength" : 30,
                   "pattern" : "^\\S(?:.*\\S)?$",
@@ -1100,7 +1100,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -1207,7 +1207,7 @@
                   "type" : "string"
                },
                "previousEnvelopeTransferChainEntrySignedContentChecksum" : {
-                  "description" : "This attribute should *not* be defined for the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. For all other entries after the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, this attribute **must** be defined and contain the checksum of the previous [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. This attribute can be used to track signed envelope transfers between platforms (for details check description of [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope)).\n\nThe checksum is computed over the entire [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry (JWS-signed payload is described in the `EnvelopeTransferChainEntry` schema). The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
+                  "description" : "This attribute should *not* be defined for the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. For all other entries after the first entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list, this attribute **MUST** be defined and contain the checksum of the previous [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry in the [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope) list. This attribute can be used to track signed envelope transfers between platforms (for details check description of [`EblEnvelope.envelopeTransferChain[]`](#/EblEnvelope)).\n\nThe checksum is computed over the entire [`EnvelopeTransferChainEntrySignedContent`](#/EnvelopeTransferChainEntrySignedContent) entry (JWS-signed payload is described in the `EnvelopeTransferChainEntry` schema). The checksum is computed using SHA-256 hash algorithm according to [RFC 6234](https://datatracker.ietf.org/doc/html/rfc6234).\n",
                   "example" : "20a0257b313ae08417e07f6555c4ec829a512c083f3ead16b41158018a22abe9",
                   "maxLength" : 64,
                   "minLength" : 64,
@@ -1370,7 +1370,7 @@
                   "type" : "string"
                },
                "tareWeight" : {
-                  "$ref" : "#/components/schemas/Tare Weight"
+                  "$ref" : "#/components/schemas/TareWeight"
                }
             },
             "required" : [
@@ -1501,7 +1501,7 @@
             "title" : "Geo Coordinate",
             "type" : "object"
          },
-         "Gross Weight" : {
+         "GrossWeight" : {
             "description" : "Total weight of the goods carried, including packaging.\n",
             "properties" : {
                "unit" : {
@@ -1585,6 +1585,45 @@
                "quantity"
             ],
             "title" : "Inner Packaging",
+            "type" : "object"
+         },
+         "InvoicePayableAt" : {
+            "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location can be provided as a `UN Location Code` or as a fallback - a `freeText` field\n",
+            "oneOf" : [
+               {
+                  "properties" : {
+                     "UNLocationCode" : {
+                        "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
+                        "example" : "NLAMS",
+                        "maxLength" : 5,
+                        "minLength" : 5,
+                        "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "UNLocationCode"
+                  ],
+                  "title" : "UN Location Code",
+                  "type" : "object"
+               },
+               {
+                  "properties" : {
+                     "freeText" : {
+                        "description" : "The name of the location where payment will be rendered by the customer.\n",
+                        "example" : "DCSA Headquarters",
+                        "maxLength" : 35,
+                        "type" : "string"
+                     }
+                  },
+                  "required" : [
+                     "freeText"
+                  ],
+                  "title" : "Free text",
+                  "type" : "object"
+               }
+            ],
+            "title" : "Invoice Payable At",
             "type" : "object"
          },
          "IssuanceManifest" : {
@@ -1757,7 +1796,7 @@
             "title" : "National Commodity Code",
             "type" : "object"
          },
-         "Net Explosive Content" : {
+         "NetExplosiveContent" : {
             "description" : "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
             "properties" : {
                "unit" : {
@@ -1787,7 +1826,7 @@
             "title" : "Net Explosive Content",
             "type" : "object"
          },
-         "Net Volume" : {
+         "NetVolume" : {
             "description" : "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n",
             "properties" : {
                "unit" : {
@@ -1816,7 +1855,7 @@
             "title" : "Net Volume",
             "type" : "object"
          },
-         "Net Weight" : {
+         "NetWeight" : {
             "description" : "Total weight of the goods carried, excluding packaging.\n",
             "properties" : {
                "unit" : {
@@ -1851,7 +1890,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -2140,7 +2179,7 @@
                   "description" : "`Phone` is mandatory to provide\n",
                   "properties" : {
                      "phone" : {
-                        "description" : "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+                        "description" : "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
                         "example" : "+45 70262970",
                         "maxLength" : 30,
                         "pattern" : "^\\S(?:.*\\S)?$",
@@ -2191,7 +2230,42 @@
             "title" : "Party Contact Detail",
             "type" : "object"
          },
-         "Place of Issue" : {
+         "PlaceOfDelivery" : {
+            "description" : "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
+            "example" : {
+               "UNLocationCode" : "DEHAM",
+               "locationName" : "Hamburg"
+            },
+            "properties" : {
+               "UNLocationCode" : {
+                  "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+                  "example" : "NLAMS",
+                  "maxLength" : 5,
+                  "minLength" : 5,
+                  "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
+                  "type" : "string"
+               },
+               "address" : {
+                  "$ref" : "#/components/schemas/Address"
+               },
+               "facility" : {
+                  "$ref" : "#/components/schemas/Facility"
+               },
+               "geoCoordinate" : {
+                  "$ref" : "#/components/schemas/GeoCoordinate"
+               },
+               "locationName" : {
+                  "description" : "The name of the location.",
+                  "example" : "Port of Amsterdam",
+                  "maxLength" : 100,
+                  "pattern" : "^\\S(?:.*\\S)?$",
+                  "type" : "string"
+               }
+            },
+            "title" : "Place of Delivery",
+            "type" : "object"
+         },
+         "PlaceOfIssue" : {
             "description" : "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
             "oneOf" : [
                {
@@ -2239,41 +2313,6 @@
                }
             },
             "title" : "Place of Issue",
-            "type" : "object"
-         },
-         "PlaceOfDelivery" : {
-            "description" : "An object to capture `Place of Delivery` location specified as: the location where the cargo is handed over to the consignee, or his agent, by the shipping line and where responsibility of the shipping line ceases.\n\n**Condition:** Only when onward transport is done by the carrier\n\nThe location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
-            "example" : {
-               "UNLocationCode" : "DEHAM",
-               "locationName" : "Hamburg"
-            },
-            "properties" : {
-               "UNLocationCode" : {
-                  "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
-                  "example" : "NLAMS",
-                  "maxLength" : 5,
-                  "minLength" : 5,
-                  "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
-                  "type" : "string"
-               },
-               "address" : {
-                  "$ref" : "#/components/schemas/Address"
-               },
-               "facility" : {
-                  "$ref" : "#/components/schemas/Facility"
-               },
-               "geoCoordinate" : {
-                  "$ref" : "#/components/schemas/GeoCoordinate"
-               },
-               "locationName" : {
-                  "description" : "The name of the location.",
-                  "example" : "Port of Amsterdam",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "title" : "Place of Delivery",
             "type" : "object"
          },
          "PlaceOfReceipt" : {
@@ -2473,7 +2512,7 @@
                   "$ref" : "#/components/schemas/PartyAddress"
                },
                "displayedAddress" : {
-                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** if provided\n  - the displayed address must be included in the Transport Document.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n",
+                  "description" : "The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.\n\n**Conditions:** If provided:\n  - the displayed address must be included in the `Transport Document`.\n  - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters\n  - for electronic BL (`isElectronic=true`), the limit is 6 lines of 35 characters\n  - the order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A single address line\n",
                      "example" : "Strawinskylaan 4117",
@@ -2542,7 +2581,7 @@
             "title" : "Shipper",
             "type" : "object"
          },
-         "Tare Weight" : {
+         "TareWeight" : {
             "description" : "The weight of an empty container (gross container weight).\n",
             "properties" : {
                "unit" : {
@@ -2791,7 +2830,7 @@
                   "type" : "string"
                },
                "displayedNameForPlaceOfDelivery" : {
-                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Delivery` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -2802,7 +2841,7 @@
                   "type" : "array"
                },
                "displayedNameForPlaceOfReceipt" : {
-                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Place of Receipt` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -2813,7 +2852,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfDischarge" : {
-                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Discharge` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -2824,7 +2863,7 @@
                   "type" : "array"
                },
                "displayedNameForPortOfLoad" : {
-                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the transport document to match the name and/or address provided on the letter of credit.\n",
+                  "description" : "The name to be used in order to specify how the `Port of Load` should be displayed on the `Transport Document` to match the name and/or address provided on the `Letter of Credit`.\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "A line of the address to be displayed on the transport document.\n",
                      "example" : "Strawinskylaan 4117",
@@ -2842,7 +2881,7 @@
                   "type" : "string"
                },
                "documentParties" : {
-                  "$ref" : "#/components/schemas/Document Parties"
+                  "$ref" : "#/components/schemas/DocumentParties"
                },
                "freightPaymentTermCode" : {
                   "description" : "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
@@ -2854,43 +2893,7 @@
                   "type" : "string"
                },
                "invoicePayableAt" : {
-                  "description" : "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location can be provided as a `UN Location Code` or as a fallback - a `freeText` field\n",
-                  "oneOf" : [
-                     {
-                        "properties" : {
-                           "UNLocationCode" : {
-                              "description" : "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)",
-                              "example" : "NLAMS",
-                              "maxLength" : 5,
-                              "minLength" : 5,
-                              "pattern" : "^[A-Z]{2}[A-Z2-9]{3}$",
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "UNLocationCode"
-                        ],
-                        "title" : "UN Location Code",
-                        "type" : "object"
-                     },
-                     {
-                        "properties" : {
-                           "freeText" : {
-                              "description" : "The name of the location where payment will be rendered by the customer.\n",
-                              "example" : "DCSA Headquarters",
-                              "maxLength" : 35,
-                              "type" : "string"
-                           }
-                        },
-                        "required" : [
-                           "freeText"
-                        ],
-                        "title" : "Free text",
-                        "type" : "object"
-                     }
-                  ],
-                  "title" : "Invoice Payable At",
-                  "type" : "object"
+                  "$ref" : "#/components/schemas/InvoicePayableAt"
                },
                "isElectronic" : {
                   "description" : "An indicator whether the transport document is electronically transferred.\n",
@@ -2957,7 +2960,7 @@
                   "type" : "array"
                },
                "placeOfIssue" : {
-                  "$ref" : "#/components/schemas/Place of Issue"
+                  "$ref" : "#/components/schemas/PlaceOfIssue"
                },
                "receiptTypeAtOrigin" : {
                   "description" : "Indicates the type of service offered at `Origin`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
@@ -2984,7 +2987,7 @@
                   "type" : "array"
                },
                "routingOfConsignmentCountries" : {
-                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                  "description" : "A list of countries the goods will be routed through from origin to destination defined by the 2 characters country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
                      "example" : "NL",
@@ -3180,7 +3183,7 @@
                   "type" : "array"
                },
                "shippingMarks" : {
-                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n",
+                  "description" : "A list of the `ShippingMarks` applicable to this `UtilizedTransportEquipment`\n\n**Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.\n",
                   "items" : {
                      "description" : "The identifying details of a package or the actual markings that appear on the package(s). This information is provided by the customer.\n",
                      "example" : "Made in China",
@@ -3240,7 +3243,7 @@
          "name" : "Digital Container Shipping Association (DCSA)",
          "url" : "https://dcsa.org"
       },
-      "description" : "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT) standard </h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support transfer of eBL documents with non-repudiation and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n0. Optionally, using the [**'Receiver Validation'**](#/Receiver%20validation/post-receiver-validation) endpoint to allow the sending user to validate the identity of the receiver,  before they transfer the eBL.\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2> \n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300).\nPlease [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+      "description" : "<h1>DCSA OpenAPI specification for electronic Bill of Lading (eBL) Platform Interoperability (PINT)</h1>\n\n<h2>The Envelope Transfer</h2>\n\nThe PINT API is designed to support transfer of eBL documents with non-repudiation and any number of additional documents between two eBL platforms. \n\nIn the most common scenario, the sending eBL platform executes the envelope transfer by:\n0. Optionally, using the [**'Receiver Validation'**](#/Receiver%20validation/post-receiver-validation) endpoint to allow the sending user to validate the identity of the receiver,  before they transfer the eBL.\n1. Initiating the envelope transfer using [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint\n2. Transferring the additional documents (one at the time) using [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint\n3. Completing the envelope transfer using [**'Finish envelope transfer'**](#/Finish%20envelope%20transfer) endpoint\n\n<h2>The eBL document</h2>\n\nThe envelope transfer from the sending eBL Platform to the receiving eBL Platform always contains the **eBL document** (transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request body [`EblEnvelope.transportDocument`](#/EblEnvelope) schema object). The eBL document must be unchanged between different envelope transfers for the lifetime of the eBL document. \n\nThe PINT API is designed to support transfer of the following types of eBL documents:\n1. Straight eBL documents. This type of eBL document is defined by [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `false`\n2. Blank-endorsed eBL documents. This type of eBL document is created by setting [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list does not contain document party where `DocumentParty.partyFunction` has value `END` (Endorsee)\n3. To-order/Negotiable eBL documents. This type of eBL document is created by setting the [`EblEnvelope.transportDocument.isToOrder`](#/EblEnvelope) attribute to `true`, and making sure that [`EblEnvelope.transportDocument.documentparties[]`](#/EblEnvelope) list contains document party where `DocumentParty.partyFunction` has value `END` (Endorsee). If the current endorsee party is also in possession of the eBL (possessor), this party can endorse some other party on the same eBL Platform (and make that other party new endorsee) by executing transaction with [`Transaction.action`](#/Transaction) type `ENDO` (Endorsement). The DCSA PINT API support To-order/Negotiable documents, however, given that not all of the eBL solution providers support the split between possession and endorsements, this doesn't apply yet to interoperable eBL\n\n<h2>The Additional Documents</h2>\n\nThe envelope transfer can optionally contain one or more **additional documents** which can be transferred via [**'Transfer additional document'**](#/Transfer%20additional%20document) endpoint:\n- **'Digital copy of the original physical B/L document' document** (described via [`EnvelopeManifest.eBLVisualisationByCarrier`](#/EnvelopeManifest) schema object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object) a.k.a. **eBLVisualisationByCarrier document**. If transferred with the initial eBL envelope transfer, eBLVisualisationByCarrier document must be transferred with every subsequent envelope transfer for the lifetime of the eBL document. Also, eBLVisualisationByCarrier document must be unchanged between different envelope transfers for the lifetime of the eBL document.\n- **Supporting document** (described via entry in the [`EnvelopeManifest.supportingDocuments[]`](#/EnvelopeManifest) list object that has been previously transferred via [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint  as JWS-signed payload of [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) schema object). For every envelope transfer, the sending platform can choose which supporting documents it wants to send to the receiving platform irrespective of the contents of the previously received envelope transfer. All details of the supporting documents transferred from sending to receiving platform as a part of the envelope transfer are only privy to these 2 platforms.\n\n<h2>Non-repudiation</h2> \n\nWhen receiving [**'Start envelope transfer'**](#/Start%20envelope%20transfer) endpoint request, the receiving platform should confirm the integrity of the received [`EblEnvelope`](#/EblEnvelope) schema object for non-repudiation purposes. Since it has been decided not to use JWS for signing of [`EblEnvelope`](#/EblEnvelope) (for network traffic optimization purposes) itself, the receiving platform can confirm the integrity of the envelope data by confirming integrity of the [`EblEnvelope.envelopeManifestSignedContent`](#/EblEnvelope) JWS-signed payload [`EnvelopeManifest`](#/EnvelopeManifest), and then use contents of [`EnvelopeManifest`](#/EnvelopeManifest) schema object to confirm the integrity of the other [`EblEnvelope`](#/EblEnvelope) schema object attributes (further details can be found in the description of [`EblEnvelope`](#/EblEnvelope) schema attributes).\n\nAt various stages during the envelope transfer process, the receiving platform can inform the sending platform whether envelope transfer has been accepted or rejected by sending the final response using the [`EnvelopeTransferFinishedResponse`](#/EnvelopeTransferFinishedResponse) schema object which has been wrapped in JWS-signed response [`EnvelopeTransferFinishedResponseSignedContent`](#/EnvelopeTransferFinishedResponseSignedContent) schema object for non-repudiation purposes. All other response schema types are unsigned, and therefore they can not be used by the sending platform for the non-repudiation purposes.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/pint/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
       "license" : {
          "name" : "Apache 2.0",
          "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"

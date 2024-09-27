@@ -289,6 +289,14 @@ public class EblCarrier extends ConformanceParty {
     si.publishDraftTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
+    if (skipSI) {
+      asyncOrchestratorPostPartyInput(
+        OBJECT_MAPPER
+          .createObjectNode()
+          .put("actionId", actionPrompt.required("actionId").asText())
+          .putObject("input")
+          .put("transportDocumentReference", si.getTransportDocumentReference()));
+    }
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
     addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));

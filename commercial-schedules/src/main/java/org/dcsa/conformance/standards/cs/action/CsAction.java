@@ -24,7 +24,7 @@ public abstract class CsAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
-  public CsAction(
+  protected CsAction(
       String sourcePartyName,
       String targetPartyName,
       CsAction previousAction,
@@ -100,7 +100,7 @@ public abstract class CsAction extends ConformanceAction {
       byte[] hashBytes = digest.digest(actualResponse.getBytes());
       responseHash = HexFormat.of().formatHex(hashBytes);
     } catch (NoSuchAlgorithmException e) {
-      log.error("Hashing of the response failed." + e);
+      log.error("Hashing of the response failed.", e);
     }
     return responseHash;
   }

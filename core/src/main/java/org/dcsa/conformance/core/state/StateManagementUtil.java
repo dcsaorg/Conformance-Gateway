@@ -1,7 +1,6 @@
 package org.dcsa.conformance.core.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -9,19 +8,21 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 public class StateManagementUtil {
 
     private StateManagementUtil() {}
 
-    public static JsonNode storeMap(ObjectMapper objectMapper, Map<String, String> hashMap) {
-        return storeMap(objectMapper, hashMap, Function.identity());
+    public static JsonNode storeMap(Map<String, String> hashMap) {
+        return storeMap(hashMap, Function.identity());
     }
 
-    public static <T> JsonNode storeMap(ObjectMapper objectMapper, Map<String, T> hashMap, Function<T, String> toString) {
-        ArrayNode arrayNode = objectMapper.createArrayNode();
+    public static <T> JsonNode storeMap(Map<String, T> hashMap, Function<T, String> toString) {
+        ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         hashMap.forEach(
                 (key, value) -> {
-                    ObjectNode entryNode = objectMapper.createObjectNode();
+                    ObjectNode entryNode = OBJECT_MAPPER.createObjectNode();
                     entryNode.put("key", key);
                     entryNode.put("value", toString.apply(value));
                     arrayNode.add(entryNode);

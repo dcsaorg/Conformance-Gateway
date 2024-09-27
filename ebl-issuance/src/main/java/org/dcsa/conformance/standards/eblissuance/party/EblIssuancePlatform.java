@@ -58,8 +58,8 @@ public class EblIssuancePlatform extends ConformanceParty {
         });
     targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
 
-    targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(OBJECT_MAPPER, tdr2PendingChecksum));
-    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(OBJECT_MAPPER, knownChecksums, String::valueOf));
+    targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(tdr2PendingChecksum));
+    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(knownChecksums, String::valueOf));
   }
 
   @Override
@@ -166,7 +166,7 @@ public class EblIssuancePlatform extends ConformanceParty {
           .formatted(tdr));
       return request.createResponse(
               400,
-              Map.of("Api-Version", List.of(apiVersion)),
+              Map.of(API_VERSION, List.of(apiVersion)),
               new ConformanceMessageBody(
                 OBJECT_MAPPER
                       .createObjectNode()
@@ -182,7 +182,7 @@ public class EblIssuancePlatform extends ConformanceParty {
       response =
           request.createResponse(
               204,
-              Map.of("Api-Version", List.of(apiVersion)),
+              Map.of(API_VERSION, List.of(apiVersion)),
               new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       String message;
@@ -196,7 +196,7 @@ public class EblIssuancePlatform extends ConformanceParty {
       response =
           request.createResponse(
               409,
-              Map.of("Api-Version", List.of(apiVersion)),
+              Map.of(API_VERSION, List.of(apiVersion)),
               new ConformanceMessageBody(
                 OBJECT_MAPPER
                       .createObjectNode()

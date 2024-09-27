@@ -1,13 +1,13 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.With;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-
-import java.util.function.Function;
 
 @With
 public record DynamicScenarioParameters(
@@ -22,7 +22,7 @@ public record DynamicScenarioParameters(
     JsonNode updatedBooking
     ) {
   public ObjectNode toJson() {
-    ObjectNode dspNode = new ObjectMapper().createObjectNode();
+    ObjectNode dspNode = OBJECT_MAPPER.createObjectNode();
     dspNode.put("scenarioType", scenarioType.name());
     if (carrierBookingRequestReference != null) {
       dspNode.put("carrierBookingRequestReference", carrierBookingRequestReference);

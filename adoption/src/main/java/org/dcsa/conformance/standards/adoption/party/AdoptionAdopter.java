@@ -94,7 +94,7 @@ public class AdoptionAdopter extends ConformanceParty {
 
     return request.createResponse(
         200,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(jsonResponseBody));
   }
 }

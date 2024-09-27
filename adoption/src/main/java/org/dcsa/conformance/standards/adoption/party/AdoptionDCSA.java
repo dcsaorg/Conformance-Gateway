@@ -71,7 +71,7 @@ public class AdoptionDCSA extends ConformanceParty {
 
     return request.createResponse(
         204,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(jsonResponseBody));
   }
 }

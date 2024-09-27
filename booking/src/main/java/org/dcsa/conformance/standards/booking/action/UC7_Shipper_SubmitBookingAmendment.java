@@ -20,18 +20,24 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final BookingState expectedBookingStatus;
+  private final BookingState expectedAmendedBookingStatus;
 
   public UC7_Shipper_SubmitBookingAmendment(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC7", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.expectedBookingStatus = expectedBookingStatus;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
 
   @Override
@@ -65,29 +71,19 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
-        var expectedBookingStatus = dsp.bookingStatus();
         return Stream.concat(
           Stream.concat( createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(reference)),
-            Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
-              getMatchedExchangeUuid(),
-              expectedBookingStatus,
-              BookingState.AMENDMENT_RECEIVED
-            ),
+            Stream.of(
               new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator),
-              new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator))),
+                requestSchemaValidator))),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
                 expectedBookingStatus,
-                BookingState.AMENDMENT_RECEIVED));
+                expectedAmendedBookingStatus));
       }
     };
   }

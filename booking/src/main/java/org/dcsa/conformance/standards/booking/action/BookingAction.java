@@ -32,7 +32,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null, null, null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -127,16 +127,10 @@ public abstract class BookingAction extends ConformanceAction {
       getCbrFromNotificationPayload(requestJsonNode) :
       responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
-    var newBookingStatus = parseBookingState(responseJsonNode.path("bookingStatus").asText(null));
-    var newAmendedBookingStatus = parseBookingState(responseJsonNode.path("amendedBookingStatus").asText(null));
-    var newBookingCancellationStatus = parseBookingCancellationState(responseJsonNode.path("bookingCancellationStatus").asText(null));
 
     var updatedDsp = dsp;
     updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    updatedDsp = updateIfNotNull(updatedDsp, newBookingStatus, updatedDsp::withBookingStatus);
-    updatedDsp = updateIfNotNull(updatedDsp, newAmendedBookingStatus, updatedDsp::withAmendedBookingStatus);
-    updatedDsp = updateIfNotNull(updatedDsp, newBookingCancellationStatus, updatedDsp::withBookingCancellationStatus);
 
     updatedDsp = updateDSPFromBookingAction(exchange, updatedDsp);
 

@@ -7,6 +7,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -15,16 +16,22 @@ import java.util.stream.Stream;
 public class UC14CarrierProcessBookingCancellationAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean isCancellationConfirmed;
+  private final BookingState expectedBookingStatus;
+  private final BookingState expectedAmendedBookingStatus;
 
   public UC14CarrierProcessBookingCancellationAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       boolean isCancellationConfirmed) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC14", 204);
     this.requestSchemaValidator = requestSchemaValidator;
     this.isCancellationConfirmed = isCancellationConfirmed;
+    this.expectedBookingStatus = expectedBookingStatus;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
 
   @Override
@@ -48,21 +55,18 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
-        var bookingStatus = dsp.bookingStatus();
-        var amendedBookingStatus = dsp.amendedBookingStatus();
-        var isCancelled = isCancellationConfirmed ?
+        var cancelledStatus = isCancellationConfirmed ?
           BookingCancellationState.CANCELLATION_CONFIRMED : BookingCancellationState.CANCELLATION_DECLINED;
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),
             new ResponseStatusCheck(
                 BookingRole::isShipper, getMatchedExchangeUuid(), expectedStatus),
-            bookingStatus == null ? null: new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
+            new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
               getMatchedExchangeUuid(),
-              bookingStatus,
-              amendedBookingStatus,
-              isCancelled),
+              expectedBookingStatus,
+              expectedAmendedBookingStatus,
+              cancelledStatus),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

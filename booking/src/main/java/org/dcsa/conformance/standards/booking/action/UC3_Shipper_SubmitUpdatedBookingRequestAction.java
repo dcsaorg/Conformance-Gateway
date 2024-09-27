@@ -18,18 +18,21 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final BookingState expectedBookingState;
 
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingState,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.expectedBookingState = expectedBookingState;
   }
 
   @Override
@@ -68,18 +71,13 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
             getMatchedExchangeUuid(),
             HttpMessageType.REQUEST,
             requestSchemaValidator),
-          new JsonSchemaCheck(
-            BookingRole::isCarrier,
-            getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator),
             BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier())),
           Stream.concat(
             createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
-                BookingState.UPDATE_RECEIVED,
+                expectedBookingState,
                 null)));
       }
     };

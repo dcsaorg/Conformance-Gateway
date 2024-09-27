@@ -143,7 +143,7 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
                                                                                             .then(
                                                                                               shipperGetBooking(
                                                                                                     COMPLETED)))))),
-                                                        uc10_carrier_declineBooking(AMENDMENT_DECLINED)
+                                                        uc10_carrier_declineBooking(null)
                                                             .then(shipperGetBooking(DECLINED)),
                                                         uc12_carrier_confirmBookingCompleted()
                                                             .then(shipperGetBooking(COMPLETED)))),

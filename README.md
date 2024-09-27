@@ -20,11 +20,11 @@ Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 ### Java
 1. Build the project using Maven:
     ```sh
-    mvn package -DskipTests
+    mvn clean package -DskipTests
     ```
 2. Run the application:
     ```sh
-    mvn spring-boot:run
+    mvn -pl spring-boot -am spring-boot:run
     ```
 
 ### Angular and NodeJS Web UI

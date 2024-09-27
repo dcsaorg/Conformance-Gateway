@@ -44,9 +44,9 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
   private static final String GET_TD_SCHEMA_NAME = "TransportDocument";
   private static final String POST_EBL_SCHEMA_NAME = "CreateShippingInstructions";
   private static final String PUT_EBL_SCHEMA_NAME = "UpdateShippingInstructions";
-  private static final String PATCH_SI_SCHEMA_NAME = "shippinginstructions_documentReference_body";
-  private static final String PATCH_TD_SCHEMA_NAME = "transportdocuments_transportDocumentReference_body";
-  private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "Shipping Instructions Response";
+  private static final String PATCH_SI_SCHEMA_NAME = "CancelShippingInstructionsUpdate";
+  private static final String PATCH_TD_SCHEMA_NAME = "ApproveTransportDocument";
+  private static final String RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME = "CreateShippingInstructionsResponse";
   private static final String EBL_SI_NOTIFICATION_SCHEMA_NAME = "ShippingInstructionsNotification";
   private static final String EBL_TD_NOTIFICATION_SCHEMA_NAME = "TransportDocumentNotification";
 

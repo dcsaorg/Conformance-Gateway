@@ -1,0 +1,60 @@
+{
+  "lastUpdatedDateTime": "2024-06-18T20:44:37+01:00",
+  "interval": "day",
+  "startDate": "2024-06-16",
+  "endDate": "2024-06-16",
+  "apiCallsStatsByStandards": [
+    {
+      "standardName": "TNT",
+      "byVersions": [
+        {
+          "versionNumber": "2.2.0",
+          "byInboundEndpoints": [
+            {
+              "httpMethod": "POST",
+              "endpointUri": "/v1/events",
+              "byQueryParameterSets": [
+                {
+                  "queryParameterSet": [
+                    "equipmentReference",
+                    "limit"
+                  ],
+                  "byHttpStatuses": [
+                    {
+                      "httpStatusCode": 200,
+                      "apiCallCount": 5400,
+                      "uniqueCounterpartCount": 320,
+                      "averageResponseTime": 1250
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "byOutboundEndpoints": [
+            {
+              "httpMethod": "POST",
+              "endpointUri": "/v1/events",
+              "byQueryParameterSets": [
+                {
+                  "queryParameterSet": [
+                    "equipmentReference",
+                    "limit"
+                  ],
+                  "byHttpStatuses": [
+                    {
+                      "httpStatusCode": 200,
+                      "apiCallCount": 5400,
+                      "uniqueCounterpartCount": 320,
+                      "averageResponseTime": 1250
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

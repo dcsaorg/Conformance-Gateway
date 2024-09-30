@@ -77,6 +77,7 @@ class SeleniumTest extends ManualTestBase {
 
   @ParameterizedTest
   @ValueSource(strings = {
+    "Adoption", // Takes 0:39 minutes
     "Booking", // Takes 10:52 minutes
     "CS", // 10:37 minutes
     "JIT", // 1:12 minutes

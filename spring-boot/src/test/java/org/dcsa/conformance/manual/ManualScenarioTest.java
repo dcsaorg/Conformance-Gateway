@@ -17,6 +17,8 @@ class ManualScenarioTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
     return Stream.of(
+        Arguments.of("Adoption", false),
+        Arguments.of("Adoption", true),
         Arguments.of("Booking", false),
         Arguments.of("Booking", true),
         Arguments.of("CS", false),

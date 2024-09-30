@@ -8,10 +8,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
-public enum JsonToolkit {
-  ; // no instances
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+public class JsonToolkit {
 
   public static final String JSON_UTF_8 = "application/json";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -32,12 +33,13 @@ public enum JsonToolkit {
     AtomicReference<String> jsonString = new AtomicReference<>();
     try (InputStream inputStream = JsonToolkit.class.getResourceAsStream(templatePath)) {
       if (inputStream == null) {
-        throw new IllegalArgumentException("Could not resolve " + templatePath);
+        throw new IllegalArgumentException("Could not find file: " + templatePath);
       }
       jsonString.set(
           new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
     }
-    replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
+    if (replacements != null)
+      replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
     return OBJECT_MAPPER.readTree(jsonString.get());
   }
 
@@ -55,11 +57,9 @@ public enum JsonToolkit {
       Map<String, ? extends Collection<String>> map) {
     ArrayNode queryParamsNode = OBJECT_MAPPER.createArrayNode();
     map.forEach(
-        (key, values) -> {
-          queryParamsNode.addObject()
-            .put("key", key)
-            .set("values", JsonToolkit.stringCollectionToArrayNode(values));
-        });
+        (key, values) -> queryParamsNode.addObject()
+          .put("key", key)
+          .set("values", JsonToolkit.stringCollectionToArrayNode(values)));
     return queryParamsNode;
   }
 

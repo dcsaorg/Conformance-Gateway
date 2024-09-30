@@ -28,6 +28,7 @@ class ConformanceApplicationTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
+    "adoption-100-conformance-auto-all-in-one",
     "booking-200-conformance-auto-all-in-one",
     "booking-200-reference-implementation-auto-all-in-one",
     "cs-100-conformance-auto-all-in-one",

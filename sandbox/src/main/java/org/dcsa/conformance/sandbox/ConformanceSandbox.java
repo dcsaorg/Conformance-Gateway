@@ -42,6 +42,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 @Slf4j
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
+    AdoptionStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
@@ -50,8 +51,7 @@ public class ConformanceSandbox {
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
     PintStandard.INSTANCE,
-    TntStandard.INSTANCE,
-    AdoptionStandard.INSTANCE
+    TntStandard.INSTANCE
   };
 
   private record OrchestratorTask(

@@ -246,8 +246,11 @@ public class ConformanceOrchestrator implements StatefulEntity {
       return;
     }
 
-    String actionId = partyInput.get("actionId").asText();
-    if (!Objects.equals(actionId, nextAction.getId().toString())) {
+    String actionId = partyInput.path("actionId").asText(null);
+    if (actionId == null) {
+      log.error("Missing required 'actionId' in given party input: {}", partyInput.toPrettyString());
+    }
+    if (actionId != null && !Objects.equals(actionId, nextAction.getId().toString())) {
       log.info(
           "Ignoring party input %s: the expected next action id is %s in current scenario %s"
               .formatted(

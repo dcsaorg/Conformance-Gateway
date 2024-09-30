@@ -59,7 +59,12 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   @Override
   public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
     super.handlePartyInput(partyInput);
-    getDspConsumer().accept(getDspSupplier().get().withTransportDocumentReference(partyInput.path("transportDocumentReference").asText()));
+    getDspConsumer()
+        .accept(
+            getDspSupplier()
+                .get()
+                .withTransportDocumentReference(
+                    partyInput.required("input").path("transportDocumentReference").asText()));
   }
 
   @Override

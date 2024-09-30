@@ -26,7 +26,7 @@
 		<sonar.projectKey>Conformance-Gateway</sonar.projectKey>
 	</properties>
 
-	<name>Conformance Toolkit parent</name>
+	<name>Conformance Framework parent</name>
 	<url>https://dcsa.org/</url>
 
 	<organization>

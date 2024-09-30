@@ -298,7 +298,7 @@ public class EblCarrier extends ConformanceParty {
     }
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));
+    addOperatorLogEntry("Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));
   }
 
   private void issueTransportDocument(JsonNode actionPrompt) {

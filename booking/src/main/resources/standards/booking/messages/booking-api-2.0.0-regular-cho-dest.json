@@ -39,7 +39,7 @@
   ],
   "documentParties": {
     "bookingAgent": {
-      "partyName": "DCSA Conformance Toolkit",
+      "partyName": "DCSA Conformance Sandbox",
       "address": {
         "name": "Mustermann",
         "street": "Strawinskylaan 4117",

@@ -28,7 +28,7 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 201);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC1", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
@@ -63,24 +63,14 @@ public class UC1_Shipper_SubmitBookingRequestAction extends StateChangingBooking
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-
         return Stream.concat(
           Stream.of(
-            new CarrierBookingRefStatusPayloadResponseConformanceCheck(
-              getMatchedExchangeUuid(),
-              BookingState.RECEIVED
-            ),
             BookingChecks.requestContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier()),
             new JsonSchemaCheck(
               BookingRole::isShipper,
               getMatchedExchangeUuid(),
               HttpMessageType.REQUEST,
-              requestSchemaValidator),
-            new JsonSchemaCheck(
-              BookingRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator)),
+              requestSchemaValidator)),
           Stream.concat(createPrimarySubChecks("POST", expectedApiVersion, "/v2/bookings"),
           getNotificationChecks(
             expectedApiVersion,

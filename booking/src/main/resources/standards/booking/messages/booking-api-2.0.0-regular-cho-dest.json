@@ -10,7 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "isImportLicenseRequired": true,
-  "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "carrierServiceCode": "TA1",
   "vessel": {
@@ -31,8 +30,10 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 323.32,
+            "unit": "KGM"
+          }
         }
       ]
     }

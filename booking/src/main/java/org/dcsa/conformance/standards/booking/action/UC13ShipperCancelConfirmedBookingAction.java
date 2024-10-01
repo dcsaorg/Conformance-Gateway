@@ -8,7 +8,9 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingRefStatusPayloadResponseConformanceCheck;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
+import org.dcsa.conformance.standards.booking.party.BookingState;
 import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
 
 import java.util.Objects;
@@ -20,18 +22,27 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final BookingState expectedBookingStatus;
+  private final BookingState expectedAmendedBookingStatus;
+  private final BookingCancellationState expectedBookingCancellationStatus;
 
   public UC13ShipperCancelConfirmedBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingStatus,
+      BookingState expectedAmendedBookingStatus,
+      BookingCancellationState expectedBookingCancellationStatus,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC13", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC13", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.expectedBookingStatus = expectedBookingStatus;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
+    this.expectedBookingCancellationStatus = expectedBookingCancellationStatus;
   }
 
   @Override
@@ -69,28 +80,14 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
         String cbr = dsp.carrierBookingReference();
-        var expectedBookingStatus = getDspSupplier().get().bookingStatus();
-        var expectedAmendedBookingStatus = getDspSupplier().get().amendedBookingStatus();
-        var expectedBookingCancellationStatus = getDspSupplier().get().bookingCancellationStatus();
         return Stream.concat(
           Stream.concat(createPrimarySubChecks("PATCH",expectedApiVersion,"/v2/bookings/%s".formatted(cbr)),
             Stream.of(
-              expectedBookingStatus == null ? null: new CarrierBookingRefStatusPayloadResponseConformanceCheck(
-                getMatchedExchangeUuid(),
-                expectedBookingStatus,
-                expectedAmendedBookingStatus,
-                expectedBookingCancellationStatus
-              ),
               new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator),
-              new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator)).filter(Objects::nonNull)),
+                requestSchemaValidator))),
           expectedBookingStatus != null ?  getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,

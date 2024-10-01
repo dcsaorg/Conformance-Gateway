@@ -22,7 +22,7 @@ public class UC9_Carrier_AwaitSurrenderRequestForAmendmentAction extends StateCh
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC9: Shipper requests surrender for amendment (via the surrender API if applicable) for transport document with reference %s and carrier sends notification that surrender has been requested. Note when the conformance toolkit is acting as carrier, no action is required from the shipper (the action will auto-resolve). When the conformance toolkit is acting like the Shipper, you will have to ensure that the carrier system sees a surrender request (the surrender uses a different API not in scope for this test)."
+    return ("UC9: Shipper requests surrender for amendment (via the surrender API if applicable) for transport document with reference %s and carrier sends notification that surrender has been requested. Note when the conformance sandbox is acting as carrier, no action is required from the shipper (the action will auto-resolve). When the conformance sandbox is acting like the Shipper, you will have to ensure that the carrier system sees a surrender request (the surrender uses a different API not in scope for this test)."
         .formatted(getDspSupplier().get().transportDocumentReference()));
   }
 

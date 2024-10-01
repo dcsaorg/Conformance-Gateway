@@ -80,8 +80,12 @@ class SeleniumTest extends ManualTestBase {
     "Adoption", // Takes 0:39 minutes
     "Booking", // Takes 10:52 minutes
     "CS", // 10:37 minutes
+//    "Ebl", // x:x minutes (DT-1681, issue with Ebl v3.0.0, suite: Conformance TD-only, Carrier & Shipper)
+    "eBL Issuance", // 5:34 minutes
+//    "eBL Surrender", // Same issue as in ManualScenarioTest
     "JIT", // 1:12 minutes
     "OVS", // 3:28 minutes
+//     "PINT", // Same issue as in ManualScenarioTest
     "TnT" // 6:6 minutes
   })
   void testStandardWithAllVersions(String standardName) {
@@ -96,30 +100,22 @@ class SeleniumTest extends ManualTestBase {
     requestedStandard
         .versions()
         .forEach(
-            version -> version
-                .roles()
-                .forEach(
-                    role -> createSandboxesAndRunGroups(requestedStandard, version, "Conformance", role)));
+            version ->
+                version.suites().stream()
+                    .filter(suite -> suite.startsWith("Conformance"))
+                    .forEach(
+                        suite ->
+                            version
+                                .roles()
+                                .forEach(
+                                    role ->
+                                        createSandboxesAndRunGroups(
+                                            requestedStandard, version.number(), suite, role))));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
   }
 
-  // Note: this method can be deleted when 'Conformance TD-only' is working. Standard can be added to method above.
-  // Takes 20 minutes
-  @ParameterizedTest
-  @ValueSource(strings = {"Carrier", "Shipper"})
-  void testEBLSIOnly(String testedParty) {
-    getAllSandboxes();
-    List<Standard> availableStandards = getAvailableStandards();
-    Standard requestedStandard =
-      availableStandards.stream()
-        .filter(standard -> standard.name().equals("Ebl"))
-        .findFirst()
-        .orElseThrow();
-    StandardVersion version = requestedStandard.versions().getFirst();
-    createSandboxesAndRunGroups(requestedStandard, version, "Conformance SI-only", testedParty);
-  }
-
-  private void createSandboxesAndRunGroups(Standard standard, StandardVersion version, String suiteName, String role) {
+  private void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {
+    log.info("Starting standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
     switchToTab(0);
     SandboxConfig sandBox1 = createSandBox(standard, version, suiteName, role, 0);
     openNewTab();
@@ -128,7 +124,7 @@ class SeleniumTest extends ManualTestBase {
     updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
 
     runScenarioGroups();
-    log.info("Finished with standard: {}, version: {}, role: {}", standard.name(), version.number(), role);
+    log.info("Finished with standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
 
     // Close tab and switch back to first tab.
     driver.close();
@@ -270,8 +266,8 @@ class SeleniumTest extends ManualTestBase {
     alreadyLoggedIn = true;
   }
 
-  SandboxConfig createSandBox(Standard standard, StandardVersion version, String suiteName, String roleName, int sandboxType) {
-    log.info("Creating Sandbox: {}, {}, {}, type: {}", standard.name(), version.number(), roleName, sandboxType);
+  SandboxConfig createSandBox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
+    log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(BASE_URL + "/create-sandbox");
     if (driver.getCurrentUrl().endsWith("/login")) {
       loginUser();
@@ -280,7 +276,7 @@ class SeleniumTest extends ManualTestBase {
     assertEquals(BASE_URL + "/create-sandbox", driver.getCurrentUrl());
 
     selectAndPickOption("standardSelect", standard.name());
-    selectAndPickOption("versionSelect", version.number());
+    selectAndPickOption("versionSelect", version);
     selectAndPickOption("suiteSelect", suiteName);
     selectAndPickOption("roleSelect", roleName);
 
@@ -290,13 +286,7 @@ class SeleniumTest extends ManualTestBase {
     assertFalse(typeOptions.isEmpty());
     typeOptions.get(sandboxType).click();
 
-    String sandboxName;
-    if (sandboxType == 0) {
-      sandboxName = "%s - %s testing: orchestrator".formatted(standard.name(), roleName);
-    } else {
-      sandboxName = "%s - %s testing: synthetic %s as tested party"
-                  .formatted(standard.name(), roleName, roleName);
-    }
+    String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
 

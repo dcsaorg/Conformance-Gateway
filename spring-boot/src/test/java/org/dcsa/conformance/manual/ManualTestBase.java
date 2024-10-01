@@ -241,7 +241,7 @@ public abstract class ManualTestBase {
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.has("sandboxId"), "SandboxId not found, maybe not created? Response: " + jsonNode);
     String sandboxId = jsonNode.get("sandboxId").asText();
-    log.info("Created sandbox: {}, v{}, suite: {}, role: {}, defaultType: {}", sandbox.standardName, sandbox.versionNumber, sandbox.scenarioSuite, sandbox.testedPartyRole, sandbox.isDefaultType);
+    log.info("Created sandbox: {} v{}, suite: {}, role: {}, defaultType: {}", sandbox.standardName, sandbox.versionNumber, sandbox.scenarioSuite, sandbox.testedPartyRole, sandbox.isDefaultType);
 
     return getSandboxConfig(sandboxId);
   }
@@ -277,6 +277,18 @@ public abstract class ManualTestBase {
     assertTrue(jsonNode.isArray());
     return mapper.convertValue(jsonNode, new TypeReference<>() {});
   }
+
+  protected String getSandboxName(String standardName, String version, String suiteName, String roleName, int sandboxType) {
+    String sandboxName;
+    if (sandboxType == 0) {
+      sandboxName = "%s v%s, %s, %s - Testing: orchestrator".formatted(standardName, version, suiteName, roleName);
+    } else {
+      sandboxName = "%s v%s, %s, %s - Testing: synthetic %s as tested party"
+        .formatted(standardName, version, suiteName, roleName, roleName);
+    }
+    return sandboxName;
+  }
+
 
   void runAllTests(
     List<ScenarioDigest> sandbox1Digests, SandboxConfig sandbox1, SandboxConfig sandbox2) {

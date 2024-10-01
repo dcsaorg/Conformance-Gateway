@@ -40,7 +40,7 @@ class ConformanceApplicationTest {
     "eblsurrender-300-conformance-auto-all-in-one",
     "jit-120-conformance-auto-all-in-one",
     "ovs-300-conformance-auto-all-in-one",
-    "pint-300-reference-implementation-auto-all-in-one",
+    "pint-300-conformance-auto-all-in-one",
     "tnt-220-conformance-auto-all-in-one"
   })
   void testEachSuite(final String sandboxId) throws InterruptedException {

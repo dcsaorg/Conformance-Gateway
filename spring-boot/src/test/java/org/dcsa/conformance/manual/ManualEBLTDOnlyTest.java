@@ -11,7 +11,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 @Slf4j
 class ManualEBLTDOnlyTest extends ManualTestBase {
 
-  @Disabled("A required API exchange was not yet detected for action 'TD Change (Out of Band)'")
+  // Carrier issue: Carrier: URISyntaxException: Illegal character in path at index 127: http://localhost:8080/conformance/sandbox/8f925262-2ea6-4f82-ac20-da85801da3ce/party/Carrier1/api/v3/transport-documents/Insert TDR here
+  // Shipper issue: A required API exchange was not yet detected for action 'UC6'
+  @Disabled("See above")
   @ParameterizedTest
   @CsvSource({"Carrier", "Shipper"})
   void testManualEblTD(String testedParty) {

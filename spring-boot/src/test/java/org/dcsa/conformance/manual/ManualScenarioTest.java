@@ -30,7 +30,7 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("JIT", true),
         Arguments.of("OVS", false),
         Arguments.of("OVS", true),
-//        PINT issue: Unknown TD Reference: j5k./hY,wZNqNDSEmJ`
+//       DT-1796, PINT issue: Unknown TD Reference: j5k./hY,wZNqNDSEmJ`
 //        Arguments.of("PINT", true),
 //        Arguments.of("PINT", false),
         Arguments.of("TnT", false),

@@ -85,7 +85,7 @@ class SeleniumTest extends ManualTestBase {
 //    "eBL Surrender", // Same issue as in ManualScenarioTest
     "JIT", // 1:12 minutes
     "OVS", // 3:28 minutes
-//     "PINT", // Same issue as in ManualScenarioTest
+//     "PINT", // Waits until DT-1796 is fixed
     "TnT" // 6:6 minutes
   })
   void testStandardWithAllVersions(String standardName) {

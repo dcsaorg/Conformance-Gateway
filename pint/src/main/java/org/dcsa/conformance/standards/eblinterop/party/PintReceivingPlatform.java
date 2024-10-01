@@ -76,10 +76,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .putNull("input"));
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry(
       "Finished resetScenarioClass");
   }
@@ -100,10 +97,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", receivingParameters.toJson()));
+        actionPrompt.required("actionId").asText(), receivingParameters.toJson());
     addOperatorLogEntry(
       "Finished ScenarioType");
   }

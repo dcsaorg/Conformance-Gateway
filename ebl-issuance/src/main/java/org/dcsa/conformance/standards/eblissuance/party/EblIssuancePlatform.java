@@ -141,10 +141,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             "5678-cn-or-end",
             "Bolero");
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-            .createObjectNode()
-            .put("actionId", actionPrompt.required("actionId").asText())
-            .set("input", suppliedScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
     addOperatorLogEntry(
         "Submitting SuppliedScenarioParameters: %s"
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));

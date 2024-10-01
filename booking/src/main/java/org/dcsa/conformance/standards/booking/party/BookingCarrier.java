@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.booking.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -168,10 +167,7 @@ public class BookingCarrier extends ConformanceParty {
   };
 
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("actionId", actionPrompt.get("actionId").asText())
-            .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.get("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }

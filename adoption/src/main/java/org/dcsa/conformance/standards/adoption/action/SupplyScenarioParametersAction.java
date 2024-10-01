@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.adoption.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -103,11 +102,6 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     try {
       JsonNode input = partyInput.get("input");
 
-      // This should not be needed, but somehow it uses the SupplyScenarioParametersAction also on
-      // DCSA role
-      if (input instanceof NullNode) {
-        return;
-      }
       String interval = input.required("interval").asText();
       if (interval == null
           || !(interval.equals("day") || interval.equals("week") || interval.equals("month"))) {

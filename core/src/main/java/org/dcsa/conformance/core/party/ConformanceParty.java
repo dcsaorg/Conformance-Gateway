@@ -129,7 +129,24 @@ public abstract class ConformanceParty implements StatefulEntity {
     return counterpartConfiguration.getRole();
   }
 
-  protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
+  /**
+   * To be invoked like this:
+   * <pre>
+   * {@code
+   * asyncOrchestratorPostPartyInput(
+   *   actionPrompt.required("actionId").asText(),
+   *   OBJECT_MAPPER.createObjectNode()
+   *     .put("keyOne", valueOne)
+   *     .put("keyTwo", valueTwo));
+   * }
+   * </pre>
+   */
+  protected void asyncOrchestratorPostPartyInput(String actionId, ObjectNode inputObjectNode) {
+    if (actionId == null) throw new IllegalArgumentException("The actionId may not be null");
+    if (inputObjectNode == null)
+      throw new IllegalArgumentException("The inputObjectNode may not be null");
+    ObjectNode jsonPartyInput =
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionId).set("input", inputObjectNode);
     if (partyConfiguration.isInManualMode()) {
       log.info(
           "Party {} NOT posting its input automatically (it is in manual mode): {}",
@@ -198,7 +215,7 @@ public abstract class ConformanceParty implements StatefulEntity {
             "Party {} notifying orchestrator that action {} is completed instead of sending notification: no counterpart URL is configured",
             actionId,
             partyConfiguration.getName());
-        asyncOrchestratorPostPartyInput(OBJECT_MAPPER.createObjectNode().put("actionId", actionId));
+        asyncOrchestratorPostPartyInput(actionId, OBJECT_MAPPER.createObjectNode());
       } else {
         log.info(
             "Party {} NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured",

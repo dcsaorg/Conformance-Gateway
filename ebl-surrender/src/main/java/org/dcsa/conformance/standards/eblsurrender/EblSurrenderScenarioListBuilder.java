@@ -46,9 +46,7 @@ class EblSurrenderScenarioListBuilder
     return switch (surrenderState) {
       case AVAILABLE_FOR_SURRENDER -> thenEither(
               requestSurrenderForDelivery(204).thenAllPathsFrom(DELIVERY_SURRENDER_REQUESTED),
-              requestSurrenderForAmendment(204).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED),
-              acceptSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER),
-              rejectSurrenderRequest(409).thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER)
+              requestSurrenderForAmendment(204).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED)
       );
       case DELIVERY_SURRENDER_REQUESTED -> thenEither(
               acceptSurrenderRequest(204).thenAllPathsFrom(SURRENDERED_FOR_DELIVERY),

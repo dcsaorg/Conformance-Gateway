@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DCSA OpenAPI specification for Commercial Schedules",
-    "description": "API specification issued by [Digital Container Shipping Association (DCSA)](https://dcsa.org/).\n\nThe Commercial Schedules API offers BCOs, LSPs, and Solution Platforms three different methods and endpoints to access schedules from carriers based on their specific needs: Point-to-Point Routings, Port Schedules, and Vessel Schedules. \n\n**Commercial schedules - point-to-point routings**: provides the product offering of single or multiple estimated end-to-end route options for a shipment in the pre-booking phase. This includes point-to-point specification of all transport legs, estimated timings, estimated schedules and interdependencies between transport legs.\n \n**Commercial schedules – port schedules**: provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.\n \n**Commercial schedules – vessel schedules**: provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).\n\n**All use cases mentioned in this API specification refer to use cases defined in the Commercial Schedules Interface Standard.**\n\nThe Commercial Schedules endpoints can be implemented independently:\n\n`1. GET /v1/point-to-point-routes # For Point to Point Routings`\n\n`2. GET /v1/port-schedules # For Port Schedules`\n\n`3. GET /v1/vessel-schedules # For Vessel Schedules`\n\nVisit the [DCSA Website](https://dcsa.org/standards/commercial-schedules/) to find other documentation related to the standard publication (i.e. Interface Standard, Information Model).\n\n\n**Stats API**\n\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to the Commercial Schedule API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction).\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/cs/v1#v100B1). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "description": "API specification issued by [Digital Container Shipping Association (DCSA)](https://dcsa.org/).\n\nThe Commercial Schedules API offers BCOs, LSPs, and Solution Platforms three different methods and endpoints to access schedules from carriers based on their specific needs: Point-to-Point Routings, Port Schedules, and Vessel Schedules. \n\n**Commercial schedules - point-to-point routings**: provides the product offering of single or multiple estimated end-to-end route options for a shipment in the pre-booking phase. This includes point-to-point specification of all transport legs, estimated timings, estimated schedules and interdependencies between transport legs.\n \n**Commercial schedules – port schedules**: provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.\n \n**Commercial schedules – vessel schedules**: provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).\n\n**All use cases mentioned in this API specification refer to use cases defined in the Commercial Schedules Interface Standard.**\n\nThe Commercial Schedules endpoints can be implemented independently:\n\n`1. GET /v1/point-to-point-routes # For Point to Point Routings`\n\n`2. GET /v1/port-schedules # For Port Schedules`\n\n`3. GET /v1/vessel-schedules # For Vessel Schedules`\n\nVisit the [DCSA Website](https://dcsa.org/standards/commercial-schedules/) to find other documentation related to the standard publication (i.e. Interface Standard, Information Model).\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design).\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/cs/v1#v100). Please also [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org/",
@@ -128,7 +128,7 @@
           {
             "name": "maxTranshipment",
             "in": "query",
-            "description": "Specifies the maximum number of transhipments that can have the proposed routings in the response. By default, transhipments are allowed and the responses can have either direct routings or routings with transhipment. The default value of maximum transhipments is defined by the carrier for when the consumer does not provide a value. If the user sets the number of transhipments to 0, only direct routings can be returned in the response.",
+            "description": "Specifies the maximum number of transhipments that the proposed routings can have in the response. By default, transhipments are allowed and the responses can have either direct routings or routings with transhipment. The default value of maximum transhipments is defined by the carrier for when the consumer does not provide a value. If the user sets the number of transhipments to 0, only direct routings can be returned in the response.",
             "required": false,
             "style": "form",
             "explode": true,
@@ -178,7 +178,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Maximum number of items to return.",
+            "description": "Specifies the maximum number of `Point-to-Point` objects to return.",
             "required": false,
             "style": "form",
             "explode": true,
@@ -200,7 +200,8 @@
             "schema": {
               "maxLength": 1024,
               "type": "string"
-            }
+            },
+            "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
           },
           {
             "name": "API-Version",
@@ -226,6 +227,16 @@
                 "schema": {
                   "type": "string",
                   "example": "1.0.0"
+                }
+              },
+              "Next-Page-Cursor": {
+                "description": "The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.\nWhen an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:\n`Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.\n\nTo retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "maxLength": 1024,
+                  "type": "string",
+                  "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
                 }
               }
             },
@@ -334,13 +345,13 @@
           "Port Schedule"
         ],
         "summary": "Port Schedule",
-        "description": "Provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.\n\nThe port must be identified by its UN Location Code. \n\nThe required query parameters are `UNLocationCode` and `date`. \n\nIf the requested port (identified with UNLocationCode) has multiple terminals (identified with facilitySMDGCode), the response will include a sorted list that provides all the arrivals and departures of the vessels for each terminal of the port (UNLocationCode). \n\nThe `GET /v1/port-schedules` endpoint can be implemented independently of having implemented the  `GET /v1/point-to-point-routes`  and `GET /v1/vessel-schedules`  endpoints. \n",
+        "description": "Provides, for a required specific port and starting date, the set of all vessels arriving and departing from the port with the corresponding estimated timestamps.\n\nThe port must be identified by its UN Location Code. \n\nThe required query parameters are `UNLocationCode` and `date`. \n\nIf the requested port (identified with `UNLocationCode`) has multiple terminals (identified with `facilitySMDGCode`), the response will include a sorted list that provides all the arrivals and departures of the vessels for each terminal of the port (`UNLocationCode`). \n\nThe `GET /v1/port-schedules` endpoint can be implemented independently of having implemented the  `GET /v1/point-to-point-routes`  and `GET /v1/vessel-schedules`  endpoints. \n",
         "operationId": "get-v1-port-schedules",
         "parameters": [
           {
             "name": "UNLocationCode",
             "in": "query",
-            "description": "The UN Location code specifying where the place is located. Specifying this filter will only return the set of all vessels arriving and departing from the port and its terminals with the corresponding estimated.",
+            "description": "The UN Location code specifying where the place is located. Specifying this filter will only return the set of all vessels arriving and departing from the port and its terminals.",
             "required": true,
             "style": "form",
             "explode": true,
@@ -381,7 +392,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Maximum number of items to return.",
+            "description": "Specifies the maximum number of `Port Schedule` objects to return.",
             "required": false,
             "style": "form",
             "explode": true,
@@ -403,7 +414,7 @@
             "schema": {
               "maxLength": 1024,
               "type": "string",
-              "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA="
+              "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
             }
           }
         ],
@@ -418,6 +429,16 @@
                 "schema": {
                   "type": "string",
                   "example": "1.0.0"
+                }
+              },
+              "Next-Page-Cursor": {
+                "description": "The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.\nWhen an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:\n`Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.\n\nTo retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "maxLength": 1024,
+                  "type": "string",
+                  "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
                 }
               }
             },
@@ -526,7 +547,7 @@
           "Vessel Schedule"
         ],
         "summary": "Vessel Schedule",
-        "description": "Provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).\n\nThe list of schedules returned in the response can be tailored to specific needs by combining available query parameters. \n\nExamples of typical query parameters and expected payload returned in the response: \n\n- a) `carrierServiceCode`: Get all vessels and their full voyages within a service   \n\n- b) `carrierServiceCode` **&** `carrierVoyageNumber`: Get a specific full voyage within a service\n\n- c) `carrierServiceCode` **&** `vesselIMONumber`: Get a specific vessel’s full voyages within a service. \n\n- d) `vesselIMONumber`: Get all full voyages for a specific vessel across all the services in which it is involved.\n\n- e) `UNLocationCode`: Get all vessels and their full voyages where the specific UNLocationCode is involved\n\n- f) `UNLocationCode` **&** `facilitySMDGCode`: Get all vessels and their full voyages where the specific UNLocationCode and facilitySMDGCode is involved\n\nOther combinations using `vesselName`, `universalServiceReference`, `universalVoyageReference`, `vesselOperatorCarrierCode`, `startDate`, `endDate` are possible. \n\nThe resulting payload returned in the responses will always include **entire voyage(s) being matched**. This means that even though a filter only matches a single `Port` (UNLocationCode) in a `Voyage` or a single `Timestamp` within a `Port` in a `Voyage` - **the entire Voyage matched** is returned. If the `carrierImportVoyageNumber` of the `Port` differs from the `carrierExportVoyageNumber` of the `Port` then the **entire Voyage** for both these Voyage numbers are included. An example of this is when `&UNLocationCode=DEHAM` is used as a filter parameter. In this case **entire Voyages** would be listed where `DEHAM` is a `Port`.\n\nBe aware that it is possible to specify filters that are mutually exclusive resulting in an empty response list. An example of this could be when both using `vesselIMONumber` and `vesselName` filters at the same time: &vesselIMONumber=9321483&vesselName=King of the Seas. If no `Vessel` exists where `vesselIMONumber` is **9321483** and `vesselName` is **King of the Seas** then the result will be an empty list. \n\nIf no `startDate` filter is provided, then **3 months** before the request date should be used as default. If no `endDate` filter is provided, then **6 months** after the request date should be used as default. The endpoint provider can customize these based on their business definitions and inform the consumers what to expect in a response when these filters are not used. \n\nThe `GET /v1/vessel-schedules` endpoint can be implemented independently of having implemented the  `GET /v1/point-to-point-routes`  and `GET /v1/port-schedules`  endpoints. \n\n**IMPORTANT**: This endpoint is for carriers to make available vessel schedules to BCO, LSP, and Solution Platforms, with a commercial purpose; this is out of the boundaries of their vessel schedules alignment with other carriers and terminals for operational purposes for which the Operational Vessel Schedules [API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_OVS/3.0.0) is used between carriers, and carriers and terminals. \n",
+        "description": "Provides, for a required specific service and/or voyage and/or vessel and/or location, the timetable of estimated departure and arrival times for each port call on the rotation of the vessel(s).\n\nThe list of schedules returned in the response can be tailored to specific needs by combining available query parameters. \n\nA filter parameter or a combination of filter parameters MUST always be provided to call the endpoint. Examples of typical query parameters and expected payload returned in the response:\n\n- a) `carrierServiceCode`: Get all vessels and their full voyages within a service   \n\n- b) `carrierServiceCode` **&** `carrierVoyageNumber`: Get a specific full voyage within a service\n\n- c) `carrierServiceCode` **&** `vesselIMONumber`: Get a specific vessel’s full voyages within a service. \n\n- d) `vesselIMONumber`: Get all full voyages for a specific vessel across all the services in which it is involved.\n\n- e) `UNLocationCode`: Get all vessels and their full voyages where the specific `UNLocationCode` is involved\n\n- f) `UNLocationCode` **&** `facilitySMDGCode`: Get all vessels and their full voyages where the specific  `UNLocationCode` and `facilitySMDGCode` is involved\n\nOther combinations using `vesselName`, `universalServiceReference`, `universalVoyageReference`, `vesselOperatorCarrierCode`, `startDate`, `endDate` are possible. \n\nThe filter parameters `startDate` and `endDate` MUST always be used in combination with any of the other available parameters.\n\nThe resulting payload returned in the responses will always include **entire voyage(s) being matched**. This means that even though a filter only matches a single `Port` (`UNLocationCode`) in a `Voyage` or a single `Timestamp` within a `Port` in a `Voyage` - **the entire Voyage matched** is returned. If the `carrierImportVoyageNumber` of the `Port` differs from the `carrierExportVoyageNumber` of the `Port` then the **entire Voyage** for both these Voyage numbers are included. An example of this is when `&UNLocationCode=DEHAM` is used as a filter parameter. In this case **entire Voyages** would be listed where `DEHAM` is a `Port`.\n\nBe aware that it is possible to specify filters that are mutually exclusive resulting in an empty response list. An example of this could be when both using `vesselIMONumber` and `vesselName` filters at the same time: `&vesselIMONumber=9321483&vesselName=King of the Seas`. If no `Vessel` exists where `vesselIMONumber` is **9321483** and `vesselName` is **King of the Seas** then the result will be an empty list. \n\nIf no `startDate` filter is provided, then **3 months** before the request date should be used as default. If no `endDate` filter is provided, then **6 months** after the request date should be used as default. The endpoint provider can customize these based on their business definitions and inform the consumers what to expect in a response when these filters are not used. \n\nThe `GET /v1/vessel-schedules` endpoint can be implemented independently of having implemented the  `GET /v1/point-to-point-routes`  and `GET /v1/port-schedules`  endpoints. \n\n**IMPORTANT**: This endpoint is for carriers to make available vessel schedules to BCO, LSP, and Solution Platforms, with a commercial purpose; this is out of the boundaries of their vessel schedules alignment with other carriers and terminals for operational purposes for which the Operational Vessel Schedules [API](https://app.swaggerhub.com/apis/dcsaorg/DCSA_OVS/3.0.0) is used between carriers, and carriers and terminals. \n",
         "operationId": "get-v1-vessel-schedule",
         "parameters": [
           {
@@ -657,7 +678,7 @@
           {
             "name": "startDate",
             "in": "query",
-            "description": "The start date of the period for which schedule information is requested. If a date of any Timestamp (ATA, ETA or PTA) inside a PortCall matches a date on or after (≥) the `startDate` the entire Voyage (import- and export-Voyage) matching the PortCall will be included in the result. All matching is done towards local Date at the place of the port call.\nIf this filter is not provided the default value is `3 months` prior to request time.  The value is populated in `ISO 8601` date format.\n",
+            "description": "The start date of the period for which schedule information is requested. If a date of any Timestamp (ATA, ETA or PTA) inside a PortCall matches a date on or after (≥) the `startDate` the entire Voyage (import- and export-Voyage) matching the PortCall will be included in the result. All matching is done towards local Date at the place of the port call.\nIf this filter is not provided the default value is `3 months` prior to request time.  The value is populated in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) date format.\n",
             "required": false,
             "style": "form",
             "explode": true,
@@ -670,7 +691,7 @@
           {
             "name": "endDate",
             "in": "query",
-            "description": "The end date of the period for which schedule information is requested. If a date of any Timestamp (ATA, ETA or PTA) inside a PortCall matches a date on or before (≤) the `endDate` the entire Voyage(import- and export-Voyage) matching the PortCall will be included in the result. All matching is done towards local Date at the place of the port call.  \nIf this filter is not provided the default value is `6 months` after request time.  The value is populated in `ISO 8601` date format.\n",
+            "description": "The end date of the period for which schedule information is requested. If a date of any Timestamp (ATA, ETA or PTA) inside a PortCall matches a date on or before (≤) the `endDate` the entire Voyage(import- and export-Voyage) matching the PortCall will be included in the result. All matching is done towards local Date at the place of the port call.  \nIf this filter is not provided the default value is `6 months` after request time.  The value is populated in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) date format.\n",
             "required": false,
             "style": "form",
             "explode": true,
@@ -683,7 +704,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Maximum number of items to return.",
+            "description": "Specifies the maximum number of `Service Schedule` objects to return.",
             "required": false,
             "style": "form",
             "explode": true,
@@ -705,7 +726,7 @@
             "schema": {
               "maxLength": 1024,
               "type": "string",
-              "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA="
+              "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
             }
           },
           {
@@ -732,6 +753,16 @@
                 "schema": {
                   "type": "string",
                   "example": "1.0.0"
+                }
+              },
+              "Next-Page-Cursor": {
+                "description": "The Next-Page-Cursor header contains a cursor value that points to the next page of results in a paginated API response.\nWhen an initial `GET` endpoint request includes the query parameter `limit=...` the API provider limits the number of items in the root array of the response to the specified limit. If the response would contain more items than the specified limit, the API provider includes only the first set of limit items and appends the following response header:\n`Next-Page-Cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`, a string that acts as a reference for the next page of results. The cursor value is used in subsequent requests to retrieve the next page by passing it as a query parameter: `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA`.\n\nTo retrieve the next page, the API consumer sends a `GET` request to the endpoint URL with only `?cursor=fE9mZnNldHw9MTAmbGltaXQ9MTA` as query parameter. The limit of items per page and any other query parameters may not be altered, therefore it may also not be specified when requesting subsequent pages. The API provider must ignore any query parameters passed along with a cursor, and should return a `400` error if any other query parameter is passed along with the `cursor`.\n",
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "maxLength": 1024,
+                  "type": "string",
+                  "example": "fE9mZnNldHw9MTAmbGltaXQ9MTA"
                 }
               }
             },
@@ -857,7 +888,7 @@
           },
           "dateTime": {
             "type": "string",
-            "description": "The local date and time, when the event will take place, in ISO 8601 format specifying the offset.",
+            "description": "The local date and time, when the event will take place, in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format specifying the offset.",
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
@@ -884,7 +915,7 @@
           },
           "dateTime": {
             "type": "string",
-            "description": "The local date and time, when the event will take place, in ISO 8601 format specifying the offset.",
+            "description": "The local date and time, when the event will take place, in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format specifying the offset.",
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
@@ -911,7 +942,7 @@
           },
           "dateTime": {
             "type": "string",
-            "description": "The local date and time, when the event will take place, in ISO 8601 format specifying the offset.",
+            "description": "The local date and time, when the event will take place, in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format specifying the offset.",
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
@@ -938,7 +969,7 @@
           },
           "dateTime": {
             "type": "string",
-            "description": "The local date and time, when the event will take place, in ISO 8601 format specifying the offset.",
+            "description": "The local date and time, when the event will take place, in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format specifying the offset.",
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
@@ -990,7 +1021,7 @@
           },
           "cutOffTimes": {
             "type": "array",
-            "description": "A list of cut-offs times provided by the carrier when available. A cut-off time indicates the latest deadline within which a task must be completed.",
+            "description": "A list of cut-offs times provided by the carrier when available. A cut-off time indicates the latest date and time by which a task must be completed. For example, the latest date and time by which a container must be delivered to a terminal to be loaded on a vessel, or where certain documentation must be provided by the Shipper.",
             "items": {
               "$ref": "#/components/schemas/CutOffTime"
             }
@@ -1004,7 +1035,7 @@
           },
           "transitTime": {
             "type": "integer",
-            "description": "The estimated total time in **days** that it takes a shipment to move from place of receipt to place of delivery. Transit time includes stop-over time during transshipments and waiting time at connection points.",
+            "description": "The estimated total time in days that it takes a shipment to move from place of receipt to place of delivery. Transit time includes stop-over time during transhipments and waiting time at connection points, if applicable, thus can vary between the same locations.",
             "format": "int32",
             "example": 10
           },
@@ -1055,14 +1086,14 @@
             "minLength": 8,
             "pattern": "^SR\\d{5}[A-Z]$",
             "type": "string",
-            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: SR\\d{5}[A-Z]. The letters SR followed by 5 digits, followed by a checksum-character as a capital letter from A to Z.",
+            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\\d{5}[A-Z]`. The letters `SR` followed by `5` digits, followed by a checksum-character as a capital letter from `A to Z`.\n",
             "example": "SR12345A"
           },
           "servicePartners": {
             "minItems": 1,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ServicePartnerSchedules"
+              "$ref": "#/components/schemas/ServicePartnerSchedule"
             }
           },
           "vessel": {
@@ -1070,14 +1101,14 @@
           },
           "isDummyVessel": {
             "type": "boolean",
-            "description": "Is this a dummy vessel. In case no vessel has been asigned yet - this property can be set to `true` indicating that the vesselIMONumber does not exist."
+            "description": "This property can be set to `true` when no vessel has been assigned, indicating that the `vesselIMONumber` does not exist."
           },
           "universalImportVoyageReference": {
             "maxLength": 5,
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "universalExportVoyageReference": {
@@ -1085,7 +1116,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "timestamps": {
@@ -1097,7 +1128,7 @@
           },
           "cutOffTimes": {
             "type": "array",
-            "description": "A list of cut-offs times provided by the carrier when available. A cut-off time indicates the latest deadline within which a task must be completed.",
+            "description": "A list of cut-offs times provided by the carrier when available. A cut-off time indicates the latest date and time by which a task must be completed. For example, the latest date and time by which a container must be delivered to a terminal to be loaded on a vessel, or where certain documentation must be provided by the Shipper.",
             "items": {
               "$ref": "#/components/schemas/CutOffTime"
             }
@@ -1144,7 +1175,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "universalExportVoyageReference": {
@@ -1152,10 +1183,12 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
+            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "cutOffTimes": {
             "type": "array",
+            "description": "A list of cut-offs times provided by the carrier when available. A cut-off time indicates the latest date and time by which a task must be completed. For example, the latest date and time by which a container must be delivered to a terminal to be loaded on a vessel, or where certain documentation must be provided by the Shipper.",
             "items": {
               "$ref": "#/components/schemas/CutOffTime"
             }
@@ -1183,7 +1216,8 @@
         "properties": {
           "eventTypeCode": {
             "type": "string",
-            "description": "Identifier for type of transportEvent\r\n\r\n- ARRI (Arrived)\r\n- DEPA (Departed)",
+            "description": "Identifier for type of transportEvent.\n\n- `ARRI` (Arrived)\n- `DEPA` (Departed)\n",
+            "example": "ARRI",
             "enum": [
               "ARRI",
               "DEPA"
@@ -1192,6 +1226,7 @@
           "eventClassifierCode": {
             "type": "string",
             "description": "Code for the event classifier. Values can vary depending on eventType.\n\nPossible values are:\n- `ACT` (Actual)\n- `EST` (Estimated)\n- `PLN` (Planned)\n",
+            "example": "PLN",
             "enum": [
               "PLN",
               "EST",
@@ -1200,7 +1235,7 @@
           },
           "eventDateTime": {
             "type": "string",
-            "description": "The local date and time, when the event takes place, in ISO 8601 format specifying the offset.",
+            "description": "The local date and time, when the event takes place, in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format specifying the offset.",
             "format": "date-time",
             "example": "2025-01-14T09:21:00+01:00"
           }
@@ -1264,7 +1299,7 @@
           },
           "isDummyVessel": {
             "type": "boolean",
-            "description": "Is this a dummy vessel. In case no vessel has been asigned yet - this property can be set to `true` indicating that the vesselIMONumber does not exist."
+            "description": "This property can be set to `true` when no vessel has been assigned, indicating that the `vesselIMONumber` does not exist."
           },
           "transportCalls": {
             "type": "array",
@@ -1285,12 +1320,12 @@
           "cutOffDateTimeCode": {
             "maxLength": 3,
             "type": "string",
-            "description": "Code for the cut-off time. Possible values are:\r\n- `DCO` (Documentation cut-off)\r\n- `VCO` (VGM cut-off)\r\n- `FCO` (FCL delivery cut-off)\r\n- `LCO` (LCL delivery cut-off)\r\n- `PCO` (Port cut-off)\r\n- `ECP` (Empty container pick-up date and time)\r\n- `EFC` (Earliest full-container delivery date)\r\n- `RCO` (Reefer cut-off)\r\n- `DGC` (Dangerous Goods cut-off)\r\n- `OBC` (OOG/BB cut-off)\r\n- `TCO` (Transhipment cut-off)\r\n- `STA` (Standard booking acceptance)\r\n- `SPA` (Special booking acceptance)\r\n- `CUA` (Customs Acceptance)\r\n- `AFC` (Advanced filling cut-off)\r\n\r\n**LCL Condition** : Only applicable when the `Receipt Type at Origin` is `CFS`.\r\n\r\nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/CutOffDateTimeCodeList-CS_v1.0.0.csv)",
+            "description": "Code for the cut-off time. Possible values are:\n  - `DCO` (Documentation cut-off)\n  - `VCO` (VGM cut-off)\n  - `FCO` (FCL delivery cut-off)\n  - `LCO` (LCL delivery cut-off) **Condition:** only when the `Receipt Type at Origin` is `CFS`\n  - `PCO` (Port cut-off)\n  - `ECP` (Empty container pick-up date and time)\n  - `EFC` (Earliest full-container delivery date)\n  - `RCO` (Reefer cut-off)\n  - `DGC` (Dangerous Goods cut-off)\n  - `OBC` (OOG/BB cut-off)\n  - `TCO` (Transhipment cut-off)\n  - `STA` (Standard booking acceptance)\n  - `SPA` (Special booking acceptance)\n  - `CUA` (Customs Acceptance)\n  - `AFC` (Advanced filling cut-off)\n  \nMore details can be found on [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/CutOffDateTimeCodeList-CS_v1.0.0.csv)\n",
             "example": "DCO"
           },
           "cutOffDateTime": {
             "type": "string",
-            "description": "Estimated cut-off time expressed in local time with offset following ISO 8601 format.",
+            "description": "Estimated cut-off time expressed in local time with offset following [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.",
             "format": "date-time",
             "example": "2019-11-12T07:41:00-08:30"
           }
@@ -1300,40 +1335,48 @@
       "Address": {
         "title": "Address",
         "required": [
-          "countryCode"
+          "city",
+          "countryCode",
+          "street"
         ],
         "type": "object",
         "properties": {
           "street": {
-            "maxLength": 100,
+            "maxLength": 70,
             "type": "string",
+            "description": "The name of the street.",
             "example": "Ruijggoordweg"
           },
           "streetNumber": {
             "maxLength": 50,
             "type": "string",
+            "description": "The number of the street.",
             "example": "100"
           },
           "floor": {
             "maxLength": 50,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
+            "description": "The floor of the street number.",
             "example": "N/A"
           },
           "postCode": {
             "maxLength": 10,
             "type": "string",
+            "description": "The post code.",
             "example": "1047 HM"
           },
           "city": {
-            "maxLength": 65,
+            "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
+            "description": "The name of the city.",
             "example": "Amsterdam"
           },
           "stateRegion": {
             "maxLength": 65,
             "type": "string",
+            "description": "The name of the state/region.",
             "example": "North Holland"
           },
           "countryCode": {
@@ -1404,14 +1447,14 @@
           },
           "errorDateTime": {
             "type": "string",
-            "description": "The DateTime corresponding to the error occuring. Must be formatted using [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+            "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.",
             "format": "date-time",
             "example": "2019-11-12T07:41:00Z"
           },
           "errors": {
             "minItems": 1,
             "type": "array",
-            "description": "An array of errors provding more detail about the root cause.",
+            "description": "An array of errors providing more detail about the root cause.",
             "items": {
               "$ref": "#/components/schemas/DetailedError"
             }
@@ -1450,14 +1493,14 @@
             "minLength": 2,
             "pattern": "^[A-Z]{2}$",
             "type": "string",
-            "description": "The flag of the nation whose laws the vessel is registered under. This is the ISO 3166 two-letter country code.",
+            "description": "The flag of the nation whose laws the vessel is registered under. This is the [ISO 3166](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en) two-letter country code.",
             "example": "DE"
           },
           "callSign": {
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU). It consists of a threeletter alphanumeric prefix that indicates nationality, followed by one to four characters to identify the individual vessel. For instance, vessels registered under Denmark are assigned the prefix ranges 5PA-5QZ, OUAOZZ, and XPA-XPZ. The Call Sign changes whenever a vessel changes its flag.",
+            "description": "A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU). It consists of a three letter alphanumeric prefix that indicates nationality, followed by one to four characters to identify the individual vessel. For instance, vessels registered under Denmark are assigned the prefix ranges 5PA-5QZ, OUAOZZ, and XPA-XPZ. The Call Sign changes whenever a vessel changes its flag.",
             "example": "NCVV"
           },
           "operatorCarrierCode": {
@@ -1516,7 +1559,7 @@
             "maxLength": 10,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU). It consists of a threeletter alphanumeric prefix that indicates nationality, followed by one to four characters to identify the individual vessel. For instance, vessels registered under Denmark are assigned the prefix ranges 5PA-5QZ, OUAOZZ, and XPA-XPZ. The Call Sign changes whenever a vessel changes its flag.",
+            "description": "A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU). It consists of a three letter alphanumeric prefix that indicates nationality, followed by one to four characters to identify the individual vessel. For instance, vessels registered under Denmark are assigned the prefix ranges 5PA-5QZ, OUAOZZ, and XPA-XPZ. The Call Sign changes whenever a vessel changes its flag.",
             "example": "NCVV"
           },
           "operatorCarrierCode": {
@@ -1545,7 +1588,8 @@
         "properties": {
           "modeOfTransport": {
             "type": "string",
-            "description": "The mode of transport as defined by DCSA. For the Vessel Transport mode this needs to be VESSEL.",
+            "description": "The mode of transport as defined by DCSA. For the Vessel Transport mode this needs to be `VESSEL`.",
+            "example": "VESSEL",
             "enum": [
               "VESSEL"
             ]
@@ -1573,7 +1617,7 @@
             "minLength": 8,
             "pattern": "^SR\\d{5}[A-Z]$",
             "type": "string",
-            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: SR\\d{5}[A-Z]. The letters SR followed by 5 digits, followed by a checksum-character as a capital letter from A to Z.",
+            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\\d{5}[A-Z]`. The letters `SR` followed by `5` digits, followed by a checksum-character as a capital letter from `A to Z`.\n",
             "example": "SR12345A"
           },
           "universalExportVoyageReference": {
@@ -1581,7 +1625,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "universalImportVoyageReference": {
@@ -1589,7 +1633,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "vessel": {
@@ -1607,7 +1651,8 @@
         "properties": {
           "modeOfTransport": {
             "type": "string",
-            "description": "The mode of transport as defined by DCSA. For the Barge Transport mode this needs to be BARGE.",
+            "description": "The mode of transport as defined by DCSA. For the Barge Transport mode this needs to be `BARGE`.",
+            "example": "BARGE",
             "enum": [
               "BARGE"
             ]
@@ -1635,7 +1680,7 @@
             "minLength": 8,
             "pattern": "^SR\\d{5}[A-Z]$",
             "type": "string",
-            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: SR\\d{5}[A-Z]. The letters SR followed by 5 digits, followed by a checksum-character as a capital letter from A to Z.",
+            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\\d{5}[A-Z]`. The letters `SR` followed by `5` digits, followed by a checksum-character as a capital letter from `A to Z`.\n",
             "example": "SR12345A"
           },
           "universalExportVoyageReference": {
@@ -1643,7 +1688,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "universalImportVoyageReference": {
@@ -1651,7 +1696,7 @@
             "minLength": 5,
             "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
             "type": "string",
-            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.",
+            "description": "A global unique voyage reference for the import Voyage, as per DCSA standard, agreed by VSA partners for the voyage.The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
             "example": "2103N"
           },
           "barge": {
@@ -1670,6 +1715,7 @@
           "modeOfTransport": {
             "type": "string",
             "description": "The mode of transport as defined by DCSA. The allowed values for the Other Transport mode are:\n- `RAIL` (When the transport mode is Rail)\n- `TRUCK`(When the transport mode is Truck)\n- `RAIL_TRUCK`(When rail and truck are expected to be the mode of transport in a leg of a proposed routing)\n- `BARGE_TRUCK`(When barge and truck are expected to be the mode of transport in a leg of a proposed routing)\n- `BARGE_RAIL`(When barge and rail are expected to be the mode of transport in a leg of a proposed routing)\n- `MULTIMODAL`(When mode of transport is not really defined or unknown at this stage)\n",
+            "example": "RAIL",
             "enum": [
               "RAIL_TRUCK",
               "BARGE_TRUCK",
@@ -1683,8 +1729,8 @@
         "additionalProperties": false,
         "description": "Other Transport modes."
       },
-      "FacilityLocation": {
-        "title": "Facility Location",
+      "Facility": {
+        "title": "Facility",
         "required": [
           "facilityCode",
           "facilityCodeListProvider"
@@ -1695,12 +1741,12 @@
             "maxLength": 6,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\r\n\r\n- for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx)\r\n- for `BIC`  - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)",
+            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.The definition of the code depends on the `facilityCodeListProvider`. As code list providers maintain multiple codeLists the following codeList is used:\n  - for `SMDG` - the codeList used is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/)\n  - for `BIC`  - the codeList used is the [BIC Facility Codes](https://www.bic-code.org/facility-codes/)\n",
             "example": "ADT"
           },
           "facilityCodeListProvider": {
             "type": "string",
-            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`.\r\n- `BIC` (Requires a UN Location Code) \r\n- `SMDG` (Requires a UN Location Code)",
+            "description": "The provider used for identifying the facility Code. Some facility codes are only defined in combination with an `UN Location Code`.\n- `BIC` (Requires a UN Location Code) \n- `SMDG` (Requires a UN Location Code)\n",
             "example": "SMDG",
             "enum": [
               "BIC",
@@ -1711,7 +1757,7 @@
         "description": "A way to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute."
       },
       "ServicePartner": {
-        "title": "Service Partners",
+        "title": "Service Partner",
         "type": "object",
         "properties": {
           "carrierCode": {
@@ -1723,7 +1769,7 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "Identifies the code list provider used for the carriercodes.",
+            "description": "Identifies the code list provider used for the `carrierCode`.",
             "example": "NMFTA",
             "enum": [
               "SMDG",
@@ -1761,8 +1807,8 @@
         },
         "description": "The service code and voyage number as identified by the carriers that are partners in the service."
       },
-      "ServicePartnerSchedules": {
-        "title": "Service Partner Schedules",
+      "ServicePartnerSchedule": {
+        "title": "Service Partner Schedule",
         "required": [
           "carrierExportVoyageNumber",
           "carrierImportVoyageNumber",
@@ -1780,7 +1826,7 @@
           },
           "carrierCodeListProvider": {
             "type": "string",
-            "description": "Identifies the code list provider used for the carriercodes.",
+            "description": "Identifies the code list provider used for the  `carrierCode`.",
             "example": "NMFTA",
             "enum": [
               "SMDG",
@@ -1829,7 +1875,8 @@
           "sequenceNumber": {
             "type": "integer",
             "description": "Sequence number of the leg.",
-            "format": "int32"
+            "format": "int32",
+            "example": 1
           },
           "transport": {
             "description": "The mode of transport as defined by DCSA.",
@@ -1852,7 +1899,7 @@
             "$ref": "#/components/schemas/PlaceOfArrival"
           }
         },
-        "description": "Leg of the Point-to-Point routing. The object \"Legs\" can be conformed by as many legs as needed and this legs must be identified with a sequence number."
+        "description": "Leg of the Point-to-Point routing. The property `Leg` can be conformed by as many leg as needed and this leg must be identified with a sequence number."
       },
       "Location": {
         "title": "Location",
@@ -1873,14 +1920,14 @@
             "minLength": 5,
             "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
             "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\r\n\r\n - 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\r\n - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\r\n\r\nMore info can be found here: [UN/LOCODE](https://en.wikipedia.org/wiki/UN/LOCODE)",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
             "example": "NLAMS"
           },
           "facility": {
-            "$ref": "#/components/schemas/FacilityLocation"
+            "$ref": "#/components/schemas/Facility"
           }
         },
-        "description": "The location can be specified using **any** of the nested structures:\n  - `Address` (used to specify the location via an Address)\n  - `UNLocationCode`\n  - `Facility` (used to specify a location using a `facilityCode` and a 'facilityCodeListProvider')\n  It is expected that if a location is specified in multiple ways (both as an `Address` and as a `Facility`) that both ways point to the same location.\n"
+        "description": "The location can be specified using **any** of the nested structures:\n  - `Address` (used to specify the location via an Address)\n  - `UNLocationCode`\n  - `Facility` (used to specify a location using a `facilityCode` and a `facilityCodeListProvider`)\n\n  It is expected that if a location is specified in multiple ways (both as an `Address` and as a `Facility`) that both ways point to the same location.\n"
       },
       "TransportCallLocation": {
         "title": "TransportCall Location",
@@ -1901,13 +1948,13 @@
             "minLength": 5,
             "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
             "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\r\n\r\n - 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\r\n - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\r\n\r\nMore info can be found here: [UN/LOCODE](https://en.wikipedia.org/wiki/UN/LOCODE)",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n  - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n  - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\n  More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
             "example": "NLAMS"
           },
           "facilitySMDGCode": {
             "maxLength": 6,
             "type": "string",
-            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\r\n\r\nThe codeList used by SMDG is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx)",
+            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\nThe codeList used by SMDG is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/)",
             "example": "ACT"
           }
         },
@@ -1929,17 +1976,17 @@
             "minLength": 5,
             "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
             "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\r\n\r\n - 2 characters for the country code using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\r\n - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\r\n\r\nMore info can be found here: [UN/LOCODE](https://en.wikipedia.org/wiki/UN/LOCODE)",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n  - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n  - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\n  More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
             "example": "NLAMS"
           },
           "facilitySMDGCode": {
             "maxLength": 6,
             "type": "string",
-            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\r\n\r\nThe codeList used by SMDG is the [SMDG Terminal Code List](https://smdg.org/wp-content/uploads/Codelists/Terminals/SMDG-Terminal-Code-List-v20210401.xlsx)",
+            "description": "The code used for identifying the specific facility. This code does not include the UN Location Code.\nThe codeList used by SMDG is the [SMDG Terminal Code List](https://smdg.org/documents/smdg-code-lists/)",
             "example": "ACT"
           }
         },
-        "description": "General purpose object to capture location-related data, the location can be specified in **any** of the following ways:\n  - `UNLocationCode`\n  - `FacilitySMDGCode` (used to specify a location using a `facilitySMDGCode`)\n  It is expected that if a location is specified in multiple ways (both as a `UNLocationCode` and as a `facilitySMDGCode`) that both ways point to the same location.\n"
+        "description": "General purpose object to capture location-related data, the location can be specified in **any** of the following ways:\n  - `UNLocationCode`\n  - `FacilitySMDGCode` (used to specify a location using a `facilitySMDGCode`)\n\n  It is expected that if a location is specified in multiple ways (both as a `UNLocationCode` and as a `facilitySMDGCode`) that both ways point to the same location.\n"
       },
       "DetailedError": {
         "title": "Detailed Error",
@@ -1953,7 +2000,7 @@
             "maximum": 9999,
             "minimum": 7000,
             "type": "integer",
-            "description": "The detailed error code returned.\r\n\r\n  - `7000-7999` Technical error codes\r\n  - `8000-8999` Functional error codes\r\n  - `9000-9999` API provider-specific error codes            \r\n\r\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).",
+            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).\n",
             "format": "int32",
             "example": 7003
           },
@@ -1982,7 +2029,7 @@
             "example": "invalidData"
           },
           "errorCodeMessage": {
-            "maxLength": 200,
+            "maxLength": 5000,
             "type": "string",
             "description": "A long description corresponding to the `errorCode` with additional information.",
             "example": "Spaces not allowed in facility code"

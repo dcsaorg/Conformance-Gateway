@@ -82,7 +82,7 @@ class SeleniumTest extends ManualTestBase {
     "CS", // 10:37 minutes
 //    "Ebl", // x:x minutes (DT-1681, issue with Ebl v3.0.0, suite: Conformance TD-only, Carrier & Shipper)
     "eBL Issuance", // 5:34 minutes
-//    "eBL Surrender", // Same issue as in ManualScenarioTest
+    "eBL Surrender",
     "JIT", // 1:12 minutes
     "OVS", // 3:28 minutes
 //     "PINT", // Waits until DT-1796 is fixed

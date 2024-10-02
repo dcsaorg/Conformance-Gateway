@@ -42,10 +42,8 @@ class ManualScenarioTest extends ManualTestBase {
 //       Supply scenario parameters [STRAIGHT_EBL] - Request(duplicate) - Response(ISSU): NON_CONFORMANT
 //        Arguments.of("eBL Issuance", true),
 
-      // eBL Surrender: 1) Carrier: DT-1680, NullPointerException: Cannot invoke "EblSurrenderState.ordinal()" because the return value of "java.util.Map.get(Object)" is null
-      // eBL Surrender: 2) Platform: DT-1680, UserFacingException: A required API exchange was not yet detected for action 'SURR 409'.
-//        Arguments.of("eBL Surrender", false),
-//        Arguments.of("eBL Surrender", true)
+        Arguments.of("eBL Surrender", false),
+        Arguments.of("eBL Surrender", true)
     );
   }
 
@@ -107,7 +105,8 @@ class ManualScenarioTest extends ManualTestBase {
           getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 0));
       sandbox2 =
           getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 1));
-      log.info("Run for the 2nd time, and see that it still works");
+      log.info("Run for the 2nd time, and verify it still works.");
+      log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, version.number(), suiteName, roleName);
     }
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());

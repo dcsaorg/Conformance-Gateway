@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -179,10 +179,12 @@ public class EblIssuanceCarrier extends ConformanceParty {
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
     jsonRequestBody.set("eBLVisualisationByCarrier",getSupportingDocumentObject());
     var eBLVisualisationByCarrier = Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
-    var issuanceManifest = OBJECT_MAPPER.createObjectNode()
-        .put("documentChecksum", tdChecksum)
-        .put("issueToChecksum", issueToChecksum)
-      .put("eBLVisualisationByCarrierChecksum",eBLVisualisationByCarrier);
+    var issuanceManifest =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("documentChecksum", tdChecksum)
+            .put("issueToChecksum", issueToChecksum)
+            .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrier);
 
     jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
@@ -204,7 +206,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
         .put("mediatype", "application/octet-stream");
   }
 
-  @SneakyThrows
   private static byte[] generateDocument() {
     byte[] pdf;
     String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
@@ -213,6 +214,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
         throw new IllegalArgumentException("File not found: " + filepath);
       }
       pdf = inputStream.readAllBytes();
+    } catch (IOException e) {
+      throw new IllegalArgumentException(
+          "Generating document failed. Could not load file: " + filepath);
     }
     String uuidHex = UUID.randomUUID().toString();
     String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);

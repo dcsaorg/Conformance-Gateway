@@ -162,6 +162,7 @@ public class EBLChecks {
   public static final Predicate<JsonNode> IS_ELECTRONIC = td -> td.path("isElectronic").asBoolean(false);
 
   public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
+  public static final Predicate<JsonNode> IS_AN_ESWB = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("SWB"));
 
   private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
     "EBLs cannot have copies with charges",
@@ -169,9 +170,21 @@ public class EBLChecks {
     JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMustBeAbsent())
   );
 
-  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES = JsonAttribute.ifThen(
     "EBLs cannot have copies without charges",
     IS_AN_EBL,
+    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES = JsonAttribute.ifThen(
+    "Electronic SWBs cannot have originals with charges",
+    IS_AN_ESWB,
+    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Electronic SWBs cannot have originals without charges",
+    IS_AN_ESWB,
     JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMustBeAbsent())
   );
 
@@ -418,7 +431,9 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isElectronic' implies 'issueTo' party",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
@@ -445,7 +460,9 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),

@@ -35,13 +35,8 @@ class ManualScenarioTest extends ManualTestBase {
 //        Arguments.of("PINT", false),
         Arguments.of("TnT", false),
         Arguments.of("TnT", true),
-        Arguments.of("eBL Issuance", false)
-
-//       2nd run of eBL Issuance is not working, DT-1679: Scenario 'Supply carrier parameters - Supply scenario parameters
-//       [STRAIGHT_EBL] - Request(duplicate) - Response(ISSU)' is not conformant. Details: Supply carrier parameters -
-//       Supply scenario parameters [STRAIGHT_EBL] - Request(duplicate) - Response(ISSU): NON_CONFORMANT
-//        Arguments.of("eBL Issuance", true),
-
+        Arguments.of("eBL Issuance", false),
+        Arguments.of("eBL Issuance", true),
         Arguments.of("eBL Surrender", false),
         Arguments.of("eBL Surrender", true)
     );
@@ -107,6 +102,10 @@ class ManualScenarioTest extends ManualTestBase {
           getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 1));
       log.info("Run for the 2nd time, and verify it still works.");
       log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, version.number(), suiteName, roleName);
+      if (standardName.equals("eBL Issuance") && roleName.equals("Platform")) {
+        // See DT-1679, eBL Issuance Platform role: Resetting the sandbox is needed.
+        resetSandbox(sandbox2);
+      }
     }
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());

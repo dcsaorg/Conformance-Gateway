@@ -246,6 +246,17 @@ public abstract class ManualTestBase {
     return getSandboxConfig(sandboxId);
   }
 
+  void resetSandbox(SandboxConfig sandbox) {
+    log.info("Reset state of sandbox: {}", sandbox.sandboxName);
+    JsonNode node =
+        mapper
+            .createObjectNode()
+            .put("operation", "resetParty")
+            .put("sandboxId", sandbox.sandboxId);
+    JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
+    assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
+  }
+
   SandboxConfig getSandboxByName(String sandboxName) {
     SandboxItem sandboxItem1 =
         getAllSandboxes().stream()

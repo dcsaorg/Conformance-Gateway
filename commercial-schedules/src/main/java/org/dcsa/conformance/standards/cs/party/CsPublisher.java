@@ -1,7 +1,5 @@
 package org.dcsa.conformance.standards.cs.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -140,10 +138,7 @@ public class CsPublisher extends ConformanceParty {
                             })));
 
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("actionId", actionPrompt.required("actionId").asText())
-            .set("input", responseSsp.toJson()));
+        actionPrompt.required("actionId").asText(), responseSsp.toJson());
 
     addOperatorLogEntry(
         "Submitting SuppliedScenarioParameters: %s"

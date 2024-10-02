@@ -143,10 +143,7 @@ public class PintSendingPlatform extends ConformanceParty {
       carrierPayloadSigner.getPublicKeyInPemFormat()
     );
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", scenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), scenarioParameters.toJson());
     addOperatorLogEntry(
       "Provided ScenarioParameters: %s".formatted(scenarioParameters));
   }
@@ -161,10 +158,7 @@ public class PintSendingPlatform extends ConformanceParty {
     sendingState.resignLatestEntry(payloadSigner);
     sendingState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .putNull("input"));
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry(
       "Resigned latest entry for document: %s".formatted(tdr));
   }
@@ -180,10 +174,7 @@ public class PintSendingPlatform extends ConformanceParty {
     sendingState.manipulateLatestTransaction(payloadSigner, rsp);
     sendingState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .putNull("input"));
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry(
       "Mutated transaction chain for document: %s".formatted(tdr));
   }

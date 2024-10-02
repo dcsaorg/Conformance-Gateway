@@ -90,10 +90,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         new CarrierScenarioParameters(
           payloadSigner.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
       "Submitting CarrierScenarioParameters: %s"
         .formatted(carrierScenarioParameters.toJson().toPrettyString()));

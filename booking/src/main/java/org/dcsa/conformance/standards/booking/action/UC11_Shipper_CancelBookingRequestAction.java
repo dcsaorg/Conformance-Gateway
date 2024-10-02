@@ -18,18 +18,21 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final BookingState expectedBookingStatus;
 
   public UC11_Shipper_CancelBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingStatus,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC11", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.expectedBookingStatus = expectedBookingStatus;
   }
 
   @Override
@@ -63,15 +66,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
         String cbrr = dsp.carrierBookingRequestReference();
         return Stream.concat(
           Stream.concat(createPrimarySubChecks("PATCH", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
-            Stream.of(new CarrierBookingRefStatusPayloadResponseConformanceCheck(
-              getMatchedExchangeUuid(),
-              BookingState.CANCELLED
-            ),
-              new JsonSchemaCheck(
-                BookingRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator),
+            Stream.of(
               new JsonSchemaCheck(
                 BookingRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -80,7 +75,7 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
           getNotificationChecks(
             expectedApiVersion,
             notificationSchemaValidator,
-            BookingState.CANCELLED,
+            expectedBookingStatus,
             null));
       }
     };

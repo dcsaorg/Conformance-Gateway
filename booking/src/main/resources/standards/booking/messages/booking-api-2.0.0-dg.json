@@ -10,7 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "isImportLicenseRequired": true,
-  "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "carrierServiceCode": "TA1",
   "vessel": {
@@ -25,8 +24,10 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 12000,
-          "cargoGrossWeightUnit": "KGM",
+          "cargoGrossWeight": {
+            "value": 12000,
+            "unit": "KGM"
+          },
           "outerPackaging": {
             "packageCode" : "5H",
             "imoPackagingCode": "3A1",
@@ -73,7 +74,7 @@
                   "value": 104.5,
                   "unit": "KGM"
                 },
-                "volume": {
+                "netVolume": {
                   "value": 10.5,
                   "unit": "MTQ"
                 },
@@ -141,7 +142,7 @@
                   "value": 104.5,
                   "unit": "KGM"
                 },
-                "volume": {
+                "netVolume": {
                   "value": 10.5,
                   "unit": "MTQ"
                 },

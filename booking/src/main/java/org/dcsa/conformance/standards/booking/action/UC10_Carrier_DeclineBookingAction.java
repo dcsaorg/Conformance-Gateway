@@ -12,14 +12,17 @@ import org.dcsa.conformance.standards.booking.party.BookingState;
 @Getter
 public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final BookingState expectedAmendedBookingStatus;
 
   public UC10_Carrier_DeclineBookingAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedAmendedBookingStatus,
       JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC10", 204);
     this.requestSchemaValidator = requestSchemaValidator;
+    this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
   }
 
   @Override
@@ -53,7 +56,7 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
                 getMatchedExchangeUuid(),
                 BookingState.DECLINED,
-                dsp.amendedBookingStatus() != null ? BookingState.AMENDMENT_DECLINED : null),
+                expectedAmendedBookingStatus),
             ApiHeaderCheck.createNotificationCheck(
                 BookingRole::isCarrier,
                 getMatchedExchangeUuid(),

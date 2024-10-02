@@ -15,9 +15,6 @@ public record DynamicScenarioParameters(
     ScenarioType scenarioType,
     String carrierBookingRequestReference,
     String carrierBookingReference,
-    BookingState bookingStatus,
-    BookingState amendedBookingStatus,
-    BookingCancellationState bookingCancellationStatus,
     JsonNode booking,
     JsonNode updatedBooking
     ) {
@@ -29,15 +26,6 @@ public record DynamicScenarioParameters(
     }
     if (carrierBookingReference != null) {
       dspNode.put("carrierBookingReference", carrierBookingReference);
-    }
-    if (bookingStatus != null) {
-      dspNode.put("bookingStatus", bookingStatus.name());
-    }
-    if (amendedBookingStatus != null) {
-      dspNode.put("amendedBookingStatus", amendedBookingStatus.name());
-    }
-    if (bookingCancellationStatus != null) {
-      dspNode.put("bookingCancellationStatus", bookingCancellationStatus.name());
     }
     if (booking != null) {
       dspNode.replace("booking", booking);
@@ -75,9 +63,6 @@ public record DynamicScenarioParameters(
       readEnum(jsonNode.required("scenarioType").asText(), ScenarioType::valueOf),
         dspNode.path("carrierBookingRequestReference").asText(null),
         dspNode.path("carrierBookingReference").asText(null),
-        bookingState(dspNode.path("bookingStatus").asText(null)),
-        bookingState(dspNode.path("amendedBookingStatus").asText(null)),
-        bookingCancellationState(dspNode.path("bookingCancellationStatus").asText(null)),
         dspNode.path("booking"),
         dspNode.path("updatedBooking")
       );

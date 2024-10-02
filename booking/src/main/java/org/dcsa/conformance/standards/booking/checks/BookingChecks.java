@@ -669,14 +669,6 @@ public class BookingChecks {
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/communicationChannelCode"), BookingDataSets.COMMUNICATION_CHANNEL_CODES),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/declaredValueCurrency"), BookingDataSets.ISO_4217_CURRENCY_CODES),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/incoTerms"), BookingDataSets.INCO_TERMS_VALUES),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
-      mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
-      JsonAttribute.presenceImpliesOtherField(
-        "cargoGrossVolume",
-        "cargoGrossVolumeUnit"
-      )
-    ),
     VALIDATE_ALL_BOOKING_UN_LOCATION_CODES,
     CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,

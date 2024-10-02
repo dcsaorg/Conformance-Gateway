@@ -200,10 +200,7 @@ public class EblCarrier extends ConformanceParty {
         );
     };
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
       "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
@@ -258,9 +255,7 @@ public class EblCarrier extends ConformanceParty {
     si.putShippingInstructions(documentReference, updatedSI);
     si.acceptUpdatedShippingInstructions(documentReference);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText()));
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry("Process out of band amendment for transport document '%s'".formatted(documentReference));
   }
 
@@ -288,14 +283,6 @@ public class EblCarrier extends ConformanceParty {
     si.publishDraftTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
-    if (skipSI) {
-      asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-          .createObjectNode()
-          .put("actionId", actionPrompt.required("actionId").asText())
-          .putObject("input")
-          .put("transportDocumentReference", si.getTransportDocumentReference()));
-    }
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
     addOperatorLogEntry("Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));

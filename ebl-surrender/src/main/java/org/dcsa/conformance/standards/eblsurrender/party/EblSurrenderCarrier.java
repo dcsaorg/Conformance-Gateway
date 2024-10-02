@@ -91,10 +91,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
             tdr, "XMPL", "Example carrier party code", "Example party code", "Example code list");
 
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("actionId", actionPrompt.required("actionId").asText())
-            .set("input", suppliedScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
 
     addOperatorLogEntry(
         "Submitting SuppliedScenarioParameters: %s"
@@ -111,7 +108,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
     }
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER.createObjectNode().put("actionId", actionPrompt.get("actionId").asText()));
+        actionPrompt.get("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry(
         "Voided and reissued the eBL with transportDocumentReference '%s'".formatted(tdr));
   }

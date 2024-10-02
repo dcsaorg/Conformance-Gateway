@@ -68,10 +68,8 @@ public class AdoptionAdopter extends ConformanceParty {
     log.info("AdoptionAdopter.getAdoptionStats({})", actionPrompt);
 
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put(ACTION_ID, actionPrompt.required(ACTION_ID).asText())
-            .putNull("input"));
+        actionPrompt.required(ACTION_ID).asText(),
+        OBJECT_MAPPER.createObjectNode().put("interval", "week").put("date", "2024-12-31"));
     addOperatorLogEntry(
         "Provided AdoptionScenarioParameters: %s".formatted(actionPrompt.get(ACTION_ID)));
   }

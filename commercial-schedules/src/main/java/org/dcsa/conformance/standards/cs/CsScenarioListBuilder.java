@@ -144,18 +144,18 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPtpForPagination(
-      CsScenarioListBuilder thenWhat, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings().then(thenWhat));
+      CsScenarioListBuilder nextRoutingsAction, CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getPtpRoutings().then(nextRoutingsAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPsForPagination(
-      CsScenarioListBuilder thenWhat, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules().then(thenWhat));
+      CsScenarioListBuilder nextPortSchedulesAction, CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getPortSchedules().then(nextPortSchedulesAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersVsForPagination(
-      CsScenarioListBuilder thenWhat, CsFilterParameter... csFilterParameters) {
-    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules().then(thenWhat));
+      CsScenarioListBuilder nextVesselSchedulesAction, CsFilterParameter... csFilterParameters) {
+    return supplyScenarioParameters(csFilterParameters).then(getVesselSchedules().then(nextVesselSchedulesAction));
   }
 
   private static CsScenarioListBuilder scenarioWithParametersPtp(

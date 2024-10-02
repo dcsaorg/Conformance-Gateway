@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.cs.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
@@ -55,7 +54,7 @@ public class CsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("CsPublisher.handleRequest(%s)".formatted(request));
     String filePath;
-    Map<String, List<String>> initialIMap = Map.of("Api-Version", List.of(apiVersion));
+    Map<String, List<String>> initialIMap = Map.of(API_VERSION, List.of(apiVersion));
     Map<String, Collection<String>> headers = new HashMap<>(initialIMap);
     if (request.queryParams().containsKey("limit")
         && !request.queryParams().containsKey("cursor")) {
@@ -139,10 +138,7 @@ public class CsPublisher extends ConformanceParty {
                             })));
 
     asyncOrchestratorPostPartyInput(
-        new ObjectMapper()
-            .createObjectNode()
-            .put("actionId", actionPrompt.required("actionId").asText())
-            .set("input", responseSsp.toJson()));
+        actionPrompt.required("actionId").asText(), responseSsp.toJson());
 
     addOperatorLogEntry(
         "Submitting SuppliedScenarioParameters: %s"

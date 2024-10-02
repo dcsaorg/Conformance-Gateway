@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -29,6 +28,7 @@ import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
@@ -42,6 +42,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 @Slf4j
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
+    AdoptionStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,

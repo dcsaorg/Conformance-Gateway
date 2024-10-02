@@ -16,8 +16,12 @@ public class CsGetRoutingsAction extends CsAction {
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator1) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetRoutings", 200);
-
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetRoutingsAction) ? "GetRoutings (second page)" : "GetRoutings",
+        200);
     this.responseSchemaValidator = responseSchemaValidator1;
   }
 
@@ -35,8 +39,10 @@ public class CsGetRoutingsAction extends CsAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET point to point routings request with the following parameters: "
-        + sspSupplier.get().toJson().toPrettyString();
+    return previousAction instanceof CsGetRoutingsAction
+        ? "Send a GET point to point routings request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
+        : "Send a GET point to point routings request with the following parameters: "
+            + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override

@@ -15,7 +15,7 @@ public class PintStandard extends AbstractStandard {
   public SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion() {
     return new TreeMap<>(
         Map.ofEntries(
-            Map.entry("3.0.0", new TreeSet<>(Set.of("Reference Implementation")))));
+            Map.entry("3.0.0", new TreeSet<>(Set.of("Conformance")))));
   }
 
   @Override

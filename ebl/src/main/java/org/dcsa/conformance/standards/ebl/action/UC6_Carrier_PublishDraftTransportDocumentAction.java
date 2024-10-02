@@ -1,11 +1,15 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
@@ -26,7 +30,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   @Override
   public String getHumanReadablePrompt() {
     if (skipSI) {
-      return "UC6: Publish draft transport document matching the scenario parameters provided in the previous step";
+      return "UC6: Publish draft transport document matching the scenario parameters provided in the previous step and provide its transport document reference here";
     }
     return ("UC6: Publish draft transport document for shipping instructions with reference %s"
         .formatted(getDspSupplier().get().shippingInstructionsReference()));
@@ -45,6 +49,28 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       }
     }
     getDspConsumer().accept(dsp.withNewTransportDocumentContent(true));
+  }
+
+  @Override
+  public boolean isInputRequired() {
+    return this.skipSI;
+  }
+
+  @Override
+  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
+    super.handlePartyInput(partyInput);
+    getDspConsumer()
+        .accept(
+            getDspSupplier()
+                .get()
+                .withTransportDocumentReference(
+                    partyInput.required("input").path("transportDocumentReference").asText()));
+  }
+
+  @Override
+  public JsonNode getJsonForHumanReadablePrompt() {
+    return OBJECT_MAPPER.createObjectNode()
+      .put("transportDocumentReference", "Insert TDR here");
   }
 
   @Override

@@ -548,6 +548,17 @@ public class JsonAttribute {
     return JsonRebaseableCheckImpl.of(jsonPointer, matchedMustBePresent()::validate);
   }
 
+  public static JsonContentMatchedValidation matchedMaximum(int limit) {
+    return (node, context) -> {
+      if (node.asInt(0) > limit) {
+        return Set.of(
+          "The attribute '%s' was %s. However, it should have been at most %d"
+            .formatted(context, renderValue(node), limit));
+      }
+      return Collections.emptySet();
+    };
+  }
+
   public static JsonContentMatchedValidation matchedMustBeAbsent() {
     return (node, context) -> {
         if (!node.isMissingNode()) {

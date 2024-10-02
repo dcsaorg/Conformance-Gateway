@@ -59,9 +59,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
         "eblStatesByTdr",
-        StateManagementUtil.storeMap(OBJECT_MAPPER, eblStatesByTdr, EblIssuanceState::name));
-    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, sirsByTdr));
-    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, brsByTdr));
+        StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
+    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(sirsByTdr));
+    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(brsByTdr));
   }
 
   @Override
@@ -95,10 +95,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         new CarrierScenarioParameters(
           payloadSigner.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
       "Submitting CarrierScenarioParameters: %s"
         .formatted(carrierScenarioParameters.toJson().toPrettyString()));
@@ -248,12 +245,12 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
       return request.createResponse(
           204,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       return request.createResponse(
           409,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(
             OBJECT_MAPPER
                   .createObjectNode()

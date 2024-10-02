@@ -62,7 +62,7 @@ public class EblShipper extends ConformanceParty {
       Map.entry(Shipper_GetShippingInstructionsAction.class, this::getShippingInstructionsRequest),
       Map.entry(Shipper_GetTransportDocumentAction.class, this::getTransportDocument),
       Map.entry(AUC_Shipper_SendOutOfOrderSIMessageAction.class, this::sendOutOfOrderMessage),
-      Map.entry(UC3_Shipper_SubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
+      Map.entry(UC3ShipperSubmitUpdatedShippingInstructionsAction.class, this::sendUpdatedShippingInstructionsRequest),
       Map.entry(UC5_Shipper_CancelUpdateToShippingInstructionsAction.class, this::cancelUpdateToShippingInstructions),
       Map.entry(UC7_Shipper_ApproveDraftTransportDocumentAction.class, this::approveDraftTransportDocument)
     );
@@ -256,7 +256,7 @@ public class EblShipper extends ConformanceParty {
     ConformanceResponse response =
         request.createResponse(
             204,
-            Map.of("Api-Version", List.of(apiVersion)),
+            Map.of(API_VERSION, List.of(apiVersion)),
             new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
 
     addOperatorLogEntry(

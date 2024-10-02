@@ -1,5 +1,6 @@
 package org.dcsa.conformance.manual;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
-  protected final ObjectMapper mapper = new ObjectMapper();
+  protected final ObjectMapper mapper = OBJECT_MAPPER;
   protected long lambdaDelay = 0L;
 
   @Autowired protected ConformanceApplication app;
@@ -36,7 +37,7 @@ public abstract class ManualTestBase {
     webuiHandler = app.getWebuiHandler();
   }
 
-  List<Standard> getAvailableStandards() {
+  protected List<Standard> getAvailableStandards() {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAvailableStandards");
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     List<Standard> standards = mapper.convertValue(jsonNode, new TypeReference<>() {});
@@ -44,7 +45,7 @@ public abstract class ManualTestBase {
     return standards;
   }
 
-  List<SandboxItem> getAllSandboxes() {
+  protected List<SandboxItem> getAllSandboxes() {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAllSandboxes");
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.size() >= 6);
@@ -326,9 +327,9 @@ public abstract class ManualTestBase {
       String sandboxName) {}
 
   // Possible result of getAllSandboxes
-  record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
+  protected record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
 
-  record SandboxConfig(
+  public record SandboxConfig(
       String sandboxId,
       String sandboxName,
       String sandboxUrl,
@@ -345,7 +346,7 @@ public abstract class ManualTestBase {
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 
-  record Standard(String name, List<StandardVersion> versions) {}
+  protected record Standard(String name, List<StandardVersion> versions) {}
 
-  record StandardVersion(String number, List<String> suites, List<String> roles) {}
+  protected record StandardVersion(String number, List<String> suites, List<String> roles) {}
 }

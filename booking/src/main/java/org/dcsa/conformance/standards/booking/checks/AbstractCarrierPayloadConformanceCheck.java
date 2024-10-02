@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
@@ -27,6 +28,12 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.AMENDMENT_CANCELLED
   );
 
+  protected static final Set<BookingCancellationState> CANCELLATION_REASON_STATES = Set.of(
+    BookingCancellationState.CANCELLATION_RECEIVED,
+    BookingCancellationState.CANCELLATION_CONFIRMED,
+    BookingCancellationState.CANCELLATION_DECLINED
+  );
+
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
     BookingState.RECEIVED,
     BookingState.REJECTED,
@@ -40,10 +47,15 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected final BookingState expectedBookingStatus;
   protected final BookingState expectedAmendedBookingStatus;
+  protected final BookingCancellationState expectedBookingCancellationStatus;
   protected final boolean amendedContent;
 
   protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
-    this(matchedExchangeUuid, httpMessageType, bookingState, null, false);
+    this(matchedExchangeUuid, httpMessageType, bookingState, null, null,false);
+  }
+
+  protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState, BookingState expectedAmendedBookingStatus) {
+    this(matchedExchangeUuid, httpMessageType, bookingState, expectedAmendedBookingStatus, null,false);
   }
 
   protected AbstractCarrierPayloadConformanceCheck(
@@ -51,6 +63,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     HttpMessageType httpMessageType,
     BookingState bookingState,
     BookingState expectedAmendedBookingStatus,
+    BookingCancellationState expectedBookingCancellationStatus,
     boolean amendedContent
   ) {
     super(
@@ -61,6 +74,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     );
     this.expectedBookingStatus = bookingState;
     this.expectedAmendedBookingStatus = expectedAmendedBookingStatus;
+    this.expectedBookingCancellationStatus = expectedBookingCancellationStatus;
     this.amendedContent = amendedContent;
   }
 
@@ -76,7 +90,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected Set<String> ensureBookingStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("bookingStatus").asText(null);
-    String expectedState = expectedBookingStatus.wireName();
+    String expectedState = expectedBookingStatus.name();
     if (Objects.equals(actualState, expectedState)) {
       return Collections.emptySet();
     }
@@ -86,7 +100,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected Set<String> ensureAmendedBookingStatusIsCorrect(JsonNode responsePayload) {
     String actualState = responsePayload.path("amendedBookingStatus").asText(null);
-    String expectedState = expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.wireName() : null;
+    String expectedState = expectedAmendedBookingStatus != null ? expectedAmendedBookingStatus.name() : null;
     if (Objects.equals(actualState, expectedState)) {
       return Collections.emptySet();
     }
@@ -95,6 +109,19 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         Objects.requireNonNullElse(expectedState, UNSET_MARKER),
         Objects.requireNonNullElse(actualState, UNSET_MARKER)));
   }
+
+  protected Set<String> ensureBookingCancellationStatusIsCorrect(JsonNode responsePayload) {
+    String actualState = responsePayload.path("bookingCancellationStatus").asText(null);
+    String expectedState = expectedBookingCancellationStatus != null ? expectedBookingCancellationStatus.name() : null;
+    if (Objects.equals(actualState, expectedState)) {
+      return Collections.emptySet();
+    }
+    return Set.of("Expected bookingCancellationStatus '%s' but found '%s'"
+      .formatted(
+        Objects.requireNonNullElse(expectedState, UNSET_MARKER),
+        Objects.requireNonNullElse(actualState, UNSET_MARKER)));
+  }
+
 
   protected boolean expectedStateMatch(Set<BookingState> states) {
     return expectedStateMatch(states::contains);
@@ -105,7 +132,17 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return check.test(state);
   }
 
-  protected Function<JsonNode, Set<String>> requiredOrExcludedByState(Set<BookingState> conditionalInTheseStates, String fieldName) {
+  protected boolean expectedCancellationStateMatch(Predicate<BookingCancellationState> check) {
+    if (expectedBookingCancellationStatus != null) {
+      return check.test(expectedBookingCancellationStatus);
+    }
+    return false;
+  }
+
+  protected Function<JsonNode, Set<String>> requiredOrExcludedByState(Set<BookingState> conditionalInTheseStates, Set<BookingCancellationState> cancellationConditionalStates, String fieldName) {
+    if (expectedCancellationStateMatch(cancellationConditionalStates::contains)) {
+      return jsonNode -> Collections.emptySet();
+    }
     if (expectedStateMatch(conditionalInTheseStates)) {
       return payload -> nonEmptyField(payload, fieldName);
     }
@@ -113,17 +150,20 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
 
-  protected Function<JsonNode, Set<String>> requiredCarrierAttributeIfState(Set<BookingState> conditionalInTheseStates, String fieldName) {
-    if (!amendedContent && conditionalInTheseStates.contains(this.expectedBookingStatus)) {
-      return booking -> nonEmptyField(booking, fieldName);
+  protected Function<JsonNode, Set<String>> reasonFieldRequiredForCancellation(Set<BookingState> conditionalInTheseStates, Set<BookingCancellationState> cancellationConditionalStates, String fieldName) {
+    if (expectedCancellationStateMatch(cancellationConditionalStates::contains)) {
+      return payload -> nonEmptyField(payload, fieldName);
     }
-    return ALL_OK;
+    if (expectedStateMatch(conditionalInTheseStates)) {
+      return payload -> nonEmptyField(payload, fieldName);
+    }
+    return payload -> fieldIsOmitted(payload, fieldName);
   }
 
   protected Set<String> fieldIsOmitted(JsonNode responsePayload, String key) {
     if (responsePayload.has(key) || responsePayload.get(key) != null) {
       return Set.of("The field '%s' must *NOT* be a present for a booking in status '%s'".formatted(
-        key, this.expectedBookingStatus.wireName()
+        key, this.expectedBookingStatus.name()
       ));
     }
     return Collections.emptySet();
@@ -135,7 +175,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
       return Collections.emptySet();
     }
     return Set.of("The field '%s' must be a present and non-empty for a booking in status '%s'".formatted(
-      key, this.expectedBookingStatus.wireName()
+      key, this.expectedBookingStatus.name()
     ));
   }
 }

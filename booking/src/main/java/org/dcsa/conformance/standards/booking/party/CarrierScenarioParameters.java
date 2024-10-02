@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public record CarrierScenarioParameters(
@@ -17,7 +18,7 @@ public record CarrierScenarioParameters(
                                         String podUNLocationCode
                                         ) {
   public ObjectNode toJson() {
-    return new ObjectMapper()
+    return OBJECT_MAPPER
         .createObjectNode()
         .put("serviceContractReference", serviceContractReference())
         .put("contractQuotationReference", contractQuotationReference())

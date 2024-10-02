@@ -10,7 +10,6 @@
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": false,
   "isImportLicenseRequired": false,
-  "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": true,
   "carrierServiceCode": "TA1",
   "vessel": {
@@ -31,15 +30,17 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM"
+          "cargoGrossWeight": {
+            "value": 323.32,
+            "unit": "KGM"
+          }
         }
       ]
     }
   ],
   "documentParties": {
     "bookingAgent": {
-      "partyName": "DCSA Conformance Toolkit",
+      "partyName": "DCSA Conformance Sandbox",
       "address": {
         "street": "Strawinskylaan 4117",
         "floor": "6",

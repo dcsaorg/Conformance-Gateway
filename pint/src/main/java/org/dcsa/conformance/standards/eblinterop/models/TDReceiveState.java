@@ -95,7 +95,7 @@ public class TDReceiveState {
           // Which it will be in day-to-day tests until someone breaks sha256 like
           // sha1 was broken (though that will likely not happen for many years and
           // is not really worth the effort to guard against in the conformance
-          // toolkit as it is impossible for us device a test where the checksums
+          // scenario as it is impossible for us device a test where the checksums
           // match but the sizes differs - if we could, the sha256 checksum would
           // be broken!)
           idx = i;

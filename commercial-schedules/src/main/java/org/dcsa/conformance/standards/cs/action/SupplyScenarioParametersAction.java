@@ -31,8 +31,7 @@ public class SupplyScenarioParametersAction extends CsAction {
                     .map(CsFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))),
         -1);
-    this.csFilterParameters =
-        Stream.of(csFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+    this.csFilterParameters = new LinkedHashSet<>(Arrays.asList(csFilterParameters));
   }
 
   @Override

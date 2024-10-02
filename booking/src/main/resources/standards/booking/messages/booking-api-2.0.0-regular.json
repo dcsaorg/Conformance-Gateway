@@ -58,7 +58,7 @@
   ],
   "documentParties": {
     "bookingAgent": {
-      "partyName": "DCSA Conformance Toolkit",
+      "partyName": "DCSA Conformance Sandbox",
       "address": {
         "street": "Strawinskylaan 4117",
         "floor": "6",
@@ -159,10 +159,14 @@
         {
           "HSCodes": ["COMMODITY_HS_CODE_1"],
           "commodityType": "COMMODITY_TYPE_1_PLACEHOLDER",
-          "cargoGrossWeight": 323.32,
-          "cargoGrossWeightUnit": "KGM",
-          "cargoGrossVolume": 14,
-          "cargoGrossVolumeUnit": "MTQ",
+          "cargoGrossWeight": {
+            "value": 323.32,
+            "unit": "KGM"
+          },
+          "cargoGrossVolume": {
+              "value": 14,
+              "unit": "MTQ"
+          },
           "exportLicenseIssueDate": "2021-10-10",
           "exportLicenseExpiryDate": "2030-10-10",
           "references": [

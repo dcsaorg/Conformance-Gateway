@@ -14,16 +14,19 @@
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<spring.boot.version>3.3.4</spring.boot.version>
 		<log4j.version>2.20.0</log4j.version>
-		<junit.version>5.11.0</junit.version>
+		<junit.version>5.11.1</junit.version>
 		<lombok.version>1.18.34</lombok.version>
+
+		<junit.includedTags>!WebUI</junit.includedTags>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
 		<sonar.projectKey>Conformance-Gateway</sonar.projectKey>
 	</properties>
 
-	<name>Conformance Toolkit parent</name>
+	<name>Conformance Framework parent</name>
 	<url>https://dcsa.org/</url>
 
 	<organization>
@@ -42,6 +45,7 @@
 		<module>jit</module>
 		<module>ovs</module>
 		<module>tnt</module>
+		<module>adoption</module>
 		<module>cdk</module>
 		<module>lambda</module>
 		<module>sandbox</module>
@@ -103,6 +107,11 @@
 			<dependency>
 				<groupId>org.dcsa.conformance</groupId>
 				<artifactId>tnt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dcsa.conformance</groupId>
+				<artifactId>adoption</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -205,6 +214,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>
@@ -213,6 +230,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.5.0</version>
+					<configuration>
+						<groups>${junit.includedTags}</groups>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

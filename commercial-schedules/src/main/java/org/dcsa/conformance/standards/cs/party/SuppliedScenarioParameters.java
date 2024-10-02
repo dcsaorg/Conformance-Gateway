@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.cs.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +36,7 @@ public class SuppliedScenarioParameters {
   }
 
   public ObjectNode toJson() {
-    ObjectNode objectNode = new ObjectMapper().createObjectNode();
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     map.forEach(
         (csFilterParameter, value) -> objectNode.put(csFilterParameter.getQueryParamName(), value));
     return objectNode;

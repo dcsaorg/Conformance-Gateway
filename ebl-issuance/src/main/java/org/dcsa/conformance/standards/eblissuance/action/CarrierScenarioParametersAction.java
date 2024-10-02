@@ -45,7 +45,10 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new CarrierScenarioParameters("Public KEY in PEM format").toJson();
+    // DT-1794: To be redesigned with support automatic execution of manual scenario runs
+    // Keeping the unused parameter in place to avoid losing data on upgrade after DT-1794 fix.
+    return new CarrierScenarioParameters("Currently ignored, submit this without changing the value")
+        .toJson();
   }
 
   @Override

@@ -1,13 +1,13 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.With;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-
-import java.util.function.Function;
 
 @With
 public record DynamicScenarioParameters(
@@ -15,25 +15,17 @@ public record DynamicScenarioParameters(
     ScenarioType scenarioType,
     String carrierBookingRequestReference,
     String carrierBookingReference,
-    BookingState bookingStatus,
-    BookingState amendedBookingStatus,
     JsonNode booking,
     JsonNode updatedBooking
     ) {
   public ObjectNode toJson() {
-    ObjectNode dspNode = new ObjectMapper().createObjectNode();
+    ObjectNode dspNode = OBJECT_MAPPER.createObjectNode();
     dspNode.put("scenarioType", scenarioType.name());
     if (carrierBookingRequestReference != null) {
       dspNode.put("carrierBookingRequestReference", carrierBookingRequestReference);
     }
     if (carrierBookingReference != null) {
       dspNode.put("carrierBookingReference", carrierBookingReference);
-    }
-    if (bookingStatus != null) {
-      dspNode.put("bookingStatus", bookingStatus.wireName());
-    }
-    if (amendedBookingStatus != null) {
-      dspNode.put("amendedBookingStatus", amendedBookingStatus.wireName());
     }
     if (booking != null) {
       dspNode.replace("booking", booking);
@@ -48,7 +40,14 @@ public record DynamicScenarioParameters(
     if (value == null) {
       return null;
     }
-    return BookingState.fromWireName(value);
+    return BookingState.valueOf(value);
+  }
+
+  private static BookingCancellationState bookingCancellationState(String value) {
+    if (value == null) {
+      return null;
+    }
+    return BookingCancellationState.valueOf(value);
   }
 
   private static <E> E readEnum(String value, Function<String, E> mapper) {
@@ -64,8 +63,6 @@ public record DynamicScenarioParameters(
       readEnum(jsonNode.required("scenarioType").asText(), ScenarioType::valueOf),
         dspNode.path("carrierBookingRequestReference").asText(null),
         dspNode.path("carrierBookingReference").asText(null),
-        bookingState(dspNode.path("bookingStatus").asText(null)),
-        bookingState(dspNode.path("amendedBookingStatus").asText(null)),
         dspNode.path("booking"),
         dspNode.path("updatedBooking")
       );

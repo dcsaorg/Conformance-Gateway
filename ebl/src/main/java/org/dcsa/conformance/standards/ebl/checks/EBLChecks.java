@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 @UtilityClass
@@ -37,10 +38,165 @@ public class EBLChecks {
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
 
+  private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
+    (documentPartyNode, arrayNodeHandler) -> {
+      arrayNodeHandler.accept(
+        documentPartyNode, "displayedAddress", ArrayOrderHandler.inputPreservedArrayOrder());
+      arrayNodeHandler.accept(
+        documentPartyNode, "identifyingCodes", ArrayOrderHandler.toStringSortableArray());
+      arrayNodeHandler.accept(
+        documentPartyNode, "taxLegalReferences", ArrayOrderHandler.toStringSortableArray());
+      arrayNodeHandler.accept(
+        documentPartyNode, "partyContactDetails", ArrayOrderHandler.toStringSortableArray());
+    };
+
+  private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTIES_ARRAY_ORDER_DEFINITIONS =
+    (documentPartyNode, arrayNodeHandler) -> {
+      for (var partyName : List.of("shipper", "consignee", "notifyParty", "seller", "buyer", "endorsee", "issueTo")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(documentPartyNode.path(partyName), arrayNodeHandler);
+      }
+
+      arrayNodeHandler.accept(
+        documentPartyNode,
+        "notifyParties",
+        ArrayOrderHandler.inputPreservedArrayOrder());
+      for (var party : documentPartyNode.path("notifyParties")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(party, arrayNodeHandler);
+      }
+      arrayNodeHandler.accept(
+        documentPartyNode,
+        "other",
+        ArrayOrderHandler.toStringSortableArray());
+      for (var party : documentPartyNode.path("other")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(party, arrayNodeHandler);
+      }
+    };
+
+  public static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>>
+      SI_ARRAY_ORDER_DEFINITIONS =
+          (rootNode, arrayNodeHandler) -> {
+            arrayNodeHandler.accept(
+              rootNode, "partyContactDetails", ArrayOrderHandler.inputPreservedArrayOrder());
+            arrayNodeHandler.accept(
+              rootNode, "routingOfConsignmentCountries", ArrayOrderHandler.inputPreservedArrayOrder());
+
+            for (var ci : rootNode.path("consignmentItems")) {
+              arrayNodeHandler.accept(
+                ci, "descriptionOfGoods", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "HSCodes", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "nationalCommodityCodes", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
+              for (var cargoItem : ci.path("cargoItems")) {
+                arrayNodeHandler.accept(cargoItem, "nationalCommodityCodes", ArrayOrderHandler.toStringSortableArray());
+                for (var cr : cargoItem.path("customsReferences")) {
+                  arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+                }
+                arrayNodeHandler.accept(
+                  ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(ci, "cargoItems", ArrayOrderHandler.toStringSortableArray());
+              for (var cr : ci.path("customsReferences")) {
+                arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(
+                ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+            }
+
+            arrayNodeHandler.accept(
+              rootNode, "consignmentItems", ArrayOrderHandler.toStringSortableArray());
+            for (var ute : rootNode.path("utilizedTransportEquipments")) {
+              arrayNodeHandler.accept(
+                ute, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ute, "seals", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ute, "references", ArrayOrderHandler.toStringSortableArray());
+              for (var cr : ute.path("customsReferences")) {
+                arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(
+                ute, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+            }
+            arrayNodeHandler.accept(
+              rootNode, "utilizedTransportEquipments", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "advanceManifestFilings", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "references", ArrayOrderHandler.toStringSortableArray());
+            for (var cr : rootNode.path("customsReferences")) {
+              arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+            }
+            arrayNodeHandler.accept(
+              rootNode, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+
+            DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(rootNode.path("documentParties"), arrayNodeHandler);
+
+            for (var hbl : rootNode.path("houseBillOfLadings")) {
+              DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path("documentParties"), arrayNodeHandler);
+            }
+            arrayNodeHandler.accept(
+              rootNode, "houseBillOfLadings", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode,
+                "requestedCarrierCertificates",
+                ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "requestedCarrierClauses", ArrayOrderHandler.toStringSortableArray());
+          };
+
+  private static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER = (leftNode, rhsNode) -> {
+    for (var node : List.of(leftNode, rhsNode)) {
+      SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
+    }
+  };
+
   private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
     JsonAttribute.isTrue(JsonPointer.compile("/isToOrder")),
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
+  );
+
+  public static final Predicate<JsonNode> IS_ELECTRONIC = td -> td.path("isElectronic").asBoolean(false);
+
+  public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies with charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies without charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy with charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
   );
 
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
@@ -257,6 +413,12 @@ public class EBLChecks {
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isElectronic' implies 'issueTo' party",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
@@ -278,6 +440,12 @@ public class EBLChecks {
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),
@@ -572,7 +740,7 @@ public class EBLChecks {
       for (var node : nodes) {
         pathBuilder.setLength(contextPath.length());
         pathBuilder.append('[').append(index).append(']');
-        var refPath = pathBuilder.toString() + "." + referenceAttributeName;
+        var refPath = pathBuilder + "." + referenceAttributeName;
         var valueNode = resolveValue != null ? resolveValue.apply(node, pathBuilder) : node;
         index++;
         if (valueNode == null || !valueNode.isTextual()) {
@@ -792,7 +960,8 @@ public class EBLChecks {
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(JsonAttribute.lostAttributeCheck(
       "Validate that shipper provided data was not altered",
-      delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions())
+      delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
+      SI_NORMALIZER
     ));
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(

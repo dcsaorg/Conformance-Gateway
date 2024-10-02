@@ -213,7 +213,7 @@ public class CarrierShippingInstructions {
     // We always add a charge per amendment to ensure an amendment is never identical to the document
     // it replaces (which could cause issues with the issuance API). In reality, the carrier would also
     // change some other detail (like the requested change or the issuance date). But in the
-    // conformance tests every thing happens in the same day and when the conformance toolkit is
+    // conformance tests every thing happens in the same day and when the conformance sandbox is
     // the carrier, booking amendments are "zero-change" amendments.
     field("charges", (o, a, v) -> addCharge(o.putArray(a)), (o, a, v) -> addCharge(o.path(a))),
     initialFieldValue("transports", (o, a, v) -> initializeTransports(o, o.putObject(a), v))

@@ -16,13 +16,23 @@ public class CsGetPortSchedulesAction extends CsAction {
       String publisherPartyName,
       CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetPortSchedules", 200);
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetPortSchedulesAction)
+            ? "GetPortSchedules (second page)"
+            : "GetPortSchedules",
+        200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
+
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET port schedules request with the following parameters: "
-        + sspSupplier.get().toJson().toPrettyString();
+    return previousAction instanceof CsGetPortSchedulesAction
+        ? "Send a GET port schedules request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
+        : "Send a GET port schedules request with the following parameters: "
+            + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override

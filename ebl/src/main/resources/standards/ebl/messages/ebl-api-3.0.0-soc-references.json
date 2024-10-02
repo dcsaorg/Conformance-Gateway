@@ -24,7 +24,7 @@
       "cargoItems": [
         {
           "equipmentReference": "ABCU7341935",
-          "grossWeight": {
+          "cargoGrossWeight": {
             "value": 12000,
             "unit": "KGM"
           },
@@ -49,8 +49,10 @@
       "equipment": {
         "equipmentReference": "ABCU7341935",
         "ISOEquipmentCode": "45G1",
-        "tareWeight": 4030,
-        "weightUnit": "KGM"
+        "tareWeight": {
+          "value": 4030,
+          "unit": "KGM"
+        }
       },
       "seals": [
         {

@@ -1,7 +1,10 @@
 package org.dcsa.conformance.standards.ebl.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_ARRAY_ORDER_DEFINITIONS;
+import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -21,14 +24,12 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.action.*;
+import org.dcsa.conformance.standards.ebl.checks.ArrayOrderHelper;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.models.CarrierShippingInstructions;
 
-import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenarioType;
-
 @Slf4j
 public class EblCarrier extends ConformanceParty {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Map<String, String> tdrToSir = new HashMap<>();
 
   public EblCarrier(
@@ -49,7 +50,7 @@ public class EblCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("tdrToSir", StateManagementUtil.storeMap(OBJECT_MAPPER, tdrToSir));
+    targetObjectNode.set("tdrToSir", StateManagementUtil.storeMap(tdrToSir));
   }
 
   @Override
@@ -199,10 +200,7 @@ public class EblCarrier extends ConformanceParty {
         );
     };
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
       "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
@@ -257,9 +255,7 @@ public class EblCarrier extends ConformanceParty {
     si.putShippingInstructions(documentReference, updatedSI);
     si.acceptUpdatedShippingInstructions(documentReference);
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText()));
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry("Process out of band amendment for transport document '%s'".formatted(documentReference));
   }
 
@@ -289,7 +285,7 @@ public class EblCarrier extends ConformanceParty {
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
-    addOperatorLogEntry("Published draft transport document '%s'".formatted(documentReference));
+    addOperatorLogEntry("Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));
   }
 
   private void issueTransportDocument(JsonNode actionPrompt) {
@@ -449,7 +445,7 @@ public class EblCarrier extends ConformanceParty {
     return request.createResponse(
       405,
       Map.of(
-        "Api-Version", List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
+        API_VERSION, List.of(apiVersion), "Allow", List.of(String.join(",", allowedMethods))),
       new ConformanceMessageBody(
         OBJECT_MAPPER
           .createObjectNode()
@@ -459,7 +455,7 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
       400,
-      Map.of("Api-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -469,7 +465,7 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
       404,
-      Map.of("Api-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(
         OBJECT_MAPPER
           .createObjectNode()
@@ -479,7 +475,7 @@ public class EblCarrier extends ConformanceParty {
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
       409,
-      Map.of("Api-Version", List.of(apiVersion)),
+      Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -521,10 +517,12 @@ public class EblCarrier extends ConformanceParty {
       } else {
         body = si.getShippingInstructions();
       }
+      body = body.deepCopy();
+      SI_ARRAY_ORDER_DEFINITIONS.accept(body, ArrayOrderHelper::shuffleArrayOrder);
       ConformanceResponse response =
         request.createResponse(
           200,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(body));
       addOperatorLogEntry(
         "Responded to GET shipping instructions request '%s' (in state '%s')"
@@ -550,7 +548,7 @@ public class EblCarrier extends ConformanceParty {
     ConformanceResponse response =
       request.createResponse(
         200,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(body));
     addOperatorLogEntry(
       "Responded to GET transport document request '%s' (in state '%s')"
@@ -631,7 +629,7 @@ public class EblCarrier extends ConformanceParty {
     ConformanceResponse response =
       request.createResponse(
         responseCode,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
       "Responded %d to %s SI '%s' (resulting state '%s')"
@@ -645,7 +643,7 @@ public class EblCarrier extends ConformanceParty {
     ConformanceResponse response =
       request.createResponse(
         202,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(""));
     addOperatorLogEntry(
       "Responded %d to %s SI '%s' (resulting state '%s')"
@@ -666,7 +664,7 @@ public class EblCarrier extends ConformanceParty {
     ConformanceResponse response =
       request.createResponse(
         responseCode,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
       "Responded %d to %s TD '%s' (resulting state '%s')"

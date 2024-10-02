@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.tnt.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,10 +21,10 @@ public class SuppliedScenarioParameters {
   }
 
   public ObjectNode toJson() {
-    ObjectNode objectNode = new ObjectMapper().createObjectNode();
+    ObjectNode objectNode = OBJECT_MAPPER.createObjectNode();
     map.forEach(
-      (ovsFilterParameter, value) ->
-        objectNode.put(ovsFilterParameter.getQueryParamName(), value));
+      (tntFilterParameter, value) ->
+        objectNode.put(tntFilterParameter.getQueryParamName(), value));
     return objectNode;
   }
 
@@ -34,11 +35,11 @@ public class SuppliedScenarioParameters {
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
     return new SuppliedScenarioParameters(
       Arrays.stream(TntFilterParameter.values())
-        .filter(ovsFilterParameter -> jsonNode.has(ovsFilterParameter.getQueryParamName()))
+        .filter(tntFilterParameter -> jsonNode.has(tntFilterParameter.getQueryParamName()))
         .collect(
           Collectors.toUnmodifiableMap(
             Function.identity(),
-            ovsFilterParameter ->
-              jsonNode.required(ovsFilterParameter.getQueryParamName()).asText())));
+            tntFilterParameter ->
+              jsonNode.required(tntFilterParameter.getQueryParamName()).asText())));
   }
 }

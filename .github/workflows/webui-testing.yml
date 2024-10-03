@@ -1,6 +1,8 @@
 name: Web UI Testing
 
 on:
+  pull_request:
+    types: [ opened, synchronize, reopened ] # REMOVE BEFORE MERGING!!!
   push:
     branches: ["dev", "test", "master"]
 

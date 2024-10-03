@@ -80,7 +80,7 @@ class SeleniumTest extends ManualTestBase {
     "Adoption", // Takes 0:39 minutes
     "Booking", // Takes 10:52 minutes
     "CS", // 10:37 minutes
-//    "Ebl", // x:x minutes (DT-1681, issue with Ebl v3.0.0, suite: Conformance TD-only, Carrier & Shipper)
+    "Ebl", // 24:? minutes
     "eBL Issuance", // 5:34 minutes
     "eBL Surrender", // 7:39 minutes
     "JIT", // 1:12 minutes
@@ -149,41 +149,48 @@ class SeleniumTest extends ManualTestBase {
           .findElements(By.className(("scenarioActionButton")))
           .get(i)
           .click();
+      waitForUIReadiness();
 
-      handleJsonPromptForText();
       do {
+        if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
       } while (!hasNoMoreActionsDisplayed());
     }
   }
 
-  private static void handleJsonPromptForText() {
-    waitForUIReadiness();
+  private boolean handleJsonPromptForText() {
     try {
-      driver.findElement(By.id("jsonForPromptText"));
+      By jsonForPromptText = By.id("jsonForPromptText");
+      String promptText = driver.findElement(jsonForPromptText).getText();
+      wait.until(ExpectedConditions.visibilityOfElementLocated(jsonForPromptText));
 
-      wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("jsonForPromptText")));
-      String promptText = driver.findElement(By.id("jsonForPromptText")).getText();
+      // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
+      if (promptText.contains("Insert TDR here")) {
+        promptText = fetchTransportDocument(promptText);
+      }
+
       driver.findElement(By.id("actionInput")).sendKeys(promptText);
       driver.findElement(By.id("submitActionButton")).click();
       waitForUIReadiness();
-    } catch (org.openqa.selenium.NoSuchElementException e) {
-      log.info("No prompt text");
-    }
-  }
-
-  // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed() {
-    if (driver.findElements(By.id("nextActions")).isEmpty()
-        && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
-      String titleValue =
-          driver.findElement(By.className("conformanceStatus")).getAttribute("title");
-      assertEquals("Conformant", titleValue);
-      log.info("Scenario is Conformant.");
       return true;
+    } catch (org.openqa.selenium.NoSuchElementException e) {
+      log.debug("No prompt text");
     }
     return false;
+  }
+
+  private String fetchTransportDocument(String promptText) {
+    handlePromptText();
+    switchToTab(1);
+
+    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    waitForUIReadiness();
+
+    String operatorLog = driver.findElement(By.cssSelector("[testId='operatorLog']")).getText();
+    String reference = extractTransportDocumentReference(operatorLog);
+    switchToTab(0);
+    return promptText.replace("Insert TDR here", reference);
   }
 
   private void handlePromptText() {
@@ -204,6 +211,19 @@ class SeleniumTest extends ManualTestBase {
     }
   }
 
+  // If there are no more actions, the scenario is finished and should be conformant.
+  private static boolean hasNoMoreActionsDisplayed() {
+    if (driver.findElements(By.id("nextActions")).isEmpty()
+        && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
+      String titleValue =
+          driver.findElement(By.className("conformanceStatus")).getAttribute("title");
+      assertEquals("Conformant", titleValue);
+      log.debug("Scenario is Conformant.");
+      return true;
+    }
+    return false;
+  }
+
   private static void waitForUIReadiness() {
     if (!driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
       wait.until(
@@ -214,6 +234,8 @@ class SeleniumTest extends ManualTestBase {
 
   private static void completeAction() {
     log.debug("Completing action");
+    waitForUIReadiness();
+
     wait.until(
         ExpectedConditions.visibilityOfElementLocated(By.id("completeCurrentActionButton")));
     driver.findElement(By.id("completeCurrentActionButton")).click();

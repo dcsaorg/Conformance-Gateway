@@ -322,7 +322,7 @@ public abstract class ManualTestBase {
             jsonForPromptText.length() >= 25, "Prompt text was:" + jsonForPromptText.length());
         String promptActionId = jsonNode.get("promptActionId").textValue();
 
-        // Special flow for: eBL TD-only UC6 in Carrier mode
+        // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
         if (jsonForPromptText.contains("Insert TDR here")) {
           jsonForPrompt = fetchTransportDocument(sandbox2);
         }
@@ -348,14 +348,16 @@ public abstract class ManualTestBase {
             .filter(text -> text.contains("transport document '"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No transport document found"));
-    String tdRefText = "transport document '";
-    int startReference = referenceText.indexOf(tdRefText);
-    int endReference = referenceText.indexOf("'", startReference + tdRefText.length());
-    String transportDocumentReference =
-        referenceText.substring(startReference + tdRefText.length(), endReference);
     return OBJECT_MAPPER
         .createObjectNode()
-        .put("transportDocumentReference", transportDocumentReference);
+        .put("transportDocumentReference", extractTransportDocumentReference(referenceText));
+  }
+
+  protected static String extractTransportDocumentReference(String referenceTextLine) {
+    String tdRefText = "transport document '";
+    int startReference = referenceTextLine.indexOf(tdRefText);
+    int endReference = referenceTextLine.indexOf("'", startReference + tdRefText.length());
+    return referenceTextLine.substring(startReference + tdRefText.length(), endReference);
   }
 
   record Sandbox(

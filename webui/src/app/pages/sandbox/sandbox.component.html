@@ -69,9 +69,10 @@
     <div class="paragraph">
         <button
         mat-raised-button
+        testId="refreshButton"
         color="primary"
         (click)="onClickRefresh()"
         >Refresh</button>
     </div>
-    <div class="paragraph" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
+    <div class="paragraph" testId="operatorLog" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
 </div>

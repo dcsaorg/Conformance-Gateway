@@ -59,7 +59,8 @@ public class PintReceivingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(ReceiverSupplyScenarioParametersAndStateSetupAction.class, this::initiateState),
-      Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass)
+      Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass),
+      Map.entry(SupplyValidationEndpointScenarioParametersAction.class, this::providedReceiverValidationScenarioParameters)
     );
   }
 
@@ -79,6 +80,14 @@ public class PintReceivingPlatform extends ConformanceParty {
         actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
     addOperatorLogEntry(
       "Finished resetScenarioClass");
+  }
+
+  private void providedReceiverValidationScenarioParameters(JsonNode actionPrompt) {
+    log.info("EblInteropReceivingPlatform.providedReceiverValidationScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    asyncOrchestratorPostPartyInput(
+      actionPrompt.required("actionId").asText(), SupplyValidationEndpointScenarioParametersAction.getJsonForPrompt());
+    addOperatorLogEntry(
+      "Finished providedReceiverValidationScenarioParameters");
   }
 
   private void initiateState(JsonNode actionPrompt) {
@@ -262,13 +271,23 @@ public class PintReceivingPlatform extends ConformanceParty {
             "Unknown endpoint")));
   }
 
+  private ConformanceResponse handleReceiverValidation(ConformanceRequest request) {
+    return request.createResponse(
+      200,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("partyName", "Name of Test Party"))
+    );
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblInteropPlatform.handleRequest(%s)".formatted(request));
 
     var url = request.url().replaceFirst("/++$", "");
     ConformanceResponse response;
-    if (url.endsWith("/envelopes")) {
+    if (url.endsWith("/receiver-validation")) {
+      response = handleReceiverValidation(request);
+    } else if (url.endsWith("/envelopes")) {
       response = handleInitiateTransferRequest(request);
     } else if(url.contains("/envelopes/")) {
       response = handleEnvelopeRequest(request);

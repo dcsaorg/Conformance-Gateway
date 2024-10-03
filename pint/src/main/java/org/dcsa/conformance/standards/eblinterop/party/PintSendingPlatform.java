@@ -86,7 +86,8 @@ public class PintSendingPlatform extends ConformanceParty {
       Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
       Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
-      Map.entry(PintCloseTransferAction.class, this::finishTransfer)
+      Map.entry(PintCloseTransferAction.class, this::finishTransfer),
+      Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation)
     );
   }
 
@@ -131,6 +132,14 @@ public class PintSendingPlatform extends ConformanceParty {
       tdrChars.append(c);
     }
     return tdrChars.toString();
+  }
+
+  private void requestReceiverValidation(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.requestReceiverValidation(%s)".formatted(actionPrompt.toPrettyString()));
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    this.syncCounterpartPost("/v" + apiVersion.charAt(0) + "/receiver-validation", dsp.receiverValidation());
+    addOperatorLogEntry(
+      "Requested receiver validation");
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {

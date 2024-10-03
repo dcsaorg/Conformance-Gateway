@@ -296,12 +296,6 @@ public class BookingChecks {
     JsonAttribute.unique("cutOffDateTimeCode")
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_CUSTOMS_REFERENCES_TYPE = mav -> {
-    mav.submitAllMatching("customsReferences.*.type");
-    mav.submitAllMatching("requestedEquipments.*.customsReferences.*.type");
-    mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*.type");
-  };
-
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
     "Validate shipmentLocations",

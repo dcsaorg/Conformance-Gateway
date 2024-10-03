@@ -12,6 +12,8 @@ import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters
 
 import java.util.Set;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 public abstract class PintAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dspReference;
@@ -28,7 +30,7 @@ public abstract class PintAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     if (previousAction == null) {
       this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null));
+          new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode()));
       this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", "", ""));
       this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", "", ""));
     } else {

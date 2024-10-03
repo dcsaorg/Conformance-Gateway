@@ -15,7 +15,8 @@ public record DynamicScenarioParameters(
   String transportDocumentChecksum,
   int documentCount,
   Set<String> documentChecksums,
-  String envelopeReference
+  String envelopeReference,
+  JsonNode receiverValidation
 ) {
   public ObjectNode toJson() {
     var node = OBJECT_MAPPER.createObjectNode()
@@ -26,6 +27,7 @@ public record DynamicScenarioParameters(
     for (var checksum : documentChecksums) {
       jsonDocumentChecksums.add(checksum);
     }
+    node.set("receiverValidation", receiverValidation);
     return node;
   }
 
@@ -36,7 +38,8 @@ public record DynamicScenarioParameters(
       StreamSupport.stream(jsonNode.required("documentChecksums").spliterator(), false)
         .map(JsonNode::asText)
         .collect(Collectors.toUnmodifiableSet()),
-      jsonNode.required("envelopeReference").asText()
+      jsonNode.required("envelopeReference").asText(),
+      jsonNode.path("receiverValidation")
     );
   }
 }

@@ -22,10 +22,8 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("Booking", true),
         Arguments.of("CS", false),
         Arguments.of("CS", true),
-
-//      DT-1681, issue with Ebl v3.0.0, suite: Conformance TD-only, Carrier & Shipper
-//        Arguments.of("Ebl", false),
-//        Arguments.of("Ebl", true),
+        Arguments.of("Ebl", false),
+        Arguments.of("Ebl", true),
         Arguments.of("JIT", false),
         Arguments.of("JIT", true),
         Arguments.of("OVS", false),

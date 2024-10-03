@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
@@ -49,28 +48,12 @@ public abstract class ManualTestBase {
     ObjectNode node = mapper.createObjectNode().put("operation", "getAllSandboxes");
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.size() >= 6);
-    // Workaround because of inconsistent data is returned.
-    List<SandboxItem> sandboxItems = new ArrayList<>();
-    jsonNode.forEach(
-        jsonNode1 -> {
-          if (jsonNode1.has("operatorLog")) {
-            sandboxItems.add(
-                new SandboxItem(
-                    jsonNode1.get("id").asText(),
-                    jsonNode1.get("name").asText(),
-                    jsonNode1.get("operatorLog").asText(),
-                    jsonNode1.get("canNotifyParty").asBoolean()));
-          } else {
-            sandboxItems.add(
-                new SandboxItem(
-                    jsonNode1.get("id").asText(), jsonNode1.get("name").asText(), null, false));
-          }
-        });
-    return sandboxItems;
+    return mapper.convertValue(jsonNode, new TypeReference<>() {});
   }
 
   void handleActionInput(
       SandboxConfig sandbox, String scenarioId, String actionId, JsonNode textInputNode) {
+    log.debug("Handling action input: {}", textInputNode);
     ObjectNode node =
         mapper
             .createObjectNode()
@@ -95,6 +78,7 @@ public abstract class ManualTestBase {
   }
 
   void notifyAction(SandboxConfig sandbox) {
+    log.debug("Notifying party.");
     ObjectNode node =
         mapper
             .createObjectNode()
@@ -106,6 +90,7 @@ public abstract class ManualTestBase {
   }
 
   void completeAction(SandboxConfig sandbox) {
+    log.debug("Completing current action.");
     ObjectNode node =
         mapper
             .createObjectNode()
@@ -214,17 +199,23 @@ public abstract class ManualTestBase {
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
 
     // Validate Sandbox 1 details
+    getSandbox(sandbox1);
+  }
+
+  SandboxItem getSandbox(SandboxConfig sandbox) {
+    JsonNode node;
     node =
         mapper
             .createObjectNode()
             .put("operation", "getSandbox")
-            .put("sandboxId", sandbox1.sandboxId)
+            .put("sandboxId", sandbox.sandboxId)
             .put("includeOperatorLog", true);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.has("id"));
     assertTrue(jsonNode.has("name"));
     assertTrue(jsonNode.has("operatorLog"));
-    assertEquals(jsonNode.get("id").asText(), sandbox1.sandboxId);
+    assertEquals(jsonNode.get("id").asText(), sandbox.sandboxId);
+    return mapper.convertValue(jsonNode, SandboxItem.class);
   }
 
   SandboxConfig createSandbox(Sandbox sandbox) {
@@ -313,9 +304,10 @@ public abstract class ManualTestBase {
 
   void runScenario(
     SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
-
+    log.debug("Starting scenario '{}'.", scenarioName);
     startOrStopScenario(sandbox1, scenarioId);
     notifyAction(sandbox2);
+    waitForCleanSandboxStatus(sandbox1);
 
     boolean isRunning;
     do {
@@ -324,12 +316,18 @@ public abstract class ManualTestBase {
       boolean hasPromptText = jsonNode.has("promptText");
       isRunning = jsonNode.get("isRunning").booleanValue();
       if (inputRequired) {
-        String jsonForPromptText = jsonNode.get("jsonForPromptText").toString();
+        JsonNode jsonForPrompt = jsonNode.get("jsonForPromptText");
+        String jsonForPromptText = jsonForPrompt.toString();
         assertTrue(
-          jsonForPromptText.length() >= 25, "Prompt text was:" + jsonForPromptText.length());
+            jsonForPromptText.length() >= 25, "Prompt text was:" + jsonForPromptText.length());
         String promptActionId = jsonNode.get("promptActionId").textValue();
 
-        handleActionInput(sandbox1, scenarioId, promptActionId, jsonNode.get("jsonForPromptText"));
+        // Special flow for: eBL TD-only UC6 in Carrier mode
+        if (jsonForPromptText.contains("Insert TDR here")) {
+          jsonForPrompt = fetchTransportDocument(sandbox2);
+        }
+
+        handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
         if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
         continue;
       }
@@ -341,6 +339,25 @@ public abstract class ManualTestBase {
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
   }
 
+  private JsonNode fetchTransportDocument(SandboxConfig sandbox2) {
+    notifyAction(sandbox2);
+
+    log.debug("Fetching transport document reference from sandbox2");
+    String referenceText =
+        getSandbox(sandbox2).operatorLog.stream()
+            .filter(text -> text.contains("transport document '"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No transport document found"));
+    String tdRefText = "transport document '";
+    int startReference = referenceText.indexOf(tdRefText);
+    int endReference = referenceText.indexOf("'", startReference + tdRefText.length());
+    String transportDocumentReference =
+        referenceText.substring(startReference + tdRefText.length(), endReference);
+    return OBJECT_MAPPER
+        .createObjectNode()
+        .put("transportDocumentReference", transportDocumentReference);
+  }
+
   record Sandbox(
       String standardName,
       String versionNumber,
@@ -350,7 +367,7 @@ public abstract class ManualTestBase {
       String sandboxName) {}
 
   // Possible result of getAllSandboxes
-  protected record SandboxItem(String id, String name, String operatorLog, boolean canNotifyParty) {}
+  protected record SandboxItem(String id, String name, List<String> operatorLog, boolean canNotifyParty) {}
 
   public record SandboxConfig(
       String sandboxId,

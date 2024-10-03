@@ -77,16 +77,16 @@ class SeleniumTest extends ManualTestBase {
 
   @ParameterizedTest
   @ValueSource(strings = {
-    "Adoption", // Takes 0:39 minutes
-    "Booking", // Takes 10:52 minutes
-    "CS", // 10:37 minutes
-    "Ebl", // 24:? minutes
-    "eBL Issuance", // 5:34 minutes
-    "eBL Surrender", // 7:39 minutes
-    "JIT", // 1:12 minutes
-    "OVS", // 3:28 minutes
+    "Adoption", // Takes 0:29 minutes
+    "Booking", // Takes 11:52 minutes
+    "CS", // 11:05 minutes
+    "Ebl", // 37:09 minutes
+    "eBL Issuance", // 6:03 minutes
+    "eBL Surrender", // 7:59 minutes
+    "JIT", // 1:14 minutes
+    "OVS", // 3:34 minutes
 //     "PINT", // Waits until DT-1796 is fixed
-    "TnT" // 6:6 minutes
+    "TnT" // 6:20 minutes
   })
   void testStandardWithAllVersions(String standardName) {
     StopWatch stopWatch = StopWatch.createStarted();

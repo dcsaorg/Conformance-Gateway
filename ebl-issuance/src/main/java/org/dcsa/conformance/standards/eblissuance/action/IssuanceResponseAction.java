@@ -61,6 +61,7 @@ public class IssuanceResponseAction extends IssuanceAction {
         return Stream.of(
             new UrlPathCheck(
                 EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "/ebl-issuance-responses"),
+            new HttpMethodCheck(EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "POST"),
             new ResponseStatusCheck(
                 EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(

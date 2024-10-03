@@ -188,7 +188,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
-    syncCounterpartPost(
+    syncCounterpartPut(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
 

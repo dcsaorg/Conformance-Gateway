@@ -104,26 +104,6 @@ public class BookingChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_TYPE_CODES)
   );
 
-  private static final JsonContentCheck VALIDATE_ALL_BOOKING_UN_LOCATION_CODES = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate all booking UNLocationCodes",
-    mav -> {
-      mav.submitAllMatching("shipmentLocations.*.location.UNLocationCode");
-      mav.submitAllMatching("invoicePayableAt.UNLocationCode");
-      mav.submitAllMatching("placeOfBLIssue.UNLocationCode");
-      mav.submitAllMatching("transportPlan.loadLocation.UNLocationCode");
-      mav.submitAllMatching("transportPlan.dischargeLocation.UNLocationCode");
-
-      // Beta-2 only
-      mav.submitAllMatching("documentParties.shipper.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.bookingAgent.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.serviceContractOwner.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.carrierBookingOffice.address.UNLocationCode");
-      mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
-
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.UN_LOCODE_DATASET)
-  );
 
   private static final JsonContentCheck CHECK_EXPECTED_ARRIVAL_POD = JsonAttribute.customValidator(
     "Check expected arrival dates are valid",
@@ -205,27 +185,6 @@ public class BookingChecks {
       mav.submitAllMatching("references.*.type");
     },
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.REFERENCE_TYPES)
-  );
-
-  private static final JsonContentCheck TLR_TYPE_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' in 'taxAndLegalReferences' static data",
-    mav -> mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.LTR_TYPE_CODES)
-  );
-
-  private static final JsonContentCheck ISO_EQUIPMENT_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate ISO Equipment code",
-    mav -> {
-      mav.submitAllMatching("requestedEquipments.*.ISOEquipmentCode");
-      mav.submitAllMatching("confirmedEquipments.*.ISOEquipmentCode");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_6346_CONTAINER_CODES)
-  );
-
-  private static final JsonContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'packagingCode' is a known code",
-    mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*.outerPackaging.packageCode"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.OUTER_PACKAGING_CODE)
   );
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
@@ -343,36 +302,6 @@ public class BookingChecks {
     mav.submitAllMatching("requestedEquipments.*.commodities.*.customsReferences.*.type");
   };
 
-  private static final JsonRebaseableContentCheck CR_TYPE_CODES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' in 'customsReferences' must be valid",
-    ALL_CUSTOMS_REFERENCES_TYPE,
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.CUSTOMS_REFERENCE_RE_REC_TYPE_CODES)
-  );
-
-  private static final JsonContentCheck AMF_MTC_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'manifestTypeCode' in 'advanceManifestFilings' static data",
-    mav -> mav.submitAllMatching("advanceManifestFilings.*.type"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.AMF_CC_MTC_TYPE_CODES)
-  );
-
-  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate field is a known ISO 3166 alpha 2 code",
-    mav -> {
-      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
-
-      // Beta-2 only
-      mav.submitAllMatching("documentParties.shippers.address.countryCode");
-      mav.submitAllMatching("documentParties.consignee.address.countryCode");
-      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
-      mav.submitAllMatching("documentParties.serviceContractOwner.address.countryCode");
-      mav.submitAllMatching("documentParties.carrierBookingOffice.address.countryCode");
-      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
-      mav.submitAllMatching("placeOfBLIssue.countryCode");
-      mav.submitAllMatching("requestedEquipments.*.commodities.*.nationalCommodityCodes.*.countryCode");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_3166_ALPHA2_COUNTRY_CODES)
-  );
 
   private static final JsonContentCheck VALIDATE_SHIPMENT_LOCATIONS = JsonAttribute.customValidator(
     "Validate shipmentLocations",
@@ -667,27 +596,20 @@ public class BookingChecks {
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/communicationChannelCode"), BookingDataSets.COMMUNICATION_CHANNEL_CODES),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/declaredValueCurrency"), BookingDataSets.ISO_4217_CURRENCY_CODES),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/incoTerms"), BookingDataSets.INCO_TERMS_VALUES),
-    VALIDATE_ALL_BOOKING_UN_LOCATION_CODES,
     CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     REFERENCE_TYPE_VALIDATION,
-    ISO_EQUIPMENT_CODE_VALIDATION,
     IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
     IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
-    OUTER_PACKAGING_CODE_IS_VALID,
-    TLR_TYPE_CODE_VALIDATIONS,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
-    COUNTRY_CODE_VALIDATIONS,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
-    CR_TYPE_CODES_VALIDATIONS,
     NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
@@ -734,11 +656,6 @@ public class BookingChecks {
       }
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'imoClass' values must be from dataset",
-      allDg(dg -> dg.path("imoClass").submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_IMO_CLASSES)
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'segregationGroups' values must be from dataset",
       allDg(dg -> dg.path("segregationGroups").all().submitPath()),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.DG_SEGREGATION_GROUPS)
@@ -751,11 +668,6 @@ public class BookingChecks {
     JsonAttribute.allOrNoneArePresent(
       JsonPointer.compile("/declaredValue"),
       JsonPointer.compile("/declaredValueCurrency")
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The charges 'currencyCode' values must be from dataset",
-      mav -> mav.submitAllMatching("charges.*.currencyCode"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(BookingDataSets.ISO_4217_CURRENCY_CODES)
     ),
 
     JsonAttribute.allIndividualMatchesMustBeValid(
@@ -773,7 +685,6 @@ public class BookingChecks {
   private static final List<JsonContentCheck> RESPONSE_ONLY_CHECKS = Arrays.asList(
     CHECK_ABSENCE_OF_CONFIRMED_FIELDS,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    AMF_MTC_VALIDATIONS,
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,

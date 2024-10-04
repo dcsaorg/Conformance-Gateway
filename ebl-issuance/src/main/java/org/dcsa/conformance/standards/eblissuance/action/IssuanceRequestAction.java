@@ -152,6 +152,7 @@ public class IssuanceRequestAction extends IssuanceAction {
         return Stream.of(
                 new UrlPathCheck(
                     EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "/ebl-issuance-requests"),
+                new HttpMethodCheck(EblIssuanceRole::isCarrier,getMatchedExchangeUuid(),"PUT"),
                 new ResponseStatusCheck(
                     EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), expectedStatus),
                 new ApiHeaderCheck(

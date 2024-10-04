@@ -100,10 +100,7 @@ class ManualScenarioTest extends ManualTestBase {
           getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 1));
       log.info("Run for the 2nd time, and verify it still works.");
       log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, version.number(), suiteName, roleName);
-      if (standardName.equals("eBL Issuance") && roleName.equals("Platform")) {
-        // See DT-1679, eBL Issuance Platform role: Resetting the sandbox is needed.
-        resetSandbox(sandbox2);
-      }
+      resetSandbox(sandbox2); // Make sure the sandbox does not keep an optional state from the first run
     }
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());

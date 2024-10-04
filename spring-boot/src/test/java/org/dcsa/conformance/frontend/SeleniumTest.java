@@ -77,12 +77,16 @@ class SeleniumTest extends ManualTestBase {
 
   @ParameterizedTest
   @ValueSource(strings = {
-    "Adoption", // Takes 0:39 minutes
-    "Booking", // Takes 10:52 minutes
-    "CS", // 10:37 minutes
-    "JIT", // 1:12 minutes
-    "OVS", // 3:28 minutes
-    "TnT" // 6:6 minutes
+    "Adoption", // Takes 0:29 minutes
+    "Booking", // Takes 11:52 minutes
+    "CS", // 11:05 minutes
+    "Ebl", // 37:09 minutes
+    "eBL Issuance", // 6:03 minutes
+    "eBL Surrender", // 7:59 minutes
+    "JIT", // 1:14 minutes
+    "OVS", // 3:34 minutes
+//     "PINT", // Waits until DT-1796 is fixed
+    "TnT" // 6:20 minutes
   })
   void testStandardWithAllVersions(String standardName) {
     StopWatch stopWatch = StopWatch.createStarted();
@@ -96,30 +100,22 @@ class SeleniumTest extends ManualTestBase {
     requestedStandard
         .versions()
         .forEach(
-            version -> version
-                .roles()
-                .forEach(
-                    role -> createSandboxesAndRunGroups(requestedStandard, version, "Conformance", role)));
+            version ->
+                version.suites().stream()
+                    .filter(suite -> suite.startsWith("Conformance"))
+                    .forEach(
+                        suite ->
+                            version
+                                .roles()
+                                .forEach(
+                                    role ->
+                                        createSandboxesAndRunGroups(
+                                            requestedStandard, version.number(), suite, role))));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
   }
 
-  // Note: this method can be deleted when 'Conformance TD-only' is working. Standard can be added to method above.
-  // Takes 20 minutes
-  @ParameterizedTest
-  @ValueSource(strings = {"Carrier", "Shipper"})
-  void testEBLSIOnly(String testedParty) {
-    getAllSandboxes();
-    List<Standard> availableStandards = getAvailableStandards();
-    Standard requestedStandard =
-      availableStandards.stream()
-        .filter(standard -> standard.name().equals("Ebl"))
-        .findFirst()
-        .orElseThrow();
-    StandardVersion version = requestedStandard.versions().getFirst();
-    createSandboxesAndRunGroups(requestedStandard, version, "Conformance SI-only", testedParty);
-  }
-
-  private void createSandboxesAndRunGroups(Standard standard, StandardVersion version, String suiteName, String role) {
+  private void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {
+    log.info("Starting standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
     switchToTab(0);
     SandboxConfig sandBox1 = createSandBox(standard, version, suiteName, role, 0);
     openNewTab();
@@ -128,7 +124,7 @@ class SeleniumTest extends ManualTestBase {
     updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
 
     runScenarioGroups();
-    log.info("Finished with standard: {}, version: {}, role: {}", standard.name(), version.number(), role);
+    log.info("Finished with standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
 
     // Close tab and switch back to first tab.
     driver.close();
@@ -153,41 +149,48 @@ class SeleniumTest extends ManualTestBase {
           .findElements(By.className(("scenarioActionButton")))
           .get(i)
           .click();
+      waitForUIReadiness();
 
-      handleJsonPromptForText();
       do {
+        if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
       } while (!hasNoMoreActionsDisplayed());
     }
   }
 
-  private static void handleJsonPromptForText() {
-    waitForUIReadiness();
+  private boolean handleJsonPromptForText() {
     try {
-      driver.findElement(By.id("jsonForPromptText"));
+      By jsonForPromptText = By.id("jsonForPromptText");
+      String promptText = driver.findElement(jsonForPromptText).getText();
+      wait.until(ExpectedConditions.visibilityOfElementLocated(jsonForPromptText));
 
-      wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("jsonForPromptText")));
-      String promptText = driver.findElement(By.id("jsonForPromptText")).getText();
+      // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
+      if (promptText.contains("Insert TDR here")) {
+        promptText = fetchTransportDocument(promptText);
+      }
+
       driver.findElement(By.id("actionInput")).sendKeys(promptText);
       driver.findElement(By.id("submitActionButton")).click();
       waitForUIReadiness();
-    } catch (org.openqa.selenium.NoSuchElementException e) {
-      log.info("No prompt text");
-    }
-  }
-
-  // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed() {
-    if (driver.findElements(By.id("nextActions")).isEmpty()
-        && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
-      String titleValue =
-          driver.findElement(By.className("conformanceStatus")).getAttribute("title");
-      assertEquals("Conformant", titleValue);
-      log.info("Scenario is Conformant.");
       return true;
+    } catch (org.openqa.selenium.NoSuchElementException e) {
+      log.debug("No prompt text");
     }
     return false;
+  }
+
+  private String fetchTransportDocument(String promptText) {
+    handlePromptText();
+    switchToTab(1);
+
+    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    waitForUIReadiness();
+
+    String operatorLog = driver.findElement(By.cssSelector("[testId='operatorLog']")).getText();
+    String reference = extractTransportDocumentReference(operatorLog);
+    switchToTab(0);
+    return promptText.replace("Insert TDR here", reference);
   }
 
   private void handlePromptText() {
@@ -208,6 +211,19 @@ class SeleniumTest extends ManualTestBase {
     }
   }
 
+  // If there are no more actions, the scenario is finished and should be conformant.
+  private static boolean hasNoMoreActionsDisplayed() {
+    if (driver.findElements(By.id("nextActions")).isEmpty()
+        && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
+      String titleValue =
+          driver.findElement(By.className("conformanceStatus")).getAttribute("title");
+      assertEquals("Conformant", titleValue);
+      log.debug("Scenario is Conformant.");
+      return true;
+    }
+    return false;
+  }
+
   private static void waitForUIReadiness() {
     if (!driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
       wait.until(
@@ -218,6 +234,8 @@ class SeleniumTest extends ManualTestBase {
 
   private static void completeAction() {
     log.debug("Completing action");
+    waitForUIReadiness();
+
     wait.until(
         ExpectedConditions.visibilityOfElementLocated(By.id("completeCurrentActionButton")));
     driver.findElement(By.id("completeCurrentActionButton")).click();
@@ -270,8 +288,8 @@ class SeleniumTest extends ManualTestBase {
     alreadyLoggedIn = true;
   }
 
-  SandboxConfig createSandBox(Standard standard, StandardVersion version, String suiteName, String roleName, int sandboxType) {
-    log.info("Creating Sandbox: {}, {}, {}, type: {}", standard.name(), version.number(), roleName, sandboxType);
+  SandboxConfig createSandBox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
+    log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(BASE_URL + "/create-sandbox");
     if (driver.getCurrentUrl().endsWith("/login")) {
       loginUser();
@@ -280,7 +298,7 @@ class SeleniumTest extends ManualTestBase {
     assertEquals(BASE_URL + "/create-sandbox", driver.getCurrentUrl());
 
     selectAndPickOption("standardSelect", standard.name());
-    selectAndPickOption("versionSelect", version.number());
+    selectAndPickOption("versionSelect", version);
     selectAndPickOption("suiteSelect", suiteName);
     selectAndPickOption("roleSelect", roleName);
 
@@ -290,13 +308,7 @@ class SeleniumTest extends ManualTestBase {
     assertFalse(typeOptions.isEmpty());
     typeOptions.get(sandboxType).click();
 
-    String sandboxName;
-    if (sandboxType == 0) {
-      sandboxName = "%s - %s testing: orchestrator".formatted(standard.name(), roleName);
-    } else {
-      sandboxName = "%s - %s testing: synthetic %s as tested party"
-                  .formatted(standard.name(), roleName, roleName);
-    }
+    String sandboxName = getSandboxName(standard.name(), version, suiteName, roleName, sandboxType);
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
 

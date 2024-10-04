@@ -17,11 +17,9 @@ import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /** Base class which contains all API call methods and wiring needed to perform a manual test */
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
@@ -32,7 +30,7 @@ public abstract class ManualTestBase {
   private ConformanceWebuiHandler webuiHandler;
 
   @BeforeEach
-  void setUp() {
+  public void setUp() {
     webuiHandler = app.getWebuiHandler();
   }
 
@@ -388,7 +386,7 @@ public abstract class ManualTestBase {
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 
-  protected record Standard(String name, List<StandardVersion> versions) {}
+  public record Standard(String name, List<StandardVersion> versions) {}
 
   protected record StandardVersion(String number, List<String> suites, List<String> roles) {}
 }

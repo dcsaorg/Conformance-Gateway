@@ -19,7 +19,7 @@
 		<junit.version>5.11.1</junit.version>
 		<lombok.version>1.18.34</lombok.version>
 
-		<junit.includedTags>!WebUI</junit.includedTags>
+		<junit.includedTags>!WebUI,!Integration</junit.includedTags>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>

@@ -223,6 +223,15 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<groups>${junit.includedTags}</groups>
+					<excludedGroups>${junit.excludedTags}</excludedGroups>
+				</configuration>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>

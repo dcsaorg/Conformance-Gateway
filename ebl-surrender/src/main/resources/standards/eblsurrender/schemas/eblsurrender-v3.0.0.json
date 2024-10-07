@@ -1,536 +1,535 @@
 {
-   "components" : {
-      "headers" : {
-         "API-Version" : {
-            "description" : "SemVer used to indicate the version of the contract (API version) returned.\n",
-            "explode" : false,
-            "schema" : {
-               "example" : "3.0.0",
-               "type" : "string"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DCSA eBL Surrender API",
+    "description": "<h1>DCSA OpenAPI specification for the surrender of an electronic Bill of Lading (eBL) via an eBL Solution Provider for amendment (incl. switch to paper), and delivery</h1>\n\nThis API is intended as an API between a carrier and an EBL Solution Platform.\n\nThe EBL Solution Platform will submit surrender requests to the carrier, via\n\n    POST /v3/ebl-surrender-requests\n\nwhich will be processed asynchronously. Responses to the surrender requests will be submitted by the carrier via \n\n    POST /v3/ebl-surrender-responses\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\nThe processes for amendments to eBL (including switch to paper) and for surrender of the eBL for delivery of the goods shall be exclusively governed by and executed in accordance with the Bylaws of the eBL Platform where the Surrender for amendment or Surrender for delivery was received, including establishing whether the User in Control performing the Surrender for amendment or Surrender for delivery is entitled to carry out this action.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
+    "contact": {
+      "name": "Digital Container Shipping Association (DCSA)",
+      "url": "https://dcsa.org",
+      "email": "info@dcsa.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "3.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0",
+      "description": "SwaggerHub API Auto Mocking"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Surrender Requests",
+      "description": "The Surrender Requests implemented\n"
+    },
+    {
+      "name": "Surrender Request responses",
+      "description": "The Surrender Request responses\n"
+    }
+  ],
+  "paths": {
+    "/v3/ebl-surrender-requests": {
+      "post": {
+        "tags": [
+          "Surrender Requests"
+        ],
+        "summary": "Creates a Surrender Request\n",
+        "description": "The EBL Solution Platform uses this endpoint to submit a surrender request.\n\nThe carrier's answer to the surrender request will be returned via a callback response (see the `Callbacks` tab)\n",
+        "operationId": "create-surrender-request",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "3"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurrenderRequestDetails"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Submission registered successfully.\n\nThe carrier will later follow up via the callback with a response.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
             },
-            "style" : "simple"
-         }
-      },
-      "parameters" : {
-         "Api-Version-Major" : {
-            "description" : "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
-            "explode" : false,
-            "in" : "header",
-            "name" : "API-Version",
-            "required" : false,
-            "schema" : {
-               "example" : "3",
-               "type" : "string"
-            },
-            "style" : "simple"
-         }
-      },
-      "schemas" : {
-         "DetailedError" : {
-            "description" : "A detailed description of what has caused the error.\n",
-            "properties" : {
-               "errorCode" : {
-                  "description" : "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).\n",
-                  "example" : 7003,
-                  "format" : "int32",
-                  "maximum" : 9999,
-                  "minimum" : 7000,
-                  "type" : "integer"
-               },
-               "errorCodeMessage" : {
-                  "description" : "A long description corresponding to the `errorCode` with additional information.\n",
-                  "example" : "Spaces not allowed in facility code",
-                  "maxLength" : 5000,
-                  "type" : "string"
-               },
-               "errorCodeText" : {
-                  "description" : "A standard short description corresponding to the `errorCode`.\n",
-                  "example" : "invalidData",
-                  "maxLength" : 100,
-                  "type" : "string"
-               },
-               "jsonPath" : {
-                  "description" : "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
-                  "example" : "$.location.facilityCode",
-                  "maxLength" : 500,
-                  "type" : "string"
-               },
-               "property" : {
-                  "description" : "The name of the property causing the error.\n",
-                  "example" : "facilityCode",
-                  "maxLength" : 100,
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "The value of the property causing the error serialised as a string exactly as in the original request.\n",
-                  "example" : "SG SIN WHS",
-                  "maxLength" : 500,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "errorCodeMessage",
-               "errorCodeText"
-            ],
-            "title" : "Detailed Error",
-            "type" : "object"
-         },
-         "EndorsementChainLink" : {
-            "description" : "Entry in the endorsement chain.\n",
-            "properties" : {
-               "actionCode" : {
-                  "description" : "The action performed by the party. This should be one of:\n- `ISSUE` (The actor issued the document to the recipient)\n- `ENDORSE` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER_FOR_DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER_FOR_AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\nNot all actions are applicable to all surrender requests.\n",
-                  "example" : "ISSUE",
-                  "maxLength" : 50,
-                  "type" : "string"
-               },
-               "actionDateTime" : {
-                  "description" : "Date time when the action occurred.",
-                  "example" : "2024-09-04T09:41:00Z",
-                  "format" : "date-time",
-                  "type" : "string"
-               },
-               "actor" : {
-                  "$ref" : "#/components/schemas/TransactionParty"
-               },
-               "recipient" : {
-                  "$ref" : "#/components/schemas/TransactionParty"
-               }
-            },
-            "required" : [
-               "actionCode",
-               "actionDateTime",
-               "actor",
-               "recipient"
-            ],
-            "title" : "Endorsement Chain Link",
-            "type" : "object"
-         },
-         "ErrorResponse" : {
-            "description" : "Unexpected error",
-            "properties" : {
-               "errorDateTime" : {
-                  "description" : "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.\n",
-                  "example" : "2024-09-04T09:41:00Z",
-                  "format" : "date-time",
-                  "type" : "string"
-               },
-               "errors" : {
-                  "description" : "An array of errors providing more detail about the root cause.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/DetailedError"
-                  },
-                  "minItems" : 1,
-                  "type" : "array"
-               },
-               "httpMethod" : {
-                  "description" : "The HTTP method used to make the request e.g. `GET`, `POST`, etc\n",
-                  "enum" : [
-                     "GET",
-                     "HEAD",
-                     "POST",
-                     "PUT",
-                     "DELETE",
-                     "OPTION",
-                     "PATCH"
-                  ],
-                  "example" : "POST",
-                  "type" : "string"
-               },
-               "providerCorrelationReference" : {
-                  "description" : "A unique identifier to the HTTP request within the scope of the API provider.\n",
-                  "example" : "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                  "maxLength" : 100,
-                  "type" : "string"
-               },
-               "requestUri" : {
-                  "description" : "The URI that was requested.\n",
-                  "example" : "/v1/events",
-                  "type" : "string"
-               },
-               "statusCode" : {
-                  "description" : "The HTTP status code returned.\n",
-                  "example" : 400,
-                  "format" : "int32",
-                  "type" : "integer"
-               },
-               "statusCodeMessage" : {
-                  "description" : "A long description corresponding to the HTTP status code with additional information.\n",
-                  "example" : "The supplied data could not be accepted",
-                  "maxLength" : 200,
-                  "type" : "string"
-               },
-               "statusCodeText" : {
-                  "description" : "A standard short description corresponding to the HTTP status code.\n",
-                  "example" : "Bad Request",
-                  "maxLength" : 50,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "errorDateTime",
-               "errors",
-               "httpMethod",
-               "requestUri",
-               "statusCode",
-               "statusCodeText"
-            ],
-            "title" : "Error Response",
-            "type" : "object"
-         },
-         "IdentifyingCode" : {
-            "properties" : {
-               "codeListName" : {
-                  "description" : "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
-                  "example" : "DID",
-                  "maxLength" : 100,
-                  "type" : "string"
-               },
-               "codeListProvider" : {
-                  "description" : "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
-                  "example" : "W3C",
-                  "maxLength" : 100,
-                  "type" : "string"
-               },
-               "partyCode" : {
-                  "description" : "Code to identify the party as provided by the `codeListProvider`\n",
-                  "example" : "MSK",
-                  "maxLength" : 150,
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "codeListProvider",
-               "partyCode"
-            ],
-            "title" : "Identifying Code",
-            "type" : "object"
-         },
-         "SurrenderRequestAnswer" : {
-            "properties" : {
-               "action" : {
-                  "description" : "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an amendment, the carrier will follow up with issuing the amended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
-                  "enum" : [
-                     "SURR",
-                     "SREJ"
-                  ],
-                  "example" : "SURR",
-                  "type" : "string"
-               },
-               "comments" : {
-                  "description" : "Free text comment associated with the surrender request transaction.  Must be provided for rejections but should be omitted when accepting the surrender.",
-                  "example" : "Comments...",
-                  "maxLength" : 255,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "surrenderRequestReference" : {
-                  "description" : "The surrender request provided by the EBL solution in the surrender request.\n",
-                  "example" : "Z12345",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "action",
-               "surrenderRequestReference"
-            ],
-            "title" : "Surrender Request Answer",
-            "type" : "object"
-         },
-         "SurrenderRequestDetails" : {
-            "description" : "A concrete surrender request related to a transport document.\n\nThe platform guarantees *all* of the following:\n\n  1) The surrender request was submitted by the sole possessor of the EBL.\n  2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n  3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n",
-            "properties" : {
-               "comments" : {
-                  "description" : "Optional free text comment associated with the surrender request transaction.",
-                  "example" : "As requested...",
-                  "maxLength" : 255,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "endorsementChain" : {
-                  "description" : "A list of one or more endorsement related actions that were performed on or after the issuance of the eBL. It is equivalent to the \"back side\" of the physical bill of lading. The type of actions recorded in the endorsement chain as defined by the DCSA standard are listed below:\n\n - **Issue:** The act of issuing an eBL i.e. making the eBL available to the receiver.\n - **Endorse:** The act of transferring the rights and obligations associated with the eBL to a specific named party, allowing them to claim or deal with the goods. The user in control of the eBL may endorse the eBL in their turn to another named party. Only applicable to To-Order eBL (`isToOrder=true`).\n - **Sign:** A general-purpose signature that can be used by any party to mark their possession of the eBL. Similar to how any possessor in the physical world can put a physical signature on the paper bill of lading. The endorsement chain as defined by DCSA does not record any transfer of possession of the eBL, unless a signature is added to it.\n - **Request surrender for amendment:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the puprpose of amending the eBL.\n - **Request surrender for delivery:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of claiming delivery of the goods.\n\n **Note:** DCSA member carriers have agreed that the name `endorsementChain` is still the correct name for this list of actions.\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/EndorsementChainLink"
-                  },
-                  "type" : "array"
-               },
-               "reasonCode" : {
-                  "description" : "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-\t`SWTP` (Switch to paper)\n",
-                  "example" : "SWTP",
-                  "maxLength" : 4,
-                  "type" : "string"
-               },
-               "surrenderRequestCode" : {
-                  "description" : "Surrender Request codes:\n- `SREQ` (Requested to surrender for Delivery)\n- `AREQ` (Requested to surrender for Amendment)\n\nThe surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a surrender for delivery or the actual contents of the amendment in a surrender related to an amendment.\n\nNote that \"Switch to paper\" is considered an amendment in how it is modelled via the DCSA eBL data standard.\n",
-                  "enum" : [
-                     "SREQ",
-                     "AREQ"
-                  ],
-                  "example" : "SREQ",
-                  "type" : "string"
-               },
-               "surrenderRequestReference" : {
-                  "description" : "A server defined reference for a concrete surrender request. Surrender request references MUST NOT be reused.\n",
-                  "example" : "Z12345",
-                  "maxLength" : 100,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "transportDocumentReference" : {
-                  "description" : "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
-                  "example" : "HHL71800000",
-                  "maxLength" : 20,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "surrenderRequestCode",
-               "surrenderRequestReference",
-               "surrenderRequestedBy",
-               "transportDocumentReference"
-            ],
-            "title" : "Surrender Request Details",
-            "type" : "object"
-         },
-         "TaxLegalReference" : {
-            "description" : "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n",
-            "properties" : {
-               "countryCode" : {
-                  "description" : "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                  "example" : "IN",
-                  "maxLength" : 2,
-                  "minLength" : 2,
-                  "pattern" : "^[A-Z]{2}$",
-                  "type" : "string"
-               },
-               "type" : {
-                  "description" : "The reference type code as defined by the relevant tax and/or legal authority.\n",
-                  "example" : "PAN",
-                  "maxLength" : 50,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "value" : {
-                  "description" : "The value of the `taxLegalReference`\n",
-                  "example" : "AAAAA0000A",
-                  "maxLength" : 35,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               }
-            },
-            "required" : [
-               "countryCode",
-               "type",
-               "value"
-            ],
-            "title" : "Tax & Legal Reference",
-            "type" : "object"
-         },
-         "TransactionParty" : {
-            "description" : "Refers to a company or a legal entity.",
-            "properties" : {
-               "eblPlatform" : {
-                  "description" : "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n",
-                  "example" : "BOLE",
-                  "maxLength" : 4,
-                  "pattern" : "^\\S+$",
-                  "type" : "string"
-               },
-               "identifyingCodes" : {
-                  "items" : {
-                     "$ref" : "#/components/schemas/IdentifyingCode"
-                  },
-                  "type" : "array"
-               },
-               "partyName" : {
-                  "description" : "Name of the party.\n",
-                  "example" : "Globeteam",
-                  "maxLength" : 70,
-                  "pattern" : "^\\S(?:.*\\S)?$",
-                  "type" : "string"
-               },
-               "taxLegalReferences" : {
-                  "description" : "A list of `Tax References` for a `Party`\n",
-                  "items" : {
-                     "$ref" : "#/components/schemas/TaxLegalReference"
-                  },
-                  "type" : "array"
-               }
-            },
-            "required" : [
-               "eblPlatform",
-               "partyName"
-            ],
-            "title" : "Transaction Party",
-            "type" : "object"
-         }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
-   },
-   "info" : {
-      "contact" : {
-         "email" : "info@dcsa.org",
-         "name" : "Digital Container Shipping Association (DCSA)",
-         "url" : "https://dcsa.org"
-      },
-      "description" : "<h1>DCSA OpenAPI specification for the surrender of an electronic Bill of Lading (eBL) via an eBL Solution Provider for amendment (incl. switch to paper), and delivery</h1>\n\nThis API is intended as an API between a carrier and an EBL Solution Platform.\n\nThe EBL Solution Platform will submit surrender requests to the carrier, via\n\n    POST /v3/ebl-surrender-requests\n\nwhich will be processed asynchronously. Responses to the surrender requests will be submitted by the carrier via \n\n    POST /v3/ebl-surrender-responses\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\nThe processes for amendments to eBL (including switch to paper) and for surrender of the eBL for delivery of the goods shall be exclusively governed by and executed in accordance with the Bylaws of the eBL Platform where the Surrender for amendment or Surrender for delivery was received, including establishing whether the User in Control performing the Surrender for amendment or Surrender for delivery is entitled to carry out this action.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
-      "license" : {
-         "name" : "Apache 2.0",
-         "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
-      },
-      "title" : "DCSA eBL Surrender API",
-      "version" : "3.0.0"
-   },
-   "openapi" : "3.0.3",
-   "paths" : {
-      "/v3/ebl-surrender-requests" : {
-         "post" : {
-            "description" : "The EBL Solution Platform uses this endpoint to submit a surrender request.\n\nThe carrier's answer to the surrender request will be returned via a callback response (see the `Callbacks` tab)\n",
-            "operationId" : "create-surrender-request",
-            "parameters" : [
-               {
-                  "description" : "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
-                  "explode" : false,
-                  "in" : "header",
-                  "name" : "API-Version",
-                  "required" : false,
-                  "schema" : {
-                     "example" : "3",
-                     "type" : "string"
-                  },
-                  "style" : "simple"
-               }
-            ],
-            "requestBody" : {
-               "content" : {
-                  "application/json" : {
-                     "schema" : {
-                        "$ref" : "#/components/schemas/SurrenderRequestDetails"
-                     }
-                  }
-               }
+    },
+    "/v3/ebl-surrender-responses": {
+      "post": {
+        "tags": [
+          "Surrender Request responses"
+        ],
+        "description": "The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.\n",
+        "operationId": "post-ebl-surrender-responses",
+        "parameters": [
+          {
+            "name": "API-Version",
+            "in": "header",
+            "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+            "required": false,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "3"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurrenderRequestAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Request successful",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
+            }
+          },
+          "409": {
+            "description": "A carrier may only answer once to a surrender request. Subsequent attempts to answer are considered an error and should be rejected with a 409 Conflict code.\n",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
             },
-            "responses" : {
-               "204" : {
-                  "description" : "Submission registered successfully.\n\nThe carrier will later follow up via the callback with a response.\n",
-                  "headers" : {
-                     "API-Version" : {
-                        "$ref" : "#/components/headers/API-Version"
-                     }
-                  }
-               },
-               "default" : {
-                  "content" : {
-                     "application/json" : {
-                        "schema" : {
-                           "$ref" : "#/components/schemas/ErrorResponse"
-                        }
-                     }
-                  },
-                  "description" : "Error",
-                  "headers" : {
-                     "API-Version" : {
-                        "$ref" : "#/components/headers/API-Version"
-                     }
-                  }
-               }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error",
+            "headers": {
+              "API-Version": {
+                "$ref": "#/components/headers/API-Version"
+              }
             },
-            "summary" : "Creates a Surrender Request\n",
-            "tags" : [
-               "Surrender Requests"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TransactionParty": {
+        "title": "Transaction Party",
+        "required": [
+          "eblPlatform",
+          "partyName"
+        ],
+        "type": "object",
+        "properties": {
+          "eblPlatform": {
+            "maxLength": 4,
+            "pattern": "^\\S+$",
+            "type": "string",
+            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (Enigio trace:original)\n- `BRIT` (BRITC eBL)\n",
+            "example": "BOLE"
+          },
+          "partyName": {
+            "maxLength": 70,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Name of the party.\n",
+            "example": "Globeteam"
+          },
+          "identifyingCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IdentifyingCode"
+            }
+          },
+          "taxLegalReferences": {
+            "type": "array",
+            "description": "A list of `Tax References` for a `Party`\n",
+            "items": {
+              "$ref": "#/components/schemas/TaxLegalReference"
+            }
+          }
+        },
+        "description": "Refers to a company or a legal entity."
+      },
+      "EndorsementChainLink": {
+        "title": "Endorsement Chain Link",
+        "required": [
+          "actionCode",
+          "actionDateTime",
+          "actor",
+          "recipient"
+        ],
+        "type": "object",
+        "properties": {
+          "actionDateTime": {
+            "type": "string",
+            "description": "Date time when the action occurred.",
+            "format": "date-time",
+            "example": "2024-09-04T09:41:00Z"
+          },
+          "actionCode": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The action performed by the party. This should be one of:\n- `ISSUE` (The actor issued the document to the recipient)\n- `ENDORSE` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER_FOR_DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER_FOR_AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\nNot all actions are applicable to all surrender requests.\n",
+            "example": "ISSUE"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/TransactionParty"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/TransactionParty"
+          }
+        },
+        "description": "Entry in the endorsement chain.\n"
+      },
+      "SurrenderRequestDetails": {
+        "title": "Surrender Request Details",
+        "required": [
+          "surrenderRequestCode",
+          "surrenderRequestReference",
+          "transportDocumentReference"
+        ],
+        "type": "object",
+        "properties": {
+          "surrenderRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A server defined reference for a concrete surrender request. Surrender request references MUST NOT be reused.\n",
+            "example": "Z12345"
+          },
+          "transportDocumentReference": {
+            "maxLength": 20,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A unique number allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.\n",
+            "example": "HHL71800000"
+          },
+          "surrenderRequestCode": {
+            "type": "string",
+            "description": "Surrender Request codes:\n- `SREQ` (Requested to surrender for Delivery)\n- `AREQ` (Requested to surrender for Amendment)\n\nThe surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a surrender for delivery or the actual contents of the amendment in a surrender related to an amendment.\n\nNote that \"Switch to paper\" is considered an amendment in how it is modelled via the DCSA eBL data standard.\n",
+            "example": "SREQ",
+            "enum": [
+              "SREQ",
+              "AREQ"
             ]
-         }
+          },
+          "reasonCode": {
+            "maxLength": 4,
+            "type": "string",
+            "description": "A code defined by DCSA indicating the reason for requesting a surrender for amendment. Possible values are:\n-\t`SWTP` (Switch to paper)\n",
+            "example": "SWTP"
+          },
+          "comments": {
+            "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Optional free text comment associated with the surrender request transaction.",
+            "example": "As requested..."
+          },
+          "endorsementChain": {
+            "type": "array",
+            "description": "A list of one or more endorsement related actions that were performed on or after the issuance of the eBL. It is equivalent to the \"back side\" of the physical bill of lading. The type of actions recorded in the endorsement chain as defined by the DCSA standard are listed below:\n\n - **Issue:** The act of issuing an eBL i.e. making the eBL available to the receiver.\n - **Endorse:** The act of transferring the rights and obligations associated with the eBL to a specific named party, allowing them to claim or deal with the goods. The user in control of the eBL may endorse the eBL in their turn to another named party. Only applicable to To-Order eBL (`isToOrder=true`).\n - **Sign:** A general-purpose signature that can be used by any party to mark their possession of the eBL. Similar to how any possessor in the physical world can put a physical signature on the paper bill of lading. The endorsement chain as defined by DCSA does not record any transfer of possession of the eBL, unless a signature is added to it.\n - **Request surrender for amendment:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the puprpose of amending the eBL.\n - **Request surrender for delivery:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of claiming delivery of the goods.\n\n **Note:** DCSA member carriers have agreed that the name `endorsementChain` is still the correct name for this list of actions.\n",
+            "items": {
+              "$ref": "#/components/schemas/EndorsementChainLink"
+            }
+          }
+        },
+        "description": "A concrete surrender request related to a transport document.\n\nThe platform guarantees *all* of the following:\n\n  1) The surrender request was submitted by the sole possessor of the EBL.\n  2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n  3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n"
       },
-      "/v3/ebl-surrender-responses" : {
-         "post" : {
-            "description" : "The carrier uses this endpoint to inform the EBL Solution Platform about the verdict for a given surrender request.\n",
-            "operationId" : "post-ebl-surrender-responses",
-            "parameters" : [
-               {
-                  "description" : "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
-                  "explode" : false,
-                  "in" : "header",
-                  "name" : "API-Version",
-                  "required" : false,
-                  "schema" : {
-                     "example" : "3",
-                     "type" : "string"
-                  },
-                  "style" : "simple"
-               }
-            ],
-            "requestBody" : {
-               "content" : {
-                  "application/json" : {
-                     "schema" : {
-                        "$ref" : "#/components/schemas/SurrenderRequestAnswer"
-                     }
-                  }
-               },
-               "required" : true
-            },
-            "responses" : {
-               "204" : {
-                  "description" : "Request successful",
-                  "headers" : {
-                     "API-Version" : {
-                        "$ref" : "#/components/headers/API-Version"
-                     }
-                  }
-               },
-               "409" : {
-                  "content" : {
-                     "application/json" : {
-                        "schema" : {
-                           "$ref" : "#/components/schemas/ErrorResponse"
-                        }
-                     }
-                  },
-                  "description" : "A carrier may only answer once to a surrender request. Subsequent attempts to answer are considered an error and should be rejected with a 409 Conflict code.\n",
-                  "headers" : {
-                     "API-Version" : {
-                        "$ref" : "#/components/headers/API-Version"
-                     }
-                  }
-               },
-               "default" : {
-                  "content" : {
-                     "application/json" : {
-                        "schema" : {
-                           "$ref" : "#/components/schemas/ErrorResponse"
-                        }
-                     }
-                  },
-                  "description" : "Error",
-                  "headers" : {
-                     "API-Version" : {
-                        "$ref" : "#/components/headers/API-Version"
-                     }
-                  }
-               }
-            },
-            "tags" : [
-               "Surrender Request responses"
+      "IdentifyingCode": {
+        "title": "Identifying Code",
+        "required": [
+          "codeListProvider",
+          "partyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "codeListProvider": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (Enigio trace:original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
+            "example": "W3C"
+          },
+          "partyCode": {
+            "maxLength": 150,
+            "type": "string",
+            "description": "Code to identify the party as provided by the `codeListProvider`\n",
+            "example": "MSK"
+          },
+          "codeListName": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
+            "example": "DID"
+          }
+        }
+      },
+      "TaxLegalReference": {
+        "title": "Tax & Legal Reference",
+        "required": [
+          "countryCode",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 50,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The reference type code as defined by the relevant tax and/or legal authority.\n",
+            "example": "PAN"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string",
+            "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+            "example": "IN"
+          },
+          "value": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The value of the `taxLegalReference`\n",
+            "example": "AAAAA0000A"
+          }
+        },
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n"
+      },
+      "ErrorResponse": {
+        "title": "Error Response",
+        "required": [
+          "errorDateTime",
+          "errors",
+          "httpMethod",
+          "requestUri",
+          "statusCode",
+          "statusCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "httpMethod": {
+            "type": "string",
+            "description": "The HTTP method used to make the request e.g. `GET`, `POST`, etc\n",
+            "example": "POST",
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "DELETE",
+              "OPTION",
+              "PATCH"
             ]
-         }
-      }
-   },
-   "servers" : [
-      {
-         "description" : "SwaggerHub API Auto Mocking",
-         "url" : "https://virtserver.swaggerhub.com/dcsaorg/DCSA_EBL_SUR/3.0.0"
-      }
-   ],
-   "tags" : [
-      {
-         "description" : "The Surrender Requests implemented\n",
-         "name" : "Surrender Requests"
+          },
+          "requestUri": {
+            "type": "string",
+            "description": "The URI that was requested.\n",
+            "example": "/v1/events"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code returned.\n",
+            "format": "int32",
+            "example": 400
+          },
+          "statusCodeText": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "A standard short description corresponding to the HTTP status code.\n",
+            "example": "Bad Request"
+          },
+          "statusCodeMessage": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "A long description corresponding to the HTTP status code with additional information.\n",
+            "example": "The supplied data could not be accepted"
+          },
+          "providerCorrelationReference": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A unique identifier to the HTTP request within the scope of the API provider.\n",
+            "example": "4426d965-0dd8-4005-8c63-dc68b01c4962"
+          },
+          "errorDateTime": {
+            "type": "string",
+            "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.\n",
+            "format": "date-time",
+            "example": "2024-09-04T09:41:00Z"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "description": "An array of errors providing more detail about the root cause.\n",
+            "items": {
+              "$ref": "#/components/schemas/DetailedError"
+            }
+          }
+        },
+        "description": "Unexpected error"
       },
-      {
-         "description" : "The Surrender Request responses\n",
-         "name" : "Surrender Request responses"
+      "DetailedError": {
+        "title": "Detailed Error",
+        "required": [
+          "errorCodeMessage",
+          "errorCodeText"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "maximum": 9999,
+            "minimum": 7000,
+            "type": "integer",
+            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).\n",
+            "format": "int32",
+            "example": 7003
+          },
+          "property": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "The name of the property causing the error.\n",
+            "example": "facilityCode"
+          },
+          "value": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The value of the property causing the error serialised as a string exactly as in the original request.\n",
+            "example": "SG SIN WHS"
+          },
+          "jsonPath": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "A path to the property causing the error, formatted according to [JSONpath](https://github.com/json-path/JsonPath).\n",
+            "example": "$.location.facilityCode"
+          },
+          "errorCodeText": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "A standard short description corresponding to the `errorCode`.\n",
+            "example": "invalidData"
+          },
+          "errorCodeMessage": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "A long description corresponding to the `errorCode` with additional information.\n",
+            "example": "Spaces not allowed in facility code"
+          }
+        },
+        "description": "A detailed description of what has caused the error.\n"
+      },
+      "SurrenderRequestAnswer": {
+        "title": "Surrender Request Answer",
+        "required": [
+          "action",
+          "surrenderRequestReference"
+        ],
+        "type": "object",
+        "properties": {
+          "surrenderRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The surrender request provided by the EBL solution in the surrender request.\n",
+            "example": "Z12345"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an amendment, the carrier will follow up with issuing the amended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
+            "example": "SURR",
+            "enum": [
+              "SURR",
+              "SREJ"
+            ]
+          },
+          "comments": {
+            "maxLength": 255,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Free text comment associated with the surrender request transaction.  Must be provided for rejections but should be omitted when accepting the surrender.",
+            "example": "Comments..."
+          }
+        }
       }
-   ]
+    },
+    "parameters": {
+      "Api-Version-Major": {
+        "name": "API-Version",
+        "in": "header",
+        "description": "An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.\n",
+        "required": false,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "example": "3"
+        }
+      }
+    },
+    "headers": {
+      "API-Version": {
+        "description": "SemVer used to indicate the version of the contract (API version) returned.\n",
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "example": "3.0.0"
+        }
+      }
+    }
+  }
 }

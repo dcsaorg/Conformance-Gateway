@@ -110,32 +110,38 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   private boolean handleJsonPromptForText() {
+    String promptText;
+    By jsonForPromptText = By.id("jsonForPromptText");
     try {
-      By jsonForPromptText = By.id("jsonForPromptText");
-      String promptText = driver.findElement(jsonForPromptText).getText();
+      promptText = driver.findElement(jsonForPromptText).getText();
       wait.until(ExpectedConditions.visibilityOfElementLocated(jsonForPromptText));
-
-      // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
-      if (promptText.contains("Insert TDR here")) {
-        promptText = fetchTransportDocument(promptText);
-      }
-
-      driver.findElement(By.id("actionInput")).sendKeys(promptText);
-      System.out.println("Prompt text sent: " + promptText);
-      driver.findElement(By.id("submitActionButton")).click();
-      waitForUIReadiness();
-      return true;
     } catch (org.openqa.selenium.NoSuchElementException e) {
-      log.info("No prompt text");
+      log.debug("No jsonForPromptText text.");
+      return false;
     }
-    return false;
+
+    // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
+    if (promptText.contains("Insert TDR here")) {
+      promptText = fetchTransportDocument(promptText);
+    }
+
+    driver.findElement(By.id("actionInput")).sendKeys(promptText);
+    driver.findElement(By.id("submitActionButton")).click();
+    waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay * 2); // Extra delay for the async calls to finish.
+    return true;
   }
 
   private String fetchTransportDocument(String promptText) {
     handlePromptText();
     switchToTab(1);
 
+    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay);
+
     String operatorLog = driver.findElement(By.cssSelector("[testId='operatorLog']")).getText();
+    log.debug("Operator log: {}", operatorLog);
     String reference = extractTransportDocumentReference(operatorLog);
     switchToTab(0);
     return promptText.replace("Insert TDR here", reference);
@@ -149,6 +155,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         switchToTab(1);
         driver.findElement(By.id("notifyPartyButton")).click();
         log.debug("Notify party");
+        waitForAsyncCalls(lambdaDelay);
 
         driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
         waitForUIReadiness();
@@ -177,17 +184,16 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   protected static void waitForUIReadiness() {
-    log.debug("Starting to wait for UI readiness");
-    StopWatch stopWatch = StopWatch.createStarted();
     if (!driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
+      StopWatch stopWatch = StopWatch.createStarted();
       wait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("app-text-waiting")));
-      log.debug("Waited: {}", stopWatch);
+      log.debug("Waited for UI readiness: {}", stopWatch);
       waitForUIReadiness();
     }
   }
 
   private void completeAction() {
-    log.info("Completing action");
+    log.debug("Completing action");
     waitForUIReadiness();
 
     wait.until(
@@ -249,7 +255,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   SandboxConfig createSandBox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
     log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(baseUrl + "/create-sandbox");
-    System.out.println(driver.getCurrentUrl()); //TODO
     if (driver.getCurrentUrl().endsWith("/login")) {
       loginUser();
       driver.get(baseUrl + "/create-sandbox");

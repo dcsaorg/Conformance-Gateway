@@ -2,10 +2,12 @@ package org.dcsa.conformance.frontend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,5 +73,20 @@ class SeleniumTest extends SeleniumTestBase {
                                         createSandboxesAndRunGroups(
                                             requestedStandard, version.number(), suite, role))));
     log.info("Finished with standard: {}, time taken: {}", standardName, stopWatch);
+  }
+
+  @Test
+  @Disabled("Useful for debugging a simulated cold-start AWS Lambda on local machine")
+  void testStandardOnSimulatedSlowAWSEnvironment() {
+    lambdaDelay = 2000L;
+    app.setSimulatedLambdaDelay(lambdaDelay);
+    stopAfterFirstScenarioGroup = true;
+    wait.withTimeout(Duration.ofSeconds(20L));
+
+    StopWatch stopWatch = StopWatch.createStarted();
+    String standardName = "Ebl";
+    createSandboxesAndRunGroups(
+      new Standard(standardName, null), "3.0.0", "Conformance TD-only", "Carrier");
+    log.info("Finished AWS testing on standard: {}, time taken: {}", standardName, stopWatch);
   }
 }

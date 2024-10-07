@@ -27,6 +27,7 @@ class AWSEnvironmentTest extends SeleniumTestBase {
     driver.manage().timeouts().implicitlyWait(Duration.ofMillis(WAIT_BEFORE_TIMEOUT_IN_MILLIS * 6));
     wait.withTimeout(Duration.ofSeconds(20L));
     stopAfterFirstScenarioGroup = true;
+    lambdaDelay = 2_000L; // Not adding delays, but accept to wait longer sometimes.
   }
 
   @Test

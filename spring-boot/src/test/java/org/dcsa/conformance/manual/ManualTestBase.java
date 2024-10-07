@@ -148,7 +148,8 @@ public abstract class ManualTestBase {
     return webuiHandler.handleRequest(USER_ID, node);
   }
 
-  void waitForAsyncCalls(long delay) {
+  protected void waitForAsyncCalls(long delay) {
+    if (delay == 0) return;
     try {
       Thread.sleep(delay); // Wait for the scenario to finish
     } catch (InterruptedException e) {
@@ -167,12 +168,8 @@ public abstract class ManualTestBase {
               .put("sandboxId", sandbox.sandboxId);
       sandboxStatus = webuiHandler.handleRequest(USER_ID, node).toString();
       if (sandboxStatus.contains("[]")) return;
-      try {
-        counter++;
-        Thread.sleep(300L); // Wait for the scenario to finish
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+      counter++;
+      waitForAsyncCalls(300L); // Wait for the scenario to finish
     } while (counter < 30);
 
     log.warn(

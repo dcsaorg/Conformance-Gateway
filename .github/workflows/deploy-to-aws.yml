@@ -54,4 +54,4 @@ jobs:
           TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
           TEST_LOGIN_URL: ${{ secrets.AWS_DEV_WEB_URL }}
         run: |
-          mvn -B -U -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI test
+          mvn -B -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI test -X

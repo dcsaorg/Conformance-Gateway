@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -12,13 +13,9 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 @Tag("Integration")
 class AWSEnvironmentTest extends SeleniumTestBase {
-
-  private static final String DEV_URL = "https://dev.conformance-development-1.dcsa.org";
-  private static final String DEV_USER = "aws-conformance-development-1+ci-test@dcsa.org";
-
-  private static final String ENV_BASE_URL = "testLoginEmail";
-  private static final String ENV_LOGIN_EMAIL = "testLoginEmail";
-  private static final String ENV_LOGIN_PASSWORD = "testLoginPassword";
+  private static final String ENV_BASE_URL = "TEST_BASE_URL";
+  private static final String ENV_LOGIN_EMAIL = "TEST_LOGIN_EMAIL";
+  private static final String ENV_LOGIN_PASSWORD = "TEST_LOGIN_PASSWORD";
 
   @Override
   @BeforeEach
@@ -32,9 +29,9 @@ class AWSEnvironmentTest extends SeleniumTestBase {
 
   @Test
   void testStandardOnDevEnvironment() {
-    baseUrl = getRequiredProperty(ENV_BASE_URL, DEV_URL);
-    loginEmail = getRequiredProperty(ENV_LOGIN_EMAIL, DEV_USER);
-    loginPassword = getRequiredProperty(ENV_LOGIN_PASSWORD, null);
+    baseUrl = getRequiredProperty(ENV_BASE_URL);
+    loginEmail = getRequiredProperty(ENV_LOGIN_EMAIL);
+    loginPassword = getRequiredProperty(ENV_LOGIN_PASSWORD);
 
     StopWatch stopWatch = StopWatch.createStarted();
     String standardName = "Ebl";
@@ -48,16 +45,23 @@ class AWSEnvironmentTest extends SeleniumTestBase {
   protected String getSandboxName(
       String standardName, String version, String suiteName, String roleName, int sandboxType) {
     String dateTimeFormatted =
-        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss "));
+        LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ")); // Keep space at end
     return dateTimeFormatted
         + super.getSandboxName(standardName, version, suiteName, roleName, sandboxType);
   }
 
-  private String getRequiredProperty(String environmentProperty, String defaultValue) {
-    String value = System.getProperty(environmentProperty, defaultValue);
+  private String getRequiredProperty(String environmentProperty) {
+    String value =
+        System.getenv().getOrDefault(environmentProperty, null); // Try system property first
     if (value == null) {
+      // When it fails, also check the passed -Dkey=value properties
+      value = System.getProperty(environmentProperty, null);
+    }
+
+    if (StringUtils.isBlank(value)) {
       throw new IllegalArgumentException(
-          "Environment variable '%s' must be set, in the environment variable or as a system property"
+          "Variable '%s' must be set, as an environment variable or supplied with -Dkey=value parameter."
               .formatted(environmentProperty));
     }
     return value;

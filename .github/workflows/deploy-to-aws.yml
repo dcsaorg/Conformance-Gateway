@@ -72,3 +72,11 @@ jobs:
         run: |
           cd cdk/
           cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack
+
+      - name: Verify Run in AWS
+        env:
+          TEST_LOGIN_EMAIL: ${{ secrets.AWS_DEV_LOGIN_EMAIL }} # User account details to log in the Web UI.
+          TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
+          TEST_LOGIN_URL: ${{ secrets.AWS_DEV_WEB_URL }}
+        run: |
+          mvn test -B -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI

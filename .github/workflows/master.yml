@@ -13,10 +13,10 @@ on:
       - master
     paths-ignore:
       - "**.md"
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths-ignore:
-      - "**.md"
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths-ignore:
+#      - "**.md"
 
 jobs:
   build:

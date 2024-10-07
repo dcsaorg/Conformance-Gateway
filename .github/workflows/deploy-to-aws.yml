@@ -43,9 +43,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: webui/package-lock.json
 
+      - name: Clear Maven Cache because GitHub CoPilot thinks it is a good idea
+        run: rm -rf ~/.m2/repository
+
       - name: Build Conformance-Gateway
         run: |
-          mvn clean package -B -V -DskipTests
+          mvn package -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Verify Run in AWS
@@ -54,4 +57,4 @@ jobs:
           TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
           TEST_LOGIN_URL: ${{ secrets.AWS_DEV_WEB_URL }}
         run: |
-          mvn -B -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI test -X
+          mvn -B -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI test

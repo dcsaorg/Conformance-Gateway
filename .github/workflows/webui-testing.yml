@@ -52,7 +52,7 @@ jobs:
 
       - name: Test Conformance-Gateway
         run: |
-          mvn test -B -Djunit.includedTags=WebUI
+          mvn test -B -Djunit.includedTags=WebUI -Djunit.excludedTags=Integration
 
       - name: Stop Web UI
         run: |

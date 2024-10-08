@@ -76,6 +76,16 @@ class SeleniumTest extends SeleniumTestBase {
   }
 
   @Test
+  @Disabled("Only for debugging")
+  void testOnlyOneSpecificScenario() {
+//    try {
+      createSandboxesAndRunGroups(new Standard("Booking", null), "2.0.0", "Conformance", "Carrier");
+//    } catch (Exception e) {
+//      waitForAsyncCalls(5 * 60_000);
+//    }
+  }
+
+  @Test
   @Disabled("Useful for debugging a simulated cold-start AWS Lambda on local machine")
   void testStandardOnSimulatedSlowAWSEnvironment() {
     lambdaDelay = 2000L;

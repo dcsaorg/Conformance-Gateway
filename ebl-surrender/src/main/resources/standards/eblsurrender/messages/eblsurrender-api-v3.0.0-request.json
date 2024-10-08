@@ -2,66 +2,78 @@
   "surrenderRequestReference": "SURRENDER_REQUEST_REFERENCE_PLACEHOLDER",
   "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
   "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
-  "surrenderRequestedBy": {
-    "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-    "partyName": "legal name",
-    "partyCodes": [
-      {
-        "partyCode": "PARTY_CODE_PLACEHOLDER",
-        "codeListProvider": "EPUI",
-        "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-      }
-    ]
-  },
+  "reasonCode": "SWTP",
+  "comments": "As requested...",
   "endorsementChain": [
     {
-      "actionCode": "ISSUE",
       "actionDateTime": "2024-06-11T13:54:00Z",
+      "actionCode": "ISSUE",
       "actor": {
         "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
         "partyName": "legal name",
-        "partyCodes": [
+        "identifyingCodes": [
           {
-            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
             "codeListProvider": "EPUI",
+            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
             "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ],
+        "taxLegalReferences": [
+          {
+            "type": "PAN",
+            "countryCode": "IN",
+            "value": "AAAAA0000A"
           }
         ]
       },
       "recipient": {
         "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
         "partyName": "legal name",
-        "partyCodes": [
+        "identifyingCodes": [
           {
-            "partyCode": "PARTY_CODE_PLACEHOLDER",
             "codeListProvider": "EPUI",
+            "partyCode": "PARTY_CODE_PLACEHOLDER",
             "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
           }
         ]
       }
     },
     {
-      "actionCode": "SURRENDER FOR DELIVERY",
       "actionDateTime": "2024-06-12T14:54:00Z",
-      "recipient": {
-        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-        "partyName": "legal name",
-        "partyCodes": [
-          {
-            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
-            "codeListProvider": "EPUI",
-            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ]
-      },
+      "actionCode": "SURRENDER FOR DELIVERY",
       "actor": {
         "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
         "partyName": "legal name",
-        "partyCodes": [
+        "identifyingCodes": [
           {
-            "partyCode": "PARTY_CODE_PLACEHOLDER",
             "codeListProvider": "EPUI",
+            "partyCode": "PARTY_CODE_PLACEHOLDER",
             "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ],
+        "taxLegalReferences": [
+          {
+            "type": "PAN",
+            "countryCode": "IN",
+            "value": "AAAAA0000A"
+          }
+        ]
+      },
+      "recipient": {
+        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
+        "partyName": "legal name",
+        "identifyingCodes": [
+          {
+            "codeListProvider": "EPUI",
+            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
+            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
+          }
+        ],
+        "taxLegalReferences": [
+          {
+            "type": "PAN",
+            "countryCode": "IN",
+            "value": "AAAAA0000A"
           }
         ]
       }

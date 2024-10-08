@@ -589,8 +589,6 @@ public class BookingChecks {
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/communicationChannelCode"), BookingDataSets.COMMUNICATION_CHANNEL_CODES),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/incoTerms"), BookingDataSets.INCO_TERMS_VALUES),
     CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,

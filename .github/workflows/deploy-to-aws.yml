@@ -45,13 +45,13 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          mvn package -B -V -DskipTests -Dmaven.surefire.plugin.version=3.5.1
+          mvn package -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Verify Run in AWS
         env:
           TEST_LOGIN_EMAIL: ${{ secrets.AWS_DEV_LOGIN_EMAIL }} # User account details to log in the Web UI.
           TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
-          TEST_LOGIN_URL: ${{ secrets.AWS_DEV_WEB_URL }}
+          TEST_BASE_URL: ${{ secrets.AWS_DEV_WEB_URL }}
         run: |
-          mvn -B -Djunit.includedTags=Integration -Djunit.excludedTags=WebUI test -Dmaven.surefire.plugin.version=3.5.1
+          mvn -B test -Pintegration

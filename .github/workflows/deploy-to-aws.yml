@@ -19,8 +19,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.AWS_ENVIRONMENT }}
-          # Enforces only AWS env name matching branches are checkout and deployed.
+          # Number of commits to fetch. 0 indicates all history for all branches and tags, for SonarCloud.
+          fetch-depth: 0
 
       - name: Print commit sha
         shell: bash

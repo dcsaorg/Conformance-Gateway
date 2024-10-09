@@ -3,6 +3,7 @@ package org.dcsa.conformance.frontend;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.time.Duration;
@@ -106,6 +107,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         log.info("Stopping after first scenario group");
         break;
       }
+      log.info("Finished scenario group {}.", i + 1);
     }
   }
 
@@ -125,6 +127,10 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       promptText = fetchTransportDocument(promptText);
     }
 
+    if (driver.findElements(By.id("actionInput")).isEmpty()) {
+      log.error("Error: No actionInput element found, while a jsonForPromptText was displayed!");
+      fail();
+    }
     driver.findElement(By.id("actionInput")).sendKeys(promptText);
     driver.findElement(By.id("submitActionButton")).click();
     waitForUIReadiness();

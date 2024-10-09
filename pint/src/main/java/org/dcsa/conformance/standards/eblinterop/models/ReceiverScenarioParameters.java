@@ -8,28 +8,20 @@ import lombok.With;
 
 @With
 public record ReceiverScenarioParameters(
-  String eblPlatform,
-  String receiverPartyName,
-  String receiverEPUI,
-  String receiverEPUICodeListName,
+  JsonNode receiverParty,
   String receiverPublicKeyPEM
 ) {
   public ObjectNode toJson() {
-    return OBJECT_MAPPER
+    var r = OBJECT_MAPPER
         .createObjectNode()
-        .put("eblPlatform", eblPlatform)
-        .put("receiverPartyName", receiverPartyName)
-        .put("receiverEPUI", receiverEPUI)
-        .put("receiverEPUICodeListName", receiverEPUICodeListName)
         .put("receiverPublicKeyPEM", receiverPublicKeyPEM);
+    r.set("receiverParty", receiverParty);
+    return r;
   }
 
   public static ReceiverScenarioParameters fromJson(JsonNode jsonNode) {
     return new ReceiverScenarioParameters(
-      jsonNode.required("eblPlatform").asText(),
-      jsonNode.required("receiverPartyName").asText(),
-      jsonNode.required("receiverEPUI").asText(),
-      jsonNode.required("receiverEPUICodeListName").asText(),
+      jsonNode.required("receiverParty"),
       jsonNode.required("receiverPublicKeyPEM").asText()
     );
   }

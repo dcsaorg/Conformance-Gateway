@@ -102,7 +102,13 @@ public class PintReceivingPlatform extends ConformanceParty {
     var expectedRecipient = "12345-jane-doe";
     var receivingParameters = getReceiverScenarioParameters(ssp, scenarioClass, expectedRecipient);
     var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
-    tdState.setExpectedReceiver(expectedRecipient);
+    tdState.setExpectedReceiver(
+      generateReceiverParty(
+        ssp,
+        scenarioClass == ScenarioClass.INVALID_RECIPIENT ? ScenarioClass.NO_ISSUES : scenarioClass,
+        expectedRecipient
+      )
+    );
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
@@ -111,20 +117,29 @@ public class PintReceivingPlatform extends ConformanceParty {
       "Finished ScenarioType");
   }
 
-  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
-    String platform, codeListName;
+  private JsonNode generateReceiverParty(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    String platform;
     if ("CARX".equals(ssp.eblPlatform())) {
       platform = "BOLE";
-      codeListName = "Bolero";
     } else {
       platform = "CARX";
-      codeListName = "CargoX";
     }
+    var partyCode = OBJECT_MAPPER.createObjectNode()
+      .put("partyCode", scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient)
+      .put("codeListProvider", platform);
+    var receiverParty = OBJECT_MAPPER.createObjectNode();
+    receiverParty.put("partyName", "Jane Doe")
+      .put("eblPlatform", platform)
+      .putArray("identifyingCodes")
+      .add(partyCode);
+    return receiverParty;
+  }
+
+  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    var receiverParty = generateReceiverParty(ssp, scenarioClass, expectedRecipient);
+
     return new ReceiverScenarioParameters(
-      platform,
-      "Jane Doe",
-      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
-      codeListName,
+      receiverParty,
       payloadSigner.getPublicKeyInPemFormat()
     );
   }

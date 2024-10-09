@@ -8,75 +8,14 @@
     {
       "actionDateTime": "2024-06-11T13:54:00Z",
       "actionCode": "ISSUE",
-      "actor": {
-        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-        "partyName": "legal name",
-        "identifyingCodes": [
-          {
-            "codeListProvider": "EPUI",
-            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
-            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ],
-        "taxLegalReferences": [
-          {
-            "type": "PAN",
-            "countryCode": "IN",
-            "value": "AAAAA0000A"
-          }
-        ]
-      },
-      "recipient": {
-        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-        "partyName": "legal name",
-        "identifyingCodes": [
-          {
-            "codeListProvider": "EPUI",
-            "partyCode": "PARTY_CODE_PLACEHOLDER",
-            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ]
-      }
+      "actor": ISSUE_TO_PARTY,
+      "recipient": SURRENDEREE_PARTY
     },
     {
       "actionDateTime": "2024-06-12T14:54:00Z",
-      "actionCode": "SURRENDER FOR DELIVERY",
-      "actor": {
-        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-        "partyName": "legal name",
-        "identifyingCodes": [
-          {
-            "codeListProvider": "EPUI",
-            "partyCode": "PARTY_CODE_PLACEHOLDER",
-            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ],
-        "taxLegalReferences": [
-          {
-            "type": "PAN",
-            "countryCode": "IN",
-            "value": "AAAAA0000A"
-          }
-        ]
-      },
-      "recipient": {
-        "eblPlatform": "EBL_PLATFORM_PLACEHOLDER",
-        "partyName": "legal name",
-        "identifyingCodes": [
-          {
-            "codeListProvider": "EPUI",
-            "partyCode": "CARRIER_PARTY_CODE_PLACEHOLDER",
-            "codeListName": "CODE_LIST_NAME_PLACEHOLDER"
-          }
-        ],
-        "taxLegalReferences": [
-          {
-            "type": "PAN",
-            "countryCode": "IN",
-            "value": "AAAAA0000A"
-          }
-        ]
-      }
+      "actionCode": "SURRENDER_FOR_DELIVERY",
+      "actor": SURRENDEREE_PARTY,
+      "recipient": CARRIER_PARTY
     }
   ]
 }

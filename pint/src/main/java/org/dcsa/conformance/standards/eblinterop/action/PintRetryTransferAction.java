@@ -23,6 +23,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Slf4j
 public class PintRetryTransferAction extends PintAction {
   private final int expectedMissingDocCount;
+  private final SenderTransmissionClass senderTransmissionClass;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
@@ -34,6 +35,7 @@ public class PintRetryTransferAction extends PintAction {
     String sendingPlatform,
     PintAction previousAction,
     int expectedMissingDocCount,
+    SenderTransmissionClass senderTransmissionClass,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -48,6 +50,7 @@ public class PintRetryTransferAction extends PintAction {
         201
     );
     this.expectedMissingDocCount = expectedMissingDocCount;
+    this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -157,6 +160,7 @@ public class PintRetryTransferAction extends PintAction {
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
                   expectedApiVersion,
+                  senderTransmissionClass,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

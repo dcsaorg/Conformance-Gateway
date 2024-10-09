@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Getter
 @Slf4j
 public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAction {
@@ -54,11 +56,16 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
+    var partyCode = OBJECT_MAPPER.createObjectNode()
+      .put("partyCode", "some-party-code")
+      .put("codeListProvider", "ZZZ");
+    var receiverParty = OBJECT_MAPPER.createObjectNode();
+    receiverParty.put("partyName", "Jane Doe")
+      .put("eblPlatform", "BOLE")
+      .putArray("identifyingCodes")
+      .add(partyCode);
     return new ReceiverScenarioParameters(
-      "Platform code (WAVE, BOLE, ...)",
-      "John Doe",
-      "identifier in your system",
-      "Platform code or ID issuer (Wave, Bolero, ...)",
+      receiverParty,
       "-----BEGIN RSA PUBLIC KEY-----\n<YOUR PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n"
     ).toJson();
   }

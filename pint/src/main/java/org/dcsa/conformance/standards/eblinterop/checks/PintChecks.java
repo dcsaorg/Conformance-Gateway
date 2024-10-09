@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.eblinterop.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.matchedMustEqual;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.SignatureChecks.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNode;
 
@@ -19,6 +20,7 @@ import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 import org.dcsa.conformance.standards.eblinterop.action.PintResponseCode;
+import org.dcsa.conformance.standards.eblinterop.action.SenderTransmissionClass;
 import org.dcsa.conformance.standards.eblinterop.models.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
@@ -27,6 +29,15 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintChecks {
 
   private static final JsonPointer TDR_PTR = JsonPointer.compile("/transportDocument/transportDocumentReference");
+
+  private static final JsonRebaseableContentCheck TRANSACTION_PARTY_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate 'codeListProvider' is a known value",
+    (mav) -> {
+      mav.submitAllMatching("transactions.*.actor.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("transactions.*.recipient.identifyingCodes.*.codeListProvider");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
+  );
 
   public static JsonContentMatchedValidation arraySizeMustEqual(IntSupplier expectedSizeSupplier) {
     return (nodeToValidate,contextPath) -> {
@@ -157,6 +168,7 @@ public class PintChecks {
 
   private static void generateScenarioRelatedChecksForTransferRequest(
       List<JsonContentCheck> checks,
+      SenderTransmissionClass senderTransmissionClass,
       Supplier<SenderScenarioParameters> sspSupplier,
       Supplier<ReceiverScenarioParameters> rspSupplier,
       Supplier<DynamicScenarioParameters> dspSupplier) {
@@ -167,17 +179,20 @@ public class PintChecks {
             delayedValue(sspSupplier, SenderScenarioParameters::transportDocumentReference)));
     checks.add(
       JsonAttribute.customValidator(
-        "[Scenario] Verify receiver EPUI is correct",
+        "[Scenario] Verify receiver party is present (and exactly as-is)",
         pathChain(
           signedContentValidation(
             pathChain(
-              anyArrayElementMatching(
-                (n) -> n.path("codeListProvider").asText("").equals("EPUI"),
-                JsonAttribute.path("partyCode", matchedMustEqual(delayedValue(rspSupplier, ReceiverScenarioParameters::receiverEPUI))),
-                true
-              ),
-              "transactions", -1, "recipient", "partyCodes")
-             //
+              (n, p) -> {
+                if (senderTransmissionClass == SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM) {
+                  return Set.of();
+                }
+                if (Objects.equals(rspSupplier.get().receiverParty(), n)) {
+                  return Set.of();
+                }
+                return Set.of("[Scenario] Last transaction did not use the receiving party provided by the receiver (exactly as-is)");
+              },
+              "transactions", -1, "recipient")
           ),
           "envelopeTransferChain", -1
         )
@@ -326,13 +341,14 @@ public class PintChecks {
   public static ActionCheck validateInitiateTransferRequest(
     UUID matched,
     String standardsVersion,
+    SenderTransmissionClass senderTransmissionClass,
     Supplier<SenderScenarioParameters> sspSupplier,
     Supplier<ReceiverScenarioParameters> rspSupplier,
     Supplier<DynamicScenarioParameters> dspSupplier
   ) {
     var jsonContentChecks = new ArrayList<JsonContentCheck>();
 
-    generateScenarioRelatedChecksForTransferRequest(jsonContentChecks, sspSupplier, rspSupplier, dspSupplier);
+    generateScenarioRelatedChecksForTransferRequest(jsonContentChecks, senderTransmissionClass, sspSupplier, rspSupplier, dspSupplier);
     jsonContentChecks.add(
       JsonAttribute.customValidator(
         "Validate the transportDocument checksum in the envelopeManifestSignedContent",
@@ -351,6 +367,13 @@ public class PintChecks {
         signedContentValidation(
           JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
         )
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.allIndividualMatchesMustBeValid(
+        "Validate codeListProvider",
+        (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
+        signedContentValidation(TRANSACTION_PARTY_CODE_LIST_PROVIDER::validate)
       )
     );
     jsonContentChecks.add(

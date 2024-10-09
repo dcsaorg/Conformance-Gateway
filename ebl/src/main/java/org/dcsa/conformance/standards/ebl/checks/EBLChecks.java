@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
@@ -210,6 +211,29 @@ public class EBLChecks {
     "Cannot have more than one original without charges when isElectronic",
     IS_ELECTRONIC,
     JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The code in 'codeListProvider' is known",
+    mav -> {
+      mav.submitAllMatching("documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.endorsee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.issueTo.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.notifyParties.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.other.party.identifyingCodes.*.codeListProvider");
+
+
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.notifyParty.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.party.identifyingCodes.*.codeListProvider");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
   );
 
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
@@ -440,6 +464,7 @@ public class EBLChecks {
       JsonAttribute.mustBePresent(ISSUE_TO_PARTY),
       JsonAttribute.mustBeAbsent(ISSUE_TO_PARTY)
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -490,6 +515,7 @@ public class EBLChecks {
       JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -557,13 +583,8 @@ public class EBLChecks {
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
-  public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
   public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
   public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
-
-  public static JsonContentCheck sirInRefStatusMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
-    return JsonAttribute.mustEqual(SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
-  }
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(SI_NOTIFICATION_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());

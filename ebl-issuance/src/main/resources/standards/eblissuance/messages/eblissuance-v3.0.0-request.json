@@ -29,7 +29,7 @@
     "cargoMovementTypeAtDestination": "FCL",
     "issueDate": "2020-12-12",
     "serviceContractReference": "HHL51800000",
-    "contractQuotationReference": "12345",
+    "contractQuotationReference": "HHL1401",
     "declaredValue": 1231.1,
     "declaredValueCurrency": "DKK",
     "carrierCode": "MMCU",
@@ -87,21 +87,29 @@
       "UNLocationCode": "NLAMS"
     },
     "invoicePayableAt": {
-      "UNLocationCode": "DKAAR"
+      "UNLocationCode": "NLAMS"
     },
     "partyContactDetails": [
       {
-        "name": "DCSA test person",
-        "email": "no-reply@dcsa.example.org"
+        "name": "Henrik",
+        "phone": "+45 51801234"
+      },
+      {
+        "name": "Henrik",
+        "phone": "+45 51801234"
       }
     ],
     "documentParties": {
       "shipper": {
-        "partyName": "DCSA CTK",
+        "partyName": "IKEA Denmark",
         "partyContactDetails": [
           {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
+            "name": "Henrik",
+            "phone": "+45 51801234"
+          },
+          {
+            "name": "Henrik",
+            "phone": "+45 51801234"
           }
         ]
       },
@@ -109,40 +117,48 @@
         "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
         "identifyingCodes": [
           {
-            "codeListProvider": "EPUI",
+            "codeListProvider": "W3C",
             "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
             "codeListName": "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER"
           }
         ],
         "partyContactDetails": [
           {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
+            "name": "Henrik",
+            "phone": "+45 51801234"
+          },
+          {
+            "name": "Henrik",
+            "phone": "+45 51801234"
           }
         ]
       },
       "issuingParty": {
         "partyName": "Hyundai",
         "address": {
-          "street": "The street name would be here",
-          "city": "... and here the city",
-          "countryCode": "KR"
+          "street": "Ruijggoordweg",
+          "city": "Amsterdam",
+          "countryCode": "NL"
         },
         "identifyingCodes": [
           {
-            "codeListProvider": "SMDG",
-            "codeListName": "LCL",
-            "partyCode": "HMM"
+            "codeListProvider": "W3C",
+            "partyCode": "MSK",
+            "codeListName": "DID"
           }
         ]
       },
       "notifyParties": [
         {
-          "partyName": "DCSA CTK",
+          "partyName": "IKEA Denmark",
           "partyContactDetails": [
             {
-              "name": "DCSA test person",
-              "email": "no-reply@dcsa.example.org"
+              "name": "Henrik",
+              "phone": "+45 51801234"
+            },
+            {
+              "name": "Henrik",
+              "phone": "+45 51801234"
             }
           ]
         }
@@ -150,7 +166,7 @@
       "other": [
         {
           "party": {
-            "partyName": "DCSA CTK Service Contract Owner"
+            "partyName": "Asseco Denmark"
           },
           "partyFunction": "SCO"
         }
@@ -188,7 +204,7 @@
         "isShipperOwned": false,
         "seals": [
           {
-            "number": "DCSA-CTK-1234"
+            "number": "VET123"
           }
         ]
       }
@@ -199,7 +215,7 @@
     "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
     "identifyingCodes": [
       {
-        "codeListProvider": "EPUI",
+        "codeListProvider": "W3C",
         "partyCode": "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
         "codeListName": "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER"
       }

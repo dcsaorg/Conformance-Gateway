@@ -65,7 +65,7 @@ public class ConformanceWebuiHandler {
   }
 
   public JsonNode _doHandleRequest(String userId, JsonNode requestNode) {
-    log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
+    log.info("ConformanceWebuiHandler.handleRequest({})", requestNode.toPrettyString());
     String operation = requestNode.get("operation").asText();
     JsonNode resultNode = switch (operation) {
       case "createSandbox" -> _createSandbox(userId, requestNode);
@@ -85,7 +85,7 @@ public class ConformanceWebuiHandler {
       case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
-    log.debug("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
+    log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
     return resultNode;
   }
 
@@ -294,7 +294,7 @@ public class ConformanceWebuiHandler {
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
 
-    log.info("Updated sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Updated sandbox: {}", sandboxConfiguration.toJsonNode().toPrettyString());
 
     return OBJECT_MAPPER.createObjectNode();
   }

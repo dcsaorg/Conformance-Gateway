@@ -17,11 +17,9 @@ import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /** Base class which contains all API call methods and wiring needed to perform a manual test */
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
@@ -32,7 +30,7 @@ public abstract class ManualTestBase {
   private ConformanceWebuiHandler webuiHandler;
 
   @BeforeEach
-  void setUp() {
+  public void setUp() {
     webuiHandler = app.getWebuiHandler();
   }
 
@@ -150,7 +148,8 @@ public abstract class ManualTestBase {
     return webuiHandler.handleRequest(USER_ID, node);
   }
 
-  void waitForAsyncCalls(long delay) {
+  protected void waitForAsyncCalls(long delay) {
+    if (delay == 0) return;
     try {
       Thread.sleep(delay); // Wait for the scenario to finish
     } catch (InterruptedException e) {
@@ -169,12 +168,8 @@ public abstract class ManualTestBase {
               .put("sandboxId", sandbox.sandboxId);
       sandboxStatus = webuiHandler.handleRequest(USER_ID, node).toString();
       if (sandboxStatus.contains("[]")) return;
-      try {
-        counter++;
-        Thread.sleep(300L); // Wait for the scenario to finish
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+      counter++;
+      waitForAsyncCalls(300L); // Wait for the scenario to finish
     } while (counter < 30);
 
     log.warn(
@@ -388,7 +383,7 @@ public abstract class ManualTestBase {
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 
-  protected record Standard(String name, List<StandardVersion> versions) {}
+  public record Standard(String name, List<StandardVersion> versions) {}
 
   protected record StandardVersion(String number, List<String> suites, List<String> roles) {}
 }

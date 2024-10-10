@@ -16,9 +16,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.AWS_ENVIRONMENT }}
-          # Enforces only AWS env name matching branches are checkout and deployed.
 
       - name: Print commit sha
         shell: bash
@@ -72,3 +69,11 @@ jobs:
         run: |
           cd cdk/
           cdk deploy ${{ env.AWS_ENVIRONMENT }}ConformanceStack
+
+      - name: Verify a scenario in AWS Dev environment
+        env:
+          TEST_LOGIN_EMAIL: ${{ secrets.AWS_DEV_LOGIN_EMAIL }} # User account details to log in the Web UI.
+          TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
+          TEST_BASE_URL: ${{ secrets.AWS_DEV_WEB_URL }}
+        run: |
+          mvn -B test -Pintegration

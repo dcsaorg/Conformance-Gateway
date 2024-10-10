@@ -655,7 +655,8 @@ public class ConformanceSandbox {
                     HttpRequest.BodyPublishers.ofString(
                         conformanceRequest.message().body().getStringBody()));
 
-    httpRequestBuilder.timeout(Duration.ofMinutes(1));
+    // Allow long debugging sessions or slow business logic at customer's side
+    httpRequestBuilder.timeout(Duration.ofHours(1));
 
     conformanceRequest
         .message()
@@ -710,10 +711,11 @@ public class ConformanceSandbox {
 
   private static void _syncSendOutboundWebRequest(ConformanceWebRequest conformanceWebRequest) {
     try {
+      // Allow long debugging sessions or slow business logic at customer's side
       HttpRequest.Builder httpRequestBuilder =
           HttpRequest.newBuilder()
               .uri(URI.create(conformanceWebRequest.url()))
-              .timeout(Duration.ofMinutes(1))
+              .timeout(Duration.ofHours(1))
               .GET();
       conformanceWebRequest
           .headers()

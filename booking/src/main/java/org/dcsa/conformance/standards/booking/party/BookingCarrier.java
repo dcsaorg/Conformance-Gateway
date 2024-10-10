@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
@@ -21,8 +23,6 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
@@ -91,7 +91,8 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    if (log.isInfoEnabled())
+      log.info("Carrier.supplyScenarioParameters({})", actionPrompt.toPrettyString());
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
     case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("SCR-1234-REGULAR",

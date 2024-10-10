@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -23,6 +22,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
@@ -662,12 +662,9 @@ public class ConformanceSandbox {
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
 
-    HttpResponse<String> httpResponse;
-    try (HttpClient httpClient =
-        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()) {
-      httpResponse =
-          httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-    }
+    HttpResponse<String> httpResponse =
+        IOToolkit.HTTP_CLIENT.send(
+            httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
             httpResponse.statusCode(),
@@ -722,9 +719,7 @@ public class ConformanceSandbox {
           .headers()
           .forEach(
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-      try (HttpClient httpClient = HttpClient.newHttpClient()) {
-        httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-      }
+      IOToolkit.HTTP_CLIENT.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (Exception e) {
       log.error(
           "Failed to send outbound request: %s"

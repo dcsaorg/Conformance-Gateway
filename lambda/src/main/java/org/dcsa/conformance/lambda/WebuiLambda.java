@@ -23,7 +23,7 @@ public class WebuiLambda
   public APIGatewayProxyResponseEvent handleRequest(
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
-      log.debug("event = {}; context = {}", event, context);
+      log.info("event = {}", event);
 
       JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
       log.debug("JSON event = {}", jsonEvent);
@@ -54,7 +54,7 @@ public class WebuiLambda
             webuiHandler
                 .handleRequest(
                     cognitoIdAsEnvironmentId, JsonToolkit.stringToJsonNode(event.getBody()))
-                .toPrettyString();
+                .toString();
       } catch (ConformanceAccessException e) {
         return new APIGatewayProxyResponseEvent()
             .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))

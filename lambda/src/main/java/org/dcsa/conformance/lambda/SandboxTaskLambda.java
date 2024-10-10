@@ -21,7 +21,7 @@ public class SandboxTaskLambda implements RequestStreamHandler {
   public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
     try {
       JsonNode jsonInput = JsonToolkit.inputStreamToJsonNode(inputStream);
-      log.debug("jsonInput = {}", jsonInput::toPrettyString);
+      log.info("jsonInput = {}", jsonInput);
 
       try {
         Thread.sleep(100); // for consistency with the local app
@@ -38,8 +38,8 @@ public class SandboxTaskLambda implements RequestStreamHandler {
           jsonInput);
 
       ObjectNode jsonOutput = OBJECT_MAPPER.createObjectNode();
-      log.debug("jsonOutput = {}", jsonOutput::toPrettyString);
-      outputStream.write(jsonOutput.toPrettyString().getBytes(StandardCharsets.UTF_8));
+      log.debug("jsonOutput = {}", jsonOutput);
+      outputStream.write(jsonOutput.toString().getBytes(StandardCharsets.UTF_8));
     } catch (RuntimeException | Error e) {
       log.error("Unhandled exception: ", e);
       throw e;

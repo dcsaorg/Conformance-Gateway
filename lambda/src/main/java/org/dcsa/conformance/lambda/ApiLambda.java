@@ -26,9 +26,9 @@ public class ApiLambda
   public APIGatewayProxyResponseEvent handleRequest(
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
-      log.debug("event = {}; context = {}", event, context);
+      log.info("event = {}", event);
       JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
-      log.debug("jsonEvent = {}", jsonEvent::toPrettyString);
+      log.debug("jsonEvent = {}", jsonEvent);
 
       ConformancePersistenceProvider persistenceProvider =
           LambdaToolkit.createPersistenceProvider();

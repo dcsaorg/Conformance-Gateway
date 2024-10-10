@@ -326,6 +326,10 @@ public abstract class ManualTestBase {
         if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
         continue;
       }
+      if (jsonNode.has("jsonForPromptText")) {
+        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, jsonNode.get("jsonForPromptText"));
+        fail();
+      }
       if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
         notifyAction(sandbox2);
       }

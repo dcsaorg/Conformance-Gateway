@@ -296,8 +296,9 @@ public abstract class ConformanceParty implements StatefulEntity {
             partyConfiguration.getOrchestratorUrl()
                 + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
     log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
+    // Allow long debugging sessions or slow business logic at customer's side
     HttpRequest.Builder httpRequestBuilder =
-        HttpRequest.newBuilder().uri(uri).timeout(Duration.ofMinutes(1)).GET();
+        HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET();
     orchestratorAuthHeader.forEach(
         (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     String stringResponseBody =

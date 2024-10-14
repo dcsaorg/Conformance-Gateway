@@ -41,11 +41,6 @@ public class UC11_Shipper_CancelBookingRequestAction extends StateChangingBookin
   }
 
   @Override
-  public JsonNode getJsonForHumanReadablePrompt() {
-    return getCspSupplier().get().toJson();
-  }
-
-  @Override
   protected boolean expectsNotificationExchange() {
     return true;
   }

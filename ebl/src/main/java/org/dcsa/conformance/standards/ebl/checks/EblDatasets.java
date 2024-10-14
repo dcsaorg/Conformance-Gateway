@@ -73,7 +73,6 @@ public class EblDatasets {
     "DNB",
     "FMC",
     "DCSA",
-    "EU",
     "ZZZ"
   );
 

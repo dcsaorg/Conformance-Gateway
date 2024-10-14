@@ -40,7 +40,7 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          mvn package -B -V -DskipTests
+          ./mvnw package -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Build Web UI
@@ -76,4 +76,4 @@ jobs:
           TEST_LOGIN_PASSWORD: ${{ secrets.AWS_DEV_LOGIN_PASSWORD }}
           TEST_BASE_URL: ${{ secrets.AWS_DEV_WEB_URL }}
         run: |
-          mvn -B test -Pintegration
+          ./mvnw -B test -Pintegration

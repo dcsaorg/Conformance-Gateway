@@ -1,12 +1,12 @@
-FROM maven:3.9.6-eclipse-temurin-21-alpine as builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /build
 
 COPY . .
 
-RUN mvn install -DskipTests -U -B
+RUN ./mvnw package spring-boot:repackage -DskipTests -V -B
 
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jdk-alpine
 
 EXPOSE 8080
 

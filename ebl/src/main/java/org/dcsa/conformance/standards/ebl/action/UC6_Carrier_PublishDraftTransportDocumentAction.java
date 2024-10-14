@@ -69,6 +69,9 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
+    if (!skipSI) {
+      return null;
+    }
     return OBJECT_MAPPER.createObjectNode()
       .put("transportDocumentReference", "Insert TDR here");
   }

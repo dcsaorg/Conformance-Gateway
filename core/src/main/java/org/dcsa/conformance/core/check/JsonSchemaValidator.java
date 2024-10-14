@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,9 @@ public class JsonSchemaValidator {
   private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER =
       new ObjectMapper(new JsonFactory());
 
-  public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
+  public static JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
-        .computeIfAbsent(filePath, ignored -> new HashMap<>())
+        .computeIfAbsent(filePath, ignored -> new ConcurrentHashMap<>())
         .computeIfAbsent(schemaName, ignored -> new JsonSchemaValidator(filePath, schemaName));
   }
 

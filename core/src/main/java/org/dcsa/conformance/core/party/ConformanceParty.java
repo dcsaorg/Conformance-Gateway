@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -22,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
@@ -296,12 +296,13 @@ public abstract class ConformanceParty implements StatefulEntity {
             partyConfiguration.getOrchestratorUrl()
                 + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
     log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
+    // Allow long debugging sessions or slow business logic at customer's side
     HttpRequest.Builder httpRequestBuilder =
         HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET();
     orchestratorAuthHeader.forEach(
         (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     String stringResponseBody =
-        HttpClient.newHttpClient()
+      IOToolkit.HTTP_CLIENT
             .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString())
             .body();
     return new ConformanceMessageBody(stringResponseBody).getJsonBody();

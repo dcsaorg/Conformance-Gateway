@@ -1,22 +1,27 @@
 package org.dcsa.conformance.core.check;
 
-import com.opencsv.CSVReader;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 class KeywordDatasets {
   private KeywordDatasets() {}
 
-  static void checkResource(Class<?> resourceClass, String resourceName) {
-    var resource = resourceClass.getResource(resourceName);
-    if (resource == null) {
-      throw new IllegalArgumentException("Could not find the resource " + resourceName
-        + " via " + resourceClass.getSimpleName());
+  static Path getAndCheckResource(@NonNull String resourceName) {
+    try {
+      Path resourcePath = Paths.get(KeywordDatasets.class.getResource(resourceName).toURI());
+      if (!Files.exists(resourcePath)) {
+        throw new IllegalArgumentException("Could not find the resource: " + resourceName);
+      }
+      return resourcePath;
+    } catch (NullPointerException | URISyntaxException e) {
+      throw new IllegalArgumentException("Could not find the resource: " + resourceName);
     }
   }
 
@@ -27,24 +32,23 @@ class KeywordDatasets {
     return row[0];
   };
 
-
   @SneakyThrows
-  static KeywordDataset loadCsvDataset(Class<?> resourceClass, String resourceName, CSVRowSelector selector) {
-    Set<String> keywords = new HashSet<>();
-    try (var reader = new CSVReader(new BufferedReader(new InputStreamReader(Objects.requireNonNull(resourceClass.getResourceAsStream(resourceName)))))) {
-      var headers = reader.readNext();
-      selector.setup(resourceName, headers);
-      for (var line : reader) {
-        var value = selector.selectValue(resourceName, line);
-        keywords.add(value);
-      }
-    }
+  static KeywordDataset loadCsvDataset(@NonNull Path resource, CSVRowSelector selector) {
+    List<String> lines = Files.readAllLines(resource);
+    String[] headers = lines.getFirst().split(",");
+    String fileName = String.valueOf(resource.getFileName());
+    selector.setup(fileName, headers);
+
+    Set<String> keywords = HashSet.newHashSet(lines.size());
+    lines.stream()
+        .map(line -> line.split(","))
+        .map(row -> selector.selectValue(fileName, row))
+        .forEach(keywords::add);
     return Collections.unmodifiableSet(keywords)::contains;
   }
 
   interface CSVRowSelector {
-    default void setup(String resourceName, String[] headers) {
-    }
+    default void setup(String resourceName, String[] headers) {}
 
     String selectValue(String resourceName, String[] row);
   }

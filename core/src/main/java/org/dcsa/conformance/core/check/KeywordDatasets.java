@@ -41,6 +41,7 @@ class KeywordDatasets {
 
     Set<String> keywords = HashSet.newHashSet(lines.size());
     lines.stream()
+        .skip(1) // Skip header line
         .map(line -> line.split(","))
         .map(row -> selector.selectValue(fileName, row))
         .forEach(keywords::add);

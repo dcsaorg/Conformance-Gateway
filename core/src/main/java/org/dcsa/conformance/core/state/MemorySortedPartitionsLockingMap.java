@@ -22,7 +22,7 @@ public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap
     super(60L * 1000L, 100L, 60L * 1000L);
   }
 
-  private MemoryMapItem getOrCreateItem(String partitionKey, String sortKey) {
+  private synchronized MemoryMapItem getOrCreateItem(String partitionKey, String sortKey) {
     return memoryMap
         .computeIfAbsent(partitionKey, ignoredKey -> new ConcurrentSkipListMap<>())
         .computeIfAbsent(sortKey, ignoredKey -> new MemoryMapItem());

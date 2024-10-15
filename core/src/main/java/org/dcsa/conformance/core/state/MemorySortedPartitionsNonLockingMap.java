@@ -12,10 +12,9 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
   private static final String VALUE = "value";
   private final ConcurrentHashMap<String, ConcurrentSkipListMap<String, JsonNode>> memoryMap = new ConcurrentHashMap<>();
 
-
   @SneakyThrows
   @Override
-  public void setItemValue(String partitionKey, String sortKey, JsonNode value) {
+  public synchronized void setItemValue(String partitionKey, String sortKey, JsonNode value) {
     JsonNode valueCopy = OBJECT_MAPPER.readTree(value.toString());
     memoryMap
         .computeIfAbsent(partitionKey, ignoredKey -> new ConcurrentSkipListMap<>())
@@ -24,27 +23,30 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
 
   @Override
   public JsonNode getItemValue(String partitionKey, String sortKey) {
-    return memoryMap
-        .getOrDefault(partitionKey, new ConcurrentSkipListMap<>())
+    return getPartitionOrDefault(partitionKey)
         .getOrDefault(sortKey, OBJECT_MAPPER.createObjectNode())
         .get(VALUE);
   }
 
+  private synchronized ConcurrentSkipListMap<String, JsonNode> getPartitionOrDefault(String partitionKey) {
+    return memoryMap.getOrDefault(partitionKey, new ConcurrentSkipListMap<>());
+  }
+
   @Override
   public JsonNode getFirstItemValue(String partitionKey) {
-    ConcurrentSkipListMap<String, JsonNode> partition = memoryMap.getOrDefault(partitionKey, new ConcurrentSkipListMap<>());
+    ConcurrentSkipListMap<String, JsonNode> partition = getPartitionOrDefault(partitionKey);
     return partition.isEmpty() ? null : partition.get(partition.firstKey()).get(VALUE);
   }
 
   @Override
   public JsonNode getLastItemValue(String partitionKey) {
-    ConcurrentSkipListMap<String, JsonNode> partition = memoryMap.getOrDefault(partitionKey, new ConcurrentSkipListMap<>());
+    ConcurrentSkipListMap<String, JsonNode> partition = getPartitionOrDefault(partitionKey);
     return partition.isEmpty() ? null : partition.get(partition.lastKey()).get(VALUE);
   }
 
   @Override
   public List<JsonNode> getPartitionValues(String partitionKey) {
-    return memoryMap.getOrDefault(partitionKey, new ConcurrentSkipListMap<>()).values().stream()
+    return getPartitionOrDefault(partitionKey).values().stream()
         .map(item -> item.get(VALUE))
         .toList();
   }

@@ -6,6 +6,7 @@ import static org.dcsa.conformance.standards.ebl.party.EblShipper.siFromScenario
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
@@ -13,6 +14,7 @@ import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -199,10 +201,11 @@ public class EblCarrier extends ConformanceParty {
           "Fibreboard boxes"
         );
     };
+    var json = carrierScenarioParameters.toJson();
     asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
+        actionPrompt.required("actionId").asText(), json);
     addOperatorLogEntry(
-      "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
+      "Prompt answer for supplyScenarioParameters: %s".formatted(json.toString()));
   }
 
   private void requestUpdateToShippingInstructions(JsonNode actionPrompt) {
@@ -283,6 +286,10 @@ public class EblCarrier extends ConformanceParty {
     si.publishDraftTransportDocument(documentReference, scenarioType);
     si.save(persistentMap);
     tdrToSir.put(si.getTransportDocumentReference(), si.getShippingInstructionsReference());
+    if (skipSI) {
+      var json = OBJECT_MAPPER.createObjectNode().put("transportDocumentReference", si.getTransportDocumentReference());
+      addOperatorLogEntry("Prompt answer for publishDraftTransportDocument: %s".formatted(json.toString()));
+    }
     generateAndEmitNotificationFromTransportDocument(actionPrompt, si, true);
 
     addOperatorLogEntry("Published draft transport document '%s'".formatted(si.getTransportDocumentReference()));
@@ -700,7 +707,7 @@ public class EblCarrier extends ConformanceParty {
 
   @SneakyThrows
   private ConformanceResponse _handlePutShippingInstructions(ConformanceRequest request) {
-    var url = request.url();
+    var url = uriContextPath(request.url());
     var documentReference = lastUrlSegment(url);
     var sir = tdrToSir.getOrDefault(documentReference, documentReference);
     var siData = persistentMap.load(sir);
@@ -730,14 +737,19 @@ public class EblCarrier extends ConformanceParty {
     );
   }
 
+  @SneakyThrows
+  private String uriContextPath(String uri) {
+    return StringUtils.stripEnd(new URI(uri).getPath(), "/");
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("Carrier.handleRequest(%s)".formatted(request));
+    var url = uriContextPath(request.url());
     try {
       var result =
         switch (request.method()) {
           case "GET" -> {
-            var url = request.url().replaceAll("/++$", "");
             var lastSegment = lastUrlSegment(url);
             var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
             if (urlStem.endsWith("/v3/shipping-instructions")) {
@@ -749,14 +761,12 @@ public class EblCarrier extends ConformanceParty {
             yield return404(request);
           }
           case "POST" -> {
-            var url = request.url();
-            if (url.endsWith("/v3/shipping-instructions") || url.endsWith("/v3/shipping-instructions/")) {
+            if (url.endsWith("/v3/shipping-instructions")) {
               yield _handlePostShippingInstructions(request);
             }
             yield return404(request);
           }
           case "PATCH" -> {
-            var url = request.url().replaceAll("/++$", "");
             var lastSegment = lastUrlSegment(url);
             var urlStem = url.substring(0, url.length() - lastSegment.length()).replaceAll("/++$", "");
             if (urlStem.endsWith("/v3/shipping-instructions")) {

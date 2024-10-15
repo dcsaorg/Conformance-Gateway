@@ -20,12 +20,16 @@ Adopters use an AWS deployment of the Conformance Framework managed by DCSA.
 ### Java
 1. Build the project using Maven:
     ```sh
-    mvn clean package -DskipTests
+    ./mvnw clean package -DskipTests
     ```
 2. Run the application:
     ```sh
-    mvn -pl spring-boot -am spring-boot:run
+    ./mvnw -pl spring-boot -am spring-boot:run
     ```
+
+### Docker Compose
+Instead of building the project and running it locally, you can use Docker Compose to run the application.
+Just run `docker compose up` in the root directory of the project. This will build the project and run the application.
 
 ### Angular and NodeJS Web UI
 1. Navigate to the WebUI project directory:

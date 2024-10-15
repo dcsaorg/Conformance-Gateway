@@ -8,24 +8,25 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceAccessException;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import software.amazon.lambda.powertools.logging.Logging;
 
-@Slf4j
+@Log4j2
 public class WebuiLambda
     implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+  @Logging
   public APIGatewayProxyResponseEvent handleRequest(
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
-      System.out.println("event = " + event + ", context = " + context);
-      log.info("event.getPath() = " + event.getPath());
+      log.info("event = {}", event);
 
       JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
-      log.info("JSON event = " + jsonEvent.toString());
+      log.debug("JSON event = {}", jsonEvent);
 
       String cognitoIdAsEnvironmentId =
           jsonEvent
@@ -35,7 +36,7 @@ public class WebuiLambda
               .get("claims")
               .get("cognito:username")
               .asText();
-      log.info("cognitoIdAsEnvironmentId='%s'".formatted(cognitoIdAsEnvironmentId));
+      log.debug("cognitoIdAsEnvironmentId='{}'", cognitoIdAsEnvironmentId);
 
       ConformancePersistenceProvider persistenceProvider =
           LambdaToolkit.createPersistenceProvider();
@@ -53,7 +54,7 @@ public class WebuiLambda
             webuiHandler
                 .handleRequest(
                     cognitoIdAsEnvironmentId, JsonToolkit.stringToJsonNode(event.getBody()))
-                .toPrettyString();
+                .toString();
       } catch (ConformanceAccessException e) {
         return new APIGatewayProxyResponseEvent()
             .withMultiValueHeaders(Map.of("Content-Type", List.of(JsonToolkit.JSON_UTF_8)))
@@ -66,7 +67,7 @@ public class WebuiLambda
           .withStatusCode(200)
           .withBody(responseBody);
     } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception: " + e, e);
+      log.error("Unhandled exception: ", e);
       throw e;
     }
   }

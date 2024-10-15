@@ -44,7 +44,7 @@ jobs:
 
       - name: Build and test Conformance-Gateway
         run: |
-          mvn package -B -V --fail-at-end
+          ./mvnw package -B -V --fail-at-end
 
       - name: Set Sonar settings for PR build
         if: ${{ (github.event_name == 'pull_request') }}
@@ -56,5 +56,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}
+          ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}
 

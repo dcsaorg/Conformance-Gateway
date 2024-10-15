@@ -1,24 +1,22 @@
 package org.dcsa.conformance.standards.eblissuance.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.With;
 import org.dcsa.conformance.standards.eblissuance.action.EblType;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @With
-public record DynamicScenarioParameters(
-  EblType eblType) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record DynamicScenarioParameters(EblType eblType) {
+
   public ObjectNode toJson() {
-    return OBJECT_MAPPER
-        .createObjectNode()
-        .put("eblType", eblType.name());
+    return OBJECT_MAPPER.valueToTree(this);
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
-    return new DynamicScenarioParameters(
-        EblType.valueOf(jsonNode.required("eblType").asText())
-    );
+    return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);
   }
 }

@@ -12,21 +12,10 @@ public record SuppliedScenarioParameters(
       JsonNode surrendereeParty
 ) {
   public ObjectNode toJson() {
-    var r = OBJECT_MAPPER
-        .createObjectNode()
-        .put("transportDocumentReference", transportDocumentReference);
-
-    r.set("issueToParty", issueToParty);
-    r.set("carrierParty", carrierParty);
-    r.set("surrendereeParty", surrendereeParty);
-    return r;
+    return OBJECT_MAPPER.valueToTree(this);
   }
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
-    return new SuppliedScenarioParameters(
-        jsonNode.required("transportDocumentReference").asText(),
-        jsonNode.required("issueToParty"),
-        jsonNode.required("carrierParty"),
-        jsonNode.required("surrendereeParty"));
+    return OBJECT_MAPPER.convertValue(jsonNode, SuppliedScenarioParameters.class);
   }
 }

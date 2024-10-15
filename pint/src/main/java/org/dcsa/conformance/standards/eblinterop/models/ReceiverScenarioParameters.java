@@ -2,27 +2,20 @@ package org.dcsa.conformance.standards.eblinterop.models;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.With;
 
 @With
-public record ReceiverScenarioParameters(
-  JsonNode receiverParty,
-  String receiverPublicKeyPEM
-) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ReceiverScenarioParameters(JsonNode receiverParty, String receiverPublicKeyPEM) {
+
   public ObjectNode toJson() {
-    var r = OBJECT_MAPPER
-        .createObjectNode()
-        .put("receiverPublicKeyPEM", receiverPublicKeyPEM);
-    r.set("receiverParty", receiverParty);
-    return r;
+    return OBJECT_MAPPER.valueToTree(this);
   }
 
   public static ReceiverScenarioParameters fromJson(JsonNode jsonNode) {
-    return new ReceiverScenarioParameters(
-      jsonNode.required("receiverParty"),
-      jsonNode.required("receiverPublicKeyPEM").asText()
-    );
+    return OBJECT_MAPPER.convertValue(jsonNode, ReceiverScenarioParameters.class);
   }
 }

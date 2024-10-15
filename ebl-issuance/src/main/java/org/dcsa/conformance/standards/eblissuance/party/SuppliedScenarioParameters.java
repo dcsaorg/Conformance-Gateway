@@ -6,34 +6,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public record SuppliedScenarioParameters(
-  String sendToPlatform,
-  String issueToLegalName,
-  String issueToPartyCode,
-  String issueToCodeListName,
-  String consigneeOrEndorseeLegalName,
-  String consigneeOrEndorseePartyCode,
-  String consigneeOrEndorseeCodeListName
-  ) {
+    String sendToPlatform,
+    String issueToLegalName,
+    String issueToPartyCode,
+    String issueToCodeListName,
+    String consigneeOrEndorseeLegalName,
+    String consigneeOrEndorseePartyCode,
+    String consigneeOrEndorseeCodeListName) {
+
   public ObjectNode toJson() {
-    return OBJECT_MAPPER
-        .createObjectNode()
-        .put("sendToPlatform", sendToPlatform)
-        .put("issueToLegalName", issueToLegalName)
-        .put("issueToPartyCode", issueToPartyCode)
-        .put("issueToCodeListName", issueToCodeListName)
-        .put("consigneeOrEndorseeLegalName", consigneeOrEndorseeLegalName)
-        .put("consigneeOrEndorseePartyCode", consigneeOrEndorseePartyCode)
-        .put("consigneeOrEndorseeCodeListName", consigneeOrEndorseeCodeListName);
+    return OBJECT_MAPPER.valueToTree(this);
   }
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
-    return new SuppliedScenarioParameters(
-        jsonNode.required("sendToPlatform").asText(),
-        jsonNode.required("issueToLegalName").asText(),
-        jsonNode.required("issueToPartyCode").asText(),
-        jsonNode.required("issueToCodeListName").asText(),
-        jsonNode.required("consigneeOrEndorseeLegalName").asText(),
-        jsonNode.required("consigneeOrEndorseePartyCode").asText(),
-        jsonNode.required("consigneeOrEndorseeCodeListName").asText());
+    return OBJECT_MAPPER.convertValue(jsonNode, SuppliedScenarioParameters.class);
   }
 }

@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
@@ -85,7 +86,7 @@ public class EblIssuancePlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(IssuanceResponseAction.class, this::sendIssuanceResponse),
+        Map.entry(IssuanceRequestAction.class, this::sendIssuanceResponse),
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
@@ -116,15 +117,36 @@ public class EblIssuancePlatform extends ConformanceParty {
         .put("errorCode", "CTK-1234");
     }
 
-    syncCounterpartPost(
+    asyncCounterpartNotification(
+      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", response);
+
+   /* syncCounterpartPost(
         "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)),
         response
-   );
+   );*/
 
     addOperatorLogEntry(
         "Sent issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
             .formatted(irc, tdr));
   }
+
+  /*private void generateAndEmitNotificationFromBooking(
+    JsonNode actionPrompt,
+    boolean includeCbrr,
+    boolean includeCbr) {
+    var notification =
+      BookingNotification.builder()
+        .apiVersion(apiVersion)
+        .booking(persistableCarrierBooking.getBooking())
+        .includeCarrierBookingRequestReference(includeCbrr)
+        .includeCarrierBookingReference(includeCbr)
+        .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
+        .build()
+        .asJsonNode();
+    asyncCounterpartNotification(
+      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", notification);
+  }*/
+
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
@@ -199,6 +221,10 @@ public class EblIssuancePlatform extends ConformanceParty {
                       .createObjectNode()
                       .put("message", message)));
     }
+    /*request.
+    asyncCounterpartNotification(
+      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", response);*/
+
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(tdr, eblStatesByTdr.get(tdr)));

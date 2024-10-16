@@ -46,6 +46,7 @@ public class IssuanceRequestAction extends IssuanceAction {
       boolean isAmended,
       String platformPartyName,
       String carrierPartyName,
+      IssuanceResponseCode responseCode,
       IssuanceAction previousAction,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator issuanceManifestSchemaValidator) {
@@ -53,8 +54,8 @@ public class IssuanceRequestAction extends IssuanceAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "Request(%s)"
-            .formatted(stepNameArg(isCorrect, isCorrect, isAmended)),
+        "Request(%s)-Response(%s)"
+            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended),responseCode.standardCode),
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
     this.isAmended = isAmended;

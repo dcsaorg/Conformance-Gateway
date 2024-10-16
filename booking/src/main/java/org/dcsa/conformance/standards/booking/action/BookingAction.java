@@ -16,10 +16,7 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
-import org.dcsa.conformance.standards.booking.party.BookingRole;
-import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.booking.party.*;
 
 public abstract class BookingAction extends ConformanceAction {
   protected final int expectedStatus;
@@ -35,7 +32,7 @@ public abstract class BookingAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     this.dspReference =
         previousAction == null
-            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null,null, null))
+            ? new OverwritingReference<>(null, new DynamicScenarioParameters(ScenarioType.REGULAR, null, null, null, null))
             : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
@@ -102,7 +99,19 @@ public abstract class BookingAction extends ConformanceAction {
       return null;
     }
     try {
-      return BookingState.fromWireName(v);
+      return BookingState.valueOf(v);
+    } catch (IllegalArgumentException e) {
+      // Do not assume conformant payload.
+      return null;
+    }
+  }
+
+  private static BookingCancellationState parseBookingCancellationState(String v) {
+    if (v == null) {
+      return null;
+    }
+    try {
+      return BookingCancellationState.valueOf(v);
     } catch (IllegalArgumentException e) {
       // Do not assume conformant payload.
       return null;
@@ -118,14 +127,10 @@ public abstract class BookingAction extends ConformanceAction {
       getCbrFromNotificationPayload(requestJsonNode) :
       responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
-    var newBookingStatus = parseBookingState(responseJsonNode.path("bookingStatus").asText(null));
-    var newAmendedBookingStatus = parseBookingState(responseJsonNode.path("amendedBookingStatus").asText(null));
 
     var updatedDsp = dsp;
     updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    updatedDsp = updateIfNotNull(updatedDsp, newBookingStatus, updatedDsp::withBookingStatus);
-    updatedDsp = updateIfNotNull(updatedDsp, newAmendedBookingStatus, updatedDsp::withAmendedBookingStatus);
 
     updatedDsp = updateDSPFromBookingAction(exchange, updatedDsp);
 
@@ -137,11 +142,20 @@ public abstract class BookingAction extends ConformanceAction {
   private String getCbrFromNotificationPayload(JsonNode requestJsonNode) {
     return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
   }
+
+  protected Stream<ActionCheck> getNotificationChecks(
+    String expectedApiVersion,
+    JsonSchemaValidator notificationSchemaValidator,
+    BookingState bookingState,
+    BookingState amendedBookingState) {
+    return getNotificationChecks(expectedApiVersion, notificationSchemaValidator, bookingState, amendedBookingState,null);
+  }
   protected Stream<ActionCheck> getNotificationChecks(
       String expectedApiVersion,
       JsonSchemaValidator notificationSchemaValidator,
       BookingState bookingState,
-      BookingState amendedBookingState) {
+      BookingState amendedBookingState,
+      BookingCancellationState bookingCancellationState) {
     String titlePrefix = "[Notification]";
     var cbr = dspReference.get().carrierBookingReference();
     var cbrr = dspReference.get().carrierBookingRequestReference();
@@ -156,7 +170,7 @@ public abstract class BookingAction extends ConformanceAction {
             new ResponseStatusCheck(
                 titlePrefix, BookingRole::isShipper, getMatchedNotificationExchangeUuid(), 204),
             new CarrierBookingNotificationDataPayloadRequestConformanceCheck(
-                getMatchedNotificationExchangeUuid(), bookingState, amendedBookingState),
+                getMatchedNotificationExchangeUuid(), bookingState, amendedBookingState, bookingCancellationState),
             ApiHeaderCheck.createNotificationCheck(
                 titlePrefix,
                 BookingRole::isCarrier,
@@ -201,7 +215,7 @@ public abstract class BookingAction extends ConformanceAction {
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
                     JsonPointer.compile("/data/bookingStatus"),
-                    bookingState.wireName()),
+                    bookingState.name()),
             amendedBookingState == null
                 ? null
                 : new JsonAttributeCheck(
@@ -210,7 +224,16 @@ public abstract class BookingAction extends ConformanceAction {
                     getMatchedNotificationExchangeUuid(),
                     HttpMessageType.REQUEST,
                     JsonPointer.compile("/data/amendedBookingStatus"),
-                    amendedBookingState.wireName()))
-        .filter(Objects::nonNull);
+                    amendedBookingState.name()),
+            bookingCancellationState == null
+              ? null
+              : new JsonAttributeCheck(
+              titlePrefix,
+              BookingRole::isCarrier,
+              getMatchedNotificationExchangeUuid(),
+              HttpMessageType.REQUEST,
+              JsonPointer.compile("/data/bookingCancellationStatus"),
+              bookingCancellationState.name()))
+            .filter(Objects::nonNull);
   }
 }

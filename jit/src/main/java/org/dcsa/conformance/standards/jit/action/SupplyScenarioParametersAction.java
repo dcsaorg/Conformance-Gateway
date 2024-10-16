@@ -32,8 +32,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                 Arrays.stream(jitFilterParameters)
                     .map(JitFilterParameter::getQueryParamName)
                     .collect(Collectors.joining(", "))));
-    this.jitFilterParameters =
-        Stream.of(jitFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+    this.jitFilterParameters = new LinkedHashSet<>(Arrays.asList(jitFilterParameters));
   }
 
   @Override

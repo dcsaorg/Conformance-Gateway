@@ -1,10 +1,11 @@
 package org.dcsa.conformance.core.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -14,23 +15,23 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StatefulEntity;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessage;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Slf4j
 public abstract class ConformanceParty implements StatefulEntity {
+  public static final String API_VERSION = "Api-Version";
+
   protected final String apiVersion;
   protected final PartyConfiguration partyConfiguration;
   protected final CounterpartConfiguration counterpartConfiguration;
@@ -128,11 +129,29 @@ public abstract class ConformanceParty implements StatefulEntity {
     return counterpartConfiguration.getRole();
   }
 
-  protected void asyncOrchestratorPostPartyInput(JsonNode jsonPartyInput) {
+  /**
+   * To be invoked like this:
+   * <pre>
+   * {@code
+   * asyncOrchestratorPostPartyInput(
+   *   actionPrompt.required("actionId").asText(),
+   *   OBJECT_MAPPER.createObjectNode()
+   *     .put("keyOne", valueOne)
+   *     .put("keyTwo", valueTwo));
+   * }
+   * </pre>
+   */
+  protected void asyncOrchestratorPostPartyInput(String actionId, ObjectNode inputObjectNode) {
+    if (actionId == null) throw new IllegalArgumentException("The actionId may not be null");
+    if (inputObjectNode == null)
+      throw new IllegalArgumentException("The inputObjectNode may not be null");
+    ObjectNode jsonPartyInput =
+        OBJECT_MAPPER.createObjectNode().put("actionId", actionId).set("input", inputObjectNode);
     if (partyConfiguration.isInManualMode()) {
       log.info(
-          "Party %s NOT posting its input automatically (it is in manual mode): %s"
-              .formatted(partyConfiguration.getName(), jsonPartyInput.toPrettyString()));
+          "Party {} NOT posting its input automatically (it is in manual mode): {}",
+          partyConfiguration.getName(),
+          jsonPartyInput.toPrettyString());
       return;
     }
     webClient.asyncRequest(
@@ -193,13 +212,14 @@ public abstract class ConformanceParty implements StatefulEntity {
     } else {
       if (actionId != null) {
         log.info(
-            "Party %s notifying orchestrator that action %s is completed instead of sending notification: no counterpart URL is configured"
-                .formatted(actionId, partyConfiguration.getName()));
-        asyncOrchestratorPostPartyInput(OBJECT_MAPPER.createObjectNode().put("actionId", actionId));
+            "Party {} notifying orchestrator that action {} is completed instead of sending notification: no counterpart URL is configured",
+            actionId,
+            partyConfiguration.getName());
+        asyncOrchestratorPostPartyInput(actionId, OBJECT_MAPPER.createObjectNode());
       } else {
         log.info(
-            "Party %s NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured"
-                .formatted(partyConfiguration.getName()));
+            "Party {} NOT sending a notification and NOT notifying orchestrator either: no counterpart URL is configured",
+            partyConfiguration.getName());
       }
     }
   }
@@ -224,7 +244,7 @@ public abstract class ConformanceParty implements StatefulEntity {
             Stream.concat(
                     Stream.concat(
                         Stream.of(
-                            Map.entry("Api-Version", List.of(apiVersionHeaderValue)),
+                            Map.entry(API_VERSION, List.of(apiVersionHeaderValue)),
                             Map.entry("Content-Type", List.of(JsonToolkit.JSON_UTF_8))),
                         counterpartConfiguration.getAuthHeaderName().isBlank()
                             ? Stream.of()
@@ -251,8 +271,7 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   public void handleNotification() {
     log.info(
-        "%s[%s].handleNotification()"
-            .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+        "{}[{}].handleNotification()", getClass().getSimpleName(), partyConfiguration.getName());
     JsonNode partyPrompt = _syncGetPartyPrompt();
     if (!partyPrompt.isEmpty()) {
       StreamSupport.stream(partyPrompt.spliterator(), false).forEach(actionPromptsQueue::addLast);
@@ -261,7 +280,7 @@ public abstract class ConformanceParty implements StatefulEntity {
   }
 
   public void reset() {
-    log.info("%s[%s].reset()".formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    log.info("{}[{}].reset()", getClass().getSimpleName(), partyConfiguration.getName());
     this.actionPromptsQueue.clear();
     this.operatorLog.clear();
     doReset();
@@ -271,20 +290,19 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   @SneakyThrows
   private JsonNode _syncGetPartyPrompt() {
-    log.info(
-        "%s[%s].getPartyPrompt()"
-            .formatted(getClass().getSimpleName(), partyConfiguration.getName()));
+    log.info("{}[{}].getPartyPrompt()", getClass().getSimpleName(), partyConfiguration.getName());
     URI uri =
         URI.create(
             partyConfiguration.getOrchestratorUrl()
                 + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
     log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
+    // Allow long debugging sessions or slow business logic at customer's side
     HttpRequest.Builder httpRequestBuilder =
         HttpRequest.newBuilder().uri(uri).timeout(Duration.ofHours(1)).GET();
     orchestratorAuthHeader.forEach(
         (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
     String stringResponseBody =
-        HttpClient.newHttpClient()
+      IOToolkit.HTTP_CLIENT
             .send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString())
             .body();
     return new ConformanceMessageBody(stringResponseBody).getJsonBody();
@@ -295,11 +313,10 @@ public abstract class ConformanceParty implements StatefulEntity {
     JsonNode actionPrompt = actionPromptsQueue.removeFirst();
     if (actionPrompt == null) return;
     log.info(
-        "%s[%s]._handleNextActionPrompt() handling %s"
-            .formatted(
-                getClass().getSimpleName(),
-                partyConfiguration.getName(),
-                actionPrompt.toPrettyString()));
+        "{}[{}]._handleNextActionPrompt() handling {}",
+        getClass().getSimpleName(),
+        partyConfiguration.getName(),
+        actionPrompt.toPrettyString());
     getActionPromptHandlers().entrySet().stream()
         .filter(
             entry ->

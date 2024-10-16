@@ -105,8 +105,8 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
-  public boolean hasMatchedExchange() {
-    return matchedExchangeUuid != null;
+  public boolean isMissingMatchedExchange() {
+    return matchedExchangeUuid == null;
   }
 
   /**
@@ -175,6 +175,7 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
+  @SuppressWarnings("unused")
   protected void doHandleNotificationExchange(ConformanceExchange exchange) {}
 
   public final ConformanceCheck createFullCheck(String expectedApiVersion) {

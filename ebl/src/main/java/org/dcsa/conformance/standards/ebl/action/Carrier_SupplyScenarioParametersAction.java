@@ -63,7 +63,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
-      case REGULAR_SWB, REGULAR_BOL, REGULAR_SWB_AMF, REGULAR_CLAD -> new CarrierScenarioParameters(
+      case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
         "Booking Reference",
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
         null,
@@ -115,7 +115,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "DKAAR",
         "220299",
         null,
-        "Non alcoholic beverages, 40,000 cans",
+        "Non alcoholic beverages",
         null,
         "Bottles"
       );
@@ -129,7 +129,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "DKAAR",
         "293499",
         null,
-        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+        "Environmentally hazardous substance",
         null,
         null
       );

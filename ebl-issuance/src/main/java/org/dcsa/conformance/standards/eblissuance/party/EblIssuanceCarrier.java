@@ -5,8 +5,13 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
+
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -54,9 +59,9 @@ public class EblIssuanceCarrier extends ConformanceParty {
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
         "eblStatesByTdr",
-        StateManagementUtil.storeMap(OBJECT_MAPPER, eblStatesByTdr, EblIssuanceState::name));
-    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, sirsByTdr));
-    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(OBJECT_MAPPER, brsByTdr));
+        StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
+    targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(sirsByTdr));
+    targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(brsByTdr));
   }
 
   @Override
@@ -90,10 +95,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
         new CarrierScenarioParameters(
           payloadSigner.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("actionId", actionPrompt.required("actionId").asText())
-        .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
       "Submitting CarrierScenarioParameters: %s"
         .formatted(carrierScenarioParameters.toJson().toPrettyString()));
@@ -175,19 +177,58 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
-    var issuanceManifest = OBJECT_MAPPER.createObjectNode()
-        .put("documentChecksum", tdChecksum)
-        .put("issueToChecksum", issueToChecksum);
+    jsonRequestBody.set("eBLVisualisationByCarrier",getSupportingDocumentObject());
+    var eBLVisualisationByCarrier = Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
+    var issuanceManifest =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("documentChecksum", tdChecksum)
+            .put("issueToChecksum", issueToChecksum)
+            .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrier);
 
     jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
-    syncCounterpartPost(
+    syncCounterpartPut(
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
         jsonRequestBody);
 
     addOperatorLogEntry(
         "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
             .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
+  }
+
+  private ObjectNode getSupportingDocumentObject() {
+    var document = generateDocument();
+    return OBJECT_MAPPER
+        .createObjectNode()
+        .put("name", "test-iss-document")
+        .put("content", document)
+        .put("mediatype", "application/octet-stream");
+  }
+
+  private static byte[] generateDocument() {
+    byte[] pdf;
+    String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
+    try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
+      if (inputStream == null) {
+        throw new IllegalArgumentException("File not found: " + filepath);
+      }
+      pdf = inputStream.readAllBytes();
+    } catch (IOException e) {
+      throw new IllegalArgumentException(
+          "Generating document failed. Could not load file: " + filepath);
+    }
+    String uuidHex = UUID.randomUUID().toString();
+    String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);
+    String title = "/Title (DCSA - Driving digitalisation in container shipping)";
+    int titleStart = pdfString.indexOf(title);
+
+    int titleEnd = pdfString.indexOf(")", titleStart);
+    String newTitle = "DCSA - " + uuidHex + " shipping";
+
+    String updatedPdfContent =
+        pdfString.substring(0, titleStart + 7) + newTitle + ")" + pdfString.substring(titleEnd + 1);
+    return updatedPdfContent.getBytes(StandardCharsets.ISO_8859_1);
   }
 
   @Override
@@ -208,12 +249,12 @@ public class EblIssuanceCarrier extends ConformanceParty {
 
       return request.createResponse(
           204,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       return request.createResponse(
           409,
-          Map.of("Api-Version", List.of(apiVersion)),
+          Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(
             OBJECT_MAPPER
                   .createObjectNode()

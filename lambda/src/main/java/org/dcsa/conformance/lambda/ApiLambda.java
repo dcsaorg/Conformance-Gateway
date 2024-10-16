@@ -1,31 +1,36 @@
 package org.dcsa.conformance.lambda;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import software.amazon.lambda.powertools.logging.Logging;
 
-@Slf4j
+@Log4j2
 public class ApiLambda
     implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+  @Logging
   public APIGatewayProxyResponseEvent handleRequest(
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
-      System.out.println("event = " + event + ", context = " + context);
-      JsonNode jsonEvent = new ObjectMapper().valueToTree(event);
-      log.info("jsonEvent = {}", jsonEvent.toPrettyString());
+      log.info("event = {}", event);
+      JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
+      log.debug("jsonEvent = {}", jsonEvent);
 
       ConformancePersistenceProvider persistenceProvider =
           LambdaToolkit.createPersistenceProvider();

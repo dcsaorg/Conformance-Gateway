@@ -94,12 +94,10 @@ public class CsDateUtils {
 
   private static String processDate(String startDate, String endDate, String type) {
     return switch (type) {
-      case "startDate", "range" ->
-          convertDateToDateTime(LocalDate.parse(startDate, CsDateUtils.DATE_FORMAT).plusWeeks(1));
-      case "endDate" ->
-          convertDateToDateTime(LocalDate.parse(endDate, CsDateUtils.DATE_FORMAT).minusWeeks(1));
-      case "date" ->
+      case "startDate", "range", "date" ->
           convertDateToDateTime(LocalDate.parse(startDate, CsDateUtils.DATE_FORMAT).plusDays(1));
+      case "endDate" ->
+          convertDateToDateTime(LocalDate.parse(endDate, CsDateUtils.DATE_FORMAT).minusDays(1));
       default -> "";
     };
   }

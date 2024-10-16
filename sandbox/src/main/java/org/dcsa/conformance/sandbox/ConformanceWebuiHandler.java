@@ -27,6 +27,7 @@ public class ConformanceWebuiHandler {
   private final String environmentBaseUrl;
   private final ConformancePersistenceProvider persistenceProvider;
   private final Consumer<JsonNode> deferredSandboxTaskConsumer;
+  private final boolean developerMode;
 
   private final SortedMap<String, ? extends AbstractStandard> standardsByName =
       new TreeMap<>(
@@ -42,6 +43,7 @@ public class ConformanceWebuiHandler {
     this.environmentBaseUrl = environmentBaseUrl;
     this.persistenceProvider = persistenceProvider;
     this.deferredSandboxTaskConsumer = deferredSandboxTaskConsumer;
+    developerMode = environmentBaseUrl.startsWith("http://localhost");
   }
 
   public JsonNode handleRequest(String userId, JsonNode requestNode) {
@@ -51,13 +53,20 @@ public class ConformanceWebuiHandler {
       if (e instanceof UserFacingException userFacingException) {
         return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
       } else {
-        return OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
+        ObjectNode node = OBJECT_MAPPER
+          .createObjectNode().put("error", "Internal Server Error");
+          if (developerMode) {
+            node.put("exception", e.getClass().getName())
+              .put("message", e.getMessage());
+          }
+          log.warn("Internal Server Error: {}; Message: {}", e.getClass().getName(), e.getMessage());
+          return node;
       }
     }
   }
 
   public JsonNode _doHandleRequest(String userId, JsonNode requestNode) {
-    log.info("ConformanceWebuiHandler.handleRequest(%s)".formatted(requestNode.toPrettyString()));
+    log.info("ConformanceWebuiHandler.handleRequest({})", requestNode.toPrettyString());
     String operation = requestNode.get("operation").asText();
     JsonNode resultNode = switch (operation) {
       case "createSandbox" -> _createSandbox(userId, requestNode);
@@ -77,7 +86,7 @@ public class ConformanceWebuiHandler {
       case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
       default -> throw new UnsupportedOperationException(operation);
     };
-    log.debug("ConformanceWebuiHandler.handleRequest() returning: %s".formatted(resultNode.toPrettyString()));
+    log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
     return resultNode;
   }
 
@@ -286,7 +295,7 @@ public class ConformanceWebuiHandler {
 
     ConformanceSandbox.saveSandboxConfiguration(persistenceProvider, userId, sandboxConfiguration);
 
-    log.info("Updated sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
+    log.info("Updated sandbox: {}", sandboxConfiguration.toJsonNode().toPrettyString());
 
     return OBJECT_MAPPER.createObjectNode();
   }

@@ -37,8 +37,6 @@ public class TDReceiveState {
 
   private static final String EXPECTED_PUBLIC_KEY = "expectedSenderPublicKey";
 
-  private static final String RECEIVING_PLATFORM = "receivingEBLPlatform";
-
   private static final String TRANSFER_CHAIN_ENTRY_HISTORY = "transferChainEntryHistory";
 
   private final ObjectNode state;
@@ -65,10 +63,9 @@ public class TDReceiveState {
     return state.path(TRANSPORT_DOCUMENT_REFERENCE).asText();
   }
 
-  public void setExpectedReceiver(String receiverEPUI) {
-    this.state.put(EXPECTED_RECEIVER, receiverEPUI);
+  public void setExpectedReceiver(JsonNode receiver) {
+    this.state.set(EXPECTED_RECEIVER, receiver);
   }
-
 
   public Set<String> getKnownDocumentChecksums() {
     return StreamSupport.stream(this.state.path(KNOWN_DOCUMENTS).spliterator(), false)
@@ -95,7 +92,7 @@ public class TDReceiveState {
           // Which it will be in day-to-day tests until someone breaks sha256 like
           // sha1 was broken (though that will likely not happen for many years and
           // is not really worth the effort to guard against in the conformance
-          // toolkit as it is impossible for us device a test where the checksums
+          // scenario as it is impossible for us device a test where the checksums
           // match but the sizes differs - if we could, the sha256 checksum would
           // be broken!)
           idx = i;
@@ -175,13 +172,13 @@ public class TDReceiveState {
     return true;
   }
 
-  public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifer) {
+  public PintResponseCode recommendedFinishTransferResponse(JsonNode initiateRequest, SignatureVerifier signatureVerifier) {
     var etc = initiateRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     JsonNode etcEntryParsed, envelopeParsed;
     try {
-      etcEntryParsed = parseSignedNode(lastEtcEntry, signatureVerifer);
-      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"), signatureVerifer);
+      etcEntryParsed = parseSignedNode(lastEtcEntry, signatureVerifier);
+      envelopeParsed = parseSignedNode(initiateRequest.path("envelopeManifestSignedContent"), signatureVerifier);
     } catch (ParseException | JsonProcessingException e) {
         return PintResponseCode.BENV;
     } catch (CouldNotValidateSignatureException e) {
@@ -193,10 +190,7 @@ public class TDReceiveState {
     var transactions = etcEntryParsed.path("transactions");
     var lastTransactionNode = transactions.path(transactions.size() - 1);
     var recipient = lastTransactionNode.path("recipient");
-    var recipientPartyCodes = recipient.path("partyCodes");
-    var recipientPlatform = recipient.path("eblPlatform").asText("!?");
-    var expectedReceiver = state.path(EXPECTED_RECEIVER).asText();
-    boolean hasExpectedCode = false;
+    var expectedReceiver = state.path(EXPECTED_RECEIVER);
     var transferChainEntryHistory = this.state.path(TRANSFER_CHAIN_ENTRY_HISTORY);
     for (int i = 0; i < transferChainEntryHistory.size() ; i++) {
       var transferChainEntry = etc.path(i);
@@ -231,22 +225,7 @@ public class TDReceiveState {
         newTransactionHistory.add(transaction);
       }
     }
-
-    for (var partyCodeNode : recipientPartyCodes) {
-      if (!partyCodeNode.path("codeListProvider").asText("").equals("EPUI")) {
-        continue;
-      }
-      if (partyCodeNode.path("partyCode").asText("").equals(expectedReceiver)) {
-        hasExpectedCode = true;
-        break;
-      }
-    }
-
-    if (!state.path(RECEIVING_PLATFORM).asText("?").equals(recipientPlatform)) {
-      hasExpectedCode = false;
-    }
-
-    if (!hasExpectedCode) {
+    if (!Objects.equals(recipient, expectedReceiver)) {
       return PintResponseCode.BENV;
     }
     var missingDocuments = this.state.putArray(MISSING_DOCUMENTS);
@@ -316,7 +295,6 @@ public class TDReceiveState {
     var state = OBJECT_MAPPER.createObjectNode()
       .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
       .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
-      .put(RECEIVING_PLATFORM, receivingParameters.eblPlatform())
       .put(EXPECTED_PUBLIC_KEY, senderPublicKeyPEM);
     return new TDReceiveState(state);
   }

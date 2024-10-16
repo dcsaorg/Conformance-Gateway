@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.checks.CsChecks;
 import org.dcsa.conformance.standards.cs.party.CsRole;
@@ -19,16 +18,26 @@ public class CsGetVesselSchedulesAction extends CsAction {
   public CsGetVesselSchedulesAction(
       String subscriberPartyName,
       String publisherPartyName,
-      ConformanceAction previousAction,
+      CsAction previousAction,
       JsonSchemaValidator responseSchemaValidator) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetVesselSchedules", 200);
+    super(
+        subscriberPartyName,
+        publisherPartyName,
+        previousAction,
+        (previousAction instanceof CsGetVesselSchedulesAction)
+            ? "GetVesselSchedules (second page)"
+            : "GetVesselSchedules",
+        200);
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
+
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET vessel schedules request with the following parameters: "
-        + sspSupplier.get().toJson().toPrettyString();
+    return previousAction instanceof CsGetVesselSchedulesAction
+        ? "Send a GET vessel schedules request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
+        : "Send a GET vessel schedules request with the following parameters: "
+            + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override
@@ -55,13 +64,24 @@ public class CsGetVesselSchedulesAction extends CsAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             CsChecks.getPayloadChecksForVs(
-                getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                sspSupplier,
+                getDspSupplier(),
+                previousAction instanceof CsGetVesselSchedulesAction));
       }
     };
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode =
+        super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
   }
 }

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.jit.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -90,10 +89,7 @@ public class JitPublisher extends ConformanceParty {
                             })));
 
     asyncOrchestratorPostPartyInput(
-        new ObjectMapper()
-            .createObjectNode()
-            .put("actionId", actionPrompt.required("actionId").asText())
-            .set("input", responseSsp.toJson()));
+        actionPrompt.required("actionId").asText(), responseSsp.toJson());
 
     addOperatorLogEntry(
         "Submitting SuppliedScenarioParameters: %s"
@@ -112,7 +108,7 @@ public class JitPublisher extends ConformanceParty {
 
     return request.createResponse(
         200,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(jsonResponseBody));
   }
 }

@@ -2,6 +2,7 @@
 
 <div class="pageSubtitle">
     <button
+        id="create_sandbox_button"
         mat-raised-button
         color="primary"
         title="Create sandbox"
@@ -15,5 +16,5 @@
 *ngFor="let sandbox of sandboxes"
 [ngClass]="'entityCard withContentPadding withPointerCursor'"
 (click)="onSandboxClick(sandbox)">
-    <div>{{sandbox.name}}</div>
+    <div class="wrappingText">{{sandbox.name}}</div>
 </mat-card>

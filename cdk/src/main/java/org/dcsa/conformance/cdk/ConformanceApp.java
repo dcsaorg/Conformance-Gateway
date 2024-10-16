@@ -5,12 +5,14 @@ import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
 
 public final class ConformanceApp {
+  public static final String REGION = "eu-north-1";
+
   public static void main(final String[] args) {
     App app = new App();
 
     new ConformanceStack(
         app,
-        StackProps.builder().env(Environment.builder().region("eu-north-1").build()).build(),
+        StackProps.builder().env(Environment.builder().region(REGION).build()).build(),
         "devConformanceStack",
         "dev",
         "Z0720499I10UDAXMT620",
@@ -22,7 +24,7 @@ public final class ConformanceApp {
 
     new ConformanceStack(
         app,
-        StackProps.builder().env(Environment.builder().region("eu-north-1").build()).build(),
+        StackProps.builder().env(Environment.builder().region(REGION).build()).build(),
         "devtestConformanceStack",
         "test", // in the dev account
         "Z0720499I10UDAXMT620",
@@ -34,7 +36,7 @@ public final class ConformanceApp {
 
     new ConformanceStack(
         app,
-        StackProps.builder().env(Environment.builder().region("eu-north-1").build()).build(),
+        StackProps.builder().env(Environment.builder().region(REGION).build()).build(),
         "testConformanceStack",
         "test",
         "Z00173773E1E6BI3P1ZF0",

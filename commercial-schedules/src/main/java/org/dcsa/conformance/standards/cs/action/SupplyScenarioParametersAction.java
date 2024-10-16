@@ -9,13 +9,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.cs.model.CsDateUtils;
 import org.dcsa.conformance.standards.cs.party.CsFilterParameter;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @Getter
-public class SupplyScenarioParametersAction extends ConformanceAction {
+public class SupplyScenarioParametersAction extends CsAction {
 
   private final LinkedHashSet<CsFilterParameter> csFilterParameters;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
@@ -30,9 +29,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
             .formatted(
                 Arrays.stream(csFilterParameters)
                     .map(CsFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))));
-    this.csFilterParameters =
-        Stream.of(csFilterParameters).collect(Collectors.toCollection(LinkedHashSet::new));
+                    .collect(Collectors.joining(", "))),
+        -1);
+    this.csFilterParameters = new LinkedHashSet<>(Arrays.asList(csFilterParameters));
   }
 
   @Override

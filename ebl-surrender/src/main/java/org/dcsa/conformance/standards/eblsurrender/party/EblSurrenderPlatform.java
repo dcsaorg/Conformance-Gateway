@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.eblsurrender.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -24,7 +25,6 @@ import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction
 public class EblSurrenderPlatform extends ConformanceParty {
   private final Map<String, EblSurrenderState> eblStatesById = new HashMap<>();
   private final Map<String, String> tdrsBySrr = new HashMap<>();
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public EblSurrenderPlatform(
       String apiVersion,
@@ -46,8 +46,8 @@ public class EblSurrenderPlatform extends ConformanceParty {
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
         "eblStatesById",
-        StateManagementUtil.storeMap(objectMapper, eblStatesById, EblSurrenderState::name));
-    targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(objectMapper, tdrsBySrr));
+        StateManagementUtil.storeMap(eblStatesById, EblSurrenderState::name));
+    targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(tdrsBySrr));
   }
 
   @Override
@@ -91,10 +91,9 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
-                Map.entry("EBL_PLATFORM_PLACEHOLDER", ssp.eblPlatform()),
-                Map.entry("CARRIER_PARTY_CODE_PLACEHOLDER", ssp.carrierPartyCode()),
-                Map.entry("PARTY_CODE_PLACEHOLDER", ssp.surrenderPartyCode()),
-                Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName()),
+                Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
+                Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
+                Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
     syncCounterpartPost(
@@ -125,8 +124,8 @@ public class EblSurrenderPlatform extends ConformanceParty {
       response =
           request.createResponse(
               204,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(objectMapper.createObjectNode()));
+              Map.of(API_VERSION, List.of(apiVersion)),
+              new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else if (Objects.equals(
         EblSurrenderState.DELIVERY_SURRENDER_REQUESTED, eblStatesById.get(tdr))) {
       eblStatesById.put(
@@ -137,15 +136,15 @@ public class EblSurrenderPlatform extends ConformanceParty {
       response =
           request.createResponse(
               204,
-              Map.of("Api-Version", List.of(apiVersion)),
-              new ConformanceMessageBody(objectMapper.createObjectNode()));
+              Map.of(API_VERSION, List.of(apiVersion)),
+              new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
     } else {
       response =
           request.createResponse(
               409,
-              Map.of("Api-Version", List.of(apiVersion)),
+              Map.of(API_VERSION, List.of(apiVersion)),
               new ConformanceMessageBody(
-                  objectMapper
+                  OBJECT_MAPPER
                       .createObjectNode()
                       .put(
                           "comments",

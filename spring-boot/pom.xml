@@ -14,8 +14,7 @@
 	<description>DCSA Conformance Spring Boot</description>
 
 	<properties>
-		<spring-cloud.version>2022.0.3</spring-cloud.version>
-		<spring.boot.version>3.2.8</spring.boot.version>
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
 	</properties>
 
 	<dependencies>
@@ -37,12 +36,11 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<version>6.0.0</version>
+			<version>6.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -50,6 +48,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<version>${spring.boot.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>4.25.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -73,6 +77,9 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring.boot.version}</version>
 				<configuration>
+					<mainClass>org.dcsa.conformance.springboot.ConformanceApplication</mainClass>
+					<layout>JAR</layout>
+					<skip>false</skip>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

@@ -16,23 +16,23 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 @Getter
 @Slf4j
 public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateChangingSIAction {
+  private final ShippingInstructionsStatus expectedSIStatus;
   private final boolean useTDRef;
   private final JsonSchemaValidator requestSchemaValidator;
-  private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
 
   public UC5_Shipper_CancelUpdateToShippingInstructionsAction(
       String carrierPartyName,
       String shipperPartyName,
       EblAction previousAction,
+      ShippingInstructionsStatus expectedSIStatus,
       boolean useTDRef,
       JsonSchemaValidator requestSchemaValidator,
-      JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", Set.of(200));
+    super(shipperPartyName, carrierPartyName, previousAction, useTDRef ? "UC5 [TDR]" : "UC5", 202);
+    this.expectedSIStatus = expectedSIStatus;
     this.useTDRef = useTDRef;
     this.requestSchemaValidator = requestSchemaValidator;
-    this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
   }
 
@@ -65,7 +65,6 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
         var documentReference = useTDRef
           ? Objects.requireNonNullElse(dsp.transportDocumentReference(), "<DSP MISSING TD REFERENCE>")
           : Objects.requireNonNullElse(dsp.shippingInstructionsReference(), "<DSP MISSING SI REFERENCE>");
-        var siStatus = Objects.requireNonNullElse(dsp.shippingInstructionsStatus(), ShippingInstructionsStatus.SI_RECEIVED);
         Stream<ActionCheck> primaryExchangeChecks =
           Stream.of(
             new HttpMethodCheck(EblRole::isShipper, getMatchedExchangeUuid(), "PATCH"),
@@ -86,29 +85,16 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                requestSchemaValidator),
-            new JsonSchemaCheck(
-                EblRole::isCarrier,
-                getMatchedExchangeUuid(),
-                HttpMessageType.RESPONSE,
-                responseSchemaValidator));
+                requestSchemaValidator));
         return Stream.concat(
           primaryExchangeChecks,
-          Stream.concat(
-            EBLChecks.siRefStatusContentChecks(
-              getMatchedExchangeUuid(),
-              expectedApiVersion,
-              siStatus,
-              ShippingInstructionsStatus.SI_UPDATE_CANCELLED,
-              EBLChecks.sirInRefStatusMustMatchDSP(getDspSupplier())
-            ),
-            getSINotificationChecks(
+          getSINotificationChecks(
               getMatchedNotificationExchangeUuid(),
               expectedApiVersion,
               notificationSchemaValidator,
-              siStatus,
+              expectedSIStatus,
               ShippingInstructionsStatus.SI_UPDATE_CANCELLED,
-              EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier()))));
+              EBLChecks.sirInNotificationMustMatchDSP(getDspSupplier())));
       }
     };
   }

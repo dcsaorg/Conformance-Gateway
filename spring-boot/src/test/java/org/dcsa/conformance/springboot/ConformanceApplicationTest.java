@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -27,7 +27,8 @@ class ConformanceApplicationTest {
   private TestRestTemplate restTemplate;
 
   @ParameterizedTest
-  @CsvSource({
+  @ValueSource(strings = {
+    "adoption-100-conformance-auto-all-in-one",
     "booking-200-conformance-auto-all-in-one",
     "booking-200-reference-implementation-auto-all-in-one",
     "cs-100-conformance-auto-all-in-one",
@@ -39,7 +40,7 @@ class ConformanceApplicationTest {
     "eblsurrender-300-conformance-auto-all-in-one",
     "jit-120-conformance-auto-all-in-one",
     "ovs-300-conformance-auto-all-in-one",
-    "pint-300-reference-implementation-auto-all-in-one",
+    "pint-300-conformance-auto-all-in-one",
     "tnt-220-conformance-auto-all-in-one"
   })
   void testEachSuite(final String sandboxId) throws InterruptedException {
@@ -60,10 +61,10 @@ class ConformanceApplicationTest {
     int firstFound = report.indexOf("conformance</h2><details open><summary>✅ CONFORMANT");
     int secondFound = report.indexOf("conformance</h2><details open><summary>✅ CONFORMANT", firstFound + 50);
     if (firstFound == -1 || secondFound == -1) { // Report current situation for debugging
-      log.error("Report current situation: {}", report);
+      log.error("Report situation on sandboxId {}: {}", sandboxId, report);
     }
-    assertTrue(firstFound > 0, "First conformance OK not found");
-    assertTrue(secondFound > firstFound, "Second conformance OK not found");
+    assertTrue(firstFound > 0, "First conformance OK not found, in sandbox: " + sandboxId);
+    assertTrue(secondFound > firstFound, "Second conformance OK not found after first, in sandbox: " + sandboxId);
   }
 
   private void checkUntilScenariosAreReady(String sandboxId) throws InterruptedException {

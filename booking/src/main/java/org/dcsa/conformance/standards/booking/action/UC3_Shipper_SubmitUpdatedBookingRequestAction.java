@@ -18,18 +18,21 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
+  private final BookingState expectedBookingState;
 
   public UC3_Shipper_SubmitUpdatedBookingRequestAction(
       String carrierPartyName,
       String shipperPartyName,
       BookingAction previousAction,
+      BookingState expectedBookingState,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator responseSchemaValidator,
       JsonSchemaValidator notificationSchemaValidator) {
-    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 200);
+    super(shipperPartyName, carrierPartyName, previousAction, "UC3", 202);
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
+    this.expectedBookingState = expectedBookingState;
   }
 
   @Override
@@ -61,44 +64,20 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var cbrr = getDspSupplier().get().carrierBookingRequestReference();
-        Stream<ActionCheck> primaryExchangeChecks =
-            Stream.of(
-                new HttpMethodCheck(BookingRole::isShipper, getMatchedExchangeUuid(), "PUT"),
-                new UrlPathCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    "/v2/bookings/%s".formatted(cbrr)),
-                new ResponseStatusCheck(
-                    BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    BookingRole::isCarrier,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                    BookingRole::isShipper,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    requestSchemaValidator),
-                BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier()));
         return Stream.concat(
           Stream.of(
           new JsonSchemaCheck(
-            BookingRole::isCarrier,
+            BookingRole::isShipper,
             getMatchedExchangeUuid(),
-            HttpMessageType.RESPONSE,
-            responseSchemaValidator)),
+            HttpMessageType.REQUEST,
+            requestSchemaValidator),
+            BookingChecks.requestContentChecks(getMatchedExchangeUuid(),expectedApiVersion, getCspSupplier(), getDspSupplier())),
           Stream.concat(
-            primaryExchangeChecks,
+            createPrimarySubChecks("PUT", expectedApiVersion, "/v2/bookings/%s".formatted(cbrr)),
             getNotificationChecks(
                 expectedApiVersion,
                 notificationSchemaValidator,
-                BookingState.UPDATE_RECEIVED,
+                expectedBookingState,
                 null)));
       }
     };

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -15,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.AbstractComponentFactory;
@@ -24,11 +22,13 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.configuration.StandardConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
+import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.booking.BookingStandard;
 import org.dcsa.conformance.standards.cs.CsStandard;
 import org.dcsa.conformance.standards.ebl.EblStandard;
@@ -42,6 +42,7 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 @Slf4j
 public class ConformanceSandbox {
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
+    AdoptionStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
@@ -238,14 +239,15 @@ public class ConformanceSandbox {
       ConformanceWebRequest webRequest,
       Consumer<JsonNode> deferredSandboxTaskConsumer) {
     log.info(
-        "ConformanceSandbox.handleRequest() "
-            + OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
+        "ConformanceSandbox.handleRequest() {}",
+        OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
 
     String expectedPrefix = "/conformance/sandbox/";
     int expectedPrefixStart = webRequest.url().indexOf(expectedPrefix);
-    if (expectedPrefixStart < 0)
-      throw new IllegalArgumentException(
-          "Missing '%s' in: %s".formatted(expectedPrefix, webRequest.url()));
+    if (expectedPrefixStart < 0) {
+      log.info("Rejecting request with missing '{}' in: {}", expectedPrefix, webRequest.url());
+      return new ConformanceWebResponse(404, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
+    }
     String remainingUri = webRequest.url().substring(expectedPrefixStart + expectedPrefix.length());
 
     int endOfSandboxId = remainingUri.indexOf("/");
@@ -591,7 +593,7 @@ public class ConformanceSandbox {
             .put("handler", "_syncHandleOutboundRequest")
             .put("sandboxId", sandboxId)
             .set("conformanceRequest", conformanceRequest.toJson());
-    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    log.debug("Deferring task: {}", deferredTask.toPrettyString());
     deferredSandboxTaskConsumer.accept(deferredTask);
   }
 
@@ -602,7 +604,7 @@ public class ConformanceSandbox {
             .createObjectNode()
             .put("handler", "_syncSendOutboundWebRequest")
             .set("conformanceWebRequest", conformanceWebRequest.toJson());
-    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    log.debug("Deferring task: {}", deferredTask.toPrettyString());
     deferredSandboxTaskConsumer.accept(deferredTask);
   }
 
@@ -611,7 +613,7 @@ public class ConformanceSandbox {
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       JsonNode jsonNode) {
     try {
-      log.debug("ConformanceSandbox.executeDeferredTask(%s)".formatted(jsonNode.toPrettyString()));
+      log.debug("ConformanceSandbox.executeDeferredTask({})", jsonNode.toPrettyString());
       switch (jsonNode.path("handler").asText()) {
         case "_syncHandleOutboundRequest":
           _syncHandleOutboundRequest(
@@ -625,7 +627,7 @@ public class ConformanceSandbox {
               ConformanceWebRequest.fromJson((ObjectNode) jsonNode.get("conformanceWebRequest")));
           return;
         default:
-          log.error("Unsupported deferred task: " + jsonNode.toPrettyString());
+          log.error("Unsupported deferred task: {}", jsonNode.toPrettyString());
       }
     } catch (Exception e) {
       log.error(
@@ -639,8 +641,9 @@ public class ConformanceSandbox {
   private static ConformanceResponse _syncHttpRequest(ConformanceRequest conformanceRequest) {
     URI uri = conformanceRequest.toURI();
     log.info(
-        "ConformanceSandbox.syncHttpRequest(%s) request: %s"
-            .formatted(uri, conformanceRequest.toJson().toPrettyString()));
+        "ConformanceSandbox.syncHttpRequest({}) request: {}",
+        uri,
+        conformanceRequest.toJson().toPrettyString());
 
     HttpRequest.Builder httpRequestBuilder =
         "GET".equals(conformanceRequest.method())
@@ -652,6 +655,7 @@ public class ConformanceSandbox {
                     HttpRequest.BodyPublishers.ofString(
                         conformanceRequest.message().body().getStringBody()));
 
+    // Allow long debugging sessions or slow business logic at customer's side
     httpRequestBuilder.timeout(Duration.ofHours(1));
 
     conformanceRequest
@@ -659,20 +663,17 @@ public class ConformanceSandbox {
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
 
-    HttpResponse<String> httpResponse;
-    try (HttpClient httpClient =
-        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()) {
-      httpResponse =
-          httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-    }
+    HttpResponse<String> httpResponse =
+        IOToolkit.HTTP_CLIENT.send(
+            httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
             httpResponse.statusCode(),
             httpResponse.headers().map(),
             new ConformanceMessageBody(httpResponse.body()));
     log.info(
-        "ConformanceSandbox.syncHttpRequest() response: %s"
-            .formatted(conformanceResponse.toJson().toPrettyString()));
+        "ConformanceSandbox.syncHttpRequest() response: {}",
+        conformanceResponse.toJson().toPrettyString());
     return conformanceResponse;
   }
 
@@ -710,6 +711,7 @@ public class ConformanceSandbox {
 
   private static void _syncSendOutboundWebRequest(ConformanceWebRequest conformanceWebRequest) {
     try {
+      // Allow long debugging sessions or slow business logic at customer's side
       HttpRequest.Builder httpRequestBuilder =
           HttpRequest.newBuilder()
               .uri(URI.create(conformanceWebRequest.url()))
@@ -719,13 +721,11 @@ public class ConformanceSandbox {
           .headers()
           .forEach(
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-      try (HttpClient httpClient = HttpClient.newHttpClient()) {
-        httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-      }
+      IOToolkit.HTTP_CLIENT.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (Exception e) {
       log.error(
-          "Failed to send outbound request: %s"
-              .formatted(conformanceWebRequest.toJson().toPrettyString()),
+          "Failed to send outbound request: {}",
+          conformanceWebRequest.toJson().toPrettyString(),
           e);
     }
   }
@@ -746,8 +746,9 @@ public class ConformanceSandbox {
             orchestrator -> partyPromptReference.set(orchestrator.handleGetPartyPrompt(partyName)))
         .run();
     log.info(
-        "Returning prompt for party %s: %s"
-            .formatted(partyName, partyPromptReference.get().toPrettyString()));
+        "Returning prompt for party {}: {}",
+        partyName,
+        partyPromptReference.get().toPrettyString());
     return new ConformanceWebResponse(
         200,
         JsonToolkit.JSON_UTF_8,

@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "DCSA EBL Surrender API",
-    "description": "This API is intended as an API between a carrier and an EBL Solution Platform.\n\nThe EBL Solution Platform will submit surrender requests to the carrier, via\n\n    /v3/ebl-surrender-requests\n\nwhich will be processed asynchronously. Responses to the surrender reqests will be submitted by the carrier via \n\n    /v3/ebl-surrender-responses\n\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\n### Stats API\nThe Stats API offers crucial statistical information for both API providers and consumers to enhance their services and helps DCSA to understand and scale the ecosystem. We expect you to invoke the Stats API for every request made to this API. Further details can be found [here](https://labs.dcsa.org/#/http/guides/api-guides/stats-api/introduction)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "title": "DCSA eBL Surrender API",
+    "description": "<h1>DCSA OpenAPI specification for the surrender of an electronic Bill of Lading (eBL) via an eBL Solution Provider for amendment (incl. switch to paper), and delivery</h1>\n\nThis API is intended as an API between a carrier and an EBL Solution Platform.\n\nThe EBL Solution Platform will submit surrender requests to the carrier, via\n\n    POST /v3/ebl-surrender-requests\n\nwhich will be processed asynchronously. Responses to the surrender requests will be submitted by the carrier via \n\n    POST /v3/ebl-surrender-responses\n\nWhen the platform submits a surrender request, the platform guarantees *all* of the following:\n\n1) The surrender request was submitted by the sole possessor of the EBL.\n2) Depending on the eBL type:\n   * For non-negotiable (\"straight\") eBLs, the surrender request was submitted by either the original shipper OR the consignee.\n   * For negotiable eBLs with a named titleholder, the surrender request was submitted by the named titleholder.\n   * For negotiable eBLs without a named titleholder / blank eBLs, possession is sufficient for the entity surrendering the eBL.\n3) The platform has the EBL in custody while the carrier is evaluating this surrender request. I.e., neither possession nor title holder changes can occur until the carrier responds to this surrender request.\n\nPlease see the [Surrender Request](#/surrenderRequestDetails) for details on what data the platform will provide.\n\nThe processes for amendments to eBL (including switch to paper) and for surrender of the eBL for delivery of the goods shall be exclusively governed by and executed in accordance with the Bylaws of the eBL Platform where the Surrender for amendment or Surrender for delivery was received, including establishing whether the User in Control performing the Surrender for amendment or Surrender for delivery is entitled to carry out this action.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/surrender#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -177,7 +177,7 @@
             "maxLength": 4,
             "pattern": "^\\S+$",
             "type": "string",
-            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n\nMust be a code this list [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/reference-data/eblsolutionproviders-v3.0.0.csv).\n",
+            "description": "The EBL platform of the transaction party. The value **MUST** be one of:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (Enigio trace:original)\n- `BRIT` (BRITC eBL)\n",
             "example": "BOLE"
           },
           "partyName": {
@@ -217,12 +217,12 @@
             "type": "string",
             "description": "Date time when the action occurred.",
             "format": "date-time",
-            "example": "2024-07-01T08:00:00+08:30"
+            "example": "2024-09-04T09:41:00Z"
           },
           "actionCode": {
             "maxLength": 50,
             "type": "string",
-            "description": "The action performed by the party. This should be one of:\n- `ISSUE` (The actor issued the document to the recipient)\n- `ENDORSE` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER FOR DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER FOR AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\nNot all actions are applicable to all surrender requests.\n",
+            "description": "The action performed by the party. This should be one of:\n- `ISSUE` (The actor issued the document to the recipient)\n- `ENDORSE` (The actor endorsed the document to the recipient)\n- `SIGN` (The actor signed or performed an \"assignment\" to the recipient)\n- `SURRENDER_FOR_DELIVERY` (The actor requested this surrender request for delivery to the recipient)\n- `SURRENDER_FOR_AMENDMENT` (The actor requested this surrender request for amendment to the recipient)\nNot all actions are applicable to all surrender requests.\n",
             "example": "ISSUE"
           },
           "actor": {
@@ -239,7 +239,6 @@
         "required": [
           "surrenderRequestCode",
           "surrenderRequestReference",
-          "surrenderRequestedBy",
           "transportDocumentReference"
         ],
         "type": "object",
@@ -260,7 +259,7 @@
           },
           "surrenderRequestCode": {
             "type": "string",
-            "description": "Surrender Request codes:\n- `SREQ` (Requested to surrender for Delivery)\n- `AREQ` (Requested to surrender for Amendment)\n\nThe surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a surrender for delivery or the actual contents of the admendment in a surrender related to an amendment.\n\nNote that \"Switch to paper\" is considered an amendment in how it is modelled via the DCSA eBL data standard.\n",
+            "description": "Surrender Request codes:\n- `SREQ` (Requested to surrender for Delivery)\n- `AREQ` (Requested to surrender for Amendment)\n\nThe surrender request code determines the type of surrender request. Any parallel negotiation between the consignee and the carrier related to any of these type surrender are handled outside this API. Examples could be the shipment release related to a surrender for delivery or the actual contents of the amendment in a surrender related to an amendment.\n\nNote that \"Switch to paper\" is considered an amendment in how it is modelled via the DCSA eBL data standard.\n",
             "example": "SREQ",
             "enum": [
               "SREQ",
@@ -282,7 +281,7 @@
           },
           "endorsementChain": {
             "type": "array",
-            "description": "The endorsement chain consist of (a number of) endorsement actions that were performed **after** the eBL bill was issued.\n\nFor straight B/Ls, the endorsement chain can be omitted. For negotiable eBLs, the endorsement chain must be present, as the carrier receiving the surrender request and will check all endorsements before accepting the eBL. The endorsement chain is the electronic version of the \"back side\" of the paper world B/L.\n",
+            "description": "A list of one or more endorsement related actions that were performed on or after the issuance of the eBL. It is equivalent to the \"back side\" of the physical bill of lading. The type of actions recorded in the endorsement chain as defined by the DCSA standard are listed below:\n\n - **Issue:** The act of issuing an eBL i.e. making the eBL available to the receiver.\n - **Endorse:** The act of transferring the rights and obligations associated with the eBL to a specific named party, allowing them to claim or deal with the goods. The user in control of the eBL may endorse the eBL in their turn to another named party. Only applicable to To-Order eBL (`isToOrder=true`).\n - **Sign:** A general-purpose signature that can be used by any party to mark their possession of the eBL. Similar to how any possessor in the physical world can put a physical signature on the paper bill of lading. The endorsement chain as defined by DCSA does not record any transfer of possession of the eBL, unless a signature is added to it.\n - **Request surrender for amendment:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the puprpose of amending the eBL.\n - **Request surrender for delivery:** The presentation (by transfer) of the eBL to the Issuer, or another user appointed by the Issuer, by a user entitled to do so for the purpose of claiming delivery of the goods.\n\n **Note:** DCSA member carriers have agreed that the name `endorsementChain` is still the correct name for this list of actions.\n",
             "items": {
               "$ref": "#/components/schemas/EndorsementChainLink"
             }
@@ -301,7 +300,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (Enigio trace:original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -340,7 +339,7 @@
             "pattern": "^[A-Z]{2}$",
             "type": "string",
             "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-            "example": "DK"
+            "example": "IN"
           },
           "value": {
             "maxLength": 35,
@@ -350,7 +349,7 @@
             "example": "AAAAA0000A"
           }
         },
-        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\nA list of examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d’Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d’Identification Fiscal in Algeria|\n\nAllowed combinations of `type` and `country` are maintained in [GitHub](https://github.com/dcsaorg/DCSA-OpenAPI/blob/master/domain/documentation/reference-data/taxandlegalreferences-v300.csv).\n"
+        "description": "Reference that uniquely identifies a party for tax and/or legal purposes in accordance with the relevant jurisdiction.\n\nA small list of **potential** examples:\n\n| Type  | Country | Description |\n|-------|:-------:|-------------|\n|PAN|IN|Goods and Services Tax Identification Number in India|\n|GSTIN|IN|Goods and Services Tax Identification Number in India|\n|IEC|IN|Importer-Exported Code in India|\n|RUC|EC|Registro Único del Contribuyente in Ecuador|\n|RUC|PE|Registro Único del Contribuyente in Peru|\n|NIF|MG|Numéro d'Identification Fiscal in Madagascar|\n|NIF|DZ|Numéro d'Identification Fiscal in Algeria|\n"
       },
       "ErrorResponse": {
         "title": "Error Response",
@@ -409,9 +408,9 @@
           },
           "errorDateTime": {
             "type": "string",
-            "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.\n",
+            "description": "The DateTime corresponding to the error occurring. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.\n",
             "format": "date-time",
-            "example": "2019-11-12T07:41:00+08:30"
+            "example": "2024-09-04T09:41:00Z"
           },
           "errors": {
             "minItems": 1,
@@ -436,7 +435,7 @@
             "maximum": 9999,
             "minimum": 7000,
             "type": "integer",
-            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://dcsa.atlassian.net/wiki/spaces/DTG/pages/197132308/Standard+Error+Codes).\n",
+            "description": "The detailed error code returned.\n\n  - `7000-7999` Technical error codes\n  - `8000-8999` Functional error codes\n  - `9000-9999` API provider-specific error codes            \n\n[Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).\n",
             "format": "int32",
             "example": 7003
           },
@@ -490,7 +489,7 @@
           },
           "action": {
             "type": "string",
-            "description": "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an admendment, the carrier will follow up with issuing the admended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
+            "description": "Action performed:\n- `SURR` (Surrendered)\n- `SREJ` (Surrender rejected)\n\nWhen the carrier accepts the surrender (`SURR`), the platform will inform the party that submitted the surrender request that the surrender has been accepted.  If the surrender is due to an amendment, the carrier will follow up with issuing the amended document to the party that submitted the surrender. The carrier will immediately become the possessor of the bill and can now void it.\n\nWhen the carrier rejects the surrender (`SREJ`), the EBL is returned to the party that submitted the surrender request.\n",
             "example": "SURR",
             "enum": [
               "SURR",

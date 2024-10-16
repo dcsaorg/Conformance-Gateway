@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.cs.party.CsRole;
+import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
 
 @UtilityClass
@@ -61,8 +63,8 @@ public class CsChecks {
                                 if (!CsDataSets.CUTOFF_DATE_TIME_CODES.contains(
                                     cutOffDateTimeCode.asText())) {
                                   issues.add(
-                                      String.format(
-                                          "Invalid cutOffDateTimeCode: %s",
+
+                                          "Invalid cutOffDateTimeCode: %s".formatted(
                                           cutOffDateTimeCode.asText()));
                                 }
                               }));
@@ -73,7 +75,9 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForPtp(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPtp("placeOfReceipt"));
     checks.add(createLocationCheckPtp("placeOfDelivery"));
@@ -88,6 +92,9 @@ public class CsChecks {
         checks.add(validateDateRangeforPtp(sspSupplier));
       }
     }
+    if (checkPagination && dspSupplier != null) {
+      checks.add(paginationCheck(dspSupplier));
+    }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
         matchedExchangeUuid,
@@ -96,9 +103,23 @@ public class CsChecks {
         checks);
   }
 
+  private static JsonContentCheck paginationCheck(Supplier<DynamicScenarioParameters> dspSupplier) {
+    return JsonAttribute.customValidator(
+        "Check the response is paginated correctly",
+        body -> {
+          var issues = new LinkedHashSet<String>();
+          String firstPageHash = dspSupplier.get().firstPage();
+          String secondPageHash = dspSupplier.get().secondPage();
+          if (Objects.equals(firstPageHash, secondPageHash)) {
+            issues.add("The second page must be different from the first page");
+          }
+          return issues;
+        });
+  }
+
   private static JsonContentCheck createLocationCheckPtp(String locationType) {
     return JsonAttribute.customValidator(
-        String.format("Check any one of the location is available for '%s'", locationType),
+        "Check any one of the location is available for '%s'".formatted(locationType),
         body -> {
           var issues = new LinkedHashSet<String>();
           for (JsonNode routing : body) {
@@ -117,11 +138,16 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForPs(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckPs());
     checks.add(VALIDATE_CUTOFF_TIME_CODE_PS);
     checks.add(validateDateForPs(sspSupplier));
+    if (checkPagination && dspSupplier != null) {
+      checks.add(paginationCheck(dspSupplier));
+    }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
         matchedExchangeUuid,
@@ -152,7 +178,9 @@ public class CsChecks {
   public static ActionCheck getPayloadChecksForVs(
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      Supplier<SuppliedScenarioParameters> sspSupplier) {
+      Supplier<SuppliedScenarioParameters> sspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      boolean checkPagination) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(createLocationCheckVs());
     if (sspSupplier.get() != null) {
@@ -162,6 +190,9 @@ public class CsChecks {
       if (sspSupplier.get().getMap().containsKey(VESSEL_IMO_NUMBER)) {
         checks.add(validateIMONumberForVS(sspSupplier));
       }
+    }
+    if (checkPagination && dspSupplier != null) {
+      checks.add(paginationCheck(dspSupplier));
     }
     return JsonAttribute.contentChecks(
         CsRole::isPublisher,
@@ -195,14 +226,14 @@ public class CsChecks {
 
   private static void checkAnyLocationIsPresent(
       String locationType, JsonNode data, LinkedHashSet<String> issues) {
-    String locationPath = String.format("/%s/location", locationType);
+    String locationPath = "/%s/location".formatted(locationType);
     JsonNode address = data.at(locationPath + "/address");
     JsonNode unLocationCode = data.at(locationPath + "/UNLocationCode");
     JsonNode facility = data.at(locationPath + "/facility");
     if (JsonAttribute.isJsonNodeAbsent(address)
         && JsonAttribute.isJsonNodeAbsent(unLocationCode)
         && JsonAttribute.isJsonNodeAbsent(facility)) {
-      issues.add(String.format("Any one of the location should be present for '%s'", locationType));
+      issues.add("Any one of the location should be present for '%s'".formatted(locationType));
     }
   }
 
@@ -277,9 +308,9 @@ public class CsChecks {
 
     // Compare the dates
     if (dateType.equals("startDate") && !dateTimeAsDate.isAfter(date)) {
-      return String.format("The %s date should be after the start date", operation);
+      return "The %s date should be after the start date".formatted(operation);
     } else if (dateType.equals("endDate") && !dateTimeAsDate.isBefore(date)) {
-      return String.format("The %s date should be before the end date", operation);
+      return "The %s date should be before the end date".formatted(operation);
     }
     return "";
   }

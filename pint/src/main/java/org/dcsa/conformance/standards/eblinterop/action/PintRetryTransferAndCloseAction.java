@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.eblinterop.action;
 
-import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 import static org.dcsa.conformance.standards.ebl.crypto.SignedNodeSupport.parseSignedNodeNoErrors;
+import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -23,6 +23,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Slf4j
 public class PintRetryTransferAndCloseAction extends PintAction {
   private final PintResponseCode responseCode;
+  private final SenderTransmissionClass senderTransmissionClass;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
@@ -34,6 +35,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     String sendingPlatform,
     PintAction previousAction,
     PintResponseCode responseCode,
+    SenderTransmissionClass senderTransmissionClass,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -48,6 +50,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
         responseCode.getHttpResponseCode()
     );
     this.responseCode = responseCode;
+    this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -170,6 +173,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
                   expectedApiVersion,
+                  senderTransmissionClass,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

@@ -14,7 +14,6 @@ end_of_line = crlf
 
 [pom.xml]
 indent_style = tab
-indent_size = 2
 
 [*.java]
 ij_java_class_count_to_use_import_on_demand = 999

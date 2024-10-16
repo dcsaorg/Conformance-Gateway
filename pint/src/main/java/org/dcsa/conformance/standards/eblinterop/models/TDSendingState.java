@@ -7,12 +7,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.nimbusds.jose.JWSObject;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import com.nimbusds.jose.JWSObject;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
@@ -25,21 +23,6 @@ public class TDSendingState {
   private static final String SIGNED_MANIFEST = "signedManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN = "envelopeTransferChain";
   private static final String ISSUANCE_MANIFEST = "issuanceManifestSignedContent";
-
-
-  private static final Map<String, String> PLATFORM2CODELISTNAME = Map.ofEntries(
-    Map.entry("WAVE", "Wave"),
-    Map.entry("CARX", "CargoX"),
-    Map.entry("EDOX", "EdoxOnline"),
-    Map.entry("IQAX", "IQAX"),
-    Map.entry("ESSD", "EssDOCS"),
-    Map.entry("BOLE", "Bolero"),
-    Map.entry("TRGO", "TradeGO"),
-    Map.entry("SECR", "Secro")/*,
-    Map.entry("", "GSBN"),
-    Map.entry("", "WiseTech")
-    */
-  );
 
   private final ObjectNode state;
 
@@ -127,39 +110,23 @@ public class TDSendingState {
     return state.path(ENVELOPE_TRANSFER_CHAIN);
   }
 
-
-
-  public static String platform2CodeListName(String platform) {
-    // The default is not valid, but it only happens with unknown platforms and null would be even worse
-    return PLATFORM2CODELISTNAME.getOrDefault(platform, platform);
-  }
-
-  public static ObjectNode generateTransaction(String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, String receivingPlatform, String receivingPartyName, String receivingEPUI, String receivingCodeListName) {
+  public static ObjectNode generateTransaction(String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, JsonNode receiverParty) {
     var actor = OBJECT_MAPPER.createObjectNode()
       .put("eblPlatform", sendingPlatform)
       .put("partyName", sendingPartyName);
-    actor.putArray("partyCodes")
+    actor.putArray("identifyingCodes")
       .addObject()
       .put("partyCode", sendingEPUI)
-      .put("codeListProvider", "EPUI")
-      .put("codeListName", platform2CodeListName(sendingPlatform));
-    var recipient = OBJECT_MAPPER.createObjectNode()
-      .put("eblPlatform", receivingPlatform)
-      .put("partyName", receivingPartyName);
-    recipient.putArray("partyCodes")
-      .addObject()
-      .put("partyCode", receivingEPUI)
-      .put("codeListProvider", "EPUI")
-      .put("codeListName", receivingCodeListName);
+      .put("codeListProvider", sendingPlatform);
     var transaction = OBJECT_MAPPER.createObjectNode()
       .put("action", action)
       .put("timestamp", Instant.now().toEpochMilli());
     transaction.set("actor", actor);
-    transaction.set("recipient", recipient);
+    transaction.set("recipient", receiverParty);
     return transaction;
   }
 
-  public static String generateTransactionEntry(PayloadSigner payloadSigner, String previousEnvelopeTransferChainEntrySignedContentChecksum, String tdChecksum, String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, String receivingPlatform, String receivingPartyName, String receivingEPUI, String receivingCodeListName) {
+  public static String generateTransactionEntry(PayloadSigner payloadSigner, String previousEnvelopeTransferChainEntrySignedContentChecksum, String tdChecksum, String action, String sendingPlatform, String sendingPartyName, String sendingEPUI, JsonNode receivingParty) {
     var latestEnvelopeTransferChainUnsigned = OBJECT_MAPPER.createObjectNode()
       .put("eblPlatform", sendingPlatform)
       .put("transportDocumentChecksum", tdChecksum)
@@ -172,10 +139,7 @@ public class TDSendingState {
         sendingPlatform,
         sendingPartyName,
         sendingEPUI,
-        receivingPlatform,
-        receivingPartyName,
-        receivingEPUI,
-        receivingCodeListName
+        receivingParty
       ));
 
 
@@ -197,12 +161,10 @@ public class TDSendingState {
     var lastSigned = chain.path(chain.size() - 1);
     var last = parseSignedNode(lastSigned);
     var sendingPlatform = "BOLE";
-    var receivingPlatform = rsp.eblPlatform();
+    var receivingPlatform = rsp.receiverParty().path("eblPlatform").asText("!?");
     var sendingEPUI = "1234";
     var sendingPartyName = "DCSA CTK tester";
-    var receivingEPUI = rsp.receiverEPUI();
-    var receivingPartyName = rsp.receiverPartyName();
-    var receiverCodeListName = rsp.receiverEPUICodeListName();
+    var receivingParty = rsp.receiverParty();
     if (sendingPlatform.equals(receivingPlatform)) {
       sendingPlatform = "WAVE";
     }
@@ -211,10 +173,7 @@ public class TDSendingState {
       sendingPlatform,
       sendingPartyName,
       sendingEPUI,
-      sendingPlatform,
-      receivingPartyName,
-      receivingEPUI,
-      receiverCodeListName
+      receivingParty
     );
 
     ((ArrayNode)last.path("transactions")).insert(0, newTransactionEntry);

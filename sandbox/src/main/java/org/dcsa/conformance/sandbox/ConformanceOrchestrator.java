@@ -321,7 +321,7 @@ public class ConformanceOrchestrator implements StatefulEntity {
               .formatted(currentScenario.toString()));
       return;
     }
-    if (!nextAction.hasMatchedExchange()) {
+    if (nextAction.isMissingMatchedExchange()) {
       throw new UserFacingException(
           "A required API exchange was not yet detected for action '%s'"
               .formatted(nextAction.getActionTitle()));

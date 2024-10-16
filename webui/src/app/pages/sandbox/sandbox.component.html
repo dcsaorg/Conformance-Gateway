@@ -28,6 +28,7 @@
         <mat-card [ngClass]="'entityCard'" *ngFor="let scenario of standardModule.scenarios">
             <div class="cardContent withPointerCursor" (click)="onScenarioClick(scenario)">
                 <button
+                class="scenarioActionButton"
                 mat-icon-button
                 color="primary"
                 [disabled]="cannotPerformAction(scenario)"
@@ -36,11 +37,12 @@
                 ><mat-icon>{{getActionIconName(scenario)}}</mat-icon></button>
 
                 <span
+                id="conformanceStatus"
                 class="conformanceStatus"
                 [title]="getConformanceStatusTitle(scenario.conformanceStatus)"
                 >{{getConformanceStatusEmoji(scenario.conformanceStatus)}}</span>
 
-                <span>{{scenario.name}}</span>
+                <span class="wrappingText">{{scenario.name}}</span>
             </div>
         </mat-card>
         <br/>
@@ -50,6 +52,7 @@
 <div *ngIf="sandbox?.canNotifyParty">
     <div class="paragraph">
         <button
+        id="notifyPartyButton"
         mat-raised-button
         color="primary"
         (click)="onClickNotifyParty()"
@@ -66,9 +69,10 @@
     <div class="paragraph">
         <button
         mat-raised-button
+        testId="refreshButton"
         color="primary"
         (click)="onClickRefresh()"
         >Refresh</button>
     </div>
-    <div class="paragraph" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
+    <div class="paragraph" testId="operatorLog" *ngFor="let logEntry of sandbox?.operatorLog">{{logEntry}}</div>
 </div>

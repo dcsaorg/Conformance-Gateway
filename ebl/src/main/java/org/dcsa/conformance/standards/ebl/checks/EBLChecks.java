@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.models.TriConsumer;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 @UtilityClass
@@ -31,15 +33,213 @@ public class EBLChecks {
   private static final JsonPointer TD_NOTIFICATION_TD_STATUS_PTR = JsonPointer.compile("/data/transportDocumentStatus");
 
   private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
-  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/sendToPlatform");
+  private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/documentParties/issueTo/sendToPlatform");
+  private static final JsonPointer ISSUE_TO_PARTY = JsonPointer.compile("/documentParties/issueTo");
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
+
+  private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
+    (documentPartyNode, arrayNodeHandler) -> {
+      arrayNodeHandler.accept(
+        documentPartyNode, "displayedAddress", ArrayOrderHandler.inputPreservedArrayOrder());
+      arrayNodeHandler.accept(
+        documentPartyNode, "identifyingCodes", ArrayOrderHandler.toStringSortableArray());
+      arrayNodeHandler.accept(
+        documentPartyNode, "taxLegalReferences", ArrayOrderHandler.toStringSortableArray());
+      arrayNodeHandler.accept(
+        documentPartyNode, "partyContactDetails", ArrayOrderHandler.toStringSortableArray());
+    };
+
+  private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTIES_ARRAY_ORDER_DEFINITIONS =
+    (documentPartyNode, arrayNodeHandler) -> {
+      for (var partyName : List.of("shipper", "consignee", "notifyParty", "seller", "buyer", "endorsee", "issueTo")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(documentPartyNode.path(partyName), arrayNodeHandler);
+      }
+
+      arrayNodeHandler.accept(
+        documentPartyNode,
+        "notifyParties",
+        ArrayOrderHandler.inputPreservedArrayOrder());
+      for (var party : documentPartyNode.path("notifyParties")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(party, arrayNodeHandler);
+      }
+      arrayNodeHandler.accept(
+        documentPartyNode,
+        "other",
+        ArrayOrderHandler.toStringSortableArray());
+      for (var party : documentPartyNode.path("other")) {
+        DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(party, arrayNodeHandler);
+      }
+    };
+
+  public static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>>
+      SI_ARRAY_ORDER_DEFINITIONS =
+          (rootNode, arrayNodeHandler) -> {
+            arrayNodeHandler.accept(
+              rootNode, "partyContactDetails", ArrayOrderHandler.inputPreservedArrayOrder());
+            arrayNodeHandler.accept(
+              rootNode, "routingOfConsignmentCountries", ArrayOrderHandler.inputPreservedArrayOrder());
+
+            for (var ci : rootNode.path("consignmentItems")) {
+              arrayNodeHandler.accept(
+                ci, "descriptionOfGoods", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "HSCodes", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "nationalCommodityCodes", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ci, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
+              for (var cargoItem : ci.path("cargoItems")) {
+                arrayNodeHandler.accept(cargoItem, "nationalCommodityCodes", ArrayOrderHandler.toStringSortableArray());
+                for (var cr : cargoItem.path("customsReferences")) {
+                  arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+                }
+                arrayNodeHandler.accept(
+                  ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(ci, "cargoItems", ArrayOrderHandler.toStringSortableArray());
+              for (var cr : ci.path("customsReferences")) {
+                arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(
+                ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+            }
+
+            arrayNodeHandler.accept(
+              rootNode, "consignmentItems", ArrayOrderHandler.toStringSortableArray());
+            for (var ute : rootNode.path("utilizedTransportEquipments")) {
+              arrayNodeHandler.accept(
+                ute, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ute, "seals", ArrayOrderHandler.toStringSortableArray());
+              arrayNodeHandler.accept(
+                ute, "references", ArrayOrderHandler.toStringSortableArray());
+              for (var cr : ute.path("customsReferences")) {
+                arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+              }
+              arrayNodeHandler.accept(
+                ute, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+            }
+            arrayNodeHandler.accept(
+              rootNode, "utilizedTransportEquipments", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "advanceManifestFilings", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "references", ArrayOrderHandler.toStringSortableArray());
+            for (var cr : rootNode.path("customsReferences")) {
+              arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
+            }
+            arrayNodeHandler.accept(
+              rootNode, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+
+            DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(rootNode.path("documentParties"), arrayNodeHandler);
+
+            for (var hbl : rootNode.path("houseBillOfLadings")) {
+              DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path("documentParties"), arrayNodeHandler);
+            }
+            arrayNodeHandler.accept(
+              rootNode, "houseBillOfLadings", ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode,
+                "requestedCarrierCertificates",
+                ArrayOrderHandler.toStringSortableArray());
+            arrayNodeHandler.accept(
+                rootNode, "requestedCarrierClauses", ArrayOrderHandler.toStringSortableArray());
+          };
+
+  private static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER = (leftNode, rhsNode) -> {
+    for (var node : List.of(leftNode, rhsNode)) {
+      SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
+    }
+  };
 
   private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
     JsonAttribute.isTrue(JsonPointer.compile("/isToOrder")),
     JsonAttribute.mustEqual(JsonPointer.compile("/transportDocumentTypeCode"), "BOL")
+  );
+
+  public static final Predicate<JsonNode> IS_ELECTRONIC = td -> td.path("isElectronic").asBoolean(false);
+
+  public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
+  public static final Predicate<JsonNode> IS_AN_ESWB = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("SWB"));
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies with charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "EBLs cannot have copies without charges",
+    IS_AN_EBL,
+    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES = JsonAttribute.ifThen(
+    "Electronic SWBs cannot have originals with charges",
+    IS_AN_ESWB,
+    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Electronic SWBs cannot have originals without charges",
+    IS_AN_ESWB,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMustBeAbsent())
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one copy with charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES = JsonAttribute.ifThen(
+    "Cannot have more than one original without charges when isElectronic",
+    IS_ELECTRONIC,
+    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
+  );
+
+  private static final JsonRebaseableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The code in 'codeListProvider' is known",
+    mav -> {
+      mav.submitAllMatching("documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.endorsee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.issueTo.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.notifyParties.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.other.party.identifyingCodes.*.codeListProvider");
+
+
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.notifyParty.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.party.identifyingCodes.*.codeListProvider");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
+  );
+
+  private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
+    "The 'documentParties.notifyParties' attribute is mandatory for negotiable B/Ls",
+    JsonAttribute.isTrue("isToOrder"),
+    JsonAttribute.at(JsonPointer.compile("/documentParties/notifyParties"), JsonAttribute.matchedMustBeNonEmpty())
   );
 
   private static final Consumer<MultiAttributeValidator> ALL_REFERENCE_TYPES = mav -> {
@@ -60,14 +260,6 @@ public class EBLChecks {
         JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
   );
 
-  private static final JsonRebaseableContentCheck TLR_TYPES_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' against 'taxAndLegalReferences'",
-    mav -> {
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*.type");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.type");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.LTR_TYPES)
-   );
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each document party can be used at most once",
@@ -78,27 +270,7 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
-  private static final Consumer<MultiAttributeValidator> ALL_UN_LOCATION_CODES = mav -> {
-    mav.submitAllMatching("invoicePayableAt.UNLocationCode");
-    mav.submitAllMatching("transports.placeOfReceipt.UNLocationCode");
-    mav.submitAllMatching("transports.portOfLoading.UNLocationCode");
-    mav.submitAllMatching("transports.portOfDischarge.UNLocationCode");
-    mav.submitAllMatching("transports.placeOfDelivery.UNLocationCode");
-    mav.submitAllMatching("transports.onwardInlandRouting.UNLocationCode");
 
-    // Beta-2 only
-    mav.submitAllMatching("issuingParty.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.shippers.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.consignee.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.endorsee.address.UNLocationCode");
-    mav.submitAllMatching("documentParties.other.*.party.address.UNLocationCode");
-  };
-
-  private static final JsonRebaseableContentCheck TD_UN_LOCATION_CODES_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
-    "UN Location are valid",
-      ALL_UN_LOCATION_CODES,
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.UN_LOCODE_DATASET)
-  );
 
   private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT = JsonAttribute.ifThen(
     "Validate displayed address length for EBLs",
@@ -168,23 +340,6 @@ public class EBLChecks {
   );
 
 
-  private static final JsonRebaseableContentCheck AMF_TYPE_CODES_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'manifestTypeCode' in 'advanceManifestFilings' against data set",
-    mav -> mav.submitAllMatching("advanceManifestFilings.*"),
-    JsonAttribute.path("manifestTypeCode", JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.AMF_TYPE_CODES))
-  );
-
-  private static final JsonRebaseableContentCheck CR_CC_T_COMBINATION_KNOWN = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate 'type' against known customs reference type codes",
-    mav -> {
-      mav.submitAllMatching("customsReferences.*.type");
-      mav.submitAllMatching("consignmentItems.*.customsReferences.*.type");
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.type");
-      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.type");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.CUSTOMS_REFERENCE_TYPE_CODES)
-  );
-
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
     mav -> {
@@ -196,27 +351,6 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "type")
   );
 
-  private static final JsonRebaseableContentCheck COUNTRY_CODE_VALIDATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate field is a known ISO 3166 alpha 2 code",
-    mav -> {
-      mav.submitAllMatching("placeOfIssue.countryCode");
-      mav.submitAllMatching("advancedManifestFilings.*.countryCode");
-      mav.submitAllMatching("customsReferences.*.countryCode");
-      mav.submitAllMatching("consignmentItems.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("consignmentItems.*.nationalCommodityCodes.*.countryCode");
-
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences.*.countryCode");
-      mav.submitAllMatching("documentParties.*.party.taxLegalReferences.*.countryCode");
-      mav.submitAllMatching("issuingParty.taxLegalReferences.*.countryCode");
-      mav.submitAllMatching("issuingParty.address.countryCode");
-      mav.submitAllMatching("documentParties.shippers.address.countryCode");
-      mav.submitAllMatching("documentParties.consignee.address.countryCode");
-      mav.submitAllMatching("documentParties.endorsee.address.countryCode");
-      mav.submitAllMatching("documentParties.other.*.party.address.countryCode");
-    },
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.ISO_3166_ALPHA2_COUNTRY_CODES)
-  );
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'type' of 'nationalCommodityCodes' is a known code",
@@ -224,11 +358,6 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
-  private static final JsonRebaseableContentCheck OUTER_PACKAGING_CODE_IS_VALID = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'packagingCode' is a known code",
-    mav -> mav.submitAllMatching("consignmentItems.*.cargoItems.*.outerPackaging.packageCode"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.OUTER_PACKAGING_CODE)
-  );
 
   private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
@@ -310,189 +439,6 @@ public class EBLChecks {
     }
   );
 
-  private static final JsonRebaseableContentCheck VOLUME_IMPLIES_VOLUME_UNIT = JsonAttribute.allIndividualMatchesMustBeValid(
-    "The use of 'volume' implies 'volumeUnit'",
-    mav -> {
-      mav.submitAllMatching("consignmentItems.*");
-      mav.submitAllMatching("consignmentItems.*.cargoItems.*");
-    },
-    JsonAttribute.presenceImpliesOtherField(
-      "volume",
-      "volumeUnit"
-    )
-  );
-
-  private static void utilizedTransportEquipmentCargoItemAlignment(
-    JsonNode consignmentItems,
-    String equipmentReference,
-    String uteContextPath,
-    double uteNumber,
-    String uteUnit,
-    String numberFieldName,
-    String numberUnitFieldName,
-    Map<String, Double> conversionTable,
-    Set<String> issues
-  ) {
-    boolean converted = false;
-    var sum = 0.0;
-    boolean matchedEquipmentReference = false;
-    for (var consignmentItem : consignmentItems) {
-      for (var cargoItem : consignmentItem.path("cargoItems")) {
-        var cargoItemEquipmentReference = cargoItem.path("equipmentReference").asText(null);
-        if (!Objects.equals(equipmentReference, cargoItemEquipmentReference)) {
-          continue;
-        }
-        matchedEquipmentReference = true;
-        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
-        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
-        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(uteUnit)) {
-          var conversionFactor = conversionTable.get(uteUnit + "->" + cargoItemWeightUnit);
-          if (conversionFactor != null) {
-            converted = true;
-            cargoItemWeight *= conversionFactor;
-          }
-        }
-        sum += cargoItemWeight;
-      }
-    }
-    if (!matchedEquipmentReference) {
-      // Another validation gets to complain about this
-      return;
-    }
-    var delta = Math.abs(sum - uteNumber);
-    // Give some leeway when converting.
-    var e = converted ? 0.99 : 0.0001;
-    if (delta < e) {
-      return;
-    }
-    issues.add(
-      "The utilizedTransportEquipment at '%s' had '%s' of %.2f %s but the cargoItems '%s' for it sums to %.2f %s%s"
-        .formatted(
-          uteContextPath,
-          numberFieldName,
-          uteNumber,
-          uteUnit,
-          numberFieldName,
-          sum,
-          uteUnit,
-          converted
-            ? " ('cargoItems' values were normalized to the utilizedTransportEquipment unit)"
-            : ""));
-  }
-
-  private static JsonContentMatchedValidation allUtilizedTransportEquipmentCargoItemAreAligned(
-    String uteNumberFieldName,
-    String uteNumberUnitFieldName,
-    String cargoItemNumberFieldName,
-    String cargoItemNumberUnitFieldName,
-    Map<String, Double> conversionTable
-  ) {
-    return (tdRoot, contextPath) -> {
-      var consignmentItems = tdRoot.path("consignmentItems");
-      var issues = new LinkedHashSet<String>();
-      var index = 0;
-      var key = "utilizedTransportEquipments";
-      for (var ute : tdRoot.path(key)) {
-        var uteContextPath = concatContextPath(contextPath, key + "[" + index + "]");
-        ++index;
-        var equipmentReference = ute.path("equipment").path("equipmentReference").asText(null);
-        var uteNumberNode = ute.path(uteNumberFieldName);
-        var uteUnit = ute.path(uteNumberUnitFieldName).asText("");
-        if (equipmentReference == null || uteNumberNode.isMissingNode() || !uteNumberNode.isNumber()) {
-          // Another validation will complain if applicable
-          continue;
-        }
-        utilizedTransportEquipmentCargoItemAlignment(
-          consignmentItems,
-          equipmentReference,
-          uteContextPath,
-          uteNumberNode.asDouble(),
-          uteUnit,
-          cargoItemNumberFieldName,
-          cargoItemNumberUnitFieldName,
-          conversionTable,
-          issues
-        );
-      }
-      return issues;
-    };
-  }
-
-
-  private static JsonContentMatchedValidation consignmentItemCargoItemAlignment(
-    String numberFieldName,
-    String numberUnitFieldName,
-    Map<String, Double> conversionTable
-  ) {
-    return (consignmentItem, contextPath) -> {
-      boolean converted = false;
-      var sum = 0.0;
-      var unit = consignmentItem.path(numberUnitFieldName).asText(null);
-      if (unit == null) {
-        // Some other validation will complain about this if relevant.
-        return Set.of();
-      }
-      for (var cargoItem : consignmentItem.path("cargoItems")) {
-        var cargoItemWeight = cargoItem.path(numberFieldName).asDouble(0.0);
-        var cargoItemWeightUnit = cargoItem.path(numberUnitFieldName).asText(null);
-        if (cargoItemWeightUnit != null && !cargoItemWeightUnit.equals(unit)) {
-          var conversionFactor = conversionTable.get(unit + "->" + cargoItemWeightUnit);
-          if (conversionFactor != null) {
-            converted = true;
-            cargoItemWeight *= conversionFactor;
-          }
-        }
-        sum += cargoItemWeight;
-      }
-      var expected = consignmentItem.path(numberFieldName).asDouble(0.0);
-      var delta = Math.abs(sum - expected);
-      // Give some leeway when converting.
-      var e = converted ? 0.99 : 0.0001;
-      if (delta < e) {
-        return Set.of();
-      }
-      return Set.of(
-          "The consignmentItem at '%s' had '%s' of %.2f %s but the cargoItem '%s' sums to %.2f %s%s"
-              .formatted(
-                  contextPath,
-                  numberFieldName,
-                  expected,
-                  unit,
-                  numberFieldName,
-                  sum,
-                  unit,
-                  converted
-                      ? " ('cargoItems' values were normalized to the consignmentItem unit)"
-                      : ""));
-    };
-  }
-
-  private static final Map<String, Double> RATIO_WEIGHT = Map.of(
-    "KGM->LBR", 0.45359237,
-    "LBR->KGM", 2.2046226218
-  );
-
-  private static final Map<String, Double> RATIO_VOLUME = Map.of(
-    "MTQ->FTQ", 0.02831685,
-    "FTQ->MTQ",  35.3146667
-  );
-
-  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'consignmentItem' weight is aligned with its 'cargoItems'",
-    mav -> mav.submitAllMatching("consignmentItems.*"),
-    consignmentItemCargoItemAlignment("weight",
-      "weightUnit",
-      RATIO_WEIGHT
-  ));
-
-  private static final JsonRebaseableContentCheck CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'consignmentItem' volume is aligned with its 'cargoItems'",
-    mav -> mav.submitAllMatching("consignmentItems.*"),
-    consignmentItemCargoItemAlignment("volume",
-      "volumeUnit",
-      RATIO_VOLUME
-    ));
-
   private static final JsonRebaseableContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
     JsonAttribute.unique("countryCode", "manifestTypeCode")
@@ -500,20 +446,25 @@ public class EBLChecks {
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
-      SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE,
-      EblDatasets.UN_LOCODE_DATASET
-    ),
-    JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
-      "'isElectronic' implies 'sendToPlatform'",
+      "'isElectronic' implies 'issueTo' party",
       JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
-      JsonAttribute.mustBePresent(JsonPointer.compile("/sendToPlatform")),
-      JsonAttribute.mustBeAbsent(JsonPointer.compile("/sendToPlatform"))
+      JsonAttribute.mustBePresent(ISSUE_TO_PARTY),
+      JsonAttribute.mustBeAbsent(ISSUE_TO_PARTY)
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -522,20 +473,21 @@ public class EBLChecks {
     EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    COUNTRY_CODE_VALIDATIONS,
-    AMF_TYPE_CODES_VALIDATION,
-    CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    OUTER_PACKAGING_CODE_IS_VALID,
-    VOLUME_IMPLIES_VOLUME_UNIT,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
-    TLR_TYPES_VALIDATIONS,
+    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
+    EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),
@@ -563,6 +515,7 @@ public class EBLChecks {
       JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -588,11 +541,6 @@ public class EBLChecks {
         }
         return Set.of();
       }
-    ),
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'imoClass' values must be from dataset",
-      allDg(dg -> dg.path("imoClass").submitPath()),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.DG_IMO_CLASSES)
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "The 'inhalationZone' values must be from dataset",
@@ -622,41 +570,7 @@ public class EBLChecks {
     EBL_DISPLAYED_ADDRESS_LIMIT,
     CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    COUNTRY_CODE_VALIDATIONS,
-    CR_CC_T_COMBINATION_KNOWN,
     CR_CC_T_CODES_UNIQUE,
-    AMF_TYPE_CODES_VALIDATION,
-    VOLUME_IMPLIES_VOLUME_UNIT,
-    OUTER_PACKAGING_CODE_IS_VALID,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_WEIGHT_IS_ALIGNED,
-    CONSIGNMENT_ITEM_VS_CARGO_ITEM_VOLUME_IS_ALIGNED,
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'cargoGrossVolume' implies 'cargoGrossVolumeUnit'",
-      mav -> mav.submitAllMatching("utilizedTransportEquipments.*"),
-      JsonAttribute.presenceImpliesOtherField(
-        "cargoGrossVolume",
-        "cargoGrossVolumeUnit"
-    )),
-    JsonAttribute.customValidator(
-      "Validate that 'utilizedTransportEquipment' weight is aligned with its 'cargoItems'",
-      allUtilizedTransportEquipmentCargoItemAreAligned(
-        "cargoGrossWeight",
-        "cargoGrossWeightUnit",
-        "weight",
-        "weightUnit",
-        RATIO_WEIGHT
-      )
-    ),
-    JsonAttribute.customValidator(
-      "Validate that 'utilizedTransportEquipment' volume is aligned with its 'cargoItems'",
-      allUtilizedTransportEquipmentCargoItemAreAligned(
-        "cargoGrossVolume",
-        "cargoGrossVolumeUnit",
-        "volume",
-        "volumeUnit",
-        RATIO_VOLUME
-      )
-    ),
     JsonAttribute.allIndividualMatchesMustBeValid(
       "Validate mode of transport type",
       mav -> {
@@ -665,18 +579,12 @@ public class EBLChecks {
       },
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
     ),
-    TLR_TYPES_VALIDATIONS,
-    TLR_CC_T_COMBINATION_UNIQUE,
-    TD_UN_LOCATION_CODES_VALID
+    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
+    TLR_CC_T_COMBINATION_UNIQUE
   );
 
-  public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
   public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
   public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
-
-  public static JsonContentCheck sirInRefStatusMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
-    return JsonAttribute.mustEqual(SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
-  }
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(SI_NOTIFICATION_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
@@ -858,22 +766,6 @@ public class EBLChecks {
   private static JsonContentMatchedValidation checkCSPValueBasedOnOtherValue(
     String attributeName,
     String referenceAttributeName,
-    Supplier<Map<String, String>> expectedValuesSupplier
-  ) {
-    return checkCSPValueBasedOnOtherValue(
-      attributeName,
-      referenceAttributeName,
-      expectedValuesSupplier,
-      (node, pathBuilder) -> {
-        pathBuilder.append(".").append(attributeName);
-        return node.path(attributeName);
-      }
-    );
-  }
-
-  private static JsonContentMatchedValidation checkCSPValueBasedOnOtherValue(
-    String attributeName,
-    String referenceAttributeName,
     Supplier<Map<String, String>> expectedValuesSupplier,
     BiFunction<JsonNode, StringBuilder, JsonNode> resolveValue
   ) {
@@ -1025,10 +917,20 @@ public class EBLChecks {
       }
       return m;
     };
+    BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
+      var hsCodes = consignmentItem.path("descriptionOfGoods");
+      if (!hsCodes.isArray()) {
+        return null;
+      }
+      // TODO: We should support more descriptionOfGoods some other day.
+      pathBuilder.append(".descriptionOfGoods[0]");
+      return hsCodes.path(0);
+    };
     return checkCSPValueBasedOnOtherValue(
       "descriptionOfGoods",
       "commoditySubreference",
-      expectedValueSupplier
+      expectedValueSupplier,
+      resolver
     );
   }
 
@@ -1045,7 +947,7 @@ public class EBLChecks {
       return m;
     };
     BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
-      var hsCodes = consignmentItem.get("HSCodes");
+      var hsCodes = consignmentItem.path("HSCodes");
       if (!hsCodes.isArray()) {
         return null;
       }
@@ -1096,7 +998,8 @@ public class EBLChecks {
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(JsonAttribute.lostAttributeCheck(
       "Validate that shipper provided data was not altered",
-      delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions())
+      delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
+      SI_NORMALIZER
     ));
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
@@ -1106,10 +1009,6 @@ public class EBLChecks {
       standardVersion,
       checks
     );
-  }
-
-  public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, JsonContentCheck ... extraChecks) {
-    return siRefStatusContentChecks(matched, standardsVersion, shippingInstructionsStatus, null, extraChecks);
   }
 
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {

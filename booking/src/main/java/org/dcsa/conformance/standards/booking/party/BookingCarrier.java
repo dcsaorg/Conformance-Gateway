@@ -1,7 +1,8 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -25,10 +26,17 @@ import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Random RANDOM = new Random();
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
+  private static final String REASON_INFO = "Declined as required by the conformance scenario";
+  private static final String CANCEL_AMENDMENT_OPERATION = "cancelAmendment";
+  private static final String CANCEL_BOOKING_OPERATION = "cancelBooking";
+  private static final String CANCEL_CONFIRMED_BOOKING_OPERATION = "cancelConfirmedBooking";
+  private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
+  private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
+  private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+
 
   public BookingCarrier(
       String apiVersion,
@@ -48,8 +56,8 @@ public class BookingCarrier extends ConformanceParty {
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrrToCbr));
-    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(OBJECT_MAPPER, cbrToCbrr));
+    targetObjectNode.set("cbrrToCbr", StateManagementUtil.storeMap(cbrrToCbr));
+    targetObjectNode.set("cbrToCbrr", StateManagementUtil.storeMap(cbrToCbrr));
   }
 
   @Override
@@ -78,23 +86,13 @@ public class BookingCarrier extends ConformanceParty {
             this::requestToAmendConfirmedBooking),
         Map.entry(UC8_Carrier_ProcessAmendmentAction.class, this::processBookingAmendment),
         Map.entry(UC10_Carrier_DeclineBookingAction.class, this::declineBooking),
-        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted));
-  }
-
-  private char computeVesselIMONumberCheckDigit(String vesselIMONumberSansCheckDigit) {
-    int sum = 0;
-    assert vesselIMONumberSansCheckDigit.length() == 6;
-    for (int i = 0; i < 6; i++) {
-      char c = vesselIMONumberSansCheckDigit.charAt(i);
-      assert c >= '0' && c <= '9';
-      sum += (7 - i) * Character.getNumericValue(c);
-    }
-    String s = String.valueOf(sum);
-    return s.charAt(s.length() - 1);
+        Map.entry(UC12_Carrier_ConfirmBookingCompletedAction.class, this::confirmBookingCompleted),
+        Map.entry(UC14CarrierProcessBookingCancellationAction.class, this::processConfirmedBookingCancellation));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    if (log.isInfoEnabled())
+      log.info("Carrier.supplyScenarioParameters({})", actionPrompt.toPrettyString());
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
     case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("SCR-1234-REGULAR",
@@ -170,10 +168,7 @@ public class BookingCarrier extends ConformanceParty {
   };
 
     asyncOrchestratorPostPartyInput(
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("actionId", actionPrompt.get("actionId").asText())
-            .set("input", carrierScenarioParameters.toJson()));
+        actionPrompt.get("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
@@ -193,7 +188,31 @@ public class BookingCarrier extends ConformanceParty {
       persistableCarrierBooking.confirmBookingAmendment(cbr);
     } else {
       persistableCarrierBooking.declineBookingAmendment(
-          cbr, "Declined as required by the conformance scenario");
+          cbr, REASON_INFO);
+    }
+    persistableCarrierBooking.save(persistentMap);
+    generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
+  }
+
+  private void processConfirmedBookingCancellation(JsonNode actionPrompt) {
+    log.info("Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
+
+    String cbr = actionPrompt.required("cbr").asText();
+    boolean isCancellationConfirmed = actionPrompt.path("isCancellationConfirmed").asBoolean(true);
+    addOperatorLogEntry(
+      "Cancellation of Confirmed booking with CBR '%s'"
+        .formatted(cbr));
+
+    // bookingReference can either be a CBR or CBRR.
+    var cbrr = cbrToCbrr.getOrDefault(cbr, cbr);
+
+    var persistableCarrierBooking =
+      PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+    if (isCancellationConfirmed) {
+      persistableCarrierBooking.cancelConfirmedBooking(cbr, "Cancelled as required by the conformance scenario");
+    } else {
+      persistableCarrierBooking.declineConfirmedBookingCancellation(
+        cbr, REASON_INFO);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -208,7 +227,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     var bookingStatus = persistableCarrierBooking.getBooking().get("bookingStatus").asText();
-    if (bookingStatus.equals(BookingState.CONFIRMED.wireName())) {
+    if (bookingStatus.equals(BookingState.CONFIRMED.name())) {
       persistableCarrierBooking
           .getBooking()
           .put("importLicenseReference", "importLicenseRefUpdate");
@@ -247,7 +266,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     persistableCarrierBooking.declineBooking(
-        cbr, "Declined as required by the conformance scenario");
+        cbr, REASON_INFO);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry("Declined the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
@@ -367,7 +386,7 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
         400,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -378,14 +397,14 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse return404(ConformanceRequest request, String message) {
     return request.createResponse(
         404,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
-        Map.of("Api-Version", List.of(apiVersion)),
+        Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
   }
 
@@ -428,10 +447,13 @@ public class BookingCarrier extends ConformanceParty {
       return "#INVALID";
     }
     if (cancelJsonBody.get("bookingStatus") != null) {
-      return "cancelBooking";
+      return CANCEL_BOOKING_OPERATION;
     }
     if(cancelJsonBody.get("amendedBookingStatus") != null ) {
-      return "cancelAmendment";
+      return CANCEL_AMENDMENT_OPERATION;
+    }
+    if(cancelJsonBody.get(BOOKING_CANCELLATION_STATUS) != null ) {
+      return CANCEL_CONFIRMED_BOOKING_OPERATION;
     }
     return "#INVALID";
   }
@@ -479,20 +501,22 @@ public class BookingCarrier extends ConformanceParty {
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
-    return returnBookingStatusResponse(200, request, booking, cbrr);
+    return returnEmpty202Response( request, booking, cbrr);
   }
 
   private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
-    if (!cancelOperation.equals("cancelBooking") && !cancelOperation.equals("cancelAmendment")) {
+    if (!cancelOperation.equals(CANCEL_BOOKING_OPERATION)
+      && !cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)
+      && !cancelOperation.equals(CANCEL_CONFIRMED_BOOKING_OPERATION)) {
       return return400(
           request,
           "The 'operation' query parameter must be given exactly one and have"
-              + " value either 'cancelBooking' OR 'cancelAmendment'");
+              + " value either 'cancelBooking' OR 'cancelAmendment' OR 'cancelConfirmedBooking'");
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
-    var cbrr = cancelOperation.equals("cancelBooking") ? bookingReference
+    var cbrr = cancelOperation.equals(CANCEL_BOOKING_OPERATION) ? bookingReference
       : cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var bookingData = persistentMap.load(cbrr);
     if (bookingData == null || bookingData.isMissingNode()) {
@@ -501,10 +525,13 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(bookingData);
     var reason = request.message().body().getJsonBody().path("reason").asText(null);
     try {
-      if (cancelOperation.equals("cancelBooking")) {
+      if (cancelOperation.equals(CANCEL_BOOKING_OPERATION)) {
         persistableCarrierBooking.cancelBookingRequest(bookingReference, reason);
-      } else {
+      } else if (cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)){
         persistableCarrierBooking.cancelBookingAmendment(bookingReference, reason);
+      }
+      else {
+        persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference, reason);
       }
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
@@ -521,41 +548,45 @@ public class BookingCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnBookingStatusResponse(
-        200, request, persistableCarrierBooking.getBooking(), bookingReference);
+    return returnEmpty202Response(
+         request, persistableCarrierBooking.getBooking(), bookingReference);
   }
 
-  private ConformanceResponse returnBookingStatusResponse(
-      int responseCode, ConformanceRequest request, ObjectNode booking, String bookingReference) {
-    var cbrr = booking.get("carrierBookingRequestReference").asText();
+  private ConformanceResponse returnBookingCBRRResponse(ConformanceRequest request, ObjectNode booking, String bookingReference) {
+    var cbrr = booking.get(CARRIER_BOOKING_REQUEST_REFERENCE).asText();
     var bookingStatus = booking.get("bookingStatus").asText();
     var statusObject =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("bookingStatus", bookingStatus)
-            .put("carrierBookingRequestReference", cbrr);
-    var cbr = booking.get("carrierBookingReference");
-    var amendedBookingStatus = booking.get("amendedBookingStatus");
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr);
     var reason = booking.get("reason");
-    if (cbr != null) {
-      statusObject.set("carrierBookingReference", cbr);
-    }
-    if (amendedBookingStatus != null) {
-      statusObject.set("amendedBookingStatus", amendedBookingStatus);
-    }
     if (reason != null) {
       statusObject.set("reason", reason);
     }
     ConformanceResponse response =
-        request.createResponse(
-            responseCode,
-            Map.of("Api-Version", List.of(apiVersion)),
-            new ConformanceMessageBody(statusObject));
+      request.createResponse(
+        202,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(statusObject));
     addOperatorLogEntry(
-        "Responded %d to %s booking '%s' (resulting state '%s')"
-            .formatted(responseCode, request.method(), bookingReference, bookingStatus));
+      "Responded %d to %s booking '%s' (resulting state '%s')"
+        .formatted(202, request.method(), bookingReference, bookingStatus));
     return response;
   }
+
+  private ConformanceResponse returnEmpty202Response(ConformanceRequest request, ObjectNode booking, String bookingReference) {
+    var bookingStatus = booking.get("bookingStatus").asText();
+    ConformanceResponse response =
+      request.createResponse(
+        202,
+        Map.of("Api-Version", List.of(apiVersion)),
+        new ConformanceMessageBody(""));
+    addOperatorLogEntry(
+      "Responded %d to %s booking '%s' (resulting state '%s')"
+        .formatted(202, request.method(), bookingReference, bookingStatus));
+    return response;
+  }
+
 
   private ConformanceResponse _handleGetBookingRequest(ConformanceRequest request) {
     var amendedContentRaw = readAmendedContent(request);
@@ -588,12 +619,12 @@ public class BookingCarrier extends ConformanceParty {
       }
       ConformanceResponse response =
           request.createResponse(
-              200, Map.of("Api-Version", List.of(apiVersion)), new ConformanceMessageBody(body));
+              200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(body));
       addOperatorLogEntry(
           "Responded to GET booking request '%s' (in state '%s')"
               .formatted(
                   bookingReference,
-                  persistableCarrierBooking.getOriginalBookingState().wireName()));
+                  persistableCarrierBooking.getOriginalBookingState()));
       return response;
     }
     return return404(request);
@@ -617,8 +648,7 @@ public class BookingCarrier extends ConformanceParty {
             .build()
             .asJsonNode());
 
-    return returnBookingStatusResponse(
-        201,
+    return returnBookingCBRRResponse(
         request,
         bookingRequestPayload,
         persistableCarrierBooking.getCarrierBookingRequestReference());
@@ -636,6 +666,7 @@ public class BookingCarrier extends ConformanceParty {
     private String carrierBookingRequestReference;
     private String bookingStatus;
     private String amendedBookingStatus;
+    private String bookingCancellationStatus;
     private String reason;
 
     private JsonNode booking;
@@ -664,17 +695,18 @@ public class BookingCarrier extends ConformanceParty {
       notification.put("datacontenttype", "application/json");
 
       var data = OBJECT_MAPPER.createObjectNode();
-      setBookingProvidedField(data, "carrierBookingReference", carrierBookingReference);
+      setBookingProvidedField(data, CARRIER_BOOKING_REFERENCE, carrierBookingReference);
       if (includeCarrierBookingRequestReference) {
         setBookingProvidedField(
-            data, "carrierBookingRequestReference", carrierBookingRequestReference);
+            data, CARRIER_BOOKING_REQUEST_REFERENCE, carrierBookingRequestReference);
       }
       if (includeCarrierBookingReference) {
         setBookingProvidedField(
-          data, "carrierBookingReference", carrierBookingReference);
+          data, CARRIER_BOOKING_REFERENCE, carrierBookingReference);
       }
       setBookingProvidedField(data, "bookingStatus", bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
+      setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
       setBookingProvidedField(data, "reason", reason);
       notification.set("data", data);
 

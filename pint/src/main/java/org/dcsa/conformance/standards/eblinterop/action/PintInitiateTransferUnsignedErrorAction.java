@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblinterop.party.PintRole;
@@ -24,6 +23,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Getter
 @Slf4j
 public class PintInitiateTransferUnsignedErrorAction extends PintAction {
+  private final SenderTransmissionClass senderTransmissionClass;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
@@ -34,6 +34,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
     String sendingPlatform,
     PintAction previousAction,
     int expectedStatus,
+    SenderTransmissionClass senderTransmissionClass,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -46,6 +47,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
         "StartTransfer",
         expectedStatus
     );
+    this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
     this.envelopeTransferChainEntrySchemaValidator = envelopeTransferChainEntrySchemaValidator;
@@ -147,6 +149,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
                   expectedApiVersion,
+                  senderTransmissionClass,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

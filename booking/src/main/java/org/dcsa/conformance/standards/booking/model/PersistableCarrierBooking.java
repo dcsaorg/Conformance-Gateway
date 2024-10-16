@@ -1,9 +1,10 @@
 package org.dcsa.conformance.standards.booking.model;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.booking.party.BookingCancellationState.*;
 import static org.dcsa.conformance.standards.booking.party.BookingState.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.StreamSupport;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingState;
 
 public class PersistableCarrierBooking {
@@ -26,6 +28,22 @@ public class PersistableCarrierBooking {
     Map.entry(PENDING_AMENDMENT, Set.of(CONFIRMED, PENDING_AMENDMENT)::contains),
     Map.entry(COMPLETED, Set.of(CONFIRMED)::contains),
     Map.entry(CANCELLED, Set.of(RECEIVED, UPDATE_RECEIVED, PENDING_UPDATE, CONFIRMED, PENDING_AMENDMENT)::contains)
+  );
+
+  private static final Set<BookingState> PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION = Set.of(
+    CONFIRMED,
+    PENDING_AMENDMENT,
+    AMENDMENT_RECEIVED,
+    AMENDMENT_CONFIRMED,
+    AMENDMENT_DECLINED,
+    AMENDMENT_CANCELLED
+  );
+
+  private static final Set<BookingState> PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION = Set.of(
+    AMENDMENT_RECEIVED,
+    AMENDMENT_CONFIRMED,
+    AMENDMENT_DECLINED,
+    AMENDMENT_CANCELLED
   );
 
   private static final Set<BookingState> MAY_AMEND_STATES = Set.of(
@@ -41,10 +59,11 @@ public class PersistableCarrierBooking {
 
   private static final String BOOKING_STATUS = "bookingStatus";
   private static final String AMENDED_BOOKING_STATUS = "amendedBookingStatus";
-
+  private static final String CANCELLATION_BOOKING_STATUS = "bookingCancellationStatus";
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
+  private static final String REASON_INFO = "Confirmed booking cancelled by shipper (no reason given)";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -53,10 +72,11 @@ public class PersistableCarrierBooking {
     AMENDED_BOOKING_STATUS,
   };
 
+
+
   private static final String BOOKING_DATA_FIELD = "booking";
   private static final String AMENDED_BOOKING_DATA_FIELD = "amendedBooking";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final ObjectNode state;
 
   private PersistableCarrierBooking(ObjectNode state) {
@@ -211,8 +231,42 @@ public class PersistableCarrierBooking {
     setReason(reason);
   }
 
+  public void cancelConfirmedBooking(String bookingReference, String reason) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(CANCELLATION_CONFIRMED);
+    if (reason == null || reason.isBlank()) {
+      reason = REASON_INFO;
+    }
+    setReason(reason);
+  }
+
+  public void updateCancelConfirmedBooking(String bookingReference, String reason) {
+    checkState(bookingReference, getOriginalBookingState(), PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION::contains);
+    if(getBookingAmendedState()!=null) {
+      checkState(bookingReference, getBookingAmendedState(), PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION::contains);
+    }
+    mutateBookingAndAmendment(b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
+    if (reason == null || reason.isBlank()) {
+      reason = REASON_INFO;
+    }
+    setReason(reason);
+  }
+
+  public void declineConfirmedBookingCancellation(String bookingReference, String reason) {
+    checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
+    changeState(CANCELLATION_DECLINED);
+    if (reason == null || reason.isBlank()) {
+      reason = REASON_INFO;
+    }
+    setReason(reason);
+  }
+
   private void changeState(String attributeName, BookingState newState) {
-    mutateBookingAndAmendment(b -> b.put(attributeName, newState.wireName()));
+    mutateBookingAndAmendment(b -> b.put(attributeName, newState.name()));
+  }
+
+  private void changeState(BookingCancellationState newState) {
+    mutateBookingAndAmendment(b -> b.put(CANCELLATION_BOOKING_STATUS, newState.name()));
   }
 
   private void mutateBookingAndAmendment(Consumer<ObjectNode> mutator) {
@@ -227,6 +281,14 @@ public class PersistableCarrierBooking {
 
   private static void checkState(
     String reference, BookingState currentState, Predicate<BookingState> expectedState) {
+    if (!expectedState.test(currentState)) {
+      throw new IllegalStateException(
+        "Booking '%s' is in state '%s'".formatted(reference, currentState));
+    }
+  }
+
+  private static void checkState(
+    String reference, BookingCancellationState currentState, Predicate<BookingCancellationState> expectedState) {
     if (!expectedState.test(currentState)) {
       throw new IllegalStateException(
         "Booking '%s' is in state '%s'".formatted(reference, currentState));
@@ -289,19 +351,25 @@ public class PersistableCarrierBooking {
 
   public BookingState getOriginalBookingState() {
     var booking = getBooking();
-    return BookingState.fromWireName(booking.required(BOOKING_STATUS).asText());
+    return BookingState.valueOf(booking.required(BOOKING_STATUS).asText());
   }
 
   public BookingState getBookingAmendedState() {
     var booking = getBooking();
     var s = booking.path(AMENDED_BOOKING_STATUS);
-    return !s.asText("").isEmpty()? BookingState.fromWireName(s.asText()) : null;
+    return !s.asText("").isEmpty()? BookingState.valueOf(s.asText()) : null;
+  }
+
+  public BookingCancellationState getBookingCancellationState() {
+    var booking = getBooking();
+    var s = booking.path(CANCELLATION_BOOKING_STATUS);
+    return !s.asText("").isEmpty()? BookingCancellationState.valueOf(s.asText()) : null;
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {
     String cbrr = UUID.randomUUID().toString();
     bookingRequest.put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr)
-      .put(BOOKING_STATUS, BookingState.RECEIVED.wireName());
+      .put(BOOKING_STATUS, BookingState.RECEIVED.name());
     var state = OBJECT_MAPPER.createObjectNode();
     state.put(SUBSCRIPTION_REFERENCE,UUID.randomUUID().toString());
     state.set(BOOKING_DATA_FIELD, bookingRequest);

@@ -13,29 +13,66 @@ import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.apigateway.*;
+import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizer;
+import software.amazon.awscdk.aws_apigatewayv2_authorizers.HttpUserPoolAuthorizerProps;
+import software.amazon.awscdk.aws_apigatewayv2_integrations.HttpLambdaIntegration;
+import software.amazon.awscdk.services.apigateway.AccessLogFormat;
+import software.amazon.awscdk.services.apigateway.DomainNameOptions;
+import software.amazon.awscdk.services.apigateway.LambdaRestApi;
+import software.amazon.awscdk.services.apigateway.LambdaRestApiProps;
+import software.amazon.awscdk.services.apigateway.LogGroupLogDestination;
 import software.amazon.awscdk.services.apigateway.StageOptions;
+import software.amazon.awscdk.services.apigatewayv2.AddRoutesOptions;
 import software.amazon.awscdk.services.apigatewayv2.CfnStage;
-import software.amazon.awscdk.services.apigatewayv2.alpha.*;
-import software.amazon.awscdk.services.apigatewayv2.alpha.DomainName;
-import software.amazon.awscdk.services.apigatewayv2.alpha.DomainNameProps;
-import software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod;
-import software.amazon.awscdk.services.apigatewayv2.authorizers.alpha.HttpUserPoolAuthorizer;
-import software.amazon.awscdk.services.apigatewayv2.authorizers.alpha.HttpUserPoolAuthorizerProps;
-import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegration;
+import software.amazon.awscdk.services.apigatewayv2.CorsHttpMethod;
+import software.amazon.awscdk.services.apigatewayv2.CorsPreflightOptions;
+import software.amazon.awscdk.services.apigatewayv2.DomainMappingOptions;
+import software.amazon.awscdk.services.apigatewayv2.DomainName;
+import software.amazon.awscdk.services.apigatewayv2.DomainNameProps;
+import software.amazon.awscdk.services.apigatewayv2.HttpApi;
+import software.amazon.awscdk.services.apigatewayv2.HttpApiProps;
+import software.amazon.awscdk.services.apigatewayv2.HttpMethod;
+import software.amazon.awscdk.services.apigatewayv2.IDomainName;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
-import software.amazon.awscdk.services.cloudfront.*;
-import software.amazon.awscdk.services.cloudfront.origins.S3Origin;
-import software.amazon.awscdk.services.cognito.*;
-import software.amazon.awscdk.services.dynamodb.*;
-import software.amazon.awscdk.services.iam.*;
-import software.amazon.awscdk.services.lambda.*;
+import software.amazon.awscdk.services.cloudfront.BehaviorOptions;
+import software.amazon.awscdk.services.cloudfront.CachePolicy;
+import software.amazon.awscdk.services.cloudfront.Distribution;
+import software.amazon.awscdk.services.cloudfront.DistributionProps;
+import software.amazon.awscdk.services.cloudfront.ErrorResponse;
+import software.amazon.awscdk.services.cloudfront.IOrigin;
+import software.amazon.awscdk.services.cloudfront.ViewerProtocolPolicy;
+import software.amazon.awscdk.services.cloudfront.origins.S3BucketOrigin;
+import software.amazon.awscdk.services.cognito.AccountRecovery;
+import software.amazon.awscdk.services.cognito.AuthFlow;
+import software.amazon.awscdk.services.cognito.PasswordPolicy;
+import software.amazon.awscdk.services.cognito.SignInAliases;
+import software.amazon.awscdk.services.cognito.UserPool;
+import software.amazon.awscdk.services.cognito.UserPoolClient;
+import software.amazon.awscdk.services.cognito.UserPoolClientOptions;
+import software.amazon.awscdk.services.dynamodb.Attribute;
+import software.amazon.awscdk.services.dynamodb.AttributeType;
+import software.amazon.awscdk.services.dynamodb.BillingMode;
+import software.amazon.awscdk.services.dynamodb.Table;
+import software.amazon.awscdk.services.dynamodb.TableProps;
+import software.amazon.awscdk.services.iam.ManagedPolicy;
+import software.amazon.awscdk.services.iam.Policy;
+import software.amazon.awscdk.services.iam.PolicyProps;
+import software.amazon.awscdk.services.iam.PolicyStatement;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.lambda.AssetCode;
+import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.FunctionProps;
+import software.amazon.awscdk.services.lambda.LayerVersion;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.logs.LogGroup;
 import software.amazon.awscdk.services.logs.RetentionDays;
-import software.amazon.awscdk.services.route53.*;
+import software.amazon.awscdk.services.route53.ARecord;
+import software.amazon.awscdk.services.route53.ARecordProps;
+import software.amazon.awscdk.services.route53.IPublicHostedZone;
+import software.amazon.awscdk.services.route53.PublicHostedZone;
+import software.amazon.awscdk.services.route53.PublicHostedZoneAttributes;
+import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayv2DomainProperties;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
@@ -232,7 +269,7 @@ public class ConformanceStack extends Stack {
 
     String webuiApiGatewayUrl = "%s-webui.%s".formatted(prefix, hostedZoneName);
     String webuiDistributionUrl = "%s.%s".formatted(prefix, hostedZoneName);
-    DomainName webuiApiDomainName =
+    IDomainName webuiApiDomainName =
         new DomainName(
             this,
             prefix + "WebuiApiDomainName",
@@ -301,7 +338,7 @@ public class ConformanceStack extends Stack {
     httpApiAccessLogGroup.grantWrite(new ServicePrincipal("apigateway.amazonaws.com"));
 
     Bucket ngBucket = new Bucket(this, prefix + "NgBucket", BucketProps.builder().build());
-    S3Origin s3Origin = new S3Origin(ngBucket);
+    IOrigin s3Origin = S3BucketOrigin.withOriginAccessControl(ngBucket);
     Distribution distribution =
         new Distribution(
             this,

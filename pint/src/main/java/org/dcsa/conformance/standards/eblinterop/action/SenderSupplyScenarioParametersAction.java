@@ -50,7 +50,7 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Scenario details");
+    return ("Please provide these scenario details. Additional documents required: %d".formatted(documentCount));
   }
 
 }

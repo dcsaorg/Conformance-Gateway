@@ -111,10 +111,13 @@ public class PintReceivingPlatform extends ConformanceParty {
     );
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), receivingParameters.toJson());
+    var receivingParametersJson = receivingParameters.toJson();
     addOperatorLogEntry(
-      "Finished ScenarioType");
+      "Prompt answer for initiateState: %s".formatted(receivingParametersJson));
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(), receivingParametersJson);
+    addOperatorLogEntry(
+      "Finished ScenarioType setup");
   }
 
   private JsonNode generateReceiverParty(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {

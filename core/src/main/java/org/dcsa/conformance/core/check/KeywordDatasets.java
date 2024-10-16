@@ -1,5 +1,6 @@
 package org.dcsa.conformance.core.check;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +16,9 @@ class KeywordDatasets {
 
   static Path getAndCheckResource(@NonNull String resourceName) {
     try {
-      Path resourcePath = Paths.get(KeywordDatasets.class.getResource(resourceName).toURI());
+      URI uri = KeywordDatasets.class.getResource(resourceName).toURI();
+      System.out.println("URI = " + uri);
+      Path resourcePath = Paths.get(uri);
       if (!Files.exists(resourcePath)) {
         throw new IllegalArgumentException("Could not find the resource: " + resourceName);
       }

@@ -1,10 +1,7 @@
 package org.dcsa.conformance.core.check;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -14,16 +11,9 @@ import lombok.SneakyThrows;
 class KeywordDatasets {
   private KeywordDatasets() {}
 
-  static Path getAndCheckResource(@NonNull String resourceName) {
-    try {
-      URI uri = KeywordDatasets.class.getResource(resourceName).toURI();
-      System.out.println("URI = " + uri);
-      Path resourcePath = Paths.get(uri);
-      if (!Files.exists(resourcePath)) {
-        throw new IllegalArgumentException("Could not find the resource: " + resourceName);
-      }
-      return resourcePath;
-    } catch (NullPointerException | URISyntaxException e) {
+  static void checkResource(@NonNull String resourceName) {
+    var resource = KeywordDatasets.class.getResource(resourceName);
+    if (resource == null) {
       throw new IllegalArgumentException("Could not find the resource: " + resourceName);
     }
   }
@@ -36,17 +26,25 @@ class KeywordDatasets {
   };
 
   @SneakyThrows
-  static KeywordDataset loadCsvDataset(@NonNull Path resource, CSVRowSelector selector) {
-    List<String> lines = Files.readAllLines(resource);
+  static KeywordDataset loadCsvDataset(@NonNull String resourceName, @NonNull CSVRowSelector selector) {
+    // Can not use Files.lines() as it does not work with resources in JAR files
+    var lines = new ArrayList<String>();
+    try (BufferedReader reader =
+        new BufferedReader(
+            new InputStreamReader(Objects.requireNonNull(KeywordDatasets.class.getResourceAsStream(resourceName))))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        lines.add(line);
+      }
+    }
     String[] headers = lines.getFirst().split(",");
-    String fileName = String.valueOf(resource.getFileName());
-    selector.setup(fileName, headers);
+    selector.setup(resourceName, headers);
 
     Set<String> keywords = HashSet.newHashSet(lines.size());
     lines.stream()
         .skip(1) // Skip header line
         .map(line -> line.split(","))
-        .map(row -> selector.selectValue(fileName, row))
+        .map(row -> selector.selectValue(resourceName, row))
         .forEach(keywords::add);
     return Collections.unmodifiableSet(keywords)::contains;
   }

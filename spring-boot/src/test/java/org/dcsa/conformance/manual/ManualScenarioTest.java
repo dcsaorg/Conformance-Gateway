@@ -45,7 +45,6 @@ class ManualScenarioTest extends ManualTestBase {
     );
   }
 
-  @Disabled
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")
   @MethodSource("testStandards")
   void testStandards(String standardName, boolean secondRun) {

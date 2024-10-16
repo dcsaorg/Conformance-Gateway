@@ -1,6 +1,5 @@
 package org.dcsa.conformance.core.check;
 
-import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -49,8 +48,8 @@ class VersionedKeywordDataset implements KeywordDataset {
     }
     return fromLoader(version -> {
       var resourceName = nameTemplate.formatted(version);
-      Path resource = KeywordDatasets.getAndCheckResource(resourceName);
-      return KeywordDatasets.loadCsvDataset(resource, rowSelector);
+      KeywordDatasets.checkResource(resourceName);
+      return KeywordDatasets.loadCsvDataset(resourceName, rowSelector);
     });
   }
 }

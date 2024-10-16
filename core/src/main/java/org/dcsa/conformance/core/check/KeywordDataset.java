@@ -2,7 +2,6 @@ package org.dcsa.conformance.core.check;
 
 import static org.dcsa.conformance.core.check.KeywordDatasets.*;
 
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
 import lombok.NonNull;
@@ -48,18 +47,18 @@ public interface KeywordDataset {
   }
 
   static KeywordDataset fromCSV(String resourceName) {
-    Path resource = getAndCheckResource(resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resource, SELECT_FIRST_COLUMN));
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SELECT_FIRST_COLUMN));
   }
 
   static KeywordDataset fromCSV(String resourceName, String columnName) {
-    Path resource = getAndCheckResource(resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resource, SelectColumn.withName(columnName)));
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SelectColumn.withName(columnName)));
   }
 
   static KeywordDataset fromCSVCombiningColumns(String resourceName, String delimiter, String ... columnNames) {
-    Path resource = getAndCheckResource(resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resource, new CombineColumnSelector(delimiter, columnNames)));
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, new CombineColumnSelector(delimiter, columnNames)));
   }
 
   static KeywordDataset fromVersionedCSV(String nameTemplate) {

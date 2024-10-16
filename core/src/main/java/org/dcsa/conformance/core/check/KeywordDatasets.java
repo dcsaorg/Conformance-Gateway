@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 class KeywordDatasets {
+
+  private static final String SPLIT_CHAR = ",";
+
   private KeywordDatasets() {}
 
   static void checkResource(@NonNull String resourceName) {
@@ -25,28 +28,49 @@ class KeywordDatasets {
     return row[0];
   };
 
+  /**
+   * Load a CSV file as a dataset of keywords. File must have a header line and split by {@link
+   * #SPLIT_CHAR} Note 1: it currently does not support escaping or quoting of values. Note 2:
+   * Values should not contain the split char.
+   *
+   * @param resourceName File path to the CSV file
+   * @param selector Selector for the column to use as the keyword
+   * @return A dataset of keywords
+   */
   @SneakyThrows
-  static KeywordDataset loadCsvDataset(@NonNull String resourceName, @NonNull CSVRowSelector selector) {
+  static KeywordDataset loadCsvDataset(
+      @NonNull String resourceName, @NonNull CSVRowSelector selector) {
     // Can not use Files.lines() as it does not work with resources in JAR files
     var lines = new ArrayList<String>();
     try (BufferedReader reader =
         new BufferedReader(
-            new InputStreamReader(Objects.requireNonNull(KeywordDatasets.class.getResourceAsStream(resourceName))))) {
+            new InputStreamReader(
+                Objects.requireNonNull(KeywordDatasets.class.getResourceAsStream(resourceName))))) {
       String line;
       while ((line = reader.readLine()) != null) {
         lines.add(line);
       }
     }
-    String[] headers = lines.getFirst().split(",");
+    String[] headers = lines.getFirst().split(SPLIT_CHAR);
     selector.setup(resourceName, headers);
 
     Set<String> keywords = HashSet.newHashSet(lines.size());
     lines.stream()
         .skip(1) // Skip header line
-        .map(line -> line.split(","))
+        .map(line -> verifyAndSplitLine(line, headers.length))
         .map(row -> selector.selectValue(resourceName, row))
         .forEach(keywords::add);
     return Collections.unmodifiableSet(keywords)::contains;
+  }
+
+  private static String[] verifyAndSplitLine(String line, int length) {
+    if (line.isBlank()) {
+      return new String[0];
+    }
+    String[] split = line.split(SPLIT_CHAR);
+    if (split.length <= length) return split;
+    throw new IllegalArgumentException(
+        "CSV line has wrong number of columns or contains split char in values: " + line);
   }
 
   interface CSVRowSelector {

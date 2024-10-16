@@ -723,6 +723,9 @@ public class ConformanceSandbox {
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
       IOToolkit.HTTP_CLIENT.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       log.error(
           "Failed to send outbound request: {}",
           conformanceWebRequest.toJson().toPrettyString(),

@@ -5,13 +5,11 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -120,22 +118,23 @@ public class EblIssuanceCarrier extends ConformanceParty {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
     }
 
+    var replacements = new HashMap<String, String>();
+    replacements.put("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr);
+    replacements.put("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir);
+    replacements.put("BOOKING_REFERENCE_PLACEHOLDER", br);
+    replacements.put("SEND_TO_PLATFORM_PLACEHOLDER", ssp.sendToPlatform());
+    replacements.put("ISSUE_TO_LEGAL_NAME_PLACEHOLDER", ssp.issueToLegalName());
+    replacements.put("ISSUE_TO_PARTY_CODE_PLACEHOLDER", ssp.issueToPartyCode());
+    replacements.put("ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER", ssp.issueToCodeListName());
+    replacements.put("CONSIGNEE_LEGAL_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeLegalName());
+    replacements.put("CONSIGNEE_PARTY_CODE_PLACEHOLDER", ssp.consigneeOrEndorseePartyCode());
+    replacements.put("CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeCodeListName());
     var jsonRequestBody =
-      (ObjectNode)JsonToolkit.templateFileToJsonNode(
-            "/standards/eblissuance/messages/eblissuance-v%s-request.json"
-                .formatted(apiVersion),
-            Map.ofEntries(
-                Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
-                Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
-                Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
-                Map.entry("SEND_TO_PLATFORM_PLACEHOLDER", ssp.sendToPlatform()),
-                Map.entry("ISSUE_TO_LEGAL_NAME_PLACEHOLDER", ssp.issueToLegalName()),
-                Map.entry("ISSUE_TO_PARTY_CODE_PLACEHOLDER", ssp.issueToPartyCode()),
-                Map.entry("ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER", ssp.issueToCodeListName()),
-                Map.entry("CONSIGNEE_LEGAL_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeLegalName()),
-                Map.entry("CONSIGNEE_PARTY_CODE_PLACEHOLDER", ssp.consigneeOrEndorseePartyCode()),
-                Map.entry("CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeCodeListName())
-        ));
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/eblissuance/messages/eblissuance-v%s-request.json"
+                    .formatted(apiVersion),
+                replacements);
 
     if (eblType.isToOrder()) {
       var td = (ObjectNode)jsonRequestBody.path("document");

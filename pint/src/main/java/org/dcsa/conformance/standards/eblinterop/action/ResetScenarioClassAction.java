@@ -35,11 +35,6 @@ public class ResetScenarioClassAction extends PintAction {
       .put("transportDocumentReference", this.getSsp().transportDocumentReference());
   }
 
-  @Override
-  public boolean isInputRequired() {
-    return true;
-  }
-
 
   @Override
   public String getHumanReadablePrompt() {

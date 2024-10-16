@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 public class JsonAttribute {
 
   private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
+  public static final String VALUE_WARNING = "The value of '%s' was '%s' instead of '%s'";
 
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
@@ -367,7 +368,7 @@ public class JsonAttribute {
           var actualValue = node.asText(null);
           if (!Objects.equals(expectedValue, actualValue)) {
             return Set.of(
-                "The value of '%s' was '%s' instead of '%s'"
+                VALUE_WARNING
                     .formatted(
                         renderJsonPointer(jsonPointer, contextPath),
                         renderValue(node),
@@ -388,7 +389,7 @@ public class JsonAttribute {
         var node = body.at(jsonPointer);
         if (!node.isBoolean() || node.asBoolean() != expectedValue) {
           return Set.of(
-            "The value of '%s' was '%s' instead of '%s'"
+            VALUE_WARNING
               .formatted(
                 renderJsonPointer(jsonPointer, contextPath),
                 renderValue(node),
@@ -433,7 +434,7 @@ public class JsonAttribute {
           }
           if (!Objects.equals(expectedValue, actualValue)) {
             return Set.of(
-              "The value of '%s' was '%s' instead of '%s'"
+              VALUE_WARNING
                 .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue)));
           }
           return Collections.emptySet();
@@ -466,7 +467,7 @@ public class JsonAttribute {
         }
         if (!Objects.equals(expectedValue, actualValue)) {
           return Set.of(
-            "The value of '%s' was '%s' instead of '%s'"
+            VALUE_WARNING
               .formatted(nodePath, renderValue(node), renderValue(expectedValue)));
         }
         return Collections.emptySet();
@@ -496,7 +497,7 @@ public class JsonAttribute {
       }
       if (!Objects.equals(expectedValue, actualValue)) {
         return Set.of(
-          "The value of '%s' was '%s' instead of '%s'"
+          VALUE_WARNING
             .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
       }
       return Collections.emptySet();
@@ -844,15 +845,6 @@ public class JsonAttribute {
     return refNode -> refNode.at(jsonPointer);
   }
 
-  private static Function<JsonNode, Set<String>> at(JsonPointer jsonPointer, Function<JsonNode, Set<String>> validator) {
-    return at(jsonPointer).andThen(validator);
-  }
-
-  private static Function<JsonNode, Set<String>> atMatched(JsonPointer jsonPointer, JsonContentMatchedValidation validator) {
-    return (refNode) -> validator.validate(refNode.at(jsonPointer), renderJsonPointer(jsonPointer));
-  }
-
-
   static String renderValue(JsonNode node) {
     if (node == null || node.isMissingNode()) {
       return "(absent)";
@@ -947,10 +939,6 @@ public class JsonAttribute {
 
     private static JsonContentCheck of(String description, Function<JsonNode, Set<String>> impl) {
       return new JsonContentCheckImpl(description, impl);
-    }
-
-    private static JsonContentCheck of(JsonPointer pointer, JsonContentMatchedValidation impl) {
-      return of(jsonCheckName(pointer), atMatched(pointer, impl));
     }
 
   }

@@ -7,8 +7,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +53,7 @@ public class ApiLambda
           .withStatusCode(conformanceWebResponse.statusCode())
           .withBody(conformanceWebResponse.body());
     } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception", e);
+      log.error("Unhandled exception: ", e);
       throw e;
     }
   }

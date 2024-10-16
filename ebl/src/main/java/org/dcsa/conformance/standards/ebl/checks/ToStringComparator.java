@@ -14,16 +14,17 @@ public class ToStringComparator implements Comparator<JsonNode> {
 
   @Override
   public int compare(JsonNode o1, JsonNode o2) {
-    var r = o1.getNodeType().compareTo(o2.getNodeType());
-    if (r != 0) return r;
-    var o1sb = new StringBuffer();
-    var o2sb = new StringBuffer();
+    var compared = o1.getNodeType().compareTo(o2.getNodeType());
+    if (compared != 0) return compared;
+
+    var o1sb = new StringBuilder();
+    var o2sb = new StringBuilder();
     stringify(o1sb, o1);
     stringify(o2sb, o2);
     return o1.toString().compareTo(o2.toString());
   }
 
-  private static void stringify(StringBuffer builder, JsonNode node) {
+  private static void stringify(StringBuilder builder, JsonNode node) {
     switch (node.getNodeType()) {
       case ARRAY -> {
         builder.append("[");

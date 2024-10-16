@@ -22,18 +22,6 @@ public record CarrierScenarioParameters(
   }
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
-    ObjectNode cspNode = (ObjectNode) jsonNode;
-
-    return new CarrierScenarioParameters(
-        cspNode.required("serviceContractReference").asText(),
-        cspNode.required("contractQuotationReference").asText(),
-        cspNode.required("carrierExportVoyageNumber").asText(),
-        cspNode.required("carrierServiceName").asText(),
-        cspNode.required("hsCodes1").asText(),
-        cspNode.required("commodityType1").asText(),
-        cspNode.required("hsCodes2").asText(),
-        cspNode.required("commodityType2").asText(),
-        cspNode.required("polUNLocationCode").asText(),
-        cspNode.required("podUNLocationCode").asText());
+    return OBJECT_MAPPER.convertValue(jsonNode, CarrierScenarioParameters.class);
   }
 }

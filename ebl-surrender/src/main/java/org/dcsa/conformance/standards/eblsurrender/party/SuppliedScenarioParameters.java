@@ -6,23 +6,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public record SuppliedScenarioParameters(
-        String transportDocumentReference, String eblPlatform, String carrierPartyCode, String surrenderPartyCode, String codeListName) {
+      String transportDocumentReference,
+      JsonNode issueToParty,
+      JsonNode carrierParty,
+      JsonNode surrendereeParty
+) {
   public ObjectNode toJson() {
-    return OBJECT_MAPPER
+    var r = OBJECT_MAPPER
         .createObjectNode()
-        .put("transportDocumentReference", transportDocumentReference)
-        .put("eblPlatform", eblPlatform)
-        .put("carrierPartyCode", surrenderPartyCode)
-        .put("surrenderPartyCode", surrenderPartyCode)
-        .put("codeListName", codeListName);
+        .put("transportDocumentReference", transportDocumentReference);
+
+    r.set("issueToParty", issueToParty);
+    r.set("carrierParty", carrierParty);
+    r.set("surrendereeParty", surrendereeParty);
+    return r;
   }
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {
     return new SuppliedScenarioParameters(
         jsonNode.required("transportDocumentReference").asText(),
-        jsonNode.required("eblPlatform").asText(),
-        jsonNode.required("carrierPartyCode").asText(),
-        jsonNode.required("surrenderPartyCode").asText(),
-        jsonNode.required("codeListName").asText());
+        jsonNode.required("issueToParty"),
+        jsonNode.required("carrierParty"),
+        jsonNode.required("surrendereeParty"));
   }
 }

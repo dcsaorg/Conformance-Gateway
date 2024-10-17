@@ -23,6 +23,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Getter
 @Slf4j
 public class PintInitiateTransferUnsignedErrorAction extends PintAction {
+  private final SenderTransmissionClass senderTransmissionClass;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
   private final JsonSchemaValidator envelopeTransferChainEntrySchemaValidator;
@@ -33,6 +34,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
     String sendingPlatform,
     PintAction previousAction,
     int expectedStatus,
+    SenderTransmissionClass senderTransmissionClass,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -45,6 +47,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
         "StartTransfer",
         expectedStatus
     );
+    this.senderTransmissionClass = senderTransmissionClass;
     this.requestSchemaValidator = requestSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
     this.envelopeTransferChainEntrySchemaValidator = envelopeTransferChainEntrySchemaValidator;
@@ -146,6 +149,7 @@ public class PintInitiateTransferUnsignedErrorAction extends PintAction {
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
                   expectedApiVersion,
+                  senderTransmissionClass,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

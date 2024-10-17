@@ -31,7 +31,9 @@ public abstract class PintAction extends ConformanceAction {
     if (previousAction == null) {
       this.dspReference =
           new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode()));
-      this.rspReference = new OverwritingReference<>(null, new ReceiverScenarioParameters("", "", "", "", ""));
+      this.rspReference =
+          new OverwritingReference<>(
+              null, new ReceiverScenarioParameters(OBJECT_MAPPER.createObjectNode(), ""));
       this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", "", ""));
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);

@@ -1,22 +1,23 @@
 package org.dcsa.conformance.core.check;
 
-import com.opencsv.CSVReader;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 class KeywordDatasets {
+
+  private static final String SPLIT_CHAR = ",";
+
   private KeywordDatasets() {}
 
-  static void checkResource(Class<?> resourceClass, String resourceName) {
-    var resource = resourceClass.getResource(resourceName);
+  static void checkResource(@NonNull String resourceName) {
+    var resource = KeywordDatasets.class.getResource(resourceName);
     if (resource == null) {
-      throw new IllegalArgumentException("Could not find the resource " + resourceName
-        + " via " + resourceClass.getSimpleName());
+      throw new IllegalArgumentException("Could not find the resource: " + resourceName);
     }
   }
 
@@ -27,24 +28,53 @@ class KeywordDatasets {
     return row[0];
   };
 
-
+  /**
+   * Load a CSV file as a dataset of keywords. File must have a header line and split by {@link
+   * #SPLIT_CHAR} Note 1: it currently does not support escaping or quoting of values. Note 2:
+   * Values should not contain the split char.
+   *
+   * @param resourceName File path to the CSV file
+   * @param selector Selector for the column to use as the keyword
+   * @return A dataset of keywords
+   */
   @SneakyThrows
-  static KeywordDataset loadCsvDataset(Class<?> resourceClass, String resourceName, CSVRowSelector selector) {
-    Set<String> keywords = new HashSet<>();
-    try (var reader = new CSVReader(new BufferedReader(new InputStreamReader(Objects.requireNonNull(resourceClass.getResourceAsStream(resourceName)))))) {
-      var headers = reader.readNext();
-      selector.setup(resourceName, headers);
-      for (var line : reader) {
-        var value = selector.selectValue(resourceName, line);
-        keywords.add(value);
+  static KeywordDataset loadCsvDataset(
+      @NonNull String resourceName, @NonNull CSVRowSelector selector) {
+    // Can not use Files.lines() as it does not work with resources in JAR files
+    var lines = new ArrayList<String>();
+    try (BufferedReader reader =
+        new BufferedReader(
+            new InputStreamReader(
+                Objects.requireNonNull(KeywordDatasets.class.getResourceAsStream(resourceName))))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        lines.add(line);
       }
     }
+    String[] headers = lines.getFirst().split(SPLIT_CHAR);
+    selector.setup(resourceName, headers);
+
+    Set<String> keywords = HashSet.newHashSet(lines.size());
+    lines.stream()
+        .skip(1) // Skip header line
+        .map(line -> verifyAndSplitLine(line, headers.length))
+        .map(row -> selector.selectValue(resourceName, row))
+        .forEach(keywords::add);
     return Collections.unmodifiableSet(keywords)::contains;
   }
 
-  interface CSVRowSelector {
-    default void setup(String resourceName, String[] headers) {
+  private static String[] verifyAndSplitLine(String line, int length) {
+    if (line.isBlank()) {
+      return new String[0];
     }
+    String[] split = line.split(SPLIT_CHAR);
+    if (split.length <= length) return split;
+    throw new IllegalArgumentException(
+        "CSV line has wrong number of columns or contains split char in values: " + line);
+  }
+
+  interface CSVRowSelector {
+    default void setup(String resourceName, String[] headers) {}
 
     String selectValue(String resourceName, String[] row);
   }

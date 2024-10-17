@@ -1,22 +1,17 @@
 package org.dcsa.conformance.sandbox;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public record SandboxWaiting(String who, String forWhom, String toDoWhat) {
-  ObjectNode toJson() {
-    return OBJECT_MAPPER
-        .createObjectNode()
-        .put("who", who)
-        .put("forWhom", forWhom)
-        .put("toDoWhat", toDoWhat);
+
+  public ObjectNode toJson() {
+    return OBJECT_MAPPER.valueToTree(this);
   }
 
-  static SandboxWaiting fromJson(ObjectNode objectNode) {
-    return new SandboxWaiting(
-        objectNode.get("who").asText(),
-        objectNode.get("forWhom").asText(),
-        objectNode.get("toDoWhat").asText());
+  public static SandboxWaiting fromJson(JsonNode jsonNode) {
+    return OBJECT_MAPPER.convertValue(jsonNode, SandboxWaiting.class);
   }
 }

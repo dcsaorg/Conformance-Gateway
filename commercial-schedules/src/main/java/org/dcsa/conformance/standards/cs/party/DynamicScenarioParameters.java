@@ -2,32 +2,17 @@ package org.dcsa.conformance.standards.cs.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.With;
+import org.dcsa.conformance.core.party.ScenarioParameters;
 
 @With
-public record DynamicScenarioParameters(String cursor, String firstPage, String secondPage) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record DynamicScenarioParameters(String cursor, String firstPage, String secondPage)
+    implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
-    ObjectNode dspNode = (ObjectNode) jsonNode;
-    return new DynamicScenarioParameters(
-        dspNode.path("cursor").asText(),
-        dspNode.path("firstPage").asText(),
-        dspNode.path("secondPage").asText());
-  }
-
-  public ObjectNode toJson() {
-    ObjectNode dspNode = OBJECT_MAPPER.createObjectNode();
-    if (cursor != null) {
-      dspNode.put("cursor", cursor);
-    }
-    if (firstPage != null) {
-      dspNode.put("firstPage", firstPage);
-    }
-    if (secondPage != null) {
-      dspNode.put("secondPage", secondPage);
-    }
-    return dspNode;
+    return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);
   }
 }

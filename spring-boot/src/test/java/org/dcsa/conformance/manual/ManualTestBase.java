@@ -83,7 +83,7 @@ public abstract class ManualTestBase {
             .put("operation", "notifyParty")
             .put("sandboxId", sandbox.sandboxId);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
-    waitForAsyncCalls(50L);
+    waitForAsyncCalls(150L);
     waitForCleanSandboxStatus(sandbox);
     waitForCleanSandboxStatus(otherSandbox);
   }

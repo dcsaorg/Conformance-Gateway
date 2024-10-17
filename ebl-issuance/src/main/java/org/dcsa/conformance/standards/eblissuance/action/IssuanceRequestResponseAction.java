@@ -19,11 +19,12 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 @Getter
 @Slf4j
-public class IssuanceRequestAction extends IssuanceAction {
+public class IssuanceRequestResponseAction extends IssuanceAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
   private final boolean isCorrect;
   private final boolean isAmended;
+  private String responseCode;
 
   private final AtomicReference<String> transportDocumentReference;
 
@@ -40,7 +41,7 @@ public class IssuanceRequestAction extends IssuanceAction {
     .collect(Collectors.joining(","));
   }
 
-  public IssuanceRequestAction(
+  public IssuanceRequestResponseAction(
       boolean isCorrect,
       boolean isDuplicate,
       boolean isAmended,
@@ -59,6 +60,7 @@ public class IssuanceRequestAction extends IssuanceAction {
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
     this.isAmended = isAmended;
+    this.responseCode = responseCode.standardCode;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
     this.transportDocumentReference =
@@ -125,6 +127,7 @@ public class IssuanceRequestAction extends IssuanceAction {
     if (tdr != null) {
       jsonNode.put("tdr", tdr);
     }
+    jsonNode.put("irc", this.responseCode);
     return jsonNode;
   }
 
@@ -166,6 +169,9 @@ public class IssuanceRequestAction extends IssuanceAction {
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     expectedApiVersion),
+            new UrlPathCheck(
+              EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "/ebl-issuance-responses"),
+            new HttpMethodCheck(EblIssuanceRole::isPlatform,getMatchedExchangeUuid(),"POST"),
                 isCorrect
                     ? new JsonSchemaCheck(
                         EblIssuanceRole::isCarrier,

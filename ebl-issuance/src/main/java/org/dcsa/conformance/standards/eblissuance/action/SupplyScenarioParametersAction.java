@@ -8,12 +8,15 @@ import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParamete
 
 public class SupplyScenarioParametersAction extends IssuanceAction {
   private final EblType eblType;
+  private final IssuanceResponseCode responseCode;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
+
   public SupplyScenarioParametersAction(
-      String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType) {
+      String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType, IssuanceResponseCode code) {
     super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s]".formatted(eblType.name()), -1);
     this.eblType = eblType;
+    this.responseCode = code;
   }
 
   @Override
@@ -84,7 +87,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   @Override
   public ObjectNode asJsonNode() {
       return super.asJsonNode()
-      .put("eblType", eblType.name());
+      .put("eblType", eblType.name()).put("responseCode",responseCode.standardCode);
   }
 
   @Override

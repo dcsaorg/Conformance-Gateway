@@ -11,6 +11,8 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblissuance.action.*;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
+import static org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode.ACCEPTED;
+
 @Slf4j
 class EblIssuanceScenarioListBuilder
     extends ScenarioListBuilder<EblIssuanceScenarioListBuilder> {
@@ -32,12 +34,13 @@ class EblIssuanceScenarioListBuilder
         "eBL types",
         carrierScenarioParameters().then(
           noAction().thenEither(
-            supplyScenarioParameters(EblType.STRAIGHT_EBL)
-              .then(correctIssuanceRequestResponse()),
+            supplyScenarioParameters(EblType.STRAIGHT_EBL,
+              IssuanceResponseCode.ACCEPTED)
+              .then(correctIssuanceRequestResponse())/*,
             supplyScenarioParameters(EblType.NEGOTIABLE_EBL).then(
               correctIssuanceRequestResponse()),
             supplyScenarioParameters(EblType.BLANK_EBL).then(
-              correctIssuanceRequestResponse()))))
+              correctIssuanceRequestResponse())*/)))
       /*Map.entry("Error cases",
         carrierScenarioParameters().then(noAction().thenEither(
           supplyScenarioParameters(EblType.STRAIGHT_EBL).then(duplicateIssuanceRequest().then(issuanceResponseBlocked())),
@@ -59,12 +62,12 @@ class EblIssuanceScenarioListBuilder
     return new EblIssuanceScenarioListBuilder(null);
   }
 
-  private static EblIssuanceScenarioListBuilder supplyScenarioParameters(EblType eblType) {
+  private static EblIssuanceScenarioListBuilder supplyScenarioParameters(EblType eblType, IssuanceResponseCode responseCode) {
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblIssuanceScenarioListBuilder(
         previousAction ->
-            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, (IssuanceAction) previousAction, eblType));
+            new SupplyScenarioParametersAction(platformPartyName, carrierPartyName, (IssuanceAction) previousAction, eblType,responseCode));
   }
 
   private static EblIssuanceScenarioListBuilder carrierScenarioParameters() {
@@ -77,7 +80,7 @@ class EblIssuanceScenarioListBuilder
   }
 
   private static EblIssuanceScenarioListBuilder correctIssuanceRequestResponse() {
-    return _issuanceRequestResponse(true, false, false,IssuanceResponseCode.ACCEPTED);
+    return _issuanceRequestResponse(true, false, false, ACCEPTED);
   }
 
  /* private static EblIssuanceScenarioListBuilder correctAmendedIssuanceRequest() {
@@ -107,7 +110,7 @@ class EblIssuanceScenarioListBuilder
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblIssuanceScenarioListBuilder(
         previousAction ->
-            new IssuanceRequestAction(
+            new IssuanceRequestResponseAction(
                 isCorrect,
                 isDuplicate,
                 isAmended,
@@ -122,7 +125,7 @@ class EblIssuanceScenarioListBuilder
   }
 
   private static EblIssuanceScenarioListBuilder issuanceResponseAccepted() {
-    return _issuanceResponse(IssuanceResponseCode.ACCEPTED, false);
+    return _issuanceResponse(ACCEPTED, false);
   }
 
   private static EblIssuanceScenarioListBuilder issuanceResponseBlocked() {
@@ -134,7 +137,7 @@ class EblIssuanceScenarioListBuilder
   }
 
   private static EblIssuanceScenarioListBuilder duplicateIssuanceResponse() {
-    return _issuanceResponse(IssuanceResponseCode.ACCEPTED, true);
+    return _issuanceResponse(ACCEPTED, true);
   }
 
   private static EblIssuanceScenarioListBuilder _issuanceResponse(

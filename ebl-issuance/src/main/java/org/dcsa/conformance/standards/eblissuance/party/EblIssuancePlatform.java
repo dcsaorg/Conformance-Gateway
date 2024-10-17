@@ -20,10 +20,11 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseAction;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
+
+import javax.json.JsonObject;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
@@ -86,7 +87,7 @@ public class EblIssuancePlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(IssuanceRequestAction.class, this::sendIssuanceResponse),
+        Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceResponse),
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
@@ -152,8 +153,11 @@ public class EblIssuancePlatform extends ConformanceParty {
     log.info(
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
-    SuppliedScenarioParameters suppliedScenarioParameters =
-        new SuppliedScenarioParameters(
+
+    String responseCode = actionPrompt.path("responseCode").asText();
+
+    SuppliedScenarioParameters suppliedScenarioParameters =getSuppliedScenarioParameters(responseCode);
+        /*new SuppliedScenarioParameters(
             "BOLE",
             "DCSA CTK Issue To party",
             "1234-issue-to",
@@ -161,7 +165,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             // These are ignored for blank ones, so we can provide them unconditionally.
             "DCSA CTK Consignee/Endorsee",
             "5678-cn-or-end",
-            "Bolero");
+            "Bolero");*/
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
     addOperatorLogEntry(
@@ -169,12 +173,52 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
+  private SuppliedScenarioParameters getSuppliedScenarioParameters(String responseCode) {
+    if (responseCode.equals(IssuanceResponseCode.ACCEPTED.standardCode)) {
+      return new SuppliedScenarioParameters(
+        "BOLE",
+        "DCSA CTK Issue To party",
+        "1234-issue-to",
+        "Bolero",
+        "DCSA CTK Consignee/Endorsee",
+        "5678-cn-or-end",
+        "Bolero"
+      );
+    } else if (responseCode.equals(IssuanceResponseCode.BLOCKED.standardCode)) {
+      return new SuppliedScenarioParameters(
+        "BOLE",
+        "DCSA CTK Blocked Party",
+        "1234-blocked",
+        "Bolero",
+        "DCSA CTK Blocked Party Reference",
+        "5678-block-ref",
+        "Bolero"
+      );
+    } else if (responseCode.equals(IssuanceResponseCode.REFUSED.standardCode)) {
+      return new SuppliedScenarioParameters(
+        "BOLE",
+        "DCSA CTK Refused Party",
+        "1234-refused",
+        "Bolero",
+        "DCSA CTK Refused Party Reference",
+        "5678-refused-ref",
+        "Bolero"
+      );
+    } else {
+      throw new IllegalArgumentException("Unexpected response code: " + responseCode);
+    }
+  }
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuancePlatform.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
+    var identifyingCodes = jsonRequest.path("issueTo").path("identifyingCodes");
+    String partyCode = null;
+    for(JsonNode identifyingCode : identifyingCodes){
+      partyCode = identifyingCode.path("partyCode").asText();
+    }
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 
@@ -221,9 +265,18 @@ public class EblIssuancePlatform extends ConformanceParty {
                       .createObjectNode()
                       .put("message", message)));
     }
-    /*request.
-    asyncCounterpartNotification(
-      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", response);*/
+    String irc= null;
+    if(partyCode.contains("issue")){
+      irc = IssuanceResponseCode.ACCEPTED.standardCode;
+    }
+
+    var platformResponse =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("transportDocumentReference", tdr)
+            .put("issuanceResponseCode", irc);
+    syncCounterpartPost(
+        "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)), platformResponse);
 
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"

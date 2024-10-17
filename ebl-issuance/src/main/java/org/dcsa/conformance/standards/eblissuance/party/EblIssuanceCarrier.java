@@ -27,7 +27,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
 @Slf4j
@@ -82,7 +82,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest),
+      Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceRequest),
       Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters)
     );
   }

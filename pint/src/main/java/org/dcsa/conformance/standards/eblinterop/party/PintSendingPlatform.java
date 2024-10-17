@@ -76,11 +76,9 @@ public class PintSendingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(ResignLatestEntryAction.class, this::resignLatestEntry),
       Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
-      Map.entry(ManipulateTransactionsAction.class, this::manipulateTransactions),
       Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
       Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
@@ -149,26 +147,11 @@ public class PintSendingPlatform extends ConformanceParty {
       "BOLE",
       payloadSigner.getPublicKeyInPemFormat(),
       carrierPayloadSigner.getPublicKeyInPemFormat()
-    );
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), scenarioParameters.toJson());
+    ).toJson();
     addOperatorLogEntry(
-      "Provided ScenarioParameters: %s".formatted(scenarioParameters));
-  }
-
-  private void resignLatestEntry(JsonNode actionPrompt) {
-    log.info(
-      "EblInteropSendingPlatform.resignLatestEntry(%s)"
-        .formatted(actionPrompt.toPrettyString()));
-    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
-    var tdr = ssp.transportDocumentReference();
-    var sendingState = TDSendingState.load(persistentMap, tdr);
-    sendingState.resignLatestEntry(payloadSigner);
-    sendingState.save(persistentMap);
+      "Prompt answer for supplyScenarioParameters: %s".formatted(scenarioParameters.toString()));
     asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
-    addOperatorLogEntry(
-      "Resigned latest entry for document: %s".formatted(tdr));
+        actionPrompt.required("actionId").asText(), scenarioParameters);
   }
 
   private void manipulateTransactions(JsonNode actionPrompt) {
@@ -242,7 +225,14 @@ public class PintSendingPlatform extends ConformanceParty {
     log.info("EblInteropSendingPlatform.retryTransfer(%s)".formatted(actionPrompt.toPrettyString()));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
     var tdr = ssp.transportDocumentReference();
+    var retryType = RetryType.valueOf(actionPrompt.required("retryType").asText());
+    var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
     var sendingState = TDSendingState.load(persistentMap, tdr);
+
+    switch (retryType) {
+      case RESIGN -> sendingState.resignLatestEntry(payloadSigner);
+      case MANIPULATE -> sendingState.manipulateLatestTransaction(payloadSigner, rsp);
+    }
 
     var body = OBJECT_MAPPER.createObjectNode();
     var tdPayload = loadTDR(tdr);
@@ -264,7 +254,7 @@ public class PintSendingPlatform extends ConformanceParty {
     }
     sendingState.save(persistentMap);
     addOperatorLogEntry(
-      "Re-sent an eBL with transportDocumentReference '%s'".formatted(tdr));
+      "Re-sent an eBL with transportDocumentReference '%s' with type: %s".formatted(tdr, retryType.name()));
   }
 
   private ObjectNode loadTDR(String tdr) {

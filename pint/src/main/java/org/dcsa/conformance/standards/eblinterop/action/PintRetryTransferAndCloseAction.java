@@ -24,6 +24,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 public class PintRetryTransferAndCloseAction extends PintAction {
   private final PintResponseCode responseCode;
   private final SenderTransmissionClass senderTransmissionClass;
+  private final RetryType retryType;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
   private final JsonSchemaValidator envelopeEnvelopeSchemaValidator;
@@ -36,6 +37,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     PintAction previousAction,
     PintResponseCode responseCode,
     SenderTransmissionClass senderTransmissionClass,
+    RetryType retryType,
     JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator envelopeEnvelopeSchemaValidator,
     JsonSchemaValidator envelopeTransferChainEntrySchemaValidator,
@@ -46,11 +48,12 @@ public class PintRetryTransferAndCloseAction extends PintAction {
         sendingPlatform,
         receivingPlatform,
         previousAction,
-        "RetryTransfer(%s)".formatted(responseCode.name()),
+        "RetryTransfer(%s, %s)".formatted(responseCode.name(), retryType.name()),
         responseCode.getHttpResponseCode()
     );
     this.responseCode = responseCode;
     this.senderTransmissionClass = senderTransmissionClass;
+    this.retryType = retryType;
     this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
     this.envelopeEnvelopeSchemaValidator = envelopeEnvelopeSchemaValidator;
@@ -60,13 +63,18 @@ public class PintRetryTransferAndCloseAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Retry transfer-transaction request");
+    return switch (retryType) {
+      case NO_CHANGE -> "Retry transfer-transaction request";
+      case RESIGN -> "Retry the transfer-transaction request with the latest transaction entry resigned";
+      case MANIPULATE -> "Retry the transfer-transaction request after manipulating (and resigning) the latest transaction";
+    };
   }
 
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
+      .put("senderTransmissionClass", senderTransmissionClass.name())
+      .put("retryType", retryType.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());

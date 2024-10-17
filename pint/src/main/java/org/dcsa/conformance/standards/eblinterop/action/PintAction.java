@@ -47,6 +47,8 @@ public abstract class PintAction extends ConformanceAction {
     super.reset();
     if (previousAction != null) {
       this.dspReference.set(null);
+      this.rspReference.set(null);
+      this.sspReference.set(null);
     }
   }
 

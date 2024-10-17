@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.booking.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.core.party.ScenarioParameters;
 
 public record CarrierScenarioParameters(
     String serviceContractReference,
@@ -15,11 +15,8 @@ public record CarrierScenarioParameters(
     String hsCodes2,
     String commodityType2,
     String polUNLocationCode,
-    String podUNLocationCode) {
-
-  public ObjectNode toJson() {
-    return OBJECT_MAPPER.valueToTree(this);
-  }
+    String podUNLocationCode)
+    implements ScenarioParameters {
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, CarrierScenarioParameters.class);

@@ -75,7 +75,7 @@ public abstract class ManualTestBase {
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
   }
 
-  void notifyAction(SandboxConfig sandbox) {
+  void notifyAction(SandboxConfig sandbox, SandboxConfig otherSandbox) {
     log.debug("Notifying party.");
     ObjectNode node =
         mapper
@@ -83,8 +83,9 @@ public abstract class ManualTestBase {
             .put("operation", "notifyParty")
             .put("sandboxId", sandbox.sandboxId);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+    waitForAsyncCalls(50L);
     waitForCleanSandboxStatus(sandbox);
-    waitForAsyncCalls(250L);
+    waitForCleanSandboxStatus(otherSandbox);
   }
 
   void completeAction(SandboxConfig sandbox) {
@@ -100,6 +101,7 @@ public abstract class ManualTestBase {
   }
 
   void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
+    waitForCleanSandboxStatus(sandbox1);
     log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
     assertTrue(jsonNode.has("isRunning"), "Did scenarioId '" + scenarioId + "' run? Can't find it's state. ");
@@ -169,12 +171,12 @@ public abstract class ManualTestBase {
       sandboxStatus = webuiHandler.handleRequest(USER_ID, node).toString();
       if (sandboxStatus.contains("[]")) return;
       counter++;
-      waitForAsyncCalls(300L); // Wait for the scenario to finish
-    } while (counter < 30);
+      waitForAsyncCalls(20L); // Wait for the scenario to finish
+    } while (counter < 1000);
 
     log.warn(
         "Waited for {} ms for sandbox status to reach the expected state: {}",
-        counter * 300,
+        counter * 20,
         sandboxStatus);
     throw new RuntimeException(
           "Sandbox status did not reach the expected state on time: " + sandboxStatus);
@@ -301,8 +303,7 @@ public abstract class ManualTestBase {
     SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     log.debug("Starting scenario '{}'.", scenarioName);
     startOrStopScenario(sandbox1, scenarioId);
-    notifyAction(sandbox2);
-    waitForCleanSandboxStatus(sandbox1);
+    notifyAction(sandbox2, sandbox1);
 
     boolean isRunning;
     do {
@@ -319,7 +320,7 @@ public abstract class ManualTestBase {
 
         // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
         if (jsonForPromptText.contains("Insert TDR here")) {
-          jsonForPrompt = fetchTransportDocument(sandbox2);
+          jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
         }
 
         handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
@@ -331,15 +332,15 @@ public abstract class ManualTestBase {
         fail();
       }
       if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
-        notifyAction(sandbox2);
+        notifyAction(sandbox2, sandbox1);
       }
       if (isRunning) completeAction(sandbox1);
     } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
   }
 
-  private JsonNode fetchTransportDocument(SandboxConfig sandbox2) {
-    notifyAction(sandbox2);
+  private JsonNode fetchTransportDocument(SandboxConfig sandbox2, SandboxConfig sandbox1) {
+    notifyAction(sandbox2, sandbox1);
 
     log.debug("Fetching transport document reference from sandbox2");
     String referenceText =

@@ -57,10 +57,10 @@ public interface KeywordDataset {
   }
 
   static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String columnName) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, SelectColumn.withName(columnName));
+    return VersionedKeywordDataset.of(nameTemplate, SelectColumn.withName(columnName));
   }
 
   static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String delimiter, String ... columnNames) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, new CombineColumnSelector(delimiter, columnNames));
+    return VersionedKeywordDataset.of(nameTemplate, new CombineColumnSelector(delimiter, columnNames));
   }
 }

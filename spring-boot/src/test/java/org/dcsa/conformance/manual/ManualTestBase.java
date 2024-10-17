@@ -98,6 +98,8 @@ public abstract class ManualTestBase {
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
     waitForCleanSandboxStatus(sandbox);
+    waitForAsyncCalls(50L);
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
   }
 
   void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
@@ -334,6 +336,7 @@ public abstract class ManualTestBase {
       if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
         notifyAction(sandbox2, sandbox1);
       }
+      waitForCleanSandboxStatus(sandbox2);
       if (isRunning) completeAction(sandbox1);
     } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);

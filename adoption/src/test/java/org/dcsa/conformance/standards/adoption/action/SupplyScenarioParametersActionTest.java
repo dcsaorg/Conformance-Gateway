@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.adoption.action;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.UserFacingException;

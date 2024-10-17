@@ -2,7 +2,6 @@ package org.dcsa.conformance.core.party;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.stream.Stream;
 
 import lombok.Getter;

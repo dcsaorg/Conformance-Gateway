@@ -3,14 +3,13 @@ package org.dcsa.conformance.standards.jit.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.jit.party.JitFilterParameter;
@@ -18,7 +17,6 @@ import org.dcsa.conformance.standards.jit.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final LinkedHashSet<JitFilterParameter> jitFilterParameters;

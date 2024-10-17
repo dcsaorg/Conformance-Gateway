@@ -3,23 +3,19 @@ package org.dcsa.conformance.standards.ovs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final LinkedHashSet<OvsFilterParameter> ovsFilterParameters;
 
@@ -86,7 +82,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                         ovsFilterParameter ->
                             switch (ovsFilterParameter) {
                               case LIMIT -> "100";
-                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
+                              case START_DATE, END_DATE -> LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
                               default -> "TODO";
                             })))
         .toJson();

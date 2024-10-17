@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
@@ -16,6 +17,7 @@ public class JsonToolkit {
 
   public static final String JSON_UTF_8 = "application/json";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  public static final DateTimeFormatter DEFAULT_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {

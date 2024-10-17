@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -13,13 +12,12 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.adoption.party.FilterParameter;
 import org.dcsa.conformance.standards.adoption.party.SuppliedScenarioParameters;
 
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
-  public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final LinkedHashSet<FilterParameter> filterParameters;
 
@@ -86,7 +84,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                         filterParameter ->
                             switch (filterParameter) {
                               case INTERVAL -> "day";
-                              case DATE -> LocalDateTime.now().format(DATE_FORMAT);
+                              case DATE -> LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
                             })))
         .toJson();
   }
@@ -108,7 +106,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
         throw new UserFacingException("Invalid interval supplied: %s".formatted(interval));
       }
       String date = input.required("date").asText();
-      DATE_FORMAT.parse(date);
+      JsonToolkit.DEFAULT_DATE_FORMAT.parse(date);
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(input);
     } catch (IllegalArgumentException | DateTimeParseException e) {
       throw new UserFacingException("Invalid input: %s".formatted(e.getMessage()));

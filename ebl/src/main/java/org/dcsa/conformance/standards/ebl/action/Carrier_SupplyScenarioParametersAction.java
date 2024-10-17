@@ -9,6 +9,8 @@ import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends EblAction {
+  public static final String DKAAR = "DKAAR";
+  public static final String BOOKING_REFERENCE = "Booking Reference";
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
   private ScenarioType scenarioType;
@@ -64,13 +66,13 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     var csp = switch (scenarioType) {
       case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         "Commodity subreference for regular (non-DG, non-reefer) cargo",
         null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
         null,
-        "DKAAR",
+        DKAAR,
         "640510",
         null,
         "Shoes - black, 400 boxes",
@@ -78,13 +80,13 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Fibreboard boxes"
       );
       case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         null,
         null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
         null,
-        "DKAAR",
+        DKAAR,
         "640510",
         null,
         "Shoes - black, 400 boxes",
@@ -92,13 +94,13 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Fibreboard boxes"
       );
       case ACTIVE_REEFER -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         "Commodity subreference for cargo requiring an *active* reefer",
         null,
         // Any valid reefer equipment reference will do as an example.
         "KKFU6671914",
         null,
-        "DKAAR",
+        DKAAR,
         "04052090",
         null,
         "Dairy products",
@@ -106,13 +108,13 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Bottles"
       );
       case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         "Commodity subreference for cargo requiring an non-operating reefer",
         null,
         // Any valid reefer equipment reference will do as an example.
         "KKFU6671914",
         null,
-        "DKAAR",
+        DKAAR,
         "220299",
         null,
         "Non alcoholic beverages",
@@ -120,41 +122,27 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Bottles"
       );
       case DG -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         "Commodity subreference for dangerous goods cargo",
         null,
         // Any valid regular equipment reference will do as an example.
         "NARU3472484",
         null,
-        "DKAAR",
+        DKAAR,
         "293499",
         null,
         "Environmentally hazardous substance",
         null,
         null
       );
-      case REGULAR_2C_2U_1E -> new CarrierScenarioParameters(
-        "Booking Reference",
+      case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
+        BOOKING_REFERENCE,
         "Commodity Subreference for regular cargo 1",
         "Commodity Subreference for regular cargo 2",
         // Any valid reefer equipment reference will do as an example.
         "MSKU3963442",
         "MSKU7895860",
-        "DKAAR",
-        "691110",
-        "732391",
-        "Tableware and kitchenware",
-        "Kitchen pots and pans",
-        "Fibreboard boxes"
-      );
-      case REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
-        "Booking Reference",
-        "Commodity Subreference for regular cargo 1",
-        "Commodity Subreference for regular cargo 2",
-        // Any valid reefer equipment reference will do as an example.
-        "MSKU3963442",
-        "MSKU7895860",
-        "DKAAR",
+        DKAAR,
         "691110",
         "732391",
         "Tableware and kitchenware",
@@ -162,12 +150,12 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
         "Fibreboard boxes"
       );
       case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
-        "Booking Reference",
+        BOOKING_REFERENCE,
         "Commodity Subreference for regular cargo",
         null,
         null,
         null,
-        "DKAAR",
+        DKAAR,
         "691110",
         null,
         "Tableware and kitchenware",

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ class ConformanceApplicationTest {
     log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed
     String rootURL = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
-    Assumptions.assumeTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
+    assertTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
 
     // Start the scenario
     String value = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "reset"), String.class);

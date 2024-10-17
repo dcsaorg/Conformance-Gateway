@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.cs.model;
 
+import lombok.NoArgsConstructor;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -7,18 +10,18 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class CsDateUtils {
   public static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-  public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   public static String getEndDateAfter3Months() {
     LocalDate futureDate = LocalDate.now().plusMonths(3);
-    return futureDate.format(DATE_FORMAT);
+    return futureDate.format(JsonToolkit.DEFAULT_DATE_FORMAT);
   }
 
   public static String getCurrentDate() {
-    return LocalDate.now().format(DATE_FORMAT);
+    return LocalDate.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
   }
 
   public static void handleArrivalAndDepartureDates(
@@ -95,9 +98,9 @@ public class CsDateUtils {
   private static String processDate(String startDate, String endDate, String type) {
     return switch (type) {
       case "startDate", "range", "date" ->
-          convertDateToDateTime(LocalDate.parse(startDate, CsDateUtils.DATE_FORMAT).plusDays(1));
+          convertDateToDateTime(LocalDate.parse(startDate, JsonToolkit.DEFAULT_DATE_FORMAT).plusDays(1));
       case "endDate" ->
-          convertDateToDateTime(LocalDate.parse(endDate, CsDateUtils.DATE_FORMAT).minusDays(1));
+          convertDateToDateTime(LocalDate.parse(endDate, JsonToolkit.DEFAULT_DATE_FORMAT).minusDays(1));
       default -> "";
     };
   }
@@ -105,7 +108,6 @@ public class CsDateUtils {
   private static String convertDateToDateTime(LocalDate date) {
     LocalDateTime dateTime = date.atStartOfDay();
     ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.systemDefault());
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-    return zonedDateTime.format(dateTimeFormatter);
+    return zonedDateTime.format(CsDateUtils.DATE_TIME_FORMATTER);
   }
 }

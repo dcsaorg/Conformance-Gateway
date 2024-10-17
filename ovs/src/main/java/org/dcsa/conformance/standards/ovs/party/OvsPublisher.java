@@ -2,7 +2,7 @@ package org.dcsa.conformance.standards.ovs.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,8 +23,6 @@ import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 
 @Slf4j
 public class OvsPublisher extends ConformanceParty {
-
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   public OvsPublisher(
       String apiVersion,
@@ -82,7 +80,7 @@ public class OvsPublisher extends ConformanceParty {
                               case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
                               case UN_LOCATION_CODE -> "NLAMS";
                               case FACILITY_SMDG_CODE -> "APM";
-                              case START_DATE, END_DATE -> DATE_FORMAT.format(new Date());
+                              case START_DATE, END_DATE -> LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
                               case LIMIT -> "100";
                             })));
 

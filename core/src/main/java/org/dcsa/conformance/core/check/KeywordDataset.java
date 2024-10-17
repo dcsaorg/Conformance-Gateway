@@ -46,30 +46,30 @@ public interface KeywordDataset {
     );
   }
 
-  static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SELECT_FIRST_COLUMN));
+  static KeywordDataset fromCSV(String resourceName) {
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SELECT_FIRST_COLUMN));
   }
 
-  static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName, String columnName) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SelectColumn.withName(columnName)));
+  static KeywordDataset fromCSV(String resourceName, String columnName) {
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SelectColumn.withName(columnName)));
   }
 
-  static KeywordDataset fromCSVCombiningColumns(Class<?> resourceClass, String resourceName, String delimiter, String ... columnNames) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, new CombineColumnSelector(delimiter, columnNames)));
+  static KeywordDataset fromCSVCombiningColumns(String resourceName, String delimiter, String ... columnNames) {
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, new CombineColumnSelector(delimiter, columnNames)));
   }
 
-  static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, SELECT_FIRST_COLUMN);
+  static KeywordDataset fromVersionedCSV(String nameTemplate) {
+    return VersionedKeywordDataset.of(nameTemplate, SELECT_FIRST_COLUMN);
   }
 
-  static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String columnName) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, SelectColumn.withName(columnName));
+  static KeywordDataset fromVersionedCSV(String nameTemplate, String columnName) {
+    return VersionedKeywordDataset.of(nameTemplate, SelectColumn.withName(columnName));
   }
 
-  static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String delimiter, String ... columnNames) {
-    return VersionedKeywordDataset.of(resourceClass, nameTemplate, new CombineColumnSelector(delimiter, columnNames));
+  static KeywordDataset fromVersionedCSV(String nameTemplate, String delimiter, String ... columnNames) {
+    return VersionedKeywordDataset.of(nameTemplate, new CombineColumnSelector(delimiter, columnNames));
   }
 }

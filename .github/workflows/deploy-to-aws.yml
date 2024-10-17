@@ -3,6 +3,8 @@ name: Deploy to AWS
 on:
   push:
     branches: ["dev"]
+  pull_request: # DELETE BEFORE MERGE
+    types: [opened, synchronize, reopened]
 
 env:
   AWS_REGION: "eu-north-1"

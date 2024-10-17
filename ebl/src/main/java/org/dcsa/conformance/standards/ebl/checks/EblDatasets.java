@@ -28,8 +28,8 @@ public class EblDatasets {
   );
 
 
-  public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/inhalationzones.csv");
-  public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV(EblDatasets.class, "/standards/ebl/datasets/segregationgroups.csv");
+  public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV("/standards/ebl/datasets/inhalationzones.csv");
+  public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV("/standards/ebl/datasets/segregationgroups.csv");
 
   public static final KeywordDataset WOOD_DECLARATION_VALUES = KeywordDataset.staticDataset(
     "Not Applicable",

@@ -46,14 +46,14 @@ public interface KeywordDataset {
     );
   }
 
-  static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SELECT_FIRST_COLUMN));
+  static KeywordDataset fromCSV(String resourceName) {
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SELECT_FIRST_COLUMN));
   }
 
-  static KeywordDataset fromCSV(Class<?> resourceClass, String resourceName, String columnName) {
-    checkResource(resourceClass, resourceName);
-    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceClass, resourceName, SelectColumn.withName(columnName)));
+  static KeywordDataset fromCSV(String resourceName, String columnName) {
+    checkResource(resourceName);
+    return KeywordDataset.lazyLoaded(() -> loadCsvDataset(resourceName, SelectColumn.withName(columnName)));
   }
 
   static KeywordDataset fromVersionedCSV(Class<?> resourceClass, String nameTemplate, String columnName) {

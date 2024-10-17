@@ -23,10 +23,8 @@ class SeleniumTest extends SeleniumTestBase {
 
   @Test
   void testLoginAndCreateSandboxStart() {
+    loginUser();
     driver.get(baseUrl);
-    if (driver.getCurrentUrl().endsWith("/login")) {
-      loginUser();
-    }
     assertEquals(baseUrl + "/environment", driver.getCurrentUrl());
     WebElement createSandbox = driver.findElement(By.id("create_sandbox_button"));
     createSandbox.click();

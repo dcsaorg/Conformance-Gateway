@@ -1,33 +1,23 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
-import com.opencsv.CSVReader;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import lombok.SneakyThrows;
 import org.dcsa.conformance.core.check.KeywordDataset;
-import org.dcsa.conformance.core.check.VersionedStaticKeywordSet;
 
 public class EblDatasets {
 
-  public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticVersionedDataset(
-    VersionedStaticKeywordSet.versionedKeywords(
-      _ignored -> false,
-      Set.of("ESSD"),
-      Set.of("ICED")
-    ),
+  public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset(
     "WAVE",
+    "CARX",
+    "ESSD",
+    "IDT",
     "BOLE",
     "EDOX",
     "IQAX",
     "SECR",
-    "CARX",
-    "TRGO"
+    "TRGO",
+    "ETEU",
+    "TRAC",
+    "BRIT"
   );
 
 
@@ -61,6 +51,29 @@ public class EblDatasets {
     "TARIC",
     "CN",
     "CUS"
+  );
+
+  public static final KeywordDataset DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES = KeywordDataset.staticDataset(
+    "WAVE",
+    "CARX",
+    "ESSD",
+    "IDT",
+    "BOLE",
+    "EDOX",
+    "IQAX",
+    "SECR",
+    "TRGO",
+    "ETEU",
+    "TRAC",
+    "BRIT",
+    "GSBN",
+    "WISE",
+    "GLEIF",
+    "W3C",
+    "DNB",
+    "FMC",
+    "DCSA",
+    "ZZZ"
   );
 
 }

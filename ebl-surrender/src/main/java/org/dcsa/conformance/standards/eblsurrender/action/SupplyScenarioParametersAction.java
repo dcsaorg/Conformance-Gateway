@@ -7,6 +7,8 @@ import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.eblsurrender.party.SuppliedScenarioParameters;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 @Getter
 public class SupplyScenarioParametersAction extends ConformanceAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
@@ -47,12 +49,22 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return  new SuppliedScenarioParameters(
-            UUID.randomUUID().toString().replace("-", "").substring(0, 20),
-            "XMPL",
-        "Example carrier party code",
-            "Example party code",
-            "Example code list")
+    var issueToParty = OBJECT_MAPPER.createObjectNode();
+    issueToParty.put("partyName", "Issue To name")
+      .put("eblPlatform", "WAVE");
+    var carrierParty = OBJECT_MAPPER.createObjectNode();
+    carrierParty.put("partyName", "Carrier name")
+      .put("eblPlatform", "WAVE");
+
+    var surrendereeParty = OBJECT_MAPPER.createObjectNode();
+    surrendereeParty.put("partyName", "Surrenderee name")
+      .put("eblPlatform", "BOLE");
+    return new SuppliedScenarioParameters(
+      UUID.randomUUID().toString().replace("-", "").substring(0, 20),
+      issueToParty,
+      carrierParty,
+      surrendereeParty
+    )
         .toJson();
   }
 

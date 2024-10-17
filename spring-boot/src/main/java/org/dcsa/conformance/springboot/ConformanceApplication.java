@@ -161,7 +161,7 @@ public class ConformanceApplication {
                     log.error("Deferred sandbox task execution failed", e);
                   }
                 },
-                100,
+                5,
                 TimeUnit.MILLISECONDS);
 
     Stream<AbstractComponentFactory> componentFactories =

@@ -86,9 +86,20 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
 
+    var issueToParty = OBJECT_MAPPER.createObjectNode();
+    issueToParty.put("partyName", "Issue To name")
+      .put("eblPlatform", "WAVE");
+    var carrierParty = OBJECT_MAPPER.createObjectNode();
+    carrierParty.put("partyName", "Carrier name")
+      .put("eblPlatform", "WAVE");
+
+    var surrendereeParty = OBJECT_MAPPER.createObjectNode();
+    surrendereeParty.put("partyName", "Surrenderee name")
+      .put("eblPlatform", "BOLE");
+
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-            tdr, "XMPL", "Example carrier party code", "Example party code", "Example code list");
+            tdr, issueToParty, carrierParty, surrendereeParty);
 
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());

@@ -71,7 +71,7 @@ public class SurrenderRequestAction extends EblSurrenderAction {
   }
 
   @Override
-  public synchronized Supplier<String> getSrrSupplier() {
+  public Supplier<String> getSrrSupplier() {
     return srrSupplier;
   }
 

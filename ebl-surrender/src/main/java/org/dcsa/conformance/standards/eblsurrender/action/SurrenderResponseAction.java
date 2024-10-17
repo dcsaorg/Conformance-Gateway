@@ -1,9 +1,7 @@
 package org.dcsa.conformance.standards.eblsurrender.action;
 
 import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -37,23 +35,13 @@ public class SurrenderResponseAction extends EblSurrenderAction {
   }
 
   @Override
-  public ObjectNode exportJsonState() {
-    return super.exportJsonState();
-  }
-
-  @Override
-  public void importJsonState(JsonNode jsonState) {
-    super.importJsonState(jsonState);
-  }
-
-  @Override
   public String getHumanReadablePrompt() {
     return ("%s the surrender request with surrender request reference '%s'")
         .formatted(accept ? "Accept" : "Reject", getSrrSupplier().get());
   }
 
   @Override
-  public synchronized Supplier<String> getSrrSupplier() {
+  public Supplier<String> getSrrSupplier() {
     if (srrSupplier != null) return srrSupplier;
     for (ConformanceAction action = this.previousAction;
         action != null;

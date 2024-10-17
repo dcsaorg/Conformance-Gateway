@@ -62,6 +62,7 @@ public abstract class ManualTestBase {
             .set("actionInput", textInputNode);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
     waitForCleanSandboxStatus(sandbox);
   }
 
@@ -83,6 +84,7 @@ public abstract class ManualTestBase {
             .put("operation", "notifyParty")
             .put("sandboxId", sandbox.sandboxId);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
     waitForAsyncCalls(150L);
     waitForCleanSandboxStatus(sandbox);
     waitForCleanSandboxStatus(otherSandbox);

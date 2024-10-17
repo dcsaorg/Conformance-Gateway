@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.time.Duration;
 import java.util.List;
@@ -238,8 +237,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   protected void loginUser() {
-    assumeFalse(alreadyLoggedIn, "Already logged in, is fine.");
+    if (alreadyLoggedIn) return; // Already logged in, is fine.
     driver.get(baseUrl);
+    waitForAsyncCalls(lambdaDelay); // First redirect might be slow
     assertEquals(baseUrl + "/login", driver.getCurrentUrl());
     assertEquals("DCSA Conformance", driver.getTitle().substring(0, 16));
 
@@ -251,6 +251,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     log.info("Logging in user into environment: {}", baseUrl);
     WebElement submitButton = driver.findElement(By.id("login_button"));
     submitButton.click();
+    waitForAsyncCalls(lambdaDelay * 3); // First login is slow in AWS, so wait a bit longer.
     waitForUIReadiness();
 
     assertEquals("Sandboxes", driver.findElement(By.className("pageTitle")).getText());
@@ -259,12 +260,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   SandboxConfig createSandBox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
+    loginUser();
     log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(baseUrl + "/create-sandbox");
-    if (driver.getCurrentUrl().endsWith("/login")) {
-      loginUser();
-      driver.get(baseUrl + "/create-sandbox");
-    }
     assertEquals(baseUrl + "/create-sandbox", driver.getCurrentUrl());
     waitForUIReadiness();
 

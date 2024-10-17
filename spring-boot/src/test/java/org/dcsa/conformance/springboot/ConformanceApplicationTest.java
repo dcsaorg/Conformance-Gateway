@@ -73,7 +73,7 @@ class ConformanceApplicationTest {
     String previousStatus = "";
     String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
     do {
-      Thread.sleep(3_000L);
+      Thread.sleep(500L);
       status = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
       if (status.equals(previousStatus)) { // Detection of a stuck scenario, prevent waiting forever. Note: turn off while debugging!
         log.error("Status did not change: {}. Originally started at: {}", status, startStatus);
@@ -82,7 +82,7 @@ class ConformanceApplicationTest {
       log.info("Current status: {}", status);
       previousStatus = status;
       if (status.length() > "{\"scenariosLeft\":0}".length()) { // More than 9 scenarios left, wait longer
-        Thread.sleep(7_000L);
+        Thread.sleep(1_000L);
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
     stopWatch.stop();

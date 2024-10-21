@@ -23,6 +23,8 @@ import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
 @Slf4j
 public class ConformanceWebuiHandler {
+  private static final String SANDBOX_ID = "sandboxId";
+
   private final ConformanceAccessChecker accessChecker;
   private final String environmentBaseUrl;
   private final ConformancePersistenceProvider persistenceProvider;
@@ -73,7 +75,7 @@ public class ConformanceWebuiHandler {
       case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
       case "getSandboxStatus" -> _getSandboxStatus(userId, requestNode);
       case "updateSandboxConfig" -> _updateSandboxConfig(userId, requestNode);
-      case "getAvailableStandards" -> _getAvailableStandards(userId);
+      case "getAvailableStandards" -> _getAvailableStandards();
       case "getAllSandboxes" -> _getAllSandboxes(userId);
       case "getSandbox" -> _getSandbox(userId, requestNode);
       case "notifyParty" -> _notifyParty(userId, requestNode);
@@ -175,11 +177,11 @@ public class ConformanceWebuiHandler {
 
     log.info("Created sandbox: " + sandboxConfiguration.toJsonNode().toPrettyString());
 
-    return OBJECT_MAPPER.createObjectNode().put("sandboxId", sandboxId);
+    return OBJECT_MAPPER.createObjectNode().put(SANDBOX_ID, sandboxId);
   }
 
   private JsonNode _getSandboxConfig(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     SandboxConfiguration sandboxConfiguration =
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -204,7 +206,7 @@ public class ConformanceWebuiHandler {
 
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
       .createObjectNode()
-      .put("sandboxId", sandboxConfiguration.getId())
+      .put(SANDBOX_ID, sandboxConfiguration.getId())
       .put("sandboxName", sandboxConfiguration.getName())
       .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
       .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
@@ -227,13 +229,13 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _getSandboxStatus(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getSandboxStatus(persistenceProvider, sandboxId);
   }
 
   private JsonNode _updateSandboxConfig(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     SandboxConfiguration sandboxConfiguration =
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
@@ -300,7 +302,7 @@ public class ConformanceWebuiHandler {
     return OBJECT_MAPPER.createObjectNode();
   }
 
-  private JsonNode _getAvailableStandards(String ignoredUserId) {
+  private JsonNode _getAvailableStandards() {
     /*
     [
       {
@@ -324,42 +326,42 @@ public class ConformanceWebuiHandler {
     TreeSet<String> sortedStandardNames = new TreeSet<>(String::compareToIgnoreCase);
     sortedStandardNames.addAll(standardsByName.keySet());
     sortedStandardNames.forEach(
-        standardName -> {
-          ObjectNode standardNode = OBJECT_MAPPER.createObjectNode().put("name", standardName);
-          standardsNode.add(standardNode);
-          {
-            ArrayNode versionsNode = OBJECT_MAPPER.createArrayNode();
-            standardNode.set("versions", versionsNode);
-            AbstractStandard standard = standardsByName.get(standardName);
-            SortedMap<String, SortedSet<String>> scenarioSuitesByStandardVersion =
-                standard.getScenarioSuitesByStandardVersion();
-            scenarioSuitesByStandardVersion
-                .keySet()
-                .forEach(
-                    standardVersion -> {
-                      ObjectNode versionNode =
-                          OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
-                      versionsNode.add(versionNode);
-
-                      SortedSet<String> scenarioSuites =
-                          scenarioSuitesByStandardVersion.get(standardVersion);
-                      { // scoped
-                        ArrayNode suitesNode = OBJECT_MAPPER.createArrayNode();
-                        versionNode.set("suites", suitesNode);
-                        scenarioSuites.forEach(suitesNode::add);
-                      }
-                      { // scoped
-                        ArrayNode rolesNode = OBJECT_MAPPER.createArrayNode();
-                        versionNode.set("roles", rolesNode);
-                        standard
-                            .createComponentFactory(standardVersion, scenarioSuites.first())
-                            .getRoleNames()
-                            .forEach(rolesNode::add);
-                      }
-                    });
-          }
-        });
+        standardName -> addStandardToNode(standardName, standardsNode));
     return standardsNode;
+  }
+
+  private void addStandardToNode(String standardName, ArrayNode standardsNode) {
+    ObjectNode standardNode = OBJECT_MAPPER.createObjectNode().put("name", standardName);
+    standardsNode.add(standardNode);
+    ArrayNode versionsNode = OBJECT_MAPPER.createArrayNode();
+    standardNode.set("versions", versionsNode);
+    AbstractStandard standard = standardsByName.get(standardName);
+    SortedMap<String, SortedSet<String>> scenarioSuitesByStandardVersion =
+        standard.getScenarioSuitesByStandardVersion();
+    scenarioSuitesByStandardVersion
+        .keySet()
+        .forEach(
+            standardVersion -> addStandardDetails(standardVersion, versionsNode, scenarioSuitesByStandardVersion, standard));
+  }
+
+  private static void addStandardDetails(
+      String standardVersion,
+      ArrayNode versionsNode,
+      SortedMap<String, SortedSet<String>> scenarioSuitesByStandardVersion,
+      AbstractStandard standard) {
+    ObjectNode versionNode = OBJECT_MAPPER.createObjectNode().put("number", standardVersion);
+    versionsNode.add(versionNode);
+
+    SortedSet<String> scenarioSuites = scenarioSuitesByStandardVersion.get(standardVersion);
+    ArrayNode suitesNode = OBJECT_MAPPER.createArrayNode();
+    versionNode.set("suites", suitesNode);
+    scenarioSuites.forEach(suitesNode::add);
+    ArrayNode rolesNode = OBJECT_MAPPER.createArrayNode();
+    versionNode.set("roles", rolesNode);
+    standard
+        .createComponentFactory(standardVersion, scenarioSuites.first())
+        .getRoleNames()
+        .forEach(rolesNode::add);
   }
 
   private JsonNode _getAllSandboxes(String userId) {
@@ -377,7 +379,7 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _getSandbox(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ObjectNode sandboxNode =
         (ObjectNode)
@@ -399,41 +401,41 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _notifyParty(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.notifyParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _resetParty(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.resetParty(persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
     return OBJECT_MAPPER.createObjectNode();
   }
 
   private JsonNode _getScenarioDigests(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getScenarioDigests(persistenceProvider, sandboxId);
   }
 
   private JsonNode _getScenario(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getScenarioDigest(
         persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 
   private JsonNode _getScenarioStatus(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.getScenarioStatus(
         persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 
   private JsonNode _handleActionInput(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     JsonNode actionInputNode = requestNode.get("actionInput");
     return ConformanceSandbox.handleActionInput(
@@ -445,7 +447,7 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _startOrStopScenario(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ConformanceSandbox.startOrStopScenario(
         persistenceProvider,
@@ -457,7 +459,7 @@ public class ConformanceWebuiHandler {
   }
 
   private JsonNode _completeCurrentAction(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get("sandboxId").asText();
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
         persistenceProvider, deferredSandboxTaskConsumer, sandboxId);

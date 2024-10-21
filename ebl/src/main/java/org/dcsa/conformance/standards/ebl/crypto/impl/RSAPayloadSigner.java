@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.ebl.crypto.impl;
 
 import org.dcsa.conformance.standards.ebl.crypto.JWSSignerDetails;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
-import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifierWithKey;
 
 import java.security.interfaces.RSAPublicKey;
 

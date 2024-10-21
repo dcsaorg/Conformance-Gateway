@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import lombok.NonNull;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
+import org.dcsa.conformance.standards.booking.party.BookingCarrier;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;
 
 public class Carrier_SupplyScenarioParametersAction extends BookingAction {
@@ -59,80 +59,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    var csp = switch (scenarioType) {
-      case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters( "SCR-1234-REGULAR",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "640510",
-        "Shoes - black, 400 boxes",
-        null,
-        null,
-        "DKAAR",
-        "DEBRV");
-      case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters( "SCR-1234-REGULAR-2REC",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "630260",
-        "Tableware and kitchenware",
-        "691010",
-        "Kitchen pots and pans",
-        "DKAAR",
-        "DEBRV");
-      case REGULAR_CHO_DEST -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-DEST",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "640510",
-        "Shoes - black, 400 boxes",
-        null,
-        null,
-        "DKAAR",
-        "USGBO");
-      case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-ORIG",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "640510",
-        "Shoes - black, 400 boxes",
-        null,
-        null,
-        "DKAAR",
-        "DKAAR");
-      case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("SCR-1234-NON-OPERATING-REEFER",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "220291",
-        "Non alcoholic beverages",
-        null,
-        null,
-        "DKAAR",
-        "DEBRV");
-      case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters( "SCR-1234-REEFER",
-        "Example Carrier Service",
-        "402E",
-        "service Name",
-        "04052090",
-        "Dairy products",
-        null,
-        null,
-        "DKAAR",
-        "DEBRV");
-      case DG -> new CarrierScenarioParameters("SCR-1234-DG",
-        "Example Carrier Service",
-        "403W",
-        "TA1",
-        "293499",
-        "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
-        null,
-        null,
-        "DKAAR",
-        "DEBRV");
-    };
-
-    return csp.toJson();
+    return BookingCarrier.getCarrierScenarioParameters(scenarioType).toJson();
   }
 
   @Override

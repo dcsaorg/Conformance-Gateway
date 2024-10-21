@@ -60,7 +60,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   protected void createSandboxesAndRunGroups(Standard standard, String version, String suiteName, String role) {
-    log.info("Starting standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
+    String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
+    log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
     SandboxConfig sandBox1 = createSandBox(standard, version, suiteName, role, 0);
     openNewTab();
@@ -68,15 +69,15 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     SandboxConfig sandBox2 = createSandBox(standard, version, suiteName, role, 1);
     updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
 
-    runScenarioGroups();
-    log.info("Finished with standard: {}, version: {}, suite: {}, role: {}", standard.name(), version, suiteName, role);
+    runScenarioGroups(readableStandardSpec);
+    log.info("Finished with standard: {}", readableStandardSpec);
 
     // Close tab and switch back to first tab.
     driver.close();
     driver.switchTo().window(driver.getWindowHandles().iterator().next());
   }
 
-  void runScenarioGroups() {
+  void runScenarioGroups(String name) {
     waitForUIReadiness();
     // WebElement can not be reused after the page is refreshed. Therefore, using the index to get the button.
     int scenarioGroupButtonIndex =
@@ -101,7 +102,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
-      } while (!hasNoMoreActionsDisplayed());
+      } while (!hasNoMoreActionsDisplayed(name));
       if (stopAfterFirstScenarioGroup) {
         log.info("Stopping after first scenario group");
         break;
@@ -176,12 +177,15 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   // If there are no more actions, the scenario is finished and should be conformant.
-  private static boolean hasNoMoreActionsDisplayed() {
+  private static boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
       && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
       String titleValue =
         driver.findElement(By.className("conformanceStatus")).getAttribute("title");
-      assertEquals("Conformant", titleValue);
+      assertEquals(
+          "Conformant",
+          titleValue,
+          "Scenario is not conformant: '" + titleValue + "', while running: " + name);
       log.debug("Scenario is Conformant.");
       return true;
     }

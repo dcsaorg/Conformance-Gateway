@@ -42,10 +42,7 @@ public class JsonToolkit {
     }
     if (replacements != null)
       replacements.forEach(
-          (key, value) -> {
-            if (value == null) value = "null"; // Null values are replaced with "null"
-            jsonString.set(jsonString.get().replaceAll(key, value));
-          });
+          (key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
     return OBJECT_MAPPER.readTree(jsonString.get());
   }
 

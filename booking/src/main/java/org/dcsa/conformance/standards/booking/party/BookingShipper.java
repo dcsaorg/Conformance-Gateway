@@ -109,35 +109,36 @@ public class BookingShipper extends ConformanceParty {
   }
 
   private JsonNode replaceBookingPlaceHolders(JsonNode actionPrompt) {
-
-    CarrierScenarioParameters carrierScenarioParameters =
+    CarrierScenarioParameters csp =
       CarrierScenarioParameters.fromJson(actionPrompt.get("csp"));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     return JsonToolkit.templateFileToJsonNode(
-        "/standards/booking/messages/"+ scenarioType.bookingTemplate(apiVersion),
+        "/standards/booking/messages/" + scenarioType.bookingTemplate(apiVersion),
         Map.ofEntries(
-          Map.entry(
-            "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-            carrierScenarioParameters.serviceContractReference()),
-          Map.entry(
-            "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
-            carrierScenarioParameters.contractQuotationReference()),
-          Map.entry(
-            "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER", carrierScenarioParameters.carrierExportVoyageNumber()),
-          Map.entry(
-            "CARRIER_SERVICE_NAME_PLACEHOLDER", carrierScenarioParameters.carrierServiceName()),
-          Map.entry(
-            "COMMODITY_HS_CODE_1", carrierScenarioParameters.hsCodes1()),
-          Map.entry(
-            "COMMODITY_HS_CODE_2", carrierScenarioParameters.hsCodes1()),
-          Map.entry(
-            "COMMODITY_TYPE_1_PLACEHOLDER", carrierScenarioParameters.commodityType1() ),
-          Map.entry(
-            "COMMODITY_TYPE_2_PLACEHOLDER", carrierScenarioParameters.commodityType2() ),
-          Map.entry(
-            "POL_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.polUNLocationCode()),
-          Map.entry(
-            "POD_UNLOCATION_CODE_PLACEHOLDER", carrierScenarioParameters.podUNLocationCode()) ));
+            Map.entry("SERVICE_CONTRACT_REFERENCE_PLACEHOLDER", csp.serviceContractReference()),
+            Map.entry(
+                "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.contractQuotationReference(), "")),
+            Map.entry(
+                "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.carrierExportVoyageNumber(), "")),
+            Map.entry(
+                "CARRIER_SERVICE_NAME_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.carrierServiceName(), "")),
+            Map.entry("COMMODITY_HS_CODE_1", Objects.requireNonNullElse(csp.hsCodes1(), "")),
+            Map.entry("COMMODITY_HS_CODE_2", Objects.requireNonNullElse(csp.hsCodes1(), "")),
+            Map.entry(
+                "COMMODITY_TYPE_1_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.commodityType1(), "")),
+            Map.entry(
+                "COMMODITY_TYPE_2_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.commodityType2(), "")),
+            Map.entry(
+                "POL_UNLOCATION_CODE_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.polUNLocationCode(), "")),
+            Map.entry(
+                "POD_UNLOCATION_CODE_PLACEHOLDER",
+                Objects.requireNonNullElse(csp.podUNLocationCode(), ""))));
   }
 
   private void sendCancelBookingRequest(JsonNode actionPrompt) {

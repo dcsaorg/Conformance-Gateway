@@ -69,9 +69,8 @@ public abstract class ManualTestBase {
   private void waitUntilScenarioStatusProgresses(SandboxConfig sandbox, String scenarioId, long conformantSubReportsStart) {
     waitForCleanSandboxStatus(sandbox);
 
-    // STNG-210: EBL Conformance TD-only, Carrier UC6 uses 2 input prompts, while not progressing conformance.
-    // 'conformantSubReportsStart = 8' is a workaround for 'SupplyCSP [REGULAR_STRAIGHT_BL] - UC6'
-    // appears to be already conformant.
+    // STNG-210: Ebl Conformance TD-only, Carrier UC6 uses 2 input prompts, while not progressing conformance.
+    // STNG-210: eBL Issuance, Conformance, uses 2 input prompts, while not progressing conformance.
     if ((sandbox.sandboxName.contains("Ebl")
             && sandbox.sandboxName.contains("Conformance TD-only, Carrier")
             && (conformantSubReportsStart == 0))

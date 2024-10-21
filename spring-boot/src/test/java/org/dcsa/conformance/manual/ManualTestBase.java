@@ -74,7 +74,7 @@ public abstract class ManualTestBase {
     // appears to be already conformant.
     if ((sandbox.sandboxName.contains("Ebl")
             && sandbox.sandboxName.contains("Conformance TD-only, Carrier")
-            && (conformantSubReportsStart == 0 || conformantSubReportsStart == 8))
+            && (conformantSubReportsStart == 0))
         || (sandbox.sandboxName.contains("eBL Issuance")
             && sandbox.sandboxName.contains("Conformance")
             && (conformantSubReportsStart == 0))) {

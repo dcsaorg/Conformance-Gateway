@@ -69,26 +69,22 @@ public abstract class ManualTestBase {
   private void waitUntilScenarioStatusProgresses(SandboxConfig sandbox, String scenarioId, long conformantSubReportsStart) {
     waitForCleanSandboxStatus(sandbox);
 
-    // STNG-210: Ebl Conformance TD-only, Carrier UC6 uses 2 input prompts, while not progressing conformance.
-    // STNG-210: eBL Issuance, Conformance, uses 2 input prompts, while not progressing conformance.
-    if ((sandbox.sandboxName.contains("Ebl")
-            && sandbox.sandboxName.contains("Conformance TD-only, Carrier")
-            && (conformantSubReportsStart == 0))
-        || (sandbox.sandboxName.contains("eBL Issuance")
-            && sandbox.sandboxName.contains("Conformance")
-            && (conformantSubReportsStart == 0))) {
-      waitForAsyncCalls(500L);
-      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
-      return;
-    }
-
     // Wait until the scenario has finished and is conformant
     int i = 0;
     while (conformantSubReportsStart == countConformantSubReports(sandbox, scenarioId)) {
+
+      // Check if input is required, if so, conformance is not progressing, so continue.
+      JsonNode jsonNode = getScenarioStatus(sandbox, scenarioId);
+      boolean inputRequired = jsonNode.has("inputRequired") && jsonNode.get("inputRequired").asBoolean();
+      if (inputRequired) {
+        log.debug("Input is required (again), return.");
+        return;
+      }
+
       log.debug("Waiting for scenario to finish.");
       waitForAsyncCalls(50L);
       i++;
-      if (i > 100) {
+      if (i > 200) {
         String message =
             "Scenario did not finish in time or in the correct Conformant state. In Sandbox: "
                 + sandbox.sandboxName;

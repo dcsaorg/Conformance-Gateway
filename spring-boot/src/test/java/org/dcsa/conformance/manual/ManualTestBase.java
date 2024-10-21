@@ -52,6 +52,7 @@ public abstract class ManualTestBase {
   void handleActionInput(
       SandboxConfig sandbox, String scenarioId, String actionId, JsonNode textInputNode) {
     log.debug("Handling action input: {}", textInputNode);
+    long conformantSubReportsStart = countConformantSubReports(sandbox, scenarioId);
     ObjectNode node =
         mapper
             .createObjectNode()
@@ -62,8 +63,52 @@ public abstract class ManualTestBase {
             .set("actionInput", textInputNode);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
-    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+    waitUntilScenarioStatusProgresses(sandbox, scenarioId, conformantSubReportsStart);
+  }
+
+  private void waitUntilScenarioStatusProgresses(SandboxConfig sandbox, String scenarioId, long conformantSubReportsStart) {
     waitForCleanSandboxStatus(sandbox);
+
+    // STNG-210: EBL Conformance TD-only, Carrier UC6 uses 2 input prompts, while not progressing conformance.
+    // 'conformantSubReportsStart = 8' is a workaround for 'SupplyCSP [REGULAR_STRAIGHT_BL] - UC6'
+    // appears to be already conformant.
+    if ((sandbox.sandboxName.contains("Ebl")
+            && sandbox.sandboxName.contains("Conformance TD-only, Carrier")
+            && (conformantSubReportsStart == 0 || conformantSubReportsStart == 8))
+        || (sandbox.sandboxName.contains("eBL Issuance")
+            && sandbox.sandboxName.contains("Conformance")
+            && (conformantSubReportsStart == 0))) {
+      waitForAsyncCalls(500L);
+      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+      return;
+    }
+
+    // Wait until the scenario has finished and is conformant
+    int i = 0;
+    while (conformantSubReportsStart == countConformantSubReports(sandbox, scenarioId)) {
+      log.debug("Waiting for scenario to finish.");
+      waitForAsyncCalls(50L);
+      i++;
+      if (i > 100) {
+        String message =
+            "Scenario did not finish in time or in the correct Conformant state. In Sandbox: "
+                + sandbox.sandboxName;
+        log.error(message);
+        fail(message);
+      }
+    }
+  }
+
+  private long countConformantSubReports(SandboxConfig sandbox, String scenarioId) {
+    JsonNode conformanceSubReport =
+        getScenarioStatus(sandbox, scenarioId).get("conformanceSubReport");
+    SubReport subReport = mapper.convertValue(conformanceSubReport, SubReport.class);
+    if (subReport == null || subReport.subReports == null) {
+      return 0;
+    }
+    return subReport.subReports.stream()
+        .filter(subReport1 -> subReport1.status.equals("CONFORMANT"))
+        .count();
   }
 
   void startOrStopScenario(SandboxConfig sandbox, String scenarioId) {

@@ -10,13 +10,6 @@ public interface VersionedStaticKeywordSet {
 
   static VersionedStaticKeywordSet versionedKeywords(
     Predicate<String> versionGuard,
-    Set<String> thenKeywords
-  ) {
-    return versionedKeywords(versionGuard, thenKeywords, Set.of());
-  }
-
-  static VersionedStaticKeywordSet versionedKeywords(
-    Predicate<String> versionGuard,
     Set<String> thenKeywords,
     Set<String> elseKeywords
   ) {

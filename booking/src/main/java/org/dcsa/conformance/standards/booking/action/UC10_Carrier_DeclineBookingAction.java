@@ -47,7 +47,6 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        var dsp = getDspSupplier().get();
         return Stream.of(
             new UrlPathCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), "/v2/booking-notifications"),

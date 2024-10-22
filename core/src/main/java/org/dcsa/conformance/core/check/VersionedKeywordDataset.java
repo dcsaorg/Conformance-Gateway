@@ -1,7 +1,5 @@
 package org.dcsa.conformance.core.check;
 
-import static org.dcsa.conformance.core.check.KeywordDatasets.loadCsvDataset;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,13 +42,14 @@ class VersionedKeywordDataset implements KeywordDataset {
     return new VersionedKeywordDataset(datasetLoader);
   }
 
-  static KeywordDataset of(Class<?> resourceClass, String nameTemplate, KeywordDatasets.CSVRowSelector rowSelector) {
+  static KeywordDataset of(String nameTemplate, KeywordDatasets.CSVRowSelector rowSelector) {
     if (!nameTemplate.contains("%s")) {
       throw new IllegalStateException("Missing a '%s' to mark where the version will be placed");
     }
     return fromLoader(version -> {
       var resourceName = nameTemplate.formatted(version);
-      return loadCsvDataset(resourceClass, resourceName, rowSelector);
+      KeywordDatasets.checkResource(resourceName);
+      return KeywordDatasets.loadCsvDataset(resourceName, rowSelector);
     });
   }
 }

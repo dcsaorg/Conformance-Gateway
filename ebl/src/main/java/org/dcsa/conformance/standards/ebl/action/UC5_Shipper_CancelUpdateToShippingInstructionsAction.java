@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.action;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

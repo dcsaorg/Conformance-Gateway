@@ -24,13 +24,9 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   public List<ConformanceScenario> buildScenarioList(long moduleIndex) {
-    return _buildScenarioList(moduleIndex);
-  }
-
-  protected List<ConformanceScenario> _buildScenarioList(long moduleIndex) {
     AtomicInteger nextScenarioIndex = new AtomicInteger();
     return parent != null
-        ? parent._buildScenarioList(moduleIndex)
+        ? parent.buildScenarioList(moduleIndex)
         : asBuilderListList().stream()
             .map(
                 builderList -> {

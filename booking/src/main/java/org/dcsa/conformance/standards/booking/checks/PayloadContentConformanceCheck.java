@@ -2,7 +2,6 @@ package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;

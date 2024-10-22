@@ -5,13 +5,11 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -121,21 +119,35 @@ public class EblIssuanceCarrier extends ConformanceParty {
     }
 
     var jsonRequestBody =
-      (ObjectNode)JsonToolkit.templateFileToJsonNode(
-            "/standards/eblissuance/messages/eblissuance-v%s-request.json"
-                .formatted(apiVersion),
-            Map.ofEntries(
-                Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
-                Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
-                Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
-                Map.entry("SEND_TO_PLATFORM_PLACEHOLDER", ssp.sendToPlatform()),
-                Map.entry("ISSUE_TO_LEGAL_NAME_PLACEHOLDER", ssp.issueToLegalName()),
-                Map.entry("ISSUE_TO_PARTY_CODE_PLACEHOLDER", ssp.issueToPartyCode()),
-                Map.entry("ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER", ssp.issueToCodeListName()),
-                Map.entry("CONSIGNEE_LEGAL_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeLegalName()),
-                Map.entry("CONSIGNEE_PARTY_CODE_PLACEHOLDER", ssp.consigneeOrEndorseePartyCode()),
-                Map.entry("CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER", ssp.consigneeOrEndorseeCodeListName())
-        ));
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/eblissuance/messages/eblissuance-v%s-request.json"
+                    .formatted(apiVersion),
+                Map.ofEntries(
+                    Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
+                    Map.entry("SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER", sir),
+                    Map.entry("BOOKING_REFERENCE_PLACEHOLDER", br),
+                    Map.entry(
+                        "SEND_TO_PLATFORM_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.sendToPlatform(), "")),
+                    Map.entry(
+                        "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issueToLegalName(), "")),
+                    Map.entry(
+                        "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issueToPartyCode(), "")),
+                    Map.entry(
+                        "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.issueToCodeListName(), "")),
+                    Map.entry(
+                        "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeLegalName(), "")),
+                    Map.entry(
+                        "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.consigneeOrEndorseePartyCode(), "")),
+                    Map.entry(
+                        "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER",
+                        Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), ""))));
 
     if (eblType.isToOrder()) {
       var td = (ObjectNode)jsonRequestBody.path("document");

@@ -11,9 +11,9 @@ public class BookingDataSets {
 
   public static final KeywordDataset CUTOFF_DATE_TIME_CODES = KeywordDataset.staticDataset("DCO", "VCO", "FCO", "LCO", "ECP", "EFC");
 
-  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/general-reference-types.csv", "General Reference Type Code");
+  public static final KeywordDataset REFERENCE_TYPES = KeywordDataset.fromCSV("/standards/booking/datasets/general-reference-types.csv", "General Reference Type Code");
 
-  public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV(BookingDataSets.class, "/standards/booking/datasets/segregationgroups.csv");
+  public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV("/standards/booking/datasets/segregationgroups.csv");
 
   public static final KeywordDataset INHALATION_ZONE_CODE = KeywordDataset.staticDataset("A", "B", "C", "D");
 

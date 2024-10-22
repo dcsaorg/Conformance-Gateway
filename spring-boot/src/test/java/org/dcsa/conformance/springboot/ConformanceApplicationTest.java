@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ class ConformanceApplicationTest {
     log.info("Starting scenario suite: {}", sandboxId);
     // validate if scenario is listed
     String rootURL = restTemplate.getForObject("http://localhost:" + port + "/", String.class);
-    Assumptions.assumeTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
+    assertTrue(rootURL.contains(sandboxId), sandboxId + " not found in root URL, skipping in this branch!");
 
     // Start the scenario
     String value = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "reset"), String.class);
@@ -73,7 +72,7 @@ class ConformanceApplicationTest {
     String previousStatus = "";
     String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
     do {
-      Thread.sleep(3_000L);
+      Thread.sleep(500L);
       status = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
       if (status.equals(previousStatus)) { // Detection of a stuck scenario, prevent waiting forever. Note: turn off while debugging!
         log.error("Status did not change: {}. Originally started at: {}", status, startStatus);
@@ -82,7 +81,7 @@ class ConformanceApplicationTest {
       log.info("Current status: {}", status);
       previousStatus = status;
       if (status.length() > "{\"scenariosLeft\":0}".length()) { // More than 9 scenarios left, wait longer
-        Thread.sleep(7_000L);
+        Thread.sleep(1_000L);
       }
     } while (!status.equals("{\"scenariosLeft\":0}"));
     stopWatch.stop();

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -23,6 +22,7 @@ import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.state.JsonNodeMap;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.*;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
@@ -41,6 +41,9 @@ import org.dcsa.conformance.standards.tnt.TntStandard;
 
 @Slf4j
 public class ConformanceSandbox {
+  protected static final String SANDBOX = "sandbox#";
+  protected static final String SESSION = "session#";
+
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
     AdoptionStandard.INSTANCE,
     BookingStandard.INSTANCE,
@@ -69,7 +72,7 @@ public class ConformanceSandbox {
           .getStatefulExecutor()
           .execute(
               description,
-              "session#" + currentSessionId,
+              SESSION + currentSessionId,
               "state#orchestrator",
               originalOrchestratorState -> {
                 SandboxConfiguration sandboxConfiguration =
@@ -83,10 +86,10 @@ public class ConformanceSandbox {
                         sandboxConfiguration,
                         componentFactory,
                         new TrafficRecorder(
-                            persistenceProvider.getNonLockingMap(), "session#" + currentSessionId),
+                            persistenceProvider.getNonLockingMap(), SESSION + currentSessionId),
                         new JsonNodeMap(
                             persistenceProvider.getNonLockingMap(),
-                            "session#" + currentSessionId,
+                            SESSION + currentSessionId,
                             "map#orchestrator#"),
                         asyncWebClient);
                 if (originalOrchestratorState != null && !originalOrchestratorState.isEmpty()) {
@@ -118,7 +121,7 @@ public class ConformanceSandbox {
           .getStatefulExecutor()
           .execute(
               description,
-              "session#" + currentSessionId,
+              SESSION + currentSessionId,
               "state#party#" + partyName,
               originalPartyState -> {
                 SandboxConfiguration sandboxConfiguration =
@@ -180,7 +183,7 @@ public class ConformanceSandbox {
                             sandboxConfiguration.getCounterparts(),
                             new JsonNodeMap(
                                 persistenceProvider.getNonLockingMap(),
-                                "session#" + currentSessionId,
+                                SESSION + currentSessionId,
                                 "map#party#" + partyName),
                             partyWebClient,
                             orchestratorAuthHeader)
@@ -208,7 +211,7 @@ public class ConformanceSandbox {
         .getStatefulExecutor()
         .execute(
             "loading state of sandbox " + sandboxId,
-            "sandbox#" + sandboxId,
+            SANDBOX + sandboxId,
             "state",
             originalSandboxState -> {
               sandboxStateNodeReference.set(originalSandboxState);
@@ -239,14 +242,13 @@ public class ConformanceSandbox {
       ConformanceWebRequest webRequest,
       Consumer<JsonNode> deferredSandboxTaskConsumer) {
     log.info(
-        "ConformanceSandbox.handleRequest() "
-            + OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
+        "ConformanceSandbox.handleRequest() {}",
+        OBJECT_MAPPER.valueToTree(webRequest).toPrettyString());
 
     String expectedPrefix = "/conformance/sandbox/";
     int expectedPrefixStart = webRequest.url().indexOf(expectedPrefix);
     if (expectedPrefixStart < 0) {
-      log.info(
-          "Rejecting request with missing '%s' in: %s".formatted(expectedPrefix, webRequest.url()));
+      log.info("Rejecting request with missing '{}' in: {}", expectedPrefix, webRequest.url());
       return new ConformanceWebResponse(404, JsonToolkit.JSON_UTF_8, Collections.emptyMap(), "{}");
     }
     String remainingUri = webRequest.url().substring(expectedPrefixStart + expectedPrefix.length());
@@ -417,7 +419,7 @@ public class ConformanceSandbox {
   private static LinkedList<SandboxWaiting> _getWaitingFor(
       ConformancePersistenceProvider persistenceProvider, String sandboxId) {
     JsonNode waitingJsonNode =
-        persistenceProvider.getNonLockingMap().getItemValue("sandbox#" + sandboxId, "waiting");
+        persistenceProvider.getNonLockingMap().getItemValue(SANDBOX + sandboxId, "waiting");
     LinkedList<SandboxWaiting> waitingList = new LinkedList<>();
     if (waitingJsonNode != null && waitingJsonNode.isArray()) {
       waitingJsonNode.forEach(
@@ -442,7 +444,7 @@ public class ConformanceSandbox {
     log.info("Sandbox %s waiting: %s".formatted(sandboxId, waitingArrayNode.toPrettyString()));
     persistenceProvider
         .getNonLockingMap()
-        .setItemValue("sandbox#" + sandboxId, "waiting", waitingArrayNode);
+        .setItemValue(SANDBOX + sandboxId, "waiting", waitingArrayNode);
   }
 
   public static ObjectNode getScenarioStatus(
@@ -594,7 +596,7 @@ public class ConformanceSandbox {
             .put("handler", "_syncHandleOutboundRequest")
             .put("sandboxId", sandboxId)
             .set("conformanceRequest", conformanceRequest.toJson());
-    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    log.debug("Deferring task: {}", deferredTask.toPrettyString());
     deferredSandboxTaskConsumer.accept(deferredTask);
   }
 
@@ -605,7 +607,7 @@ public class ConformanceSandbox {
             .createObjectNode()
             .put("handler", "_syncSendOutboundWebRequest")
             .set("conformanceWebRequest", conformanceWebRequest.toJson());
-    log.debug("Deferring task: " + deferredTask.toPrettyString());
+    log.debug("Deferring task: {}", deferredTask.toPrettyString());
     deferredSandboxTaskConsumer.accept(deferredTask);
   }
 
@@ -614,7 +616,7 @@ public class ConformanceSandbox {
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       JsonNode jsonNode) {
     try {
-      log.debug("ConformanceSandbox.executeDeferredTask(%s)".formatted(jsonNode.toPrettyString()));
+      log.debug("ConformanceSandbox.executeDeferredTask({})", jsonNode.toPrettyString());
       switch (jsonNode.path("handler").asText()) {
         case "_syncHandleOutboundRequest":
           _syncHandleOutboundRequest(
@@ -628,7 +630,7 @@ public class ConformanceSandbox {
               ConformanceWebRequest.fromJson((ObjectNode) jsonNode.get("conformanceWebRequest")));
           return;
         default:
-          log.error("Unsupported deferred task: " + jsonNode.toPrettyString());
+          log.error("Unsupported deferred task: {}", jsonNode.toPrettyString());
       }
     } catch (Exception e) {
       log.error(
@@ -642,8 +644,9 @@ public class ConformanceSandbox {
   private static ConformanceResponse _syncHttpRequest(ConformanceRequest conformanceRequest) {
     URI uri = conformanceRequest.toURI();
     log.info(
-        "ConformanceSandbox.syncHttpRequest(%s) request: %s"
-            .formatted(uri, conformanceRequest.toJson().toPrettyString()));
+        "ConformanceSandbox.syncHttpRequest({}) request: {}",
+        uri,
+        conformanceRequest.toJson().toPrettyString());
 
     HttpRequest.Builder httpRequestBuilder =
         "GET".equals(conformanceRequest.method())
@@ -655,6 +658,7 @@ public class ConformanceSandbox {
                     HttpRequest.BodyPublishers.ofString(
                         conformanceRequest.message().body().getStringBody()));
 
+    // Allow long debugging sessions or slow business logic at customer's side
     httpRequestBuilder.timeout(Duration.ofHours(1));
 
     conformanceRequest
@@ -662,20 +666,17 @@ public class ConformanceSandbox {
         .headers()
         .forEach((name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
 
-    HttpResponse<String> httpResponse;
-    try (HttpClient httpClient =
-        HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()) {
-      httpResponse =
-          httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-    }
+    HttpResponse<String> httpResponse =
+        IOToolkit.HTTP_CLIENT.send(
+            httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     ConformanceResponse conformanceResponse =
         conformanceRequest.createResponse(
             httpResponse.statusCode(),
             httpResponse.headers().map(),
             new ConformanceMessageBody(httpResponse.body()));
     log.info(
-        "ConformanceSandbox.syncHttpRequest() response: %s"
-            .formatted(conformanceResponse.toJson().toPrettyString()));
+        "ConformanceSandbox.syncHttpRequest() response: {}",
+        conformanceResponse.toJson().toPrettyString());
     return conformanceResponse;
   }
 
@@ -693,26 +694,27 @@ public class ConformanceSandbox {
                 partyConfiguration ->
                     Objects.equals(
                         partyConfiguration.getName(),
-                        conformanceRequest.message().targetPartyName()))) {
-      if (sandboxConfiguration.getOrchestrator().isActive()) {
-        new OrchestratorTask(
-                persistenceProvider,
-                conformanceWebRequest ->
-                    ConformanceSandbox._asyncSendOutboundWebRequest(
-                        deferredSandboxTaskConsumer, conformanceWebRequest),
-                sandboxId,
-                "handling outbound conformance request",
-                orchestrator ->
-                    orchestrator.handlePartyTrafficExchange(
-                        new ConformanceExchange(conformanceRequest, conformanceResponse)))
-            .run();
-      }
+                        conformanceRequest.message().targetPartyName()))
+        && sandboxConfiguration.getOrchestrator().isActive()) {
+      new OrchestratorTask(
+              persistenceProvider,
+              conformanceWebRequest ->
+                  ConformanceSandbox._asyncSendOutboundWebRequest(
+                      deferredSandboxTaskConsumer, conformanceWebRequest),
+              sandboxId,
+              "handling outbound conformance request",
+              orchestrator ->
+                  orchestrator.handlePartyTrafficExchange(
+                      new ConformanceExchange(conformanceRequest, conformanceResponse)))
+          .run();
     }
+
     return conformanceResponse;
   }
 
   private static void _syncSendOutboundWebRequest(ConformanceWebRequest conformanceWebRequest) {
     try {
+      // Allow long debugging sessions or slow business logic at customer's side
       HttpRequest.Builder httpRequestBuilder =
           HttpRequest.newBuilder()
               .uri(URI.create(conformanceWebRequest.url()))
@@ -722,13 +724,14 @@ public class ConformanceSandbox {
           .headers()
           .forEach(
               (name, values) -> values.forEach(value -> httpRequestBuilder.header(name, value)));
-      try (HttpClient httpClient = HttpClient.newHttpClient()) {
-        httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-      }
+      IOToolkit.HTTP_CLIENT.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofString());
     } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       log.error(
-          "Failed to send outbound request: %s"
-              .formatted(conformanceWebRequest.toJson().toPrettyString()),
+          "Failed to send outbound request: {}",
+          conformanceWebRequest.toJson().toPrettyString(),
           e);
     }
   }
@@ -749,8 +752,9 @@ public class ConformanceSandbox {
             orchestrator -> partyPromptReference.set(orchestrator.handleGetPartyPrompt(partyName)))
         .run();
     log.info(
-        "Returning prompt for party %s: %s"
-            .formatted(partyName, partyPromptReference.get().toPrettyString()));
+        "Returning prompt for party {}: {}",
+        partyName,
+        partyPromptReference.get().toPrettyString());
     return new ConformanceWebResponse(
         200,
         JsonToolkit.JSON_UTF_8,
@@ -832,14 +836,14 @@ public class ConformanceSandbox {
         .getStatefulExecutor()
         .execute(
             "update sandbox currentSessionId",
-            "sandbox#" + sandboxId,
+            SANDBOX + sandboxId,
             "state",
             originalSandboxState ->
                 OBJECT_MAPPER.createObjectNode().put("currentSessionId", newSessionId));
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(
-            "sandbox#" + sandboxId,
+            SANDBOX + sandboxId,
             "SK=session#%s#%s".formatted(Instant.now().toString(), newSessionId),
             OBJECT_MAPPER.createObjectNode());
 
@@ -863,7 +867,7 @@ public class ConformanceSandbox {
   public static SandboxConfiguration loadSandboxConfiguration(
       ConformancePersistenceProvider persistenceProvider, String sandboxId) {
     return SandboxConfiguration.fromJsonNode(
-        persistenceProvider.getNonLockingMap().getItemValue("sandbox#" + sandboxId, "config"));
+        persistenceProvider.getNonLockingMap().getItemValue(SANDBOX + sandboxId, "config"));
   }
 
   public static void saveSandboxConfiguration(
@@ -874,7 +878,7 @@ public class ConformanceSandbox {
         .getNonLockingMap()
         .setItemValue(
             "environment#" + environmentId,
-            "sandbox#" + sandboxConfiguration.getId(),
+            SANDBOX + sandboxConfiguration.getId(),
             OBJECT_MAPPER
                 .createObjectNode()
                 .put("id", sandboxConfiguration.getId())
@@ -882,7 +886,7 @@ public class ConformanceSandbox {
     persistenceProvider
         .getNonLockingMap()
         .setItemValue(
-            "sandbox#" + sandboxConfiguration.getId(), "config", sandboxConfiguration.toJsonNode());
+            SANDBOX + sandboxConfiguration.getId(), "config", sandboxConfiguration.toJsonNode());
   }
 
   private static AbstractComponentFactory _createComponentFactory(

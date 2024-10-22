@@ -6,11 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
 class ManualScenarioTest extends ManualTestBase {
 
   @SuppressWarnings("unused")
@@ -65,11 +70,17 @@ class ManualScenarioTest extends ManualTestBase {
                                 .forEach(
                                     role ->
                                         runManualTests(
-                                            standard1.name(), version, suite, role, secondRun))));
+                                            standard1.name(), version.number(), suite, role, secondRun))));
+  }
+
+  @Test
+  @Disabled("Only for debugging")
+  void testOnlyOneSpecificScenario(){
+    runManualTests("Booking", "2.0.0", "Conformance", "Carrier", false);
   }
 
   private void runManualTests(
-      String standardName, StandardVersion version, String suiteName, String roleName, boolean secondRun) {
+      String standardName, String standardVersion, String suiteName, String roleName, boolean secondRun) {
     SandboxConfig sandbox1;
     SandboxConfig sandbox2;
     if (!secondRun) {
@@ -77,29 +88,29 @@ class ManualScenarioTest extends ManualTestBase {
           createSandbox(
               new Sandbox(
                   standardName,
-                  version.number(),
+                  standardVersion,
                   suiteName,
                   roleName,
                   true,
-                  getSandboxName(standardName, version.number(), suiteName, roleName, 0)));
+                  getSandboxName(standardName, standardVersion, suiteName, roleName, 0)));
       sandbox2 =
           createSandbox(
               new Sandbox(
                   standardName,
-                  version.number(),
+                  standardVersion,
                   suiteName,
                   roleName,
                   false,
-                  getSandboxName(standardName, version.number(), suiteName, roleName, 1)));
+                  getSandboxName(standardName, standardVersion, suiteName, roleName, 1)));
       updateSandboxConfigBeforeStarting(sandbox1, sandbox2);
       updateSandboxConfigBeforeStarting(sandbox2, sandbox1);
     } else {
       sandbox1 =
-          getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 0));
+          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 0));
       sandbox2 =
-          getSandboxByName(getSandboxName(standardName, version.number(), suiteName, roleName, 1));
+          getSandboxByName(getSandboxName(standardName, standardVersion, suiteName, roleName, 1));
       log.info("Run for the 2nd time, and verify it still works.");
-      log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, version.number(), suiteName, roleName);
+      log.info("Using sandboxes: {} v{}, suite: {}, role: {}", standardName, standardVersion, suiteName, roleName);
       resetSandbox(sandbox2); // Make sure the sandbox does not keep an optional state from the first run
     }
 

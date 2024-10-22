@@ -2,76 +2,171 @@
   "document": {
     "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
     "shippingInstructionsReference": "SHIPPING_INSTRUCTION_REFERENCE_PLACEHOLDER",
+    "transportDocumentStatus": "ISSUED",
     "transportDocumentTypeCode": "BOL",
+    "isShippedOnBoardType": true,
     "freightPaymentTermCode": "PRE",
     "isElectronic": true,
     "isToOrder": false,
-    "contractQuotationReference": "12345",
+    "displayedNameForPlaceOfReceipt": [
+      "Strawinskylaan 4117"
+    ],
+    "displayedNameForPortOfLoad": [
+      "Strawinskylaan 4117"
+    ],
+    "displayedNameForPortOfDischarge": [
+      "Strawinskylaan 4117"
+    ],
+    "displayedNameForPlaceOfDelivery": [
+      "Strawinskylaan 4117"
+    ],
+    "shippedOnBoardDate": "2020-12-12",
+    "displayedShippedOnBoardReceivedForShipment": "Received for Shipment CMA CGM CONCORDE 28-Jul-2022 CMA CGM Agences France SAS As agents for the Carrier",
+    "termsAndConditions": "Any reference in...",
+    "receiptTypeAtOrigin": "CY",
+    "deliveryTypeAtDestination": "CY",
+    "cargoMovementTypeAtOrigin": "FCL",
+    "cargoMovementTypeAtDestination": "FCL",
+    "issueDate": "2020-12-12",
+    "serviceContractReference": "HHL51800000",
+    "contractQuotationReference": "HHL1401",
+    "declaredValue": 1231.1,
+    "declaredValueCurrency": "DKK",
+    "carrierCode": "MMCU",
+    "carrierCodeListProvider": "NMFTA",
+    "carrierClauses": [
+      "It is not allowed to..."
+    ],
+    "numberOfRiderPages": 2,
+    "transports": {
+      "plannedArrivalDate": "2024-06-07",
+      "plannedDepartureDate": "2024-06-03",
+      "preCarriageBy": "RAIL",
+      "onCarriageBy": "TRUCK",
+      "placeOfReceipt": {
+        "locationName": "Hamburg",
+        "UNLocationCode": "DEHAM"
+      },
+      "portOfLoading": {
+        "locationName": "Hamburg",
+        "UNLocationCode": "DEHAM"
+      },
+      "portOfDischarge": {
+        "locationName": "Hamburg",
+        "UNLocationCode": "DEHAM"
+      },
+      "placeOfDelivery": {
+        "locationName": "Hamburg",
+        "UNLocationCode": "DEHAM"
+      },
+      "onwardInlandRouting": {
+        "locationName": "Hamburg",
+        "UNLocationCode": "DEHAM"
+      },
+      "vesselVoyages": [
+        {
+          "vesselName": "King of the Seas",
+          "carrierExportVoyageNumber": "2103S",
+          "universalExportVoyageReference": "2103N"
+        }
+      ]
+    },
+    "charges": [
+      {
+        "chargeName": "Documentation fee - Destination",
+        "currencyAmount": 1012.12,
+        "currencyCode": "DKK",
+        "paymentTermCode": "PRE",
+        "calculationBasis": "Per day",
+        "unitPrice": 3456.6,
+        "quantity": 34.4
+      }
+    ],
+    "placeOfIssue": {
+      "locationName": "Port of Amsterdam",
+      "UNLocationCode": "NLAMS"
+    },
     "invoicePayableAt": {
-      "UNLocationCode": "DKAAR"
+      "UNLocationCode": "NLAMS"
     },
     "partyContactDetails": [
       {
-        "name": "DCSA test person",
-        "email": "no-reply@dcsa.example.org"
+        "name": "Henrik",
+        "phone": "+45 51801234"
+      },
+      {
+        "name": "Henrik",
+        "phone": "+45 51801234"
       }
     ],
     "documentParties": {
       "shipper": {
-        "partyName": "DCSA CTK",
+        "partyName": "IKEA Denmark",
         "partyContactDetails": [
           {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
+            "name": "Henrik",
+            "phone": "+45 51801234"
+          },
+          {
+            "name": "Henrik",
+            "phone": "+45 51801234"
           }
         ]
       },
       "consignee": {
         "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
-        "partyCodes": [
+        "identifyingCodes": [
           {
+            "codeListProvider": "W3C",
             "partyCode": "CONSIGNEE_PARTY_CODE_PLACEHOLDER",
-            "codeListProvider": "EPUI",
             "codeListName": "CONSIGNEE_CODE_LIST_NAME_PLACEHOLDER"
           }
         ],
         "partyContactDetails": [
           {
-            "name": "DCSA test person",
-            "email": "no-reply@dcsa.example.org"
+            "name": "Henrik",
+            "phone": "+45 51801234"
+          },
+          {
+            "name": "Henrik",
+            "phone": "+45 51801234"
+          }
+        ]
+      },
+      "issuingParty": {
+        "partyName": "Hyundai",
+        "address": {
+          "street": "Ruijggoordweg",
+          "city": "Amsterdam",
+          "countryCode": "NL"
+        },
+        "identifyingCodes": [
+          {
+            "codeListProvider": "W3C",
+            "partyCode": "MSK",
+            "codeListName": "DID"
           }
         ]
       },
       "notifyParties": [
         {
-          "partyName": "DCSA CTK",
+          "partyName": "IKEA Denmark",
           "partyContactDetails": [
             {
-              "name": "DCSA test person",
-              "email": "no-reply@dcsa.example.org"
+              "name": "Henrik",
+              "phone": "+45 51801234"
+            },
+            {
+              "name": "Henrik",
+              "phone": "+45 51801234"
             }
           ]
         }
       ],
-      "issuingParty": {
-        "partyName": "Hyundai",
-        "address": {
-          "street": "The street name would be here",
-          "city": "... and here the city",
-          "countryCode": "KR"
-        },
-        "identifyingCodes": [
-          {
-            "codeListProvider": "SMDG",
-            "codeListName": "LCL",
-            "partyCode": "HMM"
-          }
-        ]
-      },
       "other": [
         {
           "party": {
-            "partyName": "DCSA CTK Service Contract Owner"
+            "partyName": "Asseco Denmark"
           },
           "partyFunction": "SCO"
         }
@@ -102,65 +197,26 @@
     ],
     "utilizedTransportEquipments": [
       {
+        "equipment": {
+          "equipmentReference": "NARU3472484",
+          "ISOEquipmentCode": "22G1"
+        },
         "isShipperOwned": false,
         "seals": [
           {
-            "number": "DCSA-CTK-1234"
+            "number": "VET123"
           }
-        ],
-        "cargoGrossWeight": 12000.0,
-        "cargoGrossWeightUnit": "KGM",
-        "equipment": {
-          "ISOEquipmentCode": "22G1",
-          "equipmentReference": "NARU3472484"
-        }
+        ]
       }
-    ],
-    "isShippedOnBoardType": true,
-    "transportDocumentStatus": "ISSUED",
-    "cargoMovementTypeAtOrigin": "FCL",
-    "cargoMovementTypeAtDestination": "FCL",
-    "receiptTypeAtOrigin": "CY",
-    "deliveryTypeAtDestination": "CY",
-    "shippedOnBoardDate": "2023-12-19",
-    "termsAndConditions": "You agree that this transport document exist is name only for the sake of\ntesting your conformance with the DCSA EBL API. This transport document is NOT backed\nby a real shipment with ANY carrier and NONE of the requested services will be\ncarried out in real life.\n\nUnless required by applicable law or agreed to in writing, DCSA provides\nthis JSON data on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF\nANY KIND, either express or implied, including, without limitation, any\nwarranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY,\nor FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for\ndetermining the appropriateness of using or redistributing this JSON\ndata and assume any risks associated with Your usage of this data.\n\nIn no event and under no legal theory, whether in tort (including negligence),\ncontract, or otherwise, unless required by applicable law (such as deliberate\nand grossly negligent acts) or agreed to in writing, shall DCSA be liable to\nYou for damages, including any direct, indirect, special, incidental, or\nconsequential damages of any character arising as a result of this terms or conditions\nor out of the use or inability to use the provided JSON data (including but not limited\nto damages for loss of goodwill, work stoppage, computer failure or malfunction, or any\nand all other commercial damages or losses), even if DCSA has been advised of the\npossibility of such damages.\n",
-    "carrierCode": "HMM",
-    "carrierCodeListProvider": "SMDG",
-    "charges": [
-      {
-        "chargeName": "Fictive transport document fee",
-        "currencyAmount": 1.0,
-        "currencyCode": "EUR",
-        "paymentTermCode": "COL",
-        "calculationBasis": "Per transport document",
-        "unitPrice": 1.0,
-        "quantity": 1
-      }
-    ],
-    "transports": {
-      "plannedDepartureDate": "2023-12-19",
-      "plannedArrivalDate": "2023-12-21",
-      "portOfLoading": {
-        "UNLocationCode": "DKAAR"
-      },
-      "portOfDischarge": {
-        "UNLocationCode": "DEBRV"
-      },
-      "vesselVoyages": [
-        {
-          "vesselName": "HMM Algeciras",
-          "carrierExportVoyageNumber": "402E"
-        }
-      ]
-    }
+    ]
   },
   "issueTo": {
-    "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
     "partyName": "ISSUE_TO_LEGAL_NAME_PLACEHOLDER",
-    "partyCodes": [
+    "sendToPlatform": "SEND_TO_PLATFORM_PLACEHOLDER",
+    "identifyingCodes": [
       {
+        "codeListProvider": "W3C",
         "partyCode": "ISSUE_TO_PARTY_CODE_PLACEHOLDER",
-        "codeListProvider": "EPUI",
         "codeListName": "ISSUE_TO_CODE_LIST_NAME_PLACEHOLDER"
       }
     ]

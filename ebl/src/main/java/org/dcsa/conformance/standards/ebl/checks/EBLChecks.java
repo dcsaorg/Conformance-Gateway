@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
@@ -37,6 +38,12 @@ public class EBLChecks {
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
+
+  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
+  private static final String UTILIZED_TRANSPORT_EQUIPMENTS = "utilizedTransportEquipments";
+  private static final String DOCUMENT_PARTIES = "documentParties";
+  private static final String CUSTOMS_REFERENCES = "customsReferences";
+
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
     (documentPartyNode, arrayNodeHandler) -> {
@@ -80,7 +87,7 @@ public class EBLChecks {
             arrayNodeHandler.accept(
               rootNode, "routingOfConsignmentCountries", ArrayOrderHandler.inputPreservedArrayOrder());
 
-            for (var ci : rootNode.path("consignmentItems")) {
+            for (var ci : rootNode.path(CONSIGNMENT_ITEMS)) {
               arrayNodeHandler.accept(
                 ci, "descriptionOfGoods", ArrayOrderHandler.toStringSortableArray());
               arrayNodeHandler.accept(
@@ -91,51 +98,51 @@ public class EBLChecks {
                 ci, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
               for (var cargoItem : ci.path("cargoItems")) {
                 arrayNodeHandler.accept(cargoItem, "nationalCommodityCodes", ArrayOrderHandler.toStringSortableArray());
-                for (var cr : cargoItem.path("customsReferences")) {
+                for (var cr : cargoItem.path(CUSTOMS_REFERENCES)) {
                   arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
                 }
                 arrayNodeHandler.accept(
-                  ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+                  ci, CUSTOMS_REFERENCES, ArrayOrderHandler.toStringSortableArray());
               }
               arrayNodeHandler.accept(ci, "cargoItems", ArrayOrderHandler.toStringSortableArray());
-              for (var cr : ci.path("customsReferences")) {
+              for (var cr : ci.path(CUSTOMS_REFERENCES)) {
                 arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
               }
               arrayNodeHandler.accept(
-                ci, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+                ci, CUSTOMS_REFERENCES, ArrayOrderHandler.toStringSortableArray());
             }
 
             arrayNodeHandler.accept(
-              rootNode, "consignmentItems", ArrayOrderHandler.toStringSortableArray());
-            for (var ute : rootNode.path("utilizedTransportEquipments")) {
+              rootNode, CONSIGNMENT_ITEMS, ArrayOrderHandler.toStringSortableArray());
+            for (var ute : rootNode.path(UTILIZED_TRANSPORT_EQUIPMENTS)) {
               arrayNodeHandler.accept(
                 ute, "shippingMarks", ArrayOrderHandler.toStringSortableArray());
               arrayNodeHandler.accept(
                 ute, "seals", ArrayOrderHandler.toStringSortableArray());
               arrayNodeHandler.accept(
                 ute, "references", ArrayOrderHandler.toStringSortableArray());
-              for (var cr : ute.path("customsReferences")) {
+              for (var cr : ute.path(CUSTOMS_REFERENCES)) {
                 arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
               }
               arrayNodeHandler.accept(
-                ute, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+                ute, CUSTOMS_REFERENCES, ArrayOrderHandler.toStringSortableArray());
             }
             arrayNodeHandler.accept(
-              rootNode, "utilizedTransportEquipments", ArrayOrderHandler.toStringSortableArray());
+              rootNode, UTILIZED_TRANSPORT_EQUIPMENTS, ArrayOrderHandler.toStringSortableArray());
             arrayNodeHandler.accept(
                 rootNode, "advanceManifestFilings", ArrayOrderHandler.toStringSortableArray());
             arrayNodeHandler.accept(
                 rootNode, "references", ArrayOrderHandler.toStringSortableArray());
-            for (var cr : rootNode.path("customsReferences")) {
+            for (var cr : rootNode.path(CUSTOMS_REFERENCES)) {
               arrayNodeHandler.accept(cr, "values", ArrayOrderHandler.toStringSortableArray());
             }
             arrayNodeHandler.accept(
-              rootNode, "customsReferences", ArrayOrderHandler.toStringSortableArray());
+              rootNode, CUSTOMS_REFERENCES, ArrayOrderHandler.toStringSortableArray());
 
-            DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(rootNode.path("documentParties"), arrayNodeHandler);
+            DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(rootNode.path(DOCUMENT_PARTIES), arrayNodeHandler);
 
             for (var hbl : rootNode.path("houseBillOfLadings")) {
-              DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path("documentParties"), arrayNodeHandler);
+              DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path(DOCUMENT_PARTIES), arrayNodeHandler);
             }
             arrayNodeHandler.accept(
               rootNode, "houseBillOfLadings", ArrayOrderHandler.toStringSortableArray());
@@ -212,6 +219,29 @@ public class EBLChecks {
     JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
   );
 
+  private static final JsonRebaseableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The code in 'codeListProvider' is known",
+    mav -> {
+      mav.submitAllMatching("documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.endorsee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.issueTo.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.notifyParties.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("documentParties.other.party.identifyingCodes.*.codeListProvider");
+
+
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.shipper.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.consignee.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.notifyParty.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.seller.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.buyer.identifyingCodes.*.codeListProvider");
+      mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.party.identifyingCodes.*.codeListProvider");
+    },
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
+  );
+
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
     "The 'documentParties.notifyParties' attribute is mandatory for negotiable B/Ls",
     JsonAttribute.isTrue("isToOrder"),
@@ -275,6 +305,8 @@ public class EBLChecks {
     return isReeferContainerSizeTypeCode(isoEquipmentNode.asText(""));
   };
 
+  public static final String IS_NON_OPERATING_REEFER = "isNonOperatingReefer";
+  public static final String ACTIVE_REEFER_SETTINGS = "activeReeferSettings";
   private static final JsonRebaseableContentCheck ISO_EQUIPMENT_CODE_IMPLIES_REEFER = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate utilizedTransportEquipment and reefer attributes",
     ALL_UTE,
@@ -282,17 +314,17 @@ public class EBLChecks {
       HAS_ISO_EQUIPMENT_CODE,
       JsonAttribute.ifMatchedThenElse(
         IS_ISO_EQUIPMENT_CONTAINER_REEFER,
-        JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBePresent()),
+        JsonAttribute.path(IS_NON_OPERATING_REEFER, JsonAttribute.matchedMustBePresent()),
         JsonAttribute.combine(
-          JsonAttribute.path("isNonOperatingReefer", JsonAttribute.matchedMustBeAbsent()),
-          JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBeAbsent())
+          JsonAttribute.path(IS_NON_OPERATING_REEFER, JsonAttribute.matchedMustBeAbsent()),
+          JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())
         )
       ),
       // If there is no ISOEquipmentCode, then we can only say that `activeReeferSettings` implies
       // `isNonOperatingReefer=False` (the `=False` part is checked elsewhere).
       JsonAttribute.presenceImpliesOtherField(
-        "activeReeferSettings",
-        "isNonOperatingReefer"
+        ACTIVE_REEFER_SETTINGS,
+        IS_NON_OPERATING_REEFER
       )
     )
   );
@@ -301,8 +333,8 @@ public class EBLChecks {
     "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'false' must have 'activeReeferSettings'",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
-      JsonAttribute.isFalse("isNonOperatingReefer"),
-      JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBePresent())
+      JsonAttribute.isFalse(IS_NON_OPERATING_REEFER),
+      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBePresent())
     )
   );
 
@@ -310,8 +342,8 @@ public class EBLChecks {
     "All utilizedTransportEquipments where 'isNonOperatingReefer' is 'true' cannot have 'activeReeferSettings'",
     ALL_UTE,
     JsonAttribute.ifMatchedThen(
-      JsonAttribute.isTrue("isNonOperatingReefer"),
-      JsonAttribute.path("activeReeferSettings", JsonAttribute.matchedMustBeAbsent())
+      JsonAttribute.isTrue(IS_NON_OPERATING_REEFER),
+      JsonAttribute.path(ACTIVE_REEFER_SETTINGS, JsonAttribute.matchedMustBeAbsent())
     )
   );
 
@@ -319,7 +351,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck CR_CC_T_CODES_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "The combination of 'countryCode' and 'type' in '*.customsReferences' must be unique",
     mav -> {
-      mav.submitAllMatching("customsReferences");
+      mav.submitAllMatching(CUSTOMS_REFERENCES);
       mav.submitAllMatching("consignmentItems.*.customsReferences");
       mav.submitAllMatching("consignmentItems.*.cargoItems.*.customsReferences");
       mav.submitAllMatching("utilizedTransportEquipments.*.customsReferences");
@@ -338,7 +370,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
-      "documentParties",
+      DOCUMENT_PARTIES,
       JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
 
@@ -347,7 +379,7 @@ public class EBLChecks {
     "Validate documentParties match the EBL type",
     (body, contextPath) -> {
       var issues = new LinkedHashSet<String>();
-      var documentParties = body.path("documentParties");
+      var documentParties = body.path(DOCUMENT_PARTIES);
       var isToOrder = body.path("isToOrder").asBoolean(false);
 
       if (!documentParties.has("shipper")) {
@@ -376,17 +408,19 @@ public class EBLChecks {
     });
 
   private static Consumer<MultiAttributeValidator> allDg(Consumer<MultiAttributeValidator.AttributePathBuilder> consumer) {
-    return mav -> consumer.accept(mav.path("consignmentItems").all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
+    return mav -> consumer.accept(mav.path(CONSIGNMENT_ITEMS).all().path("cargoItems").all().path("outerPackaging").path("dangerousGoods").all());
   }
 
+  public static final String EQUIPMENT_REFERENCE = "equipmentReference";
   private static final JsonRebaseableContentCheck CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT = JsonAttribute.customValidator(
     "Equipment References in 'cargoItems' must be present in 'utilizedTransportEquipments'",
     (body, contextPath) -> {
       var knownEquipmentReferences = allEquipmentReferences(body);
       var missing = new LinkedHashSet<String>();
-      for (var consignmentItem : body.path("consignmentItems")) {
+      for (var consignmentItem : body.path(CONSIGNMENT_ITEMS)) {
         for (var cargoItem : consignmentItem.path("cargoItems")) {
-          var ref = cargoItem.path("equipmentReference").asText(null);
+          var ref = cargoItem.path(
+            EQUIPMENT_REFERENCE).asText(null);
           if (ref == null) {
             // Schema validated
             continue;
@@ -396,7 +430,7 @@ public class EBLChecks {
           }
         }
       }
-      var path = concatContextPath(contextPath, "utilizedTransportEquipments");
+      var path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
       return missing.stream()
         .map(ref -> "The equipment reference '%s' was used in a cargoItem but was not present in '%s'".formatted(ref, path))
         .collect(Collectors.toSet());
@@ -408,7 +442,7 @@ public class EBLChecks {
     (body, contextPath) -> {
       var duplicates = new LinkedHashSet<String>();
       allEquipmentReferences(body, duplicates);
-      var path = concatContextPath(contextPath, "utilizedTransportEquipments");
+      var path = concatContextPath(contextPath, UTILIZED_TRANSPORT_EQUIPMENTS);
       return duplicates.stream()
         .map(ref -> "The equipment reference '%s' was used more than once in '%s'".formatted(ref, path))
         .collect(Collectors.toSet());
@@ -440,6 +474,7 @@ public class EBLChecks {
       JsonAttribute.mustBePresent(ISSUE_TO_PARTY),
       JsonAttribute.mustBeAbsent(ISSUE_TO_PARTY)
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -490,6 +525,7 @@ public class EBLChecks {
       JsonAttribute.isNotNull(JsonPointer.compile("/transports/onCarriageBy")),
       JsonAttribute.mustBeNotNull(JsonPointer.compile("/transports/placeOfDelivery"), "'onCarriageBy' is present")
     ),
+    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
@@ -557,13 +593,8 @@ public class EBLChecks {
     TLR_CC_T_COMBINATION_UNIQUE
   );
 
-  public static final JsonContentCheck SIR_REQUIRED_IN_REF_STATUS = JsonAttribute.mustBePresent(SI_REF_SIR_PTR);
   public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);
   public static final JsonContentCheck TDR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(TD_NOTIFICATION_TDR_PTR);
-
-  public static JsonContentCheck sirInRefStatusMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
-    return JsonAttribute.mustEqual(SI_REF_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
-  }
 
   public static JsonContentCheck sirInNotificationMustMatchDSP(Supplier<DynamicScenarioParameters> dspSupplier) {
     return JsonAttribute.mustEqual(SI_NOTIFICATION_SIR_PTR, () -> dspSupplier.get().shippingInstructionsReference());
@@ -602,7 +633,7 @@ public class EBLChecks {
             var dsp = dspSupplier.get();
             return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
           },
-          JsonAttribute.path("documentParties", JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
+          JsonAttribute.path(DOCUMENT_PARTIES, JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
       ));
     } else {
       checks.add(
@@ -614,7 +645,7 @@ public class EBLChecks {
       checks.add(
         JsonAttribute.customValidator(
           "[Scenario] Verify that the correct 'commoditySubreference' is used",
-          JsonAttribute.path("consignmentItems", checkCommoditySubreference(cspSupplier))));
+          JsonAttribute.path(CONSIGNMENT_ITEMS, checkCommoditySubreference(cspSupplier))));
 
       checks.add(
         JsonAttribute.allIndividualMatchesMustBeValid(
@@ -630,15 +661,15 @@ public class EBLChecks {
     }
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'equipmentReference' values are used",
-      JsonAttribute.path("utilizedTransportEquipments", checkEquipmentReference(cspSupplier))
+      JsonAttribute.path(UTILIZED_TRANSPORT_EQUIPMENTS, checkEquipmentReference(cspSupplier))
     ));
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'HSCodes' are used",
-      JsonAttribute.path("consignmentItems", checkHSCodes(cspSupplier))
+      JsonAttribute.path(CONSIGNMENT_ITEMS, checkHSCodes(cspSupplier))
     ));
     checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'descriptionOfGoods' is used",
-      JsonAttribute.path("consignmentItems", checkDescriptionOfGoods(cspSupplier))
+      JsonAttribute.path(CONSIGNMENT_ITEMS, checkDescriptionOfGoods(cspSupplier))
     ));
 
     checks.add(JsonAttribute.mustEqual(
@@ -664,9 +695,9 @@ public class EBLChecks {
       if (!scenarioType.isCustomsReferencesRequired()) {
         return Set.of();
       }
-      var allReferencesParents = nodeToValidate.findParents("customsReferences");
+      var allReferencesParents = nodeToValidate.findParents(CUSTOMS_REFERENCES);
       for (var referencesParent : allReferencesParents) {
-        if (isNonEmptyNode(referencesParent.path("customsReferences"))) {
+        if (isNonEmptyNode(referencesParent.path(CUSTOMS_REFERENCES))) {
           return Set.of();
         }
       }
@@ -687,19 +718,19 @@ public class EBLChecks {
       ignored -> dspSupplier.get().scenarioType().isReferencesRequired(),
       JsonAttribute.atLeastOneOfMatched((body, ptrs) -> {
         ptrs.addAll(Arrays.asList(REFERENCE_PATHS));
-        var uteCount = body.path("utilizedTransportEquipments").size();
+        var uteCount = body.path(UTILIZED_TRANSPORT_EQUIPMENTS).size();
         for (int i = 0 ; i < uteCount ; i++) {
           ptrs.add(JsonPointer.compile("/utilizedTransportEquipments/%d/references".formatted(i)));
         }
-        var ciCount = body.path("consignmentItems").size();
+        var ciCount = body.path(CONSIGNMENT_ITEMS).size();
         for (int i = 0 ; i < ciCount ; i++) {
           ptrs.add(JsonPointer.compile("/consignmentItems/%d/references".formatted(i)));
         }
-        var notifyPartyCount = body.path("documentParties").path("notifyParties").size();
+        var notifyPartyCount = body.path(DOCUMENT_PARTIES).path("notifyParties").size();
         for (int i = 0 ; i < notifyPartyCount ; i++) {
           ptrs.add(JsonPointer.compile("/documentParties/notifyParties/%d/party/reference".formatted(i)));
         }
-        var otherPartyCount = body.path("documentParties").path("other").size();
+        var otherPartyCount = body.path(DOCUMENT_PARTIES).path("other").size();
         for (int i = 0 ; i < otherPartyCount ; i++) {
           ptrs.add(JsonPointer.compile("/documentParties/other/%d/party/reference".formatted(i)));
         }
@@ -837,12 +868,12 @@ public class EBLChecks {
 
   private static JsonContentMatchedValidation checkEquipmentReference(Supplier<CarrierScenarioParameters> cspSupplier) {
     BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (ute, pathBuilder) -> {
-      var equipmentReferenceNode = ute.get("equipmentReference");
+      var equipmentReferenceNode = ute.get(EQUIPMENT_REFERENCE);
       if (equipmentReferenceNode != null) {
         pathBuilder.append(".equipmentReference");
       } else {
         pathBuilder.append(".equipment.equipmentReference");
-        equipmentReferenceNode = ute.path("equipment").path("equipmentReference");
+        equipmentReferenceNode = ute.path("equipment").path(EQUIPMENT_REFERENCE);
       }
       return equipmentReferenceNode;
     };
@@ -868,7 +899,7 @@ public class EBLChecks {
 
         return issues;
       }
-      return checkCSPAllUsedAtLeastOnce("equipmentReference", () -> expectedReferences, resolver)
+      return checkCSPAllUsedAtLeastOnce(EQUIPMENT_REFERENCE, () -> expectedReferences, resolver)
           .validate(nodes, contextPath);
     };
    }
@@ -1045,6 +1076,7 @@ public class EBLChecks {
     jsonContentChecks.add(updatedStatusCheck);
     return JsonAttribute.contentChecks(
       titlePrefix,
+      null,
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
@@ -1062,6 +1094,7 @@ public class EBLChecks {
     ));
     return JsonAttribute.contentChecks(
       titlePrefix,
+      null,
       EblRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
@@ -1107,8 +1140,8 @@ public class EBLChecks {
       mav-> mav.submitAllMatching("utilizedTransportEquipments.*"),
       (nodeToValidate, contextPath) -> {
         var scenario = dspSupplier.get().scenarioType();
-        var activeReeferNode = nodeToValidate.path("activeReeferSettings");
-        var nonOperatingReeferNode = nodeToValidate.path("isNonOperatingReefer");
+        var activeReeferNode = nodeToValidate.path(ACTIVE_REEFER_SETTINGS);
+        var nonOperatingReeferNode = nodeToValidate.path(IS_NON_OPERATING_REEFER);
         var issues = new LinkedHashSet<String>();
         switch (scenario) {
           case ACTIVE_REEFER -> {
@@ -1167,12 +1200,12 @@ public class EBLChecks {
 
   private static Set<String> allEquipmentReferences(JsonNode body, Set<String> duplicates) {
     var seen = new HashSet<String>();
-    for (var ute : body.path("utilizedTransportEquipments")) {
+    for (var ute : body.path(UTILIZED_TRANSPORT_EQUIPMENTS)) {
       // TD or SI with SOC
-      var ref = ute.path("equipment").path("equipmentReference").asText(null);
+      var ref = ute.path("equipment").path(EQUIPMENT_REFERENCE).asText(null);
       if (ref == null) {
         // SI with COC
-        ref = ute.path("equipmentReference").asText(null);
+        ref = ute.path(EQUIPMENT_REFERENCE).asText(null);
       }
       if (ref == null) {
         continue;

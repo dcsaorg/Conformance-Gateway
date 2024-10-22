@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.eblinterop.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.dcsa.conformance.standards.eblinterop.action.SenderTransmissionClass.*;
 import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.generateTransactionEntry;
-import static org.dcsa.conformance.standards.eblinterop.models.TDSendingState.platform2CodeListName;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BinaryNode;
@@ -86,7 +85,8 @@ public class PintSendingPlatform extends ConformanceParty {
       Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
       Map.entry(PintRetryTransferAndCloseAction.class, this::retryTransfer),
-      Map.entry(PintCloseTransferAction.class, this::finishTransfer)
+      Map.entry(PintCloseTransferAction.class, this::finishTransfer),
+      Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation)
     );
   }
 
@@ -131,6 +131,14 @@ public class PintSendingPlatform extends ConformanceParty {
       tdrChars.append(c);
     }
     return tdrChars.toString();
+  }
+
+  private void requestReceiverValidation(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.requestReceiverValidation(%s)".formatted(actionPrompt.toPrettyString()));
+    var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
+    this.syncCounterpartPost("/v" + apiVersion.charAt(0) + "/receiver-validation", dsp.receiverValidation());
+    addOperatorLogEntry(
+      "Requested receiver validation");
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -273,12 +281,10 @@ public class PintSendingPlatform extends ConformanceParty {
 
   private String generateTransactions(ObjectNode payload, String tdChecksum, SenderTransmissionClass senderTransmissionClass, ReceiverScenarioParameters rsp) {
     var sendingPlatform = "BOLE";
-    var receivingPlatform = rsp.eblPlatform();
+    var receivingPlatform = rsp.receiverParty().path("eblPlatform").asText("!?");
     var sendingEPUI = "1234";
     var sendingPartyName = "DCSA CTK tester";
-    var receivingEPUI = rsp.receiverEPUI();
-    var receivingPartyName = rsp.receiverPartyName();
-    var receiverCodeListName = rsp.receiverEPUICodeListName();
+    var receiver = rsp.receiverParty();
     if (sendingPlatform.equals(receivingPlatform)) {
       sendingPlatform = "WAVE";
     }
@@ -286,7 +292,6 @@ public class PintSendingPlatform extends ConformanceParty {
     var action = "ISSU";
     String previousChecksum = null;
     if (senderTransmissionClass == VALID_TRANSFER) {
-      var codeListName = platform2CodeListName(sendingPlatform);
       var transaction = generateTransactionEntry(
         payloadSigner,
         null,
@@ -295,10 +300,7 @@ public class PintSendingPlatform extends ConformanceParty {
         sendingPlatform,
         "DCSA CTK issuer",
         "5432",
-        sendingPlatform,
-        sendingPartyName,
-        sendingEPUI,
-        codeListName
+        receiver
       );
       previousChecksum = Checksums.sha256(transaction);
       transactions.add(transaction);
@@ -310,6 +312,13 @@ public class PintSendingPlatform extends ConformanceParty {
       } else {
         receivingPlatform = "WAVE";
       }
+      receiver = receiver.deepCopy();
+      try {
+        var obj = (ObjectNode)receiver;
+        obj.put("eblPlatform", receivingPlatform);
+      } catch (ClassCastException e) {
+        /* ignore */
+      }
     }
     var latest = generateTransactionEntry(
       payloadSigner,
@@ -319,10 +328,7 @@ public class PintSendingPlatform extends ConformanceParty {
       sendingPlatform,
       sendingPartyName,
       sendingEPUI,
-      receivingPlatform,
-      receivingPartyName,
-      receivingEPUI,
-      receiverCodeListName
+      receiver
     );
     transactions.add(latest);
     return latest;

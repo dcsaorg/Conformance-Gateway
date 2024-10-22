@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.booking.party;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
@@ -22,13 +24,15 @@ import org.dcsa.conformance.standards.booking.action.*;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.model.PersistableCarrierBooking;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Slf4j
 public class BookingCarrier extends ConformanceParty {
   private static final Random RANDOM = new Random();
-  private final Map<String, String> cbrrToCbr = new HashMap<>();
-  private final Map<String, String> cbrToCbrr = new HashMap<>();
+  private static final String EXAMPLE_CARRIER_SERVICE = "Example Carrier Service";
+  private static final String MESSAGE = "message";
+  private static final String DKAAR = "DKAAR";
+  private static final String DEBRV = "DEBRV";
+  private static final String CARRIER_SERVICE = "Carrier Service %d";
+  private static final String BOOKING_STATUS = "bookingStatus";
   private static final String REASON_INFO = "Declined as required by the conformance scenario";
   private static final String CANCEL_AMENDMENT_OPERATION = "cancelAmendment";
   private static final String CANCEL_BOOKING_OPERATION = "cancelBooking";
@@ -36,6 +40,9 @@ public class BookingCarrier extends ConformanceParty {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+
+  private final Map<String, String> cbrrToCbr = new HashMap<>();
+  private final Map<String, String> cbrToCbrr = new HashMap<>();
 
 
   public BookingCarrier(
@@ -91,86 +98,105 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    if (log.isInfoEnabled())
+      log.info("Carrier.supplyScenarioParameters({})", actionPrompt.toPrettyString());
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
-    CarrierScenarioParameters carrierScenarioParameters = switch (scenarioType) {
-    case REGULAR, REGULAR_SHIPPER_OWNED -> new CarrierScenarioParameters("SCR-1234-REGULAR",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "640510",
-      "Shoes - black, 400 boxes",
-      null,
-      null,
-      "DKAAR",
-      "DEBRV");
-    case REGULAR_2RE1C, REGULAR_2RE2C -> new CarrierScenarioParameters("SCR-1234-REGULAR-2REC",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "630260",
-      "Tableware and kitchenware",
-      "691010",
-      "Kitchen pots and pans",
-      "DKAAR",
-      "DEBRV");
-    case REGULAR_CHO_DEST -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-DEST",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "640510",
-      "Shoes - black, 400 boxes",
-      null,
-      null,
-      "DKAAR",
-      "USGBO");
-    case REGULAR_CHO_ORIG -> new CarrierScenarioParameters("SCR-1234-REGULAR-CHO-ORIG",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "640510",
-      "Shoes - black, 400 boxes",
-      null,
-      null,
-      "DKAAR",
-      "DKAAR");
-    case REGULAR_NON_OPERATING_REEFER -> new CarrierScenarioParameters("SCR-1234-NON-OPERATING-REEFER",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "220291",
-      "Non alcoholic beverages",
-      null,
-      null,
-      "DKAAR",
-      "DEBRV");
-    case REEFER, REEFER_TEMP_CHANGE -> new CarrierScenarioParameters("SCR-1234-REEFER",
-      "Example Carrier Service",
-      "402E",
-      "Carrier Service %d".formatted(RANDOM.nextInt(999999)),
-      "04052090",
-      "Dairy products",
-      null,
-      null,
-      "DKAAR",
-      "DEBRV");
-    case DG -> new CarrierScenarioParameters("SCR-1234-DG",
-      "Example Carrier Service",
-      "403W",
-      "TA1",
-      "293499",
-      "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
-      null,
-      null,
-      "DKAAR",
-      "DEBRV");
-  };
-
+    CarrierScenarioParameters carrierScenarioParameters = getCarrierScenarioParameters(scenarioType);
     asyncOrchestratorPostPartyInput(
         actionPrompt.get("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
         "Provided CarrierScenarioParameters: %s".formatted(carrierScenarioParameters));
   }
+
+  public static CarrierScenarioParameters getCarrierScenarioParameters(ScenarioType scenarioType) {
+    return switch (scenarioType) {
+      case REGULAR, REGULAR_SHIPPER_OWNED ->
+          new CarrierScenarioParameters(
+              "SCR-1234-REGULAR",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "640510",
+              "Shoes - black, 400 boxes",
+              null,
+              null,
+              DKAAR,
+              DEBRV);
+      case REGULAR_2RE1C, REGULAR_2RE2C ->
+          new CarrierScenarioParameters(
+              "SCR-1234-REGULAR-2REC",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "630260",
+              "Tableware and kitchenware",
+              "691010",
+              "Kitchen pots and pans",
+              DKAAR,
+              DEBRV);
+      case REGULAR_CHO_DEST ->
+          new CarrierScenarioParameters(
+              "SCR-1234-REGULAR-CHO-DEST",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "640510",
+              "Shoes - black, 400 boxes",
+              null,
+              null,
+              DKAAR,
+              "USGBO");
+      case REGULAR_CHO_ORIG ->
+          new CarrierScenarioParameters(
+              "SCR-1234-REGULAR-CHO-ORIG",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "640510",
+              "Shoes - black, 400 boxes",
+              null,
+              null,
+              DKAAR,
+              DKAAR);
+      case REGULAR_NON_OPERATING_REEFER ->
+          new CarrierScenarioParameters(
+              "SCR-1234-NON-OPERATING-REEFER",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "220291",
+              "Non alcoholic beverages",
+              null,
+              null,
+              DKAAR,
+              DEBRV);
+      case REEFER, REEFER_TEMP_CHANGE ->
+          new CarrierScenarioParameters(
+              "SCR-1234-REEFER",
+              EXAMPLE_CARRIER_SERVICE,
+              "402E",
+              CARRIER_SERVICE.formatted(RANDOM.nextInt(999999)),
+              "04052090",
+              "Dairy products",
+              null,
+              null,
+              DKAAR,
+              DEBRV);
+      case DG ->
+          new CarrierScenarioParameters(
+              "SCR-1234-DG",
+              EXAMPLE_CARRIER_SERVICE,
+              "403W",
+              "TA1",
+              "293499",
+              "Environmentally hazardous substance, liquid, N.O.S (Propiconazole)",
+              null,
+              null,
+              DKAAR,
+              DEBRV);
+    };
+  }
+
   private void processBookingAmendment(JsonNode actionPrompt) {
     log.info("Carrier.processBookingAmendment(%s)".formatted(actionPrompt.toPrettyString()));
 
@@ -225,7 +251,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    var bookingStatus = persistableCarrierBooking.getBooking().get("bookingStatus").asText();
+    var bookingStatus = persistableCarrierBooking.getBooking().get(BOOKING_STATUS).asText();
     if (bookingStatus.equals(BookingState.CONFIRMED.name())) {
       persistableCarrierBooking
           .getBooking()
@@ -282,7 +308,7 @@ public class BookingCarrier extends ConformanceParty {
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                    "message",
+                  MESSAGE,
                     "Please perform the changes requested by the Conformance orchestrator");
     String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.required("cbrr").asText();
@@ -326,7 +352,7 @@ public class BookingCarrier extends ConformanceParty {
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                    "message",
+                  MESSAGE,
                     "Please perform the changes requested by the Conformance orchestrator");
 
     var persistableCarrierBooking =
@@ -379,14 +405,14 @@ public class BookingCarrier extends ConformanceParty {
         new ConformanceMessageBody(
             OBJECT_MAPPER
                 .createObjectNode()
-                .put("message", "Returning 405 because the method was not supported")));
+                .put(MESSAGE, "Returning 405 because the method was not supported")));
   }
 
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
         400,
         Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
   private ConformanceResponse return404(ConformanceRequest request) {
@@ -397,14 +423,14 @@ public class BookingCarrier extends ConformanceParty {
     return request.createResponse(
         404,
         Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
   private ConformanceResponse return409(ConformanceRequest request, String message) {
     return request.createResponse(
         409,
         Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
+        new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put(MESSAGE, message)));
   }
 
   @Override
@@ -442,10 +468,10 @@ public class BookingCarrier extends ConformanceParty {
     }
     var cancelJsonBody = requestPayload.body().getJsonBody();
 
-    if (cancelJsonBody.get("bookingStatus") != null && cancelJsonBody.get("amendedBookingStatus") != null) {
+    if (cancelJsonBody.get(BOOKING_STATUS) != null && cancelJsonBody.get("amendedBookingStatus") != null) {
       return "#INVALID";
     }
-    if (cancelJsonBody.get("bookingStatus") != null) {
+    if (cancelJsonBody.get(BOOKING_STATUS) != null) {
       return CANCEL_BOOKING_OPERATION;
     }
     if(cancelJsonBody.get("amendedBookingStatus") != null ) {
@@ -553,7 +579,7 @@ public class BookingCarrier extends ConformanceParty {
 
   private ConformanceResponse returnBookingCBRRResponse(ConformanceRequest request, ObjectNode booking, String bookingReference) {
     var cbrr = booking.get(CARRIER_BOOKING_REQUEST_REFERENCE).asText();
-    var bookingStatus = booking.get("bookingStatus").asText();
+    var bookingStatus = booking.get(BOOKING_STATUS).asText();
     var statusObject =
       OBJECT_MAPPER
         .createObjectNode()
@@ -574,7 +600,7 @@ public class BookingCarrier extends ConformanceParty {
   }
 
   private ConformanceResponse returnEmpty202Response(ConformanceRequest request, ObjectNode booking, String bookingReference) {
-    var bookingStatus = booking.get("bookingStatus").asText();
+    var bookingStatus = booking.get(BOOKING_STATUS).asText();
     ConformanceResponse response =
       request.createResponse(
         202,
@@ -703,7 +729,7 @@ public class BookingCarrier extends ConformanceParty {
         setBookingProvidedField(
           data, CARRIER_BOOKING_REFERENCE, carrierBookingReference);
       }
-      setBookingProvidedField(data, "bookingStatus", bookingStatus);
+      setBookingProvidedField(data, BOOKING_STATUS, bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
       setBookingProvidedField(data, "reason", reason);

@@ -4,6 +4,9 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -151,7 +154,9 @@ public class EblShipper extends ConformanceParty {
     var siWithoutStatus = si.deepCopy();
     siWithoutStatus.remove("shippingInstructionsStatus");
 
-    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(documentReference), siWithoutStatus);
+    ConformanceResponse conformanceResponse = syncCounterpartPut("/v3/shipping-instructions/%s".formatted(
+      URLEncoder.encode(documentReference, StandardCharsets.UTF_8)
+    ), siWithoutStatus);
 
     JsonNode jsonBody = conformanceResponse.message().body().getJsonBody();
     String shippingInstructionsStatus = jsonBody.path("shippingInstructionsStatus").asText();
@@ -174,7 +179,7 @@ public class EblShipper extends ConformanceParty {
       .put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_CANCELLED.wireName());
 
     syncCounterpartPatch(
-      "/v3/shipping-instructions/%s".formatted(documentReference),
+      "/v3/shipping-instructions/%s".formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
       Collections.emptyMap(),
       approvePayload);
 
@@ -209,7 +214,7 @@ public class EblShipper extends ConformanceParty {
       .put("transportDocumentStatus", TransportDocumentStatus.TD_APPROVED.wireName());
 
     syncCounterpartPatch(
-      "/v3/transport-documents/%s".formatted(documentReference),
+      "/v3/transport-documents/%s".formatted(URLEncoder.encode(documentReference, StandardCharsets.UTF_8)),
       Collections.emptyMap(),
       approvePayload);
   }
@@ -234,7 +239,7 @@ public class EblShipper extends ConformanceParty {
       ? Map.of("updatedContent", List.of("true"))
       : Collections.emptyMap();
 
-    syncCounterpartGet("/v3/shipping-instructions/" + documentReference, queryParams);
+    syncCounterpartGet("/v3/shipping-instructions/" + URLEncoder.encode(documentReference, StandardCharsets.UTF_8), queryParams);
 
     addOperatorLogEntry("Sent a GET request for shipping instructions with documentReference: %s".formatted(documentReference));
   }
@@ -243,7 +248,7 @@ public class EblShipper extends ConformanceParty {
     log.info("Shipper.getTransportDocument(%s)".formatted(actionPrompt.toPrettyString()));
     String tdr = actionPrompt.required("tdr").asText();
 
-    syncCounterpartGet("/v3/transport-documents/" + tdr, Collections.emptyMap());
+    syncCounterpartGet("/v3/transport-documents/" + URLEncoder.encode(tdr, StandardCharsets.UTF_8), Collections.emptyMap());
 
     addOperatorLogEntry("Sent a GET request for transport document with TDR: %s".formatted(tdr));
   }

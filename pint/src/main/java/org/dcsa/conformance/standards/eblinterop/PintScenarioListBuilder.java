@@ -26,6 +26,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   private static final String ENVELOPE_MANIFEST_SCHEMA = "EnvelopeManifest";
   private static final String ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA = "EnvelopeTransferChainEntry";
   private static final String ISSUANCE_MANIFEST_SCHEMA = "IssuanceManifest";
+  private static final String RECEIVER_VALIDATION_RESPONSE = "ReceiverValidationResponse";
 
   public static LinkedHashMap<String, PintScenarioListBuilder> createModuleScenarioListBuilders(
     String standardVersion, String sendingPlatformPartyName, String receivingPlatformPartyName) {
@@ -34,27 +35,27 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
     RECEIVING_PLATFORM_PARTY_NAME.set(receivingPlatformPartyName);
     return Stream.of(
         Map.entry(
-          "",
+          "Transfer scenarios",
           noAction().thenEither(
-            supplyScenarioParameters(0).thenEither(
+            supplySenderTransferScenarioParameters(0).thenEither(
               receiverStateSetup(ScenarioClass.NO_ISSUES)
                 .thenEither(
                   initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
                     noAction(),
-                    retryTransfer(PintResponseCode.DUPE),
+                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
                     resignLatestEntry().then(
-                      retryTransfer(PintResponseCode.DUPE)
+                      retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER)
                     ),
                     manipulateLatestTransactionParameters().then(
-                      retryTransfer(PintResponseCode.DISE)
+                      retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER)
                     )),
                   initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
                     noAction(),
                     resignLatestEntry().then(
-                      retryTransfer(PintResponseCode.DUPE)
+                      retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER)
                     ),
                     manipulateLatestTransactionParameters().then(
-                      retryTransfer(PintResponseCode.DISE)
+                      retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER)
                     )
                   ),
                   initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
@@ -66,56 +67,60 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 initiateAndCloseTransferAction(PintResponseCode.BENV)
               ),
               receiverStateSetup(ScenarioClass.FAIL_W_503).then(
-                initiateTransferUnsignedFailure(503).thenEither(
+                initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).thenEither(
                   resetScenarioClass(ScenarioClass.NO_ISSUES).then(
                     initiateAndCloseTransferAction(PintResponseCode.RECE)),
-                  initiateTransferUnsignedFailure(503).then(
+                  initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).then(
                     resetScenarioClass(ScenarioClass.NO_ISSUES).then(
                       initiateAndCloseTransferAction(PintResponseCode.RECE)))
                 ))
             ),
-            supplyScenarioParameters(2).thenEither(
+            supplySenderTransferScenarioParameters(2).thenEither(
               receiverStateSetup(ScenarioClass.NO_ISSUES)
                 .then(
-                  initiateTransfer(2).thenEither(
+                  initiateTransfer(2, SenderTransmissionClass.VALID_TRANSFER).thenEither(
                     transferDocument().thenEither(
                       transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
-                      retryTransfer(1).then(
+                      retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
                         transferDocument().thenEither(
                           closeTransferAction(PintResponseCode.RECE),
-                          retryTransfer(PintResponseCode.RECE)
+                          retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                         )
                       ),
                       resetScenarioClass(ScenarioClass.FAIL_W_503).then(
                         transferDocumentReceiverFailure().then(
                           resetScenarioClass(ScenarioClass.NO_ISSUES).thenEither(
                             transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
-                            retryTransfer(1).then(
+                            retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
                               transferDocument().thenEither(
                                 closeTransferAction(PintResponseCode.RECE),
-                                retryTransfer(PintResponseCode.RECE)
+                                retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                               )
                             )
                           )
                         )
                       ),
                       transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
-                        retryTransfer(1).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
                       ),
                       transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
-                        retryTransfer(1).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
                       ),
                       closeTransferAction(PintResponseCode.MDOC).then(
-                        retryTransfer(1).then(
+                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
                           transferDocument().thenEither(
                             closeTransferAction(PintResponseCode.RECE),
-                            retryTransfer(PintResponseCode.RECE)
+                            retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                           )
                         )
                       )
                     )
                   )))
-          )))
+          )),
+      Map.entry("Receiver validation scenarios",
+        supplyReceiverValidationScenarioParameters()
+          .then(receiverValidation())
+        ))
       .collect(
         Collectors.toMap(
           Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -127,8 +132,33 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
     super(actionBuilder);
   }
 
+  private static PintScenarioListBuilder supplyReceiverValidationScenarioParameters() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction ->
+        new SupplyValidationEndpointScenarioParametersAction(
+          sendingPlatform,
+          receivingPlatform,
+          (PintAction) previousAction
+        ));
+  }
 
-  private static PintScenarioListBuilder supplyScenarioParameters(int documentCount) {
+  private static PintScenarioListBuilder receiverValidation() {
+    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
+    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
+    return new PintScenarioListBuilder(
+      previousAction ->
+        new PintReceiverValidationAction(
+          sendingPlatform,
+          receivingPlatform,
+          (PintAction) previousAction,
+          200,
+          resolveMessageSchemaValidator(RECEIVER_VALIDATION_RESPONSE)
+        ));
+  }
+
+  private static PintScenarioListBuilder supplySenderTransferScenarioParameters(int documentCount) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -223,7 +253,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   }
 
 
-  private static PintScenarioListBuilder initiateTransferUnsignedFailure(int expectedStatus) {
+  private static PintScenarioListBuilder initiateTransferUnsignedFailure(int expectedStatus, SenderTransmissionClass senderTransmissionClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -233,13 +263,14 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 sendingPlatform,
                 (PintAction) previousAction,
                 expectedStatus,
+                senderTransmissionClass,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
                 resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA)));
   }
 
-  private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount) {
+  private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount, SenderTransmissionClass senderTransmissionClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -249,6 +280,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 sendingPlatform,
                 (PintAction) previousAction,
                 expectedMissingDocumentCount,
+                senderTransmissionClass,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
@@ -257,7 +289,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 ));
   }
 
-  private static PintScenarioListBuilder retryTransfer(int expectedMissingDocumentCount) {
+  private static PintScenarioListBuilder retryTransfer(int expectedMissingDocumentCount, SenderTransmissionClass senderTransmissionClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -267,6 +299,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 sendingPlatform,
                 (PintAction) previousAction,
                 expectedMissingDocumentCount,
+                senderTransmissionClass,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
@@ -274,7 +307,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 resolveMessageSchemaValidator(TRANSFER_STARTED_UNSIGNED_RESPONSE_SCHEMA)));
   }
 
-  private static PintScenarioListBuilder retryTransfer(PintResponseCode pintResponseCode) {
+  private static PintScenarioListBuilder retryTransfer(PintResponseCode pintResponseCode, SenderTransmissionClass senderTransmissionClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -284,6 +317,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 sendingPlatform,
                 (PintAction) previousAction,
                 pintResponseCode,
+                senderTransmissionClass,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),

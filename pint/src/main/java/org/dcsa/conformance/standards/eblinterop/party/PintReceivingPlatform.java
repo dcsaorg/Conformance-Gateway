@@ -59,7 +59,8 @@ public class PintReceivingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(ReceiverSupplyScenarioParametersAndStateSetupAction.class, this::initiateState),
-      Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass)
+      Map.entry(ResetScenarioClassAction.class, this::resetScenarioClass),
+      Map.entry(SupplyValidationEndpointScenarioParametersAction.class, this::providedReceiverValidationScenarioParameters)
     );
   }
 
@@ -81,6 +82,14 @@ public class PintReceivingPlatform extends ConformanceParty {
       "Finished resetScenarioClass");
   }
 
+  private void providedReceiverValidationScenarioParameters(JsonNode actionPrompt) {
+    log.info("EblInteropReceivingPlatform.providedReceiverValidationScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    asyncOrchestratorPostPartyInput(
+      actionPrompt.required("actionId").asText(), SupplyValidationEndpointScenarioParametersAction.getJsonForPrompt());
+    addOperatorLogEntry(
+      "Finished providedReceiverValidationScenarioParameters");
+  }
+
   private void initiateState(JsonNode actionPrompt) {
     log.info("EblInteropSendingPlatform.handleScenarioTypeAction(%s)".formatted(actionPrompt.toPrettyString()));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.get("ssp"));
@@ -93,7 +102,13 @@ public class PintReceivingPlatform extends ConformanceParty {
     var expectedRecipient = "12345-jane-doe";
     var receivingParameters = getReceiverScenarioParameters(ssp, scenarioClass, expectedRecipient);
     var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
-    tdState.setExpectedReceiver(expectedRecipient);
+    tdState.setExpectedReceiver(
+      generateReceiverParty(
+        ssp,
+        scenarioClass == ScenarioClass.INVALID_RECIPIENT ? ScenarioClass.NO_ISSUES : scenarioClass,
+        expectedRecipient
+      )
+    );
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
@@ -102,20 +117,29 @@ public class PintReceivingPlatform extends ConformanceParty {
       "Finished ScenarioType");
   }
 
-  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
-    String platform, codeListName;
+  private JsonNode generateReceiverParty(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    String platform;
     if ("CARX".equals(ssp.eblPlatform())) {
       platform = "BOLE";
-      codeListName = "Bolero";
     } else {
       platform = "CARX";
-      codeListName = "CargoX";
     }
+    var partyCode = OBJECT_MAPPER.createObjectNode()
+      .put("partyCode", scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient)
+      .put("codeListProvider", platform);
+    var receiverParty = OBJECT_MAPPER.createObjectNode();
+    receiverParty.put("partyName", "Jane Doe")
+      .put("eblPlatform", platform)
+      .putArray("identifyingCodes")
+      .add(partyCode);
+    return receiverParty;
+  }
+
+  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+    var receiverParty = generateReceiverParty(ssp, scenarioClass, expectedRecipient);
+
     return new ReceiverScenarioParameters(
-      platform,
-      "Jane Doe",
-      scenarioClass == ScenarioClass.INVALID_RECIPIENT ? "12345-invalid" : expectedRecipient,
-      codeListName,
+      receiverParty,
       payloadSigner.getPublicKeyInPemFormat()
     );
   }
@@ -262,13 +286,23 @@ public class PintReceivingPlatform extends ConformanceParty {
             "Unknown endpoint")));
   }
 
+  private ConformanceResponse handleReceiverValidation(ConformanceRequest request) {
+    return request.createResponse(
+      200,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("partyName", "Name of Test Party"))
+    );
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblInteropPlatform.handleRequest(%s)".formatted(request));
 
     var url = request.url().replaceFirst("/++$", "");
     ConformanceResponse response;
-    if (url.endsWith("/envelopes")) {
+    if (url.endsWith("/receiver-validation")) {
+      response = handleReceiverValidation(request);
+    } else if (url.endsWith("/envelopes")) {
       response = handleInitiateTransferRequest(request);
     } else if(url.contains("/envelopes/")) {
       response = handleEnvelopeRequest(request);

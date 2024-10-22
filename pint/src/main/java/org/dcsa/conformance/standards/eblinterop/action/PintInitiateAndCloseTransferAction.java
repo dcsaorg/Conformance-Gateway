@@ -151,6 +151,7 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
                 validateInitiateTransferRequest(
                   getMatchedExchangeUuid(),
                   expectedApiVersion,
+                  senderTransmissionClass,
                   () -> getSsp(),
                   () -> getRsp(),
                   () -> getDsp()

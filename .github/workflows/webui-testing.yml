@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Conformance-Gateway
         run: |
-          mvn test-compile -B -V -DskipTests
+          ./mvnw test-compile -B -V -DskipTests
       # No need to run tests, as they are already run in the PR workflow
 
       - name: Start Web UI
@@ -52,7 +52,7 @@ jobs:
 
       - name: Test Conformance-Gateway
         run: |
-          mvn test -B -Djunit.includedTags=WebUI
+          ./mvnw test -B -Pwebui
 
       - name: Stop Web UI
         run: |

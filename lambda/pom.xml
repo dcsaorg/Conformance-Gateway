@@ -13,17 +13,9 @@
 	<name>dcsa-conformance-lambda</name>
 	<description>DCSA Conformance Lambda</description>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-bom</artifactId>
-				<version>${log4j.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+	<properties>
+		<aspectj.version>1.9.21.2</aspectj.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -39,18 +31,31 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-lambda-java-events</artifactId>
-			<version>3.13.0</version>
+			<version>3.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-lambda</artifactId>
-			<version>1.12.771</version>
+			<version>1.12.773</version>
 		</dependency>
 
+		<!-- AWS Lambda Powertools, for logging, tracing -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.16</version>
+			<groupId>software.amazon.lambda</groupId>
+			<artifactId>powertools-logging</artifactId>
+			<version>1.18.0</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.lambda</groupId>
+			<artifactId>powertools-metrics</artifactId>
+			<version>1.18.0</version>
+		</dependency>
+		<!-- Use specific Java 21+ version -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${aspectj.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
@@ -62,12 +67,60 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>dev.aspectj</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.14</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<complianceLevel>${java.version}</complianceLevel>
+					<forceAjcCompile>true</forceAjcCompile><!-- Enable Lombok in Lambda -->
+					<sources/>
+					<weaveDirectories>
+						<weaveDirectory>${project.build.directory}/classes</weaveDirectory>
+					</weaveDirectories><!-- end Enable Lombok -->
+					<aspectLibraries>
+						<aspectLibrary>
+							<groupId>software.amazon.lambda</groupId>
+							<artifactId>powertools-logging</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>software.amazon.lambda</groupId>
+							<artifactId>powertools-metrics</artifactId>
+							</aspectLibrary>
+					</aspectLibraries>
+				</configuration>
+				<dependencies>
+						<dependency>
+							<groupId>org.aspectj</groupId>
+							<artifactId>aspectjtools</artifactId>
+							<version>${aspectj.version}</version>
+						</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.6.0</version>
 				<configuration>
 					<createDependencyReducedPom>false</createDependencyReducedPom>
 					<finalName>conformance-lambda</finalName>
+					<transformers>
+						<transformer implementation="org.apache.logging.log4j.maven.plugins.shade.transformer.Log4j2PluginCacheFileTransformer"/>
+					</transformers>
+					<relocations><!-- Fixing 'WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance. -->
+						<relocation>
+							<pattern>META-INF/versions/9/org/apache/logging/log4j/</pattern>
+							<shadedPattern>org/apache/logging/log4j/</shadedPattern>
+						</relocation>
+					</relocations><!-- end fixing WARNING -->
 				</configuration>
 				<executions>
 					<execution>
@@ -77,6 +130,13 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-transform-maven-shade-plugin-extensions</artifactId>
+						<version>0.1.0</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

@@ -17,11 +17,9 @@ import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /** Base class which contains all API call methods and wiring needed to perform a manual test */
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = ConformanceApplication.class)
 public abstract class ManualTestBase {
   private static final String USER_ID = "unit-test";
 
@@ -32,7 +30,7 @@ public abstract class ManualTestBase {
   private ConformanceWebuiHandler webuiHandler;
 
   @BeforeEach
-  void setUp() {
+  public void setUp() {
     webuiHandler = app.getWebuiHandler();
   }
 
@@ -64,6 +62,7 @@ public abstract class ManualTestBase {
             .set("actionInput", textInputNode);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
     waitForCleanSandboxStatus(sandbox);
   }
 
@@ -77,7 +76,7 @@ public abstract class ManualTestBase {
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
   }
 
-  void notifyAction(SandboxConfig sandbox) {
+  void notifyAction(SandboxConfig sandbox, SandboxConfig otherSandbox) {
     log.debug("Notifying party.");
     ObjectNode node =
         mapper
@@ -85,8 +84,10 @@ public abstract class ManualTestBase {
             .put("operation", "notifyParty")
             .put("sandboxId", sandbox.sandboxId);
     assertTrue(webuiHandler.handleRequest(USER_ID, node).isEmpty());
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
+    waitForAsyncCalls(150L);
     waitForCleanSandboxStatus(sandbox);
-    waitForAsyncCalls(250L);
+    waitForCleanSandboxStatus(otherSandbox);
   }
 
   void completeAction(SandboxConfig sandbox) {
@@ -99,9 +100,12 @@ public abstract class ManualTestBase {
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
     waitForCleanSandboxStatus(sandbox);
+    waitForAsyncCalls(50L);
+    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 4);
   }
 
   void validateSandboxScenarioGroup(SandboxConfig sandbox1, String scenarioId, String scenarioName) {
+    waitForCleanSandboxStatus(sandbox1);
     log.info("Validating scenario '{}'.", scenarioName);
     JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
     assertTrue(jsonNode.has("isRunning"), "Did scenarioId '" + scenarioId + "' run? Can't find it's state. ");
@@ -150,7 +154,8 @@ public abstract class ManualTestBase {
     return webuiHandler.handleRequest(USER_ID, node);
   }
 
-  void waitForAsyncCalls(long delay) {
+  protected void waitForAsyncCalls(long delay) {
+    if (delay == 0) return;
     try {
       Thread.sleep(delay); // Wait for the scenario to finish
     } catch (InterruptedException e) {
@@ -169,17 +174,13 @@ public abstract class ManualTestBase {
               .put("sandboxId", sandbox.sandboxId);
       sandboxStatus = webuiHandler.handleRequest(USER_ID, node).toString();
       if (sandboxStatus.contains("[]")) return;
-      try {
-        counter++;
-        Thread.sleep(300L); // Wait for the scenario to finish
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    } while (counter < 30);
+      counter++;
+      waitForAsyncCalls(20L); // Wait for the scenario to finish
+    } while (counter < 1000);
 
     log.warn(
         "Waited for {} ms for sandbox status to reach the expected state: {}",
-        counter * 300,
+        counter * 20,
         sandboxStatus);
     throw new RuntimeException(
           "Sandbox status did not reach the expected state on time: " + sandboxStatus);
@@ -306,8 +307,7 @@ public abstract class ManualTestBase {
     SandboxConfig sandbox1, SandboxConfig sandbox2, String scenarioId, String scenarioName) {
     log.debug("Starting scenario '{}'.", scenarioName);
     startOrStopScenario(sandbox1, scenarioId);
-    notifyAction(sandbox2);
-    waitForCleanSandboxStatus(sandbox1);
+    notifyAction(sandbox2, sandbox1);
 
     boolean isRunning;
     do {
@@ -324,23 +324,28 @@ public abstract class ManualTestBase {
 
         // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
         if (jsonForPromptText.contains("Insert TDR here")) {
-          jsonForPrompt = fetchTransportDocument(sandbox2);
+          jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
         }
 
         handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
         if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
         continue;
       }
-      if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
-        notifyAction(sandbox2);
+      if (jsonNode.has("jsonForPromptText")) {
+        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, jsonNode.get("jsonForPromptText"));
+        fail();
       }
+      if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
+        notifyAction(sandbox2, sandbox1);
+      }
+      waitForCleanSandboxStatus(sandbox2);
       if (isRunning) completeAction(sandbox1);
     } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
   }
 
-  private JsonNode fetchTransportDocument(SandboxConfig sandbox2) {
-    notifyAction(sandbox2);
+  private JsonNode fetchTransportDocument(SandboxConfig sandbox2, SandboxConfig sandbox1) {
+    notifyAction(sandbox2, sandbox1);
 
     log.debug("Fetching transport document reference from sandbox2");
     String referenceText =
@@ -388,7 +393,7 @@ public abstract class ManualTestBase {
 
   record SubReport(String title, String status, List<SubReport> subReports, List<String> errorMessages) {}
 
-  protected record Standard(String name, List<StandardVersion> versions) {}
+  public record Standard(String name, List<StandardVersion> versions) {}
 
   protected record StandardVersion(String number, List<String> suites, List<String> roles) {}
 }

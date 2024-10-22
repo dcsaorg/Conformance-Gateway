@@ -2,12 +2,12 @@ package org.dcsa.conformance.standards.eblissuance.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.*;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDContentChecks;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
-
-import com.fasterxml.jackson.core.JsonPointer;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
@@ -18,6 +18,12 @@ import org.dcsa.conformance.standards.eblissuance.action.EblType;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
 public class IssuanceChecks {
+
+  private static final JsonRebaseableContentCheck ISSUE_TO_CODE_LIST_PROVIDER = JsonAttribute.allIndividualMatchesMustBeValid(
+    "The 'codeListProvider' is valid",
+    mav -> mav.submitAllMatching("issueTo.identifyingCodes.*.codeListProvider"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES)
+  );
 
   private static JsonRebaseableContentCheck hasEndorseeScenarioCheck(String standardsVersion, EblType eblType) {
     return JsonAttribute.customValidator(
@@ -44,6 +50,7 @@ public class IssuanceChecks {
   public static ActionCheck tdScenarioChecks(UUID matched, String standardsVersion, EblType eblType) {
     return JsonAttribute.contentChecks(
       "Complex validations of transport document",
+      null,
       EblIssuanceRole::isCarrier,
       matched,
       HttpMessageType.REQUEST,
@@ -53,6 +60,7 @@ public class IssuanceChecks {
         JsonPointer.compile("/document/isToOrder"),
         eblType.isToOrder()
       ),
+      ISSUE_TO_CODE_LIST_PROVIDER,
       hasEndorseeScenarioCheck(standardsVersion, eblType)
     );
   }

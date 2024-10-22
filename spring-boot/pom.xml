@@ -77,6 +77,8 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring.boot.version}</version>
 				<configuration>
+					<mainClass>org.dcsa.conformance.springboot.ConformanceApplication</mainClass>
+					<layout>JAR</layout>
 					<skip>false</skip>
 					<excludes>
 						<exclude>

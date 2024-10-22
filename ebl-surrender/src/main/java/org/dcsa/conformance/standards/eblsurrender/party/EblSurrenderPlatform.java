@@ -91,10 +91,9 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
-                Map.entry("EBL_PLATFORM_PLACEHOLDER", ssp.eblPlatform()),
-                Map.entry("CARRIER_PARTY_CODE_PLACEHOLDER", ssp.carrierPartyCode()),
-                Map.entry("PARTY_CODE_PLACEHOLDER", ssp.surrenderPartyCode()),
-                Map.entry("CODE_LIST_NAME_PLACEHOLDER", ssp.codeListName()),
+                Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
+                Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
+                Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
     syncCounterpartPost(

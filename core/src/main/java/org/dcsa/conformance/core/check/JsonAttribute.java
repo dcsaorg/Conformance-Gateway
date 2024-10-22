@@ -11,6 +11,7 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 public class JsonAttribute {
 
   private static final BiFunction<JsonNode, String, Set<String>> EMPTY_VALIDATOR = (ignoredA, ignoredB) -> Set.of();
+  public static final String VALUE_WARNING = "The value of '%s' was '%s' instead of '%s'";
 
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
@@ -19,19 +20,7 @@ public class JsonAttribute {
     String standardsVersion,
     JsonContentCheck ... checks
   ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
-  }
-
-  @Deprecated
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    String standardsVersion,
-    JsonContentCheck ... checks
-  ) {
-    return contentChecks(titlePrefix, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
+    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
   public static ActionCheck contentChecks(
@@ -46,7 +35,6 @@ public class JsonAttribute {
     return contentChecks(titlePrefix, title, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, Arrays.asList(checks));
   }
 
-
   public static ActionCheck contentChecks(
     Predicate<String> isRelevantForRoleName,
     UUID matchedExchangeUuid,
@@ -54,27 +42,7 @@ public class JsonAttribute {
     String standardsVersion,
     List<JsonContentCheck> checks
   ) {
-    return contentChecks("", isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
-  }
-
-  public static ActionCheck contentChecks(
-    String titlePrefix,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    String standardVersion,
-    List<JsonContentCheck> checks
-  ) {
-    return contentChecks(
-      titlePrefix,
-      "The HTTP %s has valid content (conditional validation rules)"
-        .formatted(httpMessageType.name().toLowerCase()),
-      isRelevantForRoleName,
-      matchedExchangeUuid,
-      httpMessageType,
-      standardVersion,
-      checks
-    );
+    return contentChecks("", null, isRelevantForRoleName, matchedExchangeUuid, httpMessageType, standardsVersion, checks);
   }
 
   public static ActionCheck contentChecks(
@@ -86,6 +54,10 @@ public class JsonAttribute {
     String standardsVersion,
     List<JsonContentCheck> checks
   ) {
+    if (title == null) {
+      title = "The HTTP %s has valid content (conditional validation rules)"
+        .formatted(httpMessageType.name().toLowerCase());
+    }
     return new JsonAttributeBasedCheck(
       titlePrefix,
       title,
@@ -396,7 +368,7 @@ public class JsonAttribute {
           var actualValue = node.asText(null);
           if (!Objects.equals(expectedValue, actualValue)) {
             return Set.of(
-                "The value of '%s' was '%s' instead of '%s'"
+                VALUE_WARNING
                     .formatted(
                         renderJsonPointer(jsonPointer, contextPath),
                         renderValue(node),
@@ -417,7 +389,7 @@ public class JsonAttribute {
         var node = body.at(jsonPointer);
         if (!node.isBoolean() || node.asBoolean() != expectedValue) {
           return Set.of(
-            "The value of '%s' was '%s' instead of '%s'"
+            VALUE_WARNING
               .formatted(
                 renderJsonPointer(jsonPointer, contextPath),
                 renderValue(node),
@@ -462,7 +434,7 @@ public class JsonAttribute {
           }
           if (!Objects.equals(expectedValue, actualValue)) {
             return Set.of(
-              "The value of '%s' was '%s' instead of '%s'"
+              VALUE_WARNING
                 .formatted(renderJsonPointer(jsonPointer, contextPath), renderValue(node), renderValue(expectedValue)));
           }
           return Collections.emptySet();
@@ -495,7 +467,7 @@ public class JsonAttribute {
         }
         if (!Objects.equals(expectedValue, actualValue)) {
           return Set.of(
-            "The value of '%s' was '%s' instead of '%s'"
+            VALUE_WARNING
               .formatted(nodePath, renderValue(node), renderValue(expectedValue)));
         }
         return Collections.emptySet();
@@ -525,7 +497,7 @@ public class JsonAttribute {
       }
       if (!Objects.equals(expectedValue, actualValue)) {
         return Set.of(
-          "The value of '%s' was '%s' instead of '%s'"
+          VALUE_WARNING
             .formatted(contextPath, renderValue(nodeToValidate), renderValue(expectedValue)));
       }
       return Collections.emptySet();
@@ -822,7 +794,7 @@ public class JsonAttribute {
     @NonNull
     JsonRebaseableContentCheck elseCheck
   ) {
-    return ifThenElse(name, when, (BiFunction<JsonNode, String, Set<String>>) then::validate, elseCheck::validate);
+    return ifThenElse(name, when, then::validate, elseCheck::validate);
   }
 
   public static JsonContentMatchedValidation ifMatchedThen(
@@ -870,17 +842,8 @@ public class JsonAttribute {
   }
 
   private static Function<JsonNode, JsonNode> at(JsonPointer jsonPointer) {
-    return (refNode) -> refNode.at(jsonPointer);
+    return refNode -> refNode.at(jsonPointer);
   }
-
-  private static Function<JsonNode, Set<String>> at(JsonPointer jsonPointer, Function<JsonNode, Set<String>> validator) {
-    return at(jsonPointer).andThen(validator);
-  }
-
-  private static Function<JsonNode, Set<String>> atMatched(JsonPointer jsonPointer, JsonContentMatchedValidation validator) {
-    return (refNode) -> validator.validate(refNode.at(jsonPointer), renderJsonPointer(jsonPointer));
-  }
-
 
   static String renderValue(JsonNode node) {
     if (node == null || node.isMissingNode()) {
@@ -976,10 +939,6 @@ public class JsonAttribute {
 
     private static JsonContentCheck of(String description, Function<JsonNode, Set<String>> impl) {
       return new JsonContentCheckImpl(description, impl);
-    }
-
-    private static JsonContentCheck of(JsonPointer pointer, JsonContentMatchedValidation impl) {
-      return of(jsonCheckName(pointer), atMatched(pointer, impl));
     }
 
   }

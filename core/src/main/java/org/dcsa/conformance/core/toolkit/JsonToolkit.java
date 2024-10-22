@@ -41,7 +41,8 @@ public class JsonToolkit {
           new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
     }
     if (replacements != null)
-      replacements.forEach((key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
+      replacements.forEach(
+          (key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
     return OBJECT_MAPPER.readTree(jsonString.get());
   }
 

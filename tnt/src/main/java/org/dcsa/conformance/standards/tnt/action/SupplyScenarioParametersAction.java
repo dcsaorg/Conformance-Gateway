@@ -8,28 +8,26 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 
 @Getter
-public class SupplyScenarioParametersAction extends ConformanceAction {
+public class SupplyScenarioParametersAction extends TntAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
   private final LinkedHashSet<TntFilterParameter> tntFilterParameters;
 
+
   public SupplyScenarioParametersAction(
-      String publisherPartyName, TntFilterParameter... tntFilterParameters) {
-    super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                Arrays.stream(tntFilterParameters)
-                    .map(TntFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))));
+      String publisherPartyName,TntFilterParameter... tntFilterParameters) {
+    super(publisherPartyName,null, null,
+      "SupplyScenarioParameters(%s)"
+        .formatted(
+          Arrays.stream(tntFilterParameters)
+            .map(TntFilterParameter::getQueryParamName)
+            .collect(Collectors.joining(", "))), -1 );
     this.tntFilterParameters = new LinkedHashSet<>(Arrays.asList(tntFilterParameters));
   }
 
@@ -90,6 +88,12 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
                                       EVENT_CREATED_DATE_TIME_LTE ->
                                   ZonedDateTime.now()
                                       .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                              case EVENT_TYPE -> "SHIPMENT";
+                              case SHIPMENT_EVENT_TYPE_CODE -> "DRFT";
+                              case DOCUMENT_TYPE_CODE -> "CBR";
+                              case CARRIER_BOOKING_REFERENCE -> "CBR709951";
+                              case TRANSPORT_DOCUMENT_REFERENCE -> "TDR709951";
+
                               default -> "TODO";
                             })))
         .toJson();
@@ -105,4 +109,5 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     super.handlePartyInput(partyInput);
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }
+
 }

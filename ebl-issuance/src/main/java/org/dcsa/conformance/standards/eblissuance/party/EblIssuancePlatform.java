@@ -154,10 +154,10 @@ public class EblIssuancePlatform extends ConformanceParty {
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
-    String responseCode = actionPrompt.path("responseCode").asText();
-
-    SuppliedScenarioParameters suppliedScenarioParameters =getSuppliedScenarioParameters(responseCode);
-        /*new SuppliedScenarioParameters(
+    JsonNode code = actionPrompt.path("responseCode");
+    persistentMap.save("responseCode",code);
+    SuppliedScenarioParameters suppliedScenarioParameters =
+        new SuppliedScenarioParameters(
             "BOLE",
             "DCSA CTK Issue To party",
             "1234-issue-to",
@@ -165,7 +165,7 @@ public class EblIssuancePlatform extends ConformanceParty {
             // These are ignored for blank ones, so we can provide them unconditionally.
             "DCSA CTK Consignee/Endorsee",
             "5678-cn-or-end",
-            "Bolero");*/
+            "Bolero");
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
     addOperatorLogEntry(
@@ -173,52 +173,26 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
-  private SuppliedScenarioParameters getSuppliedScenarioParameters(String responseCode) {
+  /*private void addTheResponseCodeToTheMap(JsonNode actionPrompt) {
+    String responseCode = actionPrompt.path("responseCode").asText();
+    ;
     if (responseCode.equals(IssuanceResponseCode.ACCEPTED.standardCode)) {
-      return new SuppliedScenarioParameters(
-        "BOLE",
-        "DCSA CTK Issue To party",
-        "1234-issue-to",
-        "Bolero",
-        "DCSA CTK Consignee/Endorsee",
-        "5678-cn-or-end",
-        "Bolero"
-      );
+      persistentMap.save("responseCode",code);
     } else if (responseCode.equals(IssuanceResponseCode.BLOCKED.standardCode)) {
-      return new SuppliedScenarioParameters(
-        "BOLE",
-        "DCSA CTK Blocked Party",
-        "1234-blocked",
-        "Bolero",
-        "DCSA CTK Blocked Party Reference",
-        "5678-block-ref",
-        "Bolero"
-      );
+      persistentMap.save("responseCode",code);
     } else if (responseCode.equals(IssuanceResponseCode.REFUSED.standardCode)) {
-      return new SuppliedScenarioParameters(
-        "BOLE",
-        "DCSA CTK Refused Party",
-        "1234-refused",
-        "Bolero",
-        "DCSA CTK Refused Party Reference",
-        "5678-refused-ref",
-        "Bolero"
-      );
+      persistentMap.save("responseCode",code);
     } else {
       throw new IllegalArgumentException("Unexpected response code: " + responseCode);
     }
-  }
+  }*/
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuancePlatform.handleRequest(%s)".formatted(request));
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
-    var identifyingCodes = jsonRequest.path("issueTo").path("identifyingCodes");
-    String partyCode = null;
-    for(JsonNode identifyingCode : identifyingCodes){
-      partyCode = identifyingCode.path("partyCode").asText();
-    }
+    String irc = persistentMap.load("responseCode").asText();
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 
@@ -265,18 +239,16 @@ public class EblIssuancePlatform extends ConformanceParty {
                       .createObjectNode()
                       .put("message", message)));
     }
-    String irc= null;
-    if(partyCode.contains("issue")){
-      irc = IssuanceResponseCode.ACCEPTED.standardCode;
-    }
 
     var platformResponse =
         OBJECT_MAPPER
             .createObjectNode()
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", irc);
-    syncCounterpartPost(
-        "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)), platformResponse);
+
+    asyncCounterpartNotification(
+        null,
+        "/v3/ebl-issuance-responses",platformResponse);
 
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"

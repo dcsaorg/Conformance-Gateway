@@ -103,7 +103,7 @@ class EblIssuanceScenarioListBuilder
       boolean isCorrect,
       boolean isDuplicate,
       boolean isAmended,
-      IssuanceResponseCode responseCode
+      IssuanceResponseCode code
   ) {
     EblIssuanceComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
@@ -116,8 +116,10 @@ class EblIssuanceScenarioListBuilder
                 isAmended,
                 platformPartyName,
                 carrierPartyName,
-              responseCode,
                 (IssuanceAction) previousAction,
+              code,
+              componentFactory.getMessageSchemaValidator(
+                EblIssuanceRole.PLATFORM.getConfigName(), true, false),
                 componentFactory.getMessageSchemaValidator(
                     EblIssuanceRole.CARRIER.getConfigName(), true, false),
                 componentFactory.getMessageSchemaValidator(

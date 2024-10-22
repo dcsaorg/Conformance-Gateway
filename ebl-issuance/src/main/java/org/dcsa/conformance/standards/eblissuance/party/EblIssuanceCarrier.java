@@ -242,10 +242,11 @@ public class EblIssuanceCarrier extends ConformanceParty {
       if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {
         eblStatesByTdr.put(tdr, EblIssuanceState.ISSUED);
       }
-
       addOperatorLogEntry(
+        "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
+      /*addOperatorLogEntry(
           "Handling issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-              .formatted(irc, tdr, eblStatesByTdr.get(tdr)));
+              .formatted(irc, tdr, eblStatesByTdr.get(tdr)));*/
 
       return request.createResponse(
           204,

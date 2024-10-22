@@ -22,6 +22,7 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 public class IssuanceRequestResponseAction extends IssuanceAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
+  private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean isCorrect;
   private final boolean isAmended;
   private String responseCode;
@@ -47,8 +48,9 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       boolean isAmended,
       String platformPartyName,
       String carrierPartyName,
-      IssuanceResponseCode responseCode,
       IssuanceAction previousAction,
+      IssuanceResponseCode code,
+      JsonSchemaValidator notificationSchemaValidator,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator issuanceManifestSchemaValidator) {
     super(
@@ -56,11 +58,12 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         platformPartyName,
         previousAction,
         "Request(%s)-Response(%s)"
-            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended),responseCode.standardCode),
+            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended),code),
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
     this.isAmended = isAmended;
-    this.responseCode = responseCode.standardCode;
+    this.responseCode = code.standardCode;
+    this.notificationSchemaValidator = notificationSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
     this.transportDocumentReference =
@@ -127,7 +130,6 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     if (tdr != null) {
       jsonNode.put("tdr", tdr);
     }
-    jsonNode.put("irc", this.responseCode);
     return jsonNode;
   }
 
@@ -153,7 +155,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> signatureVerifier = () -> PayloadSignerFactory.verifierFromPemEncodedPublicKey(getCspSupplier().get().carrierSigningKeyPEM());
-        return Stream.of(
+        Stream<ActionCheck> primaryExchangeChecks = Stream.of(
                 new UrlPathCheck(
                     EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "/ebl-issuance-requests"),
                 new HttpMethodCheck(EblIssuanceRole::isCarrier,getMatchedExchangeUuid(),"PUT"),
@@ -169,9 +171,6 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     expectedApiVersion),
-            new UrlPathCheck(
-              EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), "/ebl-issuance-responses"),
-            new HttpMethodCheck(EblIssuanceRole::isPlatform,getMatchedExchangeUuid(),"POST"),
                 isCorrect
                     ? new JsonSchemaCheck(
                         EblIssuanceRole::isCarrier,
@@ -188,8 +187,10 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
                 isCorrect && expectedApiVersion.startsWith("3.")
                   ? IssuanceChecks.tdContentChecks(getMatchedExchangeUuid(), expectedApiVersion)
                   : null
-            )
-            .filter(Objects::nonNull);
+            ).filter(Objects::nonNull);
+        return Stream.concat(
+          primaryExchangeChecks,
+          getNotificationChecks(expectedApiVersion,notificationSchemaValidator));
       }
     };
   }

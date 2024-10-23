@@ -119,7 +119,6 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
           "Shipper interactions with transport document",
           carrier_SupplyScenarioParameters(ScenarioType.REGULAR_STRAIGHT_BL)
             .then(_uc6_get(true, _uc7_get(_uc8_get(_uc12_get(_uc13_get()))),
-                _uc8_get(_uc12_get(_uc13_get())),
                 _oob_amendment(_uc6_get(false, _uc8_get(_uc12_get(_uc13_get())))),
                 _uc8_get(_oob_amendment(_uc9_get(_uc10_get(_uc11_get(_uc12_get(_uc13_get()))))))))))
       .collect(

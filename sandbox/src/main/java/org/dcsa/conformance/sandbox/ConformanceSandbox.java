@@ -45,7 +45,7 @@ public class ConformanceSandbox {
   protected static final String SESSION = "session#";
 
   public static final AbstractStandard[] SUPPORTED_STANDARDS = {
-/*    AdoptionStandard.INSTANCE,
+    AdoptionStandard.INSTANCE,
     BookingStandard.INSTANCE,
     CsStandard.INSTANCE,
     EblStandard.INSTANCE,
@@ -53,7 +53,7 @@ public class ConformanceSandbox {
     EblSurrenderStandard.INSTANCE,
     JitStandard.INSTANCE,
     OvsStandard.INSTANCE,
-    PintStandard.INSTANCE,*/
+    PintStandard.INSTANCE,
     TntStandard.INSTANCE
   };
 

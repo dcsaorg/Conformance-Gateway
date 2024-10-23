@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.tnt.party;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,7 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -60,11 +58,6 @@ public class TntPublisher extends ConformanceParty {
   @Override
   protected void doReset() {}
 
-
-
-
-
-
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
@@ -73,6 +66,7 @@ public class TntPublisher extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("TntPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    boolean isBadRequest = actionPrompt.get("isBadRequest").asBoolean(false);
 
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(
@@ -88,10 +82,20 @@ public class TntPublisher extends ConformanceParty {
                         tntFilterParameter ->
                             switch (tntFilterParameter) {
                               case EVENT_TYPE -> "SHIPMENT";
-                              case SHIPMENT_EVENT_TYPE_CODE ->
-                                  "DRFT";
-                              case DOCUMENT_TYPE_CODE ->
-                                  "CBR";
+                              case SHIPMENT_EVENT_TYPE_CODE -> {
+                                if (isBadRequest) {
+                                  yield "INVALID_CODE";
+                                } else {
+                                  yield "DRFT";
+                                }
+                              }
+                              case DOCUMENT_TYPE_CODE -> {
+                                if (isBadRequest) {
+                                  yield "INVALID_CODE";
+                                } else {
+                                  yield "CBR";
+                                }
+                              }
                               case CARRIER_BOOKING_REFERENCE -> "ABC123123123";
                               case TRANSPORT_DOCUMENT_REFERENCE ->
                                   "reserved-HHL123";
@@ -110,8 +114,7 @@ public class TntPublisher extends ConformanceParty {
                                       EVENT_CREATED_DATE_TIME_LTE,
                                       EVENT_CREATED_DATE_TIME_LT,
                                       EVENT_CREATED_DATE_TIME_EQ ->
-                                  ZonedDateTime.now()
-                                      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                                  "2021-01-09T14:12:56+01:00";
                               case LIMIT -> "100";
                             })));
 
@@ -127,54 +130,23 @@ public class TntPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("TntPublisher.handleRequest(%s)".formatted(request));
 
+    Map<String, List<AttributeMapping>> attributeMappings = AttributeMapping.initializeAttributeMappings();
+
     ObjectMapper mapper = new ObjectMapper();
     ArrayNode filteredArray = mapper.createArrayNode();
 
     ArrayNode jsonResponseBody = (ArrayNode) JsonToolkit.templateFileToJsonNode(
         "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
 
-    if (!new EventTypeSpecificParamRule().validate(request.queryParams())) {
-      throw new IllegalArgumentException("Error: Invalid query parameters provided.");
+    if (!new QueryParameterSpecificRule().validate(request.queryParams())) {
+      return return400(request,"Error: Invalid query parameters provided.");
     }
-
-    Map<String, List<AttributeMapping>> attributeMappings = new HashMap<>();
-    /*attributeMappings.put("shipmentEventTypeCode", List.of(new AttributeMapping( JsonPointer.compile("/shipmentEventTypeCode"),
-      (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of("RECE", "DRFT", "PENA", "PENU", "REJE", "APPR", "ISSU", "SURR", "SUBM", "VOID", "CONF", "REQS", "CMPL", "HOLD", "RELS"))));
-    attributeMappings.put("documentTypeCode", List.of(new AttributeMapping(JsonPointer.compile("/documentTypeCode"),
-      (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of("CBR", "BKG", "SHI", "SRM", "TRD", "ARN", "VGM", "CAS", "CUS", "DGD", "OOG"))));
-    attributeMappings.put("equipmentTypeCode", List.of(new AttributeMapping(JsonPointer.compile("/equipmentEventTypeCode"),
-      (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of("LOAD", "DISC", "GTIN", "GTOT", "STUF", "STRP", "PICK", "DROP", "INSP", "RSEA", "RMVD"))));
-    attributeMappings.put("eventType", List.of(new AttributeMapping(JsonPointer.compile("/eventType"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of("SHIPMENT", "TRANSPORT", "EQUIPMENT"))));
-    attributeMappings.put("transportEventTypeCode", List.of(new AttributeMapping(JsonPointer.compile("/transportEventTypeCode"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("transportCallID", List.of(new AttributeMapping(JsonPointer.compile("/transportCall/transportCallID"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("vesselIMONumber", List.of(new AttributeMapping(JsonPointer.compile("/transportCall/vessel/vesselIMONumber"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("exportVoyageNumber", List.of(new AttributeMapping(JsonPointer.compile("/transportCall/exportVoyageNumber"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("carrierServiceCode", List.of(new AttributeMapping(JsonPointer.compile("/transportCall/carrierServiceCode"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("UNLocationCode", List.of(new AttributeMapping(JsonPointer.compile("/transportCall/location/UNLocationCode"), (node, value) -> !node.isMissingNode() && node.asText().equals(value), Set.of())));
-    attributeMappings.put("eventCreatedDateTime", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"),
-      (node, value) -> !node.isMissingNode() && OffsetDateTime.parse(node.asText()).isEqual(OffsetDateTime.parse(value)), Set.of())));
-    attributeMappings.put("eventCreatedDateTime:gte", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"), (node, value) -> !node.isMissingNode()
-      && (OffsetDateTime.parse(node.asText()).isAfter(OffsetDateTime.parse(value)) || OffsetDateTime.parse(node.asText()).isEqual(OffsetDateTime.parse(value))), Set.of())));
-    attributeMappings.put("eventCreatedDateTime:gt", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"), (node, value) -> !node.isMissingNode()
-      && (OffsetDateTime.parse(node.asText()).isAfter(OffsetDateTime.parse(value))), Set.of())));
-    attributeMappings.put("eventCreatedDateTime:lt", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"), (node, value) -> !node.isMissingNode()
-      &&  (OffsetDateTime.parse(node.asText()).isBefore(OffsetDateTime.parse(value))), Set.of())));
-    attributeMappings.put("eventCreatedDateTime:lte", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"), (node, value) -> !node.isMissingNode()
-      && (OffsetDateTime.parse(node.asText()).isBefore(OffsetDateTime.parse(value)) || OffsetDateTime.parse(node.asText()).isEqual(OffsetDateTime.parse(value))), Set.of())));
-    attributeMappings.put("eventCreatedDateTime:eq", List.of(new AttributeMapping(JsonPointer.compile("/eventCreatedDateTime"), (node, value) -> !node.isMissingNode()
-      && OffsetDateTime.parse(node.asText()).isEqual(OffsetDateTime.parse(value)), Set.of())));*/
-    attributeMappings.put("carrierBookingReference", List.of(new AttributeMapping("documentReferences/*", (node, value) -> !node.isMissingNode()
-      && node.path("documentReferenceType").asText().equals("BKG") && node.path("documentReferenceValue").asText().equals(value), Set.of())));
-    attributeMappings.put("transportDocumentID", List.of(new AttributeMapping("transportDocumentID", (node, value) -> !node.isMissingNode()
-      && node.path("documentTypeCode").asText().equals("TRD") && node.path("documentID").asText().equals(value) , Set.of())));
 
     Set<String> eventIds = new HashSet<>();
 
     for (Map.Entry<String, ? extends Collection<String>> queryParam : request.queryParams().entrySet()) {
       String paramName = queryParam.getKey();
       Collection<String> paramValues = queryParam.getValue();
-
-
       List<AttributeMapping> mappings = attributeMappings.get(paramName);
       if (mappings != null) {
         for (AttributeMapping mapping : mappings) {
@@ -186,8 +158,9 @@ public class TntPublisher extends ConformanceParty {
               traverse(node, jsonPath.split("/"), 0, results, condition, paramValue);
               if(!results.isEmpty()){
               var eventId = node.at("/eventID").asText();
-              if ( !eventIds.contains(eventId) &&
-                (mapping.getValues().isEmpty() || mapping.getValues().contains(node.asText()))) {
+              if ( !eventIds.contains(eventId)
+                && (mapping.getValues().isEmpty()
+                  || results.stream().anyMatch(result -> mapping.getValues().contains(result.asText())))) {
                   eventIds.add(eventId);
                   filteredArray.add(node);
                 }
@@ -197,7 +170,7 @@ public class TntPublisher extends ConformanceParty {
         }
       }
     }
-    //TODO:: To handle the complex sorting logic like CarrierBookingReference where referecences are different base on the jsonPath.
+    //TODO:: To handle the complex sorting logic like CarrierBookingReference where references are different base on the jsonPath.
     if (request.queryParams().containsKey("sort")) {
       Collection<String> sortingFields= request.queryParams().get("sort");
       List<SortCriteria> sortCriteria = sortingFields.stream()
@@ -223,7 +196,7 @@ public class TntPublisher extends ConformanceParty {
     return request.createResponse(
         200,
         Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(limitedArray));
+        new ConformanceMessageBody(limitedArray.isEmpty() ? filteredArray : limitedArray ));
   }
 
   public static ArrayNode sortJsonArray(ArrayNode jsonArray, List<SortCriteria> criteria) {
@@ -248,6 +221,50 @@ public class TntPublisher extends ConformanceParty {
     ArrayNode sortedArray = jsonArray.arrayNode();
     jsonNodeList.forEach(sortedArray::add);
     return sortedArray;
+  }
+
+  private ConformanceResponse return400(ConformanceRequest request, String message) {
+    return request.createResponse(
+      400,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(createErrorResponse(request.method(), request.url(), "Bad Request", message)));
+  }
+
+  private ConformanceResponse return404(ConformanceRequest request) {
+    return return404(request, "Returning 404 since the request did not match any known URL");
+  }
+
+  private ConformanceResponse return404(ConformanceRequest request, String message) {
+    return request.createResponse(
+      404,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(createErrorResponse(request.method(), request.url(), "Not Found", message)));
+  }
+
+  private ObjectNode createErrorResponse(String httpMethod, String requestUri, String reason, String message) {
+    ObjectMapper mapper = new ObjectMapper();
+
+    // Create the root object node
+    ObjectNode rootNode = mapper.createObjectNode();
+    rootNode.put("httpMethod", httpMethod);
+    rootNode.put("requestUri", requestUri);
+
+    // Create the errors array node
+    ArrayNode errorsArray = mapper.createArrayNode();
+    ObjectNode errorDetails = mapper.createObjectNode();
+    errorDetails.put("reason", reason);
+    errorDetails.put("message", message);
+    errorsArray.add(errorDetails);
+
+    // Add the errors array to the root node
+    rootNode.set("errors", errorsArray);
+
+    // Add other fields to the root node
+    rootNode.put("statusCode", 400);
+    rootNode.put("statusCodeText", "Bad Request");
+    rootNode.put("errorDateTime", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+
+    return rootNode;
   }
 
   private static int compareNodesByField(JsonNode node1, JsonNode node2, String field, SortDirection direction) {

@@ -14,6 +14,7 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.tnt.action.TntAction;
 import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
+import org.dcsa.conformance.standards.tnt.action.TntGetEventsBadRequestAction;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 
 @Slf4j
@@ -33,7 +34,8 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                 "",
                 noAction()
                     .thenEither(
-                        /*scenarioWithFilterBy(EVENT_CREATED_DATE_TIME),
+                        scenarioWithFilterByDateTimesAnd(EVENT_TYPE),
+                        scenarioWithFilterBy(EVENT_CREATED_DATE_TIME),
                         scenarioWithFilterBy(EVENT_CREATED_DATE_TIME_EQ),
                         scenarioWithFilterBy(
                             EVENT_CREATED_DATE_TIME_GT, EVENT_CREATED_DATE_TIME_LT),
@@ -42,14 +44,14 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterBy(
                             EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LT),
                         scenarioWithFilterBy(
-                            EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LTE),*/
-                        /*scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
+                            EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LTE),
+                        scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterByDateTimesAnd(EVENT_TYPE),
                         scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterByDateTimesAnd(SHIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterBy(DOCUMENT_TYPE_CODE),
-                        scenarioWithFilterByDateTimesAnd(DOCUMENT_TYPE_CODE),*/
-                        scenarioWithFilterBy(CARRIER_BOOKING_REFERENCE)/*,
+                        scenarioWithFilterByDateTimesAnd(DOCUMENT_TYPE_CODE),
+                        scenarioWithFilterBy(CARRIER_BOOKING_REFERENCE),
                         scenarioWithFilterByDateTimesAnd(CARRIER_BOOKING_REFERENCE),
                         scenarioWithFilterBy(TRANSPORT_DOCUMENT_REFERENCE),
                         scenarioWithFilterByDateTimesAnd(TRANSPORT_DOCUMENT_REFERENCE),
@@ -68,7 +70,8 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterBy(EQUIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterByDateTimesAnd(EQUIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterBy(EQUIPMENT_REFERENCE),
-                        scenarioWithFilterByDateTimesAnd(EQUIPMENT_REFERENCE)*/)))
+                        scenarioWithFilterByDateTimesAnd(EQUIPMENT_REFERENCE),
+                        scenarioWithBadRequestFilterBy(true, SHIPMENT_EVENT_TYPE_CODE))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -106,6 +109,17 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
             new SupplyScenarioParametersAction(publisherPartyName,TntFilterParameters));
   }
 
+  private static TntScenarioListBuilder supplyScenarioParameters( boolean isBadRequest, TntFilterParameter... TntFilterParameters) {
+    String publisherPartyName = threadLocalPublisherPartyName.get();
+    return new TntScenarioListBuilder(
+      previousAction ->
+        new SupplyScenarioParametersAction(isBadRequest, publisherPartyName,TntFilterParameters));
+  }
+
+  private static TntScenarioListBuilder scenarioWithBadRequestFilterBy(Boolean isBadRequest, TntFilterParameter parameter1) {
+    return supplyScenarioParameters(isBadRequest,parameter1).then(getEventsBadRequest());
+  }
+
   private static TntScenarioListBuilder getEvents() {
     TntComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();
@@ -118,4 +132,17 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
               (TntAction) previousAction,
                 componentFactory.getEventSchemaValidators()));
   }
+  private static TntScenarioListBuilder getEventsBadRequest() {
+    TntComponentFactory componentFactory = threadLocalComponentFactory.get();
+    String publisherPartyName = threadLocalPublisherPartyName.get();
+    String subscriberPartyName = threadLocalSubscriberPartyName.get();
+    return new TntScenarioListBuilder(
+      previousAction ->
+        new TntGetEventsBadRequestAction(
+          subscriberPartyName,
+          publisherPartyName,
+          (TntAction) previousAction,
+          componentFactory.getEventSchemaValidators()));
+  }
+
 }

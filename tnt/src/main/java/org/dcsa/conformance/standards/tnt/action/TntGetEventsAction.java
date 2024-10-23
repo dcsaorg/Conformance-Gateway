@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.tnt.checks.TntChecks;
 import org.dcsa.conformance.standards.tnt.checks.TntSchemaConformanceCheck;
 import org.dcsa.conformance.standards.tnt.party.TntRole;
 
@@ -55,7 +55,8 @@ public class TntGetEventsAction extends TntAction {
               getMatchedExchangeUuid(),
               HttpMessageType.RESPONSE,
               eventSchemaValidators
-            ));
+            ),
+          TntChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));
       }
     };
   }

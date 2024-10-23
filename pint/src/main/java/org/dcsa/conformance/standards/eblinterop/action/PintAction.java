@@ -20,6 +20,10 @@ public abstract class PintAction extends ConformanceAction {
   private final OverwritingReference<ReceiverScenarioParameters> rspReference;
   private final OverwritingReference<SenderScenarioParameters> sspReference;
 
+  private static final DynamicScenarioParameters INITIAL_DSP_VALUE = new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode());
+  private static final ReceiverScenarioParameters INITIAL_RSP_VALUE = new ReceiverScenarioParameters(OBJECT_MAPPER.createObjectNode(), "");
+  private static final SenderScenarioParameters INITIAL_SSP_VALUE = new SenderScenarioParameters(null, "WAVE", "", "");
+
   public PintAction(
       String sourcePartyName,
       String targetPartyName,
@@ -29,12 +33,9 @@ public abstract class PintAction extends ConformanceAction {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     if (previousAction == null) {
-      this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(null, -1, Set.of(), null, OBJECT_MAPPER.createObjectNode()));
-      this.rspReference =
-          new OverwritingReference<>(
-              null, new ReceiverScenarioParameters(OBJECT_MAPPER.createObjectNode(), ""));
-      this.sspReference = new OverwritingReference<>(null, new SenderScenarioParameters(null, "", "", ""));
+      this.dspReference = new OverwritingReference<>(null, INITIAL_DSP_VALUE);
+      this.rspReference = new OverwritingReference<>(null, INITIAL_RSP_VALUE);
+      this.sspReference = new OverwritingReference<>(null, INITIAL_SSP_VALUE);
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
       this.rspReference = new OverwritingReference<>(previousAction.rspReference, null);
@@ -46,7 +47,9 @@ public abstract class PintAction extends ConformanceAction {
   public void reset() {
     super.reset();
     if (previousAction != null) {
-      this.dspReference.set(null);
+      dspReference.set(null);
+      rspReference.set(null);
+      sspReference.set(null);
     }
   }
 
@@ -108,37 +111,18 @@ public abstract class PintAction extends ConformanceAction {
   }
 
   public SenderScenarioParameters getSsp() {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      return previousAction.getSsp();
-    }
     return this.sspReference.get();
   }
 
   public void setSsp(SenderScenarioParameters sp) {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      previousAction.setSsp(sp);
-    } else {
-      this.sspReference.set(sp);
-    }
+    this.sspReference.set(sp);
   }
 
-
   public ReceiverScenarioParameters getRsp() {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      return previousAction.getRsp();
-    }
     return this.rspReference.get();
   }
 
   public void setRsp(ReceiverScenarioParameters sp) {
-    var previousAction = (PintAction)this.previousAction;
-    if (previousAction != null) {
-      previousAction.setRsp(sp);
-    } else {
-      this.rspReference.set(sp);
-    }
+    this.rspReference.set(sp);
   }
 }

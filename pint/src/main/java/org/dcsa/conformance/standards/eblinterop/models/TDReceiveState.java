@@ -140,6 +140,7 @@ public class TDReceiveState {
           receivedDocuments.add(checksum);
         }
       }
+      default -> {/* nothing */}
     }
     var signedPayload = payloadSigner.sign(unsignedPayload.toString());
     return TextNode.valueOf(signedPayload);

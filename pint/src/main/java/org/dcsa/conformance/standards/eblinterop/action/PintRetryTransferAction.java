@@ -65,7 +65,8 @@ public class PintRetryTransferAction extends PintAction {
   @Override
   public ObjectNode asJsonNode() {
     var node = super.asJsonNode()
-      .put("senderTransmissionClass", SenderTransmissionClass.VALID_ISSUANCE.name());
+      .put("senderTransmissionClass", senderTransmissionClass.name())
+      .put("retryType", RetryType.NO_CHANGE.name());
     node.set("rsp", getRsp().toJson());
     node.set("ssp", getSsp().toJson());
     node.set("dsp", getDsp().toJson());

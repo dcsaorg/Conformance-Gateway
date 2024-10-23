@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.SenderScenarioParameters;
+import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 
 @Getter
 @Slf4j
@@ -40,17 +41,12 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new SenderScenarioParameters(
-      "TD reference",
-      "WAVE",
-      "-----BEGIN RSA PUBLIC KEY-----\n<YOUR PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n",
-      "-----BEGIN RSA PUBLIC KEY-----\n<THE CARRIER'S PUBLIC SIGNING KEY HERE>\n-----END RSA PUBLIC KEY-----\n"
-    ).toJson();
+    return PintSendingPlatform.sendingScenarioParameters().toJson();
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Scenario details");
+    return ("Please provide these scenario details. Additional documents required: %d".formatted(documentCount));
   }
 
 }

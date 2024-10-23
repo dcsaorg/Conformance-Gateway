@@ -25,6 +25,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
@@ -39,8 +40,8 @@ public class PintSendingPlatform extends ConformanceParty {
   private static final Random RANDOM = new Random();
 
 
-  private final PayloadSignerWithKey payloadSigner;
-  private final PayloadSignerWithKey carrierPayloadSigner;
+  private static final PayloadSignerWithKey SENDING_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.senderPayloadSigner();
+  private static final PayloadSignerWithKey CARRIER_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.carrierPayloadSigner();
 
   public PintSendingPlatform(
       String apiVersion,
@@ -48,9 +49,7 @@ public class PintSendingPlatform extends ConformanceParty {
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
       PartyWebClient asyncWebClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSignerWithKey senderPayloadSigner,
-      PayloadSignerWithKey carrierPayloadSigner
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader
   ) {
     super(
         apiVersion,
@@ -59,8 +58,6 @@ public class PintSendingPlatform extends ConformanceParty {
         persistentMap,
         asyncWebClient,
         orchestratorAuthHeader);
-    this.payloadSigner = senderPayloadSigner;
-    this.carrierPayloadSigner = carrierPayloadSigner;
   }
 
   @Override
@@ -76,11 +73,9 @@ public class PintSendingPlatform extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
       Map.entry(SenderSupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-      Map.entry(ResignLatestEntryAction.class, this::resignLatestEntry),
       Map.entry(PintInitiateAndCloseTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferAction.class, this::initiateTransferRequest),
       Map.entry(PintInitiateTransferUnsignedErrorAction.class, this::initiateTransferRequest),
-      Map.entry(ManipulateTransactionsAction.class, this::manipulateTransactions),
       Map.entry(PintTransferAdditionalDocumentAction.class, this::transferActionDocument),
       Map.entry(PintTransferAdditionalDocumentFailureAction.class, this::transferActionDocument),
       Map.entry(PintRetryTransferAction.class, this::retryTransfer),
@@ -88,49 +83,6 @@ public class PintSendingPlatform extends ConformanceParty {
       Map.entry(PintCloseTransferAction.class, this::finishTransfer),
       Map.entry(PintReceiverValidationAction.class, this::requestReceiverValidation)
     );
-  }
-
-  private static final char[] TDR_CHARS = (
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    + "abcdefghijklmnopqrstuvwxyz"
-    + "0123456789"
-    // spaces - cannot come first nor last
-    + " "
-    // ASCII symbols, also do not count as spaces.
-    + "-_+!/\\`\"'*^~.:,;(){}[]<>@$&%"
-    // Spec says "\S+(\s+\S+)*". Unicode smiley and other non-ASCII symbols count as "not space".
-    + "✉½¤§"
-  ).toCharArray();
-
-  private String generateTDR() {
-    var tdrChars = new StringBuilder(20);
-    // The breaker is sticky to limit how many times we will
-    // poll the random.
-    // Also, you might be tempted to think this is a good way
-    // to generate passwords/keys. You would be wrong in that
-    // case as this generator has bias that is not policy
-    // defined, and you do not want that.
-    int breakerLimit = 20;
-    for (int i = 0 ; i < 19 ; i++) {
-      var c = TDR_CHARS[RANDOM.nextInt(TDR_CHARS.length)];
-      if ((i < 1 || i > 17)) {
-        while (Character.isSpaceChar(c) && breakerLimit-- > 0) {
-          c = TDR_CHARS[RANDOM.nextInt(TDR_CHARS.length)];
-        }
-
-        if (Character.isSpaceChar(c)) {
-          // In the unlikely even that random keeps pulling
-          // a space, we just pick the first letter and move
-          // on. This ensures we will not hang forever with
-          // a slight bias towards "A". But it is not a
-          // password/key, so the bias is of no consequence.
-          c = TDR_CHARS[0];
-          assert !Character.isSpaceChar(c);
-        }
-      }
-      tdrChars.append(c);
-    }
-    return tdrChars.toString();
   }
 
   private void requestReceiverValidation(JsonNode actionPrompt) {
@@ -141,34 +93,22 @@ public class PintSendingPlatform extends ConformanceParty {
       "Requested receiver validation");
   }
 
-  private void supplyScenarioParameters(JsonNode actionPrompt) {
-    log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
-    var tdr = generateTDR();
-    var scenarioParameters = new SenderScenarioParameters(
-      tdr,
-      "BOLE",
-      payloadSigner.getPublicKeyInPemFormat(),
-      carrierPayloadSigner.getPublicKeyInPemFormat()
+  public static SenderScenarioParameters sendingScenarioParameters() {
+    return new SenderScenarioParameters(
+      "TDR-12345678",
+      "WAVE",
+      SENDING_PLATFORM_PAYLOAD_SIGNER.getPublicKeyInPemFormat(),
+      CARRIER_PLATFORM_PAYLOAD_SIGNER.getPublicKeyInPemFormat()
     );
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), scenarioParameters.toJson());
-    addOperatorLogEntry(
-      "Provided ScenarioParameters: %s".formatted(scenarioParameters));
   }
 
-  private void resignLatestEntry(JsonNode actionPrompt) {
-    log.info(
-      "EblInteropSendingPlatform.resignLatestEntry(%s)"
-        .formatted(actionPrompt.toPrettyString()));
-    var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
-    var tdr = ssp.transportDocumentReference();
-    var sendingState = TDSendingState.load(persistentMap, tdr);
-    sendingState.resignLatestEntry(payloadSigner);
-    sendingState.save(persistentMap);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info("EblInteropSendingPlatform.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    var scenarioParameters = sendingScenarioParameters().toJson();
     addOperatorLogEntry(
-      "Resigned latest entry for document: %s".formatted(tdr));
+      "Prompt answer for supplyScenarioParameters: %s".formatted(scenarioParameters.toString()));
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(), scenarioParameters);
   }
 
   private void manipulateTransactions(JsonNode actionPrompt) {
@@ -179,7 +119,7 @@ public class PintSendingPlatform extends ConformanceParty {
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
     var tdr = ssp.transportDocumentReference();
     var sendingState = TDSendingState.load(persistentMap, tdr);
-    sendingState.manipulateLatestTransaction(payloadSigner, rsp);
+    sendingState.manipulateLatestTransaction(SENDING_PLATFORM_PAYLOAD_SIGNER, rsp);
     sendingState.save(persistentMap);
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
@@ -242,7 +182,14 @@ public class PintSendingPlatform extends ConformanceParty {
     log.info("EblInteropSendingPlatform.retryTransfer(%s)".formatted(actionPrompt.toPrettyString()));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.required("ssp"));
     var tdr = ssp.transportDocumentReference();
+    var retryType = RetryType.valueOf(actionPrompt.required("retryType").asText());
+    var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
     var sendingState = TDSendingState.load(persistentMap, tdr);
+
+    switch (retryType) {
+      case RESIGN -> sendingState.resignLatestEntry(SENDING_PLATFORM_PAYLOAD_SIGNER);
+      case MANIPULATE -> sendingState.manipulateLatestTransaction(SENDING_PLATFORM_PAYLOAD_SIGNER, rsp);
+    }
 
     var body = OBJECT_MAPPER.createObjectNode();
     var tdPayload = loadTDR(tdr);
@@ -264,7 +211,7 @@ public class PintSendingPlatform extends ConformanceParty {
     }
     sendingState.save(persistentMap);
     addOperatorLogEntry(
-      "Re-sent an eBL with transportDocumentReference '%s'".formatted(tdr));
+      "Re-sent an eBL with transportDocumentReference '%s' with type: %s".formatted(tdr, retryType.name()));
   }
 
   private ObjectNode loadTDR(String tdr) {
@@ -293,7 +240,7 @@ public class PintSendingPlatform extends ConformanceParty {
     String previousChecksum = null;
     if (senderTransmissionClass == VALID_TRANSFER) {
       var transaction = generateTransactionEntry(
-        payloadSigner,
+        SENDING_PLATFORM_PAYLOAD_SIGNER,
         null,
         tdChecksum,
         action,
@@ -321,7 +268,7 @@ public class PintSendingPlatform extends ConformanceParty {
       }
     }
     var latest = generateTransactionEntry(
-      payloadSigner,
+      SENDING_PLATFORM_PAYLOAD_SIGNER,
       previousChecksum,
       tdChecksum,
       action,
@@ -371,9 +318,9 @@ public class PintSendingPlatform extends ConformanceParty {
       .put("documentChecksum", tdChecksum)
       // The receiver cannot validate the issueToChecksum anyway.
       .put("issueToChecksum", Checksums.sha256(UUID.randomUUID().toString()));
-    var issuanceManifestSignedContentNode = TextNode.valueOf(carrierPayloadSigner.sign(issuanceManifest.toString()));
+    var issuanceManifestSignedContentNode = TextNode.valueOf(CARRIER_PLATFORM_PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
 
-    JsonNode signedManifest = TextNode.valueOf(payloadSigner.sign(unsignedEnvelopeManifest.toString()));
+    JsonNode signedManifest = TextNode.valueOf(SENDING_PLATFORM_PAYLOAD_SIGNER.sign(unsignedEnvelopeManifest.toString()));
     sendingState.setSignedManifest(signedManifest);
     if (senderTransmissionClass == SIGNATURE_ISSUE) {
       signedManifest = mutatePayload(signedManifest);

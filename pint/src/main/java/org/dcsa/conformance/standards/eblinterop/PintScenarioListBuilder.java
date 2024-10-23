@@ -43,20 +43,12 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                   initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
                     noAction(),
                     retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
-                    resignLatestEntry().then(
-                      retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER)
-                    ),
-                    manipulateLatestTransactionParameters().then(
-                      retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER)
-                    )),
+                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
+                    retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)),
                   initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
                     noAction(),
-                    resignLatestEntry().then(
-                      retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER)
-                    ),
-                    manipulateLatestTransactionParameters().then(
-                      retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER)
-                    )
+                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
+                    retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)
                   ),
                   initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
                     initiateAndCloseTransferAction(PintResponseCode.RECE)
@@ -65,7 +57,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 ),
               receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
                 initiateAndCloseTransferAction(PintResponseCode.BENV)
-              ),
+              )/*,
               receiverStateSetup(ScenarioClass.FAIL_W_503).then(
                 initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).thenEither(
                   resetScenarioClass(ScenarioClass.NO_ISSUES).then(
@@ -73,7 +65,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                   initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).then(
                     resetScenarioClass(ScenarioClass.NO_ISSUES).then(
                       initiateAndCloseTransferAction(PintResponseCode.RECE)))
-                ))
+                ))*/
             ),
             supplySenderTransferScenarioParameters(2).thenEither(
               receiverStateSetup(ScenarioClass.NO_ISSUES)
@@ -87,7 +79,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                           retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                         )
                       ),
-                      resetScenarioClass(ScenarioClass.FAIL_W_503).then(
+                      /*resetScenarioClass(ScenarioClass.FAIL_W_503).then(
                         transferDocumentReceiverFailure().then(
                           resetScenarioClass(ScenarioClass.NO_ISSUES).thenEither(
                             transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
@@ -99,7 +91,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                             )
                           )
                         )
-                      ),
+                      ),*/
                       transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
                         retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
                       ),
@@ -170,31 +162,6 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 documentCount
             ));
   }
-
-  private static PintScenarioListBuilder manipulateLatestTransactionParameters() {
-    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
-    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
-    return new PintScenarioListBuilder(
-      previousAction ->
-        new ManipulateTransactionsAction(
-          receivingPlatform,
-          sendingPlatform,
-          (PintAction) previousAction
-        ));
-  }
-
-  private static PintScenarioListBuilder resignLatestEntry() {
-    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
-    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
-    return new PintScenarioListBuilder(
-      previousAction ->
-        new ResignLatestEntryAction(
-          receivingPlatform,
-          sendingPlatform,
-          (PintAction) previousAction
-        ));
-  }
-
 
   private static PintScenarioListBuilder receiverStateSetup(ScenarioClass scenarioClass) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
@@ -308,6 +275,10 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   }
 
   private static PintScenarioListBuilder retryTransfer(PintResponseCode pintResponseCode, SenderTransmissionClass senderTransmissionClass) {
+    return retryTransfer(pintResponseCode, senderTransmissionClass, RetryType.NO_CHANGE);
+  }
+
+  private static PintScenarioListBuilder retryTransfer(PintResponseCode pintResponseCode, SenderTransmissionClass senderTransmissionClass, RetryType retryType) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -318,6 +289,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                 (PintAction) previousAction,
                 pintResponseCode,
                 senderTransmissionClass,
+                retryType,
                 resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
                 resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),

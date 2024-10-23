@@ -45,9 +45,7 @@ class PintComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(PintRole.RECEIVING_PLATFORM.getConfigName()),
               persistentMap,
               asyncWebClient,
-              orchestratorAuthHeader,
-              PayloadSignerFactory.senderPayloadSigner(),
-              PayloadSignerFactory.carrierPayloadSigner()
+              orchestratorAuthHeader
           ));
     }
 
@@ -61,8 +59,7 @@ class PintComponentFactory extends AbstractComponentFactory {
               counterpartConfigurationsByRoleName.get(PintRole.SENDING_PLATFORM.getConfigName()),
               persistentMap,
               asyncWebClient,
-              orchestratorAuthHeader,
-              PayloadSignerFactory.receiverPayloadSigner()
+              orchestratorAuthHeader
           ));
     }
 

@@ -57,8 +57,8 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "Request(%s)-Response(%s)"
-            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended),code),
+        "Request(%s)Response(%s)"
+            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended),code.standardCode),
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
     this.isAmended = isAmended;
@@ -131,6 +131,14 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       jsonNode.put("tdr", tdr);
     }
     return jsonNode;
+  }
+@Override
+  protected boolean expectsNotificationExchange() {
+    return true;
+  }
+  @Override
+  public boolean isMissingMatchedExchange() {
+    return super.isMissingMatchedExchange();
   }
 
   @Override

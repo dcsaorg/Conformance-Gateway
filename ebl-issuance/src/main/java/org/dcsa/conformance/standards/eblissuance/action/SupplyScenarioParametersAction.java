@@ -14,7 +14,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   public SupplyScenarioParametersAction(
       String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType, IssuanceResponseCode code) {
-    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s]".formatted(eblType.name()), -1);
+    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s] and to get response code [%s]".formatted(eblType.name(),code.standardCode), -1);
     this.eblType = eblType;
     this.responseCode = code;
   }
@@ -80,7 +80,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
-    setDsp(getDsp().withEblType(eblType));
+    setDsp(getDsp().withEblType(eblType).withResponseCode(responseCode));
     getSspConsumer().accept(SuppliedScenarioParameters.fromJson(partyInput.get("input")));
   }
 

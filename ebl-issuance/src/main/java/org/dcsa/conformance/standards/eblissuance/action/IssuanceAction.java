@@ -39,7 +39,7 @@ public abstract class IssuanceAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     if (previousAction == null) {
       this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
+          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL,null));
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
     }
@@ -94,23 +94,29 @@ public abstract class IssuanceAction extends ConformanceAction {
 
   protected abstract Supplier<String> getTdrSupplier();
 
-
   protected Stream<ActionCheck> getNotificationChecks(
-    String expectedApiVersion,
-    JsonSchemaValidator notificationSchemaValidator
-   ) {
+      String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
     String titlePrefix = "[Notification]";
 
     return Stream.of(
-        new HttpMethodCheck(
-          titlePrefix, EblIssuanceRole::isPlatform, getMatchedNotificationExchangeUuid(), "POST"),
-        new UrlPathCheck(
-          titlePrefix,
-          EblIssuanceRole::isPlatform,
-          getMatchedNotificationExchangeUuid(),
-          "/v3/ebl-issuance-responses"),
-        new ResponseStatusCheck(
-          titlePrefix, EblIssuanceRole::isPlatform, getMatchedNotificationExchangeUuid(), 204))
-      .filter(Objects::nonNull);
+            new HttpMethodCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                "POST"),
+            new UrlPathCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                "/v3/ebl-issuance-responses"),
+            new ResponseStatusCheck(
+                titlePrefix, EblIssuanceRole::isCarrier, getMatchedNotificationExchangeUuid(), 204),
+            new JsonSchemaCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                HttpMessageType.REQUEST,
+                notificationSchemaValidator))
+        .filter(Objects::nonNull);
   }
 }

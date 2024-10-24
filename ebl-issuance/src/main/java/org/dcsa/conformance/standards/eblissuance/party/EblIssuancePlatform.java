@@ -121,32 +121,11 @@ public class EblIssuancePlatform extends ConformanceParty {
     asyncCounterpartNotification(
       actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", response);
 
-   /* syncCounterpartPost(
-        "/v%s/ebl-issuance-responses".formatted(apiVersion.charAt(0)),
-        response
-   );*/
-
     addOperatorLogEntry(
         "Sent issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
             .formatted(irc, tdr));
   }
 
-  /*private void generateAndEmitNotificationFromBooking(
-    JsonNode actionPrompt,
-    boolean includeCbrr,
-    boolean includeCbr) {
-    var notification =
-      BookingNotification.builder()
-        .apiVersion(apiVersion)
-        .booking(persistableCarrierBooking.getBooking())
-        .includeCarrierBookingRequestReference(includeCbrr)
-        .includeCarrierBookingReference(includeCbr)
-        .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
-        .build()
-        .asJsonNode();
-    asyncCounterpartNotification(
-      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", notification);
-  }*/
 
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -173,19 +152,6 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
-  /*private void addTheResponseCodeToTheMap(JsonNode actionPrompt) {
-    String responseCode = actionPrompt.path("responseCode").asText();
-    ;
-    if (responseCode.equals(IssuanceResponseCode.ACCEPTED.standardCode)) {
-      persistentMap.save("responseCode",code);
-    } else if (responseCode.equals(IssuanceResponseCode.BLOCKED.standardCode)) {
-      persistentMap.save("responseCode",code);
-    } else if (responseCode.equals(IssuanceResponseCode.REFUSED.standardCode)) {
-      persistentMap.save("responseCode",code);
-    } else {
-      throw new IllegalArgumentException("Unexpected response code: " + responseCode);
-    }
-  }*/
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblIssuancePlatform.handleRequest(%s)".formatted(request));

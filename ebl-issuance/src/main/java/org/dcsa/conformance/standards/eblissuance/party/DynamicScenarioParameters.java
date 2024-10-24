@@ -7,10 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.With;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.action.EblType;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DynamicScenarioParameters(EblType eblType) implements ScenarioParameters {
+public record DynamicScenarioParameters(EblType eblType, IssuanceResponseCode responseCode) implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);

@@ -92,6 +92,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     var carrierScenarioParameters =
         new CarrierScenarioParameters(
           payloadSigner.getPublicKeyInPemFormat());
+    persistentMap.save("responseCode",actionPrompt.path("responseCode"));
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
@@ -104,6 +105,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
     SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("ssp"));
     var dsp = DynamicScenarioParameters.fromJson(actionPrompt.required("dsp"));
     var eblType = dsp.eblType();
+    //var responseCode = OBJECT_MAPPER.createObjectNode().put("responseCode",dsp.responseCode().standardCode);
+    //persistentMap.save("responseCode",responseCode);
     String tdr =
         actionPrompt.has("tdr")
             ? actionPrompt.path("tdr").asText()

@@ -114,7 +114,7 @@ class AdoptionComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator() {
     String schemaFilePath =
-        "/standards/adoption/schemas/adoption-%s_with_push-resolved.json"
+        "/standards/adoption/schemas/adoption-%s_with_push-resolved.yaml"
             .formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, "AdoptionStats");
   }

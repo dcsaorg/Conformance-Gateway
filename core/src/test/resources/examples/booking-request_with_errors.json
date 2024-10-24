@@ -1,8 +1,7 @@
 {
-  "receiptTypeAtOrigin": "CY",
+  "receiptTypeAtOrigin": "MessingUpSomeStuff",
   "deliveryTypeAtDestination": "CY",
   "cargoMovementTypeAtOrigin": "FCL",
-  "cargoMovementTypeAtDestination": "FCL",
   "serviceContractReference": "HHL51800000",
   "freightPaymentTermCode": "PRE",
   "originChargesPaymentTerm": {
@@ -80,10 +79,8 @@
       "commodities": [
         {
           "commodityType": "Dry cargo, Freight all kinds",
-          "cargoGrossWeight": {
-            "value": 36000,
-            "unit": "KGM"
-          }
+          "cargoGrossWeight": 36000,
+          "cargoGrossWeightUnit": "KGM"
         }
       ]
     }

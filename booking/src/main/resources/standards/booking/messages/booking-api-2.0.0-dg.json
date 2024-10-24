@@ -35,6 +35,7 @@
             "description": "Jerrican, steel",
             "dangerousGoods": [
               {
+                "UNNumber": "1463",
                 "codedVariantList": "2200",
                 "properShippingName": "Environmentally hazardous substance, liquid, N.O.S",
                 "technicalName": "xylene and benzene",
@@ -91,6 +92,7 @@
                 "unNumber": "3082"
               },
               {
+                "NANumber": "9037",
                 "codedVariantList": "2300",
                 "properShippingName": "ETHANOL (ETHYL ALCOHOL)",
                 "technicalName": "DIESEL or FUEL OIL or FURNACE OIL / PG III",

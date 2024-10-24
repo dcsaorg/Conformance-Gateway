@@ -22,10 +22,8 @@
   "carrierExportVoyageNumber": "403W",
   "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": false,
-  "isImportLicenseRequired": false,
   "expectedDepartureDate": "2024-01-20",
   "incoTerms": "EXW",
-  "communicationChannelCode": "AO",
   "isEquipmentSubstitutionAllowed": false,
   "references": [
     {
@@ -76,7 +74,7 @@
   "requestedEquipments": [
     {
       "isShipperOwned": false,
-      "ISOEquipmentCode": "42GP",
+      "ISOEquipmentCode": "42G1",
       "units": 3,
       "commodities": [
         {

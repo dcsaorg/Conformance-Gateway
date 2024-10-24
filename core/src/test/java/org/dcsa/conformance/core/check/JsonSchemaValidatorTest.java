@@ -17,7 +17,7 @@ class JsonSchemaValidatorTest {
   @Test
   void validateJsonSchemaNormalInput() throws IOException {
     JsonSchemaValidator validator =
-      JsonSchemaValidator.getInstance("/schemas/booking-api-v20.json", "CreateBooking");
+      JsonSchemaValidator.getInstance("/schemas/dcsaorg-DCSA_BKG-2.0.0-resolved.json", "CreateBooking");
 
     Set<String> validate = validateInput(validator, REQUEST_NORMAL);
     assertTrue(validate.isEmpty());

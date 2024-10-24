@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -34,8 +33,8 @@ class BookingScenarioListBuilder extends ScenarioListBuilder<BookingScenarioList
   private static final String CREATE_BOOKING_SCHEMA_NAME = "CreateBooking";
   private static final String GET_BOOKING_SCHEMA_NAME = "Booking";
   private static final String UPDATE_BOOKING_SCHEMA_NAME = "UpdateBooking";
-  private static final String BOOKING_202_RESPONSE_SCHEMA = "inline_response_202";
-  private static final String CANCEL_SCHEMA_NAME = "bookings_bookingReference_body";
+  private static final String BOOKING_202_RESPONSE_SCHEMA = "CreateBookingResponse";
+  private static final String CANCEL_SCHEMA_NAME = "CancelBookingRequest";
   private static final String BOOKING_NOTIFICATION_SCHEMA_NAME = "BookingNotification";
 
   public static LinkedHashMap<String, BookingScenarioListBuilder> createModuleScenarioListBuilders(

@@ -8,7 +8,7 @@ import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParamete
 
 public class SupplyScenarioParametersAction extends IssuanceAction {
   private final EblType eblType;
-  private final IssuanceResponseCode responseCode;
+  private IssuanceResponseCode responseCode;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
 
@@ -31,6 +31,9 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
     if (suppliedScenarioParameters != null) {
       jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
     }
+    if(responseCode != null){
+      jsonState.put("responseCode",responseCode.toString());
+    }
     return jsonState;
   }
 
@@ -41,11 +44,14 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
     if (cspNode != null) {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(cspNode);
     }
+    if(jsonState.get("responseCode") != null){
+      responseCode = IssuanceResponseCode.valueOf(jsonState.required("responseCode").asText());
+    }
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters required by the scenario using the following format:";
+    return "Supply the parameters that the synthetic carrier should use when constructing an issuance request, such that when your platform system receives the issuance request, it sends back an asynchronous response with the code "+responseCode.standardCode;
   }
 
   @Override

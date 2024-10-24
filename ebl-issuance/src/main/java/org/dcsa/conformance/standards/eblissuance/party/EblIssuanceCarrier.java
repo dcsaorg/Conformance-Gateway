@@ -34,6 +34,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
   private final PayloadSignerWithKey payloadSigner;
+  private String responseCode;
 
   public EblIssuanceCarrier(
       String apiVersion,
@@ -92,7 +93,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
     var carrierScenarioParameters =
         new CarrierScenarioParameters(
           payloadSigner.getPublicKeyInPemFormat());
-    persistentMap.save("responseCode",actionPrompt.path("responseCode"));
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(

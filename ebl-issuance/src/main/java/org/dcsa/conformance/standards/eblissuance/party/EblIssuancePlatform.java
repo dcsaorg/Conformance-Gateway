@@ -134,7 +134,10 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
 
     JsonNode code = actionPrompt.path("responseCode");
-    persistentMap.save("responseCode",code);
+   if(code != null){
+     persistentMap.save("responseCode",code);
+   }
+
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
             "BOLE",
@@ -158,9 +161,22 @@ public class EblIssuancePlatform extends ConformanceParty {
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
-    String irc = persistentMap.load("responseCode").asText();
+    String irc ="";
+    if(persistentMap.load("responseCode") != null){
+      irc = persistentMap.load("responseCode").asText();
+    }else{
+      String value = jsonRequest.path("document").path("sendToPlatform").asText();
+      if(value.equals("DCSAI")){
+        irc = "ISSU";
+      }else if(value.equals("DCSAB")){
+        irc = "BREQ";
+      }else if(value.equals("DCSAR")){
+        irc = "REFU";
+      }
+    }
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
+
 
     ConformanceResponse response;
     if (tdr == null || !jsonRequest.path("document").path("documentParties").has("issuingParty")) {

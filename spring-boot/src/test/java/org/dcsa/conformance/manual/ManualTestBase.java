@@ -80,8 +80,8 @@ public abstract class ManualTestBase {
 
     // Wait until the scenario has finished and is conformant
     int i = 0;
-    while (conformantSubReportsStart == countConformantSubReports(sandbox, scenarioId)) {
-
+    long currentCount = countConformantSubReports(sandbox, scenarioId);
+    while (conformantSubReportsStart == currentCount) {
       // Check if input is required, if so, conformance is not progressing, so continue.
       JsonNode jsonNode = getScenarioStatus(sandbox, scenarioId);
       boolean inputRequired = jsonNode.has("inputRequired") && jsonNode.get("inputRequired").asBoolean();
@@ -100,6 +100,7 @@ public abstract class ManualTestBase {
         log.error(message);
         fail(message);
       }
+      currentCount = countConformantSubReports(sandbox, scenarioId);
     }
   }
 
@@ -109,6 +110,10 @@ public abstract class ManualTestBase {
     SubReport subReport = mapper.convertValue(conformanceSubReport, SubReport.class);
     if (subReport == null || subReport.subReports == null) {
       return 0;
+    }
+    // If the scenario is not conformant, return -1 and don't count any sub reports.
+    if (subReport.status.equals("NON_CONFORMANT")) {
+      return -1;
     }
     return subReport.subReports.stream()
         .filter(subReport1 -> subReport1.status.equals("CONFORMANT"))

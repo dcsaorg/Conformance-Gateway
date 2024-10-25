@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.eblissuance;
 
+import static org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode.ACCEPTED;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -11,8 +13,6 @@ import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblissuance.action.*;
 import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 
-import static org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode.ACCEPTED;
-
 @Slf4j
 class EblIssuanceScenarioListBuilder
     extends ScenarioListBuilder<EblIssuanceScenarioListBuilder> {
@@ -20,6 +20,11 @@ class EblIssuanceScenarioListBuilder
       new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalCarrierPartyName = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalPlatformPartyName = new ThreadLocal<>();
+
+  private EblIssuanceScenarioListBuilder(
+      Function<ConformanceAction, ConformanceAction> actionBuilder) {
+    super(actionBuilder);
+  }
 
   public static LinkedHashMap<String, EblIssuanceScenarioListBuilder>
       createModuleScenarioListBuilders(
@@ -41,21 +46,9 @@ class EblIssuanceScenarioListBuilder
               correctIssuanceRequestResponse()),
             supplyScenarioParameters(EblType.BLANK_EBL,IssuanceResponseCode.ACCEPTED).then(
               correctIssuanceRequestResponse()))))
-      /*Map.entry("Error cases",
-        carrierScenarioParameters().then(noAction().thenEither(
-          supplyScenarioParameters(EblType.STRAIGHT_EBL).then(duplicateIssuanceRequest().then(issuanceResponseBlocked())),
-          supplyScenarioParameters(EblType.STRAIGHT_EBL).then(duplicateIssuanceRequest().then(issuanceResponseRefused()))
-        ))
-      )*/
     ).collect(
       Collectors.toMap(
         Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-  }
-
-
-  private EblIssuanceScenarioListBuilder(
-      Function<ConformanceAction, ConformanceAction> actionBuilder) {
-    super(actionBuilder);
   }
 
   private static EblIssuanceScenarioListBuilder noAction() {

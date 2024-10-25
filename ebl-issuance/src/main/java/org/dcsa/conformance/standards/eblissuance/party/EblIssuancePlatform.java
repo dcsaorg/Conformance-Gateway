@@ -57,7 +57,8 @@ public class EblIssuancePlatform extends ConformanceParty {
     targetObjectNode.set("eblStatesByTdr", arrayNodeEblStatesById);
 
     targetObjectNode.set("tdr2PendingChecksum", StateManagementUtil.storeMap(tdr2PendingChecksum));
-    targetObjectNode.set("knownChecksums", StateManagementUtil.storeMap(knownChecksums, String::valueOf));
+    targetObjectNode.set(
+        "knownChecksums", StateManagementUtil.storeMap(knownChecksums, String::valueOf));
   }
 
   @Override
@@ -69,8 +70,10 @@ public class EblIssuancePlatform extends ConformanceParty {
                     entryNode.get("key").asText(),
                     EblIssuanceState.valueOf(entryNode.get("value").asText())));
 
-    StateManagementUtil.restoreIntoMap(tdr2PendingChecksum, sourceObjectNode.path("tdr2PendingChecksum"));
-    StateManagementUtil.restoreIntoMap(knownChecksums, sourceObjectNode.path("knownChecksums"), Boolean::valueOf);
+    StateManagementUtil.restoreIntoMap(
+        tdr2PendingChecksum, sourceObjectNode.path("tdr2PendingChecksum"));
+    StateManagementUtil.restoreIntoMap(
+        knownChecksums, sourceObjectNode.path("knownChecksums"), Boolean::valueOf);
   }
 
   @Override
@@ -92,9 +95,9 @@ public class EblIssuancePlatform extends ConformanceParty {
             .formatted(actionPrompt.toPrettyString()));
 
     JsonNode code = actionPrompt.path("responseCode");
-   if(code != null){
-     persistentMap.save("responseCode",code);
-   }
+    if (code != null) {
+      persistentMap.save("responseCode", code);
+    }
 
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
@@ -121,44 +124,40 @@ public class EblIssuancePlatform extends ConformanceParty {
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
     JsonNode responseCodeNode = persistentMap.load("responseCode");
 
-    String irc = "";
+    String irc;
     if (responseCodeNode != null) {
       irc = responseCodeNode.asText();
     } else {
       String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
-      switch (value) {
-        case "DCSAI":
-          irc = "ISSU";
-          break;
-        case "DCSAB":
-          irc = "BREQ";
-          break;
-        case "DCSAR":
-          irc = "REFU";
-          break;
-      }
+      irc =
+          switch (value) {
+            case "DCSAI" -> "ISSU";
+            case "DCSAB" -> "BREQ";
+            case "DCSAR" -> "REFU";
+            default -> "";
+          };
     }
-
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 
     ConformanceResponse response;
     if (tdr == null || !jsonRequest.path("document").path("documentParties").has("issuingParty")) {
       addOperatorLogEntry(
-        "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
-          .formatted(tdr));
+          "Rejecting issuance request for eBL with transportDocumentReference '%s' (invalid)"
+              .formatted(tdr));
       return request.createResponse(
-              400,
-              Map.of(API_VERSION, List.of(apiVersion)),
-              new ConformanceMessageBody(
-                OBJECT_MAPPER
-                      .createObjectNode()
-                      .put(
-                          "message",
-                          "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
-                              .formatted(tdr))));
+          400,
+          Map.of(API_VERSION, List.of(apiVersion)),
+          new ConformanceMessageBody(
+              OBJECT_MAPPER
+                  .createObjectNode()
+                  .put(
+                      "message",
+                      "Rejecting issuance request for document '%s' because the issuing party is missing or the TDR could not be resolved"
+                          .formatted(tdr))));
     }
-    if (state == null || state == EblIssuanceState.ISSUED && !knownChecksums.containsKey(checksum)) {
+    if (state == null
+        || state == EblIssuanceState.ISSUED && !knownChecksums.containsKey(checksum)) {
       eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
       knownChecksums.put(checksum, Boolean.TRUE);
       tdr2PendingChecksum.put(tdr, checksum);
@@ -170,20 +169,19 @@ public class EblIssuancePlatform extends ConformanceParty {
     } else {
       String message;
       if (state == EblIssuanceState.ISSUANCE_REQUESTED) {
-        message = "Rejecting issuance request for document '%s' because there is a pending issuance request for it"
-          .formatted(tdr);
+        message =
+            "Rejecting issuance request for document '%s' because there is a pending issuance request for it"
+                .formatted(tdr);
       } else {
-        message = "Rejecting issuance request for document '%s' because has been issued in the past"
-          .formatted(tdr);
+        message =
+            "Rejecting issuance request for document '%s' because has been issued in the past"
+                .formatted(tdr);
       }
       response =
           request.createResponse(
               409,
               Map.of(API_VERSION, List.of(apiVersion)),
-              new ConformanceMessageBody(
-                OBJECT_MAPPER
-                      .createObjectNode()
-                      .put("message", message)));
+              new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode().put("message", message)));
     }
 
     var platformResponse =
@@ -192,14 +190,13 @@ public class EblIssuancePlatform extends ConformanceParty {
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", irc);
     if (irc.equals("BREQ")) {
-      platformResponse.putArray("errors")
-        .addObject()
-        .put("reason", "Rejected as required by the conformance scenario")
-        .put("errorCode", "CTK-1234");
+      platformResponse
+          .putArray("errors")
+          .addObject()
+          .put("reason", "Rejected as required by the conformance scenario")
+          .put("errorCode", "CTK-1234");
     }
-    asyncCounterpartNotification(
-        null,
-        "/v3/ebl-issuance-responses",platformResponse);
+    asyncCounterpartNotification(null, "/v3/ebl-issuance-responses", platformResponse);
 
     addOperatorLogEntry(
         "Handling issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"

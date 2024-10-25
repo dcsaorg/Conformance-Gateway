@@ -66,19 +66,13 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    String sendToPlatform = "BOLE (platform code)";
-
-    switch (responseCode.standardCode) {
-      case "ISSU":
-        sendToPlatform = "DCSAI";
-        break;
-      case "BREQ":
-        sendToPlatform = "DCSAB";
-        break;
-      case "REFU":
-        sendToPlatform = "DCSAR";
-        break;
-    }
+    String sendToPlatform =
+        switch (responseCode.standardCode) {
+          case "ISSU" -> "DCSAI";
+          case "BREQ" -> "DCSAB";
+          case "REFU" -> "DCSAR";
+          default -> "BOLE (platform code)";
+        };
     return (switch (eblType) {
           case BLANK_EBL ->
               new SuppliedScenarioParameters(

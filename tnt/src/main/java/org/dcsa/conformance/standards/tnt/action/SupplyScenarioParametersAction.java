@@ -3,8 +3,6 @@ package org.dcsa.conformance.standards.tnt.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
@@ -100,35 +98,54 @@ public class SupplyScenarioParametersAction extends TntAction {
                     Collectors.toMap(
                         Function.identity(),
                         tntFilterParameter ->
-                            switch (tntFilterParameter) {
-                              case LIMIT -> "100";
-                              case EVENT_CREATED_DATE_TIME,
-                                      EVENT_CREATED_DATE_TIME_EQ,
-                                      EVENT_CREATED_DATE_TIME_GT,
-                                      EVENT_CREATED_DATE_TIME_GTE,
-                                      EVENT_CREATED_DATE_TIME_LT,
-                                      EVENT_CREATED_DATE_TIME_LTE ->
-                                "2021-01-09T14:12:56+01:00";
-                              case EVENT_TYPE -> "SHIPMENT";
-                              case SHIPMENT_EVENT_TYPE_CODE -> {
-                                if (isBadRequest != null && isBadRequest) {
-                                  yield "INVALID_CODE";
-                                } else {
-                                  yield "DRFT";
-                                }
+                          switch (tntFilterParameter) {
+                            case EVENT_TYPE -> {
+                              if (Boolean.TRUE.equals(isBadRequest)) {
+                                yield "INVALID_EVENT_TYPE";
+                              } else {
+                                yield "SHIPMENT";
                               }
-                              case DOCUMENT_TYPE_CODE -> {
-                                if (isBadRequest != null && isBadRequest) {
-                                  yield "INVALID_CODE";
-                                } else {
-                                  yield "CBR";
-                                }
+                            }
+                            case SHIPMENT_EVENT_TYPE_CODE -> {
+                              if (Boolean.TRUE.equals(isBadRequest)) {
+                                yield "INVALID_SHIPMENT_EVENT_TYPE";
+                              } else {
+                                yield "DRFT";
                               }
-                              case CARRIER_BOOKING_REFERENCE -> "CBR709951";
-                              case TRANSPORT_DOCUMENT_REFERENCE -> "TDR709951";
-
-                              default -> "TODO";
-                            })))
+                            }
+                            case DOCUMENT_TYPE_CODE -> {
+                              if (Boolean.TRUE.equals(isBadRequest)) {
+                                yield "INVALID_DOCUMENT_TYPE_CODE";
+                              } else {
+                                yield "CBR";
+                              }
+                            }
+                            case CARRIER_BOOKING_REFERENCE -> "ABC123123123";
+                            case TRANSPORT_DOCUMENT_REFERENCE ->
+                              "reserved-HHL123";
+                            case TRANSPORT_EVENT_TYPE_CODE -> "ARRI";
+                            case TRANSPORT_CALL_ID -> "123e4567-e89b-12d3-a456-426614174000";
+                            case VESSEL_IMO_NUMBER -> "9321483";
+                            case EXPORT_VOYAGE_NUMBER -> "2103S";
+                            case CARRIER_SERVICE_CODE -> "FE1";
+                            case UN_LOCATION_CODE -> "FRPAR";
+                            case EQUIPMENT_EVENT_TYPE_CODE ->{
+                              if (Boolean.TRUE.equals(isBadRequest)) {
+                                yield "INVALID_EQUIPMENT_EVENT_TYPE_CODE";
+                              } else {
+                                yield "LOAD";
+                              }
+                            }
+                            case EQUIPMENT_REFERENCE -> "APZU4812090";
+                            case EVENT_CREATED_DATE_TIME,
+                                 EVENT_CREATED_DATE_TIME_GTE,
+                                 EVENT_CREATED_DATE_TIME_GT,
+                                 EVENT_CREATED_DATE_TIME_LTE,
+                                 EVENT_CREATED_DATE_TIME_LT,
+                                 EVENT_CREATED_DATE_TIME_EQ ->
+                              "2021-01-09T14:12:56+01:00";
+                            case LIMIT -> "100";
+                          })))
         .toJson();
   }
 

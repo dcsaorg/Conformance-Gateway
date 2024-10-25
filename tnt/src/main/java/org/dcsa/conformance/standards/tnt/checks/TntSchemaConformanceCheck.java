@@ -23,9 +23,12 @@ public class TntSchemaConformanceCheck extends ActionCheck {
     UUID matchedExchangeUuid,
     HttpMessageType httpMessageType,
     Map<TntEventType, JsonSchemaValidator> eventSchemaValidators) {
-    super("", "The HTTP %s matches the standard JSON schema"
-      .formatted(HttpMessageType.RESPONSE.name().toLowerCase()), isRelevantForRoleName,
-      matchedExchangeUuid, httpMessageType);
+    super(
+      "",
+      "The HTTP %s matches the standard JSON schema".formatted(HttpMessageType.RESPONSE.name().toLowerCase()),
+      isRelevantForRoleName,
+      matchedExchangeUuid,
+      httpMessageType);
     this.eventSchemaValidators = eventSchemaValidators;
   }
 
@@ -33,13 +36,13 @@ public class TntSchemaConformanceCheck extends ActionCheck {
     return jsonNode.isObject() && !jsonNode.path("eventType").isMissingNode();
   }
 
-  private ArrayList<JsonNode> _findEventNodes(
+  private ArrayList<JsonNode> findEventNodes(
     ArrayList<JsonNode> foundEventNodes, JsonNode searchInJsonNode) {
     if (isEventNode(searchInJsonNode)) {
       foundEventNodes.add(searchInJsonNode);
     } else {
       searchInJsonNode.forEach(
-        elementNode -> _findEventNodes(foundEventNodes, elementNode));
+        elementNode -> findEventNodes(foundEventNodes, elementNode));
     }
     return foundEventNodes;
   }
@@ -48,32 +51,36 @@ public class TntSchemaConformanceCheck extends ActionCheck {
   protected Set<String> checkConformance(
     Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
-    if (exchange == null) return Set.of();
+    if (exchange == null) {
+      return Set.of();
+    }
     JsonNode jsonResponse = exchange.getMessage(httpMessageType).body().getJsonBody();
     LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
+
     if (!jsonResponse.isArray()) {
       validationErrors.add("The root JSON response must be an array of events");
     }
-    ArrayList<JsonNode> eventNodes = _findEventNodes(new ArrayList<>(), jsonResponse);
-    int eventCount = eventNodes.size();
-    for (int eventIndex = 0; eventIndex < eventCount; ++eventIndex) {
-      JsonNode eventNode = eventNodes.get(eventIndex);
+
+    ArrayList<JsonNode> eventNodes = findEventNodes(new ArrayList<>(), jsonResponse);
+
+    eventNodes.stream().forEachOrdered(eventNode -> {
       JsonNode eventTypeNode = eventNode.path("eventType");
-      TntEventType eventType;
       String eventTypeText = eventTypeNode.asText().toUpperCase();
+      TntEventType eventType;
       try {
         eventType = TntEventType.valueOf(eventTypeText);
       } catch (RuntimeException e) {
         validationErrors.add(
           "Event #%d: incorrect eventType attribute: %s"
-            .formatted(eventIndex, eventTypeNode));
-        continue;
+            .formatted(eventNodes.indexOf(eventNode), eventTypeNode));
+        return;
       }
+
       JsonSchemaValidator eventSchemaValidator = eventSchemaValidators.get(eventType);
-      for (String validationError : eventSchemaValidator.validate(eventNode)) {
-        validationErrors.add("Event #%d: %s".formatted(eventIndex, validationError));
-      }
-    }
+      eventSchemaValidator.validate(eventNode).forEach(validationError ->
+        validationErrors.add("Event #%d: %s".formatted(eventNodes.indexOf(eventNode), validationError))
+      );
+    });
     return validationErrors;
   }
 }

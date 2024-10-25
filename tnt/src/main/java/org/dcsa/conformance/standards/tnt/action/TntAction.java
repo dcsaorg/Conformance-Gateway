@@ -33,7 +33,8 @@ public abstract class TntAction extends ConformanceAction {
     this.sspSupplier = _getSspSupplier(previousAction);
     this.expectedStatus = expectedStatus;
     this.dsp = previousAction == null
-      ? new OverwritingReference<>(null, new DynamicScenarioParameters(null, null, null,null, null))
+      ? new OverwritingReference<>(null,
+      new DynamicScenarioParameters(null, null, null,null, null))
       : new OverwritingReference<>(previousAction.dsp, null);
   }
 

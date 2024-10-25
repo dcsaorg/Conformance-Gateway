@@ -9,11 +9,14 @@ import java.util.stream.Collectors;
 
 import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_DOCUMENT_TYPE_CODES;
 import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_EQUIPMENT_EVENT_TYPES;
+import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_EVENT_TYPES;
 import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_SHIPMENT_EVENT_TYPES;
 
 public class QueryParameterSpecificRule implements QueryParamRule{
 
-  private final Map<String, Set<String>> queryParamMap = Map.of(
+  private static final String EVENT_TYPE = "eventType";
+
+  private static final Map<String, Set<String>> queryParamMap = Map.of(
       "SHIPMENT", Set.of("shipmentEventTypeCode", "documentTypeCode", "carrierBookingReference",
       "transportDocumentID", "transportDocumentReference", "equipmentReference", "eventCreatedDateTime"),
       "TRANSPORT", Set.of("transportDocumentReference", "transportEventTypeCode", "transportCallID", "vesselIMONumber",
@@ -21,14 +24,14 @@ public class QueryParameterSpecificRule implements QueryParamRule{
       "EQUIPMENT", Set.of("carrierBookingReference", "transportDocumentReference", "transportCallID",
       "vesselIMONumber", "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentEventTypeCode", "equipmentReference", "eventCreatedDateTime")
     );
-    private final Set<String> excludedQueryParams = Set.of("eventType", "cursor", "limit", "eventCreatedDateTime:gte",
+    private static final Set<String> excludedQueryParams = Set.of("eventType", "cursor", "limit", "eventCreatedDateTime:gte",
       "eventCreatedDateTime:gt", "eventCreatedDateTime:lt", "eventCreatedDateTime:lte", "eventCreatedDateTime:eq", "eventCreatedDateTime");
 
     @Override
     public boolean validate(Map<String, ? extends Collection<String>> queryParams) {
       boolean areParamsValid = true;
 
-      if (queryParams.containsKey("eventType")) {
+      if (queryParams.containsKey(EVENT_TYPE)) {
         Set<String> eventTypes = new HashSet<>(queryParams.get("eventType"));
         Set<String> allowedParams = queryParamMap.entrySet().stream()
           .filter(entry -> eventTypes.contains(entry.getKey()))
@@ -40,18 +43,26 @@ public class QueryParameterSpecificRule implements QueryParamRule{
           .allMatch(allowedParams::contains);
       }
 
+      if (queryParams.containsKey(EVENT_TYPE)) {
+        return areParamsValid && validateEventType(queryParams.get(EVENT_TYPE));
+      }
       if (queryParams.containsKey("shipmentEventTypeCode")) {
         return areParamsValid && validateShipmentEventTypeCode(queryParams.get("shipmentEventTypeCode"));
       }
       if (queryParams.containsKey("documentTypeCode")) {
         return areParamsValid && validateDocumentTypeCode(queryParams.get("documentTypeCode"));
       }
-      if (queryParams.containsKey("equipmentTypeCode")) {
-        return areParamsValid && validateEquipmentEventTypeCode(queryParams.get("equipmentTypeCode"));
+      if (queryParams.containsKey("equipmentEventTypeCode")) {
+        return areParamsValid && validateEquipmentEventTypeCode(queryParams.get("equipmentEventTypeCode"));
       }
 
       return areParamsValid;
     }
+
+
+  private boolean validateEventType(Collection<String> eventTypes) {
+    return eventTypes.stream().allMatch(VALID_EVENT_TYPES::contains);
+  }
 
   private boolean validateShipmentEventTypeCode(Collection<String> shipmentEventTypeCodes) {
     return shipmentEventTypeCodes.stream().allMatch(VALID_SHIPMENT_EVENT_TYPES::contains);

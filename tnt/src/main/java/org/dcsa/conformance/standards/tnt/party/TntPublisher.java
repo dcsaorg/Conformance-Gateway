@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.tnt.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -34,34 +33,39 @@ import static org.dcsa.conformance.standards.tnt.party.CustomJsonPointer.travers
 public class TntPublisher extends ConformanceParty {
 
   public TntPublisher(
-      String apiVersion,
-      PartyConfiguration partyConfiguration,
-      CounterpartConfiguration counterpartConfiguration,
-      JsonNodeMap persistentMap,
-      PartyWebClient webClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+    String apiVersion,
+    PartyConfiguration partyConfiguration,
+    CounterpartConfiguration counterpartConfiguration,
+    JsonNodeMap persistentMap,
+    PartyWebClient webClient,
+    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-        apiVersion,
-        partyConfiguration,
-        counterpartConfiguration,
-        persistentMap,
-        webClient,
-        orchestratorAuthHeader);
+      apiVersion,
+      partyConfiguration,
+      counterpartConfiguration,
+      persistentMap,
+      webClient,
+      orchestratorAuthHeader);
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    //no state to export
+  }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    //no state to import
+  }
 
   @Override
-  protected void doReset() {}
+  protected void doReset() {
+  }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
+      Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -69,61 +73,70 @@ public class TntPublisher extends ConformanceParty {
     boolean isBadRequest = actionPrompt.get("isBadRequest").asBoolean(false);
 
     SuppliedScenarioParameters responseSsp =
-        SuppliedScenarioParameters.fromMap(
-            StreamSupport.stream(
-                    actionPrompt.required("tntFilterParametersQueryParamNames").spliterator(),
-                    false)
-                .map(
-                    jsonTntFilterParameter ->
-                        TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.asText()))
-                .collect(
-                    Collectors.toMap(
-                        Function.identity(),
-                        tntFilterParameter ->
-                            switch (tntFilterParameter) {
-                              case EVENT_TYPE -> "SHIPMENT";
-                              case SHIPMENT_EVENT_TYPE_CODE -> {
-                                if (isBadRequest) {
-                                  yield "INVALID_CODE";
-                                } else {
-                                  yield "DRFT";
-                                }
-                              }
-                              case DOCUMENT_TYPE_CODE -> {
-                                if (isBadRequest) {
-                                  yield "INVALID_CODE";
-                                } else {
-                                  yield "CBR";
-                                }
-                              }
-                              case CARRIER_BOOKING_REFERENCE -> "ABC123123123";
-                              case TRANSPORT_DOCUMENT_REFERENCE ->
-                                  "reserved-HHL123";
-                              case TRANSPORT_EVENT_TYPE_CODE -> "ARRI";
-                              case TRANSPORT_CALL_ID -> UUID.randomUUID().toString();
-                              case VESSEL_IMO_NUMBER -> "9321483";
-                              case EXPORT_VOYAGE_NUMBER -> "2103S";
-                              case CARRIER_SERVICE_CODE -> "FE1";
-                              case UN_LOCATION_CODE -> "FRPAR";
-                              case EQUIPMENT_EVENT_TYPE_CODE ->
-                                  "LOAD";
-                              case EQUIPMENT_REFERENCE -> "APZU4812090";
-                              case EVENT_CREATED_DATE_TIME,
-                                      EVENT_CREATED_DATE_TIME_GTE,
-                                      EVENT_CREATED_DATE_TIME_GT,
-                                      EVENT_CREATED_DATE_TIME_LTE,
-                                      EVENT_CREATED_DATE_TIME_LT,
-                                      EVENT_CREATED_DATE_TIME_EQ ->
-                                  "2021-01-09T14:12:56+01:00";
-                              case LIMIT -> "100";
-                            })));
+      SuppliedScenarioParameters.fromMap(
+        StreamSupport.stream(
+            actionPrompt.required("tntFilterParametersQueryParamNames").spliterator(),
+            false)
+          .map(
+            jsonTntFilterParameter ->
+              TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.asText()))
+          .collect(
+            Collectors.toMap(
+              Function.identity(),
+              tntFilterParameter ->
+                switch (tntFilterParameter) {
+                  case EVENT_TYPE -> {
+                    if (Boolean.TRUE.equals(isBadRequest)) {
+                      yield "INVALID_EVENT_TYPE";
+                    } else {
+                      yield "SHIPMENT";
+                    }
+                  }
+                  case SHIPMENT_EVENT_TYPE_CODE -> {
+                    if (isBadRequest) {
+                      yield "INVALID_SHIPMENT_EVENT_TYPE_CODE";
+                    } else {
+                      yield "DRFT";
+                    }
+                  }
+                  case DOCUMENT_TYPE_CODE -> {
+                    if (isBadRequest) {
+                      yield "INVALID_DOCUMENT_TYPE_CODE";
+                    } else {
+                      yield "CBR";
+                    }
+                  }
+                  case CARRIER_BOOKING_REFERENCE -> "ABC123123123";
+                  case TRANSPORT_DOCUMENT_REFERENCE -> "reserved-HHL123";
+                  case TRANSPORT_EVENT_TYPE_CODE -> "ARRI";
+                  case TRANSPORT_CALL_ID -> "123e4567-e89b-12d3-a456-426614174000";
+                  case VESSEL_IMO_NUMBER -> "9321483";
+                  case EXPORT_VOYAGE_NUMBER -> "2103S";
+                  case CARRIER_SERVICE_CODE -> "FE1";
+                  case UN_LOCATION_CODE -> "FRPAR";
+                  case EQUIPMENT_EVENT_TYPE_CODE -> {
+                    if (isBadRequest) {
+                      yield "INVALID_EQUIPMENT_EVENT_TYPE_CODE";
+                    } else {
+                      yield "LOAD";
+                    }
+                  }
+                  case EQUIPMENT_REFERENCE -> "APZU4812090";
+                  case EVENT_CREATED_DATE_TIME,
+                       EVENT_CREATED_DATE_TIME_GTE,
+                       EVENT_CREATED_DATE_TIME_GT,
+                       EVENT_CREATED_DATE_TIME_LTE,
+                       EVENT_CREATED_DATE_TIME_LT,
+                       EVENT_CREATED_DATE_TIME_EQ -> "2021-01-09T14:12:56+01:00";
+                  case LIMIT -> "100";
+                })));
 
     asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), responseSsp.toJson());
+      actionPrompt.required("actionId").asText(), responseSsp.toJson());
 
     addOperatorLogEntry(
-        "Submitting SuppliedScenarioParameters: %s"
-            .formatted(responseSsp.toJson().toPrettyString()));
+      "Submitting SuppliedScenarioParameters: %s"
+        .formatted(responseSsp.toJson().toPrettyString()));
   }
 
   @Override
@@ -132,52 +145,33 @@ public class TntPublisher extends ConformanceParty {
 
     Map<String, List<AttributeMapping>> attributeMappings = AttributeMapping.initializeAttributeMappings();
 
-    ObjectMapper mapper = new ObjectMapper();
-    ArrayNode filteredArray = mapper.createArrayNode();
-
     ArrayNode jsonResponseBody = (ArrayNode) JsonToolkit.templateFileToJsonNode(
-        "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
+      "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
 
     if (!new QueryParameterSpecificRule().validate(request.queryParams())) {
-      return return400(request,"Error: Invalid query parameters provided.");
+      return return400(request, "Error: Invalid query parameters provided.");
     }
-
-    Set<String> eventIds = new HashSet<>();
-
+    ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
+    jsonResponseBody.forEach(filteredArray::add);
+    // Chained Filtering Logic
     for (Map.Entry<String, ? extends Collection<String>> queryParam : request.queryParams().entrySet()) {
       String paramName = queryParam.getKey();
       Collection<String> paramValues = queryParam.getValue();
       List<AttributeMapping> mappings = attributeMappings.get(paramName);
+      Set<String> seenEventIds = new HashSet<>();
       if (mappings != null) {
-        for (AttributeMapping mapping : mappings) {
-          for (String paramValue : paramValues) {
-            String jsonPath = mapping.getJsonPath();
-            BiPredicate<JsonNode,String> condition = mapping.getCondition();
-            for (JsonNode node : jsonResponseBody) {
-              List<JsonNode> results = new ArrayList<>();
-              traverse(node, jsonPath.split("/"), 0, results, condition, paramValue);
-              if(!results.isEmpty()){
-              var eventId = node.at("/eventID").asText();
-              if ( !eventIds.contains(eventId)
-                && (mapping.getValues().isEmpty()
-                  || results.stream().anyMatch(result -> mapping.getValues().contains(result.asText())))) {
-                  eventIds.add(eventId);
-                  filteredArray.add(node);
-                }
-              }
-            }
-          }
-        }
+        filteredArray = applyFilter(filteredArray, mappings, paramValues,seenEventIds);
       }
     }
+
     //TODO:: To handle the complex sorting logic like CarrierBookingReference where references are different base on the jsonPath.
     if (request.queryParams().containsKey("sort")) {
-      Collection<String> sortingFields= request.queryParams().get("sort");
+      Collection<String> sortingFields = request.queryParams().get("sort");
       List<SortCriteria> sortCriteria = sortingFields.stream()
         .map(sortField -> {
           String[] parts = sortField.split(":");
           return new SortCriteria(parts[0], attributeMappings.get(parts[0]),
-            parts.length > 1 ? SortDirection.valueOf(parts[1].toUpperCase()) : SortDirection.ASCENDING);
+            parts.length > 1 ? SortDirection.valueOf(parts[1].toUpperCase()) : SortDirection.ASC);
         })
         .collect(Collectors.toList());
       filteredArray = sortJsonArray(filteredArray, sortCriteria);
@@ -185,7 +179,7 @@ public class TntPublisher extends ConformanceParty {
     }
     // Sort the filtered array by user provided value in parameters.
     ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
-    if (request.queryParams().containsKey("limit"))  {
+    if (request.queryParams().containsKey("limit")) {
       int limit = Integer.parseInt(request.queryParams().get("limit").iterator().next());
       if (filteredArray.size() > limit) {
         StreamSupport.stream(filteredArray.spliterator(), false)
@@ -194,10 +188,41 @@ public class TntPublisher extends ConformanceParty {
       }
     }
     return request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(limitedArray.isEmpty() ? filteredArray : limitedArray ));
+      200,
+      Map.of(API_VERSION, List.of(apiVersion)),
+      new ConformanceMessageBody(limitedArray.isEmpty() ? filteredArray : limitedArray));
   }
+
+  private ArrayNode applyFilter(ArrayNode inputArray, List<AttributeMapping> mappings,
+                                Collection<String> paramValues, Set<String> seenEventIds) {
+    ArrayNode resultArray = OBJECT_MAPPER.createArrayNode();// Track seen eventIds within this filter
+
+    mappings.forEach(mapping ->
+      paramValues.forEach(paramValue ->
+        StreamSupport.stream(inputArray.spliterator(), false)
+          .forEach(node -> {
+            String jsonPath = mapping.getJsonPath();
+            BiPredicate<JsonNode, String> condition = mapping.getCondition();
+
+            List<JsonNode> results = new ArrayList<>();
+            traverse(node, jsonPath.split("/"), 0, results, condition, paramValue);
+
+            if (!results.isEmpty()) {
+              String eventId = node.at("/eventID").asText();
+              if (!seenEventIds.contains(eventId) &&
+                (mapping.getValues().isEmpty() ||
+                  results.stream().anyMatch(
+                    result -> mapping.getValues().contains(result.asText())))) {
+                seenEventIds.add(eventId);
+                resultArray.add(node);
+              }
+            }
+          })
+      )
+    );
+    return resultArray;
+  }
+
 
   public static ArrayNode sortJsonArray(ArrayNode jsonArray, List<SortCriteria> criteria) {
     if (jsonArray == null || criteria == null || criteria.isEmpty()) {
@@ -210,7 +235,7 @@ public class TntPublisher extends ConformanceParty {
     jsonNodeList.sort((node1, node2) -> {
       int comparisonResult = 0;
       for (SortCriteria criterion : criteria) {
-        comparisonResult = compareNodesByField(node1, node2, criterion.getField(), criterion.getDirection());
+        comparisonResult = compareNodesByField(node1, node2, criterion.field(), criterion.direction());
         if (comparisonResult != 0) {
           break; // Stop comparing if a difference is found
         }
@@ -242,16 +267,14 @@ public class TntPublisher extends ConformanceParty {
   }
 
   private ObjectNode createErrorResponse(String httpMethod, String requestUri, String reason, String message) {
-    ObjectMapper mapper = new ObjectMapper();
-
     // Create the root object node
-    ObjectNode rootNode = mapper.createObjectNode();
+    ObjectNode rootNode = OBJECT_MAPPER.createObjectNode();
     rootNode.put("httpMethod", httpMethod);
     rootNode.put("requestUri", requestUri);
 
     // Create the errors array node
-    ArrayNode errorsArray = mapper.createArrayNode();
-    ObjectNode errorDetails = mapper.createObjectNode();
+    ArrayNode errorsArray = OBJECT_MAPPER.createArrayNode();
+    ObjectNode errorDetails = OBJECT_MAPPER.createObjectNode();
     errorDetails.put("reason", reason);
     errorDetails.put("message", message);
     errorsArray.add(errorDetails);
@@ -279,11 +302,11 @@ public class TntPublisher extends ConformanceParty {
 
     // Handle different data types
     if (value1.isTextual() && value2.isTextual()) {
-      return direction == SortDirection.ASCENDING ?
+      return direction == SortDirection.ASC ?
         value1.asText().compareTo(value2.asText()) :
         value2.asText().compareTo(value1.asText());
     } else if (value1.isNumber() && value2.isNumber()) {
-      return direction == SortDirection.ASCENDING ?
+      return direction == SortDirection.ASC ?
         Double.compare(value1.asDouble(), value2.asDouble()) :
         Double.compare(value2.asDouble(), value1.asDouble());
     } else {
@@ -291,6 +314,4 @@ public class TntPublisher extends ConformanceParty {
       return 0; // Consider how to handle incomparable types
     }
   }
-
-
 }

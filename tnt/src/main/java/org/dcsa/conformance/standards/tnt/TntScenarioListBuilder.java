@@ -71,7 +71,10 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterByDateTimesAnd(EQUIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterBy(EQUIPMENT_REFERENCE),
                         scenarioWithFilterByDateTimesAnd(EQUIPMENT_REFERENCE),
-                        scenarioWithBadRequestFilterBy(true, SHIPMENT_EVENT_TYPE_CODE))))
+                        scenarioWithBadRequestFilterBy(true, SHIPMENT_EVENT_TYPE_CODE),
+                        scenarioWithBadRequestFilterBy(true, EVENT_TYPE),
+                        scenarioWithBadRequestFilterBy(true, DOCUMENT_TYPE_CODE),
+                        scenarioWithBadRequestFilterBy(true, EQUIPMENT_EVENT_TYPE_CODE))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -132,6 +135,7 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
               (TntAction) previousAction,
                 componentFactory.getEventSchemaValidators()));
   }
+
   private static TntScenarioListBuilder getEventsBadRequest() {
     TntComponentFactory componentFactory = threadLocalComponentFactory.get();
     String publisherPartyName = threadLocalPublisherPartyName.get();

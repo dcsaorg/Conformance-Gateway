@@ -14,7 +14,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   public SupplyScenarioParametersAction(
       String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType, IssuanceResponseCode code) {
-    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s] and to get response code [%s]".formatted(eblType.name(),code.standardCode), -1);
+    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s] and for response code [%s]".formatted(eblType.name(),code.standardCode), -1);
     this.eblType = eblType;
     this.responseCode = code;
   }
@@ -56,9 +56,17 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
+    String sendToPlatform = "BOLE (platform code)" ;
+    if(responseCode.standardCode.equals("ISSU")){
+      sendToPlatform = "DCSAI";
+    }else if(responseCode.standardCode.equals("BREQ")){
+      sendToPlatform = "DCSAB";
+    }else if(responseCode.standardCode.equals("REFU")){
+      sendToPlatform = "DCSAR";
+    }
     return (switch (eblType) {
       case BLANK_EBL -> new SuppliedScenarioParameters(
-        "BOLE (platform code)",
+        sendToPlatform,
         "Legal name of issueTo party",
         "Party code of issueTo party",
         "Bolero (code list name for issueTo party)",
@@ -67,7 +75,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
         null
       );
       default -> new SuppliedScenarioParameters(
-        "BOLE (platform code)",
+        sendToPlatform,
         "Legal name of issue to party",
         "Party code of issue to party",
         "Bolero (code list name for issue to party)",
@@ -86,7 +94,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
-    setDsp(getDsp().withEblType(eblType).withResponseCode(responseCode));
+    setDsp(getDsp().withEblType(eblType));
     getSspConsumer().accept(SuppliedScenarioParameters.fromJson(partyInput.get("input")));
   }
 

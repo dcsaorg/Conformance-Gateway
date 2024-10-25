@@ -87,46 +87,8 @@ public class EblIssuancePlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceResponse),
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
-
-  private void sendIssuanceResponse(JsonNode actionPrompt) {
-    log.info(
-        "EblIssuancePlatform.sendIssuanceResponse(%s)".formatted(actionPrompt.toPrettyString()));
-    String tdr = actionPrompt.path("tdr").asText();
-    String irc = actionPrompt.path("irc").asText();
-
-    if (eblStatesByTdr.containsKey(tdr)) {
-      if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {
-        eblStatesByTdr.put(tdr, EblIssuanceState.ISSUED);
-      } else {
-        eblStatesByTdr.remove(tdr);
-        var checksum = tdr2PendingChecksum.get(tdr);
-        knownChecksums.remove(checksum);
-      }
-    }
-    var response = OBJECT_MAPPER
-      .createObjectNode()
-      .put("transportDocumentReference", tdr)
-      .put("issuanceResponseCode", irc);
-
-    if (irc.equals("BREQ")) {
-      response.putArray("errors")
-        .addObject()
-        .put("reason", "Rejected as required by the conformance scenario")
-        .put("errorCode", "CTK-1234");
-    }
-
-    asyncCounterpartNotification(
-      actionPrompt.required("actionId").asText(), "/v3/ebl-issuance-responses", response);
-
-    addOperatorLogEntry(
-        "Sent issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s'"
-            .formatted(irc, tdr));
-  }
-
-
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
@@ -161,22 +123,28 @@ public class EblIssuancePlatform extends ConformanceParty {
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
-    String irc ="";
-    if(persistentMap.load("responseCode") != null){
-      irc = persistentMap.load("responseCode").asText();
-    }else{
-      String value = jsonRequest.path("document").path("sendToPlatform").asText();
-      if(value.equals("DCSAI")){
-        irc = "ISSU";
-      }else if(value.equals("DCSAB")){
-        irc = "BREQ";
-      }else if(value.equals("DCSAR")){
-        irc = "REFU";
+    JsonNode responseCodeNode = persistentMap.load("responseCode");
+
+    String irc = "";
+    if (responseCodeNode != null) {
+      irc = responseCodeNode.asText();
+    } else {
+      String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
+      switch (value) {
+        case "DCSAI":
+          irc = "ISSU";
+          break;
+        case "DCSAB":
+          irc = "BREQ";
+          break;
+        case "DCSAR":
+          irc = "REFU";
+          break;
       }
     }
+
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
-
 
     ConformanceResponse response;
     if (tdr == null || !jsonRequest.path("document").path("documentParties").has("issuingParty")) {
@@ -227,7 +195,12 @@ public class EblIssuancePlatform extends ConformanceParty {
             .createObjectNode()
             .put("transportDocumentReference", tdr)
             .put("issuanceResponseCode", irc);
-
+    if (irc.equals("BREQ")) {
+      platformResponse.putArray("errors")
+        .addObject()
+        .put("reason", "Rejected as required by the conformance scenario")
+        .put("errorCode", "CTK-1234");
+    }
     asyncCounterpartNotification(
         null,
         "/v3/ebl-issuance-responses",platformResponse);

@@ -36,11 +36,11 @@ class EblIssuanceScenarioListBuilder
           noAction().thenEither(
             supplyScenarioParameters(EblType.STRAIGHT_EBL,
               IssuanceResponseCode.ACCEPTED)
-              .then(correctIssuanceRequestResponse())/*,
-            supplyScenarioParameters(EblType.NEGOTIABLE_EBL).then(
+              .then(correctIssuanceRequestResponse()),
+            supplyScenarioParameters(EblType.NEGOTIABLE_EBL,IssuanceResponseCode.ACCEPTED).then(
               correctIssuanceRequestResponse()),
-            supplyScenarioParameters(EblType.BLANK_EBL).then(
-              correctIssuanceRequestResponse())*/)))
+            supplyScenarioParameters(EblType.BLANK_EBL,IssuanceResponseCode.ACCEPTED).then(
+              correctIssuanceRequestResponse()))))
       /*Map.entry("Error cases",
         carrierScenarioParameters().then(noAction().thenEither(
           supplyScenarioParameters(EblType.STRAIGHT_EBL).then(duplicateIssuanceRequest().then(issuanceResponseBlocked())),
@@ -83,22 +83,6 @@ class EblIssuanceScenarioListBuilder
     return _issuanceRequestResponse(true, false, false, ACCEPTED);
   }
 
- /* private static EblIssuanceScenarioListBuilder correctAmendedIssuanceRequest() {
-    return _issuanceRequest(true, false, true);
-  }
-
-  private static EblIssuanceScenarioListBuilder duplicateAmendedIssuanceRequest() {
-    return _issuanceRequest(true, true, true);
-  }
-
-  private static EblIssuanceScenarioListBuilder incorrectIssuanceRequest() {
-    return _issuanceRequest(false, false, false);
-  }*/
-
-  /*private static EblIssuanceScenarioListBuilder duplicateIssuanceRequest() {
-    return _issuanceRequestResponse(true, true, false);
-  }*/
-
   private static EblIssuanceScenarioListBuilder _issuanceRequestResponse(
       boolean isCorrect,
       boolean isDuplicate,
@@ -126,36 +110,4 @@ class EblIssuanceScenarioListBuilder
                   EblIssuanceRole.CARRIER.getConfigName(), true, true)));
   }
 
-  private static EblIssuanceScenarioListBuilder issuanceResponseAccepted() {
-    return _issuanceResponse(ACCEPTED, false);
-  }
-
-  private static EblIssuanceScenarioListBuilder issuanceResponseBlocked() {
-    return _issuanceResponse(IssuanceResponseCode.BLOCKED, false);
-  }
-
-  private static EblIssuanceScenarioListBuilder issuanceResponseRefused() {
-    return _issuanceResponse(IssuanceResponseCode.REFUSED, false);
-  }
-
-  private static EblIssuanceScenarioListBuilder duplicateIssuanceResponse() {
-    return _issuanceResponse(ACCEPTED, true);
-  }
-
-  private static EblIssuanceScenarioListBuilder _issuanceResponse(
-      IssuanceResponseCode issuanceResponseCode, boolean isDuplicate) {
-    EblIssuanceComponentFactory componentFactory = threadLocalComponentFactory.get();
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String platformPartyName = threadLocalPlatformPartyName.get();
-    return new EblIssuanceScenarioListBuilder(
-        previousAction ->
-            new IssuanceResponseAction(
-                issuanceResponseCode,
-                isDuplicate,
-                carrierPartyName,
-                platformPartyName,
-                (IssuanceAction) previousAction,
-                componentFactory.getMessageSchemaValidator(
-                    EblIssuanceRole.PLATFORM.getConfigName(), true, false)));
-  }
 }

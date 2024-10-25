@@ -11,7 +11,7 @@ import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DynamicScenarioParameters(EblType eblType, IssuanceResponseCode responseCode) implements ScenarioParameters {
+public record DynamicScenarioParameters(EblType eblType) implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);

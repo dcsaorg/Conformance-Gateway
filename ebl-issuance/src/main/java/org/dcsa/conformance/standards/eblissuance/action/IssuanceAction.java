@@ -39,7 +39,7 @@ public abstract class IssuanceAction extends ConformanceAction {
     this.expectedStatus = expectedStatus;
     if (previousAction == null) {
       this.dspReference =
-          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL,null));
+          new OverwritingReference<>(null, new DynamicScenarioParameters(EblType.STRAIGHT_EBL));
     } else {
       this.dspReference = new OverwritingReference<>(previousAction.dspReference, null);
     }

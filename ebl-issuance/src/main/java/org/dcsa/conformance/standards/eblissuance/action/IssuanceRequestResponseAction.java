@@ -35,7 +35,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     boolean isAmended
   ) {
     return Stream.of(
-      isCorrect ? null : "incorrect",
+      isCorrect ? "correct" : "incorrect",
       isDuplicate ? "duplicate" : null,
       isAmended ? "amended" : null
     ).filter(Objects::nonNull)

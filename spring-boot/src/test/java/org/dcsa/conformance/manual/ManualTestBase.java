@@ -79,6 +79,12 @@ public abstract class ManualTestBase {
       if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
       return;
     }
+    // STNG-210: PINT, Conformance, uses 2 input prompts for some cases, while not progressing conformance.
+    if (sandbox.sandboxName.contains("PINT")) {
+      waitForAsyncCalls(500L);
+      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+      return;
+    }
 
     // Wait until the scenario has finished and is conformant
     int i = 0;

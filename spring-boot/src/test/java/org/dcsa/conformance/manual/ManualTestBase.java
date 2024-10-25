@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
@@ -73,6 +75,12 @@ public abstract class ManualTestBase {
     if (sandbox.sandboxName.contains("eBL Issuance")
       && sandbox.sandboxName.contains("Conformance")
       && (conformantSubReportsStart == 0)) {
+      waitForAsyncCalls(500L);
+      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+      return;
+    }
+    // STNG-210: PINT, Conformance, uses 2 input prompts for some cases, while not progressing conformance.
+    if (sandbox.sandboxName.contains("PINT")) {
       waitForAsyncCalls(500L);
       if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
       return;
@@ -372,13 +380,19 @@ public abstract class ManualTestBase {
       if (inputRequired) {
         JsonNode jsonForPrompt = jsonNode.get("jsonForPromptText");
         String jsonForPromptText = jsonForPrompt.toString();
+        var promptText = jsonNode.path("promptText").asText("");
         assertTrue(
-            jsonForPromptText.length() >= 25, "Prompt text was:" + jsonForPromptText.length());
+            jsonForPromptText.length() >= 25, "Json for prompt was length: " + jsonForPromptText.length());
         String promptActionId = jsonNode.get("promptActionId").textValue();
 
         // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
         if (jsonForPromptText.contains("Insert TDR here")) {
           jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
+          // PINT flow
+        } else if (promptText.contains("Please provide these scenario details. Additional documents required:")) {
+          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
+        } else if (promptText.contains("Setup the system for transfer and provide the following details for the sender.")) {
+          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
         }
 
         handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
@@ -396,6 +410,20 @@ public abstract class ManualTestBase {
       if (isRunning) completeAction(sandbox1);
     } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
+  }
+
+  @SneakyThrows
+  private JsonNode fetchPromptAnswer(SandboxConfig sandbox2, SandboxConfig sandbox1, String answerFor) {
+    notifyAction(sandbox2, sandbox1);
+    var prompt = "Prompt answer for %s:".formatted(answerFor);
+
+    log.debug("Fetching prompt answer for {} from sandbox2", answerFor);
+    var logEntry = getSandbox(sandbox2).operatorLog.stream()
+        .filter(text -> text.startsWith(prompt))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No prompt found"));
+    var json = logEntry.substring(prompt.length() + 1);
+    return OBJECT_MAPPER.readTree(json);
   }
 
   private JsonNode fetchTransportDocument(SandboxConfig sandbox2, SandboxConfig sandbox1) {

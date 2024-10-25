@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblinterop.action.*;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
@@ -28,9 +29,11 @@ import org.dcsa.conformance.standards.eblinterop.models.TDReceiveState;
 
 @Slf4j
 public class PintReceivingPlatform extends ConformanceParty {
-  private final Map<String, String> envelopeReferences = new HashMap<>();
 
-  private final PayloadSignerWithKey payloadSigner;
+  private static final String EXPECTED_RECEIVER_PARTY_CODE = "12345-jane-doe";
+  private static final PayloadSignerWithKey RECEIVING_PLATFORM_PAYLOAD_SIGNER = PayloadSignerFactory.receiverPayloadSigner();
+
+  private final Map<String, String> envelopeReferences = new HashMap<>();
 
   public PintReceivingPlatform(
       String apiVersion,
@@ -38,8 +41,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       CounterpartConfiguration counterpartConfiguration,
       JsonNodeMap persistentMap,
       PartyWebClient asyncWebClient,
-      Map<String, ? extends Collection<String>> orchestratorAuthHeader,
-      PayloadSignerWithKey payloadSigner) {
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
         apiVersion,
         partyConfiguration,
@@ -47,7 +49,6 @@ public class PintReceivingPlatform extends ConformanceParty {
         persistentMap,
         asyncWebClient,
         orchestratorAuthHeader);
-    this.payloadSigner = payloadSigner;
   }
 
   @Override
@@ -94,32 +95,30 @@ public class PintReceivingPlatform extends ConformanceParty {
     log.info("EblInteropSendingPlatform.handleScenarioTypeAction(%s)".formatted(actionPrompt.toPrettyString()));
     var ssp = SenderScenarioParameters.fromJson(actionPrompt.get("ssp"));
     var tdr = ssp.transportDocumentReference();
-    var existing = persistentMap.load(tdr);
-    if (existing != null){
-      throw new IllegalStateException("Please do not reuse TDRs between scenarios in the conformance test");
-    }
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
-    var expectedRecipient = "12345-jane-doe";
-    var receivingParameters = getReceiverScenarioParameters(ssp, scenarioClass, expectedRecipient);
+    var receivingParameters = getReceiverScenarioParameters(ssp.eblPlatform(), scenarioClass);
     var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
     tdState.setExpectedReceiver(
       generateReceiverParty(
-        ssp,
+        ssp.eblPlatform(),
         scenarioClass == ScenarioClass.INVALID_RECIPIENT ? ScenarioClass.NO_ISSUES : scenarioClass,
-        expectedRecipient
+        EXPECTED_RECEIVER_PARTY_CODE
       )
     );
     tdState.setScenarioClass(scenarioClass);
     tdState.save(persistentMap);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.required("actionId").asText(), receivingParameters.toJson());
+    var receivingParametersJson = receivingParameters.toJson();
     addOperatorLogEntry(
-      "Finished ScenarioType");
+      "Prompt answer for initiateState: %s".formatted(receivingParametersJson));
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(), receivingParametersJson);
+    addOperatorLogEntry(
+      "Finished ScenarioType setup");
   }
 
-  private JsonNode generateReceiverParty(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
+  private static JsonNode generateReceiverParty(String sendingPlatform, ScenarioClass scenarioClass, String expectedRecipient) {
     String platform;
-    if ("CARX".equals(ssp.eblPlatform())) {
+    if ("CARX".equals(sendingPlatform)) {
       platform = "BOLE";
     } else {
       platform = "CARX";
@@ -135,12 +134,12 @@ public class PintReceivingPlatform extends ConformanceParty {
     return receiverParty;
   }
 
-  private ReceiverScenarioParameters getReceiverScenarioParameters(SenderScenarioParameters ssp, ScenarioClass scenarioClass, String expectedRecipient) {
-    var receiverParty = generateReceiverParty(ssp, scenarioClass, expectedRecipient);
+  public static ReceiverScenarioParameters getReceiverScenarioParameters(String sendingPlatform, ScenarioClass scenarioClass) {
+    var receiverParty = generateReceiverParty(sendingPlatform, scenarioClass, EXPECTED_RECEIVER_PARTY_CODE);
 
     return new ReceiverScenarioParameters(
       receiverParty,
-      payloadSigner.getPublicKeyInPemFormat()
+      RECEIVING_PLATFORM_PAYLOAD_SIGNER.getPublicKeyInPemFormat()
     );
   }
 
@@ -164,7 +163,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     if (responseCode != null) {
       receiveState.updateTransferState(responseCode);
       unsignedPayload.put("responseCode", responseCode.name());
-      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, RECEIVING_PLATFORM_PAYLOAD_SIGNER);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),
@@ -233,7 +232,7 @@ public class PintReceivingPlatform extends ConformanceParty {
           // Will just fail the checksum check below
         }
         if (!Objects.equals(checksum, computedChecksum) || !receiveState.receiveMissingDocument(checksum)) {
-          var payload = receiveState.generateSignedResponse(INCD, payloadSigner);
+          var payload = receiveState.generateSignedResponse(INCD, RECEIVING_PLATFORM_PAYLOAD_SIGNER);
           return request.createResponse(
             INCD.getHttpResponseCode(),
             Map.of(API_VERSION, List.of(apiVersion)),
@@ -267,7 +266,7 @@ public class PintReceivingPlatform extends ConformanceParty {
       }
       var responseCode = receiveState.finishTransferCode();
       receiveState.updateTransferState(responseCode);
-      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, payloadSigner);
+      var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, RECEIVING_PLATFORM_PAYLOAD_SIGNER);
       receiveState.save(persistentMap);
       return request.createResponse(
         responseCode.getHttpResponseCode(),

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
@@ -52,6 +54,7 @@ public abstract class ManualTestBase {
   void handleActionInput(
       SandboxConfig sandbox, String scenarioId, String actionId, JsonNode textInputNode) {
     log.debug("Handling action input: {}", textInputNode);
+    long conformantSubReportsStart = countConformantSubReports(sandbox, scenarioId);
     ObjectNode node =
         mapper
             .createObjectNode()
@@ -62,8 +65,67 @@ public abstract class ManualTestBase {
             .set("actionInput", textInputNode);
     JsonNode jsonNode = webuiHandler.handleRequest(USER_ID, node);
     assertTrue(jsonNode.isEmpty(), "Should be empty, found: " + jsonNode);
-    if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+    waitUntilScenarioStatusProgresses(sandbox, scenarioId, conformantSubReportsStart);
+  }
+
+  private void waitUntilScenarioStatusProgresses(SandboxConfig sandbox, String scenarioId, long conformantSubReportsStart) {
     waitForCleanSandboxStatus(sandbox);
+
+    // STNG-210: eBL Issuance, Conformance, uses 2 input prompts, while not progressing conformance.
+    if (sandbox.sandboxName.contains("eBL Issuance")
+      && sandbox.sandboxName.contains("Conformance")
+      && (conformantSubReportsStart == 0)) {
+      waitForAsyncCalls(500L);
+      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+      return;
+    }
+    // STNG-210: PINT, Conformance, uses 2 input prompts for some cases, while not progressing conformance.
+    if (sandbox.sandboxName.contains("PINT")) {
+      waitForAsyncCalls(500L);
+      if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 6);
+      return;
+    }
+
+    // Wait until the scenario has finished and is conformant
+    int i = 0;
+    long currentCount = countConformantSubReports(sandbox, scenarioId);
+    while (conformantSubReportsStart == currentCount) {
+      // Check if input is required, if so, conformance is not progressing, so continue.
+      JsonNode jsonNode = getScenarioStatus(sandbox, scenarioId);
+      boolean inputRequired = jsonNode.has("inputRequired") && jsonNode.get("inputRequired").asBoolean();
+      if (inputRequired) {
+        log.debug("Input is required (again), return.");
+        return;
+      }
+
+      log.debug("Waiting for scenario to finish.");
+      waitForAsyncCalls(50L);
+      i++;
+      if (i > 200) {
+        String message =
+            "Scenario did not finish in time or in the correct Conformant state. In Sandbox: "
+                + sandbox.sandboxName;
+        log.error(message);
+        fail(message);
+      }
+      currentCount = countConformantSubReports(sandbox, scenarioId);
+    }
+  }
+
+  private long countConformantSubReports(SandboxConfig sandbox, String scenarioId) {
+    JsonNode conformanceSubReport =
+        getScenarioStatus(sandbox, scenarioId).get("conformanceSubReport");
+    SubReport subReport = mapper.convertValue(conformanceSubReport, SubReport.class);
+    if (subReport == null || subReport.subReports == null) {
+      return 0;
+    }
+    // If the scenario is not conformant, return -1 and don't count any sub reports.
+    if (subReport.status.equals("NON_CONFORMANT")) {
+      return -1;
+    }
+    return subReport.subReports.stream()
+        .filter(subReport1 -> subReport1.status.equals("CONFORMANT"))
+        .count();
   }
 
   void startOrStopScenario(SandboxConfig sandbox, String scenarioId) {
@@ -318,13 +380,19 @@ public abstract class ManualTestBase {
       if (inputRequired) {
         JsonNode jsonForPrompt = jsonNode.get("jsonForPromptText");
         String jsonForPromptText = jsonForPrompt.toString();
+        var promptText = jsonNode.path("promptText").asText("");
         assertTrue(
-            jsonForPromptText.length() >= 25, "Prompt text was:" + jsonForPromptText.length());
+            jsonForPromptText.length() >= 25, "Json for prompt was length: " + jsonForPromptText.length());
         String promptActionId = jsonNode.get("promptActionId").textValue();
 
         // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
         if (jsonForPromptText.contains("Insert TDR here")) {
           jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
+          // PINT flow
+        } else if (promptText.contains("Please provide these scenario details. Additional documents required:")) {
+          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
+        } else if (promptText.contains("Setup the system for transfer and provide the following details for the sender.")) {
+          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
         }
 
         handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
@@ -342,6 +410,20 @@ public abstract class ManualTestBase {
       if (isRunning) completeAction(sandbox1);
     } while (isRunning);
     validateSandboxScenarioGroup(sandbox1, scenarioId, scenarioName);
+  }
+
+  @SneakyThrows
+  private JsonNode fetchPromptAnswer(SandboxConfig sandbox2, SandboxConfig sandbox1, String answerFor) {
+    notifyAction(sandbox2, sandbox1);
+    var prompt = "Prompt answer for %s:".formatted(answerFor);
+
+    log.debug("Fetching prompt answer for {} from sandbox2", answerFor);
+    var logEntry = getSandbox(sandbox2).operatorLog.stream()
+        .filter(text -> text.startsWith(prompt))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No prompt found"));
+    var json = logEntry.substring(prompt.length() + 1);
+    return OBJECT_MAPPER.readTree(json);
   }
 
   private JsonNode fetchTransportDocument(SandboxConfig sandbox2, SandboxConfig sandbox1) {

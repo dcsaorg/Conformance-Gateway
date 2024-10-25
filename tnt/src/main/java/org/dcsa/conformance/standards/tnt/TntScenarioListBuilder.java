@@ -46,8 +46,6 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterBy(
                             EVENT_CREATED_DATE_TIME_GTE, EVENT_CREATED_DATE_TIME_LTE),
                         scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
-                        scenarioWithFilterByDateTimesAnd(EVENT_TYPE),
-                        scenarioWithFilterBy(SHIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterByDateTimesAnd(SHIPMENT_EVENT_TYPE_CODE),
                         scenarioWithFilterBy(DOCUMENT_TYPE_CODE),
                         scenarioWithFilterByDateTimesAnd(DOCUMENT_TYPE_CODE),

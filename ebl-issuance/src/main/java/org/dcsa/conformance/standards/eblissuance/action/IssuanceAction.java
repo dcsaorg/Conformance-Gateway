@@ -94,8 +94,7 @@ public abstract class IssuanceAction extends ConformanceAction {
 
   protected abstract Supplier<String> getTdrSupplier();
 
-  protected Stream<ActionCheck> getNotificationChecks(
-      String expectedApiVersion, JsonSchemaValidator notificationSchemaValidator) {
+  protected Stream<ActionCheck> getNotificationChecks(JsonSchemaValidator notificationSchemaValidator) {
     String titlePrefix = "[Notification]";
 
     return Stream.of(

@@ -198,7 +198,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
             ).filter(Objects::nonNull);
         return Stream.concat(
           primaryExchangeChecks,
-          getNotificationChecks(expectedApiVersion,notificationSchemaValidator));
+          getNotificationChecks(notificationSchemaValidator));
       }
     };
   }

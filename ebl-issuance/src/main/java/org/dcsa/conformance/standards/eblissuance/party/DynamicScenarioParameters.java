@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.With;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.action.EblType;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)

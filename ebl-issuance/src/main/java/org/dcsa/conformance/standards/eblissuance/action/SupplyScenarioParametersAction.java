@@ -11,10 +11,19 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   private IssuanceResponseCode responseCode;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
-
   public SupplyScenarioParametersAction(
-      String sourcePartyName, String targetPartyName, IssuanceAction previousAction, EblType eblType, IssuanceResponseCode code) {
-    super(sourcePartyName, targetPartyName, previousAction, "Supply scenario parameters [%s] and for response code [%s]".formatted(eblType.name(),code.standardCode), -1);
+      String sourcePartyName,
+      String targetPartyName,
+      IssuanceAction previousAction,
+      EblType eblType,
+      IssuanceResponseCode code) {
+    super(
+        sourcePartyName,
+        targetPartyName,
+        previousAction,
+        "Supply scenario parameters [%s] and for response code [%s]"
+            .formatted(eblType.name(), code.standardCode),
+        -1);
     this.eblType = eblType;
     this.responseCode = code;
   }
@@ -31,8 +40,8 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
     if (suppliedScenarioParameters != null) {
       jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
     }
-    if(responseCode != null){
-      jsonState.put("responseCode",responseCode.toString());
+    if (responseCode != null) {
+      jsonState.put("responseCode", responseCode.toString());
     }
     return jsonState;
   }
@@ -44,46 +53,53 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
     if (cspNode != null) {
       suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(cspNode);
     }
-    if(jsonState.get("responseCode") != null){
+    if (jsonState.get("responseCode") != null) {
       responseCode = IssuanceResponseCode.valueOf(jsonState.required("responseCode").asText());
     }
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters that the synthetic carrier should use when constructing an issuance request, such that when your platform system receives the issuance request, it sends back an asynchronous response with the code "+responseCode.standardCode;
+    return "Supply the parameters that the synthetic carrier should use when constructing an issuance request, such that when your platform system receives the issuance request, it sends back an asynchronous response with the code "
+        + responseCode.standardCode;
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    String sendToPlatform = "BOLE (platform code)" ;
-    if(responseCode.standardCode.equals("ISSU")){
-      sendToPlatform = "DCSAI";
-    }else if(responseCode.standardCode.equals("BREQ")){
-      sendToPlatform = "DCSAB";
-    }else if(responseCode.standardCode.equals("REFU")){
-      sendToPlatform = "DCSAR";
+    String sendToPlatform = "BOLE (platform code)";
+
+    switch (responseCode.standardCode) {
+      case "ISSU":
+        sendToPlatform = "DCSAI";
+        break;
+      case "BREQ":
+        sendToPlatform = "DCSAB";
+        break;
+      case "REFU":
+        sendToPlatform = "DCSAR";
+        break;
     }
     return (switch (eblType) {
-      case BLANK_EBL -> new SuppliedScenarioParameters(
-        sendToPlatform,
-        "Legal name of issueTo party",
-        "Party code of issueTo party",
-        "Bolero (code list name for issueTo party)",
-        null,
-        null,
-        null
-      );
-      default -> new SuppliedScenarioParameters(
-        sendToPlatform,
-        "Legal name of issue to party",
-        "Party code of issue to party",
-        "Bolero (code list name for issue to party)",
-        "Legal name of consignee/endorsee",
-        "Party code of consignee/endorsee",
-        "Bolero (code list name for consignee/endorsee)"
-      );
-    }).toJson();
+          case BLANK_EBL ->
+              new SuppliedScenarioParameters(
+                  sendToPlatform,
+                  "Legal name of issueTo party",
+                  "Party code of issueTo party",
+                  "Bolero (code list name for issueTo party)",
+                  null,
+                  null,
+                  null);
+          default ->
+              new SuppliedScenarioParameters(
+                  sendToPlatform,
+                  "Legal name of issue to party",
+                  "Party code of issue to party",
+                  "Bolero (code list name for issue to party)",
+                  "Legal name of consignee/endorsee",
+                  "Party code of consignee/endorsee",
+                  "Bolero (code list name for consignee/endorsee)");
+        })
+        .toJson();
   }
 
   @Override
@@ -100,8 +116,9 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   @Override
   public ObjectNode asJsonNode() {
-      return super.asJsonNode()
-      .put("eblType", eblType.name()).put("responseCode",responseCode.standardCode);
+    return super.asJsonNode()
+        .put("eblType", eblType.name())
+        .put("responseCode", responseCode.standardCode);
   }
 
   @Override

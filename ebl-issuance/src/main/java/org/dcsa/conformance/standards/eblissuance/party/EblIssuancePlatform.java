@@ -20,11 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
-
-import javax.json.JsonObject;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {

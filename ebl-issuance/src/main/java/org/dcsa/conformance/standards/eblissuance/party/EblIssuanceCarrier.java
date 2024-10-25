@@ -34,7 +34,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
   private final Map<String, String> sirsByTdr = new HashMap<>();
   private final Map<String, String> brsByTdr = new HashMap<>();
   private final PayloadSignerWithKey payloadSigner;
-  private String responseCode;
 
   public EblIssuanceCarrier(
       String apiVersion,

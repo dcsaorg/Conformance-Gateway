@@ -423,7 +423,7 @@ public class ConformanceSandbox {
     LinkedList<SandboxWaiting> waitingList = new LinkedList<>();
     if (waitingJsonNode != null && waitingJsonNode.isArray()) {
       waitingJsonNode.forEach(
-          objectNode -> waitingList.add(SandboxWaiting.fromJson((ObjectNode) objectNode)));
+          objectNode -> waitingList.add(SandboxWaiting.fromJson(objectNode)));
     }
     return waitingList;
   }
@@ -435,12 +435,14 @@ public class ConformanceSandbox {
       String forWhom,
       String toDoWhat) {
     ArrayNode waitingArrayNode = OBJECT_MAPPER.createArrayNode();
-    Stream.concat(
-            _getWaitingFor(persistenceProvider, sandboxId).stream()
-                .filter(waiting -> !waiting.who().equals(who)),
-            Stream.of(new SandboxWaiting(who, forWhom, toDoWhat))
-                .filter(waiting -> waiting.toDoWhat() != null))
-        .forEach(waiting -> waitingArrayNode.add(waiting.toJson()));
+    if (who != null) {
+      Stream.concat(
+              _getWaitingFor(persistenceProvider, sandboxId).stream()
+                  .filter(waiting -> !waiting.who().equals(who)),
+              Stream.of(new SandboxWaiting(who, forWhom, toDoWhat))
+                  .filter(waiting -> waiting.toDoWhat() != null))
+          .forEach(waiting -> waitingArrayNode.add(waiting.toJson()));
+    }
     log.info("Sandbox %s waiting: %s".formatted(sandboxId, waitingArrayNode.toPrettyString()));
     persistenceProvider
         .getNonLockingMap()
@@ -487,6 +489,7 @@ public class ConformanceSandbox {
       Consumer<JsonNode> deferredSandboxTaskConsumer,
       String sandboxId,
       String scenarioId) {
+    _setWaitingFor(persistenceProvider, sandboxId, null, null, null);
     new OrchestratorTask(
             persistenceProvider,
             conformanceWebRequest ->

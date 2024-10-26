@@ -133,11 +133,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     String br =
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
 
-    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
-    var isAmended = actionPrompt.path("isAmended").asBoolean(false);
-    if (isCorrect) {
-      eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
-    }
+    eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
 
     var jsonRequestBody =
         (ObjectNode)
@@ -199,23 +195,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
       }
     }
 
-    if (!isCorrect) {
-      ((ObjectNode) jsonRequestBody.path("document").path("documentParties"))
-          .remove("issuingParty");
-    }
-    if (isAmended) {
-      var sealObj =
-          (ObjectNode)
-              jsonRequestBody
-                  .path("document")
-                  .path("utilizedTransportEquipments")
-                  .path(0)
-                  .path("seals")
-                  .path(0);
-      var sealNumber = sealObj.path("sealNumber").asText("") + "X";
-      sealObj.put("sealNumber", sealNumber);
-    }
-
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
     jsonRequestBody.set("eBLVisualisationByCarrier", getSupportingDocumentObject());
@@ -235,8 +214,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
         "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
 
     addOperatorLogEntry(
-        "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
+        "Sent an issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
+            .formatted(tdr, eblStatesByTdr.get(tdr)));
   }
 
   private ObjectNode getSupportingDocumentObject() {

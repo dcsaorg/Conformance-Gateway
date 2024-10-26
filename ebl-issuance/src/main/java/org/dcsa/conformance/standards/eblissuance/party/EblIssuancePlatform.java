@@ -20,7 +20,8 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
-import org.dcsa.conformance.standards.eblissuance.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
+import org.dcsa.conformance.standards.eblissuance.action.PlatformScenarioParametersAction;
 
 @Slf4j
 public class EblIssuancePlatform extends ConformanceParty {
@@ -86,7 +87,7 @@ public class EblIssuancePlatform extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
+        Map.entry(PlatformScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -94,14 +95,10 @@ public class EblIssuancePlatform extends ConformanceParty {
         "EblIssuancePlatform.supplyScenarioParameters(%s)"
             .formatted(actionPrompt.toPrettyString()));
 
-    JsonNode code = actionPrompt.path("responseCode");
-    if (code != null) {
-      persistentMap.save("responseCode", code);
-    }
-
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-            "DCSA",
+            IssuanceResponseCode.forStandardCode(actionPrompt.required("responseCode").asText())
+                .sendToPlatform,
             "DCSA issue to party",
             "1234-issue-to",
             "DCSA",
@@ -122,21 +119,15 @@ public class EblIssuancePlatform extends ConformanceParty {
     JsonNode jsonRequest = request.message().body().getJsonBody();
 
     var tdr = jsonRequest.path("document").path("transportDocumentReference").asText(null);
-    JsonNode responseCodeNode = persistentMap.load("responseCode");
 
-    String irc;
-    if (responseCodeNode != null) {
-      irc = responseCodeNode.asText();
-    } else {
-      String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
-      irc =
-          switch (value) {
-            case "DCSA" -> "ISSU";
-            case "DCSB" -> "BREQ";
-            case "DCSR" -> "REFU";
-            default -> "";
-          };
-    }
+    String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
+    String irc =
+        switch (value) {
+          case "DCSA" -> "ISSU";
+          case "DCSB" -> "BREQ";
+          case "DCSR" -> "REFU";
+          default -> "";
+        };
     var checksum = Checksums.sha256CanonicalJson(jsonRequest.path("document"));
     var state = eblStatesByTdr.get(tdr);
 

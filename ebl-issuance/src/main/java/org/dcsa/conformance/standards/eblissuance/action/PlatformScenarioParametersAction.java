@@ -2,16 +2,21 @@ package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import lombok.Getter;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
-public class SupplyScenarioParametersAction extends IssuanceAction {
+public class PlatformScenarioParametersAction extends IssuanceAction {
   private final EblType eblType;
+  @Getter
   private IssuanceResponseCode responseCode;
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
 
-  public SupplyScenarioParametersAction(
+  public PlatformScenarioParametersAction(
       String sourcePartyName,
       String targetPartyName,
       IssuanceAction previousAction,
@@ -66,33 +71,24 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    String sendToPlatform =
-        switch (responseCode.standardCode) {
-          case "ISSU" -> "DCSA";
-          case "BREQ" -> "DCSB";
-          case "REFU" -> "DCSR";
-          default -> "BOLE (platform code)";
-        };
-    return (switch (eblType) {
-          case BLANK_EBL ->
-              new SuppliedScenarioParameters(
-                  sendToPlatform,
-                  "Legal name of issueTo party",
-                  "Party code of issueTo party",
-                  "Bolero (code list name for issueTo party)",
-                  null,
-                  null,
-                  null);
-          default ->
-              new SuppliedScenarioParameters(
-                  sendToPlatform,
-                  "Legal name of issue to party",
-                  "Party code of issue to party",
-                  "Bolero (code list name for issue to party)",
-                  "Legal name of consignee/endorsee",
-                  "Party code of consignee/endorsee",
-                  "Bolero (code list name for consignee/endorsee)");
-        })
+    String sendToPlatform = responseCode.sendToPlatform;
+    return (Objects.equals(eblType, EblType.BLANK_EBL)
+            ? new SuppliedScenarioParameters(
+                sendToPlatform,
+                "Legal name of issueTo party",
+                "Party code of issueTo party",
+                "DCSA (code list name for issueTo party)",
+                null,
+                null,
+                null)
+            : new SuppliedScenarioParameters(
+                sendToPlatform,
+                "Legal name of issue to party",
+                "Party code of issue to party",
+                "DCSA (code list name for issue to party)",
+                "Legal name of consignee/endorsee",
+                "Party code of consignee/endorsee",
+                "DCSA (code list name for consignee/endorsee)"))
         .toJson();
   }
 

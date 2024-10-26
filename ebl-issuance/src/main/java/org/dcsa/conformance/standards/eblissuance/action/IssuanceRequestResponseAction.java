@@ -1,11 +1,12 @@
 package org.dcsa.conformance.standards.eblissuance.action;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,22 +21,16 @@ import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 @Getter
 @Slf4j
 public class IssuanceRequestResponseAction extends IssuanceAction {
+  private final IssuanceResponseCode issuanceResponseCode;
   private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator issuanceManifestSchemaValidator;
   private final JsonSchemaValidator notificationSchemaValidator;
-  private final boolean isCorrect;
-  private final boolean isAmended;
   private final AtomicReference<String> transportDocumentReference;
-  private final String responseCode;
 
   public IssuanceRequestResponseAction(
-      boolean isCorrect,
-      boolean isDuplicate,
-      boolean isAmended,
       String platformPartyName,
       String carrierPartyName,
       IssuanceAction previousAction,
-      IssuanceResponseCode code,
       JsonSchemaValidator notificationSchemaValidator,
       JsonSchemaValidator requestSchemaValidator,
       JsonSchemaValidator issuanceManifestSchemaValidator) {
@@ -43,34 +38,35 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "Request(%s) Response(%s)"
-            .formatted(stepNameArg(isCorrect, isDuplicate, isAmended), code.standardCode),
-        isCorrect ? isDuplicate ? 409 : 204 : 400);
-    this.isCorrect = isCorrect;
-    this.isAmended = isAmended;
-    this.responseCode = code.standardCode;
+        "Request() Response(%s)"
+            .formatted(
+                _latestPlatformScenarioParametersAction(previousAction)
+                    .getResponseCode()
+                    .standardCode),
+        204);
+    this.issuanceResponseCode =
+        _latestPlatformScenarioParametersAction(previousAction).getResponseCode();
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.requestSchemaValidator = requestSchemaValidator;
     this.issuanceManifestSchemaValidator = issuanceManifestSchemaValidator;
     this.transportDocumentReference =
-        previousAction != null && !(this.previousAction instanceof SupplyScenarioParametersAction)
+        previousAction != null && !(this.previousAction instanceof PlatformScenarioParametersAction)
             ? null
             : new AtomicReference<>();
   }
 
-  private static String stepNameArg(boolean isCorrect, boolean isDuplicate, boolean isAmended) {
-    return Stream.of(
-            isCorrect ? "correct" : "incorrect",
-            isDuplicate ? "duplicate" : null,
-            isAmended ? "amended" : null)
-        .filter(Objects::nonNull)
-        .collect(Collectors.joining(","));
+  private static PlatformScenarioParametersAction _latestPlatformScenarioParametersAction(
+      IssuanceAction previousAction) {
+    return previousAction
+            instanceof PlatformScenarioParametersAction platformScenarioParametersAction
+        ? platformScenarioParametersAction
+        : _latestPlatformScenarioParametersAction(previousAction.getPreviousIssuanceAction());
   }
 
   @Override
   protected Supplier<String> getTdrSupplier() {
     return this.previousAction != null
-            && !(this.previousAction instanceof SupplyScenarioParametersAction)
+            && !(this.previousAction instanceof PlatformScenarioParametersAction)
         ? ((IssuanceAction) this.previousAction).getTdrSupplier()
         : this.transportDocumentReference::get;
   }
@@ -102,19 +98,16 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
   public String getHumanReadablePrompt() {
     String tdr = getTdrSupplier().get();
     var eblType = getDsp().eblType();
-    return ("Send %s issuance request for %s")
+    return ("Send an issuance request for %s")
         .formatted(
-            isCorrect ? "an" : "an incorrect",
             tdr == null
                 ? "an eBL of type %s that has not yet been issued".formatted(eblType)
-                : "%s the eBL with transportDocumentReference '%s'"
-                    .formatted(isAmended ? "an amended version of" : "", tdr));
+                : "the eBL with transportDocumentReference '%s'".formatted(tdr));
   }
 
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    jsonNode.put("isCorrect", isCorrect).put("isAmended", isAmended);
     jsonNode.set("dsp", getDsp().toJson());
     jsonNode.set("ssp", getSspSupplier().get().toJson());
     jsonNode.set("csp", getCspSupplier().get().toJson());
@@ -159,51 +152,68 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
             () ->
                 PayloadSignerFactory.verifierFromPemEncodedPublicKey(
                     getCspSupplier().get().carrierSigningKeyPEM());
-        Stream<ActionCheck> primaryExchangeChecks =
-            Stream.of(
-                    new UrlPathCheck(
-                        EblIssuanceRole::isCarrier,
-                        getMatchedExchangeUuid(),
-                        "/ebl-issuance-requests"),
-                    new HttpMethodCheck(
-                        EblIssuanceRole::isCarrier, getMatchedExchangeUuid(), "PUT"),
-                    new ResponseStatusCheck(
-                        EblIssuanceRole::isPlatform, getMatchedExchangeUuid(), expectedStatus),
-                    new ApiHeaderCheck(
-                        EblIssuanceRole::isCarrier,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        expectedApiVersion),
-                    new ApiHeaderCheck(
-                        EblIssuanceRole::isPlatform,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.RESPONSE,
-                        expectedApiVersion),
-                    isCorrect
-                        ? new JsonSchemaCheck(
-                            EblIssuanceRole::isCarrier,
-                            getMatchedExchangeUuid(),
-                            HttpMessageType.REQUEST,
-                            requestSchemaValidator)
-                        : null,
-                    expectedApiVersion.startsWith("3.0")
-                        ? IssuanceChecks.tdScenarioChecks(
-                            getMatchedExchangeUuid(), expectedApiVersion, getDsp().eblType())
-                        : null,
-                    isCorrect && expectedApiVersion.startsWith("3.")
-                        ? IssuanceChecks.issuanceRequestSignatureChecks(
-                            getMatchedExchangeUuid(),
-                            expectedApiVersion,
-                            issuanceManifestSchemaValidator,
-                            signatureVerifier)
-                        : null,
-                    isCorrect && expectedApiVersion.startsWith("3.")
-                        ? IssuanceChecks.tdContentChecks(
-                            getMatchedExchangeUuid(), expectedApiVersion)
-                        : null)
-                .filter(Objects::nonNull);
+        String asyncResponseChecksPrefix = "[Response]";
+        UUID matchedExchangeUuid = getMatchedExchangeUuid();
+        UUID matchedNotificationExchangeUuid = getMatchedNotificationExchangeUuid();
         return Stream.concat(
-            primaryExchangeChecks, getNotificationChecks(notificationSchemaValidator));
+            Stream.of(
+                new UrlPathCheck(
+                    EblIssuanceRole::isCarrier, matchedExchangeUuid, "/ebl-issuance-requests"),
+                new HttpMethodCheck(EblIssuanceRole::isCarrier, matchedExchangeUuid, "PUT"),
+                new ResponseStatusCheck(
+                    EblIssuanceRole::isPlatform, matchedExchangeUuid, expectedStatus),
+                new ApiHeaderCheck(
+                    EblIssuanceRole::isCarrier,
+                    matchedExchangeUuid,
+                    HttpMessageType.REQUEST,
+                    expectedApiVersion),
+                new ApiHeaderCheck(
+                    EblIssuanceRole::isPlatform,
+                    matchedExchangeUuid,
+                    HttpMessageType.RESPONSE,
+                    expectedApiVersion),
+                new JsonSchemaCheck(
+                    EblIssuanceRole::isCarrier,
+                    matchedExchangeUuid,
+                    HttpMessageType.REQUEST,
+                    requestSchemaValidator),
+                IssuanceChecks.tdScenarioChecks(
+                    matchedExchangeUuid, expectedApiVersion, getDsp().eblType()),
+                IssuanceChecks.issuanceRequestSignatureChecks(
+                    matchedExchangeUuid,
+                    expectedApiVersion,
+                    issuanceManifestSchemaValidator,
+                    signatureVerifier),
+                IssuanceChecks.tdContentChecks(matchedExchangeUuid, expectedApiVersion)),
+            Stream.of(
+                new HttpMethodCheck(
+                    asyncResponseChecksPrefix,
+                    EblIssuanceRole::isPlatform,
+                    matchedNotificationExchangeUuid,
+                    "POST"),
+                new UrlPathCheck(
+                    asyncResponseChecksPrefix,
+                    EblIssuanceRole::isPlatform,
+                    matchedNotificationExchangeUuid,
+                    "/v3/ebl-issuance-responses"),
+                new ResponseStatusCheck(
+                    asyncResponseChecksPrefix,
+                    EblIssuanceRole::isCarrier,
+                    matchedNotificationExchangeUuid,
+                    204),
+                new JsonSchemaCheck(
+                    asyncResponseChecksPrefix,
+                    EblIssuanceRole::isPlatform,
+                    matchedNotificationExchangeUuid,
+                    HttpMessageType.REQUEST,
+                    notificationSchemaValidator),
+                new JsonAttributeCheck(
+                    asyncResponseChecksPrefix,
+                    EblIssuanceRole::isPlatform,
+                    matchedNotificationExchangeUuid,
+                    HttpMessageType.REQUEST,
+                    JsonPointer.compile("/issuanceResponseCode"),
+                    issuanceResponseCode.standardCode)));
       }
     };
   }

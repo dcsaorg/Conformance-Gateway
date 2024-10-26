@@ -27,11 +27,11 @@ public abstract class ConformanceAction implements StatefulEntity {
   private final String actionPath;
   private final String actionTitle;
 
-  protected UUID id = UUID.randomUUID();
-  private UUID matchedExchangeUuid;
-  private UUID matchedNotificationExchangeUuid;
-  private String exchangeHandlingExceptionMessage;
-  private String notificationHandlingExceptionMessage;
+  protected volatile UUID id = UUID.randomUUID();
+  private volatile UUID matchedExchangeUuid;
+  private volatile UUID matchedNotificationExchangeUuid;
+  private volatile String exchangeHandlingExceptionMessage;
+  private volatile String notificationHandlingExceptionMessage;
 
   protected ConformanceAction(
       String sourcePartyName,

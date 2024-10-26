@@ -11,24 +11,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.ConformanceWebRequest;
 import org.dcsa.conformance.sandbox.ConformanceWebResponse;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import software.amazon.lambda.powertools.logging.Logging;
 
-@Log4j2
+@Slf4j
 public class ApiLambda
     implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-  @Logging
   public APIGatewayProxyResponseEvent handleRequest(
       final APIGatewayProxyRequestEvent event, final Context context) {
     try {
-      log.info("event = {}", event);
+      System.out.println("event = " + event + ", context = " + context);
       JsonNode jsonEvent = OBJECT_MAPPER.valueToTree(event);
-      log.debug("jsonEvent = {}", jsonEvent);
+      log.info("jsonEvent = {}", jsonEvent.toPrettyString());
 
       ConformancePersistenceProvider persistenceProvider =
           LambdaToolkit.createPersistenceProvider();
@@ -53,7 +51,7 @@ public class ApiLambda
           .withStatusCode(conformanceWebResponse.statusCode())
           .withBody(conformanceWebResponse.body());
     } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception: ", e);
+      log.error("Unhandled exception: {}", e, e);
       throw e;
     }
   }

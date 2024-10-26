@@ -101,14 +101,14 @@ public class EblIssuancePlatform extends ConformanceParty {
 
     SuppliedScenarioParameters suppliedScenarioParameters =
         new SuppliedScenarioParameters(
-            "BOLE",
-            "DCSA CTK Issue To party",
+            "DCSA",
+            "DCSA issue to party",
             "1234-issue-to",
-            "Bolero",
+            "DCSA",
             // These are ignored for blank ones, so we can provide them unconditionally.
-            "DCSA CTK Consignee/Endorsee",
+            "DCSA Consignee/Endorsee",
             "5678-cn-or-end",
-            "Bolero");
+            "DCSA");
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
     addOperatorLogEntry(
@@ -131,9 +131,9 @@ public class EblIssuancePlatform extends ConformanceParty {
       String value = jsonRequest.path("issueTo").path("sendToPlatform").asText();
       irc =
           switch (value) {
-            case "DCSAI" -> "ISSU";
-            case "DCSAB" -> "BREQ";
-            case "DCSAR" -> "REFU";
+            case "DCSA" -> "ISSU";
+            case "DCSB" -> "BREQ";
+            case "DCSR" -> "REFU";
             default -> "";
           };
     }
@@ -194,7 +194,7 @@ public class EblIssuancePlatform extends ConformanceParty {
           .putArray("errors")
           .addObject()
           .put("reason", "Rejected as required by the conformance scenario")
-          .put("errorCode", "CTK-1234");
+          .put("errorCode", "DCSA-123");
     }
     asyncCounterpartNotification(null, "/v3/ebl-issuance-responses", platformResponse);
 

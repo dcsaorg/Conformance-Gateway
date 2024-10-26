@@ -21,7 +21,7 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
         sourcePartyName,
         targetPartyName,
         previousAction,
-        "Supply scenario parameters [%s] and for response code [%s]"
+        "Platform scenario parameters [%s %s]"
             .formatted(eblType.name(), code.standardCode),
         -1);
     this.eblType = eblType;
@@ -68,9 +68,9 @@ public class SupplyScenarioParametersAction extends IssuanceAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     String sendToPlatform =
         switch (responseCode.standardCode) {
-          case "ISSU" -> "DCSAI";
-          case "BREQ" -> "DCSAB";
-          case "REFU" -> "DCSAR";
+          case "ISSU" -> "DCSA";
+          case "BREQ" -> "DCSB";
+          case "REFU" -> "DCSR";
           default -> "BOLE (platform code)";
         };
     return (switch (eblType) {

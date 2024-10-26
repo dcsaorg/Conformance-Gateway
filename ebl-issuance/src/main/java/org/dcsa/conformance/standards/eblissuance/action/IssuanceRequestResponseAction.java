@@ -43,7 +43,7 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "Request(%s)Response(%s)"
+        "Request(%s) Response(%s)"
             .formatted(stepNameArg(isCorrect, isDuplicate, isAmended), code.standardCode),
         isCorrect ? isDuplicate ? 409 : 204 : 400);
     this.isCorrect = isCorrect;
@@ -106,9 +106,9 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
         .formatted(
             isCorrect ? "an" : "an incorrect",
             tdr == null
-                ? "an eBL that has not yet been issued of type %s".formatted(eblType)
+                ? "an eBL of type %s that has not yet been issued".formatted(eblType)
                 : "%s the eBL with transportDocumentReference '%s'"
-                    .formatted(tdr, isAmended ? "an amended version of" : ""));
+                    .formatted(isAmended ? "an amended version of" : "", tdr));
   }
 
   @Override

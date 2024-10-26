@@ -1,13 +1,28 @@
 package org.dcsa.conformance.standards.eblissuance.action;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
+import org.dcsa.conformance.core.check.HttpMethodCheck;
+import org.dcsa.conformance.core.check.JsonAttributeCheck;
+import org.dcsa.conformance.core.check.JsonSchemaCheck;
+import org.dcsa.conformance.core.check.JsonSchemaValidator;
+import org.dcsa.conformance.core.check.ResponseStatusCheck;
+import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
 public abstract class IssuanceAction extends ConformanceAction {
@@ -78,4 +93,29 @@ public abstract class IssuanceAction extends ConformanceAction {
 
 
   protected abstract Supplier<String> getTdrSupplier();
+
+  protected Stream<ActionCheck> getNotificationChecks(JsonSchemaValidator notificationSchemaValidator) {
+    String titlePrefix = "[Notification]";
+
+    return Stream.of(
+            new HttpMethodCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                "POST"),
+            new UrlPathCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                "/v3/ebl-issuance-responses"),
+            new ResponseStatusCheck(
+                titlePrefix, EblIssuanceRole::isCarrier, getMatchedNotificationExchangeUuid(), 204),
+            new JsonSchemaCheck(
+                titlePrefix,
+                EblIssuanceRole::isPlatform,
+                getMatchedNotificationExchangeUuid(),
+                HttpMessageType.REQUEST,
+                notificationSchemaValidator))
+        .filter(Objects::nonNull);
+  }
 }

@@ -28,7 +28,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
 
   @Override
   protected void _saveItem(String lockedBy, String partitionKey, String sortKey, JsonNode value) {
-    log.debug(
+    log.info(
         "START _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
     String oldLockedUntil = Instant.now().toString();
     String newLockedUntil = Instant.ofEpochMilli(Instant.now().toEpochMilli() - 1).toString();
@@ -69,7 +69,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                       .build())
               .build());
     } catch (TransactionCanceledException transactionCanceledException) {
-      log.debug(
+      log.info(
           "CATCH _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
       log.warn(
           "%s: %s"
@@ -80,13 +80,13 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                       .collect(Collectors.joining(", "))));
       throw new RuntimeException(transactionCanceledException);
     }
-    log.debug("END _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+    log.info("END _saveItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
   }
 
   @Override
   protected JsonNode _loadItem(String lockedBy, String partitionKey, String sortKey)
       throws TemporaryLockingMapException {
-    log.debug(
+    log.info(
         "START _loadItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
     Map<String, AttributeValue> key =
         Map.ofEntries(
@@ -95,13 +95,15 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
 
     _createOrLockItem(lockedBy, partitionKey, sortKey, key);
 
+    log.info(
+      "END _loadItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
     return _loadLockedItem(lockedBy, partitionKey, sortKey, key);
   }
 
   private void _createOrLockItem(
       String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key)
       throws TemporaryLockingMapException {
-    log.debug(
+    log.info(
         "START _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
             .formatted(lockedBy, partitionKey, sortKey));
     try {
@@ -127,13 +129,13 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
     } catch (TransactionCanceledException transactionCanceledException) {
       if ("ConditionalCheckFailed"
           .equals(transactionCanceledException.cancellationReasons().getFirst().code())) {
-        log.debug(
-            "CCF _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+        log.info(
+            "ConditionalCheckFailed _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
         _lockExistingItem(lockedBy, partitionKey, sortKey, key);
       } else {
-        log.debug(
-            "TCE _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
+        log.info(
+            "TransactionCanceled _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
         log.warn(
             "Failed to create non-existing item (exception='%s' reasons='%s')"
@@ -145,7 +147,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
         throw transactionCanceledException;
       }
     }
-    log.debug(
+    log.info(
         "END _createOrLockItem(LB=%s, PK=%s, SK=%s, ...)"
             .formatted(lockedBy, partitionKey, sortKey));
   }
@@ -153,7 +155,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
   private void _lockExistingItem(
       String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key)
       throws TemporaryLockingMapException {
-    log.debug(
+    log.info(
         "START _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
             .formatted(lockedBy, partitionKey, sortKey));
     String oldLockedUntil = Instant.now().toString();
@@ -187,12 +189,12 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
       if ("ConditionalCheckFailed"
           .equals(transactionCanceledException.cancellationReasons().getFirst().code())) {
         log.warn(
-            "CCF _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+            "ConditionalCheckFailed _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
         throw new TemporaryLockingMapException(transactionCanceledException);
       } else {
-        log.debug(
-            "TCE _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
+        log.info(
+            "TransactionCanceled _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
                 .formatted(lockedBy, partitionKey, sortKey));
         log.warn(
             "Failed to lock existing item (exception='%s' reasons='%s')"
@@ -204,14 +206,14 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
         throw transactionCanceledException;
       }
     }
-    log.debug(
+    log.info(
         "END _lockExistingItem(LB=%s, PK=%s, SK=%s, ...)"
             .formatted(lockedBy, partitionKey, sortKey));
   }
 
   private JsonNode _loadLockedItem(
       String lockedBy, String partitionKey, String sortKey, Map<String, AttributeValue> key) {
-    log.debug(
+    log.info(
         "START _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
             .formatted(lockedBy, partitionKey, sortKey));
     try {
@@ -231,13 +233,13 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                           .get("value"),
                       AttributeValue.fromS("{}"))
                   .s());
-      log.debug(
+      log.info(
           "RETURN _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
               .formatted(lockedBy, partitionKey, sortKey));
       return itemValue;
     } catch (TransactionCanceledException transactionCanceledException) {
-      log.debug(
-          "TCE _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
+      log.info(
+          "TransactionCanceled _loadLockedItem(LB=%s, PK=%s, SK=%s, ...)"
               .formatted(lockedBy, partitionKey, sortKey));
       log.warn(
           "Failed to get locked item value (exception='%s' reasons='%s')"
@@ -252,7 +254,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
 
   @Override
   protected void _unlockItem(String lockedBy, String partitionKey, String sortKey) {
-    log.debug(
+    log.info(
         "START _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
     String oldLockedUntil = Instant.now().toString();
     String newLockedUntil = Instant.ofEpochMilli(Instant.now().toEpochMilli() - 1).toString();
@@ -285,8 +287,8 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                       .build())
               .build());
     } catch (TransactionCanceledException transactionCanceledException) {
-      log.debug(
-          "TCE _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
+      log.info(
+          "TransactionCanceled _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
       log.warn(
           "Failed to unlock item (exception='%s' reasons='%s')"
               .formatted(
@@ -296,7 +298,7 @@ public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingM
                       .collect(Collectors.joining(", "))));
       throw transactionCanceledException;
     }
-    log.debug(
+    log.info(
         "END _unlockItem(LB=%s, PK=%s, SK=%s, ...)".formatted(lockedBy, partitionKey, sortKey));
   }
 

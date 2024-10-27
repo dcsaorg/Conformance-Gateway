@@ -34,7 +34,7 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
 
   @Override
   public JsonNode getItemValue(String partitionKey, String sortKey) {
-    return JsonToolkit.stringToJsonNode(
+    AttributeValue attributeValue =
         dynamoDbClient
             .getItem(
                 GetItemRequest.builder()
@@ -46,8 +46,8 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
                     .consistentRead(true)
                     .build())
             .item()
-            .getOrDefault("value", AttributeValue.fromS(""))
-            .s());
+            .get("value");
+    return attributeValue == null ? null : JsonToolkit.stringToJsonNode(attributeValue.s());
   }
 
   @Override

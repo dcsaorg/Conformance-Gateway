@@ -30,6 +30,8 @@ import static org.dcsa.conformance.standards.tnt.checks.TntDataSets.VALID_SHIPME
 @UtilityClass
 public class TntChecks {
   private static final String SHIPMENT_EVENT_TYPE = "SHIPMENT";
+  private static final String EQUIPMENT_EVENT_TYPE = "EQUIPMENT";
+  private static final String TRANSPORT_EVENT_TYPE = "TRANSPORT";
 
   public static ActionCheck responseContentChecks(UUID matched, String standardVersion,
                                                   Supplier<SuppliedScenarioParameters> sspSupplier) {
@@ -42,7 +44,7 @@ public class TntChecks {
         Set<String> uniqueEventIds = StreamSupport.stream(body.spliterator(), false)
           .map(node -> node.path("eventID").asText())
           .collect(Collectors.toSet());
-        if (uniqueEventIds.size() != body.size()) {
+        if (!uniqueEventIds.isEmpty() && uniqueEventIds.size() != body.size()) {
           return Set.of("Event Ids are not unique");
         }
         return Set.of();
@@ -141,7 +143,7 @@ public class TntChecks {
             .collect(Collectors.toSet());
 
           Set<String> errors = Stream.concat(
-              filterNodesByEventType(body, "TRANSPORT"),
+              filterNodesByEventType(body, TRANSPORT_EVENT_TYPE),
               filterNodesByEventType(body, SHIPMENT_EVENT_TYPE)
             )
             .filter(node -> {
@@ -176,7 +178,7 @@ public class TntChecks {
             .map(String::trim)
             .collect(Collectors.toSet());
 
-          Set<String> errors = filterNodesByEventType(body, "TRANSPORT")
+          Set<String> errors = filterNodesByEventType(body, TRANSPORT_EVENT_TYPE)
             .filter(node -> {
               JsonNode transportEventTypeCodeNode = node.path("transportEventTypeCode");
               return transportEventTypeCodeNode.isMissingNode()
@@ -201,7 +203,7 @@ public class TntChecks {
         sspSupplier,
         TntFilterParameter.TRANSPORT_CALL_ID,
         "/transportCall/transportCallID",
-        "TRANSPORT", "EQUIPMENT")
+        TRANSPORT_EVENT_TYPE, EQUIPMENT_EVENT_TYPE)
     ));
 
     checks.add(JsonAttribute.customValidator(
@@ -211,8 +213,8 @@ public class TntChecks {
         sspSupplier,
         TntFilterParameter.VESSEL_IMO_NUMBER,
         "/transportCall/vessel/vesselIMONumber",
-        "TRANSPORT",
-        "EQUIPMENT"
+        TRANSPORT_EVENT_TYPE,
+        EQUIPMENT_EVENT_TYPE
       )
     ));
 
@@ -223,8 +225,8 @@ public class TntChecks {
         sspSupplier,
         TntFilterParameter.EXPORT_VOYAGE_NUMBER,
         "/transportCall/exportVoyageNumber",
-        "TRANSPORT",
-        "EQUIPMENT"
+        TRANSPORT_EVENT_TYPE,
+        EQUIPMENT_EVENT_TYPE
       )
     ));
 
@@ -235,8 +237,8 @@ public class TntChecks {
         sspSupplier,
         TntFilterParameter.CARRIER_SERVICE_CODE,
         "/transportCall/carrierServiceCode",
-        "TRANSPORT",
-        "EQUIPMENT"
+        TRANSPORT_EVENT_TYPE,
+        EQUIPMENT_EVENT_TYPE
       )
     ));
 
@@ -247,8 +249,8 @@ public class TntChecks {
         sspSupplier,
         TntFilterParameter.UN_LOCATION_CODE,
         "/transportCall/location/UNLocationCode",
-        "TRANSPORT",
-        "EQUIPMENT"
+        TRANSPORT_EVENT_TYPE,
+        EQUIPMENT_EVENT_TYPE
       )
     ));
 
@@ -267,7 +269,7 @@ public class TntChecks {
               .map(String::trim)
               .collect(Collectors.toSet());
 
-          Set<String> errors = filterNodesByEventType(body, "EQUIPMENT")
+          Set<String> errors = filterNodesByEventType(body, EQUIPMENT_EVENT_TYPE)
             .filter(node -> {
               JsonNode equipmentEventTypeCodeNode = node.path("equipmentEventTypeCode");
               return equipmentEventTypeCodeNode.isMissingNode() || equipmentEventTypeCodeNode.isNull()
@@ -373,7 +375,7 @@ public class TntChecks {
 
       Set<String> errors = Stream.concat(
           filterNodesByEventType(body, SHIPMENT_EVENT_TYPE),
-          filterNodesByEventType(body, "TRANSPORT")
+          filterNodesByEventType(body, TRANSPORT_EVENT_TYPE)
         )
         .filter(node -> {
           JsonNode referencesNode = node.path("references");
@@ -387,7 +389,7 @@ public class TntChecks {
         .collect(Collectors.toSet());
 
       errors.addAll(
-        filterNodesByEventType(body, "EQUIPMENT")
+        filterNodesByEventType(body, EQUIPMENT_EVENT_TYPE)
           .filter(node -> {
             JsonNode equipmentReferenceNode = node.path("equipmentReference");
             return !(equipmentReferenceNode.isMissingNode() || equipmentReferenceNode.isNull())
@@ -418,8 +420,8 @@ public class TntChecks {
         .collect(Collectors.toSet());
 
       Set<String> errors = Stream.concat(
-          filterNodesByEventType(body, "TRANSPORT"),
-          filterNodesByEventType(body, "EQUIPMENT")
+          filterNodesByEventType(body, TRANSPORT_EVENT_TYPE),
+          filterNodesByEventType(body, EQUIPMENT_EVENT_TYPE)
         )
         .filter(node -> {
           JsonNode documentReferencesNode = node.path("documentReferences");

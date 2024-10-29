@@ -16,48 +16,48 @@ public class QueryParameterSpecificRule implements QueryParamRule{
 
   private static final String EVENT_TYPE = "eventType";
 
-  private static final Map<String, Set<String>> queryParamMap = Map.of(
+  private static final Map<String, Set<String>> allowedQueryParamForEventTypeMap = Map.of(
       "SHIPMENT", Set.of("shipmentEventTypeCode", "documentTypeCode", "carrierBookingReference",
       "transportDocumentID", "transportDocumentReference", "equipmentReference", "eventCreatedDateTime"),
       "TRANSPORT", Set.of("transportDocumentReference", "transportEventTypeCode", "transportCallID", "vesselIMONumber",
-      "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentReference", "eventCreatedDateTime"),
+      "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentReference", "eventCreatedDateTime", "carrierBookingReference"),
       "EQUIPMENT", Set.of("carrierBookingReference", "transportDocumentReference", "transportCallID",
       "vesselIMONumber", "exportVoyageNumber", "carrierServiceCode", "UNLocationCode", "equipmentEventTypeCode", "equipmentReference", "eventCreatedDateTime")
     );
-    private static final Set<String> excludedQueryParams = Set.of("eventType", "cursor", "limit", "eventCreatedDateTime:gte",
-      "eventCreatedDateTime:gt", "eventCreatedDateTime:lt", "eventCreatedDateTime:lte", "eventCreatedDateTime:eq", "eventCreatedDateTime");
+  private static final Set<String> excludedQueryParams = Set.of("eventType", "cursor", "limit", "eventCreatedDateTime:gte",
+    "eventCreatedDateTime:gt", "eventCreatedDateTime:lt", "eventCreatedDateTime:lte", "eventCreatedDateTime:eq", "eventCreatedDateTime");
 
-    @Override
-    public boolean validate(Map<String, ? extends Collection<String>> queryParams) {
-      boolean areParamsValid = true;
+  @Override
+  public boolean validate(Map<String, ? extends Collection<String>> queryParams) {
+    boolean areParamsValid = true;
 
-      if (queryParams.containsKey(EVENT_TYPE)) {
-        Set<String> eventTypes = new HashSet<>(queryParams.get("eventType"));
-        Set<String> allowedParams = queryParamMap.entrySet().stream()
-          .filter(entry -> eventTypes.contains(entry.getKey()))
-          .flatMap(entry -> entry.getValue().stream())
-          .collect(Collectors.toSet());
+    if (queryParams.containsKey(EVENT_TYPE)) {
+      Set<String> eventTypes = new HashSet<>(queryParams.get("eventType"));
+      Set<String> allowedParams = allowedQueryParamForEventTypeMap.entrySet().stream()
+        .filter(entry -> eventTypes.contains(entry.getKey()))
+        .flatMap(entry -> entry.getValue().stream())
+        .collect(Collectors.toSet());
 
-        areParamsValid = queryParams.keySet().stream()
-          .filter(Predicate.not(excludedQueryParams::contains))
-          .allMatch(allowedParams::contains);
-      }
-
-      if (queryParams.containsKey(EVENT_TYPE)) {
-        return areParamsValid && validateEventType(queryParams.get(EVENT_TYPE));
-      }
-      if (queryParams.containsKey("shipmentEventTypeCode")) {
-        return areParamsValid && validateShipmentEventTypeCode(queryParams.get("shipmentEventTypeCode"));
-      }
-      if (queryParams.containsKey("documentTypeCode")) {
-        return areParamsValid && validateDocumentTypeCode(queryParams.get("documentTypeCode"));
-      }
-      if (queryParams.containsKey("equipmentEventTypeCode")) {
-        return areParamsValid && validateEquipmentEventTypeCode(queryParams.get("equipmentEventTypeCode"));
-      }
-
-      return areParamsValid;
+      areParamsValid = queryParams.keySet().stream()
+        .filter(Predicate.not(excludedQueryParams::contains))
+        .allMatch(allowedParams::contains);
     }
+
+    if (queryParams.containsKey(EVENT_TYPE)) {
+      return areParamsValid && validateEventType(queryParams.get(EVENT_TYPE));
+    }
+    if (queryParams.containsKey("shipmentEventTypeCode")) {
+      return areParamsValid && validateShipmentEventTypeCode(queryParams.get("shipmentEventTypeCode"));
+    }
+    if (queryParams.containsKey("documentTypeCode")) {
+      return areParamsValid && validateDocumentTypeCode(queryParams.get("documentTypeCode"));
+    }
+    if (queryParams.containsKey("equipmentEventTypeCode")) {
+      return areParamsValid && validateEquipmentEventTypeCode(queryParams.get("equipmentEventTypeCode"));
+    }
+
+    return areParamsValid;
+  }
 
 
   private boolean validateEventType(Collection<String> eventTypes) {

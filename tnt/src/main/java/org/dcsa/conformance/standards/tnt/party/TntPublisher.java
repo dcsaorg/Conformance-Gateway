@@ -60,6 +60,7 @@ public class TntPublisher extends ConformanceParty {
 
   @Override
   protected void doReset() {
+    //no state to reset
   }
 
   @Override
@@ -70,66 +71,20 @@ public class TntPublisher extends ConformanceParty {
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("TntPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
-    boolean isBadRequest = actionPrompt.get("isBadRequest").asBoolean(false);
 
     SuppliedScenarioParameters responseSsp =
       SuppliedScenarioParameters.fromMap(
         StreamSupport.stream(
-            actionPrompt.required("tntFilterParametersQueryParamNames").spliterator(),
+            actionPrompt.required("tntFilterParametersQueryParam").spliterator(),
             false)
-          .map(
-            jsonTntFilterParameter ->
-              TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.asText()))
           .collect(
             Collectors.toMap(
-              Function.identity(),
-              tntFilterParameter ->
-                switch (tntFilterParameter) {
-                  case EVENT_TYPE -> {
-                    if (Boolean.TRUE.equals(isBadRequest)) {
-                      yield "INVALID_EVENT_TYPE";
-                    } else {
-                      yield "SHIPMENT";
-                    }
-                  }
-                  case SHIPMENT_EVENT_TYPE_CODE -> {
-                    if (isBadRequest) {
-                      yield "INVALID_SHIPMENT_EVENT_TYPE_CODE";
-                    } else {
-                      yield "DRFT";
-                    }
-                  }
-                  case DOCUMENT_TYPE_CODE -> {
-                    if (isBadRequest) {
-                      yield "INVALID_DOCUMENT_TYPE_CODE";
-                    } else {
-                      yield "CBR";
-                    }
-                  }
-                  case CARRIER_BOOKING_REFERENCE -> "ABC123123123";
-                  case TRANSPORT_DOCUMENT_REFERENCE -> "reserved-HHL123";
-                  case TRANSPORT_EVENT_TYPE_CODE -> "ARRI";
-                  case TRANSPORT_CALL_ID -> "123e4567-e89b-12d3-a456-426614174000";
-                  case VESSEL_IMO_NUMBER -> "9321483";
-                  case EXPORT_VOYAGE_NUMBER -> "2103S";
-                  case CARRIER_SERVICE_CODE -> "FE1";
-                  case UN_LOCATION_CODE -> "FRPAR";
-                  case EQUIPMENT_EVENT_TYPE_CODE -> {
-                    if (isBadRequest) {
-                      yield "INVALID_EQUIPMENT_EVENT_TYPE_CODE";
-                    } else {
-                      yield "LOAD";
-                    }
-                  }
-                  case EQUIPMENT_REFERENCE -> "APZU4812090";
-                  case EVENT_CREATED_DATE_TIME,
-                       EVENT_CREATED_DATE_TIME_GTE,
-                       EVENT_CREATED_DATE_TIME_GT,
-                       EVENT_CREATED_DATE_TIME_LTE,
-                       EVENT_CREATED_DATE_TIME_LT,
-                       EVENT_CREATED_DATE_TIME_EQ -> "2021-01-09T14:12:56+01:00";
-                  case LIMIT -> "100";
-                })));
+              jsonTntFilterParameter -> TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.get("parameter").asText()),
+              jsonTntFilterParameter -> jsonTntFilterParameter.get("value").asText(),
+              (oldValue, newValue) -> oldValue, // merge function to handle duplicate keys
+              LinkedHashMap::new // supplier to create a LinkedHashMap
+            )));
+
 
     asyncOrchestratorPostPartyInput(
       actionPrompt.required("actionId").asText(), responseSsp.toJson());
@@ -253,17 +208,6 @@ public class TntPublisher extends ConformanceParty {
       400,
       Map.of(API_VERSION, List.of(apiVersion)),
       new ConformanceMessageBody(createErrorResponse(request.method(), request.url(), "Bad Request", message)));
-  }
-
-  private ConformanceResponse return404(ConformanceRequest request) {
-    return return404(request, "Returning 404 since the request did not match any known URL");
-  }
-
-  private ConformanceResponse return404(ConformanceRequest request, String message) {
-    return request.createResponse(
-      404,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(createErrorResponse(request.method(), request.url(), "Not Found", message)));
   }
 
   private ObjectNode createErrorResponse(String httpMethod, String requestUri, String reason, String message) {

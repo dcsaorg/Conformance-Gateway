@@ -15,6 +15,7 @@ import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.action.TntGetEventsAction;
+import org.dcsa.conformance.standards.tnt.action.TntGetEventsBadRequestAction;
 
 @Slf4j
 public class TntSubscriber extends ConformanceParty {
@@ -46,7 +47,9 @@ public class TntSubscriber extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(TntGetEventsAction.class, this::getEvents));
+    return Map.ofEntries(
+      Map.entry(TntGetEventsAction.class, this::getEvents),
+      Map.entry(TntGetEventsBadRequestAction.class, this::getEvents));
   }
 
   private void getEvents(JsonNode actionPrompt) {

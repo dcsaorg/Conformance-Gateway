@@ -3,34 +3,26 @@ package org.dcsa.conformance.standards.tnt.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.function.Function;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 
 @Getter
-public class SupplyScenarioParametersAction extends ConformanceAction {
+public class SupplyScenarioParametersAction extends TntAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final LinkedHashSet<TntFilterParameter> tntFilterParameters;
+  private final Map<TntFilterParameter,String> tntFilterParameterMap;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, TntFilterParameter... tntFilterParameters) {
-    super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                Arrays.stream(tntFilterParameters)
-                    .map(TntFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))));
-    this.tntFilterParameters = new LinkedHashSet<>(Arrays.asList(tntFilterParameters));
+    String publisherPartyName, Map<TntFilterParameter, String> parameters) {
+    super(publisherPartyName,null, null,
+      "SupplyScenarioParameters(%s)"
+        .formatted(
+          parameters.entrySet().stream()
+            .map(entry -> entry.getKey().getQueryParamName() + "=" + entry.getValue())
+            .collect(Collectors.joining(", "))), -1 );
+    this.tntFilterParameterMap =  parameters;
   }
 
   @Override
@@ -60,9 +52,12 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonTntFilterParameters = objectNode.putArray("tntFilterParametersQueryParamNames");
-    tntFilterParameters.forEach(
-        TntFilterParameter -> jsonTntFilterParameters.add(TntFilterParameter.getQueryParamName()));
+    ArrayNode jsonTntFilterParameters = objectNode.putArray("tntFilterParametersQueryParam");
+    tntFilterParameterMap.forEach((key, value) -> {
+      ObjectNode parameterNode = jsonTntFilterParameters.addObject();
+      parameterNode.put("parameter", key.getQueryParamName());
+      parameterNode.put("value", value);
+    });
     return objectNode;
   }
 
@@ -75,24 +70,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return SuppliedScenarioParameters.fromMap(
-            tntFilterParameters.stream()
-                .collect(
-                    Collectors.toMap(
-                        Function.identity(),
-                        tntFilterParameter ->
-                            switch (tntFilterParameter) {
-                              case LIMIT -> "100";
-                              case EVENT_CREATED_DATE_TIME,
-                                      EVENT_CREATED_DATE_TIME_EQ,
-                                      EVENT_CREATED_DATE_TIME_GT,
-                                      EVENT_CREATED_DATE_TIME_GTE,
-                                      EVENT_CREATED_DATE_TIME_LT,
-                                      EVENT_CREATED_DATE_TIME_LTE ->
-                                  ZonedDateTime.now()
-                                      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                              default -> "TODO";
-                            })))
-        .toJson();
+        tntFilterParameterMap.entrySet().stream()
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+      .toJson();
   }
 
   @Override
@@ -105,4 +85,5 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
     super.handlePartyInput(partyInput);
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }
+
 }

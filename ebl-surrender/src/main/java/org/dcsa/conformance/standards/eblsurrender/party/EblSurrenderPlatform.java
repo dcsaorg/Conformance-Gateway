@@ -19,7 +19,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
 
 @Slf4j
 public class EblSurrenderPlatform extends ConformanceParty {
@@ -65,7 +65,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
-    return Map.ofEntries(Map.entry(SurrenderRequestAction.class, this::requestSurrender));
+    return Map.ofEntries(Map.entry(SurrenderRequestResponseAction.class, this::requestSurrender));
   }
 
   private void requestSurrender(JsonNode actionPrompt) {
@@ -151,9 +151,13 @@ public class EblSurrenderPlatform extends ConformanceParty {
                           "Rejecting '%s' for document '%s' because it is in state '%s'"
                               .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
-    addOperatorLogEntry(
+    /*addOperatorLogEntry(
         "Handling surrender response with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(action, srr, tdr, eblStatesById.get(tdr)));
+            .formatted(action, srr, tdr, eblStatesById.get(tdr)));*/
+
+    addOperatorLogEntry(
+      "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
+        .formatted(action, srr, tdr, eblStatesById.get(tdr)));
     return response;
   }
 }

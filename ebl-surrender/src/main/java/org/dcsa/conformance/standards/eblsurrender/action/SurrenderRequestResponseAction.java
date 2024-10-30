@@ -19,7 +19,7 @@ import static org.dcsa.conformance.standards.eblsurrender.SurrenderChecks.surren
 
 @Getter
 @Slf4j
-public class SurrenderRequestAction extends EblSurrenderAction {
+public class SurrenderRequestResponseAction extends EblSurrenderAction {
   private final JsonSchemaValidator requestSchemaValidator;
   private final boolean forAmendment;
 
@@ -27,7 +27,7 @@ public class SurrenderRequestAction extends EblSurrenderAction {
 
   private final Supplier<String> srrSupplier = surrenderRequestReference::get;
 
-  public SurrenderRequestAction(
+  public SurrenderRequestResponseAction(
       boolean forAmendment,
       String platformPartyName,
       String carrierPartyName,
@@ -67,7 +67,12 @@ public class SurrenderRequestAction extends EblSurrenderAction {
   public String getHumanReadablePrompt() {
     return ("Send a surrender request for %s "
             + "for the eBL with the transport document reference '%s'")
-        .formatted(forAmendment ? "amendment" : "delivery", sspSupplier.get());
+        .formatted(forAmendment ? "amendment" : "delivery", sspSupplier.get().transportDocumentReference());
+  }
+
+  @Override
+  protected boolean expectsNotificationExchange() {
+    return true;
   }
 
   @Override

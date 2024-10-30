@@ -4,19 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestAction;
+import org.dcsa.conformance.standards.eblsurrender.action.SurrenderRequestResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.SurrenderResponseAction;
 import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
-import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderState.*;
 
 @Slf4j
 class EblSurrenderScenarioListBuilder
@@ -35,18 +32,25 @@ class EblSurrenderScenarioListBuilder
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
     return Stream.of(
-            Map.entry("", supplyAvailableTdrAction().thenAllPathsFrom(AVAILABLE_FOR_SURRENDER)))
+            Map.entry("Surrender for Delivery", supplyAvailableTdrAction("SURR","Straight eBL").then(requestSurrenderForDeliveryAndAccepted(204))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  private EblSurrenderScenarioListBuilder thenAllPathsFrom(
+  /*private EblSurrenderScenarioListBuilder thenAllPathsFrom(
           EblSurrenderState surrenderState) {
     return switch (surrenderState) {
       case AVAILABLE_FOR_SURRENDER -> thenEither(
               requestSurrenderForDelivery(204).thenAllPathsFrom(DELIVERY_SURRENDER_REQUESTED),
               requestSurrenderForAmendment(204).thenAllPathsFrom(AMENDMENT_SURRENDER_REQUESTED)
+
+        //requestSurrenderForDeliveryAndAccepted()
+        //requestSurrenderForDeliveryAndRejected()
+        //requestSurrenderForAmendmentAndAccepted()
+        //requestSurrenderForAmendmentAndRejected()
+        //requestSurrenderForSwitchToPaperAndAccepted()
+        //requestSurrenderForSwitchToPaperAndRejected()
       );
       case DELIVERY_SURRENDER_REQUESTED -> thenEither(
               acceptSurrenderRequest(204).thenAllPathsFrom(SURRENDERED_FOR_DELIVERY),
@@ -69,9 +73,9 @@ class EblSurrenderScenarioListBuilder
               voidAndReissue().thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER)
       );
     };
-  }
+  }*/
 
-  private EblSurrenderScenarioListBuilder thenAllHappyPathsFrom(
+  /*private EblSurrenderScenarioListBuilder thenAllHappyPathsFrom(
           EblSurrenderState surrenderState) {
     var cases = switch (surrenderState) {
       case AVAILABLE_FOR_SURRENDER -> requestSurrenderForDelivery(204).thenAllHappyPathsFrom(DELIVERY_SURRENDER_REQUESTED);
@@ -82,13 +86,13 @@ class EblSurrenderScenarioListBuilder
       case SURRENDERED_FOR_AMENDMENT -> voidAndReissue().thenAllHappyPathsFrom(AVAILABLE_FOR_SURRENDER);
     };
     return thenEither(cases);
-  }
+  }*/
 
   private EblSurrenderScenarioListBuilder noAction() {
     return new EblSurrenderScenarioListBuilder(null);
   }
 
-  private EblSurrenderScenarioListBuilder thenAnyRequest(int status) {
+  /*private EblSurrenderScenarioListBuilder thenAnyRequest(int status) {
     return thenEither(
             noAction(),
             requestSurrenderForAmendment(status),
@@ -96,13 +100,13 @@ class EblSurrenderScenarioListBuilder
             rejectSurrenderRequest(status),
             acceptSurrenderRequest(status)
     );
-  }
+  }*/
 
-  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction() {
+  private static EblSurrenderScenarioListBuilder supplyAvailableTdrAction(String response, String eblType) {
     log.debug("EblSurrenderScenarioListBuilder.supplyAvailableTdrAction()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     return new EblSurrenderScenarioListBuilder(
-        noPreviousAction -> new SupplyScenarioParametersAction(carrierPartyName, null));
+        noPreviousAction -> new SupplyScenarioParametersAction(carrierPartyName, null,response, eblType));
   }
 
   private EblSurrenderScenarioListBuilder(
@@ -116,7 +120,7 @@ class EblSurrenderScenarioListBuilder
     return _surrenderRequestBuilder(true, status);
   }
 
-  private static EblSurrenderScenarioListBuilder requestSurrenderForDelivery(int status) {
+  private static EblSurrenderScenarioListBuilder requestSurrenderForDeliveryAndAccepted(int status) {
     log.debug(
         "EblSurrenderScenarioListBuilder.requestSurrenderForDelivery(%d)".formatted(status));
     return _surrenderRequestBuilder(false, status);
@@ -129,7 +133,7 @@ class EblSurrenderScenarioListBuilder
     String platformPartyName = threadLocalPlatformPartyName.get();
     return new EblSurrenderScenarioListBuilder(
         previousAction ->
-            new SurrenderRequestAction(
+            new SurrenderRequestResponseAction(
                 forAmendment,
                 platformPartyName,
                 carrierPartyName,
@@ -167,7 +171,7 @@ class EblSurrenderScenarioListBuilder
                     EblSurrenderRole.PLATFORM.getConfigName(), true)));
   }
 
-  private static EblSurrenderScenarioListBuilder voidAndReissue() {
+  private static EblSurrenderScenarioListBuilder                                                                                                                                                                                                                                                   voidAndReissue() {
     log.debug("EblSurrenderScenarioListBuilder.voidAndReissue()");
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();

@@ -21,7 +21,9 @@ import static org.dcsa.conformance.standards.eblsurrender.SurrenderChecks.surren
 @Slf4j
 public class SurrenderRequestResponseAction extends EblSurrenderAction {
   private final JsonSchemaValidator requestSchemaValidator;
+  private final JsonSchemaValidator responseSchemaValidator;
   private final boolean forAmendment;
+  private final boolean accept;
 
   private final AtomicReference<String> surrenderRequestReference = new AtomicReference<>();
 
@@ -33,15 +35,19 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
       String carrierPartyName,
       int expectedStatus,
       ConformanceAction previousAction,
-      JsonSchemaValidator requestSchemaValidator) {
+      JsonSchemaValidator requestSchemaValidator,
+      JsonSchemaValidator responseSchemaValidator,
+      boolean accept,
+      String title) {
     super(
         platformPartyName,
         carrierPartyName,
         expectedStatus,
-        previousAction,
-        "%s %d".formatted(forAmendment ? "AREQ" : "SREQ", expectedStatus));
+        previousAction,title); //"%s %d".formatted(forAmendment ? "AREQ" : "SREQ"
     this.forAmendment = forAmendment;
     this.requestSchemaValidator = requestSchemaValidator;
+    this.responseSchemaValidator = responseSchemaValidator;
+    this.accept = accept;
   }
 
   @Override
@@ -99,7 +105,7 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-        return Stream.of(
+        return Stream.concat(Stream.of(
             new UrlPathCheck(
                 EblSurrenderRole::isPlatform, getMatchedExchangeUuid(), "/ebl-surrender-requests"),
             new ResponseStatusCheck(
@@ -131,7 +137,38 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 JsonPointer.compile("/transportDocumentReference"),
-                sspSupplier.get() == null ? null : sspSupplier.get().transportDocumentReference()));
+                sspSupplier.get() == null ? null : sspSupplier.get().transportDocumentReference())),
+          Stream.of(
+            new UrlPathCheck("[Response]",
+              EblSurrenderRole::isCarrier,
+              getMatchedNotificationExchangeUuid(),
+              "/ebl-surrender-responses"),
+            new ResponseStatusCheck("[Response]",
+              EblSurrenderRole::isPlatform, getMatchedNotificationExchangeUuid(), getExpectedStatus()),
+            new ApiHeaderCheck(
+              EblSurrenderRole::isPlatform,
+              getMatchedNotificationExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              expectedApiVersion),
+            new JsonSchemaCheck("[Response]",
+              EblSurrenderRole::isCarrier,
+              getMatchedNotificationExchangeUuid(),
+              HttpMessageType.REQUEST,
+              responseSchemaValidator),
+            new JsonAttributeCheck("[Response]",
+              EblSurrenderRole::isCarrier,
+              getMatchedNotificationExchangeUuid(),
+              HttpMessageType.REQUEST,
+              JsonPointer.compile("/action"),
+              accept ? "SURR" : "SREJ")
+            /*expectedSrr == null || expectedSrr.equals("*")
+              ? null
+              : new JsonAttributeCheck(
+              EblSurrenderRole::isCarrier,
+              getMatchedExchangeUuid(),
+              HttpMessageType.REQUEST,
+              JsonPointer.compile("/surrenderRequestReference"),
+              expectedSrr)*/));
       }
     };
   }

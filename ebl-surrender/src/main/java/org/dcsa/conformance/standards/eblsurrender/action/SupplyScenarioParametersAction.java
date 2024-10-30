@@ -16,7 +16,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   private String eblType;
 
   public SupplyScenarioParametersAction(String carrierPartyName, ConformanceAction previousAction, String response, String eblType) {
-    super(carrierPartyName, null, previousAction, "SupplyTDR");
+    super(carrierPartyName, null, previousAction, "SupplyTDR[%s]".formatted(eblType));
     this.response = response;
     this.eblType = eblType;
   }
@@ -51,15 +51,17 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    String responseAction = response.equals("SURR")?"accept":"reject";
     return "Use the following format to provide the transport document reference and additional info "
-        + "of a"+ eblType +"for which your party can accept a surrender request:";
+        + "of a "+ eblType +" for which your party can "+responseAction+ " a surrender request:";
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
+    String eblPlatform = response.equals("SURR")?"WAVE":"WAVER";
     var issueToParty = OBJECT_MAPPER.createObjectNode();
     issueToParty.put("partyName", "Issue To name")
-      .put("eblPlatform", "WAVE");
+      .put("eblPlatform", eblPlatform);
     var carrierParty = OBJECT_MAPPER.createObjectNode();
     carrierParty.put("partyName", "Carrier name")
       .put("eblPlatform", "WAVE");

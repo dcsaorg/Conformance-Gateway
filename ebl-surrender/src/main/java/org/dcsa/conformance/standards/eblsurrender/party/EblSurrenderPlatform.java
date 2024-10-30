@@ -76,6 +76,10 @@ public class EblSurrenderPlatform extends ConformanceParty {
     String tdr = ssp.transportDocumentReference();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
     String src = forAmendment ? "AREQ" : "SREQ";
+    String action = ssp.issueToParty().get("eblPlatform") != null? ssp.issueToParty().get("eblPlatform").asText() : null;
+    if(action != null && action.equals("WAVER")){
+      tdr = tdr+action;
+    }
     tdrsBySrr.put(srr, tdr);
     eblStatesById.put(
         tdr,

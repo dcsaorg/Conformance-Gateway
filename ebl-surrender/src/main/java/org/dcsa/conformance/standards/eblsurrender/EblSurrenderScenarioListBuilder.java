@@ -32,7 +32,30 @@ class EblSurrenderScenarioListBuilder
     threadLocalCarrierPartyName.set(carrierPartyName);
     threadLocalPlatformPartyName.set(platformPartyName);
     return Stream.of(
-            Map.entry("Surrender for Delivery", supplyAvailableTdrAction("SURR","Straight eBL").then(requestSurrenderForDeliveryAndAccepted(204))))
+            Map.entry(
+                "Surrender Accepted",
+                noAction()
+                    .thenEither(
+                        supplyAvailableTdrAction("SURR", "Straight eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(true),
+                                requestSurrenderForAmendmentAnd( true)),
+                        supplyAvailableTdrAction("SURR", "Negotiable eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd( true),
+                                requestSurrenderForAmendmentAnd( true)))),
+            Map.entry(
+                "Surrender Rejected",
+                noAction()
+                    .thenEither(
+                        supplyAvailableTdrAction("SREJ", "Straight eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd( false),
+                                requestSurrenderForAmendmentAnd(false)),
+                        supplyAvailableTdrAction("SREJ", "Negotiable eBL")
+                            .thenEither(
+                                requestSurrenderForDeliveryAnd(false),
+                                requestSurrenderForAmendmentAnd( false)))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -88,7 +111,7 @@ class EblSurrenderScenarioListBuilder
     return thenEither(cases);
   }*/
 
-  private EblSurrenderScenarioListBuilder noAction() {
+  private static EblSurrenderScenarioListBuilder noAction() {
     return new EblSurrenderScenarioListBuilder(null);
   }
 
@@ -114,20 +137,22 @@ class EblSurrenderScenarioListBuilder
     super(actionBuilder);
   }
 
-  private static EblSurrenderScenarioListBuilder requestSurrenderForAmendment(int status) {
+  private static EblSurrenderScenarioListBuilder requestSurrenderForAmendmentAnd(boolean accept) {
     log.debug(
-        "EblSurrenderScenarioListBuilder.requestSurrenderForAmendment(%d)".formatted(status));
-    return _surrenderRequestBuilder(true, status);
+        "EblSurrenderScenarioListBuilder.requestSurrenderForAmendment");
+    String titleSuffix = accept ? "Accepted" : "Rejected";
+    return _surrenderRequestBuilder(true,accept,"SurrenderForAmendment"+titleSuffix);
   }
 
-  private static EblSurrenderScenarioListBuilder requestSurrenderForDeliveryAndAccepted(int status) {
+  private static EblSurrenderScenarioListBuilder requestSurrenderForDeliveryAnd( boolean accept) {
     log.debug(
-        "EblSurrenderScenarioListBuilder.requestSurrenderForDelivery(%d)".formatted(status));
-    return _surrenderRequestBuilder(false, status);
+        "EblSurrenderScenarioListBuilder.requestSurrenderForDelivery");
+    String titleSuffix = accept ? "Accepted" : "Rejected";
+    return _surrenderRequestBuilder(false, accept, "SurrenderForDeliveryAnd"+titleSuffix);
   }
 
   private static EblSurrenderScenarioListBuilder _surrenderRequestBuilder(
-      boolean forAmendment, int expectedStatus) {
+      boolean forAmendment,boolean accept, String title) {
     EblSurrenderComponentFactory componentFactory = threadLocalComponentFactory.get();
     String carrierPartyName = threadLocalCarrierPartyName.get();
     String platformPartyName = threadLocalPlatformPartyName.get();
@@ -137,10 +162,11 @@ class EblSurrenderScenarioListBuilder
                 forAmendment,
                 platformPartyName,
                 carrierPartyName,
-                expectedStatus,
+                204,
                 previousAction,
                 componentFactory.getMessageSchemaValidator(
-                    EblSurrenderRole.CARRIER.getConfigName(), true))
+                    EblSurrenderRole.CARRIER.getConfigName(), true),componentFactory.getMessageSchemaValidator(
+              EblSurrenderRole.PLATFORM.getConfigName(),true),accept, title)
     );
   }
 

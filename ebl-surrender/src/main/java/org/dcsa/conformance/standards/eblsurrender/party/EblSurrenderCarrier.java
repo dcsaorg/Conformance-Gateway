@@ -166,20 +166,23 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String src = jsonRequest.get("surrenderRequestCode").asText();
     String srr = jsonRequest.get("surrenderRequestReference").asText();
     String tdr = jsonRequest.get("transportDocumentReference").asText();
+    String action = tdr.contains("WAVER") ? "SREJ":"SURR";
 
-    JsonNode responseCode = null;
+    String responseCode = null;
     if ("*".equals(srr)) {
       srr = UUID.randomUUID().toString();
     }
     if(persistentMap.load("response") !=  null){
-      responseCode = persistentMap.load("response");
+      action = persistentMap.load("response").asText();
     }
+
+    var carrierResponse = OBJECT_MAPPER
+      .createObjectNode()
+      .put("surrenderRequestReference", srr)
+      .put("action",  action);
     asyncCounterpartNotification(null,
-      "/v%s/ebl-surrender-responses".formatted(apiVersion.charAt(0)),
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("surrenderRequestReference", srr)
-        .put("action",  responseCode));
+      "/v3/ebl-surrender-responses",carrierResponse);
+
 //.put("action", accept ? "SURR" : "SREJ"));
     if (Objects.equals(
         EblSurrenderState.AVAILABLE_FOR_SURRENDER,

@@ -27,6 +27,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   private static final String ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA = "EnvelopeTransferChainEntry";
   private static final String ISSUANCE_MANIFEST_SCHEMA = "IssuanceManifest";
   private static final String RECEIVER_VALIDATION_RESPONSE = "ReceiverValidationResponse";
+  private static final String RECEIVER_VALIDATION_REQUEST = "IdentifyingCode";
 
   public static LinkedHashMap<String, PintScenarioListBuilder> createModuleScenarioListBuilders(
     String standardVersion, String sendingPlatformPartyName, String receivingPlatformPartyName) {
@@ -146,6 +147,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
           receivingPlatform,
           (PintAction) previousAction,
           200,
+          resolveMessageSchemaValidator(RECEIVER_VALIDATION_REQUEST),
           resolveMessageSchemaValidator(RECEIVER_VALIDATION_RESPONSE)
         ));
   }

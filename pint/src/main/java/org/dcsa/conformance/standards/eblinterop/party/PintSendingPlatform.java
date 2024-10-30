@@ -192,7 +192,7 @@ public class PintSendingPlatform extends ConformanceParty {
     }
 
     var body = OBJECT_MAPPER.createObjectNode();
-    var tdPayload = loadTDR(tdr);
+    var tdPayload = loadTransportDocument(tdr);
     body.set("transportDocument", tdPayload);
     body.set("envelopeManifestSignedContent", sendingState.getSignedManifest());
     body.set("envelopeTransferChain", sendingState.getSignedEnvelopeTransferChain());
@@ -214,7 +214,7 @@ public class PintSendingPlatform extends ConformanceParty {
       "Re-sent an eBL with transportDocumentReference '%s' with type: %s".formatted(tdr, retryType.name()));
   }
 
-  private ObjectNode loadTDR(String tdr) {
+  private ObjectNode loadTransportDocument(String tdr) {
     var tdPayload = (ObjectNode)
       JsonToolkit.templateFileToJsonNode(
         "/standards/pint/messages/pint-%s-transport-document.json"
@@ -295,7 +295,7 @@ public class PintSendingPlatform extends ConformanceParty {
 
     var body = OBJECT_MAPPER.createObjectNode();
 
-    var tdPayload = loadTDR(tdr);
+    var tdPayload = loadTransportDocument(tdr);
     body.set("transportDocument", tdPayload);
     if (!isCorrect && tdPayload.path("transportDocument").has("issuingParty")) {
       ((ObjectNode) tdPayload.path("transportDocument")).remove("issuingParty");

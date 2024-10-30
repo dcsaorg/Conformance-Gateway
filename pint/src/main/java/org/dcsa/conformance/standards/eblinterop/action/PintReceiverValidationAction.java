@@ -11,6 +11,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintRole;
 @Getter
 @Slf4j
 public class PintReceiverValidationAction extends PintAction {
+  private final JsonSchemaValidator requestSchemaValidator;
   private final JsonSchemaValidator responseSchemaValidator;
 
   public PintReceiverValidationAction(
@@ -18,6 +19,7 @@ public class PintReceiverValidationAction extends PintAction {
     String targetPartyName,
     PintAction previousAction,
     int responseCode,
+    JsonSchemaValidator requestSchemaValidator,
     JsonSchemaValidator responseSchemaValidator
     ) {
     super(
@@ -27,6 +29,7 @@ public class PintReceiverValidationAction extends PintAction {
         "ReceiverValidation(%d)".formatted(responseCode),
         responseCode
     );
+    this.requestSchemaValidator = requestSchemaValidator;
     this.responseSchemaValidator = responseSchemaValidator;
   }
 
@@ -64,6 +67,12 @@ public class PintReceiverValidationAction extends PintAction {
                     getMatchedExchangeUuid(),
                     HttpMessageType.RESPONSE,
                     expectedApiVersion),
+                new JsonSchemaCheck(
+                  PintRole::isSendingPlatform,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.REQUEST,
+                  requestSchemaValidator
+                ),
                 new JsonSchemaCheck(
                   PintRole::isReceivingPlatform,
                   getMatchedExchangeUuid(),

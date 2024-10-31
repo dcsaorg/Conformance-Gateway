@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.eblsurrender;
 
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
+
+import java.util.UUID;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
@@ -7,10 +10,6 @@ import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
 import org.dcsa.conformance.core.check.KeywordDataset;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.eblsurrender.party.EblSurrenderRole;
-
-import java.util.UUID;
-
-import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
 public class SurrenderChecks {
   private static final KeywordDataset SURRENDER_ACTIONS_DATA_SET = KeywordDataset.staticDataset(
@@ -46,4 +45,5 @@ public class SurrenderChecks {
       SURRENDER_PARTY_CODE_LIST_PROVIDER
     );
   }
+
 }

@@ -45,8 +45,7 @@ public class EblSurrenderPlatform extends ConformanceParty {
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
-        "eblStatesById",
-        StateManagementUtil.storeMap(eblStatesById, EblSurrenderState::name));
+        "eblStatesById", StateManagementUtil.storeMap(eblStatesById, EblSurrenderState::name));
     targetObjectNode.set("tdrsBySrr", StateManagementUtil.storeMap(tdrsBySrr));
   }
 
@@ -76,9 +75,12 @@ public class EblSurrenderPlatform extends ConformanceParty {
     String tdr = ssp.transportDocumentReference();
     boolean forAmendment = actionPrompt.get("forAmendment").booleanValue();
     String src = forAmendment ? "AREQ" : "SREQ";
-    String action = ssp.issueToParty().get("eblPlatform") != null? ssp.issueToParty().get("eblPlatform").asText() : null;
-    if(action != null && action.equals("WAVER")){
-      tdr = tdr+action;
+    String action =
+        ssp.issueToParty().get("eblPlatform") != null
+            ? ssp.issueToParty().get("eblPlatform").asText()
+            : null;
+    if (action != null && action.equals("WAVER")) {
+      tdr = tdr + action;
     }
     tdrsBySrr.put(srr, tdr);
     eblStatesById.put(
@@ -86,7 +88,11 @@ public class EblSurrenderPlatform extends ConformanceParty {
         forAmendment
             ? EblSurrenderState.AMENDMENT_SURRENDER_REQUESTED
             : EblSurrenderState.DELIVERY_SURRENDER_REQUESTED);
-
+    String reasonCode =
+        actionPrompt.get("isSwitchToPaper") != null
+                && actionPrompt.get("isSwitchToPaper").booleanValue()
+            ? "SWTP"
+            : "";
     JsonNode jsonRequestBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/eblsurrender/messages/eblsurrender-api-v%s-request.json"
@@ -95,14 +101,14 @@ public class EblSurrenderPlatform extends ConformanceParty {
                 Map.entry("SURRENDER_REQUEST_REFERENCE_PLACEHOLDER", srr),
                 Map.entry("TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER", tdr),
                 Map.entry("SURRENDER_REQUEST_CODE_PLACEHOLDER", src),
+                Map.entry("REASON_CODE", reasonCode),
                 Map.entry("ISSUE_TO_PARTY", ssp.issueToParty().toString()),
                 Map.entry("SURRENDEREE_PARTY", ssp.surrendereeParty().toString()),
                 Map.entry("CARRIER_PARTY", ssp.carrierParty().toString()),
                 Map.entry("ACTION_DATE_TIME_PLACEHOLDER", Instant.now().toString())));
 
     syncCounterpartPost(
-        "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)),
-        jsonRequestBody);
+        "/v%s/ebl-surrender-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
 
     addOperatorLogEntry(
         "Sent surrender request with surrenderRequestCode '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s'"
@@ -156,12 +162,12 @@ public class EblSurrenderPlatform extends ConformanceParty {
                               .formatted(action, tdr, eblStatesById.get(tdr)))));
     }
     /*addOperatorLogEntry(
-        "Handling surrender response with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(action, srr, tdr, eblStatesById.get(tdr)));*/
+    "Handling surrender response with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
+        .formatted(action, srr, tdr, eblStatesById.get(tdr)));*/
 
     addOperatorLogEntry(
-      "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-        .formatted(action, srr, tdr, eblStatesById.get(tdr)));
+        "Handling notification with action '%s' and surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
+            .formatted(action, srr, tdr, eblStatesById.get(tdr)));
     return response;
   }
 }

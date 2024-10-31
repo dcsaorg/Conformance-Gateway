@@ -19,8 +19,6 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.eblsurrender.action.SupplyScenarioParametersAction;
-import org.dcsa.conformance.standards.eblsurrender.action.SurrenderResponseAction;
-import org.dcsa.conformance.standards.eblsurrender.action.VoidAndReissueAction;
 
 @Slf4j
 public class EblSurrenderCarrier extends ConformanceParty {
@@ -73,9 +71,7 @@ public class EblSurrenderCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-        //Map.entry(SurrenderResponseAction.class, this::sendSurrenderResponse),
-        Map.entry(VoidAndReissueAction.class, this::voidAndReissue));
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -85,21 +81,17 @@ public class EblSurrenderCarrier extends ConformanceParty {
 
     String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
-    persistentMap.save("response",actionPrompt.get("response"));
+    persistentMap.save("response", actionPrompt.get("response"));
     var issueToParty = OBJECT_MAPPER.createObjectNode();
-    issueToParty.put("partyName", "Issue To name")
-      .put("eblPlatform", "WAVE");
+    issueToParty.put("partyName", "Issue To name").put("eblPlatform", "WAVE");
     var carrierParty = OBJECT_MAPPER.createObjectNode();
-    carrierParty.put("partyName", "Carrier name")
-      .put("eblPlatform", "WAVE");
+    carrierParty.put("partyName", "Carrier name").put("eblPlatform", "WAVE");
 
     var surrendereeParty = OBJECT_MAPPER.createObjectNode();
-    surrendereeParty.put("partyName", "Surrenderee name")
-      .put("eblPlatform", "BOLE");
+    surrendereeParty.put("partyName", "Surrenderee name").put("eblPlatform", "BOLE");
 
     SuppliedScenarioParameters suppliedScenarioParameters =
-        new SuppliedScenarioParameters(
-            tdr, issueToParty, carrierParty, surrendereeParty);
+        new SuppliedScenarioParameters(tdr, issueToParty, carrierParty, surrendereeParty);
 
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), suppliedScenarioParameters.toJson());
@@ -109,56 +101,6 @@ public class EblSurrenderCarrier extends ConformanceParty {
             .formatted(suppliedScenarioParameters.toJson().toPrettyString()));
   }
 
-  private void voidAndReissue(JsonNode actionPrompt) {
-    log.info("EblSurrenderCarrier.voidAndReissue(%s)".formatted(actionPrompt.toPrettyString()));
-    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    String tdr = ssp.transportDocumentReference();
-    if (!Objects.equals(eblStatesById.get(tdr), EblSurrenderState.SURRENDERED_FOR_AMENDMENT)) {
-      throw new IllegalStateException(
-          "Cannot void and reissue in state: " + eblStatesById.get(tdr));
-    }
-    eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
-    asyncOrchestratorPostPartyInput(
-        actionPrompt.get("actionId").asText(), OBJECT_MAPPER.createObjectNode());
-    addOperatorLogEntry(
-        "Voided and reissued the eBL with transportDocumentReference '%s'".formatted(tdr));
-  }
-
-  private void sendSurrenderResponse(JsonNode actionPrompt) {
-    log.info(
-        "EblSurrenderCarrier.sendSurrenderResponse(%s)".formatted(actionPrompt.toPrettyString()));
-    SuppliedScenarioParameters ssp = SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
-    String tdr = ssp.transportDocumentReference();
-    boolean accept = actionPrompt.get("accept").asBoolean();
-    switch (eblStatesById.get(tdr)) {
-      case AMENDMENT_SURRENDER_REQUESTED -> eblStatesById.put(
-          tdr,
-          accept
-              ? EblSurrenderState.SURRENDERED_FOR_AMENDMENT
-              : EblSurrenderState.AVAILABLE_FOR_SURRENDER);
-      case DELIVERY_SURRENDER_REQUESTED -> eblStatesById.put(
-          tdr,
-          accept
-              ? EblSurrenderState.SURRENDERED_FOR_DELIVERY
-              : EblSurrenderState.AVAILABLE_FOR_SURRENDER);
-      default -> {} // ignore -- sending from wrong state for testing purposes
-    }
-    String srr = actionPrompt.get("srr").asText();
-    if ("*".equals(srr)) {
-      srr = UUID.randomUUID().toString();
-    }
-    syncCounterpartPost(
-        "/v%s/ebl-surrender-responses".formatted(apiVersion.charAt(0)),
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("surrenderRequestReference", srr)
-            .put("action", accept ? "SURR" : "SREJ"));
-
-    addOperatorLogEntry(
-        "%s surrender request with surrenderRequestReference '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(accept ? "Accepted" : "Rejected", srr, tdr, eblStatesById.get(tdr)));
-  }
-
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("EblSurrenderCarrier.handleRequest(%s)".formatted(request));
@@ -166,29 +108,28 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String src = jsonRequest.get("surrenderRequestCode").asText();
     String srr = jsonRequest.get("surrenderRequestReference").asText();
     String tdr = jsonRequest.get("transportDocumentReference").asText();
-    String action = tdr.contains("WAVER") ? "SREJ":"SURR";
+    String action = tdr.contains("WAVER") ? "SREJ" : "SURR";
 
-    String responseCode = null;
     if ("*".equals(srr)) {
       srr = UUID.randomUUID().toString();
     }
-    if(persistentMap.load("response") !=  null){
+    if (persistentMap.load("response") != null) {
       action = persistentMap.load("response").asText();
     }
 
-    var carrierResponse = OBJECT_MAPPER
-      .createObjectNode()
-      .put("surrenderRequestReference", srr)
-      .put("action",  action);
-    asyncCounterpartNotification(null,
-      "/v3/ebl-surrender-responses",carrierResponse);
+    var carrierResponse =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("surrenderRequestReference", srr)
+            .put("action", action);
+    asyncCounterpartNotification(null, "/v3/ebl-surrender-responses", carrierResponse);
 
-//.put("action", accept ? "SURR" : "SREJ"));
     if (Objects.equals(
         EblSurrenderState.AVAILABLE_FOR_SURRENDER,
         eblStatesById.getOrDefault(
             tdr,
-            // workaround for supplyScenarioParameters() not getting called on parties in manual mode
+            // workaround for supplyScenarioParameters() not getting called on parties in manual
+            // mode
             this.partyConfiguration.isInManualMode()
                 ? EblSurrenderState.AVAILABLE_FOR_SURRENDER
                 : null))) {

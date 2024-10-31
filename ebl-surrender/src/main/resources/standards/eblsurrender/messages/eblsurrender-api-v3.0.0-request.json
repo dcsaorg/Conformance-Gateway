@@ -2,7 +2,7 @@
   "surrenderRequestReference": "SURRENDER_REQUEST_REFERENCE_PLACEHOLDER",
   "transportDocumentReference": "TRANSPORT_DOCUMENT_REFERENCE_PLACEHOLDER",
   "surrenderRequestCode": "SURRENDER_REQUEST_CODE_PLACEHOLDER",
-  "reasonCode": "SWTP",
+  "reasonCode": "REASON_CODE",
   "comments": "As requested...",
   "endorsementChain": [
     {

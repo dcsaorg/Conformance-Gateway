@@ -47,8 +47,6 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    // DT-1794: To be redesigned with support automatic execution of manual scenario runs
-    // Keeping the unused parameter in place to avoid losing data on upgrade after DT-1794 fix.
     return new CarrierScenarioParameters("Provide the public key for validating the signed content in here.")
         .toJson();
   }

@@ -116,7 +116,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
-        "Submit the CarrierScenarioParameters: %s"
+        "Prompt answer for CarrierScenarioParameters: %s"
             .formatted(carrierScenarioParameters.toJson().toPrettyString()));
   }
 

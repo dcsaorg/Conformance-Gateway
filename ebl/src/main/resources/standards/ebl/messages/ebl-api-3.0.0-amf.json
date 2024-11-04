@@ -7,6 +7,7 @@
   "invoicePayableAt": {
     "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
   },
+  "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
       "name": "DCSA test person",

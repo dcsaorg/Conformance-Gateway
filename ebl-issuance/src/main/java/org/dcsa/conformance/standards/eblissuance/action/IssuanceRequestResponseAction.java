@@ -124,10 +124,6 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
     return true;
   }
 
-  public boolean isMissingMatchedExchange() {
-    return super.isMissingMatchedExchange();
-  }
-
   @Override
   protected void doHandleExchange(ConformanceExchange exchange) {
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();

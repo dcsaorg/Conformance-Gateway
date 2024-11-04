@@ -112,30 +112,61 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   private boolean handleJsonPromptForText() {
-    String promptText;
+    String jsonPromptText;
     By jsonForPromptText = By.id("jsonForPromptText");
     try {
-      promptText = driver.findElement(jsonForPromptText).getText();
+      jsonPromptText = driver.findElement(jsonForPromptText).getText();
       wait.until(ExpectedConditions.visibilityOfElementLocated(jsonForPromptText));
     } catch (org.openqa.selenium.NoSuchElementException e) {
       log.debug("No jsonForPromptText text.");
       return false;
     }
 
+    String promptText = driver.findElement(By.cssSelector("[testId='promptText']")).getText();
+
     // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
-    if (promptText.contains("Insert TDR here")) {
-      promptText = fetchTransportDocument(promptText);
+    if (promptText.contains(
+        "UC6: Publish draft transport document matching the scenario parameters provided")) {
+      jsonPromptText = fetchTransportDocument(jsonPromptText);
+    } else // Flow for PINT scenarios
+    if (promptText.contains(
+        "Please provide these scenario details. Additional documents required:")) {
+      jsonPromptText = fetchPromptAnswer("supplyScenarioParameters");
+    } else if (promptText.contains(
+        "Setup the system for transfer and provide the following details for the sender.")) {
+      jsonPromptText = fetchPromptAnswer("initiateState");
     }
 
     if (driver.findElements(By.id("actionInput")).isEmpty()) {
       log.error("Error: No actionInput element found, while a jsonForPromptText was displayed!");
       fail();
     }
-    driver.findElement(By.id("actionInput")).sendKeys(promptText);
+    driver.findElement(By.id("actionInput")).sendKeys(jsonPromptText);
     driver.findElement(By.id("submitActionButton")).click();
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay * 2); // Extra delay for the async calls to finish.
     return true;
+  }
+
+  private String fetchPromptAnswer(String answerFor) {
+    handlePromptText();
+    switchToTab(1);
+
+    driver.findElement(By.cssSelector("[testId='refreshButton']")).click();
+    waitForUIReadiness();
+    waitForAsyncCalls(lambdaDelay);
+
+    var prompt = "Prompt answer for %s:".formatted(answerFor);
+    String operatorLog =
+        driver.findElements(By.cssSelector("[testId='operatorLog']")).stream()
+            .map(WebElement::getText)
+            .filter(log -> log.contains(prompt))
+            .findFirst()
+            .orElseThrow();
+
+    String foundAnswer = operatorLog.substring(prompt.length() + 1);
+    switchToTab(0);
+    return foundAnswer;
   }
 
   private String fetchTransportDocument(String promptText) {
@@ -147,7 +178,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     waitForAsyncCalls(lambdaDelay);
 
     String operatorLog = driver.findElement(By.cssSelector("[testId='operatorLog']")).getText();
-    log.debug("Operator log: {}", operatorLog);
     String reference = extractTransportDocumentReference(operatorLog);
     switchToTab(0);
     return promptText.replace("Insert TDR here", reference);

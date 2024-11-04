@@ -43,7 +43,7 @@ class SeleniumTest extends SeleniumTestBase {
     "eBL Surrender", // 7:59 minutes
     "JIT", // 1:14 minutes
     "OVS", // 3:34 minutes
-//     "PINT", // Waits until DT-1796 is fixed
+    "PINT", // 6:10 minutes
     "TnT" // 6:20 minutes
   })
   void testStandardWithAllVersions(String standardName) {

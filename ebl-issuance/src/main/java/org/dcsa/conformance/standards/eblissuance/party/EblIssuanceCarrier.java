@@ -25,7 +25,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerWithKey;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
-import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestAction;
+import org.dcsa.conformance.standards.eblissuance.action.IssuanceRequestResponseAction;
 import org.dcsa.conformance.standards.eblissuance.action.IssuanceResponseCode;
 
 @Slf4j
@@ -53,11 +53,35 @@ public class EblIssuanceCarrier extends ConformanceParty {
     this.payloadSigner = payloadSigner;
   }
 
+  private static byte[] generateDocument() {
+    byte[] pdf;
+    String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
+    try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
+      if (inputStream == null) {
+        throw new IllegalArgumentException("File not found: " + filepath);
+      }
+      pdf = inputStream.readAllBytes();
+    } catch (IOException e) {
+      throw new IllegalArgumentException(
+          "Generating document failed. Could not load file: " + filepath);
+    }
+    String uuidHex = UUID.randomUUID().toString();
+    String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);
+    String title = "/Title (DCSA - Driving digitalisation in container shipping)";
+    int titleStart = pdfString.indexOf(title);
+
+    int titleEnd = pdfString.indexOf(")", titleStart);
+    String newTitle = "DCSA - " + uuidHex + " shipping";
+
+    String updatedPdfContent =
+        pdfString.substring(0, titleStart + 7) + newTitle + ")" + pdfString.substring(titleEnd + 1);
+    return updatedPdfContent.getBytes(StandardCharsets.ISO_8859_1);
+  }
+
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
     targetObjectNode.set(
-        "eblStatesByTdr",
-        StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
+        "eblStatesByTdr", StateManagementUtil.storeMap(eblStatesByTdr, EblIssuanceState::name));
     targetObjectNode.set("sirsByTdr", StateManagementUtil.storeMap(sirsByTdr));
     targetObjectNode.set("brsByTdr", StateManagementUtil.storeMap(brsByTdr));
   }
@@ -80,23 +104,20 @@ public class EblIssuanceCarrier extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(IssuanceRequestAction.class, this::sendIssuanceRequest),
-      Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters)
-    );
+        Map.entry(IssuanceRequestResponseAction.class, this::sendIssuanceRequest),
+        Map.entry(CarrierScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info(
-      "EblIssuanceCarrier.supplyScenarioParameters(%s)"
-        .formatted(actionPrompt.toPrettyString()));
+        "EblIssuanceCarrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var carrierScenarioParameters =
-        new CarrierScenarioParameters(
-          payloadSigner.getPublicKeyInPemFormat());
+        new CarrierScenarioParameters(payloadSigner.getPublicKeyInPemFormat());
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), carrierScenarioParameters.toJson());
     addOperatorLogEntry(
-      "Submitting CarrierScenarioParameters: %s"
-        .formatted(carrierScenarioParameters.toJson().toPrettyString()));
+        "Submitting CarrierScenarioParameters: %s"
+            .formatted(carrierScenarioParameters.toJson().toPrettyString()));
   }
 
   private void sendIssuanceRequest(JsonNode actionPrompt) {
@@ -112,11 +133,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
     String br =
         brsByTdr.computeIfAbsent(tdr, ignoredTdr -> UUID.randomUUID().toString().substring(35));
 
-    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
-    var isAmended = actionPrompt.path("isAmended").asBoolean(false);
-    if (isCorrect) {
-      eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
-    }
+    eblStatesByTdr.put(tdr, EblIssuanceState.ISSUANCE_REQUESTED);
 
     var jsonRequestBody =
         (ObjectNode)
@@ -150,12 +167,12 @@ public class EblIssuanceCarrier extends ConformanceParty {
                         Objects.requireNonNullElse(ssp.consigneeOrEndorseeCodeListName(), ""))));
 
     if (eblType.isToOrder()) {
-      var td = (ObjectNode)jsonRequestBody.path("document");
+      var td = (ObjectNode) jsonRequestBody.path("document");
       td.put("isToOrder", true);
       if (apiVersion.startsWith("2.")) {
-        var documentParties = (ArrayNode)td.path("documentParties");
+        var documentParties = (ArrayNode) td.path("documentParties");
         var cnIdx = -1;
-        for (int i = 0 ; i < documentParties.size() ; i++) {
+        for (int i = 0; i < documentParties.size(); i++) {
           if (documentParties.path(i).path("partyFunction").asText("?").equals("CN")) {
             cnIdx = i;
             break;
@@ -164,10 +181,10 @@ public class EblIssuanceCarrier extends ConformanceParty {
         if (eblType.isBlankEbl()) {
           documentParties.remove(cnIdx);
         } else {
-          ((ObjectNode)documentParties.path(cnIdx)).put("partyFunction", "END");
+          ((ObjectNode) documentParties.path(cnIdx)).put("partyFunction", "END");
         }
       } else {
-        var documentParties = (ObjectNode)td.path("documentParties");
+        var documentParties = (ObjectNode) td.path("documentParties");
         if (eblType.isBlankEbl()) {
           documentParties.remove("consignee");
           documentParties.remove("endorsee");
@@ -178,19 +195,11 @@ public class EblIssuanceCarrier extends ConformanceParty {
       }
     }
 
-    if (!isCorrect) {
-      ((ObjectNode) jsonRequestBody.path("document").path("documentParties")).remove("issuingParty");
-    }
-    if (isAmended) {
-      var sealObj = (ObjectNode)jsonRequestBody.path("document").path("utilizedTransportEquipments").path(0).path("seals").path(0);
-      var sealNumber = sealObj.path("sealNumber").asText("") + "X";
-      sealObj.put("sealNumber", sealNumber);
-    }
-
     var tdChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("document"));
     var issueToChecksum = Checksums.sha256CanonicalJson(jsonRequestBody.path("issueTo"));
-    jsonRequestBody.set("eBLVisualisationByCarrier",getSupportingDocumentObject());
-    var eBLVisualisationByCarrier = Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
+    jsonRequestBody.set("eBLVisualisationByCarrier", getSupportingDocumentObject());
+    var eBLVisualisationByCarrier =
+        Checksums.sha256CanonicalJson(jsonRequestBody.path("eBLVisualisationByCarrier"));
     var issuanceManifest =
         OBJECT_MAPPER
             .createObjectNode()
@@ -198,15 +207,15 @@ public class EblIssuanceCarrier extends ConformanceParty {
             .put("issueToChecksum", issueToChecksum)
             .put("eBLVisualisationByCarrierChecksum", eBLVisualisationByCarrier);
 
-    jsonRequestBody.put("issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
+    jsonRequestBody.put(
+        "issuanceManifestSignedContent", payloadSigner.sign(issuanceManifest.toString()));
 
     syncCounterpartPut(
-        "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)),
-        jsonRequestBody);
+        "/v%s/ebl-issuance-requests".formatted(apiVersion.charAt(0)), jsonRequestBody);
 
     addOperatorLogEntry(
-        "Sent a %s issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
-            .formatted(isCorrect ? "correct" : "incorrect", tdr, eblStatesByTdr.get(tdr)));
+        "Sent an issuance request for eBL with transportDocumentReference '%s' (now in state '%s')"
+            .formatted(tdr, eblStatesByTdr.get(tdr)));
   }
 
   private ObjectNode getSupportingDocumentObject() {
@@ -216,31 +225,6 @@ public class EblIssuanceCarrier extends ConformanceParty {
         .put("name", "test-iss-document")
         .put("content", document)
         .put("mediatype", "application/octet-stream");
-  }
-
-  private static byte[] generateDocument() {
-    byte[] pdf;
-    String filepath = "/standards/eblissuance/messages/test-iss-document.pdf";
-    try (InputStream inputStream = EblIssuanceCarrier.class.getResourceAsStream(filepath)) {
-      if (inputStream == null) {
-        throw new IllegalArgumentException("File not found: " + filepath);
-      }
-      pdf = inputStream.readAllBytes();
-    } catch (IOException e) {
-      throw new IllegalArgumentException(
-          "Generating document failed. Could not load file: " + filepath);
-    }
-    String uuidHex = UUID.randomUUID().toString();
-    String pdfString = new String(pdf, StandardCharsets.ISO_8859_1);
-    String title = "/Title (DCSA - Driving digitalisation in container shipping)";
-    int titleStart = pdfString.indexOf(title);
-
-    int titleEnd = pdfString.indexOf(")", titleStart);
-    String newTitle = "DCSA - " + uuidHex + " shipping";
-
-    String updatedPdfContent =
-        pdfString.substring(0, titleStart + 7) + newTitle + ")" + pdfString.substring(titleEnd + 1);
-    return updatedPdfContent.getBytes(StandardCharsets.ISO_8859_1);
   }
 
   @Override
@@ -254,10 +238,8 @@ public class EblIssuanceCarrier extends ConformanceParty {
       if (Objects.equals(IssuanceResponseCode.ACCEPTED.standardCode, irc)) {
         eblStatesByTdr.put(tdr, EblIssuanceState.ISSUED);
       }
-
       addOperatorLogEntry(
-          "Handling issuance response with issuanceResponseCode '%s' for eBL with transportDocumentReference '%s' (now in state '%s')"
-              .formatted(irc, tdr, eblStatesByTdr.get(tdr)));
+          "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
 
       return request.createResponse(
           204,
@@ -268,7 +250,7 @@ public class EblIssuanceCarrier extends ConformanceParty {
           409,
           Map.of(API_VERSION, List.of(apiVersion)),
           new ConformanceMessageBody(
-            OBJECT_MAPPER
+              OBJECT_MAPPER
                   .createObjectNode()
                   .put(
                       "message",

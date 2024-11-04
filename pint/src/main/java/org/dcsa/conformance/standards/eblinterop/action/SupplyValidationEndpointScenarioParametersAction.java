@@ -31,7 +31,7 @@ public class SupplyValidationEndpointScenarioParametersAction extends PintAction
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
-    setDsp(getDsp().withReceiverValidation(partyInput));
+    setDsp(getDsp().withReceiverValidation(partyInput.path("input")));
   }
 
   public static ObjectNode getJsonForPrompt() {

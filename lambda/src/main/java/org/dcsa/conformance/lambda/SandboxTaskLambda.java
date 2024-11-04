@@ -8,20 +8,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.ConformanceSandbox;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
-import software.amazon.lambda.powertools.logging.Logging;
 
-@Log4j2
+
+@Slf4j
 public class SandboxTaskLambda implements RequestStreamHandler {
 
-  @Logging
   public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
     try {
       JsonNode jsonInput = JsonToolkit.inputStreamToJsonNode(inputStream);
-      log.info("jsonInput = {}", jsonInput);
+      log.info("jsonInput = {}", jsonInput.toPrettyString());
 
       try {
         Thread.sleep(100); // for consistency with the local app
@@ -38,13 +37,17 @@ public class SandboxTaskLambda implements RequestStreamHandler {
           jsonInput);
 
       ObjectNode jsonOutput = OBJECT_MAPPER.createObjectNode();
-      log.debug("jsonOutput = {}", jsonOutput);
-      outputStream.write(jsonOutput.toString().getBytes(StandardCharsets.UTF_8));
+      log.info("jsonOutput {}", jsonOutput.toPrettyString());
+      try (BufferedWriter writer =
+          new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+        writer.write(jsonOutput.toPrettyString());
+        writer.flush();
+      }
     } catch (RuntimeException | Error e) {
-      log.error("Unhandled exception: ", e);
+      log.error("Unhandled exception: {}", e, e);
       throw e;
     } catch (IOException e) {
-      log.error("Unhandled exception: ", e);
+      log.error("Unhandled exception: {}", e, e);
       throw new RuntimeException(e);
     }
   }

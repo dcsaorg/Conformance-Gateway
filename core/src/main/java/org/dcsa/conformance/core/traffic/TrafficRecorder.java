@@ -16,7 +16,7 @@ public class TrafficRecorder {
     this.partitionKey = partitionKey;
   }
 
-  public Map<String, List<ConformanceExchange>> getTrafficByScenarioRun() {
+  public synchronized Map<String, List<ConformanceExchange>> getTrafficByScenarioRun() {
     HashMap<String, List<ConformanceExchange>> trafficMap = new HashMap<>();
     nonLockingMap
         .getPartitionValues(partitionKey)
@@ -30,11 +30,19 @@ public class TrafficRecorder {
     return trafficMap;
   }
 
-  public void recordExchange(ConformanceExchange conformanceExchange, String scenarioRun) {
+  public synchronized void recordExchange(ConformanceExchange conformanceExchange, String scenarioRun) {
+    String sortKey;
+    while (nonLockingMap.getItemValue(partitionKey, sortKey = Instant.now().toString()) != null) {
+      try {
+        this.wait(10);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
     nonLockingMap.setItemValue(
         partitionKey,
-        Instant.now().toString(),
-      OBJECT_MAPPER
+        sortKey,
+        OBJECT_MAPPER
             .createObjectNode()
             .put("scenarioRun", scenarioRun)
             .set("exchange", conformanceExchange.toJson()));

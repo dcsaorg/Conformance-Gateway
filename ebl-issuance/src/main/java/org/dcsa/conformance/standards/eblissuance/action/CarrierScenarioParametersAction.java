@@ -11,7 +11,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   public CarrierScenarioParametersAction(
       String sourcePartyName, String targetPartyName, IssuanceAction previousAction) {
-    super(sourcePartyName, targetPartyName, previousAction, "Supply carrier parameters", -1);
+    super(sourcePartyName, targetPartyName, previousAction, "Carrier scenario parameters", -1);
   }
 
   @Override

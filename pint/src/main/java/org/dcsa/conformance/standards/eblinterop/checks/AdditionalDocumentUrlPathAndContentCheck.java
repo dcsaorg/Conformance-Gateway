@@ -31,7 +31,7 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
       Supplier<String> envelopeReferenceSupplier) {
     super(
         titlePrefix,
-        "The URL path of the HTTP request is correct",
+        "Validate document checksum (body and URL) of the HTTP request is correct",
         isRelevantForRoleName,
         matchedExchangeUuid,
         HttpMessageType.REQUEST);

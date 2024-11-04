@@ -176,7 +176,7 @@ public class ConformanceStack extends Stack {
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.SandboxTaskLambda")
                 .memorySize(1024)
-                .timeout(Duration.minutes(1))
+                .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());
@@ -191,7 +191,7 @@ public class ConformanceStack extends Stack {
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.ApiLambda")
                 .memorySize(1024)
-                .timeout(Duration.minutes(1))
+                .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());
@@ -206,7 +206,7 @@ public class ConformanceStack extends Stack {
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.WebuiLambda")
                 .memorySize(1024)
-                .timeout(Duration.minutes(1))
+                .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)
                 .logRetention(RetentionDays.SEVEN_YEARS)
                 .build());

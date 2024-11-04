@@ -393,7 +393,7 @@ public abstract class ManualTestBase {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
         } else if (promptText.contains("Setup the system for transfer and provide the following details for the sender.")) {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
-        } else if (promptText.contains("Supply the parameters required by the scenario using the following format:")) {
+        } else if (promptText.contains("Supply the public key for validating the signed content using the following format:")) {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "CarrierScenarioParameters");
         }
 

@@ -42,7 +42,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters required by the scenario using the following format:";
+    return "Supply the public key for validating the signed content using the following format:";
   }
 
   @Override

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 
 public class CarrierScenarioParametersAction extends IssuanceAction {
@@ -47,7 +49,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     // DT-1794: To be redesigned with support automatic execution of manual scenario runs
     // Keeping the unused parameter in place to avoid losing data on upgrade after DT-1794 fix.
-    return new CarrierScenarioParameters("Currently ignored, submit this without changing the value")
+    return new CarrierScenarioParameters("Provide the public key for validating the signed content in here.")
         .toJson();
   }
 

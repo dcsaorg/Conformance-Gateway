@@ -97,6 +97,7 @@ public class TntPublisher extends ConformanceParty {
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("TntPublisher.handleRequest(%s)".formatted(request));
+    Map<String, Collection<String>> headers = new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
 
     Map<String, List<AttributeMapping>> attributeMappings = AttributeMapping.initializeAttributeMappings();
 
@@ -111,7 +112,9 @@ public class TntPublisher extends ConformanceParty {
     // Chained Filtering Logic
     for (Map.Entry<String, ? extends Collection<String>> queryParam : request.queryParams().entrySet()) {
       String paramName = queryParam.getKey();
-      Collection<String> paramValues = queryParam.getValue();
+      Collection<String> paramValues = queryParam.getValue().stream()
+        .flatMap(value -> Arrays.stream(value.split(",")))
+        .collect(Collectors.toList());
       List<AttributeMapping> mappings = attributeMappings.get(paramName);
       Set<String> seenEventIds = new HashSet<>();
       if (mappings != null) {
@@ -132,20 +135,18 @@ public class TntPublisher extends ConformanceParty {
       filteredArray = sortJsonArray(filteredArray, sortCriteria);
 
     }
-    // Sort the filtered array by user provided value in parameters.
-    ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
-    if (request.queryParams().containsKey("limit")) {
-      int limit = Integer.parseInt(request.queryParams().get("limit").iterator().next());
-      if (filteredArray.size() > limit) {
-        StreamSupport.stream(filteredArray.spliterator(), false)
-          .limit(limit)
-          .forEach(limitedArray::add);
-      }
-    }
+    int limit = Integer.parseInt(request.queryParams().containsKey("limit") ?
+      request.queryParams().get("limit").iterator().next() : "100");
+    String cursor = request.queryParams()
+      .containsKey("cursor") ? request.queryParams().get("cursor").iterator().next() : null;
+    String cursorKey = "cursorKey";
+
+    ArrayNode limitedArray = applyCursorLogic(filteredArray, cursor, cursorKey, limit, headers);
+
     return request.createResponse(
       200,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(limitedArray.isEmpty() ? filteredArray : limitedArray));
+      headers,
+      new ConformanceMessageBody(limitedArray));
   }
 
   private ArrayNode applyFilter(ArrayNode inputArray, List<AttributeMapping> mappings,
@@ -177,7 +178,6 @@ public class TntPublisher extends ConformanceParty {
     );
     return resultArray;
   }
-
 
   public static ArrayNode sortJsonArray(ArrayNode jsonArray, List<SortCriteria> criteria) {
     if (jsonArray == null || criteria == null || criteria.isEmpty()) {
@@ -258,4 +258,53 @@ public class TntPublisher extends ConformanceParty {
       return 0; // Consider how to handle incomparable types
     }
   }
+
+  protected String generateCursor(ArrayNode events, int limit, String cursorKey) {
+    if (events.size() <= limit) {
+      persistentMap.save(cursorKey, OBJECT_MAPPER.createObjectNode());
+      return null;
+    }
+    JsonNode lastEvent = events.get(limit - 1);
+    String lastEventId = lastEvent.at("/eventID").asText();
+    persistentMap.save(cursorKey, OBJECT_MAPPER.createObjectNode().put("cursor", lastEventId));
+    return lastEventId;
+  }
+
+  private ArrayNode applyCursorLogic(ArrayNode filteredArray, String cursor, String cursorKey, int limit, Map<String, Collection<String>> headers) {
+    // Retrieve cursor from persistentMap if available
+    if (cursor != null) {
+      JsonNode storedCursor = persistentMap.load(cursorKey);
+      if (storedCursor != null) {
+        cursor = storedCursor.path("cursor").asText();
+      }
+    }
+
+    ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
+    int startIndex = 0; // Start from the beginning if no cursor
+
+    // Apply cursor logic (skip events based on cursor)
+    if (cursor != null) {
+      for (int i = 0; i < filteredArray.size(); i++) {
+        if (filteredArray.get(i).at("/eventID").asText().equals(cursor)) {
+          startIndex = i + 1; // Start from the next event
+          break;
+        }
+      }
+    }
+
+    // Limit results
+    for (int i = startIndex; i < filteredArray.size() && limitedArray.size() < limit; i++) {
+      limitedArray.add(filteredArray.get(i));
+    }
+
+    // Generate and store cursor for the next page
+    String nextCursor = generateCursor(filteredArray, startIndex + limit, cursorKey);
+
+    if (nextCursor != null) {
+      headers.put("Next-Page-Cursor", List.of(nextCursor));
+    }
+
+    return limitedArray;
+  }
+
 }

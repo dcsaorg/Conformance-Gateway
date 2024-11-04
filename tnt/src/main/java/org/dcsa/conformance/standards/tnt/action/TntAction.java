@@ -6,10 +6,11 @@ import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
@@ -30,25 +31,12 @@ public abstract class TntAction extends ConformanceAction {
       String actionTitle,
       int expectedStatus) {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
-    this.sspSupplier = _getSspSupplier(previousAction);
+    this.sspSupplier = getSspSupplier(previousAction);
     this.expectedStatus = expectedStatus;
     this.dsp = previousAction == null
       ? new OverwritingReference<>(null,
-      new DynamicScenarioParameters(null, null, null,null, null))
+      new DynamicScenarioParameters(null, null, null))
       : new OverwritingReference<>(previousAction.dsp, null);
-  }
-
-  protected TntAction getPreviousTntAction() {
-    return (TntAction) previousAction;
-  }
-
-
-  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
-    return dsp::get;
-  }
-
-  protected Consumer<DynamicScenarioParameters> getDspConsumer() {
-    return dsp::set;
   }
 
   @Override
@@ -57,8 +45,12 @@ public abstract class TntAction extends ConformanceAction {
     if (previousAction != null) {
       this.dsp.set(null);
     } else {
-      this.dsp.set(new DynamicScenarioParameters(null, null, null,null, null));
+      this.dsp.set(new DynamicScenarioParameters(null, null, null));
     }
+  }
+
+  protected Supplier<DynamicScenarioParameters> getDspSupplier() {
+    return dsp::get;
   }
 
   @Override
@@ -85,7 +77,7 @@ public abstract class TntAction extends ConformanceAction {
         updatedDsp = updateIfNotNull(updatedDsp, firstPageHash, updatedDsp::withFirstPage);
       } else {
         String secondPageHash = getHashString(jsonResponse);
-        updatedDsp = updateIfNotNull(updatedDsp, secondPageHash, updatedDsp::withLastPage);
+        updatedDsp = updateIfNotNull(updatedDsp, secondPageHash, updatedDsp::withSecondPage);
       }
     }
 
@@ -113,11 +105,32 @@ public abstract class TntAction extends ConformanceAction {
     return responseHash;
   }
 
-  private Supplier<SuppliedScenarioParameters> _getSspSupplier(ConformanceAction previousAction) {
-    return previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction
-        ? supplyAvailableTdrAction::getSuppliedScenarioParameters
-        : previousAction == null
-            ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
-            : _getSspSupplier(previousAction.getPreviousAction());
+  private Supplier<SuppliedScenarioParameters> getSspSupplier(ConformanceAction previousAction) {
+    if (previousAction instanceof SupplyScenarioParametersAction supplyAvailableTdrAction) {
+      return supplyAvailableTdrAction::getSuppliedScenarioParameters;
+    } else if (previousAction == null) {
+      return () -> SuppliedScenarioParameters.fromMap(Map.ofEntries());
+    } else {
+      return getSspSupplier(previousAction.getPreviousAction());
+    }
   }
+
+  @Override
+  public ObjectNode exportJsonState() {
+    ObjectNode jsonState = super.exportJsonState();
+    if (dsp.hasCurrentValue()) {
+      jsonState.set("currentDsp", dsp.get().toJson());
+    }
+    return jsonState;
+  }
+
+  @Override
+  public void importJsonState(JsonNode jsonState) {
+    super.importJsonState(jsonState);
+    JsonNode dspNode = jsonState.get("currentDsp");
+    if (dspNode != null) {
+      dsp.set(DynamicScenarioParameters.fromJson(dspNode));
+    }
+  }
+
 }

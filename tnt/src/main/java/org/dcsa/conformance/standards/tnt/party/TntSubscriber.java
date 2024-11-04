@@ -19,7 +19,7 @@ import org.dcsa.conformance.standards.tnt.action.TntGetEventsBadRequestAction;
 
 @Slf4j
 public class TntSubscriber extends ConformanceParty {
-
+  private static final String CURSOR = "cursor";
   public TntSubscriber(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -57,13 +57,18 @@ public class TntSubscriber extends ConformanceParty {
     SuppliedScenarioParameters ssp =
         SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"));
 
+    Map<String, Collection<String>> queryParams = ssp.getMap().entrySet().stream()
+      .collect(
+        Collectors.toMap(
+          entry -> entry.getKey().getQueryParamName(),
+          entry -> Set.of(entry.getValue())));
+    if (actionPrompt.has(CURSOR)) {
+      queryParams.put(CURSOR, List.of(actionPrompt.get(CURSOR).asText()));
+    }
+
     syncCounterpartGet(
-        "/v2/events",
-        ssp.getMap().entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().getQueryParamName(),
-                    entry -> Set.of(entry.getValue()))));
+        "/v2/events",queryParams
+);
 
     addOperatorLogEntry(
         "Sent GET events request with parameters %s".formatted(ssp.toJson().toPrettyString()));

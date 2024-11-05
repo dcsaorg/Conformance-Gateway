@@ -135,5 +135,142 @@
         "sealType": "WIR"
       }
     ]
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e5",
+    "eventCreatedDateTime": "2021-01-01T14:12:56+01:00",
+    "eventType": "TRANSPORT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2020-11-12T07:41:00+08:30",
+    "transportEventTypeCode": "ARRI",
+    "delayReasonCode": "WEA",
+    "changeRemark": "Bad weather",
+    "transportCall": {
+      "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+      "carrierServiceCode": "FE1",
+      "exportVoyageNumber": "2103S",
+      "importVoyageNumber": "2103N",
+      "transportCallSequenceNumber": 2,
+      "UNLocationCode": "FRPAR",
+      "facilityCode": "ADT",
+      "facilityCodeListProvider": "SMDG",
+      "facilityTypeCode": "POTE",
+      "otherFacility": "Depot location or address",
+      "modeOfTransport": "VESSEL",
+      "vessel": {
+        "vesselIMONumber": "9321483",
+        "vesselName": "King of the Seas",
+        "vesselFlag": "DE",
+        "vesselCallSignNumber": "NCVV",
+        "vesselOperatorCarrierCode": "MAEU",
+        "vesselOperatorCarrierCodeListProvider": "NMFTA"
+      }
+    },
+    "documentReferences": [
+      {
+        "documentReferenceType": "BKG",
+        "documentReferenceValue": "ABC123123123"
+      },
+      {
+        "documentReferenceType": "TRD",
+        "documentReferenceValue": "85943567-eedb-98d3-f4ed-aed697474ed4"
+      }
+    ],
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      }
+    ]
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e6",
+    "eventCreatedDateTime": "2021-01-17T14:12:56+01:00",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "the-id-of-the-documentTypeCode",
+    "documentTypeCode": "SHI",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      }
+    ]
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e7",
+    "eventCreatedDateTime": "2021-01-22T14:12:56+01:00",
+    "eventType": "EQUIPMENT",
+    "eventClassifierCode": "EST",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "equipmentEventTypeCode": "LOAD",
+    "equipmentReference": "APZU4812090",
+    "ISOEquipmentCode": "22GP",
+    "emptyIndicatorCode": "EMPTY",
+    "eventLocation": {
+      "locationName": "Eiffel Tower",
+      "latitude": "48.8585500",
+      "longitude": "2.294492036",
+      "UNLocationCode": "FRPAR",
+      "facilityCode": "ADT",
+      "facilityCodeListProvider": "SMDG",
+      "address": {
+        "name": "Henrik",
+        "street": "Kronprincessegade",
+        "streetNumber": "54",
+        "floor": "5. sal",
+        "postCode": "1306",
+        "city": "København",
+        "stateRegion": "N/A",
+        "country": "Denmark"
+      }
+    },
+    "transportCall": {
+      "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+      "carrierServiceCode": "FE1",
+      "exportVoyageNumber": "2103S",
+      "importVoyageNumber": "2103N",
+      "transportCallSequenceNumber": 2,
+      "UNLocationCode": "FRPAR",
+      "facilityCode": "ADT",
+      "facilityCodeListProvider": "SMDG",
+      "facilityTypeCode": "POTE",
+      "otherFacility": "Depot location or address",
+      "modeOfTransport": "VESSEL",
+      "vessel": {
+        "vesselIMONumber": "9321483",
+        "vesselName": "King of the Seas",
+        "vesselFlag": "DE",
+        "vesselCallSignNumber": "NCVV",
+        "vesselOperatorCarrierCode": "MAEU",
+        "vesselOperatorCarrierCodeListProvider": "NMFTA"
+      }
+    },
+    "documentReferences": [
+      {
+        "documentReferenceType": "BKG",
+        "documentReferenceValue": "ABC123123123"
+      },
+      {
+        "documentReferenceType": "TRD",
+        "documentReferenceValue": "85943567-eedb-98d3-f4ed-aed697474ed4"
+      }
+    ],
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      }
+    ],
+    "seals": [
+      {
+        "sealNumber": "string",
+        "sealSource": "CUS",
+        "sealType": "WIR"
+      }
+    ]
   }
 ]

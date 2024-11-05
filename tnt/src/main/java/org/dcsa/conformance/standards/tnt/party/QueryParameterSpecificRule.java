@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.tnt.party;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,7 +33,9 @@ public class QueryParameterSpecificRule implements QueryParamRule{
     boolean areParamsValid = true;
 
     if (queryParams.containsKey(EVENT_TYPE)) {
-      Set<String> eventTypes = new HashSet<>(queryParams.get("eventType"));
+      Set<String> eventTypes = queryParams.get("eventType").stream()
+        .flatMap(eventType -> Arrays.stream(eventType.split(",")))
+        .collect(Collectors.toSet());
       Set<String> allowedParams = allowedQueryParamForEventTypeMap.entrySet().stream()
         .filter(entry -> eventTypes.contains(entry.getKey()))
         .flatMap(entry -> entry.getValue().stream())
@@ -61,17 +64,25 @@ public class QueryParameterSpecificRule implements QueryParamRule{
 
 
   private boolean validateEventType(Collection<String> eventTypes) {
-    return eventTypes.stream().allMatch(VALID_EVENT_TYPES::contains);
+    return eventTypes.stream()
+      .flatMap(eventType -> Arrays.stream(eventType.split(",")))
+      .allMatch(VALID_EVENT_TYPES::contains);
   }
 
   private boolean validateShipmentEventTypeCode(Collection<String> shipmentEventTypeCodes) {
-    return shipmentEventTypeCodes.stream().allMatch(VALID_SHIPMENT_EVENT_TYPES::contains);
+    return shipmentEventTypeCodes.stream()
+      .flatMap(eventType -> Arrays.stream(eventType.split(",")))
+      .allMatch(VALID_SHIPMENT_EVENT_TYPES::contains);
   }
   private boolean validateDocumentTypeCode(Collection<String> documentTypeCodes) {
-    return documentTypeCodes.stream().allMatch(VALID_DOCUMENT_TYPE_CODES::contains);
+    return documentTypeCodes.stream()
+      .flatMap(eventType -> Arrays.stream(eventType.split(",")))
+      .allMatch(VALID_DOCUMENT_TYPE_CODES::contains);
   }
   private boolean validateEquipmentEventTypeCode(Collection<String> equipmentTypeCodes) {
-    return equipmentTypeCodes.stream().allMatch(VALID_EQUIPMENT_EVENT_TYPES::contains);
+    return equipmentTypeCodes.stream()
+      .flatMap(eventType -> Arrays.stream(eventType.split(",")))
+      .allMatch(VALID_EQUIPMENT_EVENT_TYPES::contains);
   }
 
 }

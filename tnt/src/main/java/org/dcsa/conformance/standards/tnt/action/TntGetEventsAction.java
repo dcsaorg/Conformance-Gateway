@@ -22,14 +22,21 @@ public class TntGetEventsAction extends TntAction {
       String publisherPartyName,
       TntAction previousAction,
       Map<TntEventType, JsonSchemaValidator> eventSchemaValidators) {
-    super(subscriberPartyName, publisherPartyName, previousAction, "GetEvents", 200);
+    super(subscriberPartyName,
+      publisherPartyName,
+      previousAction,
+      (previousAction instanceof TntGetEventsAction)
+        ? "GetEvents (Next page)"
+        : "GetEvents", 200);
     this.eventSchemaValidators = eventSchemaValidators;
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a GET events request with the following parameters: "
-        + sspSupplier.get().toJson().toPrettyString();
+    return previousAction instanceof TntGetEventsAction
+      ? "Send a GET events request to fetch the next results page, using the cursor retrieved from the headers of the response of the first GET request."
+      : "Send a GET events request with the following parameters: "
+      + sspSupplier.get().toJson().toPrettyString();
   }
 
   @Override
@@ -62,6 +69,12 @@ public class TntGetEventsAction extends TntAction {
   }
 
   public ObjectNode asJsonNode() {
-    return super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    var dsp = getDspSupplier().get();
+    ObjectNode jsonActionNode = super.asJsonNode().set("suppliedScenarioParameters", sspSupplier.get().toJson());
+    String cursor = dsp.cursor();
+    if (cursor != null && !cursor.isEmpty()) {
+      jsonActionNode.put("cursor", cursor);
+    }
+    return jsonActionNode;
   }
 }

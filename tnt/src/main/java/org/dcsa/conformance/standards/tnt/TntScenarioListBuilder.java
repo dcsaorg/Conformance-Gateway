@@ -57,7 +57,12 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
               scenarioWithBadRequestFilterBy(Map.of(DOCUMENT_TYPE_CODE, "INVALID_DOCUMENT_TYPE_CODE")),
               scenarioWithBadRequestFilterBy(
                 Map.of(EVENT_TYPE, "SHIPMENT"
-                  ,TRANSPORT_EVENT_TYPE_CODE, "ARRV")))),
+                  ,TRANSPORT_EVENT_TYPE_CODE, "ARRV")),
+              scenarioWithFilterByPagination(
+                getEvents(),
+                Map.of(EVENT_TYPE, "SHIPMENT"
+                  ,LIMIT, "1")
+              ))),
         Map.entry(
           "TRANSPORT",
           noAction()
@@ -87,7 +92,12 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
               scenarioWithBadRequestFilterBy(Map.of(EVENT_TYPE, "INVALID_TRANSPORT_EVENT")),
               scenarioWithBadRequestFilterBy(
                 Map.of(EVENT_TYPE, "TRANSPORT"
-                ,SHIPMENT_EVENT_TYPE_CODE, "DRFT")))),
+                ,SHIPMENT_EVENT_TYPE_CODE, "DRFT")),
+              scenarioWithFilterByPagination(
+                getEvents(),
+                Map.of(EVENT_TYPE, "TRANSPORT"
+                  ,LIMIT, "1")
+              ))),
         Map.entry(
           "EQUIPMENT",
           noAction()
@@ -118,8 +128,12 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
               scenarioWithBadRequestFilterBy(Map.of(EQUIPMENT_EVENT_TYPE_CODE, "INVALID_EQUIPMENT_TYPE_CODE")),
               scenarioWithBadRequestFilterBy(
                 Map.of(EVENT_TYPE, "EQUIPMENT"
-                  ,SHIPMENT_EVENT_TYPE_CODE, "DRFT"))
-            )))
+                  ,SHIPMENT_EVENT_TYPE_CODE, "DRFT")),
+              scenarioWithFilterByPagination(
+                getEvents(),
+                Map.of(EVENT_TYPE, "EQUIPMENT"
+                  ,LIMIT, "1")
+              ))))
           .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -155,6 +169,10 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
     shipmentParameters.put(LIMIT,"5");
     shipmentParameters.putAll(parameters);
     return supplyScenarioParameters(shipmentParameters).then(getEvents());
+  }
+
+  private static TntScenarioListBuilder scenarioWithFilterByPagination(TntScenarioListBuilder nextEventsAction, Map<TntFilterParameter, String> parameters) {
+    return supplyScenarioParameters(new LinkedHashMap<>(parameters)).then(nextEventsAction.then(getEvents()));
   }
 
 

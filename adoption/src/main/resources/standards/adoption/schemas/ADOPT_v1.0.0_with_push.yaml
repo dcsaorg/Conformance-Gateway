@@ -5,14 +5,12 @@ info:
     Meta-API with which container shipping organizations can share statistics on their adoption of DCSA standards.
   contact:
     name: Digital Container Shipping Association (DCSA)
-    url: https://dcsa.org/
+    url: 'https://dcsa.org/'
     email: info@dcsa.org
   license:
     name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
   version: 1.0.0_with_push
-servers:
-- url: /
 paths:
   /v1/adoption-stats:
     get:
@@ -23,46 +21,35 @@ paths:
         **Note:** This endPoint is to be implemented on "adopter" side and for DCSA to call
       operationId: get-adoption-stats
       parameters:
-      - name: interval
-        in: query
-        description: |
-          The type of interval for which to retrieve statistics:
-          - `day` (per day)
-          - `week` (per week)
-          - `month`(per month)
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-          example: month
-          enum:
-          - day
-          - week
-          - month
-      - name: date
-        in: query
-        description: |
-          The date (or any date within the week or month interval) for which to return the statistics, in YYYY-MM-DD format.
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-          format: date
-          example: 2024-06-21
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "1"
+        - name: interval
+          in: query
+          description: |
+            The type of interval for which to retrieve statistics:
+            - `day` (one day)
+            - `week` (one calendar week)
+            - `month`(one calendar month)
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum:
+              - day
+              - week
+              - month
+            example: week
+        - name: date
+          in: query
+          description: |
+            The date (or any date within the calendar week or month) for which to return the statistics, in YYYY-MM-DD format.
+          required: true
+          schema:
+            type: string
+            format: date
+            example: '2024-06-21'
+        - $ref: '#/components/parameters/Api-Version-Major'
       responses:
-        "200":
+        '200':
           description: |
             A successful response containing the adoption statistics.
           headers:
@@ -72,10 +59,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdoptionStats'
-        "400":
+        '400':
           description: |
             Invalid request parameters.
-        "500":
+        '500':
           description: |
             Internal server error.
     put:
@@ -86,90 +73,97 @@ paths:
         **Note:** This endPoint is for DCSA to implement and for the adopter to call
       operationId: put-adoption-stats
       parameters:
-      - name: API-Version
-        in: header
-        description: |
-          An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-        required: false
-        style: simple
-        explode: false
-        schema:
-          type: string
-          example: "1"
+        - $ref: '#/components/parameters/Api-Version-Major'
       requestBody:
         description: |
           The adoption statistics being pushed by the adopter to DCSA.
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/AdoptionStats'
-        required: true
       responses:
-        "204":
-          description: ""
+        '204':
+          description: ''
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
-        "400":
+        '400':
           description: |
             Invalid request.
-        "500":
+        '500':
           description: |
             Internal server error.
 components:
+  headers:
+    API-Version:
+      schema:
+        type: string
+        example: 1.0.0
+      description: |
+        SemVer used to indicate the version of the contract (API version) returned.
+  parameters:
+    Api-Version-Major:
+      in: header
+      name: API-Version
+      required: false
+      schema:
+        type: string
+        example: '1'
+      description: |
+        An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
   schemas:
     AdoptionStats:
-      required:
-      - apiCallsStatsByStandards
-      - endDate
-      - interval
-      - lastUpdatedDateTime
-      - startDate
       type: object
       properties:
         lastUpdatedDateTime:
           type: string
+          format: date-time
           description: |
             The DateTime when the stats were last updated. Must be formatted using [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format.
-          format: date-time
-          example: 2024-06-18T20:44:37+01:00
+          example: '2024-06-18T20:44:37+01:00'
         interval:
           type: string
           description: |
             The type of interval for the statistics are provided (day, week, or month).
-          example: day
           enum:
-          - day
-          - week
-          - month
+            - day
+            - week
+            - month
+          example: week
         startDate:
           type: string
+          format: date
           description: |
             The first date of the time interval for which the stats are provided, in YYYY-MM-DD format.
-          format: date
-          example: 2024-06-16
+          example: '2024-06-16'
         endDate:
           type: string
+          format: date
           description: |
             The last date of the time interval for which the stats are provided, in YYYY-MM-DD format.
-          format: date
-          example: 2024-06-22
+          example: '2024-06-22'
         apiCallsStatsByStandards:
-          minItems: 1
           type: array
+          minItems: 1
           description: |
             The API call statistics by DCSA standard, version, traffic-direction, endpoint, query parameter set and response HTTP status.
           items:
             $ref: '#/components/schemas/ApiCallsStandardStats'
-    ApiCallsStandardStats:
       required:
-      - byVersions
-      - standardName
+        - lastUpdatedDateTime
+        - interval
+        - startDate
+        - endDate
+        - apiCallsStatsByStandards
+    ApiCallsStandardStats:
       type: object
+      description: |
+        The API calls statistics for one DCSA standard.
       properties:
         standardName:
-          maxLength: 20
           type: string
+          maxLength: 20
           description: |
             Name of the DCSA standard.
             - `AN` (Arrival Notice)
@@ -192,24 +186,23 @@ components:
             - `TO` (Transport Order)
           example: TNT
         byVersions:
-          minItems: 1
           type: array
+          minItems: 1
           description: |
             The API calls statistics for each version of this DCSA standard.
           items:
             $ref: '#/components/schemas/ApiCallsVersionStats'
-      description: |
-        The API calls statistics for one DCSA standard.
-    ApiCallsVersionStats:
       required:
-      - byInboundEndpoints
-      - byOutboundEndpoints
-      - versionNumber
+        - standardName
+        - byVersions
+    ApiCallsVersionStats:
       type: object
+      description: |
+        The API calls statistics for each version of a DCSA standard.
       properties:
         versionNumber:
-          maxLength: 50
           type: string
+          maxLength: 50
           description: |
             The version number of the DCSA standard.
           example: 2.2.0
@@ -229,41 +222,41 @@ components:
             If no `outbound` traffic has been recorded the empty list should be returned
           items:
             $ref: '#/components/schemas/ApiCallsEndpointStats'
-      description: |
-        The API calls statistics for each version of a DCSA standard.
-    ApiCallsEndpointStats:
       required:
-      - byQueryParameterSets
-      - endpointUri
-      - httpMethod
+        - versionNumber
+        - byInboundEndpoints
+        - byOutboundEndpoints
+    ApiCallsEndpointStats:
       type: object
       properties:
         httpMethod:
-          type: string
           description: |
             The HTTP method used to make the request e.g. `GET`, `POST`, etc
+          type: string
           example: POST
           enum:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - PATCH
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
         endpointUri:
           type: string
           description: |
             The URI of the OpenAPI endpoint on which these calls are made / received.
           example: /v1/events
         byQueryParameterSets:
-          minItems: 1
           type: array
+          minItems: 1
           description: |
             The API calls statistics by the request query parameter set.
           items:
             $ref: '#/components/schemas/ApiCallsQueryParameterSetStats'
-    ApiCallsQueryParameterSetStats:
       required:
-      - byHttpStatuses
+        - httpMethod
+        - endpointUri
+        - byQueryParameterSets
+    ApiCallsQueryParameterSetStats:
       type: object
       properties:
         queryParameterSet:
@@ -271,26 +264,23 @@ components:
           description: |
             The list of query parameters used for a call. If none have been supplied this property should be omitted.
           example:
-          - equipmentReference
-          - limit
+            - equipmentReference
+            - limit
           items:
-            maxLength: 50
             type: string
             description: |
               Name of a queryParameter
+            maxLength: 50
         byHttpStatuses:
-          minItems: 1
           type: array
+          minItems: 1
           description: |
             The API calls statistics by the HTTP status with which they were responded.
           items:
             $ref: '#/components/schemas/ApiCallsHttpStatusStats'
-    ApiCallsHttpStatusStats:
       required:
-      - apiCallCount
-      - averageResponseTime
-      - httpStatusCode
-      - uniqueCounterpartCount
+        - byHttpStatuses
+    ApiCallsHttpStatusStats:
       type: object
       properties:
         httpStatusCode:
@@ -313,24 +303,8 @@ components:
           description: |
             The average response time of these calls, in milliseconds. If the value cannot be provided a `0` should be returned.
           example: 1250
-  parameters:
-    Api-Version-Major:
-      name: API-Version
-      in: header
-      description: |
-        An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
-      required: false
-      style: simple
-      explode: false
-      schema:
-        type: string
-        example: "1"
-  headers:
-    API-Version:
-      description: |
-        SemVer used to indicate the version of the contract (API version) returned.
-      style: simple
-      explode: false
-      schema:
-        type: string
-        example: 1.0.0
+      required:
+        - httpStatusCode
+        - apiCallCount
+        - uniqueCounterpartCount
+        - averageResponseTime

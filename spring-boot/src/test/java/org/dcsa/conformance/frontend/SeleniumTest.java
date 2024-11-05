@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
@@ -25,9 +24,9 @@ class SeleniumTest extends SeleniumTestBase {
   void testLoginAndCreateSandboxStart() {
     loginUser();
     driver.get(baseUrl);
+    wait.until(webDriver -> webDriver.findElement(By.id("create_sandbox_button")));
     assertEquals(baseUrl + "/environment", driver.getCurrentUrl());
-    WebElement createSandbox = driver.findElement(By.id("create_sandbox_button"));
-    createSandbox.click();
+    driver.findElement(By.id("create_sandbox_button")).click();
     waitForUIReadiness();
 
     assertEquals("Create sandbox", driver.findElement(By.className("pageTitle")).getText());

@@ -46,6 +46,7 @@ info:
     ### API Design & Implementation Principles
     This API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)
 
+    ### Changelog and GitHub
     For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.
 
     API specification issued by [DCSA.org](https://dcsa.org/).
@@ -97,7 +98,7 @@ paths:
             - all values provided have correct data type.
 
            A `shippingInstructionsReference` (as a reference to the `Shipping Instructions`) is created and linked to the payload in the provider system.
-
+          
            **For the rest of this description and in all examples the value `si-123` will be used as `shippingInstructionsReference`**
 
         3. A `202` (Accepted) response is returned with a payload containing **only** the `shippingInstructionsReference`:
@@ -116,9 +117,9 @@ paths:
         The provider will now start asynchronous processing. Once processed, the  status `RECEIVED` of the `Shipping Instructions` will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v3/shipping-instructions/{documentReference}
-
+            
           endPoint to check if the `shippingInstructionsStatus` of the `Shipping Instructions` has changed.
-
+          
           After the status has changed to `RECEIVED` further processing can continue by provider and will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification).
       parameters:
         - $ref: '#/components/parameters/Api-Version-Major'
@@ -277,7 +278,7 @@ paths:
                     Calling the endPoint
 
                         POST /v3/shipping-instructions
-
+                        
                     too many times within a time period results in an error.
 
                     **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
@@ -304,7 +305,7 @@ paths:
         - $ref: '#/components/parameters/documentReference'
         - $ref: '#/components/parameters/Api-Version-Major'
       description: |
-        Updates the `Shipping Instructions` with the `documentReference`. The path can contain either a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**
+        Updates the `Shipping Instructions` with the `documentReference`. The path can contain one of a `shippingInstructionsReference` or a `transportDocumentReference`. This endPoint corresponds with **UseCase 3 - Submit updated Shipping Instructions**
 
         ### Precondition
         In order to update a `Shipping Instructions`, the status of the `Shipping Instructions` needs to be in state:
@@ -328,28 +329,28 @@ paths:
             - all required properties are provided
             - all values provided have correct data type.
         3. An empty response is returned and the consumer now awaits further processing by the provider.
-
+        
         For `PUT` `Shipping Instructions` the process ends here. The `Shipping Instructions`:
           - is now accepted by the provider system
           - the status of the `Shipping Instructions` is unchanged
           - a `202` (Accepted) response is sent with an empty payload
           - awaits further processing by the provider
-
+        
         The provider will now start asynchronous processing. Once processed, the state will change to one of the following values depending on the use case for calling the `PUT` endPoint:
           - `shippingInstructionsStatus='RECEIVED'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used to make an update to a Submitted Shipping Instructions - **UseCase 1 - Submit Shipping Instructions**)
           - `shippingInstructionsStatus='PENDING_UPDATE'` and `updatedShippingInstructionsStatus='UPDATE_RECEIVED'` (if endPoint is used as a response to **UseCase 2 - Request to update Shipping Instructions**)
-
+        
         The new state will be communicated via a [Shipping Instructions Notification](#/ShippingInstructionsNotification). In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v3/shipping-instructions/{documentReference}
-
+            
         endPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.
-
+          
         If the consumer wants to get the content of the `Update Shipping Instructions` provided via this `PUT` endPoint,  the `GET` endPoint needs to be used in combination with the `?updatedContent=true` queryParameter:
-
+          
             GET /v3/shipping-instructions/{documentReference}?updatedContent=true
-
-        It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until either:
+            
+        It is possible to `GET` the content of the `Updated Shipping Instructions` via the example above until one of:
           - the provider requests for a new update (**UseCase 2: Request to update Shipping Instructions**) in which case the "old update" is no longer accessible
           - the consumer submits a new update (**UseCase 3: Submit updated Shipping Instructions**) in which case the "new update" provided **replaces** the "old update".
       requestBody:
@@ -563,7 +564,7 @@ paths:
                     Calling the endPoint
 
                         PUT /v3/shipping-instructions/si-123
-
+                      
                     too many times within a time period.
 
                     **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
@@ -931,9 +932,9 @@ paths:
                     Fetching too many `Transport Document` requests
                   description: |
                     Calling the endPoint
-
+                    
                         GET /v3/shipping-instructions/si-123
-
+                        
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -963,7 +964,7 @@ paths:
         A way for the consumer to Cancel an `Updated Shipping Instructions`. This endPoint corresponds with **UseCase 5 - Cancel update to Shipping Instructions**.
 
         ## Precondition
-        In order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE_RECEIVED`. The status of the `Shipping Instructions` can be either `RECEIVED` or `PENDING_UPDATE`.
+        In order to cancel an `Updated Shipping Instructions`, the status of the `Updated Shipping Instructions` must be in in status `UPDATE_RECEIVED`. The status of the `Shipping Instructions` can be one of `RECEIVED` or `PENDING_UPDATE`.
 
         ## Postcondition
         The provider has received a cancellation from the consumer for an `Updated Shipping Instructions` that is in state `UPDATE_RECEIVED`.
@@ -979,11 +980,11 @@ paths:
             - all required properties are provided.
             - all values provided have correct data type.
         3. An empty response is returned and the consumer now awaits further processing by the provider.
-
+        
         Once processed, the `Updated Shipping Instructions` is cancelled and a [Shipping Instructions Notification](#/ShippingInstructionsNotification) will be sent. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v3/shipping-instructions/{documentReference}
-
+            
         endPoint to check if the `shippingInstructionsStatus` and `updatedShippingInstructionsStatus` of the `Shipping Instructions` has changed.
       requestBody:
         description: |
@@ -1157,9 +1158,9 @@ paths:
                     Patching the `Shipping Instructions` too many times
                   description: |
                     Calling the endPoint
-
+                    
                         PATCH /v3/shipping-instructions/si-123
-
+                    
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -1634,9 +1635,9 @@ paths:
                     Fetching too many `Transport Document` requests
                   description: |
                     Calling the endPoint
-
+                    
                         GET /v3/transport-documents/td-987
-
+                        
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -1683,7 +1684,7 @@ paths:
         Once processed, the `Transport Document` is `ISSUED` and a [Transport Document Notification](#/TransportDocumentNotification) is sent. In case the consumer does not subscribe to notifications it is necessary for the consumer to poll on the
 
             GET /v3/transport-documents/{transportDocumentReference}
-
+            
         endPoint to check if the `transportDocumentStatus` of the `Transport Document` has changed.
       parameters:
         - in: path
@@ -1858,9 +1859,9 @@ paths:
                     Too many Patch `Transport Document` requests
                   description: |
                     Calling the endPoint
-
+                    
                         PATCH /v3/transport-documents/td-987
-
+                        
                     too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
@@ -2625,7 +2626,7 @@ components:
       in: path
       name: documentReference
       description: |
-        An identifier for a `Shipping Instructions`. It can either be a `shippingInstructionsReference` or a `transportDocumentReference`.
+        An identifier for a `Shipping Instructions`. It can be one of `shippingInstructionsReference` or `transportDocumentReference`.
       schema:
         type: string
         pattern: ^\S(?:.*\S)?$
@@ -3026,7 +3027,7 @@ components:
         - $ref: '#/components/schemas/TransportDocument'
 
     ##############################
-    # Create Shipping Instructions
+    # Create Shipping Instructions    
     ##############################
     CreateShippingInstructions:
       type: object
@@ -3112,7 +3113,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         numberOfOriginalsWithoutCharges:
@@ -3121,7 +3122,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         displayedNameForPlaceOfReceipt:
@@ -3184,7 +3185,7 @@ components:
           type: array
           minItems: 1
           description: |
-            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)
+            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) 
           items:
             $ref: '#/components/schemas/PartyContactDetail'
         isCarriersAgentAtDestinationRequired:
@@ -3239,7 +3240,7 @@ components:
           type: boolean
           description: |
             Indicates whether one or more `House Bill of Lading(s)` have been issued.
-
+            
             **Condition:** Mandatory if `manifestTypeCode` is `ENS`
           example: true
         houseBillOfLadings:
@@ -3404,7 +3405,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         numberOfOriginalsWithoutCharges:
@@ -3413,7 +3414,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         displayedNameForPlaceOfReceipt:
@@ -3476,7 +3477,7 @@ components:
           type: array
           minItems: 1
           description: |
-            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)
+            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) 
           items:
             $ref: '#/components/schemas/PartyContactDetail'
         isCarriersAgentAtDestinationRequired:
@@ -3531,7 +3532,7 @@ components:
           type: boolean
           description: |
             Indicates whether one or more `House Bill of Lading(s)` have been issued.
-
+            
             **Condition:** Mandatory if `manifestTypeCode` is `ENS`
           example: true
         houseBillOfLadings:
@@ -3723,7 +3724,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         numberOfOriginalsWithoutCharges:
@@ -3732,7 +3733,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         displayedNameForPlaceOfReceipt:
@@ -3795,7 +3796,7 @@ components:
           type: array
           minItems: 1
           description: |
-            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)
+            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) 
           items:
             $ref: '#/components/schemas/PartyContactDetail'
         isCarriersAgentAtDestinationRequired:
@@ -3850,7 +3851,7 @@ components:
           type: boolean
           description: |
             Indicates whether one or more `House Bill of Lading(s)` have been issued.
-
+            
             **Condition:** Mandatory if `manifestTypeCode` is `ENS`
         houseBillOfLadings:
           type: array
@@ -3961,7 +3962,7 @@ components:
           maxLength: 50
           description: |
             A code used to describe the feedback. Possible values are:
-            - `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information)
+            - `INFORMATIONAL_MESSAGE` (INFO - to be used when providing extra information) 
             - `PROPERTY_WILL_BE_IGNORED` (WARN - to be used for unsupported properties/values)
             - `PROPERTY_VALUE_MUST_CHANGE` (ERROR - to be used when a wrong property/value is provided)
             - `PROPERTY_VALUE_HAS_BEEN_CHANGED` (WARN - when something has been auto-updated without consumer intervention)
@@ -4076,7 +4077,7 @@ components:
 
               - `7000-7999` Technical error codes
               - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes
+              - `9000-9999` API provider-specific error codes            
 
             [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
           minimum: 7000
@@ -4218,7 +4219,7 @@ components:
       type: object
       title: Facility
       description: |
-        An object used to express a location using a `Facility`. The facility can either be expressed using a `BIC` code or a `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.
+        An object used to express a location using a `Facility`. The facility can be expressed using one of `BIC` code or `SMDG` code. The `facilityCode` does not contain the `UNLocationCode` - this should be provided in the `UnLocationCode` attribute.
       properties:
         facilityCode:
           type: string
@@ -4326,7 +4327,7 @@ components:
       type: object
       title: Party Address
       description: |
-        An object for storing address related information
+        Address where the party is located. It is an object of the attributes below.
       properties:
         street:
           type: string
@@ -4397,7 +4398,7 @@ components:
       description: |
         The party by whom or in whose name or on whose behalf a contract of carriage of goods by sea has been concluded with a carrier, or the party by whom or in whose name, or on whose behalf, the goods are actually delivered to the carrier in relation to the contract of carriage by sea.
 
-        **Condition:** Either the `address` or the `displayedAddress` must be included in the `Transport Document`.
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4423,7 +4424,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
+            
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -4437,6 +4438,8 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided. 
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4522,8 +4525,10 @@ components:
       title: Consignee
       description: |
         The party to which goods are consigned in the `Master Bill of Lading`.
-
+        
         **Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4549,7 +4554,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
+            
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -4563,6 +4568,8 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided. 
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4648,8 +4655,10 @@ components:
       title: Endorsee
       description: |
         The party to whom the title to the goods is transferred by means of endorsement.
-
+        
         **Condition:** Can only be provided for negotiable BLs (`isToOrder=true`). If a negotiable BL does not have an `Endorsee`, the BL is said to be "blank endorsed". Note `Consignee` and `Endorsee` are mutually exclusive.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4665,7 +4674,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
+            
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -4679,6 +4688,8 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided. 
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4740,7 +4751,7 @@ components:
           pattern: ^\S+$
           maxLength: 4
           description: |
-            The EBL platform of the transaction party.
+            The EBL platform of the transaction party. 
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
@@ -4759,6 +4770,7 @@ components:
           example: BOLE
         identifyingCodes:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4769,12 +4781,15 @@ components:
             $ref: '#/components/schemas/TaxLegalReference'
       required:
         - partyName
+        - identifyingCodes
 
     NotifyParty:
       type: object
       title: Notify Party
       description: |
         The person to be notified when a shipment arrives at its destination.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4800,7 +4815,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-
+            
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -4814,6 +4829,8 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided. 
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4981,6 +4998,8 @@ components:
       title: Party
       description: |
         Refers to a company or a legal entity.
+
+        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`.
       properties:
         partyName:
           type: string
@@ -4993,6 +5012,8 @@ components:
           $ref: '#/components/schemas/PartyAddress'
         identifyingCodes:
           type: array
+          description: |
+            **Condition:** Either the `address` or a party `identifyingCode` must be provided. 
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -5062,7 +5083,7 @@ components:
       type: object
       title: Issuing Party
       description: |
-        Refers to a company or a legal entity.
+        The company or a legal entity issuing the `Transport Document`.
       properties:
         partyName:
           type: string
@@ -5097,7 +5118,7 @@ components:
       type: object
       title: Party Contact Detail
       description: |
-        The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`.
+        The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.
       example:
         name: Henrik
         phone: +45 51801234
@@ -5145,7 +5166,7 @@ components:
       type: object
       title: Party Contact Detail (House B/L)
       description: |
-        The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`.
+        The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.
       example:
         name: Henrik
         phone: +45 51801234
@@ -5305,7 +5326,7 @@ components:
           maxLength: 35
           pattern: ^\S(?:.*\S)?$
           description: |
-            The value of the reference.
+            The value of the reference. 
           example: HHL00103004
       required:
         - type
@@ -5337,7 +5358,7 @@ components:
             maxLength: 35
             pattern: ^\S(?:.*\S)?$
             description: |
-              The value of the reference.
+              The value of the reference. 
             example: HHL00103004
       required:
         - type
@@ -5618,7 +5639,7 @@ components:
             - '2512'
       example:
         type: TARIC
-        values:
+        values: 
           - '85171200'
       required:
         - type
@@ -5767,7 +5788,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           description: |
             Link to the House Bill of Lading this cargoItem is connected to.
-          example: ABC123
+          example: ABC123          
         customsReferences:
           type: array
           description: |
@@ -5820,7 +5841,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in imperial or metric terms
+            The unit of measure which can be expressed in imperial or metric terms:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
           enum:
@@ -5847,7 +5868,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in either imperial or metric terms
+            The unit of measure which can be expressed in imperial or metric terms:
             - `FTQ` (Cubic foot)
             - `MTQ` (Cubic meter)
           enum:
@@ -5874,7 +5895,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in imperial or metric terms
+            The unit of measure which can be expressed in imperial or metric terms:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
           enum:
@@ -5901,7 +5922,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in either imperial or metric terms
+            The unit of measure which can be expressed in imperial or metric terms:
             - `FTQ` (Cubic foot)
             - `MTQ` (Cubic meter)
           enum:
@@ -6042,7 +6063,7 @@ components:
           maximum: 99999999
           description: |
             Specifies the number of outer packagings/overpacks associated with this `Cargo Item`.
-
+            
             **Condition:** Mandatory if `packageCode` is **NOT** one of the following values:
 
             - `VY` (Bulk, solid, fine particles ("powders"))
@@ -6080,7 +6101,7 @@ components:
       type: object
       title: Dangerous Goods
       description: |
-        Specification for `Dangerous Goods`. It is mandatory to either provide the `UNNumber` or the `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.
+        Specification for `Dangerous Goods`. It is mandatory to provide one of `UNNumber` or `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.
       oneOf:
         - type: object
           title: UN Number
@@ -6321,8 +6342,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in imperial or metric terms
-
+            The unit of measure which can be expressed in imperial or metric terms:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
           enum:
@@ -6349,8 +6369,7 @@ components:
         unit:
           type: string
           description: |
-            Unit of measure used to describe the `netWeight`. Possible values are
-
+            The unit of measure which can be expressed in imperial or metric terms:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
           enum:
@@ -6377,8 +6396,7 @@ components:
         unit:
           type: string
           description: |
-            Unit of measure used to describe the `netExplosiveWeight`. Possible values are
-
+            The unit of measure which can be expressed in imperial or metric terms:
             - `KGM` (Kilograms)
             - `LBR` (Pounds)
             - `GRM` (Grams)
@@ -6411,8 +6429,7 @@ components:
         unit:
           type: string
           description: |
-            The unit of measure which can be expressed in either imperial or metric terms
-
+            The unit of measure which can be expressed in imperial or metric terms:
             - `FTQ` (Cubic foot)
             - `MTQ` (Cubic meter)
             - `LTR` (Litre)
@@ -6508,7 +6525,7 @@ components:
           format: float
           description: |
             Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-
+            
             **Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.
           example: 42
         transportControlTemperature:
@@ -6630,7 +6647,7 @@ components:
           type: string
           description: |
             Indication if the container is `EMPTY` or `LADEN`.
-
+            
             - `EMPTY` (Empty)
             - `LADEN` (Laden)
           enum:
@@ -6677,7 +6694,7 @@ components:
           type: string
           description: |
             Indication if the container is `EMPTY` or `LADEN`.
-
+            
             - `EMPTY` (Empty)
             - `LADEN` (Laden)
           enum:
@@ -6704,7 +6721,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 4
           description: |
-            Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
+            Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: 22G1
       required:
         - emptyIndicatorCode
@@ -6777,7 +6794,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 4
           description: |
-            Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
+            Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: 22G1
         tareWeight:
           $ref: '#/components/schemas/TareWeight'
@@ -6833,7 +6850,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 4
           description: |
-            Unique code for the different equipment size and type used to transport commodities. The code can refer to either the ISO size type (e.g. 22G1) or the ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
+            Unique code for the different equipment size and type used to transport commodities. The code can refer to one of ISO size type (e.g. 22G1) or ISO type group (e.g. 22GP) following the [ISO 6346](https://www.iso.org/standard/83558.html) standard.
           example: 22G1
         tareWeight:
           $ref: '#/components/schemas/TareWeight'
@@ -7018,7 +7035,7 @@ components:
 
             In case of self-filing (`SELF`), the shipper can provide their `selfFilerCode` for each manifest.
 
-            **Condition:** The `selfFilerCode` must be provided when `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and the `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.
+            **Condition:** The `selfFilerCode` must be provided when `manifestTypeCode` is one of `ACE` (US) or `ACI` (CA) and the `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.
           enum:
             - SELF
             - CARRIER
@@ -7030,7 +7047,7 @@ components:
           description: |
             Code identifying the party who will submit the advance manifest filing(s) for the House BL.
 
-            **Mandatory** if `manifestTypeCode` is either `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.
+            **Mandatory** if `manifestTypeCode` is one of `ACE` (US) or `ACI` (CA) and `advanceManifestFilingsHouseBLPerformedBy` is set to `SELF`.
           example: FLXP
         identificationNumber:
           type: string
@@ -7080,7 +7097,7 @@ components:
           type: string
           maxLength: 1
           description: |
-            Method used for the payment of freight charges. It can be one of the following values:
+            Method used for the payment of freight charges. It can be one of the following values: 
             - `A` (Payment in cash)
             - `B` (Payment by credit card)
             - `C` (Payment by cheque)
@@ -7101,7 +7118,7 @@ components:
           minItems: 1
           description: |
             Identification in a chronological order of the countries through which the goods are routed between the country of original departure and final destination as stipulated in the lowest House Bill of Lading.
-
+            
             **Condition:** The order of the items in this array **MUST** be preserved as by the provider of the API.
 
             **Condition:** If provided - the first country in the list must be the country of `Place of Acceptance`; the last country in the list must be the country of `Place of Final Delivery`.
@@ -7145,7 +7162,7 @@ components:
 
         **Condition:** Mandatory if different from `Place of Receipt` or `Port of Loading` at the `Master Transport Document` level.
 
-        The location can be specified either using `UN Location Code` and/or `Location Name` together with `Country Code`.
+        **Condition:** The location can be specified either using `UN Location Code` and/or (`Location Name` together with `Country Code`), all three properties can be specified.
       example:
         locationName: Hamburg
         UNLocationCode: DEHAM
@@ -7156,7 +7173,7 @@ components:
           maxLength: 35
           description: |
             The name of the location.
-
+            
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
           example: Port of Amsterdam
         countryCode:
@@ -7166,7 +7183,7 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
+            
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
           example: NL
         UNLocationCode:
@@ -7188,10 +7205,10 @@ components:
       title: Place of Final Delivery
       description: |
         An object to capture `Place of Final Delivery` location specified as: Identification of the seaport, freight terminal or other place at which the goods are handed over from the `Ocean Transport Intermediary` (OTI) issuing the `House Bill of Lading` to the `Consignee`.
-
+        
         **Condition:** Mandatory if different from `Place of Delivery` at the `Master Transport Document` level.
 
-        The location can be specified either using `UN Location Code` and/or `Location Name` together with `Country Code`.
+        **Condition:** The location can be specified either using `UN Location Code` and/or (`Location Name` together with `Country Code`), all three properties can be specified.
       example:
         locationName: Hamburg
         UNLocationCode: DEHAM
@@ -7202,7 +7219,7 @@ components:
           maxLength: 35
           description: |
             The name of the location.
-
+            
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
           example: Port of Amsterdam
         countryCode:
@@ -7212,7 +7229,7 @@ components:
           maxLength: 2
           description: |
             The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-
+            
             **Condition:** Mandatory to provide in case `UN Location Code` is not provided
           example: NL
         UNLocationCode:
@@ -7238,7 +7255,7 @@ components:
       description: |
         The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:
         - Bill of Lading
-        - Sea Waybill.
+        - Sea Waybill. 
       properties:
         transportDocumentReference:
           type: string
@@ -7349,7 +7366,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         numberOfOriginalsWithoutCharges:
@@ -7358,7 +7375,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
-
+                    
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         displayedNameForPlaceOfReceipt:
@@ -7518,7 +7535,7 @@ components:
           minimum: 0
           description: |
             The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and "Ad Valorem" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.
-
+            
             **Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).
           example: 1231.1
         declaredValueCurrency:
@@ -7583,7 +7600,7 @@ components:
           type: array
           minItems: 1
           description: |
-            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)
+            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) 
           items:
             $ref: '#/components/schemas/PartyContactDetail'
         documentParties:
@@ -8090,7 +8107,7 @@ components:
       description: |
         An object to capture where the original Transport Document (`Bill of Lading`) will be issued.
 
-        The location can be specified either as a `UN Location Code` or as a `CountryCode`.
+        The location can be specified as one of `UN Location Code` or `CountryCode`.
       properties:
         locationName:
           type: string
@@ -8109,10 +8126,10 @@ components:
               maxLength: 5
               description: |-
                 The UN Location code specifying where the place is located. The pattern used must be
-
+                
                 - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
                 - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
+                
                 More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
               example: NLAMS
           required:
@@ -8149,10 +8166,10 @@ components:
           maxLength: 5
           description: |-
             The UN Location code specifying where the place is located. The pattern used must be
-
+            
             - 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
             - 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
-
+            
             More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)
           example: NLAMS
       required:
@@ -8207,7 +8224,7 @@ components:
       title: Document Parties
       description: |
         All `Parties` with associated roles.
-
+        
         **Condition:** `Buyer` and `Seller` are mandatory if `isCargoDeliveredInICS2Zone=true` **and** `advancedManifestFilingPerformedBy=CARRIER` and `isHouseBillOfLadingsIssued=false`
       properties:
         shipper:
@@ -8249,7 +8266,7 @@ components:
       title: Document Parties
       description: |
         All `Parties` with associated roles for this `House Bill of Lading`.
-
+        
         **Condition:** `Buyer` and `Seller` are mandatory if `isCargoDeliveredInICS2Zone=true` (on House B/L level) **and** `advancedManifestFilingPerformedBy=CARRIER`
       properties:
         shipper:
@@ -8324,7 +8341,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
-
+              
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -8359,7 +8376,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
-
+              
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -8397,7 +8414,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
-
+              
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -8432,7 +8449,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
-
+              
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:

@@ -98,8 +98,7 @@ class BookingComponentFactory extends AbstractComponentFactory {
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiName, String jsonSchema) {
-    String schemaFilePath = "/standards/booking/schemas/booking-%s-v%s0.yaml"
-      .formatted(apiName, standardVersion.charAt(0));
+    String schemaFilePath = "/standards/booking/schemas/BKG_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, jsonSchema);
   }
 }

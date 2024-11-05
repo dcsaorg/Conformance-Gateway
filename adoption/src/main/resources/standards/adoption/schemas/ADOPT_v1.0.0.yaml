@@ -5,12 +5,12 @@ info:
     Meta-API with which container shipping organizations can share statistics on their adoption of DCSA standards.
   contact:
     name: Digital Container Shipping Association (DCSA)
-    url: 'https://dcsa.org/'
+    url: https://dcsa.org/
     email: info@dcsa.org
   license:
     name: Apache 2.0
-    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
-  version: 1.0.0_with_push
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
 paths:
   /v1/adoption-stats:
     get:
@@ -94,6 +94,7 @@ paths:
         '500':
           description: |
             Internal server error.
+
 components:
   headers:
     API-Version:

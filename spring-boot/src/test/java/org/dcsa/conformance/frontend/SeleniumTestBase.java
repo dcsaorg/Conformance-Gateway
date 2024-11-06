@@ -136,6 +136,11 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         "Setup the system for transfer and provide the following details for the sender.")) {
       jsonPromptText = fetchPromptAnswer("initiateState");
     }
+    // Flow for ebl issuance carrier scenarios
+    else if (promptText.contains(
+        "Supply the public key for validating the signed content using the following format:")) {
+      jsonPromptText = fetchPromptAnswer("CarrierScenarioParameters");
+    }
 
     if (driver.findElements(By.id("actionInput")).isEmpty()) {
       log.error("Error: No actionInput element found, while a jsonForPromptText was displayed!");

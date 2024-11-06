@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
 import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.ebl.crypto.SignatureVerifier;
 import org.dcsa.conformance.standards.eblissuance.checks.IssuanceChecks;

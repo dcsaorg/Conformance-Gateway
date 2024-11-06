@@ -73,11 +73,10 @@ public class IssuanceChecks {
         matched,
         HttpMessageType.REQUEST,
         standardsVersion,
-        // DT-1794: To be redesigned with support automatic execution of manual scenario runs
-        // JsonAttribute.customValidator(
-        //   "Signature of the issuanceManifestSignedContent is valid",
-        //   path("issuanceManifestSignedContent", SignatureChecks.signatureValidates(signatureVerifierSupplier))
-        // ),
+        JsonAttribute.customValidator(
+          "Signature of the issuanceManifestSignedContent is valid",
+          path("issuanceManifestSignedContent", SignatureChecks.signatureValidates(signatureVerifierSupplier))
+         ),
         JsonAttribute.customValidator(
           "Schema validation of the payload of issuanceManifestSignedManifest",
           path("issuanceManifestSignedContent", SignatureChecks.signedContentSchemaValidation(

@@ -56,6 +56,14 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
             : new AtomicReference<>();
   }
 
+  @Override
+  public void reset() {
+    super.reset();
+    if (this.transportDocumentReference != null) {
+      this.transportDocumentReference.set(null);
+    }
+  }
+
   private static PlatformScenarioParametersAction _latestPlatformScenarioParametersAction(
       IssuanceAction previousAction) {
     return previousAction

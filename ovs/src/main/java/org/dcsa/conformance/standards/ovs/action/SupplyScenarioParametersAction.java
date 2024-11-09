@@ -3,34 +3,26 @@ package org.dcsa.conformance.standards.ovs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.function.Function;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 
 @Getter
-public class SupplyScenarioParametersAction extends ConformanceAction {
+public class SupplyScenarioParametersAction extends OvsAction {
   private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final LinkedHashSet<OvsFilterParameter> ovsFilterParameters;
+  private final Map<OvsFilterParameter,String> ovsFilterParameterMap;
 
   public SupplyScenarioParametersAction(
-      String publisherPartyName, OvsFilterParameter... ovsFilterParameters) {
-    super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                Arrays.stream(ovsFilterParameters)
-                    .map(OvsFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))));
-    this.ovsFilterParameters = new LinkedHashSet<>(Arrays.asList(ovsFilterParameters));
+    String publisherPartyName, Map<OvsFilterParameter, String> parameters) {
+    super(publisherPartyName,null, null,
+      "SupplyScenarioParameters(%s)"
+        .formatted(
+          parameters.entrySet().stream()
+            .map(entry -> entry.getKey().getQueryParamName() + "=" + entry.getValue())
+            .collect(Collectors.joining(", "))), -1 );
+    this.ovsFilterParameterMap =  parameters;
   }
 
   @Override
@@ -60,9 +52,12 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonOvsFilterParameters = objectNode.putArray("ovsFilterParametersQueryParamNames");
-    ovsFilterParameters.forEach(
-        ovsFilterParameter -> jsonOvsFilterParameters.add(ovsFilterParameter.getQueryParamName()));
+    ArrayNode jsonOvsFilterParameters = objectNode.putArray("ovsFilterParametersQueryParam");
+    ovsFilterParameterMap.forEach((key, value) -> {
+      ObjectNode parameterNode = jsonOvsFilterParameters.addObject();
+      parameterNode.put("parameter", key.getQueryParamName());
+      parameterNode.put("value", value);
+    });
     return objectNode;
   }
 
@@ -75,17 +70,9 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return SuppliedScenarioParameters.fromMap(
-            ovsFilterParameters.stream()
-                .collect(
-                    Collectors.toMap(
-                        Function.identity(),
-                        ovsFilterParameter ->
-                            switch (ovsFilterParameter) {
-                              case LIMIT -> "100";
-                              case START_DATE, END_DATE -> LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
-                              default -> "TODO";
-                            })))
-        .toJson();
+        ovsFilterParameterMap.entrySet().stream()
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+      .toJson();
   }
 
   @Override

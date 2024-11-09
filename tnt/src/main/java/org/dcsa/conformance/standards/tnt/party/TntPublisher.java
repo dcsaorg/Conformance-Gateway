@@ -26,8 +26,8 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
 
+import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.tnt.party.CustomJsonPointer.traverse;
 
 @Slf4j
 public class TntPublisher extends ConformanceParty {

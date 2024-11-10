@@ -78,8 +78,13 @@ public class QueryParameterSchemaCheck extends ActionCheck {
       }
 
       if (paramSchema != null) {
-        // Convert the parameter value to a JsonNode
-        JsonNode paramValueNode = OBJECT_MAPPER.valueToTree(paramValue);
+        // Convert the parameter value to a JsonNode, handling special case for "limit" parameter
+        JsonNode paramValueNode;
+        if ("limit".equals(paramName)) {
+          paramValueNode = OBJECT_MAPPER.valueToTree(Integer.parseInt(paramValue));
+        } else {
+          paramValueNode = OBJECT_MAPPER.valueToTree(paramValue);
+        }
 
         // Validate the parameter value against its schema
         JsonSchema jsonSchema = factory.getSchema(paramSchema);

@@ -168,17 +168,31 @@ public class OvsChecks {
         .map(String::trim)
         .collect(Collectors.toSet());
 
-      Set<String> errors = Stream.of(jsonPaths)
-        .flatMap(jsonPath ->
-          findMatchingNodes(body, jsonPath)
-            .filter(valueNode -> !(valueNode.isMissingNode() || valueNode.isNull())
-              && !expectedValues.contains(valueNode.asText()))
-            .map(valueNode -> "Missing or mismatched " + jsonPath + ": " + valueNode.asText()))
-        .collect(Collectors.toSet());
+      // Check if ANY of the jsonPaths match the expectedValues
+      if(jsonPaths.length > 1) {
+        boolean anyMatch = Stream.of(jsonPaths)
+          .anyMatch(jsonPath ->
+            findMatchingNodes(body, jsonPath)
+              .anyMatch(valueNode -> !(valueNode.isMissingNode() || valueNode.isNull())
+                && expectedValues.contains(valueNode.asText())));
 
-      return errors.isEmpty() ? Set.of() : errors;
+        if (!anyMatch) {
+          return Set.of("Missing or mismatched values for parameter: " + parameter.getQueryParamName()
+            + " in any of the paths: " + Arrays.toString(jsonPaths));
+        }
+      }
+      else {
+        Set<String> errors = Stream.of(jsonPaths)
+          .flatMap(jsonPath ->
+            findMatchingNodes(body, jsonPath)
+              .filter(valueNode -> !(valueNode.isMissingNode() || valueNode.isNull())
+                && !expectedValues.contains(valueNode.asText()))
+              .map(valueNode -> "Missing or mismatched " + jsonPath + ": " + valueNode.asText()))
+          .collect(Collectors.toSet());
+
+        return errors.isEmpty() ? Set.of() : errors;
+      }
     }
-
     return Set.of();
   }
 

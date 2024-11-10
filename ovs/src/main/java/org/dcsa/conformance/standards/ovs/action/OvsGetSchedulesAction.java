@@ -38,7 +38,10 @@ public class OvsGetSchedulesAction extends OvsAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
-          new UrlPathCheck(OvsRole::isSubscriber, getMatchedExchangeUuid(), "/service-schedules"),
+          new UrlPathCheck(
+            OvsRole::isSubscriber,
+            getMatchedExchangeUuid(),
+            "/service-schedules"),
           new ApiHeaderCheck(
             OvsRole::isSubscriber,
             getMatchedExchangeUuid(),
@@ -49,7 +52,10 @@ public class OvsGetSchedulesAction extends OvsAction {
             getMatchedExchangeUuid(),
             HttpMessageType.RESPONSE,
             expectedApiVersion),
-          new ResponseStatusCheck(OvsRole::isPublisher, getMatchedExchangeUuid(), expectedStatus),
+          new ResponseStatusCheck(
+            OvsRole::isPublisher,
+            getMatchedExchangeUuid(),
+            expectedStatus),
           new QueryParameterSchemaCheck(
             "",
             "The query parameters of the HTTP request are correct",

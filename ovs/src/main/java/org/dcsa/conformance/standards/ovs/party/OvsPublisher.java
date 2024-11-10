@@ -23,7 +23,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.ovs.party.CustomJsonPointer.traverse;
+import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 
 @Slf4j
 public class OvsPublisher extends ConformanceParty {

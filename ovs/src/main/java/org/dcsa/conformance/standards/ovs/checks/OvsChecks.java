@@ -29,7 +29,8 @@ public class OvsChecks {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(JsonAttribute.customValidator(
-      "Validate carrierServiceCode exists and matches in JSON response if request parameter has carrierServiceCode",
+      "Validate carrierServiceCode exists and " +
+        "matches in JSON response if request parameter has carrierServiceCode",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -38,7 +39,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate universalServiceReference exists and matches in JSON response if request parameter has universalServiceReference",
+      "Validate universalServiceReference exists and " +
+        "matches in JSON response if request parameter has universalServiceReference",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -47,7 +49,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate vesselIMONumber exists and matches in JSON response if request parameter has vesselIMONumber",
+      "Validate vesselIMONumber exists and" +
+        " matches in JSON response if request parameter has vesselIMONumber",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -56,7 +59,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate vesselName exists and matches in JSON response if request parameter has vesselName",
+      "Validate vesselName exists and" +
+        " matches in JSON response if request parameter has vesselName",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -65,7 +69,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate carrierVoyageNumber exists and matches in JSON response if request parameter has carrierVoyageNumber",
+      "Validate carrierVoyageNumber exists and " +
+        "matches in JSON response if request parameter has carrierVoyageNumber",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -75,7 +80,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate universalVoyageReference exists and matches in JSON response if request parameter has universalVoyageReference",
+      "Validate universalVoyageReference exists and" +
+        " matches in JSON response if request parameter has universalVoyageReference",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -85,7 +91,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate UNLocationCode exists and matches in JSON response if request parameter has UNLocationCode",
+      "Validate UNLocationCode exists and " +
+        "matches in JSON response if request parameter has UNLocationCode",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -94,7 +101,8 @@ public class OvsChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "Validate facilitySMDGCode exists and matches in JSON response if request parameter has facilitySMDGCode",
+      "Validate facilitySMDGCode exists and " +
+        "matches in JSON response if request parameter has facilitySMDGCode",
       body -> validateParameter(
         body,
         sspSupplier,
@@ -104,7 +112,8 @@ public class OvsChecks {
 
     checks.add(
       JsonAttribute.customValidator(
-        "Validate startDate exists and matches in JSON response if request parameter has startDate",
+        "Validate startDate exists and " +
+          "matches in JSON response if request parameter has startDate",
         body ->
           validateDate(
             body,
@@ -115,7 +124,8 @@ public class OvsChecks {
 
     checks.add(
       JsonAttribute.customValidator(
-        "Validate endDate exists and matches in JSON response if request parameter has endDate",
+        "Validate endDate exists and " +
+          "matches in JSON response if request parameter has endDate",
         body ->
           validateDate(
             body,

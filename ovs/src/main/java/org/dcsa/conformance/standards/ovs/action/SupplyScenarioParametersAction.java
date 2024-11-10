@@ -45,7 +45,8 @@ public class SupplyScenarioParametersAction extends OvsAction {
     super.importJsonState(jsonState);
     if (jsonState.has("suppliedScenarioParameters")) {
       suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+          SuppliedScenarioParameters.fromJson(
+            jsonState.required("suppliedScenarioParameters"));
     }
   }
 

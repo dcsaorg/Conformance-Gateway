@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.ovs.party;
+package org.dcsa.conformance.core.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

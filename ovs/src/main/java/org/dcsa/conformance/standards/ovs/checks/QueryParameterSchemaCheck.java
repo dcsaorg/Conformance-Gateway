@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -39,7 +40,7 @@ public class QueryParameterSchemaCheck extends ActionCheck {
   }
 
   private JsonNode loadQueryParametersSchema(String openApiSpecPath, String endpointPath) throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
     InputStream inputStream = getClass().getResourceAsStream(openApiSpecPath);
     JsonNode openApiSpec = objectMapper.readTree(inputStream);
 

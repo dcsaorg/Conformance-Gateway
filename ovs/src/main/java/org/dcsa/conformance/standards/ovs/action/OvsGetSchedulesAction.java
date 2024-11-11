@@ -61,7 +61,7 @@ public class OvsGetSchedulesAction extends OvsAction {
             "The query parameters of the HTTP request are correct",
             OvsRole::isSubscriber,
             getMatchedExchangeUuid(),
-            "/standards/ovs/schemas/ovs-300-publisher.json"),
+            "/standards/ovs/schemas/OVS_v3.0.0.yaml"),
           new JsonSchemaCheck(
               OvsRole::isPublisher,
               getMatchedExchangeUuid(),

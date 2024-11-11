@@ -2,26 +2,36 @@ package org.dcsa.conformance.core.check;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.*;
-import java.io.InputStream;
-import java.util.Arrays;
+import com.networknt.schema.oas.OpenApi30;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JsonSchemaValidator {
   private static final Map<String, Map<String, JsonSchemaValidator>> INSTANCES = new HashMap<>();
-  private static final ObjectMapper JSON_FACTORY_OBJECT_MAPPER =
-      new ObjectMapper(new JsonFactory());
+
+  private static final Map<String, Keyword> NON_VALIDATION_KEYWORDS =
+      Stream.of(
+              "example",
+              "exclusiveMinimum",
+              "openapi",
+              "tags",
+              "servers",
+              "paths",
+              "components",
+              "info")
+          .map(NonValidationKeyword::new)
+          .collect(Collectors.toMap(NonValidationKeyword::getValue, keyword -> keyword));
 
   public static synchronized JsonSchemaValidator getInstance(String filePath, String schemaName) {
     return INSTANCES
@@ -31,45 +41,28 @@ public class JsonSchemaValidator {
 
   private final JsonSchema jsonSchema;
 
-  @SneakyThrows
   private JsonSchemaValidator(String filePath, String schemaName) {
     log.info("Loading schema: {} with schemaName: {}", filePath, schemaName);
-    // https://github.com/networknt/json-schema-validator/issues/579#issuecomment-1488269135
+
+    // Prevent warnings on unknown keywords
+    OpenApi30.getInstance().getKeywords().putAll(NON_VALIDATION_KEYWORDS);
 
     JsonSchemaFactory jsonSchemaFactory =
-        JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-            .objectMapper(JSON_FACTORY_OBJECT_MAPPER)
-            .build();
-    SchemaValidatorsConfig schemaValidatorsConfig = new SchemaValidatorsConfig();
-    schemaValidatorsConfig.setTypeLoose(false);
+        JsonSchemaFactory.getInstance(
+            SpecVersion.VersionFlag.V7,
+            builder ->
+                builder
+                    .metaSchema(OpenApi30.getInstance())
+                    .defaultMetaSchemaIri(OpenApi30.getInstance().getIri())
+                    .metaSchemaFactory(DisallowUnknownJsonMetaSchemaFactory.getInstance()));
 
-    JsonSchema rootJsonSchema;
-    try (InputStream schemaFileInputStream =
-        JsonSchemaValidator.class.getResourceAsStream(filePath)) {
+    SchemaValidatorsConfig config = SchemaValidatorsConfig.builder().typeLoose(false).build();
 
-      if (schemaFileInputStream == null || schemaFileInputStream.available() == 0) {
-        throw new IllegalArgumentException("Schema file not found: " + filePath);
-      }
-      rootJsonSchema = jsonSchemaFactory.getSchema(schemaFileInputStream, schemaValidatorsConfig);
-    }
-
-    ValidationContext validationContext =
-        new ValidationContext(
-            jsonSchemaFactory.getUriFactory(),
-            null,
-            JsonMetaSchema.getV4(),
-            jsonSchemaFactory,
-            schemaValidatorsConfig);
-    // Prevent warnings on unknown keywords
-    Map<String, Keyword> keywords = validationContext.getMetaSchema().getKeywords();
-    Arrays.asList("example", "discriminator", "exclusiveMinimum")
-        .forEach(keyword -> keywords.put(keyword, new NonValidationKeyword(keyword)));
     jsonSchema =
-        jsonSchemaFactory.create(
-            validationContext,
-            "#/components/schemas/" + schemaName,
-            rootJsonSchema.getSchemaNode().get("components").get("schemas").get(schemaName),
-            rootJsonSchema);
+        jsonSchemaFactory.getSchema(
+            SchemaLocation.of("classpath:" + filePath + "#/components/schemas/" + schemaName),
+            config);
+
     jsonSchema.initializeValidators();
   }
 
@@ -84,7 +77,7 @@ public class JsonSchemaValidator {
     }
   }
 
-  public Set<String> validate(JsonNode jsonNode) {
+  public Set<String> validate(@NonNull JsonNode jsonNode) {
     Set<ValidationMessage> validationMessageSet = jsonSchema.validate(jsonNode);
     return validationMessageSet.stream()
         .map(ValidationMessage::toString)

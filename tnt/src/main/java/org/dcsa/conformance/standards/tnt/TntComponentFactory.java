@@ -99,7 +99,7 @@ class TntComponentFactory extends AbstractComponentFactory {
   }
 
   public Map<TntEventType, JsonSchemaValidator> getEventSchemaValidators() {
-    String schemaFilePath = "/standards/tnt/schemas/tnt-220-publisher.json";
+    String schemaFilePath = "/standards/tnt/schemas/TNT_v2.2.0-resolved.yaml";
     return Map.ofEntries(
         Map.entry(
             TntEventType.EQUIPMENT,

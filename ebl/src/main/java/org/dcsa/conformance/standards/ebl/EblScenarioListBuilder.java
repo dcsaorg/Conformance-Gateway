@@ -1097,8 +1097,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
     if (schemaValidator != null) {
       return schemaValidator;
     }
-    String schemaFilePath = "/standards/ebl/schemas/ebl-%s-%s.json"
-      .formatted(apiName, standardVersion.toLowerCase());
+    String schemaFilePath = "/standards/ebl/schemas/EBL_v%s.yaml".formatted(standardVersion);
 
     schemaValidator = JsonSchemaValidator.getInstance(schemaFilePath, schema);
     SCHEMA_CACHE.put(schemaKey, schemaValidator);

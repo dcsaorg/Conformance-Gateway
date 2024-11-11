@@ -82,12 +82,26 @@ public class EblSurrenderCarrier extends ConformanceParty {
     String tdr = UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     eblStatesById.put(tdr, EblSurrenderState.AVAILABLE_FOR_SURRENDER);
     persistentMap.save("response", actionPrompt.get("response"));
+
+    var identifyingCodes =
+        OBJECT_MAPPER
+            .createArrayNode()
+            .add(
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put("codeListProvider", "WAVE")
+                    .put("partyCode", "MSK")
+                    .put("codeListName", "DID"));
+
     var issueToParty = OBJECT_MAPPER.createObjectNode();
+    issueToParty.set("identifyingCodes", identifyingCodes);
     issueToParty.put("partyName", "Issue To name").put("eblPlatform", "WAVE");
     var carrierParty = OBJECT_MAPPER.createObjectNode();
+    carrierParty.set("identifyingCodes", identifyingCodes);
     carrierParty.put("partyName", "Carrier name").put("eblPlatform", "WAVE");
 
     var surrendereeParty = OBJECT_MAPPER.createObjectNode();
+    surrendereeParty.set("identifyingCodes", identifyingCodes);
     surrendereeParty.put("partyName", "Surrenderee name").put("eblPlatform", "BOLE");
 
     SuppliedScenarioParameters suppliedScenarioParameters =

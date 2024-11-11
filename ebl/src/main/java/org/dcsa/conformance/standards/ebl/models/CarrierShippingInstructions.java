@@ -235,7 +235,7 @@ public class CarrierShippingInstructions {
             .put("imoPackagingCode", "3A1")
             .put("numberOfPackages", 400);
           var dg = outerPackaging.putArray("dangerousGoods").addObject();
-          dg.put("unNumber", "3082")
+          dg.put("UNNumber", "3082")
             .put("properShippingName", "Environmentally hazardous substance, liquid, N.O.S")
             .put("imoClass", "9")
             .put("packingGroup", 3)

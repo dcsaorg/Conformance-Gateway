@@ -99,7 +99,7 @@ class EblSurrenderComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
     String schemaFilePath =
-        "/standards/eblsurrender/schemas/eblsurrender-v%s.json".formatted(standardVersion);
+        "/standards/eblsurrender/schemas/EBL_SUR_v%s.yaml".formatted(standardVersion);
     String schemaName =
         EblSurrenderRole.isCarrier(apiProviderRole)
             ? (forRequest ? "SurrenderRequestDetails" : null)

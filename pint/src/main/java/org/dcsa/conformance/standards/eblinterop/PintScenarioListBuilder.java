@@ -340,7 +340,7 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
 
   private static JsonSchemaValidator resolveMessageSchemaValidator(String schemaName) {
     var standardVersion = STANDARD_VERSION.get();
-    String schemaFilePath = "/standards/pint/schemas/pint-%s.json".formatted(standardVersion);
+    String schemaFilePath = "/standards/pint/schemas/EBL_PINT_v%s.yaml".formatted(standardVersion);
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
   }
 }

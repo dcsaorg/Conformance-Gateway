@@ -7,6 +7,7 @@
   "invoicePayableAt": {
     "UNLocationCode": "INVOICE_PAYABLE_AT_UNLOCATION_CODE"
   },
+  "isCargoDeliveredInICS2Zone": false,
   "partyContactDetails": [
     {
       "name": "DCSA test person",
@@ -71,6 +72,13 @@
     "issueTo": {
       "partyName": "DCSA CTK",
       "sendToPlatform": "BOLE",
+      "identifyingCodes" : [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "DCSA test person",

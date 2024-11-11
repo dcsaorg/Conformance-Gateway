@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
-
 import org.dcsa.conformance.standards.cs.action.CsAction;
 import org.dcsa.conformance.standards.cs.action.CsGetPortSchedulesAction;
 import org.dcsa.conformance.standards.cs.action.CsGetRoutingsAction;
@@ -195,7 +194,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                componentFactory.getMessageSchemaValidator("api", "serviceSchedules")));
+                componentFactory.getMessageSchemaValidator("serviceSchedules")));
   }
 
   private static CsScenarioListBuilder getPtpRoutings() {
@@ -208,7 +207,7 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                componentFactory.getMessageSchemaValidator("api", "pointToPointRoutings")));
+                componentFactory.getMessageSchemaValidator("pointToPointRoutings")));
   }
 
   private static CsScenarioListBuilder getPortSchedules() {
@@ -221,6 +220,6 @@ public class CsScenarioListBuilder extends ScenarioListBuilder<CsScenarioListBui
                 subscriberPartyName,
                 publisherPartyName,
                 (CsAction) previousAction,
-                componentFactory.getMessageSchemaValidator("api", "portSchedules")));
+                componentFactory.getMessageSchemaValidator("portSchedules")));
   }
 }

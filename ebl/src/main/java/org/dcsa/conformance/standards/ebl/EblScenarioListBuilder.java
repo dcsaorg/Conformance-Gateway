@@ -52,10 +52,6 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
 
   private static final ConcurrentHashMap<String, JsonSchemaValidator> SCHEMA_CACHE = new ConcurrentHashMap<>();
 
-  private EblScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
-    super(actionBuilder);
-  }
-
   public static LinkedHashMap<String, EblScenarioListBuilder> createModuleScenarioListBuilders(
       EblComponentFactory componentFactory, String standardVersion, String carrierPartyName, String shipperPartyName) {
     STANDARD_VERSION.set(standardVersion);
@@ -105,6 +101,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
+
   private static LinkedHashMap<String, EblScenarioListBuilder> createConformanceTdOnlyScenarios() {
     return Stream.of(
         Map.entry(
@@ -146,7 +143,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
         originalSiState,
         SI_UPDATE_RECEIVED,
         _uc2_get(SI_PENDING_UPDATE, _uc3_get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, _uc4a_uc14())),
-      _uc3_get(originalSiState,SI_UPDATE_RECEIVED, _uc4a_uc14()),
+        _uc3_get(originalSiState, SI_UPDATE_RECEIVED, _uc4a_uc14()),
         _uc4a_get(
             SI_RECEIVED,
             SI_UPDATE_CONFIRMED,
@@ -281,6 +278,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
     );
   }
 
+
   private static EblScenarioListBuilder _uc14_get(ShippingInstructionsStatus siState) {
     return uc14_carrier_confirmShippingInstructionsComplete()
         .then(shipper_GetShippingInstructions(siState, false));
@@ -312,378 +310,6 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-  }
-
-  private static EblScenarioListBuilder noAction() {
-    return new EblScenarioListBuilder(null);
-  }
-
-  private static EblScenarioListBuilder carrier_SupplyScenarioParameters(ScenarioType scenarioType) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
-                                                                        boolean useTDRef) {
-    return shipper_GetShippingInstructions(expectedSiStatus, null, useTDRef);
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
-                                                                        ShippingInstructionsStatus expectedUpdatedSiStatus,
-                                                                        boolean requestAmendedSI,
-                                                                        boolean useTDRef) {
-    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useTDRef);
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructionsRecordTDRef() {
-    return shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, false, true, false);
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus,
-    ShippingInstructionsStatus expectedUpdatedSiStatus,
-    boolean useTDRef
-  ) {
-    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, false, false, useTDRef);
-  }
-
-  private static EblScenarioListBuilder shipper_GetShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus,
-    ShippingInstructionsStatus expectedUpdatedSiStatus,
-    boolean requestAmendedSI,
-    boolean recordTDR,
-    boolean useTDRef) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new Shipper_GetShippingInstructionsAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          expectedSiStatus,
-          expectedUpdatedSiStatus,
-          resolveMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
-          requestAmendedSI,
-          recordTDR,
-          useTDRef));
-  }
-
-  private static EblScenarioListBuilder shipper_GetTransportDocument(
-    TransportDocumentStatus expectedTdStatus) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new Shipper_GetTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                expectedTdStatus,
-                resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc1_shipper_submitShippingInstructions() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC1_Shipper_SubmitShippingInstructionsAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
-          resolveMessageSchemaValidator(EBL_API, RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
-          resolveMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc3ShipperSubmitUpdatedShippingInstructions(
-    ShippingInstructionsStatus expectedSiStatus,
-    boolean useTDRef
-  ) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC3ShipperSubmitUpdatedShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                expectedSiStatus,
-                useTDRef,
-                resolveMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc2_carrier_requestUpdateToShippingInstruction() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC2_Carrier_RequestUpdateToShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc4a_carrier_acceptUpdatedShippingInstructions() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                SI_RECEIVED,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
-              true));
-  }
-
-  private static EblScenarioListBuilder uc4d_carrier_declineUpdatedShippingInstructions(ShippingInstructionsStatus shippingInstructionsStatus) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                shippingInstructionsStatus,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
-              false));
-  }
-
-  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions(ShippingInstructionsStatus expectedSIStatus, boolean useTDRef) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC5_Shipper_CancelUpdateToShippingInstructionsAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          expectedSIStatus,
-          useTDRef,
-          resolveMessageSchemaValidator(
-            EBL_API, PATCH_SI_SCHEMA_NAME),
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument(boolean skipSI) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC6_Carrier_PublishDraftTransportDocumentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-          skipSI));
-  }
-
-  private static EblScenarioListBuilder uc7_shipper_approveDraftTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC7_Shipper_ApproveDraftTransportDocumentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_API, PATCH_TD_SCHEMA_NAME),
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc8_carrier_issueTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC8_Carrier_IssueTransportDocumentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc9_carrier_awaitSurrenderRequestForAmendment() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc10a_carrier_acceptSurrenderRequestForAmendment() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-          true));
-  }
-
-  private static EblScenarioListBuilder uc10r_carrier_rejectSurrenderRequestForAmendment() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-          false));
-  }
-
-  private static EblScenarioListBuilder uc11_carrier_voidTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-            previousAction ->
-                new UC11v_Carrier_VoidTransportDocumentAction(
-                    carrierPartyName,
-                    shipperPartyName,
-                    (EblAction) previousAction,
-                    resolveMessageSchemaValidator(
-                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-    }
-
-  private static EblScenarioListBuilder uc11i_carrier_issueAmendedTransportDocument() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc12_carrier_awaitSurrenderRequestForDelivery() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC12_Carrier_AwaitSurrenderRequestForDeliveryAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder uc13a_carrier_acceptSurrenderRequestForDelivery() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC13_Carrier_ProcessSurrenderRequestForDeliveryAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-          true));
-  }
-
-  private static EblScenarioListBuilder uc13r_carrier_rejectSurrenderRequestForDelivery() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-        previousAction ->
-            new UC13_Carrier_ProcessSurrenderRequestForDeliveryAction(
-                carrierPartyName,
-                shipperPartyName,
-                (EblAction) previousAction,
-                resolveMessageSchemaValidator(
-                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
-                false));
-  }
-
-  private static EblScenarioListBuilder uc14_carrier_confirmShippingInstructionsComplete() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          resolveMessageSchemaValidator(
-            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
-  }
-
-  private static EblScenarioListBuilder oob_carrier_processOutOfBoundTDUpdateRequest() {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction ->
-        new UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction));
-  }
-
-  private static EblScenarioListBuilder auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType outOfOrderMessageType, boolean useTDRef) {
-    String carrierPartyName = threadLocalCarrierPartyName.get();
-    String shipperPartyName = threadLocalShipperPartyName.get();
-    return new EblScenarioListBuilder(
-      previousAction -> {
-        var schema = switch (outOfOrderMessageType) {
-          case SUBMIT_SI_UPDATE -> PUT_EBL_SCHEMA_NAME;
-          case CANCEL_SI_UPDATE -> PATCH_SI_SCHEMA_NAME;
-          case APPROVE_TD -> PATCH_TD_SCHEMA_NAME;
-        };
-        return new AUC_Shipper_SendOutOfOrderSIMessageAction(
-          carrierPartyName,
-          shipperPartyName,
-          (EblAction) previousAction,
-          outOfOrderMessageType,
-          useTDRef,
-          resolveMessageSchemaValidator(
-            EBL_API, schema));
-      });
-  }
-
-  private static JsonSchemaValidator resolveMessageSchemaValidator(String apiName, String schema) {
-    var standardVersion = STANDARD_VERSION.get();
-    var schemaKey = standardVersion + Character.toString(0x1f) + apiName + Character.toString(0x1f) + schema;
-    var schemaValidator = SCHEMA_CACHE.get(schemaKey);
-    if (schemaValidator != null) {
-      return schemaValidator;
-    }
-    String schemaFilePath = "/standards/ebl/schemas/EBL_v%s.yaml".formatted(standardVersion);
-
-    schemaValidator = JsonSchemaValidator.getInstance(schemaFilePath, schema);
-    SCHEMA_CACHE.put(schemaKey, schemaValidator);
-    return schemaValidator;
   }
 
   private EblScenarioListBuilder thenAllPathsFrom(
@@ -1098,6 +724,388 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       case TD_START, TD_ANY -> throw new AssertionError("Not a real/reachable state");
       case TD_VOIDED -> then(noAction());
     };
+  }
+
+  private EblScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {
+    super(actionBuilder);
+  }
+
+  private static EblScenarioListBuilder noAction() {
+    return new EblScenarioListBuilder(null);
+  }
+
+  private static EblScenarioListBuilder carrier_SupplyScenarioParameters(ScenarioType scenarioType) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction -> new Carrier_SupplyScenarioParametersAction(carrierPartyName, scenarioType));
+  }
+
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
+                                                                        boolean useTDRef) {
+    return shipper_GetShippingInstructions(expectedSiStatus, null, useTDRef);
+  }
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(ShippingInstructionsStatus expectedSiStatus,
+                                                                        ShippingInstructionsStatus expectedUpdatedSiStatus,
+                                                                        boolean requestAmendedSI,
+                                                                        boolean useTDRef) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, requestAmendedSI, false, useTDRef);
+  }
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructionsRecordTDRef() {
+    return shipper_GetShippingInstructions(SI_RECEIVED, SI_ANY, false, true, false);
+  }
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    ShippingInstructionsStatus expectedUpdatedSiStatus,
+    boolean useTDRef
+  ) {
+    return shipper_GetShippingInstructions(expectedSiStatus, expectedUpdatedSiStatus, false, false, useTDRef);
+  }
+
+
+  private static EblScenarioListBuilder shipper_GetShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    ShippingInstructionsStatus expectedUpdatedSiStatus,
+    boolean requestAmendedSI,
+    boolean recordTDR,
+    boolean useTDRef) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new Shipper_GetShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          expectedSiStatus,
+          expectedUpdatedSiStatus,
+          resolveMessageSchemaValidator(EBL_API, GET_EBL_SCHEMA_NAME),
+          requestAmendedSI,
+          recordTDR,
+          useTDRef));
+  }
+
+  private static EblScenarioListBuilder shipper_GetTransportDocument(
+    TransportDocumentStatus expectedTdStatus) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new Shipper_GetTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedTdStatus,
+                resolveMessageSchemaValidator(EBL_API, GET_TD_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc1_shipper_submitShippingInstructions() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC1_Shipper_SubmitShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(EBL_API, POST_EBL_SCHEMA_NAME),
+          resolveMessageSchemaValidator(EBL_API, RESPONSE_POST_SHIPPING_INSTRUCTIONS_SCHEMA_NAME),
+          resolveMessageSchemaValidator(EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc3ShipperSubmitUpdatedShippingInstructions(
+    ShippingInstructionsStatus expectedSiStatus,
+    boolean useTDRef
+  ) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC3ShipperSubmitUpdatedShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                expectedSiStatus,
+                useTDRef,
+                resolveMessageSchemaValidator(EBL_API, PUT_EBL_SCHEMA_NAME),
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc2_carrier_requestUpdateToShippingInstruction() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC2_Carrier_RequestUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc4a_carrier_acceptUpdatedShippingInstructions() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                SI_RECEIVED,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+              true));
+  }
+
+  private static EblScenarioListBuilder uc4d_carrier_declineUpdatedShippingInstructions(ShippingInstructionsStatus shippingInstructionsStatus) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC4_Carrier_ProcessUpdateToShippingInstructionsAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                shippingInstructionsStatus,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME),
+              false));
+  }
+
+  private static EblScenarioListBuilder uc5_shipper_cancelUpdateToShippingInstructions(ShippingInstructionsStatus expectedSIStatus, boolean useTDRef) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC5_Shipper_CancelUpdateToShippingInstructionsAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          expectedSIStatus,
+          useTDRef,
+          resolveMessageSchemaValidator(
+            EBL_API, PATCH_SI_SCHEMA_NAME),
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc6_carrier_publishDraftTransportDocument(boolean skipSI) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC6_Carrier_PublishDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          skipSI));
+  }
+
+
+
+  private static EblScenarioListBuilder uc7_shipper_approveDraftTransportDocument() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC7_Shipper_ApproveDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_API, PATCH_TD_SCHEMA_NAME),
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc8_carrier_issueTransportDocument() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC8_Carrier_IssueTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc9_carrier_awaitSurrenderRequestForAmendment() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC9_Carrier_AwaitSurrenderRequestForAmendmentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc10a_carrier_acceptSurrenderRequestForAmendment() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          true));
+  }
+
+  private static EblScenarioListBuilder uc10r_carrier_rejectSurrenderRequestForAmendment() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC10_Carrier_ProcessSurrenderRequestForAmendmentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          false));
+  }
+
+  private static EblScenarioListBuilder uc11_carrier_voidTransportDocument() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+            previousAction ->
+                new UC11v_Carrier_VoidTransportDocumentAction(
+                    carrierPartyName,
+                    shipperPartyName,
+                    (EblAction) previousAction,
+                    resolveMessageSchemaValidator(
+                        EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+    }
+
+  private static EblScenarioListBuilder uc11i_carrier_issueAmendedTransportDocument() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC11i_Carrier_IssueAmendedTransportDocumentAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+
+
+  private static EblScenarioListBuilder uc12_carrier_awaitSurrenderRequestForDelivery() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC12_Carrier_AwaitSurrenderRequestForDeliveryAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder uc13a_carrier_acceptSurrenderRequestForDelivery() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC13_Carrier_ProcessSurrenderRequestForDeliveryAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+          true));
+  }
+
+  private static EblScenarioListBuilder uc13r_carrier_rejectSurrenderRequestForDelivery() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+        previousAction ->
+            new UC13_Carrier_ProcessSurrenderRequestForDeliveryAction(
+                carrierPartyName,
+                shipperPartyName,
+                (EblAction) previousAction,
+                resolveMessageSchemaValidator(
+                    EBL_NOTIFICATIONS_API, EBL_TD_NOTIFICATION_SCHEMA_NAME),
+                false));
+  }
+
+
+  private static EblScenarioListBuilder uc14_carrier_confirmShippingInstructionsComplete() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UC14_Carrier_ConfirmShippingInstructionsCompleteAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          resolveMessageSchemaValidator(
+            EBL_NOTIFICATIONS_API, EBL_SI_NOTIFICATION_SCHEMA_NAME)));
+  }
+
+  private static EblScenarioListBuilder oob_carrier_processOutOfBoundTDUpdateRequest() {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction ->
+        new UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTransportDocumentAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction));
+  }
+
+  private static EblScenarioListBuilder auc_shipper_sendOutOfOrderSIMessage(OutOfOrderMessageType outOfOrderMessageType, boolean useTDRef) {
+    String carrierPartyName = threadLocalCarrierPartyName.get();
+    String shipperPartyName = threadLocalShipperPartyName.get();
+    return new EblScenarioListBuilder(
+      previousAction -> {
+        var schema = switch (outOfOrderMessageType) {
+          case SUBMIT_SI_UPDATE -> PUT_EBL_SCHEMA_NAME;
+          case CANCEL_SI_UPDATE -> PATCH_SI_SCHEMA_NAME;
+          case APPROVE_TD -> PATCH_TD_SCHEMA_NAME;
+        };
+        return new AUC_Shipper_SendOutOfOrderSIMessageAction(
+          carrierPartyName,
+          shipperPartyName,
+          (EblAction) previousAction,
+          outOfOrderMessageType,
+          useTDRef,
+          resolveMessageSchemaValidator(
+            EBL_API, schema));
+      });
+  }
+
+  private static JsonSchemaValidator resolveMessageSchemaValidator(String apiName, String schema) {
+    var standardVersion = STANDARD_VERSION.get();
+    var schemaKey = standardVersion + Character.toString(0x1f) + apiName + Character.toString(0x1f) + schema;
+    var schemaValidator = SCHEMA_CACHE.get(schemaKey);
+    if (schemaValidator != null) {
+      return schemaValidator;
+    }
+    String schemaFilePath = "/standards/ebl/schemas/EBL_v%s.yaml".formatted(standardVersion);
+
+    schemaValidator = JsonSchemaValidator.getInstance(schemaFilePath, schema);
+    SCHEMA_CACHE.put(schemaKey, schemaValidator);
+    return schemaValidator;
   }
 
 }

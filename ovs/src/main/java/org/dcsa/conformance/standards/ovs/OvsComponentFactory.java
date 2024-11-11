@@ -98,11 +98,7 @@ class OvsComponentFactory extends AbstractComponentFactory {
   }
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
-    String schemaFilePath =
-        "/standards/ovs/schemas/ovs-%s-%s.json"
-            .formatted(
-                standardVersion.toLowerCase().replaceAll("[.-]", ""),
-                apiProviderRole.toLowerCase());
+    String schemaFilePath = "/standards/ovs/schemas/OVS_v%s.yaml".formatted(standardVersion);
     String schemaName =
         OvsRole.isPublisher(apiProviderRole) ? (forRequest ? null : "serviceSchedules") : null;
     return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);

@@ -102,7 +102,7 @@ class EblIssuanceComponentFactory extends AbstractComponentFactory {
 
   public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest, boolean issuanceManifest) {
     String schemaFilePath =
-        "/standards/eblissuance/schemas/eblissuance-v%s.json"
+        "/standards/eblissuance/schemas/EBL_ISS_v%s.yaml"
             .formatted(standardVersion);
     String schemaName = EblIssuanceRole.isCarrier(apiProviderRole)
         ? (forRequest ? "IssuanceRequest" : null)

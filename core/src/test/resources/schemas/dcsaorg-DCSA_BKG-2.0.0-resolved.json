@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "DCSA OpenAPI specification for Booking",
-    "description": "API specification issued by DCSA.org.\n\nFor explanation of specific values or objects please refer to the [Information Model 2024.Q1](https://dcsa-website.cdn.prismic.io/dcsa-website/ZhlC9TjCgu4jzyW5_20240402-DCSA-Information-Model-2024.Q1-ReleaseCandidate_01.pdf). This API specification does not define the allowable updates and their timing in accordance with the established business rules. Refer to the [DCSA Interface Standard for the Booking process 2.0](https://dcsa.org/standards/booking/documentation-booking-2) to address this. **All use cases mentioned in this API specification refer to use cases defined in this Booking IFS**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\n### Booking (Implemented by provider)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n**Note:** All `/v2/bookings` endPoints must be implemented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification endPoint](#/BookingNotification).\n\n    POST /v2/booking-notifications\n\nThe endPoints support both a **Lightweight Notification** and a **Full State Transfer**. How much data is sent via this Notification endPoint depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** This endPoint is to be implemented by the consumers of the `Booking API` in order to receive push events.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n",
+    "title": "DCSA Booking API",
+    "description": "<h1>DCSA OpenAPI specification for the Booking process</h1>\n\nThis API is intended as an API between a carrier and anyone creating a `Booking`. The process includes:\n\n- Booking request\n- Booking update\n- Booking confirmation\n- Booking amendment\n- Booking cancellation\n- Booking rejection\n\nFor explanation of specific values or objects please refer to the [Information Model](https://developer.dcsa.org/documentation/information_models). This API specification does not define the allowable updates and their timing in accordance with the established business rules. **All use cases mentioned in this API specification refer to use cases defined in [DCSA Interface Standard for the Booking process 2.0](https://dcsa.org/standards/booking/documentation-booking-2)**.\n\nAll other documents related to the Booking publication can be found [here](https://dcsa.org/standards/booking-process/)\n\n### Booking (Implemented by provider)\n\nIt is possible to use the Booking API as a standalone API. In that case poll on the following endPoints:\n\n    GET /v2/bookings/{bookingReference}\n\nin order to poll information about status changes.\n\n**Note:** All `/v2/bookings` endPoints must be implemented by the provider.\n\n### Notifications (Implemented by consumer)\nIt is possible to have notifications pushed to you whenever the provider needs input and/or a state change. The format of the notification is defined by the [Booking Notification endPoint](#/BookingNotification).\n\n    POST /v2/booking-notifications\n\nThe endPoints support both a **Lightweight Notification** and a **Full State Transfer**. How much data is sent via this Notification endPoint depends on what kind of Notification is being subscribed to.\n\nSigning up for notifications is defined outside the scope of this API specification.\n\n**Note:** This endPoint is to be implemented by the consumers of the `Booking API` in order to receive push events.\n\n### API Design & Implementation Principles\nThis API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)\n\nFor a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/bkg/v2#v200). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.\n\nAPI specification issued by [DCSA.org](https://dcsa.org/).\n",
     "contact": {
       "name": "Digital Container Shipping Association (DCSA)",
       "url": "https://dcsa.org",
@@ -16,7 +16,8 @@
   },
   "servers": [
     {
-      "url": "/"
+      "url": "https://virtserver.swaggerhub.com/dcsaorg/DCSA_BKG/2.0.0",
+      "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "tags": [
@@ -88,7 +89,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -184,7 +184,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -291,7 +290,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -387,7 +385,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -458,7 +455,7 @@
                               "description": "Jerrican, steel",
                               "dangerousGoods": [
                                 {
-                                  "unNumber": "3082",
+                                  "UNNumber": "3082",
                                   "properShippingName": "Environmentally hazardous substance, liquid, N.O.S\n",
                                   "imoClass": "9",
                                   "isMarinePollutant": false,
@@ -505,7 +502,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/inline_response_202"
+                  "$ref": "#/components/schemas/CreateBookingResponse"
                 },
                 "examples": {
                   "acceptedExample": {
@@ -727,7 +724,6 @@
                       "carrierExportVoyageNumber": "403W",
                       "isPartialLoadAllowed": false,
                       "isExportDeclarationRequired": false,
-                      "isImportLicenseRequired": false,
                       "expectedDepartureDate": "2024-01-20",
                       "incoTerms": "EXW",
                       "isEquipmentSubstitutionAllowed": false,
@@ -837,7 +833,6 @@
                       "carrierExportVoyageNumber": "403W",
                       "isPartialLoadAllowed": false,
                       "isExportDeclarationRequired": false,
-                      "isImportLicenseRequired": false,
                       "expectedDepartureDate": "2024-01-20",
                       "incoTerms": "EXW",
                       "isEquipmentSubstitutionAllowed": false,
@@ -1212,7 +1207,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -1310,7 +1304,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -1417,7 +1410,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -1516,7 +1508,6 @@
                     "carrierExportVoyageNumber": "403W",
                     "isPartialLoadAllowed": false,
                     "isExportDeclarationRequired": false,
-                    "isImportLicenseRequired": false,
                     "expectedDepartureDate": "2024-01-20",
                     "incoTerms": "EXW",
                     "isEquipmentSubstitutionAllowed": false,
@@ -1587,7 +1578,7 @@
                               "description": "Jerrican, steel",
                               "dangerousGoods": [
                                 {
-                                  "unNumber": "3082",
+                                  "UNNumber": "3082",
                                   "properShippingName": "Environmentally hazardous substance, liquid, N.O.S\n",
                                   "imoClass": "9",
                                   "isMarinePollutant": false,
@@ -1869,7 +1860,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/bookings_bookingReference_body"
+                "$ref": "#/components/schemas/CancelBookingRequest"
               },
               "examples": {
                 "bookingCancelledExample": {
@@ -1912,15 +1903,15 @@
                 "examples": {
                   "bookingCancelledExample": {
                     "summary": "Booking Request cancelled\n",
-                    "description": "The consumer has requested that the `Booking Request` should be cancelled. The cancellation has been accepted and is now awaiting further processing by the provider\n"
+                    "description": "The consumer has requested that the `Booking Request` should be cancelled. The cancellation request has been accepted and is now awaiting further processing by the provider\n"
                   },
                   "amendmentCancelledExample": {
                     "summary": "Amendment cancellation on a confirmed Booking accepted\n",
-                    "description": "The consumer has requested that the amendment to a confirmed `Booking` is to be cancelled. The cancellation has been accepted and is now awaiting further processing by the provider\n"
+                    "description": "The consumer has requested that the amendment to a confirmed `Booking` is to be cancelled. The cancellation request as been accepted and is now awaiting further processing by the provider\n"
                   },
                   "confirmedBookingCancellationExample": {
                     "summary": "Request to Cancel a confirmed Booking accepted\n",
-                    "description": "The consumer has requested to cancel a confirmed `Booking`. The cancellation has been accepted and is now awaiting further processing by the provider\n"
+                    "description": "The consumer has requested to cancel a confirmed `Booking`. The cancellation request has been accepted and is now awaiting further processing by the provider\n"
                   }
                 }
               }
@@ -2224,7 +2215,6 @@
                         "carrierExportVoyageNumber": "403W",
                         "isPartialLoadAllowed": false,
                         "isExportDeclarationRequired": false,
-                        "isImportLicenseRequired": false,
                         "expectedDepartureDate": "2024-01-20",
                         "incoTerms": "EXW",
                         "isEquipmentSubstitutionAllowed": false,
@@ -2373,7 +2363,6 @@
                         "carrierExportVoyageNumber": "403W",
                         "isPartialLoadAllowed": false,
                         "isExportDeclarationRequired": false,
-                        "isImportLicenseRequired": false,
                         "expectedDepartureDate": "2024-01-20",
                         "incoTerms": "EXW",
                         "isEquipmentSubstitutionAllowed": false,
@@ -2523,7 +2512,6 @@
                         "carrierExportVoyageNumber": "403W",
                         "isPartialLoadAllowed": false,
                         "isExportDeclarationRequired": false,
-                        "isImportLicenseRequired": false,
                         "expectedDepartureDate": "2024-01-20",
                         "incoTerms": "EXW",
                         "isEquipmentSubstitutionAllowed": false,
@@ -2744,6 +2732,82 @@
   },
   "components": {
     "schemas": {
+      "CreateBookingResponse": {
+        "title": "Create Booking Response",
+        "required": [
+          "carrierBookingRequestReference"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierBookingRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference to the booking during the booking request phase.\n",
+            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
+          }
+        },
+        "description": "**Only** the `carrierBookingRequestReference` is returned.\n"
+      },
+      "CancelBookingRequest": {
+        "title": "Cancel Booking Request",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 5000,
+            "type": "string",
+            "description": "An optional property where a reason for cancelling the booking or the amendment can be given.\n",
+            "example": "Booking cancelled due to internal problems"
+          }
+        },
+        "oneOf": [
+          {
+            "title": "Cancel Booking Request (prior to Booking Confirmation)",
+            "required": [
+              "bookingStatus"
+            ],
+            "type": "object",
+            "properties": {
+              "bookingStatus": {
+                "maxLength": 50,
+                "type": "string",
+                "description": "Setting the `bookingStatus` to `CANCELLED` cancels the `Booking Request` (only possible **before** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingRequestReference`). The `Booking Request` will discontinue if the request is accepted by the provider.\n\n**Condition:** It is a precondition that the `bookingStatus` **is NOT** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.\n\nOnly possible value to set is `CANCELLED`.\n",
+                "example": "CANCELLED"
+              }
+            }
+          },
+          {
+            "title": "Only cancel the amendment to a Confirmed Booking",
+            "required": [
+              "amendedBookingStatus"
+            ],
+            "type": "object",
+            "properties": {
+              "amendedBookingStatus": {
+                "maxLength": 50,
+                "type": "string",
+                "description": "Setting the `amendedBookingStatus` to `AMENDMENT_CANCELLED` **only** cancels the amendment to a confirmed `Booking`. This is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`.\n\n**Condition:** It is a precondition that the `amendedBookingStatus` **is** `AMENDMENT_RECEIVED` in order to cancel it. If this is not the case a `404` (Not Found) error response should be returned.\n\nOnly possible value to set is `AMENDMENT_CANCELLED`.\n",
+                "example": "AMENDMENT_CANCELLED"
+              }
+            }
+          },
+          {
+            "title": "Request to cancel a Confirmed Booking",
+            "required": [
+              "bookingCancellationStatus"
+            ],
+            "type": "object",
+            "properties": {
+              "bookingCancellationStatus": {
+                "maxLength": 50,
+                "type": "string",
+                "description": "Setting the `bookingCancellationStatus` to `CANCELLATION_RECEIVED` is a request to cancel a confirmed Booking (only possible **after** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`). Upon receiving this request the provider will check if it is possible to cancel the confirmed booking. Further processing is needed by the provider.\n\n**Condition:** It is a precondition that the `bookingStatus` **is** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.\n\nOnly possible value to set is `CANCELLATION_RECEIVED`.\n",
+                "example": "CANCELLATION_RECEIVED"
+              }
+            }
+          }
+        ]
+      },
       "BookingNotification": {
         "title": "Booking Notification",
         "required": [
@@ -2808,10 +2872,85 @@
             "example": "30675492-50ff-4e17-a7df-7a487a8ad343"
           },
           "data": {
-            "$ref": "#/components/schemas/Data"
+            "$ref": "#/components/schemas/BookingNotificationData"
           }
         },
         "description": "`CloudEvent` specific properties for the `Notification`.\n"
+      },
+      "BookingNotificationData": {
+        "title": "Data",
+        "required": [
+          "bookingStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "bookingStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the `Booking`. Possible values are:\n\n- `RECEIVED` (Booking request has been received)\n- `PENDING_UPDATE` (An update is required to the Booking)\n- `UPDATE_RECEIVED` (An update has been received and is awaiting to be processed)\n- `CONFIRMED` (Booking has been Confirmed)\n- `PENDING_AMENDMENT` (An amendment is required to the Booking)\n- `REJECTED` (Booking discontinued by carrier before it has been Confirmed)\n- `DECLINED` (Booking discontinued by carrier after it has been Confirmed)\n- `CANCELLED` (Booking discontinued by consumer)\n- `COMPLETED` (The Transport Document this Booking is connected to has been Surrendered for Delivery)\n",
+            "example": "RECEIVED"
+          },
+          "amendedBookingStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this property is empty. Possible values are:\n\n- `AMENDMENT_RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT_CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT_DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT_CANCELLED` (Amendment discontinued by consumer)\n",
+            "example": "AMENDMENT_RECEIVED"
+          },
+          "bookingCancellationStatus": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The status of the latest booking cancellation. If no cancellation has been requested - then this property is empty. Possible values are:\n- `CANCELLATION_RECEIVED` (A request to cancel a Confirmed Booking has been received and is awaiting to be processed)\n- `CANCELLATION_DECLINED` (Cancellation of the Confirmed Booking has been declined by provider)\n- `CANCELLATION_CONFIRMED` (Cancellation of the Confirmed Booking has been confirmed by provider)\n",
+            "example": "CANCELLATION_RECEIVED"
+          },
+          "carrierBookingRequestReference": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
+            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
+          },
+          "carrierBookingReference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
+            "example": "ABC709951"
+          },
+          "feedbacks": {
+            "type": "array",
+            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
+          },
+          "booking": {
+            "$ref": "#/components/schemas/BookingFullNotification"
+          },
+          "amendedBooking": {
+            "$ref": "#/components/schemas/AmendedBookingFullNotification"
+          }
+        },
+        "description": "`Booking` specific properties for the `Notification`\n"
+      },
+      "BookingFullNotification": {
+        "title": "Booking",
+        "type": "object",
+        "description": "This property contains the booking in case the subscriber is subscribing to the `Full State Transfer` of the Booking.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Booking then the content in this property can be ignored.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Booking"
+          }
+        ]
+      },
+      "AmendedBookingFullNotification": {
+        "title": "Amended Booking",
+        "type": "object",
+        "description": "This property contains the amended booking in case:\n  - an amendment is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Booking\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Booking or no amendment is active - then the content in this property can be ignored.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Booking"
+          }
+        ]
       },
       "Feedback": {
         "title": "Feedback",
@@ -3098,8 +3237,6 @@
           "deliveryTypeAtDestination",
           "documentParties",
           "isEquipmentSubstitutionAllowed",
-          "isExportDeclarationRequired",
-          "isImportLicenseRequired",
           "receiptTypeAtOrigin",
           "requestedEquipments",
           "shipmentLocations"
@@ -3241,33 +3378,20 @@
           },
           "isPartialLoadAllowed": {
             "type": "boolean",
-            "description": "Indication whether the shipper agrees to load part of the shipment in case where not all of the cargo is delivered within cut-off.\n\n**Note:** If this property is omitted it is considered that 'Partial Load **is** allowed' by default\n",
-            "example": true,
-            "default": true
+            "description": "Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.\n\n**Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
+            "example": true
           },
           "isExportDeclarationRequired": {
             "type": "boolean",
-            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n",
+            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n\n**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
             "example": true
           },
           "exportDeclarationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure.\n",
+            "description": "Reference number assigned to an Export declaration typically submitted by the exporter (or the freight forwarder on behalf of the exporter) that provides detailed information about the goods being exported. It serves as a record for the exporting country's government and is used for statistical, regulatory, and compliance purposes. The export declaration must typically be submitted to the relevant customs authorities before the goods leave the exporting country.\n",
             "example": "ABC123123"
-          },
-          "isImportLicenseRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular\nshipment/commodity/destination.\n",
-            "example": true
-          },
-          "importLicenseReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival.\n",
-            "example": "XYZ987987"
           },
           "expectedDepartureDate": {
             "type": "string",
@@ -3322,10 +3446,10 @@
             "example": true
           },
           "invoicePayableAt": {
-            "$ref": "#/components/schemas/Invoice Payable At"
+            "$ref": "#/components/schemas/InvoicePayableAt"
           },
           "placeOfBLIssue": {
-            "$ref": "#/components/schemas/Place of BL Issue"
+            "$ref": "#/components/schemas/PlaceOfBLIssue"
           },
           "references": {
             "type": "array",
@@ -3342,7 +3466,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/Document Parties_1"
+            "$ref": "#/components/schemas/DocumentPartiesReq"
           },
           "partyContactDetails": {
             "type": "array",
@@ -3377,8 +3501,6 @@
           "deliveryTypeAtDestination",
           "documentParties",
           "isEquipmentSubstitutionAllowed",
-          "isExportDeclarationRequired",
-          "isImportLicenseRequired",
           "receiptTypeAtOrigin",
           "requestedEquipments",
           "shipmentLocations"
@@ -3534,32 +3656,19 @@
           },
           "isPartialLoadAllowed": {
             "type": "boolean",
-            "description": "Indication whether the shipper agrees to load part of the shipment in case where not all of the cargo is delivered within cut-off.\n\n**Note:** If this property is omitted it is considered that 'Partial Load **is** allowed' by default\n",
-            "example": true,
-            "default": true
+            "description": "Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.\n\n**Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
+            "example": true
           },
           "isExportDeclarationRequired": {
             "type": "boolean",
-            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n",
+            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n\n**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
             "example": true
           },
           "exportDeclarationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
-            "example": "ABC123123"
-          },
-          "isImportLicenseRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular\nshipment/commodity/destination.\n",
-            "example": true
-          },
-          "importLicenseReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
+            "description": "Reference number assigned to an Export declaration typically submitted by the exporter (or the freight forwarder on behalf of the exporter) that provides detailed information about the goods being exported. It serves as a record for the exporting country's government and is used for statistical, regulatory, and compliance purposes. The export declaration must typically be submitted to the relevant customs authorities before the goods leave the exporting country.\n",
             "example": "ABC123123"
           },
           "expectedDepartureDate": {
@@ -3615,10 +3724,10 @@
             "example": true
           },
           "invoicePayableAt": {
-            "$ref": "#/components/schemas/Invoice Payable At"
+            "$ref": "#/components/schemas/InvoicePayableAt"
           },
           "placeOfBLIssue": {
-            "$ref": "#/components/schemas/Place of BL Issue"
+            "$ref": "#/components/schemas/PlaceOfBLIssue"
           },
           "references": {
             "type": "array",
@@ -3635,7 +3744,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/Document Parties_1"
+            "$ref": "#/components/schemas/DocumentPartiesReq"
           },
           "partyContactDetails": {
             "type": "array",
@@ -3662,6 +3771,38 @@
           }
         }
       },
+      "DocumentPartiesReq": {
+        "title": "Document Parties",
+        "required": [
+          "bookingAgent"
+        ],
+        "type": "object",
+        "properties": {
+          "bookingAgent": {
+            "$ref": "#/components/schemas/BookingAgent"
+          },
+          "shipper": {
+            "$ref": "#/components/schemas/Shipper"
+          },
+          "consignee": {
+            "$ref": "#/components/schemas/Consignee"
+          },
+          "serviceContractOwner": {
+            "$ref": "#/components/schemas/ServiceContractOwner"
+          },
+          "carrierBookingOffice": {
+            "$ref": "#/components/schemas/CarrierBookingOffice"
+          },
+          "other": {
+            "type": "array",
+            "description": "A list of document parties that can be optionally provided at booking stage.",
+            "items": {
+              "$ref": "#/components/schemas/OtherDocumentParty"
+            }
+          }
+        },
+        "description": "All `Parties` with associated roles.\n"
+      },
       "Booking": {
         "title": "Booking",
         "required": [
@@ -3671,8 +3812,6 @@
           "deliveryTypeAtDestination",
           "documentParties",
           "isEquipmentSubstitutionAllowed",
-          "isExportDeclarationRequired",
-          "isImportLicenseRequired",
           "receiptTypeAtOrigin",
           "requestedEquipments",
           "shipmentLocations"
@@ -3846,32 +3985,19 @@
           },
           "isPartialLoadAllowed": {
             "type": "boolean",
-            "description": "Indication whether the shipper agrees to load part of the shipment in case where not all of the cargo is delivered within cut-off.\n\n**Note:** If this property is omitted it is considered that 'Partial Load **is** allowed' by default\n",
-            "example": true,
-            "default": true
+            "description": "Indicates whether the shipper agrees to load part of the shipment in case not all of the cargo is delivered within cut-off.\n\n**Note:** The carrier is not liable in case unable to follow the customer's instructions due to operational constraints. If this value is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
+            "example": true
           },
           "isExportDeclarationRequired": {
             "type": "boolean",
-            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n",
+            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n\n**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
             "example": true
           },
           "exportDeclarationReference": {
             "maxLength": 35,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
-            "example": "ABC123123"
-          },
-          "isImportLicenseRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular shipment/commodity/destination.\n",
-            "example": true
-          },
-          "importLicenseReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
+            "description": "Reference number assigned to an Export declaration typically submitted by the exporter (or the freight forwarder on behalf of the exporter) that provides detailed information about the goods being exported. It serves as a record for the exporting country's government and is used for statistical, regulatory, and compliance purposes. The export declaration must typically be submitted to the relevant customs authorities before the goods leave the exporting country.\n",
             "example": "ABC123123"
           },
           "expectedDepartureDate": {
@@ -3933,10 +4059,10 @@
             "example": "Any reference in..."
           },
           "invoicePayableAt": {
-            "$ref": "#/components/schemas/Invoice Payable At"
+            "$ref": "#/components/schemas/InvoicePayableAt"
           },
           "placeOfBLIssue": {
-            "$ref": "#/components/schemas/Place of BL Issue"
+            "$ref": "#/components/schemas/PlaceOfBLIssue"
           },
           "references": {
             "type": "array",
@@ -3953,7 +4079,7 @@
             }
           },
           "documentParties": {
-            "$ref": "#/components/schemas/Document Parties"
+            "$ref": "#/components/schemas/DocumentParties"
           },
           "partyContactDetails": {
             "type": "array",
@@ -4032,6 +4158,103 @@
             }
           }
         }
+      },
+      "InvoicePayableAt": {
+        "title": "Invoice Payable At",
+        "required": [
+          "UNLocationCode"
+        ],
+        "type": "object",
+        "properties": {
+          "UNLocationCode": {
+            "maxLength": 5,
+            "minLength": 5,
+            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+            "type": "string",
+            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+            "example": "NLAMS"
+          }
+        },
+        "description": "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location must be provided as a `UN Location Code`\n"
+      },
+      "PlaceOfBLIssue": {
+        "title": "Place of B/L Issue",
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "maxLength": 100,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "The name of the location.",
+            "example": "Port of Amsterdam"
+          }
+        },
+        "description": "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
+        "oneOf": [
+          {
+            "title": "UN Location Code",
+            "required": [
+              "UNLocationCode"
+            ],
+            "type": "object",
+            "properties": {
+              "UNLocationCode": {
+                "maxLength": 5,
+                "minLength": 5,
+                "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+                "type": "string",
+                "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
+                "example": "NLAMS"
+              }
+            }
+          },
+          {
+            "title": "Country Code",
+            "required": [
+              "countryCode"
+            ],
+            "type": "object",
+            "properties": {
+              "countryCode": {
+                "maxLength": 2,
+                "minLength": 2,
+                "pattern": "^[A-Z]{2}$",
+                "type": "string",
+                "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
+                "example": "DK"
+              }
+            }
+          }
+        ]
+      },
+      "DocumentParties": {
+        "title": "Document Parties",
+        "type": "object",
+        "properties": {
+          "bookingAgent": {
+            "$ref": "#/components/schemas/BookingAgent"
+          },
+          "shipper": {
+            "$ref": "#/components/schemas/Shipper"
+          },
+          "consignee": {
+            "$ref": "#/components/schemas/Consignee"
+          },
+          "serviceContractOwner": {
+            "$ref": "#/components/schemas/ServiceContractOwner"
+          },
+          "carrierBookingOffice": {
+            "$ref": "#/components/schemas/CarrierBookingOffice"
+          },
+          "other": {
+            "type": "array",
+            "description": "A list of document parties that can be optionally provided at booking stage.",
+            "items": {
+              "$ref": "#/components/schemas/OtherDocumentParty"
+            }
+          }
+        },
+        "description": "All `Parties` with associated roles.\n"
       },
       "ActiveReeferSettings": {
         "title": "Active Reefer Settings",
@@ -4557,7 +4780,7 @@
                 "maxLength": 30,
                 "pattern": "^\\S(?:.*\\S)?$",
                 "type": "string",
-                "description": "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+                "description": "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
                 "example": "+45 70262970"
               }
             },
@@ -4593,7 +4816,7 @@
           "codeListProvider": {
             "maxLength": 100,
             "type": "string",
-            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (TRACE Original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `EU` (European Union Member State Customs Authority)\n- `ZZZ` (Mutually defined)\n",
+            "description": "A list of codes identifying a party. Possible values are:\n- `WAVE` (Wave)\n- `CARX` (CargoX)\n- `ESSD` (EssDOCS)\n- `IDT` (ICE Digital Trade)\n- `BOLE` (Bolero)\n- `EDOX` (EdoxOnline)\n- `IQAX` (IQAX)\n- `SECR` (Secro)\n- `TRGO` (TradeGO)\n- `ETEU` (eTEU)\n- `TRAC` (Enigio trace:original)\n- `BRIT` (BRITC eBL)\n- `GSBN` (Global Shipping Business Network)\n- `WISE` (WiseTech)\n- `GLEIF` (Global Legal Entity Identifier Foundation)\n- `W3C` (World Wide Web Consortium)\n- `DNB` (Dun and Bradstreet)\n- `FMC` (Federal Maritime Commission)\n- `DCSA` (Digital Container Shipping Association)\n- `ZZZ` (Mutually defined)\n",
             "example": "W3C"
           },
           "partyCode": {
@@ -4605,7 +4828,7 @@
           "codeListName": {
             "maxLength": 100,
             "type": "string",
-            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n- `EORI` (Economic Operators Registration and Identification) for codeListProvider `EU`\n",
+            "description": "The name of the code list, code generation mechanism or code authority for the `partyCode`. Example values could be:\n- `DID` (Decentralized Identifier) for `codeListProvider` `W3C`\n- `LEI` (Legal Entity Identifier) for `codeListProvider` `GLEIF`\n- `DUNS` (Data Universal Numbering System) for `codeListProvider` `DNB`\n",
             "example": "DID"
           }
         }
@@ -4814,13 +5037,13 @@
           },
           "containerPositionings": {
             "type": "array",
-            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
+            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.\n\n**Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
             "items": {
               "$ref": "#/components/schemas/ContainerPositioning"
             }
           },
           "emptyContainerPickup": {
-            "$ref": "#/components/schemas/Empty Container Pickup"
+            "$ref": "#/components/schemas/EmptyContainerPickup"
           },
           "equipmentReferences": {
             "type": "array",
@@ -4834,7 +5057,10 @@
             }
           },
           "tareWeight": {
-            "$ref": "#/components/schemas/Tare Weight"
+            "$ref": "#/components/schemas/TareWeight"
+          },
+          "cargoGrossWeight": {
+            "$ref": "#/components/schemas/CargoGrossWeightReq"
           },
           "isShipperOwned": {
             "type": "boolean",
@@ -4898,13 +5124,13 @@
           },
           "containerPositionings": {
             "type": "array",
-            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
+            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location.\n\n**Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
             "items": {
               "$ref": "#/components/schemas/ContainerPositioning"
             }
           },
           "emptyContainerPickup": {
-            "$ref": "#/components/schemas/Empty Container Pickup"
+            "$ref": "#/components/schemas/EmptyContainerPickup"
           },
           "equipmentReferences": {
             "type": "array",
@@ -4918,7 +5144,10 @@
             }
           },
           "tareWeight": {
-            "$ref": "#/components/schemas/Tare Weight_1"
+            "$ref": "#/components/schemas/TareWeight"
+          },
+          "cargoGrossWeight": {
+            "$ref": "#/components/schemas/CargoGrossWeightReq"
           },
           "isShipperOwned": {
             "type": "boolean",
@@ -4957,6 +5186,34 @@
         },
         "description": "If needed - it is **only** possible to specify a single Reefer setting. If multiple settings are required for the same `equipmentSizeType` then multiple `requestedEquipment` should be specified (one for each Reefer setting).\n"
       },
+      "TareWeight": {
+        "title": "Tare Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The weight of an empty container (gross container weight).\n",
+            "format": "float",
+            "example": 4000
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The weight of an empty container (gross container weight).\n\n**Condition:** In case of Shipper Owned Containers (`SOC`) this is a required property\n"
+      },
       "ContainerPositioning": {
         "title": "Container Positioning",
         "required": [
@@ -4985,7 +5242,7 @@
         "properties": {
           "estimatedDateTime": {
             "type": "string",
-            "description": "The estimated date and time for the positioning of the container(s) at the `Container Positioning Location` (CPO), if provided, or the `Place of Receipt` (PRE) if CPO location is not provided.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).\n",
+            "description": "The estimated date and time for the positioning of the container(s) at the `Container Positioning Location` (CPO), if provided, or the `Place of Receipt` (PRE) if CPO location is not provided.\n\n**Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).\n",
             "format": "date-time",
             "example": "2024-09-04T09:41:00Z"
           },
@@ -5024,7 +5281,7 @@
             "$ref": "#/components/schemas/GeoCoordinate"
           }
         },
-        "description": "An object to capture the `Container Positioning Location`.\n\nThe location of the customer facility where the container(s) will be loaded.\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).\n\nThe location can be specified in **any** of the following ways: `Address`, `Facility`, `UN Location Code` or a `GeoCoordinate`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
+        "description": "An object to capture the `Container Positioning Location`.\n\nThe location of the customer facility where the container(s) will be loaded.\n\n**Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`).\n\nThe location can be specified in **any** of the following ways: `Address`, `Facility`, `UN Location Code` or a `GeoCoordinate`.\n\n**Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.\n",
         "example": {
           "locationName": "Shanghai Shengdong International Container Terminal",
           "UNLocationCode": "CNSGH",
@@ -5076,7 +5333,6 @@
       "CommodityShipper": {
         "title": "Commodity (Shipper)",
         "required": [
-          "cargoGrossWeight",
           "commodityType"
         ],
         "type": "object",
@@ -5108,28 +5364,22 @@
             }
           },
           "cargoGrossWeight": {
-            "$ref": "#/components/schemas/Cargo Gross Weight"
+            "$ref": "#/components/schemas/CargoGrossWeight"
           },
           "cargoGrossVolume": {
-            "$ref": "#/components/schemas/Cargo Gross Volume"
+            "$ref": "#/components/schemas/CargoGrossVolume"
           },
           "cargoNetWeight": {
-            "$ref": "#/components/schemas/Cargo Net Weight"
+            "$ref": "#/components/schemas/CargoNetWeight"
           },
           "cargoNetVolume": {
-            "$ref": "#/components/schemas/Cargo Net Volume"
+            "$ref": "#/components/schemas/CargoNetVolume"
           },
-          "exportLicenseIssueDate": {
-            "type": "string",
-            "description": "Issue date of the export license applicable to the booking. Mandatory to provide in booking request for specific commodities\n",
-            "format": "date",
-            "example": "2021-05-14"
+          "exportLicense": {
+            "$ref": "#/components/schemas/ExportLicense"
           },
-          "exportLicenseExpiryDate": {
-            "type": "string",
-            "description": "Expiry date of the export license applicable to the booking.\n\nMandatory to provide in booking request for specific commodities.\n",
-            "format": "date",
-            "example": "2021-05-21"
+          "importLicense": {
+            "$ref": "#/components/schemas/ImportLicense"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
@@ -5154,16 +5404,15 @@
       "Commodity": {
         "title": "Commodity",
         "required": [
-          "cargoGrossWeight",
           "commodityType"
         ],
         "type": "object",
         "properties": {
-          "commoditySubreference": {
+          "commoditySubReference": {
             "maxLength": 100,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "A unique reference for this commodity object assigned by the carrier in the booking confirmation. The reference must be provided by the shipper as part of the `Shipping Instructions` for the carrier to link the consignment item to this commodity. A commodity reference is only unique in the context of a booking.\n\n**Conditional:** Mandatory to provide for `CONFIRMED` bookings\n",
+            "description": "A unique reference for this commodity object assigned by the carrier in the booking confirmation. The reference must be provided by the shipper as part of the `Shipping Instructions` for the carrier to link the consignment item to this commodity. A commodity reference is only unique in the context of a booking.\n\n**Condition:** Mandatory to provide for `CONFIRMED` bookings\n",
             "example": "COM-001"
           },
           "commodityType": {
@@ -5193,28 +5442,22 @@
             }
           },
           "cargoGrossWeight": {
-            "$ref": "#/components/schemas/Cargo Gross Weight"
+            "$ref": "#/components/schemas/CargoGrossWeight"
           },
           "cargoGrossVolume": {
-            "$ref": "#/components/schemas/Cargo Gross Volume"
+            "$ref": "#/components/schemas/CargoGrossVolume"
           },
           "cargoNetWeight": {
-            "$ref": "#/components/schemas/Cargo Net Weight"
+            "$ref": "#/components/schemas/CargoNetWeight"
           },
           "cargoNetVolume": {
-            "$ref": "#/components/schemas/Cargo Net Volume"
+            "$ref": "#/components/schemas/CargoNetVolume"
           },
-          "exportLicenseIssueDate": {
-            "type": "string",
-            "description": "Issue date of the export license applicable to the booking. Mandatory to provide in booking request for specific commodities\n",
-            "format": "date",
-            "example": "2021-05-14"
+          "exportLicense": {
+            "$ref": "#/components/schemas/ExportLicense"
           },
-          "exportLicenseExpiryDate": {
-            "type": "string",
-            "description": "Expiry date of the export license applicable to the booking.\n\nMandatory to provide in booking request for specific commodities.\n",
-            "format": "date",
-            "example": "2021-05-21"
+          "importLicense": {
+            "$ref": "#/components/schemas/ImportLicense"
           },
           "outerPackaging": {
             "$ref": "#/components/schemas/OuterPackaging"
@@ -5236,10 +5479,211 @@
         },
         "description": "Type of goods, defined by its commodity type\n"
       },
+      "ExportLicense": {
+        "title": "Export License",
+        "type": "object",
+        "properties": {
+          "isRequired": {
+            "type": "boolean",
+            "description": "Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.\n  \n**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
+            "example": true
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Reference number assigned to an `Export License` or permit, which authorizes a business or individual to export specific goods to specific countries under defined conditions. It is a permit that is required when shipping certain restricted or controlled goods, such as military equipment, high-tech items, chemicals, or items subject to international regulations. The `Export License` must be valid at time of departure.\n",
+            "example": "EMC007123"
+          },
+          "issueDate": {
+            "type": "string",
+            "description": "Issue date of the `Export License` applicable to the booking.\n",
+            "format": "date",
+            "example": "2024-09-14"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Expiry date of the `Export License` applicable to the booking.\n",
+            "format": "date",
+            "example": "2024-09-21"
+          }
+        },
+        "description": "`Export License` required for this commodity\n"
+      },
+      "ImportLicense": {
+        "title": "Import License",
+        "type": "object",
+        "properties": {
+          "isRequired": {
+            "type": "boolean",
+            "description": "Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.\n  \n**Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.\n",
+            "example": true
+          },
+          "reference": {
+            "maxLength": 35,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string",
+            "description": "Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that athorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.\n",
+            "example": "EMC007123"
+          },
+          "issueDate": {
+            "type": "string",
+            "description": "Issue date of the `Import License` applicable to the booking.\n",
+            "format": "date",
+            "example": "2024-09-14"
+          },
+          "expiryDate": {
+            "type": "string",
+            "description": "Expiry date of the `Import License` applicable to the booking.\n",
+            "format": "date",
+            "example": "2024-09-21"
+          }
+        },
+        "description": "`Import License` required for this commodity\n"
+      },
+      "CargoGrossWeightReq": {
+        "title": "Cargo Gross Weight (Requested Equipment)",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 36000
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n\n**Condition:** Mandatory if not provided on `Commodity` level\n"
+      },
+      "CargoGrossWeight": {
+        "title": "Cargo Gross Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 36000
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n\n**Condition:** Mandatory if not provided on `Requested Equipment` level.\n"
+      },
+      "CargoGrossVolume": {
+        "title": "Cargo Gross Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated grand total volume of the cargo.\n",
+            "format": "float",
+            "example": 360
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          }
+        },
+        "description": "The estimated grand total volume of the cargo.\n"
+      },
+      "CargoNetWeight": {
+        "title": "Cargo Net Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated grand total net weight of the cargo, excluding packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 36000
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "The estimated grand total net weight of the cargo, excluding packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n"
+      },
+      "CargoNetVolume": {
+        "title": "Cargo Net Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The estimated net total volume of the cargo.\n",
+            "format": "float",
+            "example": 360
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ"
+            ]
+          }
+        },
+        "description": "The estimated net total volume of the cargo.\n"
+      },
       "NationalCommodityCode": {
         "title": "National Commodity Code",
         "required": [
-          "countryCode",
           "type",
           "values"
         ],
@@ -5492,16 +5936,16 @@
             "example": "A"
           },
           "grossWeight": {
-            "$ref": "#/components/schemas/Gross Weight"
+            "$ref": "#/components/schemas/GrossWeight"
           },
           "netWeight": {
-            "$ref": "#/components/schemas/Net Weight"
+            "$ref": "#/components/schemas/NetWeight"
           },
           "netExplosiveContent": {
-            "$ref": "#/components/schemas/Net Explosive Content"
+            "$ref": "#/components/schemas/NetExplosiveContent"
           },
           "netVolume": {
-            "$ref": "#/components/schemas/Net Volume"
+            "$ref": "#/components/schemas/NetVolume"
           },
           "limits": {
             "$ref": "#/components/schemas/Limits"
@@ -5519,16 +5963,16 @@
             "example": "To be handled with extreme care"
           }
         },
-        "description": "Specification for `Dangerous Goods`. It is mandatory to either provide the `unNumber` or the `naNumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.\n",
+        "description": "Specification for `Dangerous Goods`. It is mandatory to either provide the `UNNumber` or the `NANumber`. Dangerous Goods is based on **IMDG Amendment Version 41-22**.\n",
         "oneOf": [
           {
             "title": "UN Number",
             "required": [
-              "unNumber"
+              "UNNumber"
             ],
             "type": "object",
             "properties": {
-              "unNumber": {
+              "UNNumber": {
                 "maxLength": 4,
                 "minLength": 4,
                 "pattern": "^\\d{4}$",
@@ -5541,11 +5985,11 @@
           {
             "title": "NA Number",
             "required": [
-              "naNumber"
+              "NANumber"
             ],
             "type": "object",
             "properties": {
-              "naNumber": {
+              "NANumber": {
                 "maxLength": 4,
                 "minLength": 4,
                 "pattern": "^\\d{4}$",
@@ -5556,6 +6000,121 @@
             }
           }
         ]
+      },
+      "GrossWeight": {
+        "title": "Gross Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
+            "format": "float",
+            "example": 12000.3
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in imperial or metric terms\n\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "Total weight of the goods carried, including packaging.\n"
+      },
+      "NetWeight": {
+        "title": "Net Weight",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "Total weight of the goods carried, excluding packaging.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measure used to describe the `netWeight`. Possible values are\n\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR"
+            ]
+          }
+        },
+        "description": "Total weight of the goods carried, excluding packaging.\n"
+      },
+      "NetExplosiveContent": {
+        "title": "Net Explosive Content",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n- `GRM` (Grams)\n- `ONZ` (Ounce)\n",
+            "example": "KGM",
+            "enum": [
+              "KGM",
+              "LBR",
+              "GRM",
+              "ONZ"
+            ]
+          }
+        },
+        "description": "The total weight of the explosive substances, without the packaging’s, casings, etc.\n"
+      },
+      "NetVolume": {
+        "title": "Net Volume",
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "The volume of the referenced dangerous goods.\n",
+            "format": "float",
+            "example": 2.4
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n- `LTR` (Litre)\n",
+            "example": "MTQ",
+            "enum": [
+              "MTQ",
+              "FTQ",
+              "LTR"
+            ]
+          }
+        },
+        "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
       },
       "InnerPackaging": {
         "title": "Inner Packaging",
@@ -5611,7 +6170,7 @@
             "maxLength": 30,
             "pattern": "^\\S(?:.*\\S)?$",
             "type": "string",
-            "description": "Phone number for the contact. Phone **must** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
+            "description": "Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).\n",
             "example": "+45 70262970"
           },
           "referenceNumber": {
@@ -5696,16 +6255,32 @@
           },
           "containerPositionings": {
             "type": "array",
-            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location (all times are estimated).\n\n**Conditional:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
+            "description": "A list of date and time and locations of the customer facility where the container(s) will be loaded. If multiple Container positioning locations (`CPO`) are provided (multi-stop), the first location is where the empty container will be stuffed first. The order in which the `CPO` locations should be visited is implicitly defined by the shipper based on the date and time provided per location (all times are estimated).\n\n**Condition:** Only applicable to carrier haulage service at origin (`Receipt type at origin = 'SD'`). \n",
             "items": {
               "$ref": "#/components/schemas/ContainerPositioningEstimated"
             }
           },
           "emptyContainerPickup": {
-            "$ref": "#/components/schemas/Empty Container Pickup"
+            "$ref": "#/components/schemas/EmptyContainerPickup"
           }
         },
         "description": "The confirmed equipments for the booking\n"
+      },
+      "EmptyContainerPickup": {
+        "title": "Empty Container Pickup",
+        "type": "object",
+        "properties": {
+          "dateTime": {
+            "type": "string",
+            "description": "The date and time for the pick-up of the empty container(s) at the Empty container depot release location, if provided.\n",
+            "format": "date-time",
+            "example": "2024-09-04T09:41:00Z"
+          },
+          "depotReleaseLocation": {
+            "$ref": "#/components/schemas/EmptyContainerDepotReleaseLocation"
+          }
+        },
+        "description": "The date and time and location for the empty container pick-up.\n\n**Condition:** Only applicable to merchant haulage service at origin (`Receipt type at origin = 'CY'`).\n"
       },
       "Transport": {
         "title": "Transport",
@@ -5920,7 +6495,6 @@
       "AdvanceManifestFiling": {
         "title": "Advance Manifest Filing",
         "required": [
-          "countryCode",
           "manifestTypeCode"
         ],
         "type": "object",
@@ -6107,1307 +6681,6 @@
           }
         },
         "description": "Vessels related to this booking request.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and `carrierServiceCode` or `carrierServiceName` are blank.\n"
-      },
-      "inline_response_202": {
-        "required": [
-          "carrierBookingRequestReference"
-        ],
-        "type": "object",
-        "properties": {
-          "carrierBookingRequestReference": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n",
-            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
-          }
-        },
-        "description": "**Only** the `carrierBookingRequestReference` is returned.\n"
-      },
-      "bookings_bookingReference_body": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "maxLength": 5000,
-            "type": "string",
-            "description": "An optional property where a reason for cancelling the booking or the amendment can be given.\n",
-            "example": "Booking cancelled due to internal problems"
-          }
-        },
-        "oneOf": [
-          {
-            "title": "Cancel Booking Request (prior to Booking Confirmation)",
-            "required": [
-              "bookingStatus"
-            ],
-            "type": "object",
-            "properties": {
-              "bookingStatus": {
-                "maxLength": 50,
-                "type": "string",
-                "description": "Setting the `bookingStatus` to `CANCELLED` cancels the `Booking Request` (only possible **before** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingRequestReference`). The `Booking Request` will discontinue if the request is accepted by the provider.\n\n**Conditional:** It is a precondition that the `bookingStatus` **is NOT** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.\n\nOnly possible value to set is `CANCELLED`.\n",
-                "example": "CANCELLED"
-              }
-            }
-          },
-          {
-            "title": "Only cancel the amendment to a Confirmed Booking",
-            "required": [
-              "amendedBookingStatus"
-            ],
-            "type": "object",
-            "properties": {
-              "amendedBookingStatus": {
-                "maxLength": 50,
-                "type": "string",
-                "description": "Setting the `amendedBookingStatus` to `AMENDMENT_CANCELLED` **only** cancels the amendment to a confirmed `Booking`. This is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`.\n\n**Conditional:** It is a precondition that the `amendedBookingStatus` **is** `AMENDMENT_RECEIVED` in order to cancel it. If this is not the case a `404` (Not Found) error response should be returned.\n\nOnly possible value to set is `AMENDMENT_CANCELLED`.\n",
-                "example": "AMENDMENT_CANCELLED"
-              }
-            }
-          },
-          {
-            "title": "Request to cancel a Confirmed Booking",
-            "required": [
-              "bookingCancellationStatus"
-            ],
-            "type": "object",
-            "properties": {
-              "bookingCancellationStatus": {
-                "maxLength": 50,
-                "type": "string",
-                "description": "Setting the `bookingCancellationStatus` to `CANCELLATION_RECEIVED` is a request to cancel a confirmed Booking (only possible **after** it is `CONFIRMED` and using this property is only possible in combination with the `bookingReference` path-property being the `carrierBookingReference`). Upon receiving this request the provider will check if it is possible to cancel the confirmed booking. Further processing is needed by the provider.\n\n**Conditional:** It is a precondition that the `bookingStatus` **is** `CONFIRMED` or `PENDING_AMENDMENT` in order to cancel it. If this is not the case a `409` (Conflict) error response should be returned.\n\nOnly possible value to set is `CANCELLATION_RECEIVED`.\n",
-                "example": "CANCELLATION_RECEIVED"
-              }
-            }
-          }
-        ]
-      },
-      "Invoice Payable At": {
-        "title": "Invoice Payable At",
-        "required": [
-          "UNLocationCode"
-        ],
-        "type": "object",
-        "properties": {
-          "UNLocationCode": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-            "type": "string",
-            "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
-            "example": "NLAMS"
-          }
-        },
-        "description": "Location where payment of ocean freight and charges for the main transport will take place by the customer.\n\nThe location must be provided as a `UN Location Code`\n"
-      },
-      "Place of BL Issue": {
-        "title": "Place of B/L Issue",
-        "type": "object",
-        "properties": {
-          "locationName": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of the location.",
-            "example": "Port of Amsterdam"
-          }
-        },
-        "description": "An object to capture where the original Transport Document (`Bill of Lading`) will be issued.\n\nThe location can be specified either as a `UN Location Code` or as a `CountryCode`.\n",
-        "oneOf": [
-          {
-            "title": "UN Location Code",
-            "required": [
-              "UNLocationCode"
-            ],
-            "type": "object",
-            "properties": {
-              "UNLocationCode": {
-                "maxLength": 5,
-                "minLength": 5,
-                "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
-                "type": "string",
-                "description": "The UN Location code specifying where the place is located. The pattern used must be\n\n- 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n- 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used\n\nMore info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download)\n",
-                "example": "NLAMS"
-              }
-            }
-          },
-          {
-            "title": "Country Code",
-            "required": [
-              "countryCode"
-            ],
-            "type": "object",
-            "properties": {
-              "countryCode": {
-                "maxLength": 2,
-                "minLength": 2,
-                "pattern": "^[A-Z]{2}$",
-                "type": "string",
-                "description": "The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)\n",
-                "example": "DK"
-              }
-            }
-          }
-        ]
-      },
-      "Document Parties": {
-        "title": "Document Parties",
-        "type": "object",
-        "properties": {
-          "bookingAgent": {
-            "$ref": "#/components/schemas/BookingAgent"
-          },
-          "shipper": {
-            "$ref": "#/components/schemas/Shipper"
-          },
-          "consignee": {
-            "$ref": "#/components/schemas/Consignee"
-          },
-          "serviceContractOwner": {
-            "$ref": "#/components/schemas/ServiceContractOwner"
-          },
-          "carrierBookingOffice": {
-            "$ref": "#/components/schemas/CarrierBookingOffice"
-          },
-          "other": {
-            "type": "array",
-            "description": "A list of document parties that can be optionally provided at booking stage.",
-            "items": {
-              "$ref": "#/components/schemas/OtherDocumentParty"
-            }
-          }
-        },
-        "description": "All `Parties` with associated roles.\n"
-      },
-      "Booking_1": {
-        "title": "Booking",
-        "required": [
-          "bookingStatus",
-          "cargoMovementTypeAtDestination",
-          "cargoMovementTypeAtOrigin",
-          "deliveryTypeAtDestination",
-          "documentParties",
-          "isEquipmentSubstitutionAllowed",
-          "isExportDeclarationRequired",
-          "isImportLicenseRequired",
-          "receiptTypeAtOrigin",
-          "requestedEquipments",
-          "shipmentLocations"
-        ],
-        "type": "object",
-        "properties": {
-          "carrierBookingRequestReference": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
-            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
-          },
-          "carrierBookingReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
-            "example": "ABC709951"
-          },
-          "bookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the `Booking`. Possible values are:\n- `RECEIVED` (Booking request has been received)\n- `PENDING_UPDATE` (An update is required to the Booking)\n- `UPDATE_RECEIVED` (An update has been received and is awaiting to be processed)\n- `CONFIRMED` (Booking has been Confirmed)\n- `PENDING_AMENDMENT` (An amendment is required to the Booking)\n- `REJECTED` (Booking discontinued by carrier before it has been Confirmed)\n- `DECLINED` (Booking discontinued by carrier after it has been Confirmed)\n- `CANCELLED` (Booking discontinued by consumer)\n- `COMPLETED` (The Transport Document this Booking is connected to has been Surrendered for Delivery)\n",
-            "example": "RECEIVED"
-          },
-          "amendedBookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT_RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT_CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT_DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT_CANCELLED` (Amendment discontinued by consumer)\n",
-            "example": "AMENDMENT_RECEIVED"
-          },
-          "bookingCancellationStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the latest booking cancellation. If no cancellation has been requested - then this property is empty. Possible values are:\n- `CANCELLATION_RECEIVED` (A request to cancel a Confirmed Booking has been received and is awaiting to be processed)\n- `CANCELLATION_DECLINED` (Cancellation of the Confirmed Booking has been declined by provider)\n- `CANCELLATION_CONFIRMED` (Cancellation of the Confirmed Booking has been confirmed by provider)\n",
-            "example": "CANCELLATION_RECEIVED"
-          },
-          "receiptTypeAtOrigin": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Indicates the type of service offered at `Origin`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-            "example": "CY",
-            "enum": [
-              "CY",
-              "SD",
-              "CFS"
-            ]
-          },
-          "deliveryTypeAtDestination": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Indicates the type of service offered at `Destination`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-            "example": "CY",
-            "enum": [
-              "CY",
-              "SD",
-              "CFS"
-            ]
-          },
-          "cargoMovementTypeAtOrigin": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Refers to the shipment term at the **loading** of the cargo into the container. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-            "example": "FCL"
-          },
-          "cargoMovementTypeAtDestination": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-            "example": "FCL"
-          },
-          "serviceContractReference": {
-            "maxLength": 30,
-            "type": "string",
-            "description": "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n\n**Condition:** Either a valid `serviceContractReference` or `contractQuotationReference` must be provided.\n",
-            "example": "HHL51800000"
-          },
-          "freightPaymentTermCode": {
-            "type": "string",
-            "description": "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
-            "example": "PRE",
-            "enum": [
-              "PRE",
-              "COL"
-            ]
-          },
-          "originChargesPaymentTerm": {
-            "$ref": "#/components/schemas/OriginChargesPaymentTerm"
-          },
-          "destinationChargesPaymentTerm": {
-            "$ref": "#/components/schemas/DestinationChargesPaymentTerm"
-          },
-          "contractQuotationReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n\n**Condition:** Either a valid `contractQuotationReference` or `serviceContractReference` must be provided.\n",
-            "example": "HHL1401"
-          },
-          "vessel": {
-            "$ref": "#/components/schemas/Vessel"
-          },
-          "carrierServiceName": {
-            "maxLength": 50,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of a service as specified by the carrier.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceCode` are blank\n",
-            "example": "Great Lion Service"
-          },
-          "carrierServiceCode": {
-            "maxLength": 11,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The carrier specific code of the service for which the schedule details are published.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceName` are blank\n",
-            "example": "FE1"
-          },
-          "universalServiceReference": {
-            "maxLength": 8,
-            "minLength": 8,
-            "pattern": "^SR\\d{5}[A-Z]$",
-            "type": "string",
-            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\\d{5}[A-Z]`. The letters `SR` followed by `5 digits`, followed by a checksum-character as a capital letter from `A to Z`.\n",
-            "example": "SR12345A"
-          },
-          "carrierExportVoyageNumber": {
-            "maxLength": 50,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The carrier specific identifier of the export Voyage.\n\n**Condition:** Mandatory if `expectedDepartureDate` or `expectedArrivalAtPlaceOfDeliveryStartDate` and `expectedArrivalAtPlaceOfDeliveryEndDate` is not provided.\n",
-            "example": "2103S"
-          },
-          "universalExportVoyageReference": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
-            "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
-            "example": "2103N"
-          },
-          "declaredValue": {
-            "minimum": 0,
-            "type": "number",
-            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n",
-            "format": "float",
-            "example": 1231.1
-          },
-          "declaredValueCurrency": {
-            "maxLength": 3,
-            "minLength": 3,
-            "pattern": "^[A-Z]{3}$",
-            "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
-            "example": "DKK"
-          },
-          "carrierCode": {
-            "maxLength": 4,
-            "pattern": "^\\S+$",
-            "type": "string",
-            "description": "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the carrier the booking request is intended for. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.\n",
-            "example": "MMCU"
-          },
-          "carrierCodeListProvider": {
-            "type": "string",
-            "description": "The code list provider for the `carrierCode`. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
-            "example": "NMFTA",
-            "enum": [
-              "SMDG",
-              "NMFTA"
-            ]
-          },
-          "isPartialLoadAllowed": {
-            "type": "boolean",
-            "description": "Indication whether the shipper agrees to load part of the shipment in case where not all of the cargo is delivered within cut-off.\n\n**Note:** If this property is omitted it is considered that 'Partial Load **is** allowed' by default\n",
-            "example": true,
-            "default": true
-          },
-          "isExportDeclarationRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n",
-            "example": true
-          },
-          "exportDeclarationReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
-            "example": "ABC123123"
-          },
-          "isImportLicenseRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular shipment/commodity/destination.\n",
-            "example": true
-          },
-          "importLicenseReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
-            "example": "ABC123123"
-          },
-          "expectedDepartureDate": {
-            "type": "string",
-            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-17"
-          },
-          "expectedArrivalAtPlaceOfDeliveryStartDate": {
-            "type": "string",
-            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-17"
-          },
-          "expectedArrivalAtPlaceOfDeliveryEndDate": {
-            "type": "string",
-            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-19"
-          },
-          "transportDocumentTypeCode": {
-            "type": "string",
-            "description": "Specifies the type of the `Transport Document`. Possible values are:\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)\n",
-            "example": "SWB",
-            "enum": [
-              "BOL",
-              "SWB"
-            ]
-          },
-          "transportDocumentReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A unique reference allocated by the shipping line to the `Transport Document` that the booking concerns.\n",
-            "example": "reserved-HHL123"
-          },
-          "bookingChannelReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.\n\n**Condition:** a booking channel is being used\n",
-            "example": "Inttra reference"
-          },
-          "incoTerms": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Transport obligations, costs and risks as agreed between buyer and seller as defined by [Incoterms Rules](https://iccwbo.org/business-solutions/incoterms-rules/).\n",
-            "example": "FCA"
-          },
-          "isEquipmentSubstitutionAllowed": {
-            "type": "boolean",
-            "description": "Indicates if an alternate equipment type can be provided by the carrier.\n",
-            "example": true
-          },
-          "termsAndConditions": {
-            "maxLength": 50000,
-            "type": "string",
-            "description": "Carrier terms and conditions of transport.\n",
-            "example": "Any reference in..."
-          },
-          "invoicePayableAt": {
-            "$ref": "#/components/schemas/Invoice Payable At"
-          },
-          "placeOfBLIssue": {
-            "$ref": "#/components/schemas/Place of BL Issue"
-          },
-          "references": {
-            "type": "array",
-            "description": "A list of `References`\n",
-            "items": {
-              "$ref": "#/components/schemas/Reference"
-            }
-          },
-          "customsReferences": {
-            "type": "array",
-            "description": "A list of `Customs references`\n",
-            "items": {
-              "$ref": "#/components/schemas/CustomsReference"
-            }
-          },
-          "documentParties": {
-            "$ref": "#/components/schemas/Document Parties"
-          },
-          "partyContactDetails": {
-            "type": "array",
-            "description": "The contact details of the person(s) to contact in relation to the **Booking** (changes, notifications etc.) \n",
-            "items": {
-              "$ref": "#/components/schemas/PartyContactDetail"
-            }
-          },
-          "shipmentLocations": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Shipment Locations`\n",
-            "items": {
-              "$ref": "#/components/schemas/ShipmentLocation"
-            }
-          },
-          "requestedEquipments": {
-            "minItems": 1,
-            "type": "array",
-            "description": "List of `Requested Equipments`. Multiple containers can be requested within the same booking. For each Requested Equipment object with 2 or more units, it is a condition that the commodity (or list of commodities) defined within the same Requested Equipment object is the same for each requested unit.\n\n**Example:** 2 x 20' containing 50% shoes and 50% t-shirts can be requested within the same Requested Equipment object only if each 20' will contain 50% shoes and 50% t-shirts. If 1 x 20' will contain 100% shoes and the other 20' will be 100% t-shirts, 2 separate Requested Equipment objects must be defined.\n",
-            "items": {
-              "$ref": "#/components/schemas/RequestedEquipment"
-            }
-          },
-          "confirmedEquipments": {
-            "type": "array",
-            "description": "A list of `Confirmed Equipments`\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/ConfirmedEquipment"
-            }
-          },
-          "transportPlan": {
-            "type": "array",
-            "description": "A list of `Transport` objects (legs) describing the entire transport plan including transshipments.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/Transport"
-            }
-          },
-          "shipmentCutOffTimes": {
-            "type": "array",
-            "description": "A list of cut-off times provided by the carrier in the booking confirmation. A cut-off time indicates the latest deadline within which a task must be completed. The confirmed schedule cannot be guaranteed if a cut-off time is missed. Customs brokers may set additional cut-off times to receive the export customs documentation, which is not included in the shipment cut-off times of a carrier booking.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/ShipmentCutOffTime"
-            }
-          },
-          "advanceManifestFilings": {
-            "type": "array",
-            "description": "A list of `Advance Manifest Filings` provided by the carrier\n",
-            "items": {
-              "$ref": "#/components/schemas/AdvanceManifestFiling"
-            }
-          },
-          "charges": {
-            "type": "array",
-            "description": "A list of `Charges`\n",
-            "items": {
-              "$ref": "#/components/schemas/Charge"
-            }
-          },
-          "carrierClauses": {
-            "type": "array",
-            "description": "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
-            "items": {
-              "maxLength": 20000,
-              "pattern": "^\\S(?:.*\\S)?$",
-              "type": "string",
-              "description": "The content of the clause.\n",
-              "example": "It is not allowed to..."
-            }
-          },
-          "feedbacks": {
-            "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-            "items": {
-              "$ref": "#/components/schemas/Feedback"
-            }
-          }
-        },
-        "description": "This property contains the booking in case the subscriber is subscribing to the `Full State Transfer` of the Booking.\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Booking then the content in this property can be ignored.\n"
-      },
-      "Amended Booking": {
-        "title": "Amended Booking",
-        "required": [
-          "bookingStatus",
-          "cargoMovementTypeAtDestination",
-          "cargoMovementTypeAtOrigin",
-          "deliveryTypeAtDestination",
-          "documentParties",
-          "isEquipmentSubstitutionAllowed",
-          "isExportDeclarationRequired",
-          "isImportLicenseRequired",
-          "receiptTypeAtOrigin",
-          "requestedEquipments",
-          "shipmentLocations"
-        ],
-        "type": "object",
-        "properties": {
-          "carrierBookingRequestReference": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
-            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
-          },
-          "carrierBookingReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` must be provided\n",
-            "example": "ABC709951"
-          },
-          "bookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the `Booking`. Possible values are:\n- `RECEIVED` (Booking request has been received)\n- `PENDING_UPDATE` (An update is required to the Booking)\n- `UPDATE_RECEIVED` (An update has been received and is awaiting to be processed)\n- `CONFIRMED` (Booking has been Confirmed)\n- `PENDING_AMENDMENT` (An amendment is required to the Booking)\n- `REJECTED` (Booking discontinued by carrier before it has been Confirmed)\n- `DECLINED` (Booking discontinued by carrier after it has been Confirmed)\n- `CANCELLED` (Booking discontinued by consumer)\n- `COMPLETED` (The Transport Document this Booking is connected to has been Surrendered for Delivery)\n",
-            "example": "RECEIVED"
-          },
-          "amendedBookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this field is empty. Possible values are:\n- `AMENDMENT_RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT_CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT_DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT_CANCELLED` (Amendment discontinued by consumer)\n",
-            "example": "AMENDMENT_RECEIVED"
-          },
-          "bookingCancellationStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the latest booking cancellation. If no cancellation has been requested - then this property is empty. Possible values are:\n- `CANCELLATION_RECEIVED` (A request to cancel a Confirmed Booking has been received and is awaiting to be processed)\n- `CANCELLATION_DECLINED` (Cancellation of the Confirmed Booking has been declined by provider)\n- `CANCELLATION_CONFIRMED` (Cancellation of the Confirmed Booking has been confirmed by provider)\n",
-            "example": "CANCELLATION_RECEIVED"
-          },
-          "receiptTypeAtOrigin": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Indicates the type of service offered at `Origin`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-            "example": "CY",
-            "enum": [
-              "CY",
-              "SD",
-              "CFS"
-            ]
-          },
-          "deliveryTypeAtDestination": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Indicates the type of service offered at `Destination`. The options are:\n- `CY` (Container yard (incl. rail ramp))\n- `SD` (Store Door)\n- `CFS` (Container Freight Station)\n",
-            "example": "CY",
-            "enum": [
-              "CY",
-              "SD",
-              "CFS"
-            ]
-          },
-          "cargoMovementTypeAtOrigin": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Refers to the shipment term at the **loading** of the cargo into the container. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-            "example": "FCL"
-          },
-          "cargoMovementTypeAtDestination": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Refers to the shipment term at the **unloading** of the cargo out of the container. Possible values are:\n- `FCL` (Full Container Load)\n- `LCL` (Less than Container Load)\n",
-            "example": "FCL"
-          },
-          "serviceContractReference": {
-            "maxLength": 30,
-            "type": "string",
-            "description": "Reference number for agreement between shipper and carrier, which optionally includes a certain minimum quantity commitment (usually referred as “MQC”) of cargo that the shipper commits to over a fixed period, and the carrier commits to a certain rate or rate schedule.\n\n**Condition:** Either a valid `serviceContractReference` or `contractQuotationReference` must be provided.\n",
-            "example": "HHL51800000"
-          },
-          "freightPaymentTermCode": {
-            "type": "string",
-            "description": "An indicator of whether freight and ancillary fees for the main transport are prepaid (`PRE`) or collect (`COL`). When prepaid the charges are the responsibility of the shipper or the Invoice payer on behalf of the shipper (if provided). When collect, the charges are the responsibility of the consignee or the Invoice payer on behalf of the consignee (if provided).\n- `PRE` (Prepaid)\n- `COL` (Collect)\n",
-            "example": "PRE",
-            "enum": [
-              "PRE",
-              "COL"
-            ]
-          },
-          "originChargesPaymentTerm": {
-            "$ref": "#/components/schemas/OriginChargesPaymentTerm"
-          },
-          "destinationChargesPaymentTerm": {
-            "$ref": "#/components/schemas/DestinationChargesPaymentTerm"
-          },
-          "contractQuotationReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Information provided by the shipper to identify whether pricing for the shipment has been agreed via a contract or a quotation reference.\n\n**Condition:** Either a valid `contractQuotationReference` or `serviceContractReference` must be provided.\n",
-            "example": "HHL1401"
-          },
-          "vessel": {
-            "$ref": "#/components/schemas/Vessel"
-          },
-          "carrierServiceName": {
-            "maxLength": 50,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The name of a service as specified by the carrier.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceCode` are blank\n",
-            "example": "Great Lion Service"
-          },
-          "carrierServiceCode": {
-            "maxLength": 11,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The carrier specific code of the service for which the schedule details are published.\n\n**Condition:** Mandatory if `carrierExportVoyageNumber` is provided and Vessel details or `carrierServiceName` are blank\n",
-            "example": "FE1"
-          },
-          "universalServiceReference": {
-            "maxLength": 8,
-            "minLength": 8,
-            "pattern": "^SR\\d{5}[A-Z]$",
-            "type": "string",
-            "description": "A global unique service reference, as per DCSA standard, agreed by VSA partners for the service. The service reference must match the regular expression pattern: `SR\\d{5}[A-Z]`. The letters `SR` followed by `5 digits`, followed by a checksum-character as a capital letter from `A to Z`.\n",
-            "example": "SR12345A"
-          },
-          "carrierExportVoyageNumber": {
-            "maxLength": 50,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The carrier specific identifier of the export Voyage.\n\n**Condition:** Mandatory if `expectedDepartureDate` or `expectedArrivalAtPlaceOfDeliveryStartDate` and `expectedArrivalAtPlaceOfDeliveryEndDate` is not provided.\n",
-            "example": "2103S"
-          },
-          "universalExportVoyageReference": {
-            "maxLength": 5,
-            "minLength": 5,
-            "pattern": "^\\d{2}[0-9A-Z]{2}[NEWSR]$",
-            "type": "string",
-            "description": "A global unique voyage reference for the export Voyage, as per DCSA standard, agreed by VSA partners for the voyage. The voyage reference must match the regular expression pattern: `\\d{2}[0-9A-Z]{2}[NEWSR]`\n- `2 digits` for the year\n- `2 alphanumeric characters` for the sequence number of the voyage\n- `1 character` for the direction/haul (`N`orth, `E`ast, `W`est, `S`outh or `R`oundtrip).\n",
-            "example": "2103N"
-          },
-          "declaredValue": {
-            "minimum": 0,
-            "type": "number",
-            "description": "The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and \"Ad Valorem\" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.\n",
-            "format": "float",
-            "example": 1231.1
-          },
-          "declaredValueCurrency": {
-            "maxLength": 3,
-            "minLength": 3,
-            "pattern": "^[A-Z]{3}$",
-            "type": "string",
-            "description": "The currency used for the declared value, using the 3-character code defined by [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).\n",
-            "example": "DKK"
-          },
-          "carrierCode": {
-            "maxLength": 4,
-            "pattern": "^\\S+$",
-            "type": "string",
-            "description": "The `SCAC` code (provided by [NMFTA](https://nmfta.org/scac/)) or `SMDG` code (provided by [SMDG](https://smdg.org/documents/smdg-code-lists/smdg-liner-code-list/)) of the carrier the booking request is intended for. `carrierCodeListProvider` defines which list the `carrierCode` is based upon.\n",
-            "example": "MMCU"
-          },
-          "carrierCodeListProvider": {
-            "type": "string",
-            "description": "The code list provider for the `carrierCode`. Possible values are:\n- `SMDG` (Ship Message Design Group)\n- `NMFTA` (National Motor Freight Traffic Association)\n",
-            "example": "NMFTA",
-            "enum": [
-              "SMDG",
-              "NMFTA"
-            ]
-          },
-          "isPartialLoadAllowed": {
-            "type": "boolean",
-            "description": "Indication whether the shipper agrees to load part of the shipment in case where not all of the cargo is delivered within cut-off.\n\n**Note:** If this property is omitted it is considered that 'Partial Load **is** allowed' by default\n",
-            "example": true,
-            "default": true
-          },
-          "isExportDeclarationRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an export declaration is required for this particular shipment/commodity/destination.\n",
-            "example": true
-          },
-          "exportDeclarationReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A government document permitting designated goods to be shipped out of the country.  Reference number assigned by an issuing authority to an Export License. The export license must be valid at time of departure. Required if Export declaration required is `True`.\n",
-            "example": "ABC123123"
-          },
-          "isImportLicenseRequired": {
-            "type": "boolean",
-            "description": "Information provided by the shipper whether an import permit or license is required for this particular shipment/commodity/destination.\n",
-            "example": true
-          },
-          "importLicenseReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A certificate, issued by countries exercising import controls, that permits importation of the articles stated in the license. Reference number assigned by an issuing authority to an Import License. The import license number must be valid at time of arrival. Required if import license required is ‘True’.\n",
-            "example": "ABC123123"
-          },
-          "expectedDepartureDate": {
-            "type": "string",
-            "description": "The date when the shipment is expected to be loaded on board a vessel as provided by the shipper or its agent.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedArrivalAtPlaceOfDeliveryDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-17"
-          },
-          "expectedArrivalAtPlaceOfDeliveryStartDate": {
-            "type": "string",
-            "description": "The start date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryEndDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-17"
-          },
-          "expectedArrivalAtPlaceOfDeliveryEndDate": {
-            "type": "string",
-            "description": "The end date (provided as a range together with `expectedArrivalAtPlaceOfDeliveryStartDate`) for when the shipment is expected to arrive at `Place Of Delivery`.\n\n**Condition:** Mandatory if vessel/voyage/service details or `expectedDepartureDate` is not provided.\n",
-            "format": "date",
-            "example": "2021-05-19"
-          },
-          "transportDocumentTypeCode": {
-            "type": "string",
-            "description": "Specifies the type of the `Transport Document`. Possible values are:\n- `BOL` (Bill of Lading)\n- `SWB` (Sea Waybill)\n",
-            "example": "SWB",
-            "enum": [
-              "BOL",
-              "SWB"
-            ]
-          },
-          "transportDocumentReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A unique reference allocated by the shipping line to the `Transport Document` that the booking concerns.\n",
-            "example": "reserved-HHL123"
-          },
-          "bookingChannelReference": {
-            "maxLength": 20,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "Identification number provided by the platform/channel used for booking request/confirmation, ex: Inttra booking reference, or GTNexus, other.\n\n**Condition:** a booking channel is being used\n",
-            "example": "Inttra reference"
-          },
-          "incoTerms": {
-            "maxLength": 3,
-            "type": "string",
-            "description": "Transport obligations, costs and risks as agreed between buyer and seller as defined by [Incoterms Rules](https://iccwbo.org/business-solutions/incoterms-rules/).\n",
-            "example": "FCA"
-          },
-          "isEquipmentSubstitutionAllowed": {
-            "type": "boolean",
-            "description": "Indicates if an alternate equipment type can be provided by the carrier.\n",
-            "example": true
-          },
-          "termsAndConditions": {
-            "maxLength": 50000,
-            "type": "string",
-            "description": "Carrier terms and conditions of transport.\n",
-            "example": "Any reference in..."
-          },
-          "invoicePayableAt": {
-            "$ref": "#/components/schemas/Invoice Payable At"
-          },
-          "placeOfBLIssue": {
-            "$ref": "#/components/schemas/Place of BL Issue"
-          },
-          "references": {
-            "type": "array",
-            "description": "A list of `References`\n",
-            "items": {
-              "$ref": "#/components/schemas/Reference"
-            }
-          },
-          "customsReferences": {
-            "type": "array",
-            "description": "A list of `Customs references`\n",
-            "items": {
-              "$ref": "#/components/schemas/CustomsReference"
-            }
-          },
-          "documentParties": {
-            "$ref": "#/components/schemas/Document Parties"
-          },
-          "partyContactDetails": {
-            "type": "array",
-            "description": "The contact details of the person(s) to contact in relation to the **Booking** (changes, notifications etc.) \n",
-            "items": {
-              "$ref": "#/components/schemas/PartyContactDetail"
-            }
-          },
-          "shipmentLocations": {
-            "minItems": 1,
-            "type": "array",
-            "description": "A list of `Shipment Locations`\n",
-            "items": {
-              "$ref": "#/components/schemas/ShipmentLocation"
-            }
-          },
-          "requestedEquipments": {
-            "minItems": 1,
-            "type": "array",
-            "description": "List of `Requested Equipments`. Multiple containers can be requested within the same booking. For each Requested Equipment object with 2 or more units, it is a condition that the commodity (or list of commodities) defined within the same Requested Equipment object is the same for each requested unit.\n\n**Example:** 2 x 20' containing 50% shoes and 50% t-shirts can be requested within the same Requested Equipment object only if each 20' will contain 50% shoes and 50% t-shirts. If 1 x 20' will contain 100% shoes and the other 20' will be 100% t-shirts, 2 separate Requested Equipment objects must be defined.\n",
-            "items": {
-              "$ref": "#/components/schemas/RequestedEquipment"
-            }
-          },
-          "confirmedEquipments": {
-            "type": "array",
-            "description": "A list of `Confirmed Equipments`\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/ConfirmedEquipment"
-            }
-          },
-          "transportPlan": {
-            "type": "array",
-            "description": "A list of `Transport` objects (legs) describing the entire transport plan including transshipments.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/Transport"
-            }
-          },
-          "shipmentCutOffTimes": {
-            "type": "array",
-            "description": "A list of cut-off times provided by the carrier in the booking confirmation. A cut-off time indicates the latest deadline within which a task must be completed. The confirmed schedule cannot be guaranteed if a cut-off time is missed. Customs brokers may set additional cut-off times to receive the export customs documentation, which is not included in the shipment cut-off times of a carrier booking.\n\n**Condition:** Mandatory and non-empty for a `CONFIRMED` Booking\n",
-            "items": {
-              "$ref": "#/components/schemas/ShipmentCutOffTime"
-            }
-          },
-          "advanceManifestFilings": {
-            "type": "array",
-            "description": "A list of `Advance Manifest Filings` provided by the carrier\n",
-            "items": {
-              "$ref": "#/components/schemas/AdvanceManifestFiling"
-            }
-          },
-          "charges": {
-            "type": "array",
-            "description": "A list of `Charges`\n",
-            "items": {
-              "$ref": "#/components/schemas/Charge"
-            }
-          },
-          "carrierClauses": {
-            "type": "array",
-            "description": "Additional clauses for a specific shipment added by the carrier to the Bill of Lading, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.\n",
-            "items": {
-              "maxLength": 20000,
-              "pattern": "^\\S(?:.*\\S)?$",
-              "type": "string",
-              "description": "The content of the clause.\n",
-              "example": "It is not allowed to..."
-            }
-          },
-          "feedbacks": {
-            "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-            "items": {
-              "$ref": "#/components/schemas/Feedback"
-            }
-          }
-        },
-        "description": "This property contains the amended booking in case:\n  - an amendment is currently active\n  - the subscriber is subscribing to the `Full State Transfer` of the Booking\n\nIn case the subscriber does not subscribe to the `Full State Transfer` of the Booking or no amendment is active - then the content in this property can be ignored.\n"
-      },
-      "Data": {
-        "title": "Data",
-        "required": [
-          "bookingStatus"
-        ],
-        "type": "object",
-        "properties": {
-          "bookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the `Booking`. Possible values are:\n\n- `RECEIVED` (Booking request has been received)\n- `PENDING_UPDATE` (An update is required to the Booking)\n- `UPDATE_RECEIVED` (An update has been received and is awaiting to be processed)\n- `CONFIRMED` (Booking has been Confirmed)\n- `PENDING_AMENDMENT` (An amendment is required to the Booking)\n- `REJECTED` (Booking discontinued by carrier before it has been Confirmed)\n- `DECLINED` (Booking discontinued by carrier after it has been Confirmed)\n- `CANCELLED` (Booking discontinued by consumer)\n- `COMPLETED` (The Transport Document this Booking is connected to has been Surrendered for Delivery)\n",
-            "example": "RECEIVED"
-          },
-          "amendedBookingStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of latest amendment added to the `Booking`. If no amendment has been requested - then this property is empty. Possible values are:\n\n- `AMENDMENT_RECEIVED` (An amendment has been received and is awaiting to be processed)\n- `AMENDMENT_CONFIRMED` (Amendment is confirmed)\n- `AMENDMENT_DECLINED` (Amendment discontinued by provider)\n- `AMENDMENT_CANCELLED` (Amendment discontinued by consumer)\n",
-            "example": "AMENDMENT_RECEIVED"
-          },
-          "bookingCancellationStatus": {
-            "maxLength": 50,
-            "type": "string",
-            "description": "The status of the latest booking cancellation. If no cancellation has been requested - then this property is empty. Possible values are:\n- `CANCELLATION_RECEIVED` (A request to cancel a Confirmed Booking has been received and is awaiting to be processed)\n- `CANCELLATION_DECLINED` (Cancellation of the Confirmed Booking has been declined by provider)\n- `CANCELLATION_CONFIRMED` (Cancellation of the Confirmed Booking has been confirmed by provider)\n",
-            "example": "CANCELLATION_RECEIVED"
-          },
-          "carrierBookingRequestReference": {
-            "maxLength": 100,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "A reference to the booking during the booking request phase.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
-            "example": "24595eb0-5cfc-4381-9c3a-cedc1975e9aa"
-          },
-          "carrierBookingReference": {
-            "maxLength": 35,
-            "pattern": "^\\S(?:.*\\S)?$",
-            "type": "string",
-            "description": "The `carrierBookingReference` if know. Often this will not be known until the booking has been confirmed. Is available during a booking amendment.\n\n**Condition:** `carrierBookingRequestReference` and/or `carrierBookingReference` is required to provide\n",
-            "example": "ABC709951"
-          },
-          "feedbacks": {
-            "type": "array",
-            "description": "Feedback that can be provided includes, but is not limited to:\n- unsupported properties\n- changed values\n- removed properties\n- general information\n",
-            "items": {
-              "$ref": "#/components/schemas/Feedback"
-            }
-          },
-          "booking": {
-            "$ref": "#/components/schemas/Booking_1"
-          },
-          "amendedBooking": {
-            "$ref": "#/components/schemas/Amended Booking"
-          }
-        },
-        "description": "`Booking` specific properties for the `Notification`\n"
-      },
-      "Document Parties_1": {
-        "title": "Document Parties",
-        "required": [
-          "bookingAgent"
-        ],
-        "type": "object",
-        "properties": {
-          "bookingAgent": {
-            "$ref": "#/components/schemas/BookingAgent"
-          },
-          "shipper": {
-            "$ref": "#/components/schemas/Shipper"
-          },
-          "consignee": {
-            "$ref": "#/components/schemas/Consignee"
-          },
-          "serviceContractOwner": {
-            "$ref": "#/components/schemas/ServiceContractOwner"
-          },
-          "carrierBookingOffice": {
-            "$ref": "#/components/schemas/CarrierBookingOffice"
-          },
-          "other": {
-            "type": "array",
-            "description": "A list of document parties that can be optionally provided at booking stage.",
-            "items": {
-              "$ref": "#/components/schemas/OtherDocumentParty"
-            }
-          }
-        },
-        "description": "All `Parties` with associated roles.\n"
-      },
-      "Empty Container Pickup": {
-        "title": "Empty Container Pickup",
-        "type": "object",
-        "properties": {
-          "dateTime": {
-            "type": "string",
-            "description": "The date and time for the pick-up of the empty container(s) at the Empty container depot release location, if provided.\n",
-            "format": "date-time",
-            "example": "2024-09-04T09:41:00Z"
-          },
-          "depotReleaseLocation": {
-            "$ref": "#/components/schemas/EmptyContainerDepotReleaseLocation"
-          }
-        },
-        "description": "The date and time and location for the empty container pick-up.\n\n**Condition:** Only applicable to merchant haulage service at origin (`Receipt type at origin = 'CY'`).\n"
-      },
-      "Tare Weight": {
-        "title": "Tare Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The weight of an empty container (gross container weight).\n",
-            "format": "float",
-            "example": 4000
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "The weight of an empty container (gross container weight).\n\n**Conditional:** In case of Shipper Owned Containers (`SOC`) this is a required property\n"
-      },
-      "Tare Weight_1": {
-        "title": "Tare Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The weight of an empty container (gross container weight).\n",
-            "format": "float",
-            "example": 4800
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "The weight of an empty container (gross container weight).\n\n**Conditional:** In case of Shipper Owned Containers (`SOC`) this is a required property\n"
-      },
-      "Cargo Gross Weight": {
-        "title": "Cargo Gross Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
-            "format": "float",
-            "example": 36000
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "The estimated grand total gross weight of the cargo, including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n"
-      },
-      "Cargo Gross Volume": {
-        "title": "Cargo Gross Volume",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The estimated grand total volume of the cargo.\n",
-            "format": "float",
-            "example": 360
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
-          }
-        },
-        "description": "The estimated grand total volume of the cargo.\n"
-      },
-      "Cargo Net Weight": {
-        "title": "Cargo Net Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The estimated grand total net weight of the cargo, excluding packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
-            "format": "float",
-            "example": 36000
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "The estimated grand total net weight of the cargo, excluding packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n"
-      },
-      "Cargo Net Volume": {
-        "title": "Cargo Net Volume",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The estimated net total volume of the cargo.\n",
-            "format": "float",
-            "example": 360
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ"
-            ]
-          }
-        },
-        "description": "The estimated net total volume of the cargo.\n"
-      },
-      "Gross Weight": {
-        "title": "Gross Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The grand total weight of the DG cargo and weight per `UNNumber`/`NANumber` including packaging items being carried, which can be expressed in imperial or metric terms, as provided by the shipper.\n",
-            "format": "float",
-            "example": 12000.3
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in imperial or metric terms\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "Total weight of the goods carried, including packaging.\n"
-      },
-      "Net Weight": {
-        "title": "Net Weight",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "Total weight of the goods carried, excluding packaging.\n",
-            "format": "float",
-            "example": 2.4
-          },
-          "unit": {
-            "type": "string",
-            "description": "Unit of measure used to describe the `netWeight`. Possible values are\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR"
-            ]
-          }
-        },
-        "description": "Total weight of the goods carried, excluding packaging.\n"
-      },
-      "Net Explosive Content": {
-        "title": "Net Explosive Content",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The total weight of the explosive substances, without the packaging's, casings, etc.\n",
-            "format": "float",
-            "example": 2.4
-          },
-          "unit": {
-            "type": "string",
-            "description": "Unit of measure used to describe the `netExplosiveWeight`. Possible values are\n- `KGM` (Kilograms)\n- `LBR` (Pounds)\n- `GRM` (Grams)\n- `ONZ` (Ounce)\n",
-            "example": "KGM",
-            "enum": [
-              "KGM",
-              "LBR",
-              "GRM",
-              "ONZ"
-            ]
-          }
-        },
-        "description": "The total weight of the explosive substances, without the packaging's, casings, etc.\n"
-      },
-      "Net Volume": {
-        "title": "Net Volume",
-        "required": [
-          "unit",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "description": "The volume of the referenced dangerous goods.\n",
-            "format": "float",
-            "example": 2.4
-          },
-          "unit": {
-            "type": "string",
-            "description": "The unit of measure which can be expressed in either imperial or metric terms\n- `FTQ` (Cubic foot)\n- `MTQ` (Cubic meter)\n- `LTR` (Litre)\n",
-            "example": "MTQ",
-            "enum": [
-              "MTQ",
-              "FTQ",
-              "LTR"
-            ]
-          }
-        },
-        "description": "The volume of the referenced dangerous goods.\n\n**Condition:** only applicable to liquids and gas.\n"
       }
     },
     "parameters": {

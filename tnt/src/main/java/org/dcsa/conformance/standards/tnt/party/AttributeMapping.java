@@ -134,7 +134,7 @@ public class AttributeMapping {
         && node.path("documentReferenceType").asText().equals("BKG") && node.path("documentReferenceValue").asText().equals(value),
         Set.of()),
       new AttributeMapping("/", (node, value) -> !node.isMissingNode()
-        && node.path("documentTypeCode").asText().equals("BKG") && node.path("documentID").asText().equals(value),
+        && node.path(DOCUMENT_TYPE_CODE).asText().equals("BKG") && node.path("documentID").asText().equals(value),
         Set.of())));
   }
 

@@ -150,7 +150,6 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
   private static TntScenarioListBuilder scenarioWithFilterByShipmentEvent(Map<TntFilterParameter, String> parameters) {
     Map<TntFilterParameter,String> shipmentParameters = new LinkedHashMap<>();
     shipmentParameters.put(EVENT_TYPE, "SHIPMENT");
-    shipmentParameters.put(LIMIT,"5");
     shipmentParameters.putAll(parameters);
     return supplyScenarioParameters(shipmentParameters).then(getEvents());
   }
@@ -158,7 +157,6 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
   private static TntScenarioListBuilder scenarioWithFilterByTransportEvent(Map<TntFilterParameter, String> parameters) {
     Map<TntFilterParameter,String> shipmentParameters = new LinkedHashMap<>();
     shipmentParameters.put(EVENT_TYPE, "TRANSPORT");
-    shipmentParameters.put(LIMIT,"5");
     shipmentParameters.putAll(parameters);
     return supplyScenarioParameters(shipmentParameters).then(getEvents());
   }
@@ -166,7 +164,6 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
   private static TntScenarioListBuilder scenarioWithFilterByEquipmentEvent(Map<TntFilterParameter, String> parameters) {
     Map<TntFilterParameter,String> shipmentParameters = new LinkedHashMap<>();
     shipmentParameters.put(EVENT_TYPE, "EQUIPMENT");
-    shipmentParameters.put(LIMIT,"5");
     shipmentParameters.putAll(parameters);
     return supplyScenarioParameters(shipmentParameters).then(getEvents());
   }

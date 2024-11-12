@@ -143,6 +143,7 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
         originalSiState,
         SI_UPDATE_RECEIVED,
         _uc2_get(SI_PENDING_UPDATE, _uc3_get(SI_PENDING_UPDATE, SI_UPDATE_RECEIVED, _uc4a_uc14())),
+        _uc3_get(originalSiState, SI_UPDATE_RECEIVED, _uc4a_uc14()),
         _uc4a_get(
             SI_RECEIVED,
             SI_UPDATE_CONFIRMED,
@@ -176,10 +177,13 @@ class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder>
       ShippingInstructionsStatus originalSiState,
       ShippingInstructionsStatus modifiedSiState,
       EblScenarioListBuilder... thenEither) {
+    // Calling both amemded SI GET and original SI GET after a UC3
     return uc3ShipperSubmitUpdatedShippingInstructions(originalSiState, false)
         .then(
-            shipper_GetShippingInstructions(originalSiState, modifiedSiState, false)
-                .thenEither(thenEither));
+            shipper_GetShippingInstructions(originalSiState, modifiedSiState, true, false)
+                .then(
+                    shipper_GetShippingInstructions(originalSiState, modifiedSiState, false, false)
+                        .thenEither(thenEither)));
   }
 
   private static EblScenarioListBuilder _uc4a_get(

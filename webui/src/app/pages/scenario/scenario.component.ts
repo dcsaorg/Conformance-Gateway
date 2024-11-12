@@ -6,7 +6,7 @@ import { Sandbox } from "../../model/sandbox";
 import { sleep } from "../../model/toolkit";
 import { Subscription } from "rxjs";
 import { ScenarioDigest } from "src/app/model/scenario";
-import { ConformanceStatus,
+import {
   getConformanceStatusEmoji,
   getConformanceStatusTitle
 } from "src/app/model/conformance-status";
@@ -122,11 +122,25 @@ export class ScenarioComponent {
 
   async onSubmit(withInput: boolean) {
     this.performingAction = "Processing action input...";
+    var serviceActionInput;
+    try {
+      serviceActionInput = withInput ? this.scenarioStatus?.jsonForPromptText ?
+        JSON.parse(this.actionInput.trim())
+        : this.actionInput.trim() : undefined;
+    } catch (e) {
+      this.performingAction = "";
+      await MessageDialog.open(
+        this.dialog,
+        "Error processing action input",
+        e instanceof Error ? e.message : "Unknown error");
+      await this.loadScenarioStatus();
+      return;
+    }
     const response:any = await this.conformanceService.handleActionInput(
       this.sandbox!.id,
       this.scenario!.id,
       this.scenarioStatus!.promptActionId,
-      withInput ? (this.scenarioStatus?.jsonForPromptText ? JSON.parse(this.actionInput.trim()) : this.actionInput.trim()) : undefined);
+      serviceActionInput);
     if (response?.error) {
       await MessageDialog.open(
         this.dialog,

@@ -23,15 +23,21 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class QueryParameterSchemaCheck extends ActionCheck {
 
   private final JsonNode parametersSchema; // Store the "parameters" array from OpenAPI spec
-  private final JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+  private final JsonSchemaFactory factory =
+      JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
 
   public QueryParameterSchemaCheck(
-    String titlePrefix,
-    String description,
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    String schemaPath) {
-    super(titlePrefix, description, isRelevantForRoleName, matchedExchangeUuid, HttpMessageType.REQUEST);
+      String titlePrefix,
+      String description,
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String schemaPath) {
+    super(
+        titlePrefix,
+        description,
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST);
     try {
       this.parametersSchema = loadQueryParametersSchema(schemaPath, "/v3/service-schedules");
     } catch (IOException e) {
@@ -39,16 +45,14 @@ public class QueryParameterSchemaCheck extends ActionCheck {
     }
   }
 
-  private JsonNode loadQueryParametersSchema(String openApiSpecPath, String endpointPath) throws IOException {
+  private JsonNode loadQueryParametersSchema(String openApiSpecPath, String endpointPath)
+      throws IOException {
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
     InputStream inputStream = getClass().getResourceAsStream(openApiSpecPath);
     JsonNode openApiSpec = objectMapper.readTree(inputStream);
 
     // Get the "parameters" array, which contains schemas for individual parameters
-    return openApiSpec.path("paths")
-      .path(endpointPath)
-      .path("get")
-      .path("parameters");
+    return openApiSpec.path("paths").path(endpointPath).path("get").path("parameters");
   }
 
   @Override
@@ -58,10 +62,9 @@ public class QueryParameterSchemaCheck extends ActionCheck {
     if (exchange == null) {
       return Set.of();
     }
-    Map<String, String> queryParams = exchange.getRequest().queryParams()
-      .entrySet()
-      .stream()
-      .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().iterator().next()));
+    Map<String, String> queryParams =
+        exchange.getRequest().queryParams().entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().iterator().next()));
 
     for (Map.Entry<String, String> entry : queryParams.entrySet()) {
       String paramName = entry.getKey();
@@ -90,9 +93,10 @@ public class QueryParameterSchemaCheck extends ActionCheck {
         // Validate the parameter value against its schema
         JsonSchema jsonSchema = factory.getSchema(paramSchema);
         Set<ValidationMessage> validationResult = jsonSchema.validate(paramValueNode);
-        errors.addAll(validationResult.stream()
-          .map(ValidationMessage::getMessage)
-          .collect(Collectors.toSet()));
+        errors.addAll(
+            validationResult.stream()
+                .map(ValidationMessage::getMessage)
+                .collect(Collectors.toSet()));
       }
     }
     return errors;

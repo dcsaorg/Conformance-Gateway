@@ -1,11 +1,12 @@
 package org.dcsa.conformance.standards.ovs.party;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDateTime;
+
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,9 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.ovs.action.SupplyScenarioParametersAction;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 
 @Slf4j
 public class OvsPublisher extends ConformanceParty {
@@ -61,28 +65,16 @@ public class OvsPublisher extends ConformanceParty {
     SuppliedScenarioParameters responseSsp =
         SuppliedScenarioParameters.fromMap(
             StreamSupport.stream(
-                    actionPrompt.required("ovsFilterParametersQueryParamNames").spliterator(),
-                    false)
-                .map(
-                    jsonOvsFilterParameter ->
-                        OvsFilterParameter.byQueryParamName.get(jsonOvsFilterParameter.asText()))
+                    actionPrompt.required("ovsFilterParametersQueryParam").spliterator(), false)
                 .collect(
                     Collectors.toMap(
-                        Function.identity(),
-                        ovsFilterParameter ->
-                            switch (ovsFilterParameter) {
-                              case CARRIER_SERVICE_NAME -> "Great Lion Service";
-                              case CARRIER_SERVICE_CODE -> "FE1";
-                              case UNIVERSAL_SERVICE_REFERENCE -> "SR12345A";
-                              case VESSEL_IMO_NUMBER -> "9321483";
-                              case VESSEL_NAME -> "King of the Seas";
-                              case CARRIER_VOYAGE_NUMBER -> "2103S";
-                              case UNIVERSAL_VOYAGE_REFERENCE -> "2201N";
-                              case UN_LOCATION_CODE -> "NLAMS";
-                              case FACILITY_SMDG_CODE -> "APM";
-                              case START_DATE, END_DATE -> LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT);
-                              case LIMIT -> "100";
-                            })));
+                        jsonOvsFilterParameter ->
+                            OvsFilterParameter.byQueryParamName.get(
+                                jsonOvsFilterParameter.get("parameter").asText()),
+                        jsonOvsFilterParameter -> jsonOvsFilterParameter.get("value").asText(),
+                        (oldValue, newValue) -> oldValue, // merge function to handle duplicate keys
+                        LinkedHashMap::new // supplier to create a LinkedHashMap
+                        )));
 
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), responseSsp.toJson());
@@ -96,15 +88,78 @@ public class OvsPublisher extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("OvsPublisher.handleRequest(%s)".formatted(request));
 
+    Map<String, List<OvsAttributeMapping>> ovsAttributeMappings =
+        OvsAttributeMapping.initializeAttributeMappings();
+
     JsonNode jsonResponseBody =
         JsonToolkit.templateFileToJsonNode(
             "/standards/ovs/messages/ovs-%s-response.json"
                 .formatted(apiVersion.toLowerCase().replaceAll("[.-]", "")),
             Map.ofEntries());
 
-    return request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+    ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
+    jsonResponseBody.forEach(filteredArray::add);
+
+    // Chained Filtering Logic
+    for (Map.Entry<String, ? extends Collection<String>> queryParam :
+        request.queryParams().entrySet()) {
+      String paramName = queryParam.getKey();
+      Collection<String> paramValues =
+          queryParam.getValue().stream()
+              .flatMap(value -> Arrays.stream(value.split(",")))
+              .collect(Collectors.toList());
+
+      List<OvsAttributeMapping> mappings = ovsAttributeMappings.get(paramName);
+      if (mappings != null) {
+        filteredArray = applyFilter(filteredArray, mappings, paramValues);
+      }
+    }
+
+    int limit =
+        Integer.parseInt(
+            request.queryParams().containsKey("limit")
+                ? request.queryParams().get("limit").iterator().next()
+                : "100");
+    if (filteredArray.size() > limit) {
+      ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
+      for (int i = 0; i < limit; i++) {
+        limitedArray.add(filteredArray.get(i));
+      }
+      filteredArray = limitedArray;
+    }
+
+    Map<String, Collection<String>> headers =
+      new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+    return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
+  }
+
+  private ArrayNode applyFilter(
+      ArrayNode inputArray, List<OvsAttributeMapping> mappings, Collection<String> paramValues) {
+    ArrayNode resultArray = OBJECT_MAPPER.createArrayNode();
+
+    mappings.forEach(
+        mapping ->
+            paramValues.forEach(
+                paramValue ->
+                    StreamSupport.stream(inputArray.spliterator(), false)
+                        .forEach(
+                            node -> {
+                              String jsonPath = mapping.jsonPath();
+                              BiPredicate<JsonNode, String> condition = mapping.condition();
+
+                              List<JsonNode> results = new ArrayList<>();
+                              traverse(
+                                  node, jsonPath.split("/"), 0, results, condition, paramValue);
+
+                              if (!results.isEmpty()
+                                  && (mapping.values().isEmpty()
+                                      || results.stream()
+                                          .anyMatch(
+                                              result ->
+                                                  mapping.values().contains(result.asText())))) {
+                                resultArray.add(node);
+                              }
+                            })));
+    return resultArray;
   }
 }

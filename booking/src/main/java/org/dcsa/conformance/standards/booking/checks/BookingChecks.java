@@ -524,11 +524,19 @@ public class BookingChecks {
       "carrierServiceName",
       delayedValue(cspSupplier, CarrierScenarioParameters::carrierServiceName)
     ));
-    checks.add(JsonAttribute.mustEqual(
+
+    checks.add(JsonAttribute.customValidator(
       "[Scenario] Verify that the correct 'contractQuotationReference' is used",
-      "contractQuotationReference",
-      delayedValue(cspSupplier, CarrierScenarioParameters::contractQuotationReference)
-    ));
+      body -> {
+        var contractQuotationReference = body.path("contractQuotationReference").asText("");
+        var serviceContractReference = body.path("serviceContractReference").asText("");
+        if (!contractQuotationReference.isEmpty() && !serviceContractReference.isEmpty()) {
+          return Set.of("The scenario requires either of 'contractQuotationReference'/'serviceContractReference'" +
+            " to be present, but not both");
+        }
+        return Set.of();
+      }
+     ));
 
     checks.add(JsonAttribute.mustEqual(
       "[Scenario] Verify that the correct 'carrierExportVoyageNumber' is used",
@@ -609,7 +617,7 @@ public class BookingChecks {
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryEndDate"),
       JsonPointer.compile("/carrierExportVoyageNumber")
     ),
-    JsonAttribute.atLeastOneOf(
+    JsonAttribute.xOrFields(
       JsonPointer.compile("/contractQuotationReference"),
       JsonPointer.compile("/serviceContractReference")
     ),

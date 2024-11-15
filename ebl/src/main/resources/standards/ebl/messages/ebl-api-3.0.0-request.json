@@ -71,7 +71,6 @@
     },
     "issueTo": {
       "partyName": "DCSA CTK",
-      "sendToPlatform": "BOLE",
       "identifyingCodes" : [
         {
           "codeListProvider": "W3C",

@@ -15,10 +15,8 @@ public abstract class AbstractStandard {
 
   public abstract SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion();
 
-  // TODO abstract
-  public Map<String, SortedMap<String, SortedSet<String>>> getRoleNameEndpointUriMethods() {
-    return Map.of();
-  }
+  public abstract Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
+      getEndpointUrisAndMethodsByScenarioSuiteAndRoleName();
 
   protected abstract AbstractComponentFactory doCreateComponentFactory(
       String standardVersion, String scenarioSuite);

@@ -26,21 +26,28 @@ public class BookingStandard extends AbstractStandard {
   }
 
   @Override
-  public Map<String, SortedMap<String, SortedSet<String>>> getRoleNameEndpointUriMethods() {
+  public Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
+      getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
+    Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
+        Map.ofEntries(
+            Map.entry(
+                BookingRole.CARRIER.getConfigName(),
+                new TreeMap<>(
+                    Map.ofEntries(
+                        Map.entry("/v2/bookings", new TreeSet<>(Set.of("POST"))),
+                        Map.entry(
+                            "/v2/bookings/{bookingReference}",
+                            new TreeSet<>(Set.of("PUT", "GET", "PATCH")))))),
+            Map.entry(
+                BookingRole.SHIPPER.getConfigName(),
+                new TreeMap<>(
+                    Map.ofEntries(
+                        Map.entry("/v2/booking-notifications", new TreeSet<>(Set.of("POST")))))));
     return Map.ofEntries(
         Map.entry(
-            BookingRole.CARRIER.getConfigName(),
-            new TreeMap<>(
-                Map.ofEntries(
-                    Map.entry("/v2/bookings", new TreeSet<>(Set.of("POST"))),
-                    Map.entry(
-                        "/v2/bookings/{bookingReference}",
-                        new TreeSet<>(Set.of("PUT", "GET", "PATCH")))))),
-        Map.entry(
-            BookingRole.SHIPPER.getConfigName(),
-            new TreeMap<>(
-                Map.ofEntries(
-                    Map.entry("/v2/booking-notifications", new TreeSet<>(Set.of("POST")))))));
+            BookingScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE,
+            endpointUrisAndMethodsByRoleName),
+        Map.entry(BookingScenarioListBuilder.SCENARIO_SUITE_RI, endpointUrisAndMethodsByRoleName));
   }
 
   @Override

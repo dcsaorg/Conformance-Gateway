@@ -19,26 +19,45 @@ public class EblStandard extends AbstractStandard {
   }
 
   @Override
-  public Map<String, SortedMap<String, SortedSet<String>>> getRoleNameEndpointUriMethods() {
+  public Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
+      getEndpointUrisAndMethodsByScenarioSuiteAndRoleName() {
     return Map.ofEntries(
         Map.entry(
-            EblRole.CARRIER.getConfigName(),
-            new TreeMap<>(
-                Map.ofEntries(
-                    Map.entry("/v3/shipping-instructions", new TreeSet<>(Set.of("POST"))),
-                    Map.entry(
-                        "/v3/shipping-instructions/{documentReference}",
-                        new TreeSet<>(Set.of("PUT", "GET", "PATCH"))),
-                    Map.entry(
-                        "/v3/transport-documents/{transportDocumentReference}",
-                        new TreeSet<>(Set.of("GET", "PATCH")))))),
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_SI_ONLY,
+            Map.ofEntries(
+                Map.entry(EblRole.CARRIER.getConfigName(), new TreeMap<>(Map.ofEntries(Map.entry("/v3/shipping-instructions", new TreeSet<>(Set.of("POST"))),
+                  Map.entry(
+                    "/v3/shipping-instructions/{documentReference}",
+                    new TreeSet<>(Set.of("PUT", "GET", "PATCH")))))),
+                Map.entry(EblRole.SHIPPER.getConfigName(), new TreeMap<>(Map.ofEntries(Map.entry(
+                  "/v3/shipping-instructions-notifications",
+                  new TreeSet<>(Set.of("POST")))))))),
         Map.entry(
-            EblRole.SHIPPER.getConfigName(),
-            new TreeMap<>(
-                Map.ofEntries(
-                    Map.entry("/v2/booking-notifications", new TreeSet<>(Set.of("POST"))),
-                    Map.entry(
-                        "/v3/transport-document-notifications", new TreeSet<>(Set.of("POST")))))));
+            EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+            Map.ofEntries(
+                Map.entry(EblRole.CARRIER.getConfigName(), new TreeMap<>(Map.ofEntries(Map.entry(
+                  "/v3/transport-documents/{transportDocumentReference}",
+                  new TreeSet<>(Set.of("GET", "PATCH")))))),
+                Map.entry(EblRole.SHIPPER.getConfigName(), new TreeMap<>(Map.ofEntries(Map.entry(
+                  "/v3/transport-document-notifications",
+                  new TreeSet<>(Set.of("POST")))))))),
+        Map.entry(
+            EblScenarioListBuilder.SCENARIO_SUITE_RI,
+            Map.ofEntries(
+                Map.entry(EblRole.CARRIER.getConfigName(), new TreeMap<>(Map.ofEntries(Map.entry("/v3/shipping-instructions", new TreeSet<>(Set.of("POST"))),
+                  Map.entry(
+                    "/v3/shipping-instructions/{documentReference}",
+                    new TreeSet<>(Set.of("PUT", "GET", "PATCH"))),
+                  Map.entry(
+                    "/v3/transport-documents/{transportDocumentReference}",
+                    new TreeSet<>(Set.of("GET", "PATCH")))))),
+                Map.entry(EblRole.SHIPPER.getConfigName(), new TreeMap<>(Map.ofEntries(
+                  Map.entry(
+                    "/v3/shipping-instructions-notifications",
+                    new TreeSet<>(Set.of("POST"))),
+                  Map.entry(
+                    "/v3/transport-document-notifications",
+                    new TreeSet<>(Set.of("POST")))))))));
   }
 
   @Override

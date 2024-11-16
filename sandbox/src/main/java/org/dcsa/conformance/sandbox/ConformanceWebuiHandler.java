@@ -226,18 +226,19 @@ public class ConformanceWebuiHandler {
     }
     jsonSandboxConfig.set("externalPartyAdditionalHeaders", jsonAdditionalHeaders);
 
-    Map<String, SortedMap<String, SortedSet<String>>> roleNameEndpointUriMethods =
+    Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
         SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
             .standard
-            .getRoleNameEndpointUriMethods();
+            .getEndpointUrisAndMethodsByScenarioSuiteAndRoleName()
+            .get(sandboxConfiguration.getScenarioSuite());
     jsonSandboxConfig.set(
         "sandboxEndpointUriMethods",
         _jsonSandboxEndpointUriMethods(
-            roleNameEndpointUriMethods.get(sandboxPartyCounterpartConfig.getRole())));
+            endpointUrisAndMethodsByRoleName.get(sandboxPartyCounterpartConfig.getRole())));
     jsonSandboxConfig.set(
         "externalPartyEndpointUriMethods",
         _jsonSandboxEndpointUriMethods(
-            roleNameEndpointUriMethods.get(externalPartyCounterpartConfig.getRole())));
+            endpointUrisAndMethodsByRoleName.get(externalPartyCounterpartConfig.getRole())));
 
     return jsonSandboxConfig;
   }

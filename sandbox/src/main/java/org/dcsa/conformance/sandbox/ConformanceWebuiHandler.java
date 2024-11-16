@@ -227,10 +227,10 @@ public class ConformanceWebuiHandler {
     }
     jsonSandboxConfig.set("externalPartyAdditionalHeaders", jsonAdditionalHeaders);
 
+    ArrayNode jsonExternalPartyEndpointUriOverrides = OBJECT_MAPPER.createArrayNode();
     EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations =
         externalPartyCounterpartConfig.getEndpointUriOverrideConfigurations();
     if (endpointUriOverrideConfigurations != null) {
-      ArrayNode jsonExternalPartyEndpointUriOverrides = OBJECT_MAPPER.createArrayNode();
       Arrays.stream(endpointUriOverrideConfigurations)
           .forEach(
               endpointUriOverrideConfiguration ->
@@ -247,9 +247,9 @@ public class ConformanceWebuiHandler {
                           .put(
                               "baseUriOverride",
                               endpointUriOverrideConfiguration.getBaseUriOverride())));
-      jsonSandboxConfig.set(
-          "externalPartyEndpointUriOverrides", jsonExternalPartyEndpointUriOverrides);
     }
+    jsonSandboxConfig.set(
+        "externalPartyEndpointUriOverrides", jsonExternalPartyEndpointUriOverrides);
 
     Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
         SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
@@ -346,7 +346,8 @@ public class ConformanceWebuiHandler {
                           jsonEndpointUriOverride.get("baseUriOverride").asText()))
               .toArray(EndpointUriOverrideConfiguration[]::new));
     } else {
-      externalPartyCounterpartConfig.setEndpointUriOverrideConfigurations(null);
+      externalPartyCounterpartConfig.setEndpointUriOverrideConfigurations(
+          new EndpointUriOverrideConfiguration[] {});
     }
 
     if (!sandboxConfiguration.getOrchestrator().isActive()) {

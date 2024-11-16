@@ -50,8 +50,8 @@ export class EditSandboxComponent {
   }
 
   onUsingCustomEndpointUrisChange(enabled: boolean): void {
+    this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = [];
     if (enabled) {
-      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = [];
       for (let endpointUriMethod of this.updatedSandboxConfig!.externalPartyEndpointUriMethods) {
         for (let method of endpointUriMethod.methods) {
           const suffixStart = endpointUriMethod.endpointUri.indexOf("/{")
@@ -70,8 +70,6 @@ export class EditSandboxComponent {
           );
         }
       }
-    } else {
-      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = undefined;
     }
   }
 

@@ -100,7 +100,7 @@
         </div>
         <div>
           <mat-checkbox
-            [checked]="!!originalSandboxConfig?.externalPartyEndpointUriOverrides"
+            [checked]="!!originalSandboxConfig?.externalPartyEndpointUriOverrides?.length"
             (change)="onUsingCustomEndpointUrisChange($event.checked)"
           >Use custom endpoint URIs</mat-checkbox>
         </div>
@@ -120,7 +120,7 @@
             </div>
           </div>
         </div>
-        <div *ngIf="!!updatedSandboxConfig?.externalPartyEndpointUriOverrides">
+        <div *ngIf="!!updatedSandboxConfig?.externalPartyEndpointUriOverrides?.length">
           <div *ngFor="let endpointUriOverride of updatedSandboxConfig?.externalPartyEndpointUriOverrides; let i = index">
             <mat-card [ngClass]="'configCard'">
               <div class="paragraph" style="margin-bottom: 1em; font-weight: bold;">

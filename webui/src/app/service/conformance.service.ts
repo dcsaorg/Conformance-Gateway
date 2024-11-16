@@ -140,7 +140,7 @@ export class ConformanceService {
     externalPartyAuthHeaderName: string,
     externalPartyAuthHeaderValue: string,
     externalPartyAdditionalHeaders: HeaderNameAndValue[],
-    externalPartyEndpointUriOverrides: EndpointUriOverride[] | undefined,
+    externalPartyEndpointUriOverrides: EndpointUriOverride[],
   ): Promise<any> {
     return await this.apiService.call({
       operation: "updateSandboxConfig",

@@ -461,6 +461,11 @@ public abstract class ManualTestBase {
   // Possible result of getAllSandboxes
   protected record SandboxItem(String id, String name, List<String> operatorLog, boolean canNotifyParty) {}
 
+  public record EndpointUriMethod(
+    String endpointUri,
+    String[] methods
+  ) {}
+
   public record SandboxConfig(
     String sandboxId,
     String sandboxName,
@@ -471,6 +476,8 @@ public abstract class ManualTestBase {
     String externalPartyAuthHeaderName,
     String externalPartyAuthHeaderValue,
     HttpHeaderConfiguration[] externalPartyAdditionalHeaders,
+    EndpointUriMethod[] sandboxEndpointUriMethods,
+    EndpointUriMethod[] externalPartyEndpointUriMethods,
     EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides) {}
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}

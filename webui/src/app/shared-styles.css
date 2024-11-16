@@ -5,6 +5,25 @@
     white-space: nowrap;
 }
 
+.configCard {
+  margin-top: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
+}
+
+.configPageSubtitle {
+  font-size: 1.1rem;
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+.configPageTitle {
+  font-size: 1.2rem;
+  margin-top: 1em;
+  font-weight: bold;
+}
+
 .conformanceStatus {
     width: 2em;
 }

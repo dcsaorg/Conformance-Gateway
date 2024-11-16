@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.sandbox.configuration.SandboxConfiguration;
 import org.dcsa.conformance.sandbox.state.ConformancePersistenceProvider;
 
@@ -225,7 +226,32 @@ public class ConformanceWebuiHandler {
     }
     jsonSandboxConfig.set("externalPartyAdditionalHeaders", jsonAdditionalHeaders);
 
+    Map<String, SortedMap<String, SortedSet<String>>> roleNameEndpointUriMethods =
+        SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
+            .standard
+            .getRoleNameEndpointUriMethods();
+    jsonSandboxConfig.set(
+        "sandboxEndpointUriMethods",
+        _jsonSandboxEndpointUriMethods(
+            roleNameEndpointUriMethods.get(sandboxPartyCounterpartConfig.getRole())));
+    jsonSandboxConfig.set(
+        "externalPartyEndpointUriMethods",
+        _jsonSandboxEndpointUriMethods(
+            roleNameEndpointUriMethods.get(externalPartyCounterpartConfig.getRole())));
+
     return jsonSandboxConfig;
+  }
+
+  private static ArrayNode _jsonSandboxEndpointUriMethods(SortedMap<String, SortedSet<String>> sandboxEndpointUriMethods) {
+    ArrayNode jsonSandboxEndpointUriMethods = OBJECT_MAPPER.createArrayNode();
+    sandboxEndpointUriMethods.forEach(
+        (endpointUri, methods) -> {
+          ObjectNode jsonEndpointUriMethods =
+              OBJECT_MAPPER.createObjectNode().put("endpointUri", endpointUri);
+          jsonEndpointUriMethods.set("methods", JsonToolkit.stringCollectionToArrayNode(methods));
+          jsonSandboxEndpointUriMethods.add(jsonEndpointUriMethods);
+        });
+    return jsonSandboxEndpointUriMethods;
   }
 
   private JsonNode _getSandboxStatus(String userId, JsonNode requestNode) {

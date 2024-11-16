@@ -471,7 +471,7 @@ public abstract class ManualTestBase {
     String externalPartyAuthHeaderName,
     String externalPartyAuthHeaderValue,
     HttpHeaderConfiguration[] externalPartyAdditionalHeaders,
-    EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations) {}
+    EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides) {}
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 

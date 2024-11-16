@@ -7,7 +7,7 @@ export interface SandboxConfig {
   sandboxAuthHeaderValue: string,
   externalPartyUrl: string,
   externalPartyEndpointUriMethods: EndpointUriMethods[],
-  externalPartyEndpointUriOverrides: EndpointUriOverride[],
+  externalPartyEndpointUriOverrides: EndpointUriOverride[] | undefined,
   externalPartyAuthHeaderName: string,
   externalPartyAuthHeaderValue: string,
   externalPartyAdditionalHeaders: HeaderNameAndValue[]

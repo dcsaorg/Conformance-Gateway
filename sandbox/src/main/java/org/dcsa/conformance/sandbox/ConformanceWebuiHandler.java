@@ -16,6 +16,7 @@ import org.dcsa.conformance.core.AbstractComponentFactory;
 import org.dcsa.conformance.core.AbstractStandard;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
+import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -58,12 +59,12 @@ public class ConformanceWebuiHandler {
       } else {
         ObjectNode node = OBJECT_MAPPER
           .createObjectNode().put("error", "Internal Server Error");
-          if (developerMode) {
+        if (developerMode) {
             node.put("exception", e.getClass().getName())
               .put("message", e.getMessage());
-          }
-          log.warn("Internal Server Error: {}; Message: {}", e.getClass().getName(), e.getMessage());
-          return node;
+        }
+        log.warn("Internal Server Error: {}; Message: {}", e.getClass().getName(), e.getMessage());
+        return node;
       }
     }
   }
@@ -72,23 +73,23 @@ public class ConformanceWebuiHandler {
     log.info("ConformanceWebuiHandler.handleRequest({})", requestNode.toPrettyString());
     String operation = requestNode.get("operation").asText();
     JsonNode resultNode = switch (operation) {
-      case "createSandbox" -> _createSandbox(userId, requestNode);
-      case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
-      case "getSandboxStatus" -> _getSandboxStatus(userId, requestNode);
-      case "updateSandboxConfig" -> _updateSandboxConfig(userId, requestNode);
-      case "getAvailableStandards" -> _getAvailableStandards();
-      case "getAllSandboxes" -> _getAllSandboxes(userId);
-      case "getSandbox" -> _getSandbox(userId, requestNode);
-      case "notifyParty" -> _notifyParty(userId, requestNode);
-      case "resetParty" -> _resetParty(userId, requestNode);
-      case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
-      case "getScenario" -> _getScenario(userId, requestNode);
-      case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
-      case "handleActionInput" -> _handleActionInput(userId, requestNode);
-      case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
-      case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
-      default -> throw new UnsupportedOperationException(operation);
-    };
+          case "createSandbox" -> _createSandbox(userId, requestNode);
+          case "getSandboxConfig" -> _getSandboxConfig(userId, requestNode);
+          case "getSandboxStatus" -> _getSandboxStatus(userId, requestNode);
+          case "updateSandboxConfig" -> _updateSandboxConfig(userId, requestNode);
+          case "getAvailableStandards" -> _getAvailableStandards();
+          case "getAllSandboxes" -> _getAllSandboxes(userId);
+          case "getSandbox" -> _getSandbox(userId, requestNode);
+          case "notifyParty" -> _notifyParty(userId, requestNode);
+          case "resetParty" -> _resetParty(userId, requestNode);
+          case "getScenarioDigests" -> _getScenarioDigests(userId, requestNode);
+          case "getScenario" -> _getScenario(userId, requestNode);
+          case "getScenarioStatus" -> _getScenarioStatus(userId, requestNode);
+          case "handleActionInput" -> _handleActionInput(userId, requestNode);
+          case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
+          case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
+          default -> throw new UnsupportedOperationException(operation);
+        };
     log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
     return resultNode;
   }
@@ -206,14 +207,14 @@ public class ConformanceWebuiHandler {
             .orElseThrow();
 
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
-      .createObjectNode()
-      .put(SANDBOX_ID, sandboxConfiguration.getId())
-      .put("sandboxName", sandboxConfiguration.getName())
-      .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
-      .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
-      .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
-      .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
-      .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
+            .createObjectNode()
+            .put(SANDBOX_ID, sandboxConfiguration.getId())
+            .put("sandboxName", sandboxConfiguration.getName())
+            .put("sandboxUrl", sandboxPartyCounterpartConfig.getUrl())
+            .put("sandboxAuthHeaderName", sandboxConfiguration.getAuthHeaderName())
+            .put("sandboxAuthHeaderValue", sandboxConfiguration.getAuthHeaderValue())
+            .put("externalPartyUrl", externalPartyCounterpartConfig.getUrl())
+            .put("externalPartyAuthHeaderName", externalPartyCounterpartConfig.getAuthHeaderName())
       .put("externalPartyAuthHeaderValue", externalPartyCounterpartConfig.getAuthHeaderValue());
 
     ArrayNode jsonAdditionalHeaders = OBJECT_MAPPER.createArrayNode();
@@ -225,6 +226,30 @@ public class ConformanceWebuiHandler {
               headerNameAndValue -> jsonAdditionalHeaders.add(headerNameAndValue.toJsonNode()));
     }
     jsonSandboxConfig.set("externalPartyAdditionalHeaders", jsonAdditionalHeaders);
+
+    EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations =
+        externalPartyCounterpartConfig.getEndpointUriOverrideConfigurations();
+    if (endpointUriOverrideConfigurations != null) {
+      ArrayNode jsonExternalPartyEndpointUriOverrides = OBJECT_MAPPER.createArrayNode();
+      Arrays.stream(endpointUriOverrideConfigurations)
+          .forEach(
+              endpointUriOverrideConfiguration ->
+                  jsonExternalPartyEndpointUriOverrides.add(
+                      OBJECT_MAPPER
+                          .createObjectNode()
+                          .put("method", endpointUriOverrideConfiguration.getMethod())
+                          .put(
+                              "endpointBaseUri",
+                              endpointUriOverrideConfiguration.getEndpointBaseUri())
+                          .put(
+                              "endpointSuffix",
+                              endpointUriOverrideConfiguration.getEndpointSuffix())
+                          .put(
+                              "baseUriOverride",
+                              endpointUriOverrideConfiguration.getBaseUriOverride())));
+      jsonSandboxConfig.set(
+          "externalPartyEndpointUriOverrides", jsonExternalPartyEndpointUriOverrides);
+    }
 
     Map<String, SortedMap<String, SortedSet<String>>> endpointUrisAndMethodsByRoleName =
         SupportedStandard.forName(sandboxConfiguration.getStandard().getName())
@@ -281,12 +306,12 @@ public class ConformanceWebuiHandler {
     String externalPartyUrl = requestNode.get("externalPartyUrl").asText();
     String sandboxPartyBaseUrl =
         Stream.of(sandboxConfiguration.getCounterparts())
-            .filter(
-                counterpart ->
+                .filter(
+                    counterpart ->
                     counterpart.getName().equals(sandboxConfiguration.getParties()[0].getName()))
-            .findFirst()
-            .orElseThrow()
-            .getUrl()
+                .findFirst()
+                .orElseThrow()
+                .getUrl()
             .split("/party/")[0] + "/";
     CounterpartConfiguration.validateUrl(
         externalPartyUrl, sandboxPartyBaseUrl.startsWith("http://localhost"));
@@ -305,6 +330,23 @@ public class ConformanceWebuiHandler {
           StreamSupport.stream(jsonHeaders.spliterator(), false)
               .map(HttpHeaderConfiguration::fromJsonNode)
               .toArray(HttpHeaderConfiguration[]::new));
+    }
+
+    JsonNode jsonExternalPartyEndpointUriOverrides =
+        requestNode.path("externalPartyEndpointUriOverrides");
+    if (jsonExternalPartyEndpointUriOverrides.isArray()) {
+      externalPartyCounterpartConfig.setEndpointUriOverrideConfigurations(
+          StreamSupport.stream(jsonExternalPartyEndpointUriOverrides.spliterator(), false)
+              .map(
+                  jsonEndpointUriOverride ->
+                      new EndpointUriOverrideConfiguration(
+                          jsonEndpointUriOverride.get("method").asText(),
+                          jsonEndpointUriOverride.get("endpointBaseUri").asText(),
+                          jsonEndpointUriOverride.get("endpointSuffix").asText(),
+                          jsonEndpointUriOverride.get("baseUriOverride").asText()))
+              .toArray(EndpointUriOverrideConfiguration[]::new));
+    } else {
+      externalPartyCounterpartConfig.setEndpointUriOverrideConfigurations(null);
     }
 
     if (!sandboxConfiguration.getOrchestrator().isActive()) {

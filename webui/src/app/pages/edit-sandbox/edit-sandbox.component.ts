@@ -50,8 +50,8 @@ export class EditSandboxComponent {
   }
 
   onUsingCustomEndpointUrisChange(enabled: boolean): void {
-    this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = [];
     if (enabled) {
+      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = [];
       for (let endpointUriMethod of this.updatedSandboxConfig!.externalPartyEndpointUriMethods) {
         for (let method of endpointUriMethod.methods) {
           const suffixStart = endpointUriMethod.endpointUri.indexOf("/{")
@@ -70,6 +70,8 @@ export class EditSandboxComponent {
           );
         }
       }
+    } else {
+      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = undefined;
     }
   }
 
@@ -108,6 +110,7 @@ export class EditSandboxComponent {
       this.updatedSandboxConfig!.externalPartyAuthHeaderName,
       this.updatedSandboxConfig!.externalPartyAuthHeaderValue,
       this.updatedSandboxConfig!.externalPartyAdditionalHeaders,
+      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides,
     );
     if (response?.error) {
       await MessageDialog.open(

@@ -4,8 +4,8 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
 import { SandboxConfig } from "src/app/model/sandbox-config";
 import { Subscription } from "rxjs";
-import {MessageDialog} from "../../dialogs/message/message-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
+import { MessageDialog } from "../../dialogs/message/message-dialog.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-edit-sandbox',
@@ -49,6 +49,30 @@ export class EditSandboxComponent {
     }
   }
 
+  onUsingCustomEndpointUrisChange(enabled: boolean): void {
+    this.updatedSandboxConfig!.externalPartyEndpointUriOverrides = [];
+    if (enabled) {
+      for (let endpointUriMethod of this.updatedSandboxConfig!.externalPartyEndpointUriMethods) {
+        for (let method of endpointUriMethod.methods) {
+          const suffixStart = endpointUriMethod.endpointUri.indexOf("/{")
+          this.updatedSandboxConfig!.externalPartyEndpointUriOverrides.push(
+            suffixStart > 0 ? {
+              method,
+              endpointBaseUri: endpointUriMethod.endpointUri.substring(0, suffixStart),
+              endpointSuffix: endpointUriMethod.endpointUri.substring(suffixStart),
+              baseUriOverride: endpointUriMethod.endpointUri.substring(0, suffixStart),
+            } : {
+              method,
+              endpointBaseUri: endpointUriMethod.endpointUri,
+              endpointSuffix: "",
+              baseUriOverride: endpointUriMethod.endpointUri,
+            }
+          );
+        }
+      }
+    }
+  }
+
   onAddHeader() {
     this.updatedSandboxConfig?.externalPartyAdditionalHeaders.push({headerName: '', headerValue: ''});
   }
@@ -84,6 +108,7 @@ export class EditSandboxComponent {
       this.updatedSandboxConfig!.externalPartyAuthHeaderName,
       this.updatedSandboxConfig!.externalPartyAuthHeaderValue,
       this.updatedSandboxConfig!.externalPartyAdditionalHeaders,
+      this.updatedSandboxConfig!.externalPartyEndpointUriOverrides,
     );
     if (response?.error) {
       await MessageDialog.open(

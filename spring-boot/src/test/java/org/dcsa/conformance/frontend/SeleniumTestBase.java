@@ -333,6 +333,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       null,
       null,
       null,
+      null,
+      null,
+      null,
       null);
   }
 

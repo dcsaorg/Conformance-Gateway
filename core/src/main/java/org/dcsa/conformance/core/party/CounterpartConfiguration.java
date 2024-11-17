@@ -20,6 +20,7 @@ public class CounterpartConfiguration {
   private String authHeaderName = "";
   private String authHeaderValue = "";
   private HttpHeaderConfiguration[] externalPartyAdditionalHeaders;
+  private EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations;
 
   public static void validateUrl(String url, boolean allowHttpLocalhost) throws UserFacingException {
     try {

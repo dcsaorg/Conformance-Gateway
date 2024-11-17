@@ -14,6 +14,7 @@ import java.util.List;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
@@ -460,16 +461,24 @@ public abstract class ManualTestBase {
   // Possible result of getAllSandboxes
   protected record SandboxItem(String id, String name, List<String> operatorLog, boolean canNotifyParty) {}
 
+  public record EndpointUriMethod(
+    String endpointUri,
+    String[] methods
+  ) {}
+
   public record SandboxConfig(
-      String sandboxId,
-      String sandboxName,
-      String sandboxUrl,
-      String sandboxAuthHeaderName,
-      String sandboxAuthHeaderValue,
-      String externalPartyUrl,
-      String externalPartyAuthHeaderName,
-      String externalPartyAuthHeaderValue,
-      HttpHeaderConfiguration[] externalPartyAdditionalHeaders) {}
+    String sandboxId,
+    String sandboxName,
+    String sandboxUrl,
+    String sandboxAuthHeaderName,
+    String sandboxAuthHeaderValue,
+    String externalPartyUrl,
+    String externalPartyAuthHeaderName,
+    String externalPartyAuthHeaderValue,
+    HttpHeaderConfiguration[] externalPartyAdditionalHeaders,
+    EndpointUriMethod[] sandboxEndpointUriMethods,
+    EndpointUriMethod[] externalPartyEndpointUriMethods,
+    EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides) {}
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 

@@ -1,4 +1,4 @@
-<div class="pageTitle">Sandbox settings</div>
+<div class="configPageTitle">Sandbox settings</div>
 
 <app-text-waiting
   *ngIf="!originalSandboxConfig || !updatedSandboxConfig"
@@ -7,148 +7,237 @@
 <app-text-waiting *ngIf="updatingSandbox" text="Updating sandbox settings..."></app-text-waiting>
 
 <div *ngIf="originalSandboxConfig && updatedSandboxConfig && !updatingSandbox">
-    <div class="pageSubtitle">Connecting to the sandbox</div>
 
-    <div class="paragraph">Sandbox URL:</div>
-    <input
-    id="sandboxUrlInput"
-    class="readOnlyInput"
-    type = "text"
-    readonly="true"
-    [value]="originalSandboxConfig.sandboxUrl"
-    />
-
-    <div class="paragraph">Request authentication header name:</div>
-    <input
-    id="sandboxAuthHeaderNameInput"
-    class="readOnlyInput"
-    type = "text"
-    readonly="true"
-    [value]="originalSandboxConfig.sandboxAuthHeaderName"
-    />
-
-    <div class="paragraph">Request authentication header value:</div>
-    <input
-    id="sandboxAuthHeaderValueInput"
-    class="readOnlyInput"
-    type = "text"
-    readonly="true"
-    [value]="originalSandboxConfig.sandboxAuthHeaderValue"
-    />
-
-    <br />
-    <br />
-
-    <div class="pageSubtitle">Update sandbox settings</div>
-
-    <form
-    #createSandboxForm="ngForm"
+  <form
     (submit)="onUpdate()"
-    >
-        <div>
-            <br />
-            <mat-form-field class="fullWidth">
-                <mat-label>Sandbox name</mat-label>
-                <input
-                matInput
-                #sandboxNameInput
-                type = "text"
-                autocomplete="off"
-                name="sandboxNameTextField"
-                [(ngModel)]="updatedSandboxConfig.sandboxName"
-                />
-            </mat-form-field>
-        </div>
-
-        <div>
-            <br />
-            <mat-form-field class="fullWidth">
-                <mat-label>Sandbox counterpart URL</mat-label>
-                <input
-                matInput
-                #externalPartyUrlInput
-                type = "text"
-                autocomplete="off"
-                name="externalPartyUrlTextField"
-                [(ngModel)]="updatedSandboxConfig.externalPartyUrl"
-                />
-            </mat-form-field>
-        </div>
-
-        <div>
-            <br />
-            <mat-form-field class="fullWidth">
-                <mat-label>Sandbox counterpart authentication header name</mat-label>
-                <input
-                matInput
-                #externalPartyAuthHeaderNameInput
-                type = "text"
-                autocomplete="off"
-                name="externalPartyAuthHeaderNameTextField"
-                [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderName"
-                />
-            </mat-form-field>
-        </div>
-
-        <div>
-            <br />
-            <mat-form-field class="fullWidth">
-                <mat-label>Sandbox counterpart authentication header value</mat-label>
-                <input
-                matInput
-                #externalPartyAuthHeaderValueInput
-                type = "text"
-                autocomplete="off"
-                name="externalPartyAuthHeaderValueTextField"
-                [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderValue"
-                />
-            </mat-form-field>
-        </div>
-
-        <div class="pageSubtitle">Additional headers</div>
+  >
+    <mat-card [ngClass]="'configCard'">
+      <div class="configPageSubtitle">Sandbox name</div>
+      <div>
         <br/>
+        <mat-form-field class="fullWidth">
+          <input
+            matInput
+            type="text"
+            autocomplete="off"
+            name="sandboxNameTextField"
+            [(ngModel)]="updatedSandboxConfig!.sandboxName"
+          />
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <mat-card [ngClass]="'configCard'">
+      <div class="configPageSubtitle">Connecting to the sandbox (read-only)</div>
+      <div *ngIf="!originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
+        This type of sandbox has no endpoints to which your application can make API calls.
+      </div>
+      <div *ngIf="originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
+        Configure your application to make all API requests to these sandbox endpoint URLs:
+      </div>
+      <div *ngFor="let endpointUriAndMethods of originalSandboxConfig?.sandboxEndpointUriMethods">
+        <div *ngFor="let method of endpointUriAndMethods.methods">
+          <div class="paragraph">{{ method }} {{ endpointUriAndMethods.endpointUri }}</div>
+          <input
+            class="readOnlyInput"
+            type="text"
+            readonly="readonly"
+            [value]="originalSandboxConfig!.sandboxUrl + endpointUriAndMethods.endpointUri"
+          />
+        </div>
+      </div>
+    </mat-card>
+
+    <div *ngIf="originalSandboxConfig?.sandboxEndpointUriMethods?.length">
+      <mat-card [ngClass]="'configCard'">
+        <div class="configPageSubtitle">Authenticating to the sandbox (read-only)</div>
+        <div *ngIf="!originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
+          This type of sandbox has no endpoints to which your application can make API calls.
+        </div>
+        <div style="margin-top: 1em;">
+          Configure your application to include this header when making API requests to the sandbox:
+        </div>
+        <div class="paragraph">Sandbox authentication header name:</div>
+        <input
+          id="sandboxAuthHeaderNameInput"
+          class="readOnlyInput"
+          type="text"
+          readonly="readonly"
+          [value]="originalSandboxConfig!.sandboxAuthHeaderName"
+        />
+        <div class="paragraph">Sandbox authentication header value:</div>
+        <input
+          id="sandboxAuthHeaderValueInput"
+          class="readOnlyInput"
+          type="text"
+          readonly="readonly"
+          [value]="originalSandboxConfig!.sandboxAuthHeaderValue"
+        />
+      </mat-card>
+    </div>
+
+    <mat-card [ngClass]="'configCard'">
+      <div class="configPageSubtitle">Connecting to your application</div>
+      <div *ngIf="!originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+        This type of sandbox does not make API calls to your application.
+      </div>
+      <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length">
+        <div style="margin-top: 1em;">
+          Enter the base URL of all your application's endpoints to which the sandbox makes API calls:
+        </div>
         <div>
-            <button
+          <br/>
+          <mat-form-field class="fullWidth">
+            <mat-label>Base URL for all your endpoints</mat-label>
+            <input
+              matInput
+              type="text"
+              autocomplete="off"
+              name="externalPartyUrlTextField"
+              [(ngModel)]="updatedSandboxConfig!.externalPartyUrl"
+            />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-checkbox
+            [checked]="!!originalSandboxConfig?.externalPartyEndpointUriOverrides?.length"
+            (change)="onUsingCustomEndpointUrisChange($event.checked)"
+          >Use custom endpoint URIs</mat-checkbox>
+        </div>
+        <div *ngIf="!updatedSandboxConfig?.externalPartyEndpointUriOverrides?.length">
+          <div style="margin-top: 1em; margin-bottom: .5em;">The sandbox will make all API requests for each endpoint to these URLs:</div>
+          <div *ngFor="let endpointUriAndMethods of originalSandboxConfig?.externalPartyEndpointUriMethods">
+            <div *ngFor="let method of endpointUriAndMethods.methods">
+              <div class="paragraph" style="margin-bottom: .5em;">
+                {{ method }} {{ endpointUriAndMethods.endpointUri }}
+              </div>
+              <input
+                class="readOnlyInput"
+                type="text"
+                readonly="readonly"
+                [value]="updatedSandboxConfig!.externalPartyUrl + endpointUriAndMethods.endpointUri"
+              />
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!!updatedSandboxConfig?.externalPartyEndpointUriOverrides?.length">
+          <div *ngFor="let endpointUriOverride of updatedSandboxConfig?.externalPartyEndpointUriOverrides; let i = index">
+            <mat-card [ngClass]="'configCard'">
+              <div class="paragraph" style="margin-bottom: 1em; font-weight: bold;">
+                {{ endpointUriOverride.method }}
+                {{ endpointUriOverride.endpointBaseUri + endpointUriOverride.endpointSuffix }}
+              </div>
+              <mat-form-field class="fullWidth">
+                <mat-label>Custom URI to use instead of {{ endpointUriOverride.endpointBaseUri }}</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  autocomplete="off"
+                  [name]="'endpointUriOverrideEndpointUri_' + i"
+                  [(ngModel)]="endpointUriOverride.baseUriOverride"
+                />
+              </mat-form-field>
+              <div style="margin-bottom: .5em;">The sandbox will make all API requests for this endpoint to:</div>
+              <input
+                class="readOnlyInput"
+                type="text"
+                readonly="readonly"
+                [value]="updatedSandboxConfig!.externalPartyUrl + endpointUriOverride.baseUriOverride + endpointUriOverride.endpointSuffix"
+              />
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length">
+      <mat-card [ngClass]="'configCard'">
+        <div class="configPageSubtitle">Authenticating to your application</div>
+        <div *ngIf="!originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+          This type of sandbox does not make API calls to your application.
+        </div>
+        <div style="margin-top: 1em;">Enter the header name and value to be included by the sandbox in all API requests that it makes to your application:</div>
+        <div>
+          <br/>
+          <mat-form-field class="fullWidth">
+            <mat-label>Authentication header name</mat-label>
+            <input
+              matInput
+              type="text"
+              autocomplete="off"
+              name="externalPartyAuthHeaderNameTextField"
+              [(ngModel)]="updatedSandboxConfig!.externalPartyAuthHeaderName"
+            />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="fullWidth">
+            <mat-label>Authentication header value</mat-label>
+            <input
+              matInput
+              type="text"
+              autocomplete="off"
+              name="externalPartyAuthHeaderValueTextField"
+              [(ngModel)]="updatedSandboxConfig!.externalPartyAuthHeaderValue"
+            />
+          </mat-form-field>
+        </div>
+        <div class="configPageSubtitle">Additional headers (if required by your application)</div>
+        <div style="margin-top: 1em;">If your application requires more than one header in inbound API requests, enter any additional ones here:</div>
+        <div style="margin-top: 1em; margin-bottom: 1em;">
+          <button
             mat-mini-fab
             color="primary"
             type="button"
             (click)="onAddHeader()"
-            ><mat-icon>add</mat-icon></button>
+          >
+            <mat-icon>add</mat-icon>
+          </button>
 
-            &nbsp;
+          <span>&nbsp;</span>
 
-            <button
+          <button
             mat-mini-fab
             color="primary"
             type="button"
-            [disabled]="updatedSandboxConfig.externalPartyAdditionalHeaders.length < 1"
+            [disabled]="updatedSandboxConfig!.externalPartyAdditionalHeaders.length < 1"
             (click)="onRemoveHeader()"
-            ><mat-icon>remove</mat-icon></button>
-
-            <div *ngFor="let additionalHeader of updatedSandboxConfig.externalPartyAdditionalHeaders">
-                <app-edit-header [headerNameAndValue]="additionalHeader"></app-edit-header>
-                <hr/>
-            </div>
+          >
+            <mat-icon>remove</mat-icon>
+          </button>
         </div>
 
-        <br />
-        <br />
-        <div>
-            <button
-            id="updateSandboxButton"
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="cannotUpdate()"
-            ><mat-icon>done</mat-icon>Update</button>
-            &nbsp;
-            <button
-            mat-raised-button
-            type="button"
-            (click)="onCancel()"
-            ><mat-icon>not_interested</mat-icon>Cancel</button>
+        <div *ngFor="let additionalHeader of updatedSandboxConfig!.externalPartyAdditionalHeaders">
+          <hr/>
+          <app-edit-header [headerNameAndValue]="additionalHeader"></app-edit-header>
         </div>
-        <br />
-    </form>
+      </mat-card>
+    </div>
+
+    <br/>
+    <br/>
+    <div>
+      <button
+        id="updateSandboxButton"
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="cannotUpdate()"
+      >
+        <mat-icon>done</mat-icon>
+        Update
+      </button>
+      &nbsp;
+      <button
+        mat-raised-button
+        type="button"
+        (click)="onCancel()"
+      >
+        <mat-icon>not_interested</mat-icon>
+        Cancel
+      </button>
+    </div>
+    <br/>
+  </form>
 </div>
 

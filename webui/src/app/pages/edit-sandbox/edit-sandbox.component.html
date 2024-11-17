@@ -17,6 +17,7 @@
         <br/>
         <mat-form-field class="fullWidth">
           <input
+            testId="sandboxNameInput"
             matInput
             type="text"
             autocomplete="off"
@@ -39,6 +40,7 @@
         <div *ngFor="let method of endpointUriAndMethods.methods">
           <div class="paragraph">{{ method }} {{ endpointUriAndMethods.endpointUri }}</div>
           <input
+            testId="sandboxUrlInput"
             class="readOnlyInput"
             type="text"
             readonly="readonly"
@@ -59,7 +61,7 @@
         </div>
         <div class="paragraph">Sandbox authentication header name:</div>
         <input
-          id="sandboxAuthHeaderNameInput"
+          testId="sandboxAuthHeaderNameInput"
           class="readOnlyInput"
           type="text"
           readonly="readonly"
@@ -67,7 +69,7 @@
         />
         <div class="paragraph">Sandbox authentication header value:</div>
         <input
-          id="sandboxAuthHeaderValueInput"
+          testId="sandboxAuthHeaderValueInput"
           class="readOnlyInput"
           type="text"
           readonly="readonly"
@@ -88,7 +90,7 @@
         <div>
           <br/>
           <mat-form-field class="fullWidth">
-            <mat-label>Base URL for all your endpoints</mat-label>
+            <mat-label>Application endpoints base URL</mat-label>
             <input
               matInput
               type="text"
@@ -218,7 +220,7 @@
     <br/>
     <div>
       <button
-        id="updateSandboxButton"
+        testId="updateSandboxButton"
         mat-raised-button
         color="primary"
         type="submit"
@@ -229,6 +231,7 @@
       </button>
       &nbsp;
       <button
+        testId="cancelUpdateSandboxButton"
         mat-raised-button
         type="button"
         (click)="onCancel()"

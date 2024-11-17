@@ -54,6 +54,9 @@ import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
 import software.amazon.awscdk.services.dynamodb.Table;
 import software.amazon.awscdk.services.dynamodb.TableProps;
+import software.amazon.awscdk.services.ec2.SubnetSelection;
+import software.amazon.awscdk.services.ec2.SubnetType;
+import software.amazon.awscdk.services.ec2.Vpc;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Policy;
 import software.amazon.awscdk.services.iam.PolicyProps;
@@ -141,6 +144,8 @@ public class ConformanceStack extends Stack {
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build());
 
+    Vpc vpc = Vpc.Builder.create(this, prefix + "ConformanceVpc").maxAzs(1).natGateways(1).build();
+
     AssetCode assetCode =
         Code.fromAsset(
             "../lambda/",
@@ -175,6 +180,9 @@ public class ConformanceStack extends Stack {
                 .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.SandboxTaskLambda")
+                .vpc(vpc)
+                .vpcSubnets(
+                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
                 .memorySize(1024)
                 .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)
@@ -190,6 +198,9 @@ public class ConformanceStack extends Stack {
                 .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.ApiLambda")
+                .vpc(vpc)
+                .vpcSubnets(
+                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
                 .memorySize(1024)
                 .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)
@@ -205,6 +216,9 @@ public class ConformanceStack extends Stack {
                 .runtime(Runtime.JAVA_21)
                 .code(assetCode)
                 .handler("org.dcsa.conformance.lambda.WebuiLambda")
+                .vpc(vpc)
+                .vpcSubnets(
+                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
                 .memorySize(1024)
                 .timeout(Duration.minutes(5))
                 .reservedConcurrentExecutions(16)

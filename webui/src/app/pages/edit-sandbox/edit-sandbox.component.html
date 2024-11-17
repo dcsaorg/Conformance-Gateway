@@ -30,18 +30,18 @@
 
     <mat-card [ngClass]="'configCard'">
       <div class="configPageSubtitle">Connecting to the sandbox (read-only)</div>
+      <div class="paragraph">Sandbox base URL:</div>
+      <input
+        testId="sandboxUrlInput"
+        class="readOnlyInput"
+        type = "text"
+        readonly="readonly"
+        [value]="originalSandboxConfig.sandboxUrl"
+      />
       <div *ngIf="!originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
         This type of sandbox has no endpoints to which your application can make API calls.
       </div>
       <div *ngIf="originalSandboxConfig?.sandboxEndpointUriMethods?.length">
-        <div class="paragraph">Sandbox base URL:</div>
-        <input
-          testId="sandboxUrlInput"
-          class="readOnlyInput"
-          type = "text"
-          readonly="readonly"
-          [value]="originalSandboxConfig.sandboxUrl"
-        />
         <div style="margin-top: 1em;">
           Configure your application to make all API requests to these sandbox endpoint URLs:
         </div>

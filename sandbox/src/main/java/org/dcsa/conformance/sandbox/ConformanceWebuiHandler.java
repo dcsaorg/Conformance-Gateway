@@ -265,6 +265,14 @@ public class ConformanceWebuiHandler {
         _jsonSandboxEndpointUriMethods(
             endpointUrisAndMethodsByRoleName.get(externalPartyCounterpartConfig.getRole())));
 
+    JsonNode ipAddressConfigValue =
+        persistenceProvider
+            .getNonLockingMap()
+            .getItemValue("configuration", "outboundApiCallsSourceIpAddress");
+    if (ipAddressConfigValue.isTextual()) {
+      jsonSandboxConfig.put("outboundApiCallsSourceIpAddress", ipAddressConfigValue.asText());
+    }
+
     return jsonSandboxConfig;
   }
 

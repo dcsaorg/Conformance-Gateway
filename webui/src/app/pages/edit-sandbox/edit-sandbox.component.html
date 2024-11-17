@@ -156,6 +156,17 @@
               </mat-card>
             </div>
           </div>
+          <div *ngIf="originalSandboxConfig.outboundApiCallsSourceIpAddress">
+            <div style="margin-top: 1em; margin-bottom: .5em;">
+              You can whitelist this IP address, from which all sandboxes in your environment will make their API requests to your application:
+            </div>
+            <input
+              class="readOnlyInput"
+              type="text"
+              readonly="readonly"
+              [value]="originalSandboxConfig.outboundApiCallsSourceIpAddress"
+            />
+          </div>
         </div>
       </mat-card>
 

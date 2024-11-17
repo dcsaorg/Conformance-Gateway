@@ -478,7 +478,8 @@ public abstract class ManualTestBase {
     HttpHeaderConfiguration[] externalPartyAdditionalHeaders,
     EndpointUriMethod[] sandboxEndpointUriMethods,
     EndpointUriMethod[] externalPartyEndpointUriMethods,
-    EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides) {}
+    EndpointUriOverrideConfiguration[] externalPartyEndpointUriOverrides,
+    String outboundApiCallsSourceIpAddress) {}
 
   record ScenarioDigest(String moduleName, List<Scenario> scenarios) {}
 

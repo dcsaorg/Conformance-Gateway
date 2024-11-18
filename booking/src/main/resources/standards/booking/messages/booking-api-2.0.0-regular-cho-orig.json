@@ -4,7 +4,6 @@
   "cargoMovementTypeAtOrigin": "FCL",
   "cargoMovementTypeAtDestination": "FCL",
   "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
-  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
   "isPartialLoadAllowed": false,

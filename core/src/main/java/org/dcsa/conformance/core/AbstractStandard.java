@@ -1,5 +1,6 @@
 package org.dcsa.conformance.core;
 
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import lombok.Getter;
@@ -13,6 +14,9 @@ public abstract class AbstractStandard {
   }
 
   public abstract SortedMap<String, SortedSet<String>> getScenarioSuitesByStandardVersion();
+
+  public abstract Map<String, Map<String, SortedMap<String, SortedSet<String>>>>
+      getEndpointUrisAndMethodsByScenarioSuiteAndRoleName();
 
   protected abstract AbstractComponentFactory doCreateComponentFactory(
       String standardVersion, String scenarioSuite);

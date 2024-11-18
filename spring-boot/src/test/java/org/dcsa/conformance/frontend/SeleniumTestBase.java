@@ -258,19 +258,27 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   private void updateSandboxConfigBeforeStarting(SandboxConfig sandbox1, SandboxConfig sandbox2) {
     log.info("Updating both sandbox configs before starting");
     // Starts in the 2nd tab
-    driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox1.sandboxUrl());
-    driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox1.sandboxAuthHeaderName());
-    driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox1.sandboxAuthHeaderValue());
-    driver.findElement(By.id("updateSandboxButton")).click();
+    if (sandbox1.sandboxUrl() != null) {
+      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox1.sandboxUrl());
+      driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox1.sandboxAuthHeaderName());
+      driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox1.sandboxAuthHeaderValue());
+      driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
+    } else {
+      driver.findElement(By.cssSelector("[testId='cancelUpdateSandboxButton']")).click();
+    }
     waitForUIReadiness();
     assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
 
     // Starts in the 1st tab
     switchToTab(0);
-    driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox2.sandboxUrl());
-    driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
-    driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
-    driver.findElement(By.id("updateSandboxButton")).click();
+    if (sandbox2.sandboxUrl() != null) {
+      driver.findElement(By.name("externalPartyUrlTextField")).sendKeys(sandbox2.sandboxUrl());
+      driver.findElement(By.name("externalPartyAuthHeaderNameTextField")).sendKeys(sandbox2.sandboxAuthHeaderName());
+      driver.findElement(By.name("externalPartyAuthHeaderValueTextField")).sendKeys(sandbox2.sandboxAuthHeaderValue());
+      driver.findElement(By.cssSelector("[testId='updateSandboxButton']")).click();
+    } else {
+      driver.findElement(By.cssSelector("[testId='cancelUpdateSandboxButton']")).click();
+    }
     waitForUIReadiness();
     assertTrue(driver.findElement(By.className("pageTitle")).getText().startsWith("Sandbox: "));
   }
@@ -320,16 +328,21 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.findElement(By.id("mat-input-0")).sendKeys(sandboxName);
     driver.findElement(By.id("createSandboxButton")).click();
 
-    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sandboxUrlInput")));
-    String sandboxURL = driver.findElement(By.id("sandboxUrlInput")).getAttribute("value");
-    String sandboxAuthHeaderName = driver.findElement(By.id("sandboxAuthHeaderNameInput")).getAttribute("value");
-    String sandboxAuthHeaderValue = driver.findElement(By.id("sandboxAuthHeaderValueInput")).getAttribute("value");
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
+    boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
+    String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getAttribute("value");
+    String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getAttribute("value");
+    String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getAttribute("value");
     return new SandboxConfig(
       null,
       sandboxName,
       sandboxURL,
       sandboxAuthHeaderName,
       sandboxAuthHeaderValue,
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null,

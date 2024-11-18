@@ -39,13 +39,14 @@ public class TntChecks {
     var checks = new ArrayList<JsonContentCheck>();
 
     checks.add(JsonAttribute.customValidator(
-      "Validate eventIds are unique",
+      "Validate that eventID values are unique",
       body -> {
         Set<String> uniqueEventIds = StreamSupport.stream(body.spliterator(), false)
+          .filter(node -> node.has("eventID"))
           .map(node -> node.path("eventID").asText())
           .collect(Collectors.toSet());
         if (!uniqueEventIds.isEmpty() && uniqueEventIds.size() != body.size()) {
-          return Set.of("Event Ids are not unique");
+          return Set.of("Event ID values are not unique");
         }
         return Set.of();
       }

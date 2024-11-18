@@ -234,7 +234,7 @@ public abstract class ConformanceParty implements StatefulEntity {
         withFullApiVersionHeader ? apiVersion : apiVersion.split("\\.")[0];
     return new ConformanceRequest(
         method,
-        counterpartConfiguration.getUrl() + path,
+        _getCounterpartUrl(counterpartConfiguration, method, path),
         queryParams,
         new ConformanceMessage(
             partyConfiguration.getName(),
@@ -265,6 +265,27 @@ public abstract class ConformanceParty implements StatefulEntity {
                 ? new ConformanceMessageBody("")
                 : new ConformanceMessageBody(jsonBody),
             System.currentTimeMillis()));
+  }
+
+  private String _getCounterpartUrl(
+      CounterpartConfiguration counterpartConfiguration, String method, String path) {
+    var url = counterpartConfiguration.getUrl() + path;
+    EndpointUriOverrideConfiguration[] endpointUriOverrideConfigurations =
+        counterpartConfiguration.getEndpointUriOverrideConfigurations();
+    if (endpointUriOverrideConfigurations != null) {
+      for (EndpointUriOverrideConfiguration endpointUriOverrideConfiguration :
+          endpointUriOverrideConfigurations) {
+        if (method.equals(endpointUriOverrideConfiguration.getMethod())) {
+          int baseUriIndex = url.indexOf(endpointUriOverrideConfiguration.getEndpointBaseUri());
+          if (baseUriIndex > -1) {
+            return url.replace(
+                endpointUriOverrideConfiguration.getEndpointBaseUri(),
+                endpointUriOverrideConfiguration.getBaseUriOverride());
+          }
+        }
+      }
+    }
+    return url;
   }
 
   public abstract ConformanceResponse handleRequest(ConformanceRequest request);

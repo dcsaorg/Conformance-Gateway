@@ -68,7 +68,7 @@
               ],
               "outputHashing": "all"
             },
-            "devtest": {
+            "dt": {
               "budgets": [
                 {
                   "type": "initial",
@@ -84,7 +84,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.devtest.ts"
+                  "with": "src/environments/environment.dt.ts"
                 }
               ],
               "outputHashing": "all"

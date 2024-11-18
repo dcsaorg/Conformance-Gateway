@@ -1,5 +1,6 @@
 package org.dcsa.conformance.springboot;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -149,6 +150,19 @@ public class ConformanceApplication {
           new ConformancePersistenceProvider(
               new MemorySortedPartitionsNonLockingMap(), new MemorySortedPartitionsLockingMap());
     }
+
+    // for web UI testing only
+    try {
+      persistenceProvider
+          .getNonLockingMap()
+          .setItemValue(
+              "configuration",
+              "outboundApiCallsSourceIpAddress",
+              OBJECT_MAPPER.readTree("\"12.34.56.78\""));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+
     deferredSandboxTaskConsumer =
         jsonNode ->
             executor.schedule(

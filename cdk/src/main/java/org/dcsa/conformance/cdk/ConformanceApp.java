@@ -25,14 +25,17 @@ public final class ConformanceApp {
     new ConformanceStack(
         app,
         StackProps.builder().env(Environment.builder().region(REGION).build()).build(),
-        "devtestConformanceStack",
-        "test", // in the dev account
-        "Z0720499I10UDAXMT620",
-        "conformance-development-1.dcsa.org",
+        "dtConformanceStack",
+        "dt",
+        "Z08637291XUXSIEGQ5KNR",
+        "conformance-dt-1.dcsa.org",
         "arn:aws:lambda:eu-north-1:580247275435:layer:LambdaInsightsExtension:35",
-        "arn:aws:acm:eu-north-1:468100668426:certificate/64b2b920-f435-4ebc-9874-eb97e6bd9bf9",
-        "arn:aws:acm:eu-north-1:468100668426:certificate/607709d1-0910-43d1-adb8-9b2fc81cfa60",
-        "arn:aws:acm:us-east-1:468100668426:certificate/3ae61e03-9e88-4d6c-a3ac-9ac2943d80e1");
+        // dt-api.conformance-dt-1.dcsa.org
+        "arn:aws:acm:eu-north-1:231663969095:certificate/5b911671-b1b1-4435-9d68-654828be4ac0",
+        // dt-webui.conformance-dt-1.dcsa.org
+        "arn:aws:acm:eu-north-1:231663969095:certificate/58332d65-4f49-4216-9ebc-d8ed2219abdf",
+        // dt.conformance-dt-1.dcsa.org
+        "arn:aws:acm:us-east-1:231663969095:certificate/bba79568-0523-4b34-9844-accedcb4bd5e");
 
     new ConformanceStack(
         app,

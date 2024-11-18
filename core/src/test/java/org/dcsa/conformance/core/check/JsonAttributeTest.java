@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -29,9 +28,10 @@ import java.util.function.Predicate;
 
 import static org.mockito.ArgumentMatchers.any;
 
-@ExtendWith(MockitoExtension.class)
 class JsonAttributeTest {
 
+  private ObjectNode objectNode;
+  private ArrayNode arrayNode;
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final JsonContentCheck jsonContentCheck =
@@ -46,6 +46,12 @@ class JsonAttributeTest {
           return Collections.emptySet();
         }
       };
+
+  @BeforeEach
+  void setUp() {
+    arrayNode = JsonNodeFactory.instance.arrayNode(); // Initialize in @BeforeEach
+    objectNode = JsonNodeFactory.instance.objectNode(); // Initialize in @BeforeEach
+  }
 
   @Test
   void testContentChecksWithVarArgs() {
@@ -62,12 +68,15 @@ class JsonAttributeTest {
     assertDoesNotThrow(
         () ->
             JsonAttribute.contentChecks(
-                predicate, UUID.randomUUID(), HttpMessageType.REQUEST, "2.0.0", jsonContentCheck));
+                predicate,
+                UUID.randomUUID(),
+                HttpMessageType.REQUEST,
+                "2.0.0",
+                List.of(jsonContentCheck)));
   }
 
   @Test
   void testIsTrueWithJsonPointer() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     assertTrue(JsonAttribute.isTrue(JsonPointer.compile("/test")).test(objectNode));
     assertFalse(JsonAttribute.isTrue(JsonPointer.compile("/testFalse")).test(objectNode));
@@ -75,7 +84,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsTrueWithStringPath() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     assertTrue(JsonAttribute.isTrue("test").test(objectNode));
     assertFalse(JsonAttribute.isTrue("testFalse").test(objectNode));
@@ -83,7 +91,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsFalseWithStringPath() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", false);
     assertTrue(JsonAttribute.isFalse("test").test(objectNode));
     assertFalse(JsonAttribute.isFalse("testFalse").test(objectNode));
@@ -91,7 +98,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsEqualTo() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     assertTrue(JsonAttribute.isEqualTo("test", "test").test(objectNode));
     assertFalse(JsonAttribute.isEqualTo("test", "testFalse").test(objectNode));
@@ -99,7 +105,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsOneOf() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(JsonAttribute.isOneOf("test", Set.of("test", "test1")).test(objectNode));
@@ -108,7 +113,6 @@ class JsonAttributeTest {
 
   @Test
   void testMustBePresent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "value");
 
     assertTrue(
@@ -123,7 +127,6 @@ class JsonAttributeTest {
 
   @Test
   void testIfThen() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     objectNode.put("test2", "test2");
     assertTrue(
@@ -170,7 +173,6 @@ class JsonAttributeTest {
 
   @Test
   void testMustBeNotNull() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     String reason = "test reason";
 
@@ -186,7 +188,6 @@ class JsonAttributeTest {
 
   @Test
   void testMustEqual() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -212,7 +213,6 @@ class JsonAttributeTest {
 
   @Test
   void testPath() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -227,23 +227,17 @@ class JsonAttributeTest {
 
   @Test
   void testLostAttributeCheck() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     Supplier<JsonNode> supplier = () -> objectNode;
 
-    assertDoesNotThrow(
-        () -> org.dcsa.conformance.core.check.JsonAttribute.lostAttributeCheck("test", supplier));
+    assertDoesNotThrow(() -> JsonAttribute.lostAttributeCheck("test", supplier));
 
     BiConsumer<JsonNode, JsonNode> normalizer = (a, b) -> {};
-    assertDoesNotThrow(
-        () ->
-            org.dcsa.conformance.core.check.JsonAttribute.lostAttributeCheck(
-                "test", supplier, normalizer));
+    assertDoesNotThrow(() -> JsonAttribute.lostAttributeCheck("test", supplier, normalizer));
   }
 
   @Test
   void testPresenceImpliesOtherField() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     objectNode.put("test1", "test1");
 
@@ -259,8 +253,6 @@ class JsonAttributeTest {
 
   @Test
   void testAllIndividualMatchesMustBeValid() {
-    ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
 
@@ -277,8 +269,6 @@ class JsonAttributeTest {
 
   @Test
   void testUnique() {
-    ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
     arrayNode.add(objectNode);
@@ -289,7 +279,6 @@ class JsonAttributeTest {
 
   @Test
   void testPathValidation() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -300,7 +289,6 @@ class JsonAttributeTest {
 
   @Test
   void testAtValidation() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -316,9 +304,7 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMustBeNonEmpty() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
-    ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
     arrayNode.add(objectNode);
 
     assertTrue(JsonAttribute.matchedMustBeNonEmpty().validate(objectNode, "").isEmpty());
@@ -333,7 +319,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMustBeNotNull() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     objectNode.putNull("test1");
 
@@ -344,7 +329,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMustBeTrue() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     objectNode.put("testFalse", false);
 
@@ -355,7 +339,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMaximum() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", 1);
 
     assertTrue(JsonAttribute.matchedMaximum(2).validate(objectNode.get("test"), "").isEmpty());
@@ -374,8 +357,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMaxLength() {
-    ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
     arrayNode.add(objectNode);
 
@@ -397,7 +378,6 @@ class JsonAttributeTest {
     KeywordDataset dataset = Mockito.mock(KeywordDataset.class);
     Mockito.when(dataset.contains(any())).thenReturn(true);
 
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -408,7 +388,6 @@ class JsonAttributeTest {
 
   @Test
   void testAtMostOneOf() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -424,7 +403,6 @@ class JsonAttributeTest {
 
   @Test
   void testAtLeastOneOf() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "test");
 
     assertTrue(
@@ -440,7 +418,6 @@ class JsonAttributeTest {
 
   @Test
   void testIfThenElse() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     objectNode.put("test2", "value");
 
@@ -465,7 +442,6 @@ class JsonAttributeTest {
 
   @Test
   void testIfMatchedThen() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     objectNode.put("test2", "value");
 
@@ -486,7 +462,6 @@ class JsonAttributeTest {
 
   @Test
   void testIfMatchedThenElse() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", true);
     objectNode.put("test2", "value");
 
@@ -515,7 +490,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMustBePresent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "value");
 
     // Test when the node is present
@@ -533,7 +507,6 @@ class JsonAttributeTest {
     Mockito.when(dataset.contains("validKeyword")).thenReturn(true);
     Mockito.when(dataset.contains("invalidKeyword")).thenReturn(false);
 
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "validKeyword");
 
     JsonContentMatchedValidation validation =
@@ -554,7 +527,6 @@ class JsonAttributeTest {
 
   @Test
   void testMustBeAbsent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "value");
 
     // Test when the node is present
@@ -572,7 +544,6 @@ class JsonAttributeTest {
 
   @Test
   void testMatchedMustEqual() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "expectedValue");
 
     Supplier<String> expectedValueSupplier = () -> "expectedValue";
@@ -606,7 +577,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsJsonNodePresent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "value");
 
     // Test when the node is present and not null
@@ -619,7 +589,6 @@ class JsonAttributeTest {
 
   @Test
   void testIsJsonNodeAbsent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test", "value");
 
     // Test when the node is present and not null
@@ -632,7 +601,6 @@ class JsonAttributeTest {
 
   @Test
   void testAtLeastOneOfMatched() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test1", "value1");
     objectNode.put("test2", "value2");
 
@@ -657,7 +625,6 @@ class JsonAttributeTest {
 
   @Test
   void testAllOrNoneArePresent() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("test1", "value1");
     objectNode.put("test2", "value2");
 
@@ -683,7 +650,6 @@ class JsonAttributeTest {
 
   @Test
   void testXOrFields() {
-    ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
     objectNode.put("field1", "value1");
 
     JsonRebaseableContentCheck check =
@@ -697,7 +663,7 @@ class JsonAttributeTest {
     objectNode.put("field2", "value2");
     result = check.validate(objectNode, "");
     assertFalse(result.isEmpty());
-    assertTrue(result.contains("Either one of them can be present, but not both: field1, field2"));
+    assertTrue(result.contains("Either one of them can be present, but not both : field1, field2"));
 
     // Test when none of the fields are present
     objectNode.removeAll();

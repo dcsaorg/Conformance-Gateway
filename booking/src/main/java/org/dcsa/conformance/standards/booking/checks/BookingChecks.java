@@ -526,7 +526,7 @@ public class BookingChecks {
     ));
 
     checks.add(JsonAttribute.customValidator(
-      "[Scenario] Verify that the correct 'contractQuotationReference' is used",
+      "[Scenario] Verify that the correct 'contractQuotationReference'/'serviceContractReference' is used",
       body -> {
         var contractQuotationReference = body.path("contractQuotationReference").asText("");
         var serviceContractReference = body.path("serviceContractReference").asText("");

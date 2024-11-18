@@ -664,7 +664,7 @@ public class JsonAttribute {
     if (ptrs.length < 2) {
       throw new IllegalStateException("At least two arguments are required");
     }
-    String name = "The following are eXclusive OR fields (either one of them can be present, but not both): %s".formatted(
+    String name = "Either one of them can be present, but not both : %s".formatted(
       Arrays.stream(ptrs)
         .map(JsonAttribute::renderJsonPointer)
         .collect(Collectors.joining(", "))
@@ -678,7 +678,7 @@ public class JsonAttribute {
           return Set.of();
         }
         return Set.of(
-          "At least one of the following must be present: %s".formatted(
+          "Either one of them can be present, but not both : %s".formatted(
             Arrays.stream(ptrs)
               .map(ptr -> JsonAttribute.renderJsonPointer(ptr, contextPath))
               .collect(Collectors.joining(", "))

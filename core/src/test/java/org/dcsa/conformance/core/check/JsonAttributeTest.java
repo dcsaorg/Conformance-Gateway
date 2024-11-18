@@ -49,8 +49,9 @@ class JsonAttributeTest {
 
   @BeforeEach
   void setUp() {
-    arrayNode = JsonNodeFactory.instance.arrayNode(); // Initialize in @BeforeEach
-    objectNode = JsonNodeFactory.instance.objectNode(); // Initialize in @BeforeEach
+    // Initialize in @BeforeEach
+    arrayNode = JsonNodeFactory.instance.arrayNode();
+    objectNode = JsonNodeFactory.instance.objectNode();
   }
 
   @Test

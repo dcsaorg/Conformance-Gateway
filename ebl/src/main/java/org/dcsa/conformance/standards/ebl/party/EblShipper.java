@@ -106,6 +106,11 @@ public class EblShipper extends ConformanceParty {
       var parties = (ObjectNode) jsonRequestBody.path("documentParties");
       parties.putObject("consignee")
         .put("partyName", "DCSA CTK Consignee")
+        .putArray("identifyingCodes")
+        .addObject()
+        .put("codeListProvider","W3C")
+        .put("partyCode","MSK")
+        .put("codeListName","DID")
         .putArray("partyContactDetails")
         .addObject()
         .put("name", "DCSA another test person")

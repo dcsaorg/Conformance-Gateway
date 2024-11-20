@@ -15,7 +15,6 @@
     "portChargesPaymentTermCode": "PRE",
     "otherChargesPaymentTermCode": "PRE"
   },
-  "contractQuotationReference": "CONTRACT_QUOTATION_REFERENCE_PLACEHOLDER",
   "vessel": {
     "name": "King of the Seas",
     "vesselIMONumber": "9298686"

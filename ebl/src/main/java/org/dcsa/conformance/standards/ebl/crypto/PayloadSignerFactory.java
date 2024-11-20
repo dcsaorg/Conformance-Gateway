@@ -7,8 +7,14 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import lombok.SneakyThrows;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.util.io.pem.PemWriter;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.standards.ebl.crypto.impl.RSAPayloadSigner;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -178,22 +184,15 @@ public class PayloadSignerFactory {
 
     @SneakyThrows
     public static SignatureVerifier verifierFromPemEncodedPublicKey(String publicKeyPem) {
-      if (publicKeyPem.contains("-----BEGIN RSA PUBLIC KEY-----")) {
-        String privKeyPEM = publicKeyPem.replace("-----BEGIN RSA PUBLIC KEY-----", "")
-          .replace("-----END RSA PUBLIC KEY-----", "")
-          .replaceAll("\\s++", "");
-
-        byte [] encoded = Base64.getDecoder().decode(privKeyPEM);
-
+      try (var reader = new PemReader(new StringReader(publicKeyPem))) {
+        var encoded = reader.readPemObject().getContent();
         var keySpec = new X509EncodedKeySpec(encoded);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         var rsaPublicKey = (RSAPublicKey)kf.generatePublic(keySpec);
         return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
+      } catch (Exception e) {
+        throw new UserFacingException("Could not parse provided string as an X509 PEM encoded RSA public key");
       }
-      if (publicKeyPem.isEmpty()) {
-        throw new AssertionError("Missing key at the time where it was needed.");
-      }
-      throw new UnsupportedOperationException("Unsupported key format");
     }
 
     private record SingleKeySignatureVerifier(JWSVerifier jwsVerifier) implements SignatureVerifier {
@@ -219,13 +218,12 @@ public class PayloadSignerFactory {
       }
     }
 
+    @SneakyThrows
     public static String pemEncodeKey(RSAPublicKey key) {
-      var base64 = Base64.getEncoder().encodeToString(key.getEncoded());
-      var result = new StringBuilder("-----BEGIN RSA PUBLIC KEY-----\n");
-      for (int i = 0; i < base64.length() ; i += 64) {
-        var limit = i + Math.min(64, base64.length() - i);
-        result.append(base64, i, limit);
+      var w = new StringWriter();
+      try (var pemWriter = new PemWriter(w)) {
+        pemWriter.writeObject(new PemObject("PUBLIC KEY", key.getEncoded()));
       }
-      return result.append("-----END RSA PUBLIC KEY-----").toString();
+      return w.getBuffer().toString();
     }
 }

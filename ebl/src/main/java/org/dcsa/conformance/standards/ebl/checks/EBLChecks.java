@@ -34,7 +34,6 @@ public class EBLChecks {
 
   private static final JsonPointer SI_REQUEST_INVOICE_PAYABLE_AT_UN_LOCATION_CODE = JsonPointer.compile("/invoicePayableAt/UNLocationCode");
   private static final JsonPointer SI_REQUEST_SEND_TO_PLATFORM = JsonPointer.compile("/documentParties/issueTo/sendToPlatform");
-  private static final JsonPointer ISSUE_TO_PARTY = JsonPointer.compile("/documentParties/issueTo");
 
   private static final JsonPointer TD_TDR = JsonPointer.compile("/transportDocumentReference");
   private static final JsonPointer TD_TRANSPORT_DOCUMENT_STATUS = JsonPointer.compile("/transportDocumentStatus");
@@ -454,11 +453,25 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
 
+  private static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
+    JsonAttribute.ifThenElse(
+      "'isElectronic' and 'transportDocumentTypeCode' BOL implies 'sendToPlatform'",
+      JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
+      JsonAttribute.ifThenElse(
+        "'transportDocumentTypeCode' is BOL",
+        JsonAttribute.isEqualTo("/transportDocumentTypeCode", "BOL"),
+        JsonAttribute.mustBePresent(SI_REQUEST_SEND_TO_PLATFORM),
+        JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)
+      ),
+      JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)
+    );
+
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
+    SEND_TO_PLATFORM_CONDITIONAL_CHECK,
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
@@ -468,12 +481,6 @@ public class EBLChecks {
     EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
     E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
     E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
-    JsonAttribute.ifThenElse(
-      "'isElectronic' implies 'issueTo' party",
-      JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
-      JsonAttribute.mustBePresent(ISSUE_TO_PARTY),
-      JsonAttribute.mustBeAbsent(ISSUE_TO_PARTY)
-    ),
     DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,

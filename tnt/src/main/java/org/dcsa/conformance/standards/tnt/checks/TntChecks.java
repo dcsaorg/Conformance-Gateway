@@ -13,6 +13,7 @@ import org.dcsa.conformance.standards.tnt.party.TntRole;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,19 +39,17 @@ public class TntChecks {
 
     var checks = new ArrayList<JsonContentCheck>();
 
-    checks.add(JsonAttribute.customValidator(
-      "Validate that eventID values are unique",
-      body -> {
-        Set<String> uniqueEventIds = StreamSupport.stream(body.spliterator(), false)
-          .filter(node -> node.has("eventID"))
-          .map(node -> node.path("eventID").asText())
-          .collect(Collectors.toSet());
-        if (!uniqueEventIds.isEmpty() && uniqueEventIds.size() != body.size()) {
-          return Set.of("Event ID values are not unique");
-        }
-        return Set.of();
-      }
-    ));
+    // The OpenAPI specification explicitly states that the eventIDs must be unique.
+    checks.add(
+      JsonAttribute.customValidator(
+        "Validate that eventID values are unique",
+        body ->
+          StreamSupport.stream(body.spliterator(), false)
+            .filter(node -> node.has("eventID"))
+            .map(node -> node.path("eventID").asText())
+            .allMatch(new HashSet<>()::add)
+            ? Set.of()
+            : Set.of("Event ID values are not unique")));
 
     checks.add(JsonAttribute.customValidator(
       "Validate eventCreatedDateTime parameter conditions are met",

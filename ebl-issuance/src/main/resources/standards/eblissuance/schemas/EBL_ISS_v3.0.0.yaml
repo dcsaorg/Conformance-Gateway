@@ -25,6 +25,10 @@ info:
     ### API Design & Implementation Principles
     This API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)
 
+    ### Digital Signatures
+    Please look at the following implementation guide for how to create [Digital Signatures](https://developer.dcsa.org/implementing-digital-signatures-for-transport-documents).
+
+    ### Changelog and GitHub
     For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3/issuance#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.
 
     API specification issued by [DCSA.org](https://dcsa.org/).
@@ -254,7 +258,7 @@ components:
 
               - `7000-7999` Technical error codes
               - `8000-8999` Functional error codes
-              - `9000-9999` API provider-specific error codes            
+              - `9000-9999` API provider-specific error codes
 
             [Error codes as specified by DCSA](https://developer.dcsa.org/standard-error-codes).
           minimum: 7000
@@ -398,7 +402,7 @@ components:
           pattern: ^\S+$
           maxLength: 4
           description: |
-            The EBL platform of the transaction party. 
+            The EBL platform of the transaction party.
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
@@ -536,7 +540,7 @@ components:
       description: |
         The document that governs the terms of carriage between shipper and carrier for maritime transportation. Two distinct types of transport documents exist:
         - Bill of Lading
-        - Sea Waybill. 
+        - Sea Waybill.
       properties:
         transportDocumentReference:
           type: string
@@ -647,7 +651,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer with charges.
-            
+
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         numberOfOriginalsWithoutCharges:
@@ -656,7 +660,7 @@ components:
           minimum: 0
           description: |
             Number of originals of the Bill of Lading that has been requested by the customer without charges.
-            
+
             **Condition:** Only applicable if `transportDocumentType` = `BOL` (Bill of Lading). If `isElectronic = 'True'`, accepted value is `1` (one) or `0` (zero)
           example: 1
         displayedNameForPlaceOfReceipt:
@@ -816,7 +820,7 @@ components:
           minimum: 0
           description: |
             The value of the cargo that the shipper declares in order to avoid the carrier's limitation of liability and "Ad Valorem" freight, i.e., freight which is calculated based on the value of the goods declared by the shipper.
-            
+
             **Condition:** Included in the transport document upon customer request. If customers want the value to show, evidence is required, and customers need to approve additional insurance fee charge from the carrier (very exceptional).
           example: 1231.1
         declaredValueCurrency:
@@ -881,7 +885,7 @@ components:
           type: array
           minItems: 1
           description: |
-            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.) 
+            The contact details of the person(s) to contact in relation to the **Transport Document** (changes, notifications etc.)
           items:
             $ref: '#/components/schemas/PartyContactDetail'
         documentParties:
@@ -1011,7 +1015,7 @@ components:
           maxLength: 35
           pattern: ^\S(?:.*\S)?$
           description: |
-            The value of the reference. 
+            The value of the reference.
           example: HHL00103004
       required:
         - type
@@ -1043,7 +1047,7 @@ components:
             maxLength: 35
             pattern: ^\S(?:.*\S)?$
             description: |
-              The value of the reference. 
+              The value of the reference.
             example: HHL00103004
       required:
         - type
@@ -1197,7 +1201,7 @@ components:
             - '2512'
       example:
         type: TARIC
-        values: 
+        values:
           - '85171200'
       required:
         - type
@@ -1907,7 +1911,7 @@ components:
           format: float
           description: |
             Lowest temperature at which a chemical can vaporize to form an ignitable mixture in air.
-            
+
             **Condition:** only applicable to specific hazardous goods according to the IMO IMDG Code.
           example: 42
         transportControlTemperature:
@@ -2127,7 +2131,7 @@ components:
           minimum: 0
           maximum: 100
           description: |
-            The percentage of the controlled atmosphere CO<sub>2</sub> target value
+            The percentage of the controlled atmosphere O<sub>2</sub> target value
           example: 25
         co2Setpoint:
           type: number
@@ -2296,7 +2300,7 @@ components:
 
         **Condition:** Only when pre-carriage is done by the carrier.
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` or a `Geo Coordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
       example:
@@ -2404,7 +2408,7 @@ components:
 
         **Condition:** Only when onward transport is done by the carrier
 
-        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility` or an `Address`.
+        The location can be specified in **any** of the following ways: `UN Location Code`, `Facility`, `Address` or a `Geo Coordinate`.
 
         **Condition:** It is expected that if a location is specified in multiple ways (e.g. both as an `Address` and as a `Facility`) that both ways point to the same location.
       example:
@@ -2824,7 +2828,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-            
+
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -2878,7 +2882,7 @@ components:
       title: Consignee
       description: |
         The party to which goods are consigned in the `Master Bill of Lading`.
-        
+
         **Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)
 
         **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
@@ -2907,7 +2911,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-            
+
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -2921,6 +2925,7 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -2955,13 +2960,14 @@ components:
             example: HHL007
       required:
         - partyName
+        - identifyingCodes
 
     Endorsee:
       type: object
       title: Endorsee
       description: |
         The party to whom the title to the goods is transferred by means of endorsement.
-        
+
         **Condition:** Can only be provided for negotiable BLs (`isToOrder=true`). If a negotiable BL does not have an `Endorsee`, the BL is said to be "blank endorsed". Note `Consignee` and `Endorsee` are mutually exclusive.
 
         **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
@@ -2980,7 +2986,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-            
+
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -2994,6 +3000,7 @@ components:
             example: Strawinskylaan 4117
         identifyingCodes:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -3010,6 +3017,7 @@ components:
             $ref: '#/components/schemas/PartyContactDetail'
       required:
         - partyName
+        - identifyingCodes
 
     CarriersAgentAtDestination:
       type: object
@@ -3069,7 +3077,7 @@ components:
           maxItems: 6
           description: |
             The address of the party to be displayed on the `Transport Document`. The displayed address may be used to match the address provided in the `Letter of Credit`.
-            
+
             **Conditions:** If provided:
               - the displayed address must be included in the `Transport Document`.
               - for physical BL (`isElectronic=false`), it is only allowed to provide max 2 lines of 35 characters
@@ -3396,7 +3404,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Export License` or permit is required for this shipment/commodity/destination.
-              
+
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:
@@ -3434,7 +3442,7 @@ components:
           type: boolean
           description: |
             Information provided by the shipper to indicate whether an `Import License` or permit is required for this shipment/commodity/destination.
-              
+
             **Note:** If this property is omitted, it may be interpreted differently by different API providers and by the same API provider in different contexts.
           example: true
         reference:

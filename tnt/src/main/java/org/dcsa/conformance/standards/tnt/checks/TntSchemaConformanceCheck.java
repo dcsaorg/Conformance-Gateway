@@ -18,17 +18,19 @@ import java.util.function.Predicate;
 public class TntSchemaConformanceCheck extends ActionCheck {
 
   private final Map<TntEventType, JsonSchemaValidator> eventSchemaValidators;
+
   public TntSchemaConformanceCheck(
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    HttpMessageType httpMessageType,
-    Map<TntEventType, JsonSchemaValidator> eventSchemaValidators) {
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      HttpMessageType httpMessageType,
+      Map<TntEventType, JsonSchemaValidator> eventSchemaValidators) {
     super(
-      "",
-      "The HTTP %s matches the standard JSON schema".formatted(HttpMessageType.RESPONSE.name().toLowerCase()),
-      isRelevantForRoleName,
-      matchedExchangeUuid,
-      httpMessageType);
+        "",
+        "The HTTP %s matches the standard JSON schema"
+            .formatted(HttpMessageType.RESPONSE.name().toLowerCase()),
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        httpMessageType);
     this.eventSchemaValidators = eventSchemaValidators;
   }
 
@@ -37,19 +39,17 @@ public class TntSchemaConformanceCheck extends ActionCheck {
   }
 
   private ArrayList<JsonNode> findEventNodes(
-    ArrayList<JsonNode> foundEventNodes, JsonNode searchInJsonNode) {
+      ArrayList<JsonNode> foundEventNodes, JsonNode searchInJsonNode) {
     if (isEventNode(searchInJsonNode)) {
       foundEventNodes.add(searchInJsonNode);
     } else {
-      searchInJsonNode.forEach(
-        elementNode -> findEventNodes(foundEventNodes, elementNode));
+      searchInJsonNode.forEach(elementNode -> findEventNodes(foundEventNodes, elementNode));
     }
     return foundEventNodes;
   }
 
   @Override
-  protected Set<String> checkConformance(
-    Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) {
       return Set.of();
@@ -63,24 +63,30 @@ public class TntSchemaConformanceCheck extends ActionCheck {
 
     ArrayList<JsonNode> eventNodes = findEventNodes(new ArrayList<>(), jsonResponse);
 
-    eventNodes.stream().forEachOrdered(eventNode -> {
-      JsonNode eventTypeNode = eventNode.path("eventType");
-      String eventTypeText = eventTypeNode.asText().toUpperCase();
-      TntEventType eventType;
-      try {
-        eventType = TntEventType.valueOf(eventTypeText);
-      } catch (RuntimeException e) {
-        validationErrors.add(
-          "Event #%d: incorrect eventType attribute: %s"
-            .formatted(eventNodes.indexOf(eventNode), eventTypeNode));
-        return;
-      }
+    eventNodes.stream()
+        .forEachOrdered(
+            eventNode -> {
+              JsonNode eventTypeNode = eventNode.path("eventType");
+              String eventTypeText = eventTypeNode.asText().toUpperCase();
+              TntEventType eventType;
+              try {
+                eventType = TntEventType.valueOf(eventTypeText);
+              } catch (RuntimeException e) {
+                validationErrors.add(
+                    "Event #%d: incorrect eventType attribute: %s"
+                        .formatted(eventNodes.indexOf(eventNode), eventTypeNode));
+                return;
+              }
 
-      JsonSchemaValidator eventSchemaValidator = eventSchemaValidators.get(eventType);
-      eventSchemaValidator.validate(eventNode).forEach(validationError ->
-        validationErrors.add("Event #%d: %s".formatted(eventNodes.indexOf(eventNode), validationError))
-      );
-    });
+              JsonSchemaValidator eventSchemaValidator = eventSchemaValidators.get(eventType);
+              eventSchemaValidator
+                  .validate(eventNode)
+                  .forEach(
+                      validationError ->
+                          validationErrors.add(
+                              "Event #%d: %s"
+                                  .formatted(eventNodes.indexOf(eventNode), validationError)));
+            });
     return validationErrors;
   }
 }

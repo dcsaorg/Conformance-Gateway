@@ -104,12 +104,18 @@ public class EblShipper extends ConformanceParty {
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is a full element
       var parties = (ObjectNode) jsonRequestBody.path("documentParties");
-      parties.putObject("consignee")
-        .put("partyName", "DCSA CTK Consignee")
-        .putArray("partyContactDetails")
-        .addObject()
-        .put("name", "DCSA another test person")
-        .put("email", "no-reply@dcsa-consignee.example.org");
+      parties
+          .putObject("consignee")
+          .put("partyName", "DCSA CTK Consignee")
+          .putArray("identifyingCodes")
+          .addObject()
+          .put("codeListProvider", "W3C")
+          .put("partyCode", "MSK")
+          .put("codeListName", "DID")
+          .putArray("partyContactDetails")
+          .addObject()
+          .put("name", "DCSA another test person")
+          .put("email", "no-reply@dcsa-consignee.example.org");
     }
     return jsonRequestBody;
   }

@@ -182,7 +182,7 @@ public class TntChecks {
     // following values:  CBR, BKG, SHI, SRM, TRD, ARN, VGM, CAS, CUS, DGD, OOG
     checks.add(
         JsonAttribute.customValidator(
-            "Validate documentTypeCode exists and matches in JSON response if request parameter has documentTypeCode",
+            "Validate documentTypeCode exists for SHIPMENT events and matches in JSON response if request parameter has documentTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
               ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
@@ -225,7 +225,7 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate transportEventTypeCode exists and matches in JSON response "
+            "Validate transportEventTypeCode exists for TRANSPORT events and matches in JSON response "
                 + "if request parameter has transportEventTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
@@ -270,67 +270,117 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate transportCallID exists for TRANSPORT and matches in JSON response if request parameter has transportCallID",
+            "Validate transportCallID exists for TRANSPORT events and matches in JSON response if request parameter has transportCallID",
             body ->
                 validateParameter(
                     body,
                     sspSupplier,
                     TntFilterParameter.TRANSPORT_CALL_ID,
                     "/transportCall/transportCallID",
-                    TRANSPORT_EVENT_TYPE,
+                    TRANSPORT_EVENT_TYPE)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate transportCallID exists for EQUIPMENT events and matches in JSON response if request parameter has transportCallID",
+            body ->
+                validateParameter(
+                    body,
+                    sspSupplier,
+                    TntFilterParameter.TRANSPORT_CALL_ID,
+                    "/transportCall/transportCallID",
                     EQUIPMENT_EVENT_TYPE)));
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate vesselIMONumber exists and matches in JSON response if request parameter has vesselIMONumber",
+            "Validate vesselIMONumber exists for TRANSPORT events and matches in JSON response if request parameter has vesselIMONumber",
             body ->
                 validateParameter(
                     body,
                     sspSupplier,
                     TntFilterParameter.VESSEL_IMO_NUMBER,
                     "/transportCall/vessel/vesselIMONumber",
-                    TRANSPORT_EVENT_TYPE,
+                    TRANSPORT_EVENT_TYPE)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate vesselIMONumber exists for EQUIPMENT events and matches in JSON response if request parameter has vesselIMONumber",
+            body ->
+                validateParameter(
+                    body,
+                    sspSupplier,
+                    TntFilterParameter.VESSEL_IMO_NUMBER,
+                    "/transportCall/vessel/vesselIMONumber",
                     EQUIPMENT_EVENT_TYPE)));
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate exportVoyageNumber exists and matches in JSON response if request parameter has exportVoyageNumber",
+            "Validate exportVoyageNumber exists for TRANSPORT events and matches in JSON response if request parameter has exportVoyageNumber",
             body ->
                 validateParameter(
                     body,
                     sspSupplier,
                     TntFilterParameter.EXPORT_VOYAGE_NUMBER,
                     "/transportCall/exportVoyageNumber",
-                    TRANSPORT_EVENT_TYPE,
+                    TRANSPORT_EVENT_TYPE)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate exportVoyageNumber exists for EQUIPMENT events and matches in JSON response if request parameter has exportVoyageNumber",
+            body ->
+                validateParameter(
+                    body,
+                    sspSupplier,
+                    TntFilterParameter.EXPORT_VOYAGE_NUMBER,
+                    "/transportCall/exportVoyageNumber",
                     EQUIPMENT_EVENT_TYPE)));
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate carrierServiceCode exists and matches in JSON response if request parameter has carrierServiceCode",
+            "Validate carrierServiceCode exists for TRANSPORT events and matches in JSON response if request parameter has carrierServiceCode",
             body ->
                 validateParameter(
                     body,
                     sspSupplier,
                     TntFilterParameter.CARRIER_SERVICE_CODE,
                     "/transportCall/carrierServiceCode",
-                    TRANSPORT_EVENT_TYPE,
+                    TRANSPORT_EVENT_TYPE)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate carrierServiceCode exists for EQUIPMENT events and matches in JSON response if request parameter has carrierServiceCode",
+            body ->
+                validateParameter(
+                    body,
+                    sspSupplier,
+                    TntFilterParameter.CARRIER_SERVICE_CODE,
+                    "/transportCall/carrierServiceCode",
                     EQUIPMENT_EVENT_TYPE)));
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate UNLocationCode exists and matches in JSON response if request parameter has UNLocationCode",
+            "Validate UNLocationCode exists for TRANSPORT events and matches in JSON response if request parameter has UNLocationCode",
             body ->
                 validateParameter(
                     body,
                     sspSupplier,
                     TntFilterParameter.UN_LOCATION_CODE,
                     "/transportCall/location/UNLocationCode",
-                    TRANSPORT_EVENT_TYPE,
+                    TRANSPORT_EVENT_TYPE)));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "Validate UNLocationCode exists for EQUIPMENT events and matches in JSON response if request parameter has UNLocationCode",
+            body ->
+                validateParameter(
+                    body,
+                    sspSupplier,
+                    TntFilterParameter.UN_LOCATION_CODE,
+                    "/transportCall/location/UNLocationCode",
                     EQUIPMENT_EVENT_TYPE)));
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate equipmentEventTypeCode exists and matches in JSON response if request parameter "
+            "Validate equipmentEventTypeCode exists for EQUIPMENT events and matches in JSON response if request parameter "
                 + "has equipmentEventTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
@@ -419,8 +469,7 @@ public class TntChecks {
       Supplier<SuppliedScenarioParameters> sspSupplier,
       TntFilterParameter parameter,
       String jsonPath,
-      String eventType1,
-      String eventType2) {
+      String eventType) {
 
     Set<String> issues = new LinkedHashSet<>();
     ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
@@ -437,9 +486,7 @@ public class TntChecks {
               .collect(Collectors.toSet());
 
       Set<String> errors =
-          Stream.concat(
-                  filterNodesByEventType(eventNodes, eventType1),
-                  filterNodesByEventType(eventNodes, eventType2))
+          filterNodesByEventType(eventNodes, eventType)
               .filter(
                   node -> {
                     JsonNode valueNode = node.at(jsonPath);

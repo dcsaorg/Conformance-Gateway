@@ -101,14 +101,18 @@ public class TntPublisher extends ConformanceParty {
 
     Map<String, List<AttributeMapping>> attributeMappings = AttributeMapping.initializeAttributeMappings();
 
-    ArrayNode jsonResponseBody = (ArrayNode) JsonToolkit.templateFileToJsonNode(
+    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(
       "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
+
+    Set<String> issues = new LinkedHashSet<>();
+    ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(jsonResponseBody, issues);
 
     if (!new QueryParameterSpecificRule().validate(request.queryParams())) {
       return return400(request, "Error: Invalid query parameters provided.");
     }
     ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
-    jsonResponseBody.forEach(filteredArray::add);
+    eventNodes.forEach(filteredArray::add);
+
     // Chained Filtering Logic
     for (Map.Entry<String, ? extends Collection<String>> queryParam : request.queryParams().entrySet()) {
       String paramName = queryParam.getKey();

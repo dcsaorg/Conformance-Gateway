@@ -142,18 +142,18 @@ public class AttributeMapping {
     attributeMappings.put("equipmentReference", List.of(
       new AttributeMapping("equipmentReference", (node, value) -> !node.isMissingNode(),
         Set.of()),
-      new AttributeMapping("references", (node, value) -> !node.isMissingNode()
+      new AttributeMapping("references/*", (node, value) -> !node.isMissingNode()
         && node.path("referenceType").asText().equals("EQ") && node.path("referenceValue").asText().equals(value),
         Set.of())));
   }
 
   private static void addTransportDocumentReferenceMappings(Map<String, List<AttributeMapping>> attributeMappings) {
     attributeMappings.put("transportDocumentReference", List.of(
-      new AttributeMapping("documentReferences", (node, value) -> !node.isMissingNode()
+      new AttributeMapping("documentReferences/*", (node, value) -> !node.isMissingNode()
         && node.path("documentReferenceType").asText().equals("TRD") && node.path("documentReferenceValue").asText().equals(value),
         Set.of()),
       new AttributeMapping("/", (node, value) -> !node.isMissingNode()
-        && node.path("documentReferenceType").asText().equals("TRD") && node.path("documentReferenceValue").asText().equals(value),
+        && node.path(DOCUMENT_TYPE_CODE).asText().equals("TRD") && node.path("documentID").asText().equals(value),
         Set.of())));
   }
 

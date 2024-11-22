@@ -43,18 +43,22 @@ public class TntChecks {
                     ? Set.of("No events found in response")
                     : Set.of()));
 
-    // The OpenAPI specification explicitly states that the eventIDs must be unique.
     checks.add(
         JsonAttribute.customValidator(
-            "Validate that eventID values are unique",
+            "Each event must have a unique eventID",
             body -> {
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-              return eventNodes.stream()
-                      .filter(node -> node.has("eventID"))
-                      .map(node -> node.path("eventID").asText())
-                      .allMatch(new HashSet<>()::add)
-                  ? Set.of()
-                  : Set.of("Event ID values are not unique");
+              LinkedHashSet<String> validationErrors = new LinkedHashSet<>();
+              HashSet<Object> uniqueEventIds = new HashSet<>();
+              TntSchemaConformanceCheck.findEventNodes(body).stream()
+                  .filter(node -> node.has("eventID"))
+                  .map(node -> node.path("eventID").asText())
+                  .forEach(
+                      eventId -> {
+                        if (!uniqueEventIds.add(eventId)) {
+                          validationErrors.add("Duplicate eventId: '%s'".formatted(eventId));
+                        }
+                      });
+              return validationErrors;
             }));
 
     checks.add(

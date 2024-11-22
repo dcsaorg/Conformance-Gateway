@@ -34,6 +34,7 @@ public class TntPublisher extends ConformanceParty {
 
   private static final boolean RETURN_EMPTY_RESPONSE = false;
   private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
+  private static final boolean USE_WRONG_EVENT_IDS = false;
 
   public TntPublisher(
       String apiVersion,
@@ -173,6 +174,14 @@ public class TntPublisher extends ConformanceParty {
           new ConformanceMessageBody(
               JsonToolkit.templateFileToJsonNode(
                   "/standards/tnt/messages/tnt-220-response-wrong-structure.json",
+                  Map.ofEntries())));
+    } else if (USE_WRONG_EVENT_IDS) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                "/standards/tnt/messages/tnt-220-response-wrong-event-ids.json",
                   Map.ofEntries())));
     } else {
       return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));

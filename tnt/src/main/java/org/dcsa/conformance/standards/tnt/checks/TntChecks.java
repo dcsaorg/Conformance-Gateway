@@ -74,23 +74,19 @@ public class TntChecks {
               Set<String> issues = new LinkedHashSet<>();
               ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
 
-              Set<OffsetDateTime> eventCreatedDateTimes =
-                  eventNodes.stream()
-                      .flatMap(
-                          node -> {
-                            try {
-                              return Stream.of(
-                                  OffsetDateTime.parse(node.path("eventCreatedDateTime").asText()));
-                            } catch (DateTimeParseException e) {
-                              issues.add(
-                                  "Invalid eventCreatedDateTime format: "
-                                      + node.path("eventCreatedDateTime").asText()
-                                      + ": "
-                                      + e.getMessage());
-                              return Stream.empty(); // Return empty stream for invalid date-times
-                            }
-                          })
-                      .collect(Collectors.toSet());
+              Set<OffsetDateTime> eventCreatedDateTimes = new HashSet<>();
+              for (JsonNode node : eventNodes) {
+                try {
+                  eventCreatedDateTimes.add(
+                      OffsetDateTime.parse(node.path("eventCreatedDateTime").asText()));
+                } catch (DateTimeParseException e) {
+                  issues.add(
+                      "Invalid eventCreatedDateTime format: "
+                          + node.path("eventCreatedDateTime").asText()
+                          + ": "
+                          + e.getMessage());
+                }
+              }
 
               Set<Map.Entry<TntFilterParameter, String>> eventCreatedDateTimeParams =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -129,9 +125,6 @@ public class TntChecks {
               return Set.of();
             }));
 
-    // As the OpenAPI Specification Tnt 2.2.0 states that the shipmentEventTypeCode must be one of
-    // the following values: RECE, DRFT, PENA, PENU, REJE, APPR, ISSU, SURR, SUBM, VOID, CONF, REQS,
-    // CMPL, HOLD, RELS
     checks.add(
         JsonAttribute.customValidator(
             "Validate shipmentEventTypeCode exists and matches in JSON response "
@@ -178,8 +171,6 @@ public class TntChecks {
               return Set.of();
             }));
 
-    // As the OpenAPI Specification Tnt 2.2.0 states that the documentTypeCode must be one of the
-    // following values:  CBR, BKG, SHI, SRM, TRD, ARN, VGM, CAS, CUS, DGD, OOG
     checks.add(
         JsonAttribute.customValidator(
             "Validate documentTypeCode exists for SHIPMENT events and matches in JSON response if request parameter has documentTypeCode",
@@ -403,7 +394,8 @@ public class TntChecks {
                             node -> {
                               JsonNode equipmentEventTypeCodeNode =
                                   node.path("equipmentEventTypeCode");
-                              return !expectedEquipmentEventTypeCodes.contains(
+                              return !isEmptyNode(equipmentEventTypeCodeNode)
+                                  && !expectedEquipmentEventTypeCodes.contains(
                                   equipmentEventTypeCodeNode.asText());
                             })
                         .map(

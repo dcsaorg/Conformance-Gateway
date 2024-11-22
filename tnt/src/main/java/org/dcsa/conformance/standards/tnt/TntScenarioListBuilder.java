@@ -109,7 +109,7 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterByTransportEvent(
                             Map.of(
                                 TRANSPORT_DOCUMENT_REFERENCE,
-                                "85943567-eedb-98d3-f4ed-aed697474ed4")),
+                                "reserved-HHL123")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(TRANSPORT_EVENT_TYPE_CODE, "ARRI")),
                         scenarioWithFilterByTransportEvent(
@@ -159,7 +159,7 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(
                                 TRANSPORT_DOCUMENT_REFERENCE,
-                                "85943567-eedb-98d3-f4ed-aed697474ed4")),
+                                "reserved-HHL123")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(TRANSPORT_CALL_ID, "123e4567-e89b-12d3-a456-426614174000")),
                         scenarioWithFilterByEquipmentEvent(Map.of(VESSEL_IMO_NUMBER, "9321483")),

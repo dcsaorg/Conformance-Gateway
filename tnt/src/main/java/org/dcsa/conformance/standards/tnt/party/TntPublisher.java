@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -126,7 +125,6 @@ public class TntPublisher extends ConformanceParty {
       }
     }
 
-    //TODO:: To handle the complex sorting logic like CarrierBookingReference where references are different base on the jsonPath.
     if (request.queryParams().containsKey("sort")) {
       Collection<String> sortingFields = request.queryParams().get("sort");
       List<SortCriteria> sortCriteria = sortingFields.stream()
@@ -196,7 +194,7 @@ public class TntPublisher extends ConformanceParty {
       for (SortCriteria criterion : criteria) {
         comparisonResult = compareNodesByField(node1, node2, criterion.field(), criterion.direction());
         if (comparisonResult != 0) {
-          break; // Stop comparing if a difference is found
+          return comparisonResult; // Stop comparing if a difference is found
         }
       }
       return comparisonResult;

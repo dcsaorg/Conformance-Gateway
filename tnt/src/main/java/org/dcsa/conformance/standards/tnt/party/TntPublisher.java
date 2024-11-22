@@ -32,76 +32,79 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class TntPublisher extends ConformanceParty {
 
   public TntPublisher(
-    String apiVersion,
-    PartyConfiguration partyConfiguration,
-    CounterpartConfiguration counterpartConfiguration,
-    JsonNodeMap persistentMap,
-    PartyWebClient webClient,
-    Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
+      String apiVersion,
+      PartyConfiguration partyConfiguration,
+      CounterpartConfiguration counterpartConfiguration,
+      JsonNodeMap persistentMap,
+      PartyWebClient webClient,
+      Map<String, ? extends Collection<String>> orchestratorAuthHeader) {
     super(
-      apiVersion,
-      partyConfiguration,
-      counterpartConfiguration,
-      persistentMap,
-      webClient,
-      orchestratorAuthHeader);
+        apiVersion,
+        partyConfiguration,
+        counterpartConfiguration,
+        persistentMap,
+        webClient,
+        orchestratorAuthHeader);
   }
 
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {
-    //no state to export
+    // no state to export
   }
 
   @Override
   protected void importPartyJsonState(ObjectNode sourceObjectNode) {
-    //no state to import
+    // no state to import
   }
 
   @Override
   protected void doReset() {
-    //no state to reset
+    // no state to reset
   }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-      Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("TntPublisher.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
 
     SuppliedScenarioParameters responseSsp =
-      SuppliedScenarioParameters.fromMap(
-        StreamSupport.stream(
-            actionPrompt.required("tntFilterParametersQueryParam").spliterator(),
-            false)
-          .collect(
-            Collectors.toMap(
-              jsonTntFilterParameter -> TntFilterParameter.byQueryParamName.get(jsonTntFilterParameter.get("parameter").asText()),
-              jsonTntFilterParameter -> jsonTntFilterParameter.get("value").asText(),
-              (oldValue, newValue) -> oldValue, // merge function to handle duplicate keys
-              LinkedHashMap::new // supplier to create a LinkedHashMap
-            )));
-
+        SuppliedScenarioParameters.fromMap(
+            StreamSupport.stream(
+                    actionPrompt.required("tntFilterParametersQueryParam").spliterator(), false)
+                .collect(
+                    Collectors.toMap(
+                        jsonTntFilterParameter ->
+                            TntFilterParameter.byQueryParamName.get(
+                                jsonTntFilterParameter.get("parameter").asText()),
+                        jsonTntFilterParameter -> jsonTntFilterParameter.get("value").asText(),
+                        (oldValue, newValue) -> oldValue, // merge function to handle duplicate keys
+                        LinkedHashMap::new // supplier to create a LinkedHashMap
+                        )));
 
     asyncOrchestratorPostPartyInput(
-      actionPrompt.required("actionId").asText(), responseSsp.toJson());
+        actionPrompt.required("actionId").asText(), responseSsp.toJson());
 
     addOperatorLogEntry(
-      "Submitting SuppliedScenarioParameters: %s"
-        .formatted(responseSsp.toJson().toPrettyString()));
+        "Submitting SuppliedScenarioParameters: %s"
+            .formatted(responseSsp.toJson().toPrettyString()));
   }
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("TntPublisher.handleRequest(%s)".formatted(request));
-    Map<String, Collection<String>> headers = new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+    Map<String, Collection<String>> headers =
+        new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
 
-    Map<String, List<AttributeMapping>> attributeMappings = AttributeMapping.initializeAttributeMappings();
+    Map<String, List<AttributeMapping>> attributeMappings =
+        AttributeMapping.initializeAttributeMappings();
 
-    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(
-      "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
+    JsonNode jsonResponseBody =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
 
     Set<String> issues = new LinkedHashSet<>();
     ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(jsonResponseBody, issues);
@@ -113,71 +116,90 @@ public class TntPublisher extends ConformanceParty {
     eventNodes.forEach(filteredArray::add);
 
     // Chained Filtering Logic
-    for (Map.Entry<String, ? extends Collection<String>> queryParam : request.queryParams().entrySet()) {
+    for (Map.Entry<String, ? extends Collection<String>> queryParam :
+        request.queryParams().entrySet()) {
       String paramName = queryParam.getKey();
-      Collection<String> paramValues = queryParam.getValue().stream()
-        .flatMap(value -> Arrays.stream(value.split(",")))
-        .collect(Collectors.toList());
+      Collection<String> paramValues =
+          queryParam.getValue().stream()
+              .flatMap(value -> Arrays.stream(value.split(",")))
+              .collect(Collectors.toList());
       List<AttributeMapping> mappings = attributeMappings.get(paramName);
       Set<String> seenEventIds = new HashSet<>();
       if (mappings != null) {
-        filteredArray = applyFilter(filteredArray, mappings, paramValues,seenEventIds);
+        filteredArray = applyFilter(filteredArray, mappings, paramValues, seenEventIds);
       }
     }
 
     if (request.queryParams().containsKey("sort")) {
       Collection<String> sortingFields = request.queryParams().get("sort");
-      List<SortCriteria> sortCriteria = sortingFields.stream()
-        .map(sortField -> {
-          String[] parts = sortField.split(":");
-          return new SortCriteria(parts[0], attributeMappings.get(parts[0]),
-            parts.length > 1 ? SortDirection.valueOf(parts[1].toUpperCase()) : SortDirection.ASC);
-        })
-        .collect(Collectors.toList());
+      List<SortCriteria> sortCriteria =
+          sortingFields.stream()
+              .map(
+                  sortField -> {
+                    String[] parts = sortField.split(":");
+                    return new SortCriteria(
+                        parts[0],
+                        attributeMappings.get(parts[0]),
+                        parts.length > 1
+                            ? SortDirection.valueOf(parts[1].toUpperCase())
+                            : SortDirection.ASC);
+                  })
+              .collect(Collectors.toList());
       filteredArray = sortJsonArray(filteredArray, sortCriteria);
-
     }
-    int limit = Integer.parseInt(request.queryParams().containsKey("limit") ?
-      request.queryParams().get("limit").iterator().next() : "100");
-    String cursor = request.queryParams()
-      .containsKey("cursor") ? request.queryParams().get("cursor").iterator().next() : null;
+    int limit =
+        Integer.parseInt(
+            request.queryParams().containsKey("limit")
+                ? request.queryParams().get("limit").iterator().next()
+                : "100");
+    String cursor =
+        request.queryParams().containsKey("cursor")
+            ? request.queryParams().get("cursor").iterator().next()
+            : null;
     String cursorKey = "cursorKey";
 
     ArrayNode limitedArray = applyCursorLogic(filteredArray, cursor, cursorKey, limit, headers);
 
-    return request.createResponse(
-      200,
-      headers,
-      new ConformanceMessageBody(limitedArray));
+    return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));
   }
 
-  private ArrayNode applyFilter(ArrayNode inputArray, List<AttributeMapping> mappings,
-                                Collection<String> paramValues, Set<String> seenEventIds) {
-    ArrayNode resultArray = OBJECT_MAPPER.createArrayNode();// Track seen eventIds within this filter
+  private ArrayNode applyFilter(
+      ArrayNode inputArray,
+      List<AttributeMapping> mappings,
+      Collection<String> paramValues,
+      Set<String> seenEventIds) {
+    ArrayNode resultArray =
+        OBJECT_MAPPER.createArrayNode(); // Track seen eventIds within this filter
 
-    mappings.forEach(mapping ->
-      paramValues.forEach(paramValue ->
-        StreamSupport.stream(inputArray.spliterator(), false)
-          .forEach(node -> {
-            String jsonPath = mapping.getJsonPath();
-            BiPredicate<JsonNode, String> condition = mapping.getCondition();
+    mappings.forEach(
+        mapping ->
+            paramValues.forEach(
+                paramValue ->
+                    StreamSupport.stream(inputArray.spliterator(), false)
+                        .forEach(
+                            node -> {
+                              String jsonPath = mapping.getJsonPath();
+                              BiPredicate<JsonNode, String> condition = mapping.getCondition();
 
-            List<JsonNode> results = new ArrayList<>();
-            traverse(node, jsonPath.split("/"), 0, results, condition, paramValue);
+                              List<JsonNode> results = new ArrayList<>();
+                              traverse(
+                                  node, jsonPath.split("/"), 0, results, condition, paramValue);
 
-            if (!results.isEmpty()) {
-              String eventId = node.at("/eventID").asText();
-              if (!seenEventIds.contains(eventId) &&
-                (mapping.getValues().isEmpty() ||
-                  results.stream().anyMatch(
-                    result -> mapping.getValues().contains(result.asText())))) {
-                seenEventIds.add(eventId);
-                resultArray.add(node);
-              }
-            }
-          })
-      )
-    );
+                              if (!results.isEmpty()) {
+                                String eventId = node.at("/eventID").asText();
+                                if (!seenEventIds.contains(eventId)
+                                    && (mapping.getValues().isEmpty()
+                                        || results.stream()
+                                            .anyMatch(
+                                                result ->
+                                                    mapping
+                                                        .getValues()
+                                                        .contains(result.asText())))) {
+                                  seenEventIds.add(eventId);
+                                  resultArray.add(node);
+                                }
+                              }
+                            })));
     return resultArray;
   }
 
@@ -189,16 +211,18 @@ public class TntPublisher extends ConformanceParty {
     List<JsonNode> jsonNodeList = new ArrayList<>();
     jsonArray.forEach(jsonNodeList::add);
 
-    jsonNodeList.sort((node1, node2) -> {
-      int comparisonResult = 0;
-      for (SortCriteria criterion : criteria) {
-        comparisonResult = compareNodesByField(node1, node2, criterion.field(), criterion.direction());
-        if (comparisonResult != 0) {
-          return comparisonResult; // Stop comparing if a difference is found
-        }
-      }
-      return comparisonResult;
-    });
+    jsonNodeList.sort(
+        (node1, node2) -> {
+          int comparisonResult = 0;
+          for (SortCriteria criterion : criteria) {
+            comparisonResult =
+                compareNodesByField(node1, node2, criterion.field(), criterion.direction());
+            if (comparisonResult != 0) {
+              return comparisonResult; // Stop comparing if a difference is found
+            }
+          }
+          return comparisonResult;
+        });
 
     ArrayNode sortedArray = jsonArray.arrayNode();
     jsonNodeList.forEach(sortedArray::add);
@@ -207,12 +231,14 @@ public class TntPublisher extends ConformanceParty {
 
   private ConformanceResponse return400(ConformanceRequest request, String message) {
     return request.createResponse(
-      400,
-      Map.of(API_VERSION, List.of(apiVersion)),
-      new ConformanceMessageBody(createErrorResponse(request.method(), request.url(), "Bad Request", message)));
+        400,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(
+            createErrorResponse(request.method(), request.url(), "Bad Request", message)));
   }
 
-  private ObjectNode createErrorResponse(String httpMethod, String requestUri, String reason, String message) {
+  private ObjectNode createErrorResponse(
+      String httpMethod, String requestUri, String reason, String message) {
     // Create the root object node
     ObjectNode rootNode = OBJECT_MAPPER.createObjectNode();
     rootNode.put("httpMethod", httpMethod);
@@ -231,12 +257,14 @@ public class TntPublisher extends ConformanceParty {
     // Add other fields to the root node
     rootNode.put("statusCode", 400);
     rootNode.put("statusCodeText", "Bad Request");
-    rootNode.put("errorDateTime", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    rootNode.put(
+        "errorDateTime", ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
     return rootNode;
   }
 
-  private static int compareNodesByField(JsonNode node1, JsonNode node2, String field, SortDirection direction) {
+  private static int compareNodesByField(
+      JsonNode node1, JsonNode node2, String field, SortDirection direction) {
     // Handle nested fields using recursion
     String[] fieldParts = field.split("/", 2);
     JsonNode value1 = node1.path(fieldParts[0]);
@@ -248,13 +276,13 @@ public class TntPublisher extends ConformanceParty {
 
     // Handle different data types
     if (value1.isTextual() && value2.isTextual()) {
-      return direction == SortDirection.ASC ?
-        value1.asText().compareTo(value2.asText()) :
-        value2.asText().compareTo(value1.asText());
+      return direction == SortDirection.ASC
+          ? value1.asText().compareTo(value2.asText())
+          : value2.asText().compareTo(value1.asText());
     } else if (value1.isNumber() && value2.isNumber()) {
-      return direction == SortDirection.ASC ?
-        Double.compare(value1.asDouble(), value2.asDouble()) :
-        Double.compare(value2.asDouble(), value1.asDouble());
+      return direction == SortDirection.ASC
+          ? Double.compare(value1.asDouble(), value2.asDouble())
+          : Double.compare(value2.asDouble(), value1.asDouble());
     } else {
       // Add more type handling as needed (e.g., boolean, dates)
       return 0; // Consider how to handle incomparable types
@@ -272,7 +300,12 @@ public class TntPublisher extends ConformanceParty {
     return lastEventId;
   }
 
-  private ArrayNode applyCursorLogic(ArrayNode filteredArray, String cursor, String cursorKey, int limit, Map<String, Collection<String>> headers) {
+  private ArrayNode applyCursorLogic(
+      ArrayNode filteredArray,
+      String cursor,
+      String cursorKey,
+      int limit,
+      Map<String, Collection<String>> headers) {
     // Retrieve cursor from persistentMap if available
     if (cursor != null) {
       JsonNode storedCursor = persistentMap.load(cursorKey);
@@ -308,5 +341,4 @@ public class TntPublisher extends ConformanceParty {
 
     return limitedArray;
   }
-
 }

@@ -1,0 +1,339 @@
+[
+  {
+    "someEvents": [
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e6",
+        "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+        "eventType": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "eventDateTime": "2019-11-12T07:41:00+08:30",
+        "shipmentEventTypeCode": "DRFT",
+        "documentID": "ABC123123123",
+        "documentTypeCode": "BKG",
+        "reason": "The following attributes are missing...",
+        "references": [
+          {
+            "referenceType": "FF",
+            "referenceValue": "string"
+          },
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          }
+        ]
+      },
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e2",
+        "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+        "eventType": "TRANSPORT",
+        "eventClassifierCode": "ACT",
+        "eventDateTime": "2021-01-09T14:12:56+01:00",
+        "transportEventTypeCode": "ARRI",
+        "delayReasonCode": "WEA",
+        "changeRemark": "Bad weather",
+        "transportCall": {
+          "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+          "carrierServiceCode": "FE1",
+          "exportVoyageNumber": "2103S",
+          "importVoyageNumber": "2103N",
+          "transportCallSequenceNumber": 2,
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "facilityTypeCode": "POTE",
+          "otherFacility": "Depot location or address",
+          "modeOfTransport": "VESSEL",
+          "vessel": {
+            "vesselIMONumber": "9321483",
+            "vesselName": "King of the Seas",
+            "vesselFlag": "DE",
+            "vesselCallSignNumber": "NCVV",
+            "vesselOperatorCarrierCode": "MAEU",
+            "vesselOperatorCarrierCodeListProvider": "NMFTA"
+          }
+        },
+        "documentReferences": [
+          {
+            "documentReferenceType": "BKG",
+            "documentReferenceValue": "ABC123123123"
+          },
+          {
+            "documentReferenceType": "TRD",
+            "documentReferenceValue": "reserved-HHL123"
+          }
+        ],
+        "references": [
+          {
+            "referenceType": "FF",
+            "referenceValue": "string"
+          },
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          }
+        ]
+      },
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e5",
+        "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+        "eventType": "TRANSPORT",
+        "eventClassifierCode": "ACT",
+        "eventDateTime": "2021-01-09T14:12:56+01:00",
+        "transportEventTypeCode": "ARRI",
+        "delayReasonCode": "WEA",
+        "changeRemark": "Bad weather",
+        "transportCall": {
+          "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+          "carrierServiceCode": "FE1",
+          "exportVoyageNumber": "2103S",
+          "importVoyageNumber": "2103N",
+          "transportCallSequenceNumber": 2,
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "facilityTypeCode": "POTE",
+          "otherFacility": "Depot location or address",
+          "modeOfTransport": "VESSEL",
+          "location": {
+            "latitude": "48.8585500",
+            "longitude": "2.294492036",
+            "UNLocationCode": "FRPAR"
+          },
+          "vessel": {
+            "vesselIMONumber": "9321483",
+            "vesselName": "King of the Seas",
+            "vesselFlag": "DE",
+            "vesselCallSignNumber": "NCVV",
+            "vesselOperatorCarrierCode": "MAEU",
+            "vesselOperatorCarrierCodeListProvider": "NMFTA"
+          }
+        },
+        "documentReferences": [
+          {
+            "documentReferenceType": "BKG",
+            "documentReferenceValue": "ABC123123123"
+          },
+          {
+            "documentReferenceType": "TRD",
+            "documentReferenceValue": "reserved-HHL123"
+          }
+        ],
+        "references": [
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          },
+          {
+            "referenceType": "FF",
+            "referenceValue": "APZU4812090"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "someEvents": [
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e3",
+        "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+        "eventType": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "eventDateTime": "2019-11-12T07:41:00+08:30",
+        "shipmentEventTypeCode": "DRFT",
+        "documentID": "reserved-HHL123",
+        "documentTypeCode": "SHI",
+        "reason": "The following attributes are missing...",
+        "references": [
+          {
+            "referenceType": "FF",
+            "referenceValue": "string"
+          },
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          }
+        ]
+      },
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e4",
+        "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+        "eventType": "EQUIPMENT",
+        "eventClassifierCode": "EST",
+        "eventDateTime": "2019-11-12T07:41:00+08:30",
+        "equipmentEventTypeCode": "LOAD",
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP",
+        "emptyIndicatorCode": "EMPTY",
+        "eventLocation": {
+          "locationName": "Eiffel Tower",
+          "latitude": "48.8585500",
+          "longitude": "2.294492036",
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "address": {
+            "name": "Henrik",
+            "street": "Kronprincessegade",
+            "streetNumber": "54",
+            "floor": "5. sal",
+            "postCode": "1306",
+            "city": "København",
+            "stateRegion": "N/A",
+            "country": "Denmark"
+          }
+        },
+        "transportCall": {
+          "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+          "carrierServiceCode": "FE1",
+          "exportVoyageNumber": "2103S",
+          "importVoyageNumber": "2103N",
+          "transportCallSequenceNumber": 2,
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "facilityTypeCode": "POTE",
+          "otherFacility": "Depot location or address",
+          "modeOfTransport": "VESSEL",
+          "vessel": {
+            "vesselIMONumber": "9321483",
+            "vesselName": "King of the Seas",
+            "vesselFlag": "DE",
+            "vesselCallSignNumber": "NCVV",
+            "vesselOperatorCarrierCode": "MAEU",
+            "vesselOperatorCarrierCodeListProvider": "NMFTA"
+          }
+        },
+        "documentReferences": [
+          {
+            "documentReferenceType": "BKG",
+            "documentReferenceValue": "ABC123123123"
+          },
+          {
+            "documentReferenceType": "TRD",
+            "documentReferenceValue": "reserved-HHL123"
+          }
+        ],
+        "references": [
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          },
+          {
+            "referenceType": "FF",
+            "referenceValue": "APZU4812090"
+          }
+        ],
+        "seals": [
+          {
+            "sealNumber": "string",
+            "sealSource": "CUS",
+            "sealType": "WIR"
+          }
+        ]
+      },
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e7",
+        "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+        "eventType": "EQUIPMENT",
+        "eventClassifierCode": "EST",
+        "eventDateTime": "2019-11-12T07:41:00+08:30",
+        "equipmentEventTypeCode": "LOAD",
+        "equipmentReference": "APZU4812090",
+        "ISOEquipmentCode": "22GP",
+        "emptyIndicatorCode": "EMPTY",
+        "eventLocation": {
+          "locationName": "Eiffel Tower",
+          "latitude": "48.8585500",
+          "longitude": "2.294492036",
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "address": {
+            "name": "Henrik",
+            "street": "Kronprincessegade",
+            "streetNumber": "54",
+            "floor": "5. sal",
+            "postCode": "1306",
+            "city": "København",
+            "stateRegion": "N/A",
+            "country": "Denmark"
+          }
+        },
+        "transportCall": {
+          "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
+          "carrierServiceCode": "FE1",
+          "exportVoyageNumber": "2103S",
+          "importVoyageNumber": "2103N",
+          "transportCallSequenceNumber": 2,
+          "UNLocationCode": "FRPAR",
+          "facilityCode": "ADT",
+          "facilityCodeListProvider": "SMDG",
+          "facilityTypeCode": "POTE",
+          "otherFacility": "Depot location or address",
+          "modeOfTransport": "VESSEL",
+          "location": {
+            "latitude": "48.8585500",
+            "longitude": "2.294492036",
+            "UNLocationCode": "FRPAR"
+          },
+          "vessel": {
+            "vesselIMONumber": "9321483",
+            "vesselName": "King of the Seas",
+            "vesselFlag": "DE",
+            "vesselCallSignNumber": "NCVV",
+            "vesselOperatorCarrierCode": "MAEU",
+            "vesselOperatorCarrierCodeListProvider": "NMFTA"
+          }
+        },
+        "documentReferences": [
+          {
+            "documentReferenceType": "BKG",
+            "documentReferenceValue": "ABC123123123"
+          },
+          {
+            "documentReferenceType": "TRD",
+            "documentReferenceValue": "reserved-HHL123"
+          }
+        ],
+        "references": [
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          },
+          {
+            "referenceType": "FF",
+            "referenceValue": "APZU4812090"
+          }
+        ],
+        "seals": [
+          {
+            "sealNumber": "string",
+            "sealSource": "CUS",
+            "sealType": "WIR"
+          }
+        ]
+      },
+      {
+        "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e8",
+        "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+        "eventType": "SHIPMENT",
+        "eventClassifierCode": "ACT",
+        "eventDateTime": "2019-11-12T07:41:00+08:30",
+        "shipmentEventTypeCode": "DRFT",
+        "documentID": "reserved-HHL123",
+        "documentTypeCode": "TRD",
+        "reason": "The following attributes are missing...",
+        "references": [
+          {
+            "referenceType": "FF",
+            "referenceValue": "string"
+          },
+          {
+            "referenceType": "EQ",
+            "referenceValue": "APZU4812090"
+          }
+        ]
+      }
+    ]
+  }
+]

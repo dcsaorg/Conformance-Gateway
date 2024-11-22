@@ -1,17 +1,6 @@
 package org.dcsa.conformance.standards.tnt.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.NonNull;
-import lombok.experimental.UtilityClass;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.JsonAttribute;
-import org.dcsa.conformance.core.check.JsonContentCheck;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
-import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
-import org.dcsa.conformance.standards.tnt.party.TntHelper;
-import org.dcsa.conformance.standards.tnt.party.TntRole;
-
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -26,6 +15,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import lombok.NonNull;
+import lombok.experimental.UtilityClass;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
+import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
+import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
+import org.dcsa.conformance.standards.tnt.party.TntRole;
 
 @UtilityClass
 public class TntChecks {
@@ -39,32 +37,24 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate response has events",
-            body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
-              if (eventNodes.isEmpty()) {
-                issues.add("No events found in response");
-              }
-              return issues;
-            }));
+            "Every response received during a conformance test must contain events",
+            body ->
+                TntSchemaConformanceCheck.findEventNodes(body).isEmpty()
+                    ? Set.of("No events found in response")
+                    : Set.of()));
 
     // The OpenAPI specification explicitly states that the eventIDs must be unique.
     checks.add(
         JsonAttribute.customValidator(
             "Validate that eventID values are unique",
             body -> {
-              Set<String> issues = new HashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
-              Set<String> result =
-                  eventNodes.stream()
-                          .filter(node -> node.has("eventID"))
-                          .map(node -> node.path("eventID").asText())
-                          .allMatch(new HashSet<>()::add)
-                      ? Set.of()
-                      : Set.of("Event ID values are not unique");
-              issues.addAll(result);
-              return issues;
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
+              return eventNodes.stream()
+                      .filter(node -> node.has("eventID"))
+                      .map(node -> node.path("eventID").asText())
+                      .allMatch(new HashSet<>()::add)
+                  ? Set.of()
+                  : Set.of("Event ID values are not unique");
             }));
 
     checks.add(
@@ -72,7 +62,7 @@ public class TntChecks {
             "Validate eventCreatedDateTime parameter conditions are met",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
               Set<OffsetDateTime> eventCreatedDateTimes = new HashSet<>();
               for (JsonNode node : eventNodes) {
@@ -131,7 +121,7 @@ public class TntChecks {
                 + "if request parameter has shipmentEventTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
               Optional<Map.Entry<TntFilterParameter, String>> shipmentEventTypeCodeParam =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -176,7 +166,7 @@ public class TntChecks {
             "Validate documentTypeCode exists for SHIPMENT events and matches in JSON response if request parameter has documentTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
               Optional<Map.Entry<TntFilterParameter, String>> documentTypeCodeParam =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -220,7 +210,7 @@ public class TntChecks {
                 + "if request parameter has transportEventTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
               Optional<Map.Entry<TntFilterParameter, String>> transportEventTypeCodeParam =
                   sspSupplier.get().getMap().entrySet().stream()
                       .filter(e -> e.getKey().equals(TntFilterParameter.TRANSPORT_EVENT_TYPE_CODE))
@@ -375,7 +365,7 @@ public class TntChecks {
                 + "has equipmentEventTypeCode",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
               Optional<Map.Entry<TntFilterParameter, String>> equipmentEventTypeCodeParam =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -396,7 +386,7 @@ public class TntChecks {
                                   node.path("equipmentEventTypeCode");
                               return !isEmptyNode(equipmentEventTypeCodeNode)
                                   && !expectedEquipmentEventTypeCodes.contains(
-                                  equipmentEventTypeCodeNode.asText());
+                                      equipmentEventTypeCodeNode.asText());
                             })
                         .map(
                             node ->
@@ -415,7 +405,7 @@ public class TntChecks {
             "Validate limit parameter is met",
             body -> {
               Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
               Optional<Map.Entry<TntFilterParameter, String>> limitParam =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -464,7 +454,7 @@ public class TntChecks {
       String eventType) {
 
     Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
     Optional<Map.Entry<TntFilterParameter, String>> param =
         sspSupplier.get().getMap().entrySet().stream()
@@ -509,7 +499,7 @@ public class TntChecks {
             .findFirst();
 
     Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
     if (equipmentReferenceParam.isPresent()) {
       Set<String> expectedEquipmentReferences =
@@ -567,7 +557,7 @@ public class TntChecks {
             .findFirst();
 
     Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(body, issues);
+    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
 
     if (referenceParam.isPresent()) {
       Set<String> expectedCarrierBookingReferences =

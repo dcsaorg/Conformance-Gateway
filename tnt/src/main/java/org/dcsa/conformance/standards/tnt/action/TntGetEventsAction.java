@@ -58,9 +58,7 @@ public class TntGetEventsAction extends TntAction {
               HttpMessageType.RESPONSE,
             expectedApiVersion),
             new TntSchemaConformanceCheck(
-              TntRole::isPublisher,
               getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
               eventSchemaValidators
             ),
           TntChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, sspSupplier));

@@ -24,12 +24,16 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.tnt.checks.TntSchemaConformanceCheck;
 
 import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class TntPublisher extends ConformanceParty {
+
+  private static final boolean RETURN_EMPTY_RESPONSE = false;
+  private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
 
   public TntPublisher(
       String apiVersion,
@@ -106,11 +110,10 @@ public class TntPublisher extends ConformanceParty {
         JsonToolkit.templateFileToJsonNode(
             "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
 
-    Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntHelper.findEventNodes(jsonResponseBody, issues);
+    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(jsonResponseBody);
 
     if (!new QueryParameterSpecificRule().validate(request.queryParams())) {
-      return return400(request, "Error: Invalid query parameters provided.");
+      return return400(request);
     }
     ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
     eventNodes.forEach(filteredArray::add);
@@ -160,7 +163,20 @@ public class TntPublisher extends ConformanceParty {
 
     ArrayNode limitedArray = applyCursorLogic(filteredArray, cursor, cursorKey, limit, headers);
 
-    return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));
+    if (RETURN_EMPTY_RESPONSE) {
+      return request.createResponse(
+          200, headers, new ConformanceMessageBody(OBJECT_MAPPER.createArrayNode()));
+    } else if (USE_WRONG_RESPONSE_STRUCTURE) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-structure.json",
+                  Map.ofEntries())));
+    } else {
+      return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));
+    }
   }
 
   private ArrayNode applyFilter(
@@ -229,16 +245,16 @@ public class TntPublisher extends ConformanceParty {
     return sortedArray;
   }
 
-  private ConformanceResponse return400(ConformanceRequest request, String message) {
+  private ConformanceResponse return400(ConformanceRequest request) {
     return request.createResponse(
         400,
         Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(
-            createErrorResponse(request.method(), request.url(), "Bad Request", message)));
+            createErrorResponse(request.method(), request.url())));
   }
 
   private ObjectNode createErrorResponse(
-      String httpMethod, String requestUri, String reason, String message) {
+    String httpMethod, String requestUri) {
     // Create the root object node
     ObjectNode rootNode = OBJECT_MAPPER.createObjectNode();
     rootNode.put("httpMethod", httpMethod);
@@ -247,8 +263,8 @@ public class TntPublisher extends ConformanceParty {
     // Create the errors array node
     ArrayNode errorsArray = OBJECT_MAPPER.createArrayNode();
     ObjectNode errorDetails = OBJECT_MAPPER.createObjectNode();
-    errorDetails.put("reason", reason);
-    errorDetails.put("message", message);
+    errorDetails.put("reason", "Bad Request");
+    errorDetails.put("message", "Error: Invalid query parameters provided.");
     errorsArray.add(errorDetails);
 
     // Add the errors array to the root node

@@ -31,7 +31,12 @@ public class SupplyScenarioParametersAction extends TntAction {
         "SupplyScenarioParameters(%s)"
             .formatted(
                 parameters.keySet().stream()
-                    .map(TntFilterParameter::getQueryParamName)
+                    .map(
+                        parameter ->
+                            parameter.getQueryParamName()
+                                + (parameter.equals(TntFilterParameter.EVENT_TYPE)
+                                    ? "=" + parameters.get(parameter) // the scenario title must be unique!
+                                    : ""))
                     .collect(Collectors.joining(", "))),
         -1);
     this.tntFilterParameterMap = parameters;

@@ -10,7 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -127,26 +126,21 @@ public class TntChecks {
               return validationErrors;
             }));
 
-    // FIXME
     checks.add(
         JsonAttribute.customValidator(
-            "Validate limit parameter is met",
+            "The number of events must not exceed the 'limit' query parameter",
             body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
+              String limitQueryParameter = sspSupplier.get().getMap().get(TntFilterParameter.LIMIT);
+              if (limitQueryParameter == null) return Set.of();
 
-              Optional<Map.Entry<TntFilterParameter, String>> limitParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(TntFilterParameter.LIMIT))
-                      .findFirst();
-
-              if (limitParam.isPresent()) {
-                int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
-                if (eventNodes.size() > expectedLimit) {
-                  issues.add("The number of events exceeds the limit parameter: " + expectedLimit);
-                }
+              int maxEventCount = Integer.parseInt(limitQueryParameter);
+              int eventCount = TntSchemaConformanceCheck.findEventNodes(body).size();
+              if (eventCount > maxEventCount) {
+                return Set.of(
+                    "The number of events (%d) exceeds the value of the 'limit' query parameter (%d)"
+                        .formatted(eventCount, maxEventCount));
               }
-              return issues;
+              return Set.of();
             }));
 
     return JsonAttribute.contentChecks(

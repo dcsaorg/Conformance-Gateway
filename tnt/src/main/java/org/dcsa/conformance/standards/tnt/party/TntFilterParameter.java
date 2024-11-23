@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
+@Getter
 public enum TntFilterParameter {
   EVENT_TYPE("eventType"),
   SHIPMENT_EVENT_TYPE_CODE("shipmentEventTypeCode"),
@@ -35,7 +36,7 @@ public enum TntFilterParameter {
               Collectors.toUnmodifiableMap(
                   TntFilterParameter::getQueryParamName, Function.identity()));
 
-  @Getter private final String queryParamName;
+  private final String queryParamName;
 
   TntFilterParameter(String queryParamName) {
     this.queryParamName = queryParamName;

@@ -33,8 +33,9 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class TntPublisher extends ConformanceParty {
 
   private static final boolean RETURN_EMPTY_RESPONSE = false;
-  private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
+  private static final boolean USE_WRONG_DATE_TIMES = false;
   private static final boolean USE_WRONG_EVENT_IDS = false;
+  private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
 
   public TntPublisher(
       String apiVersion,
@@ -167,13 +168,13 @@ public class TntPublisher extends ConformanceParty {
     if (RETURN_EMPTY_RESPONSE) {
       return request.createResponse(
           200, headers, new ConformanceMessageBody(OBJECT_MAPPER.createArrayNode()));
-    } else if (USE_WRONG_RESPONSE_STRUCTURE) {
+    } else if (USE_WRONG_DATE_TIMES) {
       return request.createResponse(
           200,
           headers,
           new ConformanceMessageBody(
               JsonToolkit.templateFileToJsonNode(
-                  "/standards/tnt/messages/tnt-220-response-wrong-structure.json",
+                  "/standards/tnt/messages/tnt-220-response-wrong-date-times.json",
                   Map.ofEntries())));
     } else if (USE_WRONG_EVENT_IDS) {
       return request.createResponse(
@@ -181,7 +182,15 @@ public class TntPublisher extends ConformanceParty {
           headers,
           new ConformanceMessageBody(
               JsonToolkit.templateFileToJsonNode(
-                "/standards/tnt/messages/tnt-220-response-wrong-event-ids.json",
+                  "/standards/tnt/messages/tnt-220-response-wrong-event-ids.json",
+                  Map.ofEntries())));
+    } else if (USE_WRONG_RESPONSE_STRUCTURE) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-structure.json",
                   Map.ofEntries())));
     } else {
       return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));

@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,58 +68,46 @@ public class TntChecks {
         JsonAttribute.customValidator(
             "Validate eventCreatedDateTime parameter conditions are met",
             body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-              Set<OffsetDateTime> eventCreatedDateTimes = new HashSet<>();
-              for (JsonNode node : eventNodes) {
-                try {
-                  eventCreatedDateTimes.add(
-                      OffsetDateTime.parse(node.path("eventCreatedDateTime").asText()));
-                } catch (DateTimeParseException e) {
-                  issues.add(
-                      "Invalid eventCreatedDateTime format: "
-                          + node.path("eventCreatedDateTime").asText()
-                          + ": "
-                          + e.getMessage());
-                }
-              }
-
-              Set<Map.Entry<TntFilterParameter, String>> eventCreatedDateTimeParams =
+              List<Map.Entry<TntFilterParameter, String>> eventCreatedDateTimeParams =
                   sspSupplier.get().getMap().entrySet().stream()
                       .filter(
-                          e ->
-                              e.getKey()
+                          entry ->
+                              entry
+                                  .getKey()
                                   .getQueryParamName()
-                                  .contains(
+                                  .startsWith(
                                       TntFilterParameter.EVENT_CREATED_DATE_TIME
                                           .getQueryParamName()))
-                      .collect(Collectors.toSet());
-
-              if (!eventCreatedDateTimeParams.isEmpty() && !eventCreatedDateTimes.isEmpty()) {
-                // iterate through the eventCreatedDateTimeParams and get key and value and pass it
-                // to validateEventCreatedDateTime
-                Set<String> errors =
-                    eventCreatedDateTimeParams.stream()
-                        .filter(param -> param.getKey().getQueryParamName().split(":").length == 2)
-                        .flatMap(
-                            param -> {
-                              String[] eventCreatedDateTimeParamKey =
-                                  param.getKey().getQueryParamName().split(":");
-                              OffsetDateTime eventCreatedDateTimeParamValue =
-                                  OffsetDateTime.parse(param.getValue());
-                              return validateEventCreatedDateTime(
-                                  eventCreatedDateTimes,
-                                  eventCreatedDateTimeParamKey,
-                                  eventCreatedDateTimeParamValue)
-                                  .stream();
-                            })
-                        .collect(Collectors.toSet());
-
-                issues.addAll(errors);
-                return issues;
+                      .toList();
+              if (eventCreatedDateTimeParams.isEmpty()) {
+                return Set.of();
               }
-              return Set.of();
+              Set<String> validationErrors = new LinkedHashSet<>();
+              AtomicInteger eventIndex = new AtomicInteger(-1);
+              TntSchemaConformanceCheck.findEventNodes(body).stream()
+                  .map(
+                      eventNode ->
+                          _stringToOffsetDateTime(eventNode.path("eventCreatedDateTime").asText()))
+                  .filter(Objects::nonNull)
+                  .forEach(
+                      eventCreatedDateTime -> {
+                        eventIndex.incrementAndGet();
+                        eventCreatedDateTimeParams.forEach(
+                            entry -> {
+                              OffsetDateTime filterParamDateTime =
+                                  _stringToOffsetDateTime(entry.getValue());
+                              if (filterParamDateTime != null) {
+                                String validationError =
+                                    _validateEventCreatedDateTime(
+                                      eventCreatedDateTime, entry.getKey(), filterParamDateTime);
+                                if (validationError != null) {
+                                  validationErrors.add(
+                                      "Event #%d: %s".formatted(eventIndex.get(), validationError));
+                                }
+                              }
+                            });
+                      });
+              return validationErrors;
             }));
 
     checks.add(
@@ -618,56 +609,50 @@ public class TntChecks {
     return Set.of();
   }
 
-  private Set<String> validateEventCreatedDateTime(
-      Set<OffsetDateTime> eventCreatedDateTimes,
-      String[] eventCreatedDateTimeParamKey,
-      OffsetDateTime eventCreatedDateTimeParamValue) {
-    switch (eventCreatedDateTimeParamKey[1]) {
-      case "gte":
-        if (eventCreatedDateTimes.stream()
-            .anyMatch(
-                dateTime ->
-                    dateTime.isBefore(eventCreatedDateTimeParamValue)
-                        || dateTime.isEqual(eventCreatedDateTimeParamValue))) {
-          return Set.of(
-              "Event Created Date Time is not greater than or equal to "
-                  + eventCreatedDateTimeParamValue);
-        }
+  private static OffsetDateTime _stringToOffsetDateTime(String dateTimeString) {
+    try {
+      return OffsetDateTime.parse(dateTimeString);
+    } catch (DateTimeParseException e) {
+      return null;
+    }
+  }
+
+  static String _validateEventCreatedDateTime(OffsetDateTime eventCreatedDateTime, TntFilterParameter parameterKey, OffsetDateTime parameterValue) {
+    switch (parameterKey) {
+      case EVENT_CREATED_DATE_TIME:
+      case EVENT_CREATED_DATE_TIME_EQ:
+        if (!eventCreatedDateTime.isEqual(parameterValue))
+          return "eventCreatedDateTime '%s' does not equal filter parameter date time '%s'"
+              .formatted(eventCreatedDateTime, parameterValue);
         break;
-      case "gt":
-        if (eventCreatedDateTimes.stream()
-            .anyMatch(dateTime -> dateTime.isBefore(eventCreatedDateTimeParamValue))) {
-          return Set.of(
-              "Event Created Date Time is not greater than " + eventCreatedDateTimeParamValue);
-        }
+
+      case EVENT_CREATED_DATE_TIME_LT:
+        if (!eventCreatedDateTime.isBefore(parameterValue))
+          return "eventCreatedDateTime '%s' is not before filter parameter date time '%s'"
+              .formatted(eventCreatedDateTime, parameterValue);
         break;
-      case "lte":
-        if (eventCreatedDateTimes.stream()
-            .anyMatch(
-                dateTime ->
-                    dateTime.isAfter(eventCreatedDateTimeParamValue)
-                        || dateTime.isEqual(eventCreatedDateTimeParamValue))) {
-          return Set.of(
-              "Event Created Date Time is not less than or equal to "
-                  + eventCreatedDateTimeParamValue);
-        }
+
+      case EVENT_CREATED_DATE_TIME_LTE:
+        if (!(eventCreatedDateTime.isBefore(parameterValue)
+            || eventCreatedDateTime.isEqual(parameterValue)))
+          return "eventCreatedDateTime '%s' is not before or equal to filter parameter date time '%s'"
+              .formatted(eventCreatedDateTime, parameterValue);
         break;
-      case "lt":
-        if (eventCreatedDateTimes.stream()
-            .anyMatch(dateTime -> dateTime.isAfter(eventCreatedDateTimeParamValue))) {
-          return Set.of(
-              "Event Created Date Time is not less than " + eventCreatedDateTimeParamValue);
-        }
+
+      case EVENT_CREATED_DATE_TIME_GT:
+        if (!eventCreatedDateTime.isAfter(parameterValue))
+          return "eventCreatedDateTime '%s' is not after filter parameter date time '%s'"
+              .formatted(eventCreatedDateTime, parameterValue);
         break;
-      case "eq":
-        if (eventCreatedDateTimes.stream()
-            .anyMatch(dateTime -> !dateTime.isEqual(eventCreatedDateTimeParamValue))) {
-          return Set.of(
-              "Event Created Date Time is not equal to " + eventCreatedDateTimeParamValue);
-        }
+
+      case EVENT_CREATED_DATE_TIME_GTE:
+        if (!(eventCreatedDateTime.isAfter(parameterValue)
+            || eventCreatedDateTime.isEqual(parameterValue)))
+          return "eventCreatedDateTime '%s' is not after or equal to filter parameter date time '%s'"
+              .formatted(eventCreatedDateTime, parameterValue);
         break;
     }
-    return Set.of();
+    return null;
   }
 
   private Stream<JsonNode> filterNodesByEventType(ArrayList<JsonNode> body, String eventType) {

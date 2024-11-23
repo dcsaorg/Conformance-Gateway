@@ -33,6 +33,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 public class TntPublisher extends ConformanceParty {
 
   private static final boolean RETURN_EMPTY_RESPONSE = false;
+  private static final boolean USE_WRONG_ATTRIBUTE_VALUES = false;
   private static final boolean USE_WRONG_DATE_TIMES = false;
   private static final boolean USE_WRONG_EVENT_IDS = false;
   private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
@@ -168,6 +169,14 @@ public class TntPublisher extends ConformanceParty {
     if (RETURN_EMPTY_RESPONSE) {
       return request.createResponse(
           200, headers, new ConformanceMessageBody(OBJECT_MAPPER.createArrayNode()));
+    } else if (USE_WRONG_ATTRIBUTE_VALUES) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-attribute-values.json",
+                  Map.ofEntries())));
     } else if (USE_WRONG_DATE_TIMES) {
       return request.createResponse(
           200,

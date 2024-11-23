@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,7 +67,7 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate eventCreatedDateTime parameter conditions are met",
+            "The eventCreatedDateTime of each event matches the date-time filter parameters",
             body -> {
               List<Map.Entry<TntFilterParameter, String>> eventCreatedDateTimeParams =
                   sspSupplier.get().getMap().entrySet().stream()
@@ -112,289 +113,58 @@ public class TntChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Validate shipmentEventTypeCode exists and matches in JSON response "
-                + "if request parameter has shipmentEventTypeCode",
+            "If present, event attributes must match the corresponding query parameters",
             body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-              Optional<Map.Entry<TntFilterParameter, String>> shipmentEventTypeCodeParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(TntFilterParameter.SHIPMENT_EVENT_TYPE_CODE))
-                      .findFirst();
-
-              if (shipmentEventTypeCodeParam.isPresent()) {
-                Set<String> expectedShipmentEventTypeCodes =
-                    Arrays.stream(shipmentEventTypeCodeParam.get().getValue().split(","))
-                        .map(String::trim)
-                        .collect(Collectors.toSet());
-
-                Stream<JsonNode> filteredStream =
-                    filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE);
-                if (filteredStream.anyMatch(node -> true)) {
-                  issues.addAll(
-                      filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE)
-                          .filter(
-                              node -> {
-                                JsonNode shipmentEventTypeCodeNode =
-                                    node.path("shipmentEventTypeCode");
-                                return !isEmptyNode(shipmentEventTypeCodeNode)
-                                    && !expectedShipmentEventTypeCodes.contains(
-                                        shipmentEventTypeCodeNode.asText());
-                              })
-                          .map(
-                              node ->
-                                  "Missing or mismatched shipmentEventTypeCode "
-                                      + "for eventType SHIPMENT ")
-                          .collect(Collectors.toSet())); // Check if the stream is empty
-                } else {
-                  issues.add(
-                      "No matching events found for " + shipmentEventTypeCodeParam + " filter.");
-                }
-                return issues;
-              }
-              return Set.of();
+              Map<TntFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
+              Set<String> validationErrors = new LinkedHashSet<>();
+              AtomicInteger eventIndex = new AtomicInteger(-1);
+              TntSchemaConformanceCheck.findEventNodes(body)
+                  .forEach(
+                      eventNode -> {
+                        eventIndex.incrementAndGet();
+                        Stream.of(
+                                TntFilterParameter.CARRIER_SERVICE_CODE,
+                                TntFilterParameter.DOCUMENT_TYPE_CODE,
+                                TntFilterParameter.EQUIPMENT_REFERENCE,
+                                TntFilterParameter.EVENT_TYPE,
+                                TntFilterParameter.EQUIPMENT_EVENT_TYPE_CODE,
+                                TntFilterParameter.EXPORT_VOYAGE_NUMBER,
+                                TntFilterParameter.SHIPMENT_EVENT_TYPE_CODE,
+                                TntFilterParameter.TRANSPORT_CALL_ID,
+                                TntFilterParameter.TRANSPORT_EVENT_TYPE_CODE,
+                                TntFilterParameter.UN_LOCATION_CODE,
+                                TntFilterParameter.VESSEL_IMO_NUMBER)
+                            .filter(filterParametersMap::containsKey)
+                            .forEach(
+                                filterParameter -> {
+                                  Set<String> parameterValues =
+                                      Arrays.stream(
+                                              filterParametersMap.get(filterParameter).split(","))
+                                          .collect(Collectors.toSet());
+                                  Set<String> attributeValues =
+                                      filterParameter.getEventPaths().stream()
+                                          .map(eventPath -> eventNode.at("/" + eventPath))
+                                          .filter(Predicate.not(JsonNode::isMissingNode))
+                                          .map(JsonNode::asText)
+                                          .collect(Collectors.toSet());
+                                  if (!attributeValues.isEmpty()
+                                      && parameterValues.stream()
+                                          .noneMatch(attributeValues::contains)) {
+                                    validationErrors.add(
+                                        "Event #%d: Value '%s' at path '%s' does not match value '%s' of query parameter '%s'"
+                                            .formatted(
+                                                eventIndex.get(),
+                                                String.join(",", attributeValues),
+                                                String.join(",", filterParameter.getEventPaths()),
+                                                filterParametersMap.get(filterParameter),
+                                                filterParameter.getQueryParamName()));
+                                  }
+                                });
+                      });
+              return validationErrors;
             }));
 
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate documentTypeCode exists for SHIPMENT events and matches in JSON response if request parameter has documentTypeCode",
-            body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-              Optional<Map.Entry<TntFilterParameter, String>> documentTypeCodeParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(TntFilterParameter.DOCUMENT_TYPE_CODE))
-                      .findFirst();
-
-              if (documentTypeCodeParam.isPresent()) {
-                Set<String> expectedDocumentTypeCodes =
-                    Arrays.stream(documentTypeCodeParam.get().getValue().split(","))
-                        .map(String::trim)
-                        .collect(Collectors.toSet());
-
-                Stream<JsonNode> filteredStream =
-                    filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE);
-                if (filteredStream.anyMatch(node -> true)) { // Check if the stream is empty
-                  issues.addAll(
-                      filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE)
-                          .filter(
-                              node -> {
-                                JsonNode documentTypeCodeNode = node.path("documentTypeCode");
-                                return !isEmptyNode(documentTypeCodeNode)
-                                    && !expectedDocumentTypeCodes.contains(
-                                        documentTypeCodeNode.asText());
-                              })
-                          .map(
-                              node ->
-                                  "Missing or mismatched documentTypeCode for eventType "
-                                      + node.path("eventType").asText())
-                          .collect(Collectors.toSet()));
-                } else {
-                  issues.add("No matching events found for " + documentTypeCodeParam + " filter.");
-                }
-                return issues;
-              }
-              return Set.of();
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate transportEventTypeCode exists for TRANSPORT events and matches in JSON response "
-                + "if request parameter has transportEventTypeCode",
-            body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-              Optional<Map.Entry<TntFilterParameter, String>> transportEventTypeCodeParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(TntFilterParameter.TRANSPORT_EVENT_TYPE_CODE))
-                      .findFirst();
-
-              if (transportEventTypeCodeParam.isPresent()) {
-                Set<String> expectedTransportEventTypeCodes =
-                    Arrays.stream(transportEventTypeCodeParam.get().getValue().split(","))
-                        .map(String::trim)
-                        .collect(Collectors.toSet());
-
-                Stream<JsonNode> filteredStream =
-                    filterNodesByEventType(eventNodes, TRANSPORT_EVENT_TYPE);
-                if (filteredStream.anyMatch(node -> true)) {
-                  issues.addAll(
-                      filterNodesByEventType(eventNodes, TRANSPORT_EVENT_TYPE)
-                          .filter(
-                              node -> {
-                                JsonNode transportEventTypeCodeNode =
-                                    node.path("transportEventTypeCode");
-                                return !isEmptyNode(transportEventTypeCodeNode)
-                                    && !expectedTransportEventTypeCodes.contains(
-                                        transportEventTypeCodeNode.asText());
-                              })
-                          .map(
-                              node ->
-                                  "Missing or mismatched transportEventTypeCode for eventType TRANSPORT ")
-                          .collect(Collectors.toSet()));
-                } else {
-                  issues.add(
-                      "No matching events found for " + transportEventTypeCodeParam + " filter.");
-                }
-                return issues;
-              }
-
-              return Set.of();
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate transportCallID exists for TRANSPORT events and matches in JSON response if request parameter has transportCallID",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.TRANSPORT_CALL_ID,
-                    "/transportCall/transportCallID",
-                    TRANSPORT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate transportCallID exists for EQUIPMENT events and matches in JSON response if request parameter has transportCallID",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.TRANSPORT_CALL_ID,
-                    "/transportCall/transportCallID",
-                    EQUIPMENT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate vesselIMONumber exists for TRANSPORT events and matches in JSON response if request parameter has vesselIMONumber",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.VESSEL_IMO_NUMBER,
-                    "/transportCall/vessel/vesselIMONumber",
-                    TRANSPORT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate vesselIMONumber exists for EQUIPMENT events and matches in JSON response if request parameter has vesselIMONumber",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.VESSEL_IMO_NUMBER,
-                    "/transportCall/vessel/vesselIMONumber",
-                    EQUIPMENT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate exportVoyageNumber exists for TRANSPORT events and matches in JSON response if request parameter has exportVoyageNumber",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.EXPORT_VOYAGE_NUMBER,
-                    "/transportCall/exportVoyageNumber",
-                    TRANSPORT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate exportVoyageNumber exists for EQUIPMENT events and matches in JSON response if request parameter has exportVoyageNumber",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.EXPORT_VOYAGE_NUMBER,
-                    "/transportCall/exportVoyageNumber",
-                    EQUIPMENT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate carrierServiceCode exists for TRANSPORT events and matches in JSON response if request parameter has carrierServiceCode",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.CARRIER_SERVICE_CODE,
-                    "/transportCall/carrierServiceCode",
-                    TRANSPORT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate carrierServiceCode exists for EQUIPMENT events and matches in JSON response if request parameter has carrierServiceCode",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.CARRIER_SERVICE_CODE,
-                    "/transportCall/carrierServiceCode",
-                    EQUIPMENT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate UNLocationCode exists for TRANSPORT events and matches in JSON response if request parameter has UNLocationCode",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.UN_LOCATION_CODE,
-                    "/transportCall/location/UNLocationCode",
-                    TRANSPORT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate UNLocationCode exists for EQUIPMENT events and matches in JSON response if request parameter has UNLocationCode",
-            body ->
-                validateParameter(
-                    body,
-                    sspSupplier,
-                    TntFilterParameter.UN_LOCATION_CODE,
-                    "/transportCall/location/UNLocationCode",
-                    EQUIPMENT_EVENT_TYPE)));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate equipmentEventTypeCode exists for EQUIPMENT events and matches in JSON response if request parameter "
-                + "has equipmentEventTypeCode",
-            body -> {
-              Set<String> issues = new LinkedHashSet<>();
-              ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-              Optional<Map.Entry<TntFilterParameter, String>> equipmentEventTypeCodeParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(TntFilterParameter.EQUIPMENT_EVENT_TYPE_CODE))
-                      .findFirst();
-
-              if (equipmentEventTypeCodeParam.isPresent()) {
-                Set<String> expectedEquipmentEventTypeCodes =
-                    Arrays.stream(equipmentEventTypeCodeParam.get().getValue().split(","))
-                        .map(String::trim)
-                        .collect(Collectors.toSet());
-
-                Set<String> errors =
-                    filterNodesByEventType(eventNodes, EQUIPMENT_EVENT_TYPE)
-                        .filter(
-                            node -> {
-                              JsonNode equipmentEventTypeCodeNode =
-                                  node.path("equipmentEventTypeCode");
-                              return !isEmptyNode(equipmentEventTypeCodeNode)
-                                  && !expectedEquipmentEventTypeCodes.contains(
-                                      equipmentEventTypeCodeNode.asText());
-                            })
-                        .map(
-                            node ->
-                                "Missing or mismatched equipmentEventTypeCode for eventType EQUIPMENT ")
-                        .collect(Collectors.toSet());
-
-                issues.addAll(errors);
-                return issues;
-              }
-
-              return Set.of();
-            }));
-
+    // FIXME
     checks.add(
         JsonAttribute.customValidator(
             "Validate limit parameter is met",
@@ -416,12 +186,7 @@ public class TntChecks {
               return issues;
             }));
 
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate equipmentReference exists and matches in JSON response "
-                + "if request parameter has equipmentReference",
-            body -> validateEquipmentReference(body, sspSupplier)));
-
+    // FIXME
     checks.add(
         JsonAttribute.customValidator(
             "Validate carrierBookingReference exists and matches in JSON response "
@@ -430,6 +195,7 @@ public class TntChecks {
                 validateBookingDocumentReference(
                     body, sspSupplier, "CBR", TntFilterParameter.CARRIER_BOOKING_REFERENCE)));
 
+    // FIXME
     checks.add(
         JsonAttribute.customValidator(
             "Validate transportDocumentReference exists and matches in JSON response "
@@ -439,106 +205,6 @@ public class TntChecks {
                     body, sspSupplier, "TRD", TntFilterParameter.TRANSPORT_DOCUMENT_REFERENCE)));
     return JsonAttribute.contentChecks(
         TntRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
-  }
-
-  private Set<String> validateParameter(
-      JsonNode body,
-      Supplier<SuppliedScenarioParameters> sspSupplier,
-      TntFilterParameter parameter,
-      String jsonPath,
-      String eventType) {
-
-    Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-    Optional<Map.Entry<TntFilterParameter, String>> param =
-        sspSupplier.get().getMap().entrySet().stream()
-            .filter(e -> e.getKey().equals(parameter))
-            .findFirst();
-
-    if (param.isPresent()) {
-      Set<String> expectedValues =
-          Arrays.stream(param.get().getValue().split(","))
-              .map(String::trim)
-              .collect(Collectors.toSet());
-
-      Set<String> errors =
-          filterNodesByEventType(eventNodes, eventType)
-              .filter(
-                  node -> {
-                    JsonNode valueNode = node.at(jsonPath);
-                    return !(isEmptyNode(valueNode))
-                        && !expectedValues.contains(valueNode.asText());
-                  })
-              .map(
-                  node ->
-                      "Missing or mismatched "
-                          + jsonPath
-                          + " for eventType "
-                          + node.path("eventType").asText())
-              .collect(Collectors.toSet());
-
-      issues.addAll(errors);
-      return issues;
-    }
-
-    return Set.of();
-  }
-
-  private Set<String> validateEquipmentReference(
-      JsonNode body, Supplier<SuppliedScenarioParameters> sspSupplier) {
-
-    Optional<Map.Entry<TntFilterParameter, String>> equipmentReferenceParam =
-        sspSupplier.get().getMap().entrySet().stream()
-            .filter(e -> e.getKey().equals(TntFilterParameter.EQUIPMENT_REFERENCE))
-            .findFirst();
-
-    Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-    if (equipmentReferenceParam.isPresent()) {
-      Set<String> expectedEquipmentReferences =
-          Arrays.stream(equipmentReferenceParam.get().getValue().split(","))
-              .map(String::trim)
-              .collect(Collectors.toSet());
-
-      Set<String> errors =
-          Stream.concat(
-                  filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE),
-                  filterNodesByEventType(eventNodes, TRANSPORT_EVENT_TYPE))
-              .filter(
-                  node -> {
-                    JsonNode referencesNode = node.path("references");
-                    return StreamSupport.stream(referencesNode.spliterator(), false)
-                        .anyMatch(
-                            refNode ->
-                                !(isEmptyNode(referencesNode))
-                                    && (refNode.path("referenceType").asText().equals("EQ")
-                                        && !(expectedEquipmentReferences.contains(
-                                            refNode.path("referenceValue").asText()))));
-                  })
-              .map(
-                  node ->
-                      "Missing or mismatched equipmentReference for eventType "
-                          + node.path("eventType").asText())
-              .collect(Collectors.toSet());
-
-      errors.addAll(
-          filterNodesByEventType(eventNodes, EQUIPMENT_EVENT_TYPE)
-              .filter(
-                  node -> {
-                    JsonNode equipmentReferenceNode = node.path("equipmentReference");
-                    return !(isEmptyNode(equipmentReferenceNode))
-                        && !expectedEquipmentReferences.contains(equipmentReferenceNode.asText());
-                  })
-              .map(node -> "Missing or mismatched equipmentReference for eventType EQUIPMENT ")
-              .collect(Collectors.toSet()));
-
-      issues.addAll(errors);
-      return issues;
-    }
-
-    return Set.of();
   }
 
   private Set<String> validateBookingDocumentReference(

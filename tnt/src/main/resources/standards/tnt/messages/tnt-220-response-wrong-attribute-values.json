@@ -1,0 +1,58 @@
+[
+  {
+    "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+    "eventType": "TRANSPORT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2021-01-09T14:12:56+01:00",
+    "transportEventTypeCode": "DEPA",
+    "transportCall": {
+      "transportCallID": "6a1f0d3b-82be-46a1-aba8-509b7e3bd7a1",
+      "carrierServiceCode": "FE1",
+      "exportVoyageNumber": "1234W",
+      "UNLocationCode": "XYABC",
+      "modeOfTransport": "VESSEL",
+      "location": {
+        "UNLocationCode": "XYBCD"
+      },
+      "vessel": {
+        "vesselIMONumber": "1234567"
+      }
+    }
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e3",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "VOID",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "ARN"
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e4",
+    "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+    "eventType": "EQUIPMENT",
+    "eventClassifierCode": "EST",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "equipmentEventTypeCode": "RMVD",
+    "equipmentReference": "APZU2134567",
+    "emptyIndicatorCode": "EMPTY",
+    "eventLocation": {
+      "UNLocationCode": "XYABC"
+    },
+    "transportCall": {
+      "transportCallID": "6a1f0d3b-82be-46a1-aba8-509b7e3bd7a1",
+      "carrierServiceCode": "XY9",
+      "exportVoyageNumber": "1234W",
+      "UNLocationCode": "XYBCD",
+      "modeOfTransport": "VESSEL",
+      "location": {
+        "UNLocationCode": "XYCDE"
+      },
+      "vessel": {
+        "vesselIMONumber": "1234567"
+      }
+    }
+  }
+]

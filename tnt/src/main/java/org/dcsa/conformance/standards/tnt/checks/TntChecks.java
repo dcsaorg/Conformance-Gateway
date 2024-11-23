@@ -14,26 +14,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.tnt.action.TntEventType;
 import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 import org.dcsa.conformance.standards.tnt.party.TntRole;
 
 @UtilityClass
 public class TntChecks {
-  private static final String SHIPMENT_EVENT_TYPE = "SHIPMENT";
-  private static final String EQUIPMENT_EVENT_TYPE = "EQUIPMENT";
-  private static final String TRANSPORT_EVENT_TYPE = "TRANSPORT";
 
   public static ActionCheck responseContentChecks(
       UUID matched, String standardVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
@@ -61,6 +56,27 @@ public class TntChecks {
                         if (!uniqueEventIds.add(eventId)) {
                           validationErrors.add("Duplicate eventId: '%s'".formatted(eventId));
                         }
+                      });
+              return validationErrors;
+            }));
+
+    checks.add(
+        JsonAttribute.customValidator(
+            "If present, at least event attribute must match the corresponding query parameters",
+            body -> {
+              Map<TntFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
+              Set<String> validationErrors = new LinkedHashSet<>();
+              AtomicInteger eventIndex = new AtomicInteger(-1);
+              TntSchemaConformanceCheck.findEventNodes(body)
+                  .forEach(
+                      eventNode -> {
+                        eventIndex.incrementAndGet();
+                        _checkThatEventValuesMatchParamValues(eventNode, filterParametersMap)
+                            .forEach(
+                                validationError ->
+                                    validationErrors.add(
+                                        "Event #%d: %s"
+                                            .formatted(eventIndex.get(), validationError)));
                       });
               return validationErrors;
             }));
@@ -111,59 +127,6 @@ public class TntChecks {
               return validationErrors;
             }));
 
-    checks.add(
-        JsonAttribute.customValidator(
-            "If present, event attributes must match the corresponding query parameters",
-            body -> {
-              Map<TntFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
-              Set<String> validationErrors = new LinkedHashSet<>();
-              AtomicInteger eventIndex = new AtomicInteger(-1);
-              TntSchemaConformanceCheck.findEventNodes(body)
-                  .forEach(
-                      eventNode -> {
-                        eventIndex.incrementAndGet();
-                        Stream.of(
-                                TntFilterParameter.CARRIER_SERVICE_CODE,
-                                TntFilterParameter.DOCUMENT_TYPE_CODE,
-                                TntFilterParameter.EQUIPMENT_REFERENCE,
-                                TntFilterParameter.EVENT_TYPE,
-                                TntFilterParameter.EQUIPMENT_EVENT_TYPE_CODE,
-                                TntFilterParameter.EXPORT_VOYAGE_NUMBER,
-                                TntFilterParameter.SHIPMENT_EVENT_TYPE_CODE,
-                                TntFilterParameter.TRANSPORT_CALL_ID,
-                                TntFilterParameter.TRANSPORT_EVENT_TYPE_CODE,
-                                TntFilterParameter.UN_LOCATION_CODE,
-                                TntFilterParameter.VESSEL_IMO_NUMBER)
-                            .filter(filterParametersMap::containsKey)
-                            .forEach(
-                                filterParameter -> {
-                                  Set<String> parameterValues =
-                                      Arrays.stream(
-                                              filterParametersMap.get(filterParameter).split(","))
-                                          .collect(Collectors.toSet());
-                                  Set<String> attributeValues =
-                                      filterParameter.getEventPaths().stream()
-                                          .map(eventPath -> eventNode.at("/" + eventPath))
-                                          .filter(Predicate.not(JsonNode::isMissingNode))
-                                          .map(JsonNode::asText)
-                                          .collect(Collectors.toSet());
-                                  if (!attributeValues.isEmpty()
-                                      && parameterValues.stream()
-                                          .noneMatch(attributeValues::contains)) {
-                                    validationErrors.add(
-                                        "Event #%d: Value '%s' at path '%s' does not match value '%s' of query parameter '%s'"
-                                            .formatted(
-                                                eventIndex.get(),
-                                                String.join(",", attributeValues),
-                                                String.join(",", filterParameter.getEventPaths()),
-                                                filterParametersMap.get(filterParameter),
-                                                filterParameter.getQueryParamName()));
-                                  }
-                                });
-                      });
-              return validationErrors;
-            }));
-
     // FIXME
     checks.add(
         JsonAttribute.customValidator(
@@ -186,93 +149,8 @@ public class TntChecks {
               return issues;
             }));
 
-    // FIXME
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate carrierBookingReference exists and matches in JSON response "
-                + "if request parameter has carrierBookingReference",
-            body ->
-                validateBookingDocumentReference(
-                    body, sspSupplier, "CBR", TntFilterParameter.CARRIER_BOOKING_REFERENCE)));
-
-    // FIXME
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate transportDocumentReference exists and matches in JSON response "
-                + "if request parameter has transportDocumentReference",
-            body ->
-                validateBookingDocumentReference(
-                    body, sspSupplier, "TRD", TntFilterParameter.TRANSPORT_DOCUMENT_REFERENCE)));
     return JsonAttribute.contentChecks(
         TntRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
-  }
-
-  private Set<String> validateBookingDocumentReference(
-      JsonNode body,
-      Supplier<SuppliedScenarioParameters> sspSupplier,
-      @NonNull String filterType,
-      TntFilterParameter parameter) {
-    Optional<Map.Entry<TntFilterParameter, String>> referenceParam =
-        sspSupplier.get().getMap().entrySet().stream()
-            .filter(e -> e.getKey().equals(parameter))
-            .findFirst();
-
-    Set<String> issues = new LinkedHashSet<>();
-    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(body);
-
-    if (referenceParam.isPresent()) {
-      Set<String> expectedCarrierBookingReferences =
-          Arrays.stream(referenceParam.get().getValue().split(","))
-              .map(String::trim)
-              .collect(Collectors.toSet());
-
-      Set<String> errors =
-          Stream.concat(
-                  filterNodesByEventType(eventNodes, TRANSPORT_EVENT_TYPE),
-                  filterNodesByEventType(eventNodes, EQUIPMENT_EVENT_TYPE))
-              .filter(
-                  node -> {
-                    JsonNode documentReferencesNode = node.path("documentReferences");
-                    return StreamSupport.stream(documentReferencesNode.spliterator(), false)
-                        .anyMatch(
-                            refNode ->
-                                !(isEmptyNode(refNode)
-                                        && isEmptyNode(refNode.path("documentReferenceType"))
-                                        && isEmptyNode(refNode.path("documentReferenceValue")))
-                                    && refNode
-                                        .path("documentReferenceType")
-                                        .asText()
-                                        .equals(filterType)
-                                    && !(expectedCarrierBookingReferences.contains(
-                                        refNode.path("documentReferenceValue").asText())));
-                  })
-              .map(
-                  node ->
-                      "Missing or mismatched "
-                          + parameter.name()
-                          + " for eventType "
-                          + node.path("eventType").asText())
-              .collect(Collectors.toSet());
-
-      errors.addAll(
-          filterNodesByEventType(eventNodes, SHIPMENT_EVENT_TYPE)
-              .filter(
-                  node -> {
-                    JsonNode documentTypeCodeNode = node.path("documentTypeCode");
-                    JsonNode documentIDNode = node.path("documentID");
-                    return documentTypeCodeNode.asText().equals(filterType)
-                        && !expectedCarrierBookingReferences.contains(documentIDNode.asText());
-                  })
-              .map(
-                  node ->
-                      "Missing or mismatched " + parameter.name() + "for eventType SHIPMENT at ")
-              .collect(Collectors.toSet()));
-
-      issues.addAll(errors);
-      return issues;
-    }
-
-    return Set.of();
   }
 
   private static OffsetDateTime _stringToOffsetDateTime(String dateTimeString) {
@@ -281,6 +159,97 @@ public class TntChecks {
     } catch (DateTimeParseException e) {
       return null;
     }
+  }
+
+  static TntEventType _getEventType(JsonNode eventNode) {
+    return Arrays.stream(TntEventType.values())
+        .filter(
+            eventType -> eventType.name().equalsIgnoreCase(eventNode.path("eventType").asText()))
+        .findFirst()
+        .orElse(null);
+  }
+
+  static Set<String> _checkThatEventValuesMatchParamValues(
+      JsonNode eventNode, Map<TntFilterParameter, String> filterParametersMap) {
+    TntEventType eventType = _getEventType(eventNode);
+    if (eventType == null) return Set.of();
+    Set<String> validationErrors = new LinkedHashSet<>();
+    Arrays.stream(TntFilterParameter.values())
+        .filter(param -> !param.getJsonPathsByEventType().isEmpty())
+        .filter(filterParametersMap::containsKey)
+        .forEach(
+            filterParameter -> {
+              Set<String> parameterValues =
+                  Arrays.stream(filterParametersMap.get(filterParameter).split(","))
+                      .collect(Collectors.toSet());
+              Set<String> attributeValues = new HashSet<>();
+              Set<String> eventTypeJsonPaths =
+                  filterParameter.getJsonPathsByEventType().get(eventType);
+              eventTypeJsonPaths.forEach(
+                  jsonPathExpression -> {
+                    if (jsonPathExpression.contains(" WHERE ")) {
+                      // "/some/path WHERE /where/clause"
+                      String[] jsonPathExpressionTokens = jsonPathExpression.split(" WHERE ");
+                      String jsonPath = jsonPathExpressionTokens[0];
+                      String whereClause = jsonPathExpressionTokens[1];
+                      // "/documentReferenceType=BKG"
+                      String[] whereClauseTokens = whereClause.split("=");
+                      String whereClauseJsonPath = whereClauseTokens[0];
+                      String whereClauseValue = whereClauseTokens[1];
+                      if (jsonPath.contains("/*/")) {
+                        // "/documentReferences/*/documentReferenceValue"
+                        String[] jsonPathTokens = jsonPath.split("/*");
+                        String jsonPathToArray = jsonPathTokens[0];
+                        String jsonPathInElement = jsonPathTokens[1];
+                        JsonNode arrayNode = eventNode.at(jsonPathToArray);
+                        if (arrayNode.isArray()) {
+                          StreamSupport.stream(arrayNode.spliterator(), false)
+                              .filter(
+                                  elementNode ->
+                                      whereClauseValue.equals(
+                                          elementNode.at(whereClauseJsonPath).textValue()))
+                              .forEach(
+                                  elementNode -> {
+                                    JsonNode attributeValueNode = elementNode.at(jsonPathInElement);
+                                    if (attributeValueNode.isTextual()) {
+                                      attributeValues.add(attributeValueNode.textValue());
+                                    }
+                                  });
+                        }
+                      } else {
+                        // "/documentID"
+                        if (whereClauseValue.equals(
+                            eventNode.at(whereClauseJsonPath).textValue())) {
+                          JsonNode attributeValueNode = eventNode.at(jsonPath);
+                          if (attributeValueNode.isTextual()) {
+                            attributeValues.add(attributeValueNode.textValue());
+                          }
+                        }
+                      }
+                    } else {
+                      // "/transportCall/transportCallID"
+                      JsonNode attributeNode = eventNode.at(jsonPathExpression);
+                      if (attributeNode.isTextual()) {
+                        attributeValues.add(attributeNode.textValue());
+                      }
+                    }
+                  });
+              if (!attributeValues.isEmpty()
+                  && parameterValues.stream().noneMatch(attributeValues::contains)) {
+                validationErrors.add(
+                    "Value%s '%s' at path%s '%s' do%s not match value%s '%s' of query parameter '%s'"
+                        .formatted(
+                            attributeValues.size() > 1 ? "s" : "",
+                            String.join(", ", attributeValues),
+                            eventTypeJsonPaths.size() > 1 ? "s" : "",
+                            String.join(", ", eventTypeJsonPaths),
+                            attributeValues.size() > 1 ? "" : "es",
+                            filterParametersMap.get(filterParameter).contains(",") ? "s" : "",
+                            String.join(", ", filterParametersMap.get(filterParameter).split(",")),
+                            filterParameter.getQueryParamName()));
+              }
+            });
+    return validationErrors;
   }
 
   static String _validateEventCreatedDateTime(OffsetDateTime eventCreatedDateTime, TntFilterParameter parameterKey, OffsetDateTime parameterValue) {
@@ -319,13 +288,5 @@ public class TntChecks {
         break;
     }
     return null;
-  }
-
-  private Stream<JsonNode> filterNodesByEventType(ArrayList<JsonNode> body, String eventType) {
-    return body.stream().filter(node -> node.path("eventType").asText().equals(eventType));
-  }
-
-  private boolean isEmptyNode(JsonNode node) {
-    return node.isMissingNode() || node.isNull();
   }
 }

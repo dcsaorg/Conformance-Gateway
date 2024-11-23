@@ -1,0 +1,149 @@
+[
+  {
+    "eventID": 123456789,
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "incorrect",
+    "eventCreatedDateTime": "2021-01-09T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "ABC123123123",
+    "documentTypeCode": "BKG",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e8",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "TRD",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "3cecb101-7a1a-43a4-9d62-e88a131651e8",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "TRD",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "1ed826d0-3643-42e3-974b-eb88357c8e40",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "TRD",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "af7728dc-0e1e-42d2-ad78-61c5c0c25878",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "TRD",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  },
+  {
+    "eventID": "af7728dc-0e1e-42d2-ad78-61c5c0c25878",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "TRD",
+    "reason": "The following attributes are missing...",
+    "references": [
+      {
+        "referenceType": "FF",
+        "referenceValue": "string"
+      },
+      {
+        "referenceType": "EQ",
+        "referenceValue": "APZU4812090"
+      }
+    ]
+  }
+]

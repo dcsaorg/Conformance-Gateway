@@ -36,32 +36,30 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                     .thenEither(
                         scenarioWithFilterByShipmentEvent(Map.of(SHIPMENT_EVENT_TYPE_CODE, "DRFT")),
                         scenarioWithFilterByShipmentEvent(
-                            Map.of(EVENT_CREATED_DATE_TIME_EQ, "2021-01-09T14:12:56+01:00")),
+                            Map.of(
+                                EVENT_CREATED_DATE_TIME_GT,
+                                "2001-01-01T14:00:56+01:00",
+                                EVENT_CREATED_DATE_TIME_LT,
+                                "2050-01-30T14:01:56+01:00")),
                         scenarioWithFilterByShipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
-                                EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
-                        scenarioWithFilterByShipmentEvent(
-                            Map.of(
-                                EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:02:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:22:56+01:00")),
                         scenarioWithFilterByShipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:14:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByShipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:12:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
-                        scenarioWithFilterByShipmentEvent(Map.of(DOCUMENT_TYPE_CODE, "CBR")),
+                                "2050-01-30T14:12:56+01:00")),
+                        scenarioWithFilterByShipmentEvent(Map.of(DOCUMENT_TYPE_CODE, "SHI")),
                         scenarioWithFilterByShipmentEvent(
                             Map.of(CARRIER_BOOKING_REFERENCE, "ABC123123123")),
                         scenarioWithFilterByShipmentEvent(
@@ -83,37 +81,37 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                 noAction()
                     .thenEither(
                         scenarioWithFilterByTransportEvent(
-                            Map.of(EVENT_CREATED_DATE_TIME_EQ, "2021-01-09T14:12:56+01:00")),
+                            Map.of(
+                                EVENT_CREATED_DATE_TIME_GT,
+                                "2001-01-01T14:13:56+01:00",
+                                EVENT_CREATED_DATE_TIME_LT,
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
-                                EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
-                        scenarioWithFilterByTransportEvent(
-                            Map.of(
-                                EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:12:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:14:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:16:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(CARRIER_BOOKING_REFERENCE, "ABC123123123")),
                         scenarioWithFilterByTransportEvent(
-                            Map.of(TRANSPORT_DOCUMENT_REFERENCE, "reserved-HHL123")),
+                            Map.of(
+                                TRANSPORT_DOCUMENT_REFERENCE,
+                                "reserved-HHL123")),
                         scenarioWithFilterByTransportEvent(
-                            Map.of(TRANSPORT_EVENT_TYPE_CODE, "ARRV")),
+                            Map.of(TRANSPORT_EVENT_TYPE_CODE, "ARRI")),
                         scenarioWithFilterByTransportEvent(
                             Map.of(TRANSPORT_CALL_ID, "123e4567-e89b-12d3-a456-426614174000")),
                         scenarioWithFilterByTransportEvent(Map.of(VESSEL_IMO_NUMBER, "9321483")),
@@ -133,35 +131,35 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                 noAction()
                     .thenEither(
                         scenarioWithFilterByEquipmentEvent(
-                            Map.of(EVENT_CREATED_DATE_TIME_EQ, "2021-01-09T14:12:56+01:00")),
+                            Map.of(
+                                EVENT_CREATED_DATE_TIME_GT,
+                                "2001-01-01T14:13:56+01:00",
+                                EVENT_CREATED_DATE_TIME_LT,
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
-                                EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
-                        scenarioWithFilterByEquipmentEvent(
-                            Map.of(
-                                EVENT_CREATED_DATE_TIME_GT,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:12:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:12:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LT,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(
                                 EVENT_CREATED_DATE_TIME_GTE,
-                                "2021-01-09T14:12:56+01:00",
+                                "2001-01-01T14:12:56+01:00",
                                 EVENT_CREATED_DATE_TIME_LTE,
-                                "2021-01-30T14:12:56+01:00")),
+                                "2050-01-30T14:12:56+01:00")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(CARRIER_BOOKING_REFERENCE, "ABC123123123")),
                         scenarioWithFilterByEquipmentEvent(
-                            Map.of(TRANSPORT_DOCUMENT_REFERENCE, "reserved-HHL123")),
+                            Map.of(
+                                TRANSPORT_DOCUMENT_REFERENCE,
+                                "reserved-HHL123")),
                         scenarioWithFilterByEquipmentEvent(
                             Map.of(TRANSPORT_CALL_ID, "123e4567-e89b-12d3-a456-426614174000")),
                         scenarioWithFilterByEquipmentEvent(Map.of(VESSEL_IMO_NUMBER, "9321483")),

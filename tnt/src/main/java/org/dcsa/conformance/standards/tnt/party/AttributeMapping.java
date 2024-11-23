@@ -254,7 +254,7 @@ public class AttributeMapping {
             new AttributeMapping(
                 "equipmentReference", (node, value) -> !node.isMissingNode(), Set.of()),
             new AttributeMapping(
-                "references",
+                "references/*",
                 (node, value) ->
                     !node.isMissingNode()
                         && node.path("referenceType").asText().equals("EQ")
@@ -268,7 +268,7 @@ public class AttributeMapping {
         "transportDocumentReference",
         List.of(
             new AttributeMapping(
-                "documentReferences",
+                "documentReferences/*",
                 (node, value) ->
                     !node.isMissingNode()
                         && node.path("documentReferenceType").asText().equals("TRD")
@@ -278,8 +278,8 @@ public class AttributeMapping {
                 "/",
                 (node, value) ->
                     !node.isMissingNode()
-                        && node.path("documentReferenceType").asText().equals("TRD")
-                        && node.path("documentReferenceValue").asText().equals(value),
+                        && node.path(DOCUMENT_TYPE_CODE).asText().equals("TRD")
+                        && node.path("documentID").asText().equals(value),
                 Set.of())));
   }
 }

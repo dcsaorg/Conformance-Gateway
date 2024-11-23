@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -25,12 +24,19 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.tnt.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.tnt.checks.TntSchemaConformanceCheck;
 
 import static org.dcsa.conformance.core.party.CustomJsonPointer.traverse;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Slf4j
 public class TntPublisher extends ConformanceParty {
+
+  private static final boolean RETURN_EMPTY_RESPONSE = false;
+  private static final boolean USE_WRONG_ATTRIBUTE_VALUES = false;
+  private static final boolean USE_WRONG_DATE_TIMES = false;
+  private static final boolean USE_WRONG_EVENT_IDS = false;
+  private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
 
   public TntPublisher(
       String apiVersion,
@@ -103,16 +109,18 @@ public class TntPublisher extends ConformanceParty {
     Map<String, List<AttributeMapping>> attributeMappings =
         AttributeMapping.initializeAttributeMappings();
 
-    ArrayNode jsonResponseBody =
-        (ArrayNode)
-            JsonToolkit.templateFileToJsonNode(
-                "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
+    JsonNode jsonResponseBody =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/tnt/messages/tnt-220-response.json", Map.ofEntries());
+
+    ArrayList<JsonNode> eventNodes = TntSchemaConformanceCheck.findEventNodes(jsonResponseBody);
 
     if (!new QueryParameterSpecificRule().validate(request.queryParams())) {
-      return return400(request, "Error: Invalid query parameters provided.");
+      return return400(request);
     }
     ArrayNode filteredArray = OBJECT_MAPPER.createArrayNode();
-    jsonResponseBody.forEach(filteredArray::add);
+    eventNodes.forEach(filteredArray::add);
+
     // Chained Filtering Logic
     for (Map.Entry<String, ? extends Collection<String>> queryParam :
         request.queryParams().entrySet()) {
@@ -128,8 +136,6 @@ public class TntPublisher extends ConformanceParty {
       }
     }
 
-    // TODO:: To handle the complex sorting logic like CarrierBookingReference where references are
-    // different base on the jsonPath.
     if (request.queryParams().containsKey("sort")) {
       Collection<String> sortingFields = request.queryParams().get("sort");
       List<SortCriteria> sortCriteria =
@@ -160,7 +166,44 @@ public class TntPublisher extends ConformanceParty {
 
     ArrayNode limitedArray = applyCursorLogic(filteredArray, cursor, cursorKey, limit, headers);
 
-    return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));
+    if (RETURN_EMPTY_RESPONSE) {
+      return request.createResponse(
+          200, headers, new ConformanceMessageBody(OBJECT_MAPPER.createArrayNode()));
+    } else if (USE_WRONG_ATTRIBUTE_VALUES) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-attribute-values.json",
+                  Map.ofEntries())));
+    } else if (USE_WRONG_DATE_TIMES) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-date-times.json",
+                  Map.ofEntries())));
+    } else if (USE_WRONG_EVENT_IDS) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-event-ids.json",
+                  Map.ofEntries())));
+    } else if (USE_WRONG_RESPONSE_STRUCTURE) {
+      return request.createResponse(
+          200,
+          headers,
+          new ConformanceMessageBody(
+              JsonToolkit.templateFileToJsonNode(
+                  "/standards/tnt/messages/tnt-220-response-wrong-structure.json",
+                  Map.ofEntries())));
+    } else {
+      return request.createResponse(200, headers, new ConformanceMessageBody(limitedArray));
+    }
   }
 
   private ArrayNode applyFilter(
@@ -218,7 +261,7 @@ public class TntPublisher extends ConformanceParty {
             comparisonResult =
                 compareNodesByField(node1, node2, criterion.field(), criterion.direction());
             if (comparisonResult != 0) {
-              break; // Stop comparing if a difference is found
+              return comparisonResult; // Stop comparing if a difference is found
             }
           }
           return comparisonResult;
@@ -229,16 +272,16 @@ public class TntPublisher extends ConformanceParty {
     return sortedArray;
   }
 
-  private ConformanceResponse return400(ConformanceRequest request, String message) {
+  private ConformanceResponse return400(ConformanceRequest request) {
     return request.createResponse(
         400,
         Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(
-            createErrorResponse(request.method(), request.url(), "Bad Request", message)));
+            createErrorResponse(request.method(), request.url())));
   }
 
   private ObjectNode createErrorResponse(
-      String httpMethod, String requestUri, String reason, String message) {
+    String httpMethod, String requestUri) {
     // Create the root object node
     ObjectNode rootNode = OBJECT_MAPPER.createObjectNode();
     rootNode.put("httpMethod", httpMethod);
@@ -247,8 +290,8 @@ public class TntPublisher extends ConformanceParty {
     // Create the errors array node
     ArrayNode errorsArray = OBJECT_MAPPER.createArrayNode();
     ObjectNode errorDetails = OBJECT_MAPPER.createObjectNode();
-    errorDetails.put("reason", reason);
-    errorDetails.put("message", message);
+    errorDetails.put("reason", "Bad Request");
+    errorDetails.put("message", "Error: Invalid query parameters provided.");
     errorsArray.add(errorDetails);
 
     // Add the errors array to the root node

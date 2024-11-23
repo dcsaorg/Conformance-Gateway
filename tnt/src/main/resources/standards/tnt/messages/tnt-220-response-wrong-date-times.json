@@ -1,0 +1,69 @@
+[
+  {
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "missing eventCreatedDateTime",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "missing eventDateTime",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "wrong eventCreatedDateTime format",
+    "eventCreatedDateTime": "2021 01 01 14:12:56",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "wrong eventDateTime format",
+    "eventCreatedDateTime": "2021-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019/11/12 07:41:00 +08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "eventDateTime too early",
+    "eventCreatedDateTime": "1999-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  },
+  {
+    "TEST_CASE": "eventDateTime too late",
+    "eventCreatedDateTime": "2099-01-01T14:12:56Z",
+    "eventType": "SHIPMENT",
+    "eventClassifierCode": "ACT",
+    "eventDateTime": "2019-11-12T07:41:00+08:30",
+    "shipmentEventTypeCode": "DRFT",
+    "documentID": "reserved-HHL123",
+    "documentTypeCode": "SHI"
+  }
+]

@@ -192,7 +192,7 @@ public class TntChecks {
                       String whereClauseValue = whereClauseTokens[1];
                       if (jsonPath.contains("/*/")) {
                         // "/documentReferences/*/documentReferenceValue"
-                        String[] jsonPathTokens = jsonPath.split("/*");
+                        String[] jsonPathTokens = jsonPath.split("/\\*");
                         String jsonPathToArray = jsonPathTokens[0];
                         String jsonPathInElement = jsonPathTokens[1];
                         JsonNode arrayNode = eventNode.at(jsonPathToArray);

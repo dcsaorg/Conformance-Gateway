@@ -28,7 +28,7 @@
       </div>
     </mat-card>
 
-    <div [ngStyle]="{'color': !originalSandboxConfig?.sandboxEndpointUriMethods?.length ? 'grey' : 'initial'}">
+    <div [ngStyle]="{'color': !originalSandboxConfig.sandboxEndpointUriMethods.length ? 'grey' : 'initial'}">
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Connecting to the sandbox (read-only)</div>
         <div class="paragraph">Sandbox base URL:</div>
@@ -84,7 +84,7 @@
       </mat-card>
     </div>
 
-    <div [ngStyle]="{'color': !originalSandboxConfig?.externalPartyEndpointUriMethods?.length ? 'grey' : 'initial'}">
+    <div [ngStyle]="{'color': !originalSandboxConfig.externalPartyEndpointUriMethods.length ? 'grey' : 'initial'}">
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Connecting to your application</div>
         <div *ngIf="!originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
@@ -109,7 +109,7 @@
         <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length">
           <div>
             <mat-checkbox
-              [checked]="!!originalSandboxConfig?.externalPartyEndpointUriOverrides?.length"
+              [checked]="!!originalSandboxConfig.externalPartyEndpointUriOverrides.length"
               (change)="onUsingCustomEndpointUrisChange($event.checked)"
             >Use custom endpoint URIs</mat-checkbox>
           </div>

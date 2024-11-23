@@ -3,9 +3,17 @@ package org.dcsa.conformance.standards.tnt.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.standards.tnt.party.SuppliedScenarioParameters;
 import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
 
@@ -15,14 +23,18 @@ public class SupplyScenarioParametersAction extends TntAction {
   private final Map<TntFilterParameter,String> tntFilterParameterMap;
 
   public SupplyScenarioParametersAction(
-    String publisherPartyName, Map<TntFilterParameter, String> parameters) {
-    super(publisherPartyName,null, null,
-      "SupplyScenarioParameters(%s)"
-        .formatted(
-          parameters.entrySet().stream()
-            .map(entry -> entry.getKey().getQueryParamName() + "=" + entry.getValue())
-            .collect(Collectors.joining(", "))), -1 );
-    this.tntFilterParameterMap =  parameters;
+      String publisherPartyName, Map<TntFilterParameter, String> parameters) {
+    super(
+        publisherPartyName,
+        null,
+        null,
+        "SupplyScenarioParameters(%s)"
+            .formatted(
+                parameters.keySet().stream()
+                    .map(TntFilterParameter::getQueryParamName)
+                    .collect(Collectors.joining(", "))),
+        -1);
+    this.tntFilterParameterMap = parameters;
   }
 
   @Override
@@ -83,7 +95,47 @@ public class SupplyScenarioParametersAction extends TntAction {
   @Override
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
-    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
-  }
 
+    JsonNode inputNode = partyInput.get("input");
+    Set<String> inputKeys =
+      StreamSupport.stream(
+          ((Iterable<String>) inputNode::fieldNames)
+            .spliterator(),
+          false)
+        .collect(Collectors.toSet());
+
+    Set<String> missingKeys =
+      StreamSupport.stream(
+          ((Iterable<String>) () -> getJsonForHumanReadablePrompt().fieldNames())
+            .spliterator(),
+          false)
+        .collect(Collectors.toSet());
+    missingKeys.removeAll(inputKeys);
+    if (!missingKeys.isEmpty()) {
+      throw new UserFacingException(
+          "The input must contain: %s".formatted(String.join(", ", missingKeys)));
+    }
+
+    Arrays.stream(TntFilterParameter.values())
+        .map(TntFilterParameter::getQueryParamName)
+        .filter(
+            queryParamName ->
+                queryParamName.startsWith(
+                    TntFilterParameter.EVENT_CREATED_DATE_TIME.getQueryParamName()))
+        .filter(inputNode::hasNonNull)
+        .forEach(
+            queryParamName -> {
+              String dateValue = inputNode.path(queryParamName).asText();
+              try {
+                OffsetDateTime.parse(dateValue);
+              } catch (DateTimeParseException e) {
+                throw new UserFacingException(
+                    "Invalid date-time format '%s' for input parameter '%s'"
+                        .formatted(dateValue, queryParamName),
+                    e);
+              }
+            });
+
+    suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(inputNode);
+  }
 }

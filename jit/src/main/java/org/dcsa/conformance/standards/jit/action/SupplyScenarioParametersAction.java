@@ -1,38 +1,22 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.standards.jit.party.JitFilterParameter;
+import org.dcsa.conformance.standards.jit.JitScenarioContext;
+import org.dcsa.conformance.standards.jit.party.JitConsumer;
 import org.dcsa.conformance.standards.jit.party.SuppliedScenarioParameters;
 
-@Getter
+@Slf4j
 public class SupplyScenarioParametersAction extends ConformanceAction {
 
-  private SuppliedScenarioParameters suppliedScenarioParameters = null;
-  private final LinkedHashSet<JitFilterParameter> jitFilterParameters;
+  public static final String PARAMETERS = "suppliedScenarioParameters";
+  @Getter private SuppliedScenarioParameters suppliedScenarioParameters;
 
-  public SupplyScenarioParametersAction(
-      String publisherPartyName, JitFilterParameter... jitFilterParameters) {
-    super(
-        publisherPartyName,
-        null,
-        null,
-        "SupplyScenarioParameters(%s)"
-            .formatted(
-                Arrays.stream(jitFilterParameters)
-                    .map(JitFilterParameter::getQueryParamName)
-                    .collect(Collectors.joining(", "))));
-    this.jitFilterParameters = new LinkedHashSet<>(Arrays.asList(jitFilterParameters));
+  public SupplyScenarioParametersAction(JitScenarioContext context) {
+    super(context.consumerPartyName(), null, null, "SupplyScenarioParameters");
   }
 
   @Override
@@ -45,7 +29,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (suppliedScenarioParameters != null) {
-      jsonState.set("suppliedScenarioParameters", suppliedScenarioParameters.toJson());
+      jsonState.set(PARAMETERS, suppliedScenarioParameters.toJson());
     }
     return jsonState;
   }
@@ -53,48 +37,20 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    if (jsonState.has("suppliedScenarioParameters")) {
+    if (jsonState.has(PARAMETERS)) {
       suppliedScenarioParameters =
-          SuppliedScenarioParameters.fromJson(jsonState.required("suppliedScenarioParameters"));
+          SuppliedScenarioParameters.fromJson(jsonState.required(PARAMETERS));
     }
   }
 
   @Override
-  public ObjectNode asJsonNode() {
-    ObjectNode objectNode = super.asJsonNode();
-    ArrayNode jsonJitFilterParameters = objectNode.putArray("jitFilterParametersQueryParamNames");
-    jitFilterParameters.forEach(
-        jitFilterParameter -> jsonJitFilterParameters.add(jitFilterParameter.getQueryParamName()));
-    return objectNode;
-  }
-
-  @Override
   public String getHumanReadablePrompt() {
-    return "Use the following format to provide the values of the specified query parameters"
-        + " for which your party can successfully process a GET request:";
+    return "Supply the parameters required by the scenario:";
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return SuppliedScenarioParameters.fromMap(
-            jitFilterParameters.stream()
-                .collect(
-                    Collectors.toMap(
-                        Function.identity(),
-                        jitFilterParameter ->
-                            switch (jitFilterParameter) {
-                              case LIMIT -> "100";
-                              case EVENT_CREATED_DATE_TIME,
-                                      EVENT_CREATED_DATE_TIME_EQ,
-                                      EVENT_CREATED_DATE_TIME_GT,
-                                      EVENT_CREATED_DATE_TIME_GTE,
-                                      EVENT_CREATED_DATE_TIME_LT,
-                                      EVENT_CREATED_DATE_TIME_LTE ->
-                                  ZonedDateTime.now()
-                                      .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                              default -> "TODO";
-                            })))
-        .toJson();
+    return JitConsumer.createSuppliedScenarioParameters().toJson();
   }
 
   @Override
@@ -104,6 +60,7 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public void handlePartyInput(JsonNode partyInput) {
+    log.info("SupplyScenarioParametersAction.handlePartyInput({})", partyInput.toPrettyString());
     super.handlePartyInput(partyInput);
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }

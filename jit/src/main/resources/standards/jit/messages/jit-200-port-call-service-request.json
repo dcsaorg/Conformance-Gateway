@@ -1,0 +1,60 @@
+{
+  "portCall": {
+    "portCallID": "0342254a-5927-4856-b9c9-aa12e7c00563",
+    "portVisitReference": "NLAMS1234589",
+    "carrierServiceName": "Great Lion Service",
+    "carrierServiceCode": "FE1",
+    "universalServiceReference": "SR12345A",
+    "UNLocationCode": "NLAMS"
+  },
+  "terminalCall": {
+    "terminalCallID": "0342254a-5927-4856-b9c9-aa12e7c00563",
+    "transportCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
+    "transportCallSequenceNumber": 2,
+    "carrierImportVoyageNumber": "2103N",
+    "carrierExportVoyageNumber": "2103S",
+    "universalImportVoyageReference": "2103N",
+    "universalExportVoyageReference": "2103N"
+  },
+  "vessel": {
+    "vesselIMONumber": "9321483",
+    "MMSINumber": "278111222",
+    "name": "King of the Seas",
+    "lengthOverall": 245.45,
+    "width": 37.33,
+    "callSign": "NCVV",
+    "type": "CONT",
+    "draft": 12.5,
+    "dimensionUnit": "MTR",
+    "vesselPosition": {
+      "locationName": "CMP Container Terminal Copenhagen",
+      "UNLocationCode": "DKCPH",
+      "facility": {
+        "facilityCode": "CMPDK",
+        "facilityCodeListProvider": "SMDG"
+      }
+    },
+    "milesToDestinationPort": 245.45
+  },
+  "specification": {
+    "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
+    "portCallServiceType": "SERVICE_TYPE_PLACEHOLDER",
+    "portCallServiceEventTypeCode": "STRT",
+    "portCallPhaseTypeCode": "ALGS",
+    "facilityTypeCode": "BRTH",
+    "portCallServiceLocation": {
+      "locationName": "CMP Container Terminal Copenhagen",
+      "UNLocationCode": "DKCPH",
+      "facility": {
+        "facilityCode": "CMPDK",
+        "facilityCodeListProvider": "SMDG"
+      }
+    },
+    "moves": {
+      "restowMoves": 20,
+      "bbkPieces": 3,
+      "totalMoves": 155
+    }
+  },
+  "isFYI": true
+}

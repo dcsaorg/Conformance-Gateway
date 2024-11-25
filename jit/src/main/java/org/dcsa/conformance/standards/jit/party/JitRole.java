@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum JitRole {
-  PUBLISHER("Publisher"),
-  SUBSCRIBER("Subscriber");
+  PROVIDER("Provider"),
+  CONSUMER("Consumer");
 
   private final String configName;
 
@@ -13,11 +13,11 @@ public enum JitRole {
     this.configName = configName;
   }
 
-  public static boolean isPublisher(String configName) {
-    return JitRole.PUBLISHER.configName.equals(configName);
+  public static boolean isProvider(String configName) {
+    return JitRole.PROVIDER.configName.equals(configName);
   }
 
-  public static boolean isSubscriber(String configName) {
-    return JitRole.SUBSCRIBER.configName.equals(configName);
+  public static boolean isConsumer(String configName) {
+    return JitRole.CONSUMER.configName.equals(configName);
   }
 }

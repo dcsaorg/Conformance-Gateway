@@ -22,6 +22,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
+import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 
@@ -63,12 +64,14 @@ public class JitProvider extends ConformanceParty {
   private void portCallServiceRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallServiceRequest({})", actionPrompt.toPrettyString());
 
+    SuppliedScenarioParameters ssp =
+        SuppliedScenarioParameters.fromJson(
+            actionPrompt.required(SupplyScenarioParametersAction.PARAMETERS));
+
     String serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
-    String portCallServiceID = UUID.randomUUID().toString();
+    JsonNode jsonBody = replacePlaceHolders(ssp.portCallID(), ssp.portCallServiceID(), serviceType);
 
-    JsonNode jsonBody = replacePlaceHolders(portCallServiceID, serviceType);
-
-    syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + portCallServiceID, jsonBody);
+    syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + ssp.portCallServiceID(), jsonBody);
 
     addOperatorLogEntry("Submitted %s Port Call Service".formatted(serviceType));
   }
@@ -78,13 +81,16 @@ public class JitProvider extends ConformanceParty {
 
     JitTimestampType timestampType =
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
-    JitTimestamp previousTimestamp = JitTimestamp.fromJson(actionPrompt.path("previousTimestamp"));
 
-    // TODO: fetch timestamp from SSP
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    JitTimestamp previousTimestamp = dsp.previousTimestamp();
 
     // Create values for the first timestamp in the sequence.
-    if (previousTimestamp == null && timestampType != JitTimestampType.ESTIMATED) {
+    if (previousTimestamp == null) {
       previousTimestamp = getTimestampForType(JitTimestampType.ESTIMATED, null);
+      if (dsp.portCallServiceID() != null) {
+        previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
+      }
     }
     JitTimestamp timestamp = getTimestampForType(timestampType, previousTimestamp);
     sendTimestampPutRequest(timestampType, timestamp);
@@ -137,10 +143,13 @@ public class JitProvider extends ConformanceParty {
             .formatted(timestampType, timestamp.portCallServiceDateTime()));
   }
 
-  private JsonNode replacePlaceHolders(String portCallServiceId, String serviceType) {
+  private JsonNode replacePlaceHolders(
+      String portCallId, String portCallServiceId, String serviceType) {
     return JsonToolkit.templateFileToJsonNode(
         "/standards/jit/messages/jit-200-port-call-service-request.json",
         Map.of(
+            "PORT_CALL_ID_PLACEHOLDER",
+            portCallId,
             "SERVICE_TYPE_PLACEHOLDER",
             serviceType,
             "PORT_CALL_SERVICE_ID_PLACEHOLDER",

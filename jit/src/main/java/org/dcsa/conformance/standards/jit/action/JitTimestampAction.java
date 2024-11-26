@@ -69,18 +69,9 @@ public class JitTimestampAction extends JitAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    //    jsonNode.set(
-    //        SupplyScenarioParametersAction.PARAMETERS,
-    //        ((SupplyScenarioParametersAction) previousAction.getPreviousAction())
-    //            .getSuppliedScenarioParameters()
-    //            .toJson());
     jsonNode.put("timestampType", timestampType.name());
-    if (((JitAction) previousAction).getDsp() != null) {
-      if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
-      jsonNode.put("portCallServiceID", dsp.portCallServiceID());
-      if (dsp.previousTimestamp() != null)
-        jsonNode.set("previousTimestamp", dsp.previousTimestamp().toJson());
-    }
+    dsp = ((JitAction) previousAction).getDsp();
+    jsonNode.set("dsp", dsp.toJson());
     return jsonNode;
   }
 

@@ -6,10 +6,7 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 public record SuppliedScenarioParameters(
-    String portCallID,
-    String transportCallID,
-    String carrierServiceName,
-    String carrierServiceCode)
+    String portCallID, String transportCallID, String portCallServiceID)
     implements ScenarioParameters {
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {

@@ -71,7 +71,7 @@ public class JitConsumer extends ConformanceParty {
 
   public static SuppliedScenarioParameters createSuppliedScenarioParameters() {
     return new SuppliedScenarioParameters(
-        UUID.randomUUID().toString(), UUID.randomUUID().toString(), "Great Lion Service", "FE1");
+        UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   private void timestampRequest(JsonNode actionPrompt) {
@@ -84,8 +84,8 @@ public class JitConsumer extends ConformanceParty {
           "Only REQUESTED timestamps are supported for a Consumer party.");
     }
 
-    JitTimestamp previousTimestamp = JitTimestamp.fromJson(actionPrompt.path("previousTimestamp"));
-    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, previousTimestamp);
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.previousTimestamp());
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/requested-timestamp",

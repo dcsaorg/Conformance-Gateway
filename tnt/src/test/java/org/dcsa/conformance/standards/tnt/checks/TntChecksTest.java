@@ -1,57 +1,61 @@
 package org.dcsa.conformance.standards.tnt.checks;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.dcsa.conformance.standards.tnt.action.TntEventType.*;
 import static org.dcsa.conformance.standards.tnt.party.TntFilterParameter.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.standards.tnt.action.TntEventType;
-import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
-import org.junit.jupiter.api.Test;
-
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
+import org.dcsa.conformance.standards.tnt.action.TntEventType;
+import org.dcsa.conformance.standards.tnt.party.TntFilterParameter;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class TntChecksTest {
   private static final OffsetDateTime TODAY = OffsetDateTime.now();
   private static final OffsetDateTime TOMORROW = TODAY.plusDays(1);
 
-  @Test
-  void testValidateEventCreatedDateTime() {
-    _check(TODAY, EVENT_CREATED_DATE_TIME_LT, TODAY, false);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_LTE, TODAY, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME, TODAY, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_EQ, TODAY, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_GTE, TODAY, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_GT, TODAY, false);
+  private static Stream<Arguments> testValidateEventCreatedDateTime() {
+    return Stream.of(
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LT, TODAY, false),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LTE, TODAY, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME, TODAY, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_EQ, TODAY, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GTE, TODAY, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GT, TODAY, false),
 
-    _check(TODAY, EVENT_CREATED_DATE_TIME_LT, TOMORROW, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_LTE, TOMORROW, true);
-    _check(TODAY, EVENT_CREATED_DATE_TIME, TOMORROW, false);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_EQ, TOMORROW, false);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_GTE, TOMORROW, false);
-    _check(TODAY, EVENT_CREATED_DATE_TIME_GT, TOMORROW, false);
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LT, TOMORROW, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LTE, TOMORROW, true),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME, TOMORROW, false),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_EQ, TOMORROW, false),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GTE, TOMORROW, false),
+        Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GT, TOMORROW, false),
 
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME_LT, TODAY, false);
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME_LTE, TODAY, false);
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME, TODAY, false);
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME_EQ, TODAY, false);
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME_GTE, TODAY, true);
-    _check(TOMORROW, EVENT_CREATED_DATE_TIME_GT, TODAY, true);
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_LT, TODAY, false),
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_LTE, TODAY, false),
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME, TODAY, false),
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_EQ, TODAY, false),
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_GTE, TODAY, true),
+        Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_GT, TODAY, true));
   }
 
-  private void _check(
+  @ParameterizedTest()
+  @MethodSource("testValidateEventCreatedDateTime")
+  void testValidateEventCreatedDateTime(
       OffsetDateTime left,
       TntFilterParameter operator,
       OffsetDateTime right,
       boolean expectedResult) {
-    String validationError = TntChecks._validateEventCreatedDateTime(left, operator, right);
+    String validationError = TntChecks.validateEventCreatedDateTime(left, operator, right);
     if (expectedResult) {
       assertNull(
           validationError,
@@ -68,148 +72,148 @@ class TntChecksTest {
   @Test
   void testMatchingCbrAndTrd() {
     ArrayNode documentReferencesArray =
-        _arrayOfNodes(
-            _documentReferenceNode("BKG", "bkg123"),
-            _documentReferenceNode("BKG", "bkg234"),
-            _documentReferenceNode("TRD", "trd123"),
-            _documentReferenceNode("TRD", "trd234"));
+        arrayOfNodes(
+            documentReferenceNode("BKG", "bkg123"),
+            documentReferenceNode("BKG", "bkg234"),
+            documentReferenceNode("TRD", "trd123"),
+            documentReferenceNode("TRD", "trd234"));
     Stream.of(TRANSPORT, EQUIPMENT)
         .forEach(
             eventType -> {
               ObjectNode eventWithCBR =
-                  _withChildNode(
-                      _eventJsonObject(eventType), "documentReferences", documentReferencesArray);
+                  withChildNode(
+                      eventJsonObject(eventType), "documentReferences", documentReferencesArray);
 
               assertTrue(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg234")))
                       .isEmpty());
               assertFalse(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(CARRIER_BOOKING_REFERENCE, "wrong")))
                       .isEmpty());
               assertFalse(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(CARRIER_BOOKING_REFERENCE, "trd123")))
                       .isEmpty());
 
               assertTrue(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "trd123")))
                       .isEmpty());
               assertFalse(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "wrong")))
                       .isEmpty());
               assertFalse(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithCBR,
-                          _filterParameters(
+                          filterParameters(
                               eventType, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "bkg123")))
                       .isEmpty());
             });
 
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT)
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT)
                     .put("documentID", "bkg123")
                     .put("documentTypeCode", "BKG"),
-                _filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
+                filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT)
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT)
                     .put("documentID", "bkg234")
                     .put("documentTypeCode", "BKG"),
-                _filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
+                filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
             .isEmpty());
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT)
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT)
                     .put("documentID", "bkg234")
                     .put(
                         "documentTypeCode", "CBR"), // which means something else in this context :|
-                _filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
+                filterParameters(SHIPMENT, Map.entry(CARRIER_BOOKING_REFERENCE, "bkg123")))
             .isEmpty());
 
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT)
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT)
                     .put("documentID", "trd123")
                     .put("documentTypeCode", "TRD"),
-                _filterParameters(SHIPMENT, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "trd123")))
+                filterParameters(SHIPMENT, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "trd123")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT)
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT)
                     .put("documentID", "trd123")
                     .put("documentTypeCode", "TRD"),
-                _filterParameters(SHIPMENT, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "wrong")))
+                filterParameters(SHIPMENT, Map.entry(TRANSPORT_DOCUMENT_REFERENCE, "wrong")))
             .isEmpty());
   }
 
   @Test
   void testMatchingDocumentTypeCode() {
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
-                _filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "CBR")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
+                filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "CBR")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
-                _filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "BKG")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
+                filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "BKG")))
             .isEmpty());
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
-                _filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "CBR,BKG")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT).put("documentTypeCode", "CBR"),
+                filterParameters(SHIPMENT, Map.entry(DOCUMENT_TYPE_CODE, "CBR,BKG")))
             .isEmpty());
   }
 
   @Test
   void testMatchingEventTypeCodes() {
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(TRANSPORT).put("transportEventTypeCode", "ARRI"),
-                _filterParameters(TRANSPORT, Map.entry(TRANSPORT_EVENT_TYPE_CODE, "ARRI")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(TRANSPORT).put("transportEventTypeCode", "ARRI"),
+                filterParameters(TRANSPORT, Map.entry(TRANSPORT_EVENT_TYPE_CODE, "ARRI")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(TRANSPORT).put("transportEventTypeCode", "ARRI"),
-                _filterParameters(TRANSPORT, Map.entry(TRANSPORT_EVENT_TYPE_CODE, "DEPA")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(TRANSPORT).put("transportEventTypeCode", "ARRI"),
+                filterParameters(TRANSPORT, Map.entry(TRANSPORT_EVENT_TYPE_CODE, "DEPA")))
             .isEmpty());
 
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT).put("shipmentEventTypeCode", "RECE"),
-                _filterParameters(SHIPMENT, Map.entry(SHIPMENT_EVENT_TYPE_CODE, "RECE")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT).put("shipmentEventTypeCode", "RECE"),
+                filterParameters(SHIPMENT, Map.entry(SHIPMENT_EVENT_TYPE_CODE, "RECE")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(SHIPMENT).put("shipmentEventTypeCode", "RECE"),
-                _filterParameters(SHIPMENT, Map.entry(SHIPMENT_EVENT_TYPE_CODE, "DRFT")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(SHIPMENT).put("shipmentEventTypeCode", "RECE"),
+                filterParameters(SHIPMENT, Map.entry(SHIPMENT_EVENT_TYPE_CODE, "DRFT")))
             .isEmpty());
 
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(EQUIPMENT).put("equipmentEventTypeCode", "LOAD"),
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_EVENT_TYPE_CODE, "LOAD")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(EQUIPMENT).put("equipmentEventTypeCode", "LOAD"),
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_EVENT_TYPE_CODE, "LOAD")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
-                _eventJsonObject(EQUIPMENT).put("equipmentEventTypeCode", "LOAD"),
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_EVENT_TYPE_CODE, "DISC")))
+        TntChecks.checkThatEventValuesMatchParamValues(
+                eventJsonObject(EQUIPMENT).put("equipmentEventTypeCode", "LOAD"),
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_EVENT_TYPE_CODE, "DISC")))
             .isEmpty());
   }
 
@@ -219,10 +223,10 @@ class TntChecksTest {
         .forEach(
             eventType -> {
               ObjectNode eventWithVesselImo =
-                  _withChildNode(
-                      _eventJsonObject(eventType),
+                  withChildNode(
+                      eventJsonObject(eventType),
                       "transportCall",
-                      _withChildNode(
+                      withChildNode(
                           JsonToolkit.OBJECT_MAPPER.createObjectNode(),
                           "vessel",
                           JsonToolkit.OBJECT_MAPPER
@@ -230,14 +234,14 @@ class TntChecksTest {
                               .put("vesselIMONumber", "1234567")));
 
               assertTrue(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithVesselImo,
-                          _filterParameters(eventType, Map.entry(VESSEL_IMO_NUMBER, "1234567")))
+                          filterParameters(eventType, Map.entry(VESSEL_IMO_NUMBER, "1234567")))
                       .isEmpty());
               assertFalse(
-                  TntChecks._checkThatEventValuesMatchParamValues(
+                  TntChecks.checkThatEventValuesMatchParamValues(
                           eventWithVesselImo,
-                          _filterParameters(eventType, Map.entry(VESSEL_IMO_NUMBER, "2345678")))
+                          filterParameters(eventType, Map.entry(VESSEL_IMO_NUMBER, "2345678")))
                       .isEmpty());
             });
   }
@@ -245,87 +249,87 @@ class TntChecksTest {
   @Test
   void testMatchingEquipmentReferences() {
     ObjectNode equipmentEvent =
-        _withChildNode(
-            _eventJsonObject(EQUIPMENT).put("equipmentReference", "ASDF1234567"),
+        withChildNode(
+            eventJsonObject(EQUIPMENT).put("equipmentReference", "ASDF1234567"),
             "references",
-            _arrayOfNodes(_referenceNode("EQ", "ASDF2345678"), _referenceNode("FF", "ff123")));
+            arrayOfNodes(referenceNode("EQ", "ASDF2345678"), referenceNode("FF", "ff123")));
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 equipmentEvent,
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ASDF1234567")))
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ASDF1234567")))
             .isEmpty());
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 equipmentEvent,
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ASDF2345678")))
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ASDF2345678")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 equipmentEvent,
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ff123")))
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "ff123")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 equipmentEvent,
-                _filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "wrong")))
+                filterParameters(EQUIPMENT, Map.entry(EQUIPMENT_REFERENCE, "wrong")))
             .isEmpty());
   }
 
   @Test
   void testMatchingUnLocationCode() {
     ObjectNode eventWithVesselImo =
-        _withChildNode(
-            _withChildNode(
-                _eventJsonObject(EQUIPMENT),
+        withChildNode(
+            withChildNode(
+                eventJsonObject(EQUIPMENT),
                 "eventLocation",
                 JsonToolkit.OBJECT_MAPPER.createObjectNode().put("UNLocationCode", "FRPAR")),
             "transportCall",
             JsonToolkit.OBJECT_MAPPER.createObjectNode().put("UNLocationCode", "DEHAM"));
 
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 eventWithVesselImo,
-                _filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "FRPAR")))
+                filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "FRPAR")))
             .isEmpty());
     assertTrue(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 eventWithVesselImo,
-                _filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "DEHAM")))
+                filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "DEHAM")))
             .isEmpty());
     assertFalse(
-        TntChecks._checkThatEventValuesMatchParamValues(
+        TntChecks.checkThatEventValuesMatchParamValues(
                 eventWithVesselImo,
-                _filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "NLRTM")))
+                filterParameters(EQUIPMENT, Map.entry(UN_LOCATION_CODE, "NLRTM")))
             .isEmpty());
   }
 
-  private static ObjectNode _withChildNode(
+  private static ObjectNode withChildNode(
       ObjectNode parentNode, String childName, JsonNode childNode) {
     parentNode.set(childName, childNode);
     return parentNode;
   }
 
-  private static ArrayNode _arrayOfNodes(JsonNode... elementNodes) {
+  private static ArrayNode arrayOfNodes(JsonNode... elementNodes) {
     ArrayNode arrayNode = JsonToolkit.OBJECT_MAPPER.createArrayNode();
     Arrays.stream(elementNodes).forEach(arrayNode::add);
     return arrayNode;
   }
 
-  private static ObjectNode _documentReferenceNode(String type, String value) {
+  private static ObjectNode documentReferenceNode(String type, String value) {
     return JsonToolkit.OBJECT_MAPPER
         .createObjectNode()
         .put("documentReferenceType", type)
         .put("documentReferenceValue", value);
   }
 
-  private static ObjectNode _referenceNode(String type, String value) {
+  private static ObjectNode referenceNode(String type, String value) {
     return JsonToolkit.OBJECT_MAPPER
         .createObjectNode()
         .put("referenceType", type)
         .put("referenceValue", value);
   }
 
-  private static ObjectNode _eventJsonObject(TntEventType eventType) {
+  private static ObjectNode eventJsonObject(TntEventType eventType) {
     return JsonToolkit.OBJECT_MAPPER
         .createObjectNode()
         .put(EVENT_TYPE.getQueryParamName(), eventType.name());
@@ -333,7 +337,7 @@ class TntChecksTest {
 
   @SafeVarargs
   @SuppressWarnings("varargs")
-  private static Map<TntFilterParameter, String> _filterParameters(
+  private static Map<TntFilterParameter, String> filterParameters(
       TntEventType eventType, Map.Entry<TntFilterParameter, String>... mapEntryStream) {
     return Stream.concat(
             Stream.of(Map.entry(EVENT_TYPE, eventType.name())), Arrays.stream(mapEntryStream))

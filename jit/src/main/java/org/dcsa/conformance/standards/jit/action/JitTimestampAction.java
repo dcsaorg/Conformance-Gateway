@@ -49,16 +49,20 @@ public class JitTimestampAction extends JitAction {
         "JitTimestampAction.doHandleExchange() requestJsonNode: {}",
         requestJsonNode.toPrettyString());
 
-    // TODO: update when type of timestamps is PUT through single enpoint
+    // TODO: update when type of timestamps is PUT through single endpoint
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
-    if (dsp.previousTimestamp() == null) {
-      dsp = dsp.withPreviousTimestamp(receivedTimestamp);
-    }
+    dsp =
+        dsp.withPreviousTimestamp(receivedTimestamp)
+            .withPortCallServiceDateTime(receivedTimestamp.portCallServiceDateTime());
 
     // Update DSP with the timestamp type
     String[] urlPath = exchange.getRequest().url().split("/");
     if (urlPath[urlPath.length - 1].equals("requested-timestamp")) {
       dsp = dsp.withTimestampType(JitTimestampType.REQUESTED);
+    } else if (urlPath[urlPath.length - 1].equals("planned-timestamp")) {
+      dsp = dsp.withTimestampType(JitTimestampType.PLANNED);
+    } else if (urlPath[urlPath.length - 1].equals("actual-timestamp")) {
+      dsp = dsp.withTimestampType(JitTimestampType.ACTUAL);
     }
   }
 
@@ -72,8 +76,10 @@ public class JitTimestampAction extends JitAction {
     //            .toJson());
     jsonNode.put("timestampType", timestampType.name());
     if (((JitAction) previousAction).getDsp() != null) {
-      jsonNode.put("portCallServiceID", ((JitAction) previousAction).getDsp().portCallServiceID());
-      dsp = ((JitAction) previousAction).getDsp();
+      if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
+      jsonNode.put("portCallServiceID", dsp.portCallServiceID());
+      if (dsp.previousTimestamp() != null)
+        jsonNode.set("previousTimestamp", dsp.previousTimestamp().toJson());
     }
     return jsonNode;
   }

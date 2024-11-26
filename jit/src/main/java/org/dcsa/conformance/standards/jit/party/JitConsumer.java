@@ -2,20 +2,18 @@ package org.dcsa.conformance.standards.jit.party;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -79,25 +77,23 @@ public class JitConsumer extends ConformanceParty {
   private void timestampRequest(JsonNode actionPrompt) {
     log.info("JitConsumer.timestampRequest({})", actionPrompt.toPrettyString());
 
-    JitTimestamp timestamp =
-        new JitTimestamp(
-            UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(),
-            actionPrompt.required("portCallServiceID").asText(),
-            LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
-            "STR",
-            false,
-            "Port closed due to strike");
-
-    // TODO: FROM DSP?
     JitTimestampType timestampType =
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
+    if (timestampType != JitTimestampType.REQUESTED) {
+      throw new UserFacingException(
+          "Only REQUESTED timestamps are supported for a Consumer party.");
+    }
+
+    JitTimestamp previousTimestamp = JitTimestamp.fromJson(actionPrompt.path("previousTimestamp"));
+    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, previousTimestamp);
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/requested-timestamp",
         timestamp.toJson());
 
-    addOperatorLogEntry("Submitted %s timestamp for: %s".formatted(timestampType, timestamp.portCallServiceDateTime()));
+    addOperatorLogEntry(
+        "Submitted %s timestamp for: %s"
+            .formatted(timestampType, timestamp.portCallServiceDateTime()));
   }
 
   @Override
@@ -115,22 +111,9 @@ public class JitConsumer extends ConformanceParty {
               .asText();
       addOperatorLogEntry("Handled Port Call Service accepted: %s".formatted(portCallServiceType));
     } else {
-      JitTimestamp jitTimestamp = null;
-      try {
-        jitTimestamp =
-            OBJECT_MAPPER.readValue(request.message().body().getStringBody(), JitTimestamp.class);
-        addOperatorLogEntry(
-            "Handled Timestamp accepted for: " + jitTimestamp.portCallServiceDateTime());
-      } catch (JsonProcessingException e) {
-        addOperatorLogEntry("Wrong Timestamp format");
-        statusCode = 400;
-      }
-      // TODO: verify if recieved timestamp is correct
-      // {
-      //  "timestampID" : "ab1a5283-ca44-4cdd-8c95-fd62726c7f1b",
-      //  "replyToTimestampID" : "0b7cb1fc-be6c-4b36-bc33-b3c13e97ebd2",
-      //  "portCallServiceID" : "11675cf1-39d2-430b-9b81-a5a11c9a7bbc",
-      //  "portCallServiceDateTime" : "2024-11-22T07:41:00+08:30",
+      JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
+      addOperatorLogEntry("Handled Timestamp accepted for: " + timestamp.portCallServiceDateTime());
+      // TODO: verify if recieved timestamp is correct, in JitChecks class
     }
 
     return request.createResponse(

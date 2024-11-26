@@ -63,6 +63,7 @@ public class JitPortCallServiceAction extends JitAction {
             null,
             PortCallServiceType.fromName(
                 requestJsonNode.get("specification").get("portCallServiceType").asText()),
+            null,
             requestJsonNode.get("portCall").get("portCallID").asText(),
             requestJsonNode.get("terminalCall").get("terminalCallID").asText(),
             requestJsonNode.get("specification").get("portCallServiceID").asText());

@@ -24,7 +24,7 @@ class TntChecksTest {
   private static final OffsetDateTime TODAY = OffsetDateTime.now();
   private static final OffsetDateTime TOMORROW = TODAY.plusDays(1);
 
-  private static Stream<Arguments> testValidateEventCreatedDateTime() {
+  private static Stream<Arguments> provideEventCreatedDateTimeData() {
     return Stream.of(
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LT, TODAY, false),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LTE, TODAY, true),
@@ -32,14 +32,14 @@ class TntChecksTest {
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_EQ, TODAY, true),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GTE, TODAY, true),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GT, TODAY, false),
-
+        //
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LT, TOMORROW, true),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_LTE, TOMORROW, true),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME, TOMORROW, false),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_EQ, TOMORROW, false),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GTE, TOMORROW, false),
         Arguments.of(TODAY, EVENT_CREATED_DATE_TIME_GT, TOMORROW, false),
-
+        //
         Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_LT, TODAY, false),
         Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_LTE, TODAY, false),
         Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME, TODAY, false),
@@ -48,8 +48,8 @@ class TntChecksTest {
         Arguments.of(TOMORROW, EVENT_CREATED_DATE_TIME_GT, TODAY, true));
   }
 
-  @ParameterizedTest()
-  @MethodSource("testValidateEventCreatedDateTime")
+  @ParameterizedTest
+  @MethodSource("provideEventCreatedDateTimeData")
   void testValidateEventCreatedDateTime(
       OffsetDateTime left,
       TntFilterParameter operator,

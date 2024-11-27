@@ -42,7 +42,7 @@ public class JsonToolkit {
     }
     if (replacements != null)
       replacements.forEach(
-          (key, value) -> jsonString.set(jsonString.get().replace(key, value)));
+          (key, value) -> jsonString.set(jsonString.get().replaceAll(key, value)));
     return OBJECT_MAPPER.readTree(jsonString.get());
   }
 

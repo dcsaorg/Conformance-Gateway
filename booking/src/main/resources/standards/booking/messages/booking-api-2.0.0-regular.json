@@ -28,7 +28,6 @@
   "universalExportVoyageReference": "2103N",
   "declaredValue": 1231.1,
   "declaredValueCurrency": "EUR",
-  "isPartialLoadAllowed": false,
   "isExportDeclarationRequired": true,
   "exportDeclarationReference": "ABC123123",
   "isImportLicenseRequired": true,

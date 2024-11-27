@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.tnt.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -8,9 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
@@ -24,7 +23,7 @@ public abstract class TntAction extends ConformanceAction {
   protected final int expectedStatus;
   private final OverwritingReference<DynamicScenarioParameters> dsp;
 
-  public TntAction(
+  protected TntAction(
       String sourcePartyName,
       String targetPartyName,
       TntAction previousAction,
@@ -81,7 +80,7 @@ public abstract class TntAction extends ConformanceAction {
       }
     }
 
-    if (!dsp.equals(updatedDsp)) dsp.set(updatedDsp);
+    if (!dsp.get().equals(updatedDsp)) dsp.set(updatedDsp);
   }
 
   private <T> DynamicScenarioParameters updateIfNotNull(

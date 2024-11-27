@@ -84,7 +84,7 @@ public class ConformanceScenario implements StatefulEntity {
   public ConformanceAction popNextAction() {
     ConformanceAction poppedAction = nextActions.pop();
     log.info(
-        "Popped from scenario '%s' action: %s".formatted(toString(), poppedAction.getActionTitle()));
+        "Popped from scenario '%s', current action is now: %s".formatted(toString(), poppedAction.getActionTitle()));
     return poppedAction;
   }
 

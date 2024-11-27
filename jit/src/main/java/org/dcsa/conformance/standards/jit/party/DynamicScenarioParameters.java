@@ -16,7 +16,7 @@ public record DynamicScenarioParameters(
     JitTimestampType timestampType,
     JitTimestamp previousTimestamp,
     PortCallServiceType portCallServiceType,
-    String portCallServiceDateTime,
+    String timestampDateTime,
     String portCallID,
     String terminalCallID,
     String portCallServiceID)

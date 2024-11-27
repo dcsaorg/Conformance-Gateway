@@ -2,10 +2,10 @@ package org.dcsa.conformance.standards.jit.model;
 
 public enum JitSchema {
   PORT_CALL_SERVICE("PortCallService"),
-  ESTIMATED_TIMESTAMP("EstimatedTimestamp"),
-  PLANNED_TIMESTAMP("PlannedTimestamp"),
-  REQUESTED_TIMESTAMP("RequestedTimestamp"),
-  ACTUAL_TIMESTAMP("ActualTimestamp"),
+  ESTIMATED_TIMESTAMP(Constants.TIMESTAMP),
+  PLANNED_TIMESTAMP(Constants.TIMESTAMP),
+  REQUESTED_TIMESTAMP(Constants.TIMESTAMP),
+  ACTUAL_TIMESTAMP(Constants.TIMESTAMP),
   CANCEL("Cancel"),
   DECLINE("Decline");
 
@@ -17,5 +17,9 @@ public enum JitSchema {
 
   public String getSchemaName() {
     return schemaName;
+  }
+
+  private static class Constants {
+    public static final String TIMESTAMP = "Timestamp";
   }
 }

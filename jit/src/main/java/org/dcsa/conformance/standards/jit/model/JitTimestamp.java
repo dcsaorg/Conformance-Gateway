@@ -13,7 +13,8 @@ public record JitTimestamp(
     String timestampID,
     String replyToTimestampID,
     String portCallServiceID,
-    String portCallServiceDateTime,
+    JitClassifierCode classifierCode,
+    String dateTime,
     String delayReasonCode,
     boolean isFYI,
     String remark) {

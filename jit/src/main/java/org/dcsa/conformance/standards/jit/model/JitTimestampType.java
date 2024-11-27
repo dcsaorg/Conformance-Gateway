@@ -2,15 +2,27 @@ package org.dcsa.conformance.standards.jit.model;
 
 import lombok.Getter;
 
+@Getter
 public enum JitTimestampType {
-  ESTIMATED(JitSchema.ESTIMATED_TIMESTAMP),
-  PLANNED(JitSchema.PLANNED_TIMESTAMP),
-  ACTUAL(JitSchema.ACTUAL_TIMESTAMP),
-  REQUESTED(JitSchema.REQUESTED_TIMESTAMP);
+  ESTIMATED(JitSchema.ESTIMATED_TIMESTAMP, JitClassifierCode.EST),
+  PLANNED(JitSchema.PLANNED_TIMESTAMP, JitClassifierCode.PLN),
+  ACTUAL(JitSchema.ACTUAL_TIMESTAMP, JitClassifierCode.ACT),
+  REQUESTED(JitSchema.REQUESTED_TIMESTAMP, JitClassifierCode.REQ);
 
-  @Getter private final JitSchema jitSchema;
+  private final JitSchema jitSchema;
+  private final JitClassifierCode classifierCode;
 
-  JitTimestampType(JitSchema jitSchema) {
+  JitTimestampType(JitSchema jitSchema, JitClassifierCode classifierCode) {
     this.jitSchema = jitSchema;
+    this.classifierCode = classifierCode;
+  }
+
+  public static JitTimestampType fromClassifierCode(final JitClassifierCode classifierCode) {
+    for (JitTimestampType jitTimestampType : values()) {
+      if (jitTimestampType.getClassifierCode() == classifierCode) {
+        return jitTimestampType;
+      }
+    }
+    throw new IllegalArgumentException("Unknown classifier code: " + classifierCode.name());
   }
 }

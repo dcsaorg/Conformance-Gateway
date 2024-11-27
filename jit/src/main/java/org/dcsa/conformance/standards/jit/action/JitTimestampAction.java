@@ -49,21 +49,12 @@ public class JitTimestampAction extends JitAction {
         "JitTimestampAction.doHandleExchange() requestJsonNode: {}",
         requestJsonNode.toPrettyString());
 
-    // TODO: update when type of timestamps is PUT through single endpoint
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
     dsp =
         dsp.withPreviousTimestamp(receivedTimestamp)
-            .withPortCallServiceDateTime(receivedTimestamp.portCallServiceDateTime());
-
-    // Update DSP with the timestamp type
-    String[] urlPath = exchange.getRequest().url().split("/");
-    if (urlPath[urlPath.length - 1].equals("requested-timestamp")) {
-      dsp = dsp.withTimestampType(JitTimestampType.REQUESTED);
-    } else if (urlPath[urlPath.length - 1].equals("planned-timestamp")) {
-      dsp = dsp.withTimestampType(JitTimestampType.PLANNED);
-    } else if (urlPath[urlPath.length - 1].equals("actual-timestamp")) {
-      dsp = dsp.withTimestampType(JitTimestampType.ACTUAL);
-    }
+            .withTimestampDateTime(receivedTimestamp.dateTime())
+            .withTimestampType(
+                JitTimestampType.fromClassifierCode(receivedTimestamp.classifierCode()));
   }
 
   @Override

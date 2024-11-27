@@ -104,43 +104,35 @@ public class JitProvider extends ConformanceParty {
               UUID.randomUUID().toString(),
               previousTimestamp != null ? previousTimestamp.timestampID() : null,
               UUID.randomUUID().toString(),
+              timestampType.getClassifierCode(),
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
               "STR",
               false,
-              "Port closed due to strike " + timestampType.name());
+              "Port closed due to strike");
       case PLANNED, ACTUAL ->
-          previousTimestamp.withRemark("Port closed due to strike " + timestampType.name());
+          previousTimestamp
+              .withClassifierCode(timestampType.getClassifierCode());
       case REQUESTED ->
           previousTimestamp
+              .withClassifierCode(timestampType.getClassifierCode())
               .withTimestampID(
                   UUID.randomUUID().toString()) // Create new ID, because it's a new timestamp
               .withReplyToTimestampID(
                   previousTimestamp.timestampID()) // Respond to the previous timestamp
-              .withPortCallServiceDateTime(
-                  LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T16:16:16+08:30")
-              .withRemark("Port closed due to strike " + timestampType.name());
+              .withDateTime(
+                  LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T16:16:16+08:30");
     };
   }
 
   private void sendTimestampPutRequest(
       @NonNull JitTimestampType timestampType, @NonNull JitTimestamp timestamp) {
-    String urlPart =
-        switch (timestampType) {
-          case ESTIMATED -> "estimated-timestamp";
-          case PLANNED -> "planned-timestamp";
-          case ACTUAL -> "actual-timestamp";
-          case REQUESTED ->
-              throw new IllegalArgumentException(
-                  "Requested timestamp not supported to send to a consumer");
-        };
-
     syncCounterpartPut(
-        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/" + urlPart,
+        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
         timestamp.toJson());
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s"
-            .formatted(timestampType, timestamp.portCallServiceDateTime()));
+            .formatted(timestampType, timestamp.dateTime()));
   }
 
   private JsonNode replacePlaceHolders(
@@ -163,8 +155,11 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
 
     addOperatorLogEntry(
-        "Provider Handled Port Call Service: '%s' accepted, with remark: %s"
-            .formatted(timestamp.portCallServiceDateTime(), timestamp.remark()));
+        "Handled %s timestamp accepted for date/time: %s and remark: %s"
+            .formatted(
+                JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
+                timestamp.dateTime(), timestamp.remark()));
+
     return request.createResponse(
         204,
         Map.of(API_VERSION, List.of(apiVersion)),

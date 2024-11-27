@@ -85,15 +85,15 @@ public class JitConsumer extends ConformanceParty {
     }
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
-    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.previousTimestamp());
+    JitTimestamp timestamp =
+        JitProvider.getTimestampForType(timestampType, dsp.previousTimestamp());
 
     syncCounterpartPut(
-        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/requested-timestamp",
+        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
         timestamp.toJson());
 
     addOperatorLogEntry(
-        "Submitted %s timestamp for: %s"
-            .formatted(timestampType, timestamp.portCallServiceDateTime()));
+        "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
   }
 
   @Override
@@ -112,8 +112,12 @@ public class JitConsumer extends ConformanceParty {
       addOperatorLogEntry("Handled Port Call Service accepted: %s".formatted(portCallServiceType));
     } else {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
-      addOperatorLogEntry("Handled Timestamp accepted for: " + timestamp.portCallServiceDateTime());
-      // TODO: verify if recieved timestamp is correct, in JitChecks class
+      addOperatorLogEntry(
+          "Handled %s timestamp accepted for date/time: %s"
+              .formatted(
+                  JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
+                  timestamp.dateTime()));
+      // TODO: verify if received timestamp is correct, in JitChecks class
     }
 
     return request.createResponse(

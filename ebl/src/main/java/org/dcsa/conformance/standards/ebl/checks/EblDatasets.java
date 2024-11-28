@@ -26,7 +26,7 @@ public class EblDatasets {
     "CR",
     "AKG"
   );
-
+  public static final KeywordDataset EXEMPT_PACKAGE_CODES = KeywordDataset.staticDataset("VY", "VS", "VR", "VQ", "VO", "VL", "NG", "NF", "NE", "VG");
 
   public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV("/standards/ebl/datasets/inhalationzones.csv");
   public static final KeywordDataset DG_SEGREGATION_GROUPS = KeywordDataset.fromCSV("/standards/ebl/datasets/segregationgroups.csv");

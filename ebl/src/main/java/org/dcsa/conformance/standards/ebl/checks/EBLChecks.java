@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.checks;
 
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 
@@ -453,6 +454,90 @@ public class EBLChecks {
     JsonAttribute.unique("countryCode", "manifestTypeCode")
   );
 
+  private static final JsonRebaseableContentCheck ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED = JsonAttribute.ifThen(
+    "If any manifestTypeCode in advanceManifestFilings is ENS, isHouseBillOfLadingsIssued is required",
+    node -> {
+      JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+      if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
+        return false;
+      }
+      for (JsonNode filing : advanceManifestFilings) {
+        if ("ENS".equals(filing.path("manifestTypeCode").asText())) {
+          return true;
+        }
+      }
+      return false;
+    },
+    JsonAttribute.mustBePresent(JsonPointer.compile("/isHouseBillOfLadingsIssued"))
+  );
+
+  private static final JsonRebaseableContentCheck HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER = JsonAttribute.ifThen(
+    "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties",
+    node -> {
+      JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
+      if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
+        return false;
+      }
+      for (JsonNode hbl : houseBillOfLadings) {
+        if (hbl.path("isToOrder").asBoolean(false)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    JsonAttribute.mustBePresent(JsonPointer.compile("/houseBillOfLadings/*/documentParties/notifyParty"))
+  );
+
+  private static final JsonRebaseableContentCheck NUMBER_OF_PACKAGES_CONDITIONAL_CHECK = JsonAttribute.ifThen(
+    "If packageCode in outerPackaging is not exempt, numberOfPackages is required",
+    node -> {
+      JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
+      if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
+        return false;
+      }
+      for (JsonNode hbl : houseBillOfLadings) {
+        JsonNode consignmentItems = hbl.path("consignmentItems");
+        if (consignmentItems.isMissingNode() || !consignmentItems.isArray()) {
+          continue;
+        }
+        for (JsonNode consignmentItem : consignmentItems) {
+          JsonNode cargoItems = consignmentItem.path("cargoItems");
+          if (cargoItems.isMissingNode() || !cargoItems.isArray()) {
+            continue;
+          }
+          for (JsonNode cargoItem : cargoItems) {
+            JsonNode outerPackaging = cargoItem.path("outerPackaging");
+            if (outerPackaging.isMissingNode()) {
+              continue;
+            }
+            String packageCode = outerPackaging.path("packageCode").asText();
+            if (!EXEMPT_PACKAGE_CODES.contains(packageCode)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    },
+    JsonAttribute.mustBePresent(JsonPointer.compile("/houseBillOfLadings/*/consignmentItems/*/cargoItems/*/outerPackaging/numberOfPackages"))
+  );
+  private static final JsonRebaseableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF = JsonAttribute.ifThen(
+    "If manifestTypeCode is ENS and advanceManifestFilingsHouseBLPerformedBy is SELF, identificationNumber is required",
+    node -> {
+      JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+      if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
+        return false;
+      }
+      for (JsonNode filing : advanceManifestFilings) {
+        if ("ENS".equals(filing.path("manifestTypeCode").asText()) &&
+          "SELF".equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())) {
+          return true;
+        }
+      }
+      return false;
+    },
+    JsonAttribute.mustBePresent(JsonPointer.compile("/advanceManifestFilings/*/identificationNumber"))
+  );
   private static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
     JsonAttribute.ifThenElse(
       "'isElectronic' and 'transportDocumentTypeCode' BOL implies 'sendToPlatform'",
@@ -465,13 +550,71 @@ public class EBLChecks {
       ),
       JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)
     );
-
+  private static final JsonRebaseableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK = JsonAttribute.ifThen(
+    "If houseBillOfLadings is present, the first country in routingOfConsignmentCountries should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery",
+    node -> {
+      JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
+      if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
+        return false;
+      }
+      for (JsonNode hbl : houseBillOfLadings) {
+        JsonNode routingOfConsignmentCountries = hbl.path("routingOfConsignmentCountries");
+        if (routingOfConsignmentCountries.isMissingNode() || !routingOfConsignmentCountries.isArray()) {
+          continue;
+        }
+        String placeOfAcceptance = hbl.path("placeOfAcceptance").asText(null);
+        String placeOfFinalDelivery = hbl.path("placeOfFinalDelivery").asText(null);
+        if (placeOfAcceptance != null && !placeOfAcceptance.equals(routingOfConsignmentCountries.path(0).asText())) {
+          return true;
+        }
+        if (placeOfFinalDelivery != null && routingOfConsignmentCountries.size() > 1 &&
+          !placeOfFinalDelivery.equals(routingOfConsignmentCountries.path(routingOfConsignmentCountries.size() - 1).asText())) {
+          return true;
+        }
+      }
+      return false;
+    },
+    JsonAttribute.mustBePresent(JsonPointer.compile("/houseBillOfLadings/*/routingOfConsignmentCountries"))
+  );
+  private static final JsonRebaseableContentCheck BUYER_SELLER_REQUIRED_IF_ICS2ZONE_AND_CARRIER = JsonAttribute.ifThen(
+    "If isCargoDeliveredInICS2Zone is true in any houseBillOfLading and advanceManifestFilingsHouseBLPerformedBy is CARRIER, buyer and seller are required in documentParties",
+    node -> {
+      JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
+      if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
+        return false;
+      }
+      for (JsonNode hbl : houseBillOfLadings) {
+        if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(false)) {
+          JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+          if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
+            continue;
+          }
+          for (JsonNode filing : advanceManifestFilings) {
+            if ("CARRIER".equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    },
+    JsonAttribute.combine(
+            (JsonContentMatchedValidation) JsonAttribute.mustBePresent(JsonPointer.compile("/houseBillOfLadings/*/documentParties/buyer")),
+            (JsonContentMatchedValidation) JsonAttribute.mustBePresent(JsonPointer.compile("/houseBillOfLadings/*/documentParties/seller"))
+    )
+  );
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
       EblDatasets.EBL_PLATFORMS_DATASET
     ),
     SEND_TO_PLATFORM_CONDITIONAL_CHECK,
+    ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED,
+    HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER,
+    NUMBER_OF_PACKAGES_CONDITIONAL_CHECK,
+    IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF,
+    ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
+    BUYER_SELLER_REQUIRED_IF_ICS2ZONE_AND_CARRIER,
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_COPY_WITH_CHARGES,

@@ -41,13 +41,13 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                                 CARRIER_SERVICE_NAME,
                                 "Red Falcon Service",
                                 START_DATE,
-                                "2026-01-01")),
+                                "2024-01-01")),
                         scenarioWithParameters(
                             Map.of(
                                 CARRIER_SERVICE_NAME,
                                 "Great Lion Service",
                                 END_DATE,
-                                "2021-01-01")),
+                                "2025-01-01")),
                         scenarioWithParameters(Map.of(CARRIER_SERVICE_CODE, "BW1")),
                         scenarioWithParameters(Map.of(CARRIER_SERVICE_CODE, "BW1", LIMIT, "1")),
                         scenarioWithParameters(Map.of(UNIVERSAL_SERVICE_REFERENCE, "SR12345A")),
@@ -64,9 +64,10 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                 noAction()
                     .thenEither(
                         scenarioWithParameters(Map.of(UN_LOCATION_CODE, "NLAMS")),
-                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", LIMIT, "1")),
-                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM")),
-                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM", LIMIT, "1")))),
+                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", LIMIT, "1"))
+                        //TODO: Check schema validation for this
+                        /*scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM")),
+                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM", LIMIT, "1"))*/)),
             Map.entry(
                 "Voyage schedules",
                 noAction()

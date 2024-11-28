@@ -64,10 +64,9 @@ class OvsScenarioListBuilder extends ScenarioListBuilder<OvsScenarioListBuilder>
                 noAction()
                     .thenEither(
                         scenarioWithParameters(Map.of(UN_LOCATION_CODE, "NLAMS")),
-                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", LIMIT, "1"))
-                        //TODO: Check schema validation for this
-                        /*scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM")),
-                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM", LIMIT, "1"))*/)),
+                        scenarioWithParameters(Map.of(UN_LOCATION_CODE, "USNYC", LIMIT, "1")),
+                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM")),
+                        scenarioWithParameters(Map.of(FACILITY_SMDG_CODE, "APM", LIMIT, "1")))),
             Map.entry(
                 "Voyage schedules",
                 noAction()

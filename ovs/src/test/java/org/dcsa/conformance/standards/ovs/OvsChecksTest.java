@@ -53,6 +53,168 @@ public class OvsChecksTest {
   }
 
   @Test
+  void testCheckCarrierServiceName_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.CARRIER_SERVICE_NAME, "Great Lion Service");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckCarrierServiceName_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.CARRIER_SERVICE_NAME, "Great Tiger Service");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUniversalServiceReference_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UNIVERSAL_SERVICE_REFERENCE, "SR12345A");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUniversalServiceReference_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UNIVERSAL_SERVICE_REFERENCE, "SRA");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckVesselIMONumber_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.VESSEL_IMO_NUMBER, "1234567");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckVesselIMONumber_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.VESSEL_IMO_NUMBER, "1234");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckVesselName_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.VESSEL_NAME, "Great Vessel");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+
+  @Test
+  void testCheckVesselName_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.VESSEL_NAME, "Great Bowl");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+
+  @Test
+  void testCheckCarrierVoyageNumber_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.CARRIER_VOYAGE_NUMBER, "2104N,2104S");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckCarrierVoyageNumber_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.CARRIER_VOYAGE_NUMBER, "2104P,2104Q");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUniversalVoyageReference_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UNIVERSAL_VOYAGE_REFERENCE, "SR12345A,SR45678A");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUniversalVoyageReference_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UNIVERSAL_VOYAGE_REFERENCE, "SR1245A,SR458A");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUNLocationCode_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UN_LOCATION_CODE, "NLAMS");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckUNLocationCode_noMatch() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.UN_LOCATION_CODE, "USNYC");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void testCheckFacilitySMDGCode_match() {
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.FACILITY_SMDG_CODE, "APM");
+    JsonNode transportCall =
+      serviceNodes
+        .get(0)
+        .get("vesselSchedules")
+        .get(0)
+        .get("transportCalls")
+        .get(0);
+    ((ObjectNode) transportCall.get("location")).put("facilitySMDGCode", "APM");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testCheckFacilitySMDGCode_noMatch() {
+    JsonNode transportCall =
+      serviceNodes
+        .get(0)
+        .get("vesselSchedules")
+        .get(0)
+        .get("transportCalls")
+        .get(0);
+    ((ObjectNode) transportCall.get("location")).put("facilitySMDGCode", "APM");
+    Map<OvsFilterParameter, String> filterParametersMap =
+      Map.of(OvsFilterParameter.FACILITY_SMDG_CODE, "APP");
+    Set<String> result =
+      OvsChecks.checkThatScheduleValuesMatchParamValues(serviceNodes, filterParametersMap);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
   void testCheckThatScheduleValuesMatchParamValues_emptyParams() {
     Map<OvsFilterParameter, String> filterParametersMap = Collections.emptyMap();
     Set<String> result =
@@ -152,13 +314,13 @@ public class OvsChecksTest {
   void testCheckServiceSchedulesExist_emptyServiceSchedules() {
     JsonNode body = objectMapper.createArrayNode();
     Set<String> result = OvsChecks.checkServiceSchedulesExist(body);
-    assertEquals(1, result.size()); // Empty array should not return errors
+    assertEquals(1, result.size());
   }
 
   @Test
   void testCheckServiceSchedulesExist_nullServiceNode() {
     Set<String> result = OvsChecks.checkServiceSchedulesExist(null);
-    assertEquals(1, result.size()); // Empty array should not return errors
+    assertEquals(1, result.size());
   }
 
   @Test
@@ -181,7 +343,7 @@ public class OvsChecksTest {
     Set<String> result =
         OvsChecks.validateDate(
             serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertTrue(result.isEmpty()); // Should contain errors about invalid date format
+    assertTrue(result.isEmpty());
   }
 
   // Helper method to create a sample JsonNode for vessel schedules
@@ -213,7 +375,8 @@ public class OvsChecksTest {
     vesselSchedule.put("vesselName", vesselName);
     vesselSchedule.set(
         "transportCalls",
-        createTransportCalls("TCREF1", "2104N", "2104S", "SR12345A", "SR12345A", "NLAMS"));
+        createTransportCalls("TCREF1", "2104N", "2104S",
+          "SR12345A", "SR45678A", "NLAMS"));
     vesselSchedulesArrayNode.add(vesselSchedule);
     return vesselSchedulesArrayNode;
   }

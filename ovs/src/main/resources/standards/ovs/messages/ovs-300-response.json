@@ -136,8 +136,7 @@
             "universalImportVoyageReference": "2105N",
             "universalExportVoyageReference": "2105S",
             "location": {
-              "locationName": "Port of New York",
-              "locationType": "UNLO",
+              "locationType": "FACS",
               "UNLocationCode": "USNYC",
               "facilitySMDGCode": "APM"
             },

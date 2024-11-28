@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.jit.model;
 
+import lombok.Getter;
+
+@Getter
 public enum JitSchema {
   PORT_CALL_SERVICE("PortCallService"),
   ESTIMATED_TIMESTAMP(Constants.TIMESTAMP),
@@ -13,10 +16,6 @@ public enum JitSchema {
 
   JitSchema(String schemaName) {
     this.schemaName = schemaName;
-  }
-
-  public String getSchemaName() {
-    return schemaName;
   }
 
   private static class Constants {

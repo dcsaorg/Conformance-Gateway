@@ -2,6 +2,7 @@ package org.dcsa.conformance.core.check;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,7 +26,7 @@ public abstract class ConformanceCheck {
 
   private synchronized List<ConformanceCheck> getSubChecks() {
     if (_subChecks == null) {
-      this._subChecks = this.createSubChecks().collect(Collectors.toList());
+      _subChecks = createSubChecks().filter(Objects::nonNull).collect(Collectors.toList());
     }
     return _subChecks;
   }

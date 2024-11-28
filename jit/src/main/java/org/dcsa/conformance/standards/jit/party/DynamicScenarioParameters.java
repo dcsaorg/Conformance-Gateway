@@ -15,6 +15,7 @@ import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 public record DynamicScenarioParameters(
     JitTimestampType timestampType,
     JitTimestamp previousTimestamp,
+    JitTimestamp currentTimestamp,
     PortCallServiceType portCallServiceType,
     String timestampDateTime,
     String portCallID,

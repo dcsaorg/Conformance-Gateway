@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.jit.checks;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,8 @@ import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
+import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 
@@ -46,20 +49,35 @@ public class JitChecks {
   }
 
   public static ActionCheck createChecksForTimestamp(
-    Predicate<String> isRelevantForRoleName,
-    UUID matchedExchangeUuid,
-    String expectedApiVersion,
-    DynamicScenarioParameters dsp) {
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      DynamicScenarioParameters dsp) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    if (dsp != null && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
+      checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
+    }
+    if (checks.isEmpty()) return null;
     return JsonAttribute.contentChecks(
-      isRelevantForRoleName,
-      matchedExchangeUuid,
-      HttpMessageType.REQUEST,
-      expectedApiVersion,
-      List.of(checkPlannedMatchesRequestedTimestamp(dsp)));
+      x -> true,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
   }
 
-  private static JsonContentCheck checkPlannedMatchesRequestedTimestamp(DynamicScenarioParameters dsp) {
-    // TODO: Implement this check
-    return null;
+  private static JsonContentCheck checkPlannedMatchesRequestedTimestamp(
+      DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Check if the Planned timestamp matches the Requested timestamp.",
+        body -> {
+          JitTimestamp receivedTimestamp = JitTimestamp.fromJson(body);
+          if (dsp.previousTimestamp().classifierCode().equals(JitClassifierCode.REQ)
+              && !dsp.previousTimestamp().dateTime().equals(receivedTimestamp.dateTime())) {
+            return Set.of(
+                "Expected matching timestamp: '%s' but got Planned timestamp: '%s'"
+                    .formatted(dsp.previousTimestamp().dateTime(), receivedTimestamp.dateTime()));
+          }
+          return Collections.emptySet();
+        });
   }
 }

@@ -83,14 +83,12 @@ public class JitProvider extends ConformanceParty {
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
-    JitTimestamp previousTimestamp = dsp.previousTimestamp();
+    JitTimestamp previousTimestamp =
+        dsp.currentTimestamp(); // currentTimestamp is still the value from the previous action.
 
     // Create values for the first timestamp in the sequence.
     if (previousTimestamp == null) {
       previousTimestamp = getTimestampForType(JitTimestampType.ESTIMATED, null);
-      if (dsp.portCallServiceID() != null) {
-        previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
-      }
     }
     JitTimestamp timestamp = getTimestampForType(timestampType, previousTimestamp);
     sendTimestampPutRequest(timestampType, timestamp);
@@ -110,8 +108,7 @@ public class JitProvider extends ConformanceParty {
               false,
               "Port closed due to strike");
       case PLANNED, ACTUAL ->
-          previousTimestamp
-              .withClassifierCode(timestampType.getClassifierCode());
+          previousTimestamp.withClassifierCode(timestampType.getClassifierCode());
       case REQUESTED ->
           previousTimestamp
               .withClassifierCode(timestampType.getClassifierCode())
@@ -131,8 +128,7 @@ public class JitProvider extends ConformanceParty {
         timestamp.toJson());
 
     addOperatorLogEntry(
-        "Submitted %s timestamp for: %s"
-            .formatted(timestampType, timestamp.dateTime()));
+        "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
   }
 
   private JsonNode replacePlaceHolders(
@@ -158,7 +154,8 @@ public class JitProvider extends ConformanceParty {
         "Handled %s timestamp accepted for date/time: %s and remark: %s"
             .formatted(
                 JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
-                timestamp.dateTime(), timestamp.remark()));
+                timestamp.dateTime(),
+                timestamp.remark()));
 
     return request.createResponse(
         204,

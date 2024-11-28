@@ -86,7 +86,7 @@ public class JitConsumer extends ConformanceParty {
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
     JitTimestamp timestamp =
-        JitProvider.getTimestampForType(timestampType, dsp.previousTimestamp());
+        JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",

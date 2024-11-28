@@ -61,6 +61,7 @@ public class JitPortCallServiceAction extends JitAction {
         new DynamicScenarioParameters(
             null,
             null,
+            null,
             PortCallServiceType.fromName(
                 requestJsonNode.get("specification").get("portCallServiceType").asText()),
             null,

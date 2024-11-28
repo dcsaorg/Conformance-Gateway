@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
@@ -13,6 +14,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.party.JitRole;
@@ -51,7 +53,8 @@ public class JitTimestampAction extends JitAction {
 
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
     dsp =
-        dsp.withPreviousTimestamp(receivedTimestamp)
+        dsp.withPreviousTimestamp(dsp.currentTimestamp())
+            .withCurrentTimestamp(receivedTimestamp)
             .withTimestampDateTime(receivedTimestamp.dateTime())
             .withTimestampType(
                 JitTimestampType.fromClassifierCode(receivedTimestamp.classifierCode()));
@@ -76,9 +79,8 @@ public class JitTimestampAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
-//        ActionCheck checksForTimestamp =
-//            JitChecks.createChecksForTimestamp(
-//                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
+        ActionCheck checksForTimestamp =
+            JitChecks.createChecksForTimestamp(getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), "PUT"),
@@ -87,9 +89,8 @@ public class JitTimestampAction extends JitAction {
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
-                  responseSchemaValidator)
-//              checksForTimestamp
-              );
+                  responseSchemaValidator),
+              checksForTimestamp);
         }
         // Consumer sends requested timestamp
         return Stream.of(
@@ -99,9 +100,8 @@ public class JitTimestampAction extends JitAction {
                 JitRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
-                responseSchemaValidator)
-//            checksForTimestamp
-            );
+                responseSchemaValidator),
+            checksForTimestamp);
       }
     };
   }

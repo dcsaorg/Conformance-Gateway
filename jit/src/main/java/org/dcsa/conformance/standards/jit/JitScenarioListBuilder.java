@@ -37,7 +37,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         sendTimestamp(context, JitTimestampType.ESTIMATED)
                             .then(
-                                sendTimestampConsumer(context, JitTimestampType.REQUESTED)
+                                sendRequestedTimestamp(context)
                                     .then(
                                         sendTimestamp(context, JitTimestampType.PLANNED)
                                             .then(
@@ -52,10 +52,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         previousAction -> new JitTimestampAction(context, previousAction, timestampType, true));
   }
 
-  private static JitScenarioListBuilder sendTimestampConsumer(
-      JitScenarioContext context, JitTimestampType timestampType) {
+  private static JitScenarioListBuilder sendRequestedTimestamp(
+      JitScenarioContext context) {
     return new JitScenarioListBuilder(
-        previousAction -> new JitTimestampAction(context, previousAction, timestampType, false));
+        previousAction -> new JitTimestampAction(context, previousAction, JitTimestampType.REQUESTED, false));
   }
 
   private JitScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {

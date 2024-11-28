@@ -35,7 +35,7 @@ public abstract class JitAction extends ConformanceAction {
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (dsp != null) {
-      jsonState.set("currentDsp", dsp.toJson());
+      jsonState.set("dsp", dsp.toJson());
     }
     return jsonState;
   }
@@ -43,7 +43,7 @@ public abstract class JitAction extends ConformanceAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    JsonNode dspNode = jsonState.get("currentDsp");
+    JsonNode dspNode = jsonState.get("dsp");
     if (dspNode != null) {
       dsp = DynamicScenarioParameters.fromJson(dspNode);
     }

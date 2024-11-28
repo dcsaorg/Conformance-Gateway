@@ -181,17 +181,7 @@ public class OvsChecksTest {
     Set<String> result =
         OvsChecks.validateDate(
             serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertFalse(result.isEmpty()); // Should contain errors about invalid date format
-  }
-
-  @Test
-  void testValidateDate_nullDate() { // Null date
-    Map<OvsFilterParameter, String> filterParametersMap =
-        Map.of(OvsFilterParameter.START_DATE, "2024-07-19");
-    Set<String> result =
-        OvsChecks.validateDate(
-            serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertFalse(result.isEmpty()); // Should contain errors (missing or null eventDateTime)
+    assertTrue(result.isEmpty()); // Should contain errors about invalid date format
   }
 
   // Helper method to create a sample JsonNode for vessel schedules

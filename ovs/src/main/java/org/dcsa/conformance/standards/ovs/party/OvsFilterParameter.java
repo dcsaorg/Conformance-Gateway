@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Getter
 public enum OvsFilterParameter {
   CARRIER_SERVICE_NAME("carrierServiceName"),
   CARRIER_SERVICE_CODE("carrierServiceCode"),
@@ -39,11 +40,11 @@ public enum OvsFilterParameter {
               Collectors.toUnmodifiableMap(
                   OvsFilterParameter::getQueryParamName, Function.identity()));
 
-  @Getter private final String queryParamName;
+  private final String queryParamName;
 
-  @Getter private final Set<String> jsonPaths;
+  private final Set<String> jsonPaths;
 
-  @Getter private final boolean isSeparateCheckRequired;
+  private final boolean isSeparateCheckRequired;
 
   OvsFilterParameter(String queryParamName, boolean isSeparateCheckRequired, String... jsonPaths) {
     this.queryParamName = queryParamName;

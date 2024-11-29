@@ -390,7 +390,7 @@ public class PersistableCarrierBooking {
 
   public static PersistableCarrierBooking fromPersistentStore(JsonNodeMap jsonNodeMap, String carrierBookingRequestReference) {
     var data = jsonNodeMap.load(carrierBookingRequestReference);
-    if (data == null) {
+    if (data == null || data.isMissingNode() || !data.isObject()) {
       throw new IllegalArgumentException("Unknown CBRR: " + carrierBookingRequestReference);
     }
     return fromPersistentStore(data);

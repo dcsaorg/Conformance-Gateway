@@ -2,13 +2,12 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
@@ -119,8 +118,6 @@ public abstract class BookingAction extends ConformanceAction {
   }
 
   protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
-    DynamicScenarioParameters dsp = dspReference.get();
-
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     String newCbr = getCbrFromNotificationPayload(requestJsonNode) != null ?
@@ -128,10 +125,10 @@ public abstract class BookingAction extends ConformanceAction {
       responseJsonNode.path("carrierBookingReference").asText(null);
     var newCbrr = responseJsonNode.path("carrierBookingRequestReference").asText(null);
 
+    DynamicScenarioParameters dsp = dspReference.get();
     var updatedDsp = dsp;
     updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-
     updatedDsp = updateDSPFromBookingAction(exchange, updatedDsp);
 
     if (!dsp.equals(updatedDsp)) {

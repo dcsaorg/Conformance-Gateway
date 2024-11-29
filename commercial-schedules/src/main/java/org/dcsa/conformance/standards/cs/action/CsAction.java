@@ -90,7 +90,7 @@ public abstract class CsAction extends ConformanceAction {
       }
     }
 
-    if (!dsp.equals(updatedDsp)) dsp.set(updatedDsp);
+    if (!dsp.get().equals(updatedDsp)) dsp.set(updatedDsp);
   }
 
   private String getHashString(String actualResponse) {

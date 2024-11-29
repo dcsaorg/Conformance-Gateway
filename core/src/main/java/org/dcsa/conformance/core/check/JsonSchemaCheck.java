@@ -5,12 +5,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class JsonSchemaCheck extends ActionCheck {
-  private final HttpMessageType httpMessageType;
   private final JsonSchemaValidator jsonSchemaValidator;
 
   public JsonSchemaCheck(
@@ -34,7 +32,6 @@ public class JsonSchemaCheck extends ActionCheck {
         isRelevantForRoleName,
         matchedExchangeUuid,
         httpMessageType);
-    this.httpMessageType = httpMessageType;
     this.jsonSchemaValidator = jsonSchemaValidator;
   }
 

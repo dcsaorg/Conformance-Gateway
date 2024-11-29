@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonContentCheck;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @UtilityClass
 public class OvsChecks {
 
@@ -62,7 +64,7 @@ public class OvsChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Check eventDateTime is greater than or equal to startDate filter parameter if present",
+            "Check eventDateTime is greater than startDate filter parameter if present",
             body -> {
               Set<String> validationErrors = new LinkedHashSet<>();
               Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
@@ -78,7 +80,7 @@ public class OvsChecks {
 
     checks.add(
         JsonAttribute.customValidator(
-            "Check eventDateTime is less than or equal to endDate filter parameter if present",
+            "Check eventDateTime is less than endDate filter parameter if present",
             body -> {
               Set<String> validationErrors = new LinkedHashSet<>();
               Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
@@ -110,7 +112,8 @@ public class OvsChecks {
                 int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
                 if (body.size() > expectedLimit) {
                   return Set.of(
-                      "The number of schedules exceeds the limit parameter: " + expectedLimit);
+                      "The number of service schedules exceeds the limit parameter: "
+                          + expectedLimit);
                 }
               }
               return Set.of();
@@ -132,30 +135,50 @@ public class OvsChecks {
               Set<String> parameterValues =
                   Arrays.stream(filterParametersMap.get(filterParameter).split(","))
                       .collect(Collectors.toSet());
-              Set<String> attributeValues = new HashSet<>();
+              Set<Map.Entry<String, JsonNode>> attributeValues = new HashSet<>();
               Set<String> jsonPaths = filterParameter.getJsonPaths();
               jsonPaths.forEach(
                   jsonPathExpression -> {
                     findMatchingNodes(schedulesNode, jsonPathExpression)
                         .forEach(
-                            node -> {
-                              if (!node.isMissingNode() && !node.isNull()) {
-                                attributeValues.add(node.asText());
+                            result -> {
+                              if (!result.getValue().isMissingNode()
+                                  && !result.getValue().isNull()) {
+                                attributeValues.add(result);
                               }
                             });
                   });
               if (!attributeValues.isEmpty()
-                  && parameterValues.stream().noneMatch(attributeValues::contains)) {
-                validationErrors.add(
-                    "Value%s '%s' at path%s '%s' do%s not match value%s of query parameter '%s'"
-                        .formatted(
-                            attributeValues.size() > 1 ? "s" : "",
-                            String.join(", ", attributeValues),
-                            String.join(", ", jsonPaths),
-                            attributeValues.size() > 1 ? "" : "es",
-                            filterParametersMap.get(filterParameter).contains(",") ? "s" : "",
-                            String.join(", ", filterParametersMap.get(filterParameter).split(",")),
-                            filterParameter.getQueryParamName()));
+                  && parameterValues.stream()
+                      .noneMatch(
+                          parameterValue ->
+                              attributeValues.stream()
+                                  .anyMatch(
+                                      entry ->
+                                          entry
+                                              .getValue()
+                                              .asText()
+                                              .trim()
+                                              .equals(
+                                                  parameterValue.trim())))) { // Trim and compare
+
+                String errorMessage =
+                    String.format(
+                        "Value%s '%s' at path%s '%s' do%s not match value%s '%s' of query parameter '%s'",
+                        attributeValues.size() > 1 ? "s" : "",
+                        attributeValues.stream()
+                            .map(e -> e.getValue().asText())
+                            .collect(Collectors.joining(", ")),
+                        attributeValues.size() > 1 ? "s" : "",
+                        attributeValues.stream()
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.joining(", ")), // Get keys here
+                        attributeValues.size() > 1 ? "" : "es",
+                        parameterValues.size() > 1 ? "s" : "",
+                        String.join(", ", parameterValues),
+                        filterParameter.getQueryParamName());
+
+                validationErrors.add(errorMessage);
               }
             });
 
@@ -184,7 +207,7 @@ public class OvsChecks {
         findMatchingNodes(body, "*/vesselSchedules/*/transportCalls/*/timestamps")
             .flatMap(
                 timestampsNode ->
-                    StreamSupport.stream(timestampsNode.spliterator(), false)
+                    StreamSupport.stream(timestampsNode.getValue().spliterator(), false)
                         .filter(
                             timestampNode -> {
                               LocalDate eventDateTime =
@@ -199,8 +222,8 @@ public class OvsChecks {
                     "Event DateTime "
                         + timestampNode.path("eventDateTime").asText()
                         + (dateParameter == OvsFilterParameter.START_DATE
-                            ? " is before or equal to the startDate: "
-                            : " is after or equal to the endDate: ")
+                            ? " is before the startDate: "
+                            : " is after the endDate: ")
                         + expectedDate)
             .collect(Collectors.toSet());
 
@@ -211,52 +234,67 @@ public class OvsChecks {
     try {
       return OffsetDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME).toLocalDate();
     } catch (DateTimeParseException e) {
+      log.error("Failed to parse date time string: {}", dateTimeString, e);
       return null;
     }
   }
 
   public Set<String> validateUniqueTransportCallReference(JsonNode body) {
-    Set<String> transportCallReferences = new HashSet<>();
     Set<String> errors = new HashSet<>();
-    // Iterate over each array node in the response body
+    // Iterate over each service schedule in the response body
     for (JsonNode node : body) {
+      Set<String> transportCallReferences = new HashSet<>();
       findMatchingNodes(node, "vesselSchedules/*/transportCalls/*/transportCallReference")
-          .filter(tcrNode -> !tcrNode.isMissingNode() && !tcrNode.isNull())
+          .filter(tcrNode -> !tcrNode.getValue().isMissingNode() && !tcrNode.getValue().isNull())
           .forEach(
               transportCallReferenceNode -> {
-                String transportCallReference = transportCallReferenceNode.asText();
+                String transportCallReference = transportCallReferenceNode.getValue().asText();
                 if (!transportCallReferences.add(transportCallReference)) {
-                  errors.add("Duplicate transportCallReference found: " + transportCallReference);
+                  errors.add(
+                      ("Duplicate transportCallReference %s " + "found at %s")
+                          .formatted(transportCallReference, transportCallReferenceNode.getKey()));
                 }
               });
     }
     return errors;
   }
 
-  public Stream<JsonNode> findMatchingNodes(JsonNode node, String jsonPath) {
+  public Stream<Map.Entry<String, JsonNode>> findMatchingNodes(JsonNode node, String jsonPath) {
+    return findMatchingNodes(node, jsonPath, "");
+  }
+
+  private Stream<Map.Entry<String, JsonNode>> findMatchingNodes(
+      JsonNode node, String jsonPath, String currentPath) {
     if (jsonPath.isEmpty() || jsonPath.equals("/")) {
-      return Stream.of(node);
+      return Stream.of(Map.entry(currentPath, node));
     }
-    String[] pathSegments = jsonPath.split("/");
-    if (pathSegments[0].equals("*")) {
+
+    String[] pathSegments = jsonPath.split("/", 2);
+    String segment = pathSegments[0];
+    String remainingPath = pathSegments.length > 1 ? pathSegments[1] : "";
+
+    if (segment.equals("*")) {
       if (node.isArray()) {
-        // If the node is an array, iterate over its elements
-        return StreamSupport.stream(node.spliterator(), false)
-            .flatMap(
-                childNode ->
-                    findMatchingNodes(
-                        childNode,
-                        String.join(
-                            "/", Arrays.copyOfRange(pathSegments, 1, pathSegments.length))));
+        List<Map.Entry<String, JsonNode>> results = new ArrayList<>();
+        for (int i = 0; i < node.size(); i++) {
+          JsonNode childNode = node.get(i);
+          String newPath = currentPath.isEmpty() ? String.valueOf(i) : currentPath + "/" + i;
+          results.addAll(findMatchingNodes(childNode, remainingPath, newPath).toList());
+        }
+        return results.stream();
+      } else if (node.isObject()) {
+        return findMatchingNodes(node, remainingPath, currentPath);
       } else {
-        // If not an array, treat it as a single node
-        return findMatchingNodes(
-            node, String.join("/", Arrays.copyOfRange(pathSegments, 1, pathSegments.length)));
+        return Stream.of();
       }
     } else {
-      return findMatchingNodes(
-          node.path(pathSegments[0]),
-          String.join("/", Arrays.copyOfRange(pathSegments, 1, pathSegments.length)));
+      JsonNode childNode = node.path(segment);
+      if (!childNode.isMissingNode()) {
+        String newPath = currentPath.isEmpty() ? segment : currentPath + "/" + segment;
+        return findMatchingNodes(childNode, remainingPath, newPath);
+      } else {
+        return Stream.of();
+      }
     }
   }
 
@@ -267,7 +305,11 @@ public class OvsChecks {
     } else {
       boolean hasVesselSchedules =
           findMatchingNodes(body, "*/vesselSchedules")
-              .anyMatch(node -> !node.isMissingNode() && node.isArray() && !node.isEmpty());
+              .anyMatch(
+                  node ->
+                      !node.getValue().isMissingNode()
+                          && node.getValue().isArray()
+                          && !node.getValue().isEmpty());
       if (!hasVesselSchedules) {
         validationErrors.add("Response doesn't have schedules.");
       }

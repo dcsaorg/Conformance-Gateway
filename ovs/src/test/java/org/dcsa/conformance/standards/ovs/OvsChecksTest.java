@@ -292,21 +292,21 @@ public class OvsChecksTest {
   @Test
   void testFindMatchingNodes_rootMatch() {
     JsonNode root = objectMapper.createObjectNode().put("value", "test");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "/");
+    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "/").map(Map.Entry::getValue);
     assertEquals(1, result.count());
   }
 
   @Test
   void testFindMatchingNodes_arrayMatch() throws IOException {
     JsonNode root = objectMapper.readTree("[{\"a\": 1}, {\"b\": 2}]");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*");
+    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);;
     assertEquals(2, result.count());
   }
 
   @Test
   void testFindMatchingNodes_emptyArrayMatch() throws IOException {
     JsonNode root = objectMapper.readTree("[]");
-    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*");
+    Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);;
     assertEquals(0, result.count());
   }
 

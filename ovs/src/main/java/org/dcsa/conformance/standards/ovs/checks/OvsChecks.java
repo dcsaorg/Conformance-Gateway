@@ -209,6 +209,9 @@ public class OvsChecks {
                 timestampsNode ->
                     StreamSupport.stream(timestampsNode.getValue().spliterator(), false)
                         .filter(
+                            eventDateTimeNode ->
+                                !eventDateTimeNode.isMissingNode() && !eventDateTimeNode.isNull())
+                        .filter(
                             timestampNode -> {
                               LocalDate eventDateTime =
                                   stringToISODateTime(timestampNode.path("eventDateTime").asText());

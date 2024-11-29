@@ -14,10 +14,10 @@
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<spring.boot.version>3.3.5</spring.boot.version>
+		<spring.boot.version>3.4.0</spring.boot.version>
 		<jackson.version>2.18.1</jackson.version>
-		<lombok.version>1.18.34</lombok.version>
-		<log4j.version>2.24.1</log4j.version>
+		<lombok.version>1.18.36</lombok.version>
+		<log4j.version>2.24.2</log4j.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<junit.version>5.11.3</junit.version>
 

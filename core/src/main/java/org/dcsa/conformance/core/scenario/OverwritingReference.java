@@ -32,4 +32,14 @@ public class OverwritingReference<V> {
     }
     this.currentValue = value;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    throw new IllegalArgumentException("OverwritingReference should not be compared for equality.");
+  }
+
+  @Override
+  public int hashCode() {
+    throw new IllegalArgumentException("OverwritingReference should not be hashed.");
+  }
 }

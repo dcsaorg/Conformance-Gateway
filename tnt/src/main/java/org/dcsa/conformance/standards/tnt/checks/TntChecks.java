@@ -70,7 +70,7 @@ public class TntChecks {
                   .forEach(
                       eventNode -> {
                         eventIndex.incrementAndGet();
-                        _checkThatEventValuesMatchParamValues(eventNode, filterParametersMap)
+                        checkThatEventValuesMatchParamValues(eventNode, filterParametersMap)
                             .forEach(
                                 validationError ->
                                     validationErrors.add(
@@ -103,7 +103,7 @@ public class TntChecks {
               TntSchemaConformanceCheck.findEventNodes(body).stream()
                   .map(
                       eventNode ->
-                          _stringToOffsetDateTime(eventNode.path("eventCreatedDateTime").asText()))
+                          stringToOffsetDateTime(eventNode.path("eventCreatedDateTime").asText()))
                   .filter(Objects::nonNull)
                   .forEach(
                       eventCreatedDateTime -> {
@@ -111,10 +111,10 @@ public class TntChecks {
                         eventCreatedDateTimeParams.forEach(
                             entry -> {
                               OffsetDateTime filterParamDateTime =
-                                  _stringToOffsetDateTime(entry.getValue());
+                                  stringToOffsetDateTime(entry.getValue());
                               if (filterParamDateTime != null) {
                                 String validationError =
-                                    _validateEventCreatedDateTime(
+                                    validateEventCreatedDateTime(
                                       eventCreatedDateTime, entry.getKey(), filterParamDateTime);
                                 if (validationError != null) {
                                   validationErrors.add(
@@ -147,7 +147,7 @@ public class TntChecks {
         TntRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
 
-  private static OffsetDateTime _stringToOffsetDateTime(String dateTimeString) {
+  private static OffsetDateTime stringToOffsetDateTime(String dateTimeString) {
     try {
       return OffsetDateTime.parse(dateTimeString);
     } catch (DateTimeParseException e) {
@@ -155,7 +155,7 @@ public class TntChecks {
     }
   }
 
-  static TntEventType _getEventType(JsonNode eventNode) {
+  static TntEventType getEventType(JsonNode eventNode) {
     return Arrays.stream(TntEventType.values())
         .filter(
             eventType -> eventType.name().equalsIgnoreCase(eventNode.path("eventType").asText()))
@@ -163,9 +163,9 @@ public class TntChecks {
         .orElse(null);
   }
 
-  static Set<String> _checkThatEventValuesMatchParamValues(
+  static Set<String> checkThatEventValuesMatchParamValues(
       JsonNode eventNode, Map<TntFilterParameter, String> filterParametersMap) {
-    TntEventType eventType = _getEventType(eventNode);
+    TntEventType eventType = getEventType(eventNode);
     if (eventType == null) return Set.of();
     Set<String> validationErrors = new LinkedHashSet<>();
     Arrays.stream(TntFilterParameter.values())
@@ -246,10 +246,9 @@ public class TntChecks {
     return validationErrors;
   }
 
-  static String _validateEventCreatedDateTime(OffsetDateTime eventCreatedDateTime, TntFilterParameter parameterKey, OffsetDateTime parameterValue) {
+  static String validateEventCreatedDateTime(OffsetDateTime eventCreatedDateTime, TntFilterParameter parameterKey, OffsetDateTime parameterValue) {
     switch (parameterKey) {
-      case EVENT_CREATED_DATE_TIME:
-      case EVENT_CREATED_DATE_TIME_EQ:
+      case EVENT_CREATED_DATE_TIME, EVENT_CREATED_DATE_TIME_EQ:
         if (!eventCreatedDateTime.isEqual(parameterValue))
           return "eventCreatedDateTime '%s' does not equal filter parameter date time '%s'"
               .formatted(eventCreatedDateTime, parameterValue);

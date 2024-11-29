@@ -231,27 +231,22 @@ public class ConformanceOrchestrator implements StatefulEntity {
   public void handlePartyInput(JsonNode partyInput) {
     log.info("ConformanceOrchestrator.handlePartyInput(%s)".formatted(partyInput.toPrettyString()));
     if (currentScenarioId == null) {
-      log.info(
-          "Ignoring party input %s: no scenario is currently active"
-              .formatted(partyInput.toPrettyString()));
+      log.info("Ignoring party input: no scenario is currently active");
       return;
     }
 
     ConformanceScenario currentScenario = _getCurrentScenario();
     ConformanceAction nextAction = currentScenario.peekNextAction();
     if (nextAction == null) {
-      log.info(
-          "Ignoring party input %s: the active scenario has no next action"
-              .formatted(partyInput.toPrettyString()));
+      log.info("Ignoring party input: the active scenario has no next action");
       return;
     }
 
     String actionId = partyInput.get("actionId").asText();
     if (!Objects.equals(actionId, nextAction.getId().toString())) {
       log.info(
-          "Ignoring party input %s: the expected next action id is %s in current scenario %s"
-              .formatted(
-                  partyInput.toPrettyString(), nextAction.getId(), currentScenario.toString()));
+          "Ignoring party input: the expected next action id is %s in current scenario %s"
+              .formatted(nextAction.getId(), currentScenario.toString()));
       return;
     }
 

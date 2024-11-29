@@ -101,6 +101,11 @@ public abstract class ConformanceAction implements StatefulEntity {
     return false;
   }
 
+  /**
+   * Whether the action requires input from the user. Overwrite this method to return true if required.
+   *
+   * @return true if the action requires input.
+   */
   public boolean isInputRequired() {
     return false;
   }

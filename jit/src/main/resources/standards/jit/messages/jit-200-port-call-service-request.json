@@ -9,8 +9,8 @@
   },
   "terminalCall": {
     "terminalCallID": "0342254a-5927-4856-b9c9-aa12e7c00563",
-    "transportCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
-    "transportCallSequenceNumber": 2,
+    "terminalCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
+    "terminalCallSequenceNumber": 2,
     "carrierImportVoyageNumber": "2103N",
     "carrierExportVoyageNumber": "2103S",
     "universalImportVoyageReference": "2103N",

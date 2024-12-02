@@ -53,14 +53,14 @@
     "facilityTypeCode": "BRTH",
     "delayReasonCode": "WEA",
     "remark": "Port closed due to strike",
-    "transportCall": {
+    "terminalCall": {
       "transportCallID": "123e4567-e89b-12d3-a456-426614174000",
-      "transportCallReference": "987e4567",
+      "terminalCallReference": "987e4567",
       "portVisitReference": "NLRTM1234589",
       "carrierServiceCode": "FE1",
       "carrierExportVoyageNumber": "2103S",
       "carrierImportVoyageNumber": "2103N",
-      "transportCallSequenceNumber": 2,
+      "terminalCallSequenceNumber": 2,
       "modeOfTransport": "VESSEL",
       "location": {
         "locationName": "Port of Amsterdam",

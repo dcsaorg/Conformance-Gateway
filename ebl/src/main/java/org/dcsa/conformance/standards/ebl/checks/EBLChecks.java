@@ -44,7 +44,6 @@ public class EBLChecks {
   private static final String UTILIZED_TRANSPORT_EQUIPMENTS = "utilizedTransportEquipments";
   private static final String DOCUMENT_PARTIES = "documentParties";
   private static final String CUSTOMS_REFERENCES = "customsReferences";
-  private static final String HOUSE_BILL_OF_LADINGS = "houseBillOfLadings";
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =

@@ -61,7 +61,7 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   @SafeVarargs
   protected final T thenEither(T... children) {
     log.debug("ScenarioListBuilder.thenEither(%d)".formatted(children.length));
-    if (!this.children.isEmpty()) throw new IllegalStateException();
+    if (!this.children.isEmpty()) throw new IllegalStateException("Cannot add children to a builder that already has children");
     Stream.of(children)
         .forEach(
             child -> {

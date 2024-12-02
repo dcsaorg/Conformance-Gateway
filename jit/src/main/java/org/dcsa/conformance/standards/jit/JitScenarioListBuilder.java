@@ -21,41 +21,139 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     var scenarioList = new LinkedHashMap<String, JitScenarioListBuilder>();
     scenarioList.put(
+        "S-ERP-A service types",
+        supplyScenarioParameters(context)
+            .thenEither(
+                PortCallServiceType.getServicesWithERPAndA().stream()
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                                .then(
+                                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                                        .then(
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL))))))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
+    scenarioList.put(
         "S-A service types",
         supplyScenarioParameters(context)
             .thenEither(
-                portCallService(context, PortCallServiceType.SEA_PASSAGE)
-                    .then(sendTimestamp(context, JitTimestampType.ACTUAL)),
-                portCallService(context, PortCallServiceType.ALL_FAST)
-                    .then(sendTimestamp(context, JitTimestampType.ACTUAL))));
+                PortCallServiceType.getServicesHavingOnlyA().stream()
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(sendTimestamp(context, JitTimestampType.ACTUAL)))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
+    // “S service type with variations” TODO: Implement
 
     scenarioList.put(
-        "S-ERP-A service types",
+        "S-ERP-A in-band ERP variations - S(service type) - E - R - P - A - A",
         supplyScenarioParameters(context)
-            .then(
-                portCallService(context, PortCallServiceType.BERTH)
-                    .then(
-                        sendTimestamp(context, JitTimestampType.ESTIMATED)
-                            .then(
-                                sendRequestedTimestamp(context)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.PLANNED)
-                                            .then(
-                                                sendTimestamp(
-                                                    context, JitTimestampType.ACTUAL)))))));
+            .thenEither(
+                PortCallServiceType.getServicesWithERPAndA().stream()
+                    .filter(PortCallServiceType::isCommon)
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                                .then(
+                                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                                        .then(
+                                                            sendTimestamp(
+                                                                    context,
+                                                                    JitTimestampType.ACTUAL)
+                                                                .then(
+                                                                    sendTimestamp(
+                                                                        context,
+                                                                        JitTimestampType
+                                                                            .ACTUAL)))))))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
+    scenarioList.put(
+        "S-ERP-A in-band ERP variations - S(service type) - E - R - P - R - P - A",
+        supplyScenarioParameters(context)
+            .thenEither(
+                PortCallServiceType.getServicesWithERPAndA().stream()
+                    .filter(PortCallServiceType::isCommon)
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                                .then(
+                                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                                        .then(
+                                                            sendTimestamp(
+                                                                    context,
+                                                                    JitTimestampType.REQUESTED)
+                                                                .then(
+                                                                    sendTimestamp(
+                                                                            context,
+                                                                            JitTimestampType
+                                                                                .PLANNED)
+                                                                        .then(
+                                                                            sendTimestamp(
+                                                                                context,
+                                                                                JitTimestampType
+                                                                                    .ACTUAL))))))))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
+    scenarioList.put(
+        "S-ERP-A in-band S-resend variations - S - E - R - P - A“",
+        supplyScenarioParameters(context)
+            .thenEither(
+                PortCallServiceType.getServicesWithERPAndA().stream()
+                    .filter(PortCallServiceType::isCommon)
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(
+                                    portCallService(context, serviceType)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.ESTIMATED)
+                                                .then(
+                                                    sendTimestamp(
+                                                            context, JitTimestampType.REQUESTED)
+                                                        .then(
+                                                            sendTimestamp(
+                                                                    context,
+                                                                    JitTimestampType.PLANNED)
+                                                                .then(
+                                                                    sendTimestamp(
+                                                                        context,
+                                                                        JitTimestampType
+                                                                            .ACTUAL)))))))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
     return scenarioList;
   }
 
   private static JitScenarioListBuilder sendTimestamp(
       JitScenarioContext context, JitTimestampType timestampType) {
+    if (timestampType == JitTimestampType.REQUESTED) {
+      return new JitScenarioListBuilder(
+          previousAction ->
+              new JitTimestampAction(context, previousAction, JitTimestampType.REQUESTED, false));
+    }
     return new JitScenarioListBuilder(
         previousAction -> new JitTimestampAction(context, previousAction, timestampType, true));
-  }
-
-  private static JitScenarioListBuilder sendRequestedTimestamp(
-      JitScenarioContext context) {
-    return new JitScenarioListBuilder(
-        previousAction -> new JitTimestampAction(context, previousAction, JitTimestampType.REQUESTED, false));
   }
 
   private JitScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {

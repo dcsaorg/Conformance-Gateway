@@ -4,20 +4,21 @@ import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public enum PortCallServiceType {
   // Port Call Services negotiable through an `ERP`-cycle including an `A`, can be one of:
-  BERTH("Berth"),
-  CARGO_OPERATIONS("Cargo operations"),
-  PILOTAGE("Pilotage"),
+  BERTH("Berth", true),
+  CARGO_OPERATIONS("Cargo operations", true),
+  PILOTAGE("Pilotage", true),
   TOWAGE("Towage"),
   MOORING("Mooring"),
   BUNKERING("Bunkering"),
-  PILOT_BOARDING_PLACE("Pilot Boarding Place"),
+  PILOT_BOARDING_PLACE("Pilot Boarding Place", true),
   ANCHORAGE("Anchorage"),
   SLUDGE("Sludge"),
   // Port Call Services without `ERP`-cycle having only an `A`, can be one of:
-  SEA_PASSAGE("Sea Passage"),
-  ALL_FAST("All Fast"),
+  SEA_PASSAGE("Sea Passage", true),
+  ALL_FAST("All Fast", true),
   GANGWAY_DOWN_AND_SECURE("Gangway down and secure"),
   VESSEL_READY_FOR_CARGO_OPERATIONS("Vessel Ready for cargo operations"),
   VESSEL_READY_TO_SAIL("Vessel Ready to sail"),
@@ -28,16 +29,20 @@ public enum PortCallServiceType {
   ANCHORAGE_OPERATIONS("Anchorage Operations"),
   SHORE_POWER("ShorePower"),
   // Port Call Service without an `ERP` and without an `A`, can be one of:
-  MOVES("Moves forecast"),
-  CANCEL("Cancel"),
-  DECLINE("Decline"),
-  OMISSION("Omission"),
+  MOVES("Moves", true),
   ;
 
-  @Getter private final String fullName;
+  private final String fullName;
+  private final boolean common; // True if a type is a common type, according to the Product Owner.
 
   PortCallServiceType(String fullName) {
     this.fullName = fullName;
+    this.common = false;
+  }
+
+  PortCallServiceType(String fullName, boolean common) {
+    this.fullName = fullName;
+    this.common = common;
   }
 
   public static List<PortCallServiceType> getServicesWithERPAndA() {
@@ -53,7 +58,7 @@ public enum PortCallServiceType {
         SLUDGE);
   }
 
-  public static List<PortCallServiceType> getServicesWithoutERPHavingOnlyA() {
+  public static List<PortCallServiceType> getServicesHavingOnlyA() {
     return List.of(
         SEA_PASSAGE,
         ALL_FAST,

@@ -5,7 +5,6 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATIO
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
-import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REQUESTED_CARRIER_CLAUSES;
 
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -368,13 +367,6 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
-  private static final JsonRebaseableContentCheck VALID_REQUESTED_CARRIER_CLAUSES = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'requestedCarrierClauses' is valid",
-    mav -> mav.submitAllMatching("requestedCarrierClauses"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CLAUSES)
-  );
-
-
   private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
@@ -547,7 +539,7 @@ public class EBLChecks {
             for (JsonNode filing : advanceManifestFilings) {
               if ("ENS".equals(filing.path("manifestTypeCode").asText())
                   && "SELF"
-                      .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())) {
+                      .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText()) && filing.path("identificationNumber").isMissingNode()) {
                 return true;
               }
             }
@@ -555,6 +547,26 @@ public class EBLChecks {
           },
           JsonAttribute.mustBePresent(
               JsonPointer.compile("/advanceManifestFilings/*/identificationNumber")));
+
+  private static final JsonRebaseableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
+    JsonAttribute.ifThen(
+      "If manifestTypeCode is ACE/ACI and advanceManifestFilingsHouseBLPerformedBy is SELF, selfFilerCode is required",
+      node -> {
+        JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+        if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
+          return false;
+        }
+        for (JsonNode filing : advanceManifestFilings) {
+          if (("ACI".equals(filing.path("manifestTypeCode").asText()) || "ACE".equals(filing.path("manifestTypeCode").asText()))
+            && "SELF".equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())
+            && filing.path("selfFilerCode").isMissingNode()) {
+            return true;
+          }
+        }
+        return false;
+      },
+      JsonAttribute.mustBePresent(
+        JsonPointer.compile("/advanceManifestFilings/*/selfFilerCode")));
 
   private static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POA =
       JsonAttribute.ifThen(
@@ -567,7 +579,7 @@ public class EBLChecks {
             for (JsonNode hbl : houseBillOfLadings) {
               JsonNode placeOfAcceptance = hbl.path("placeOfAcceptance");
               if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()) {
+                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("locationName").isMissingNode()) {
                 return true;
               }
             }
@@ -587,7 +599,7 @@ public class EBLChecks {
             for (JsonNode hbl : houseBillOfLadings) {
               JsonNode placeOfAcceptance = hbl.path("placeOfFinalDelivery");
               if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()) {
+                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("locationName").isMissingNode()) {
                 return true;
               }
             }
@@ -606,7 +618,7 @@ public class EBLChecks {
             for (JsonNode hbl : houseBillOfLadings) {
               JsonNode placeOfAcceptance = hbl.path("placeOfAcceptance");
               if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()) {
+                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("countryCode").isMissingNode()) {
                 return true;
               }
             }
@@ -626,7 +638,7 @@ public class EBLChecks {
             for (JsonNode hbl : houseBillOfLadings) {
               JsonNode placeOfAcceptance = hbl.path("placeOfFinalDelivery");
               if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()) {
+                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()  && placeOfAcceptance.path("countryCode").isMissingNode()) {
                 return true;
               }
             }
@@ -658,13 +670,13 @@ public class EBLChecks {
                   || !routingOfConsignmentCountries.isArray()) {
                 continue;
               }
-              String placeOfAcceptance = hbl.path("placeOfAcceptance").asText(null);
-              String placeOfFinalDelivery = hbl.path("placeOfFinalDelivery").asText(null);
-              if ((placeOfAcceptance != null
-                      && !placeOfAcceptance.equals(routingOfConsignmentCountries.path(0).asText()))
-                  || (placeOfFinalDelivery != null
+              String placeOfAcceptanceCountry = hbl.path("placeOfAcceptance.countryCode").asText(null);
+              String placeOfFinalDeliveryCountry = hbl.path("placeOfFinalDelivery.countryCode").asText(null);
+              if ((placeOfAcceptanceCountry != null
+                      && !placeOfAcceptanceCountry.equals(routingOfConsignmentCountries.path(0).asText()))
+                  || (placeOfFinalDeliveryCountry != null
                       && routingOfConsignmentCountries.size() > 1
-                      && !placeOfFinalDelivery.equals(
+                      && !placeOfFinalDeliveryCountry.equals(
                           routingOfConsignmentCountries
                               .path(routingOfConsignmentCountries.size() - 1)
                               .asText()))) {
@@ -740,6 +752,7 @@ public class EBLChecks {
     HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER,
     NUMBER_OF_PACKAGES_CONDITIONAL_CHECK,
     IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF,
+    SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF,
     LOCATION_NAME_CONDITIONAL_VALIDATION_POA,
     LOCATION_NAME_CONDITIONAL_VALIDATION_POFD,
     COUNTRY_CODE_CONDITIONAL_VALIDATION_POA,
@@ -747,7 +760,6 @@ public class EBLChecks {
     ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
     BUYER_CONDITIONAL_CHECK,
     SELLER_CONDITIONAL_CHECK,
-    VALID_REQUESTED_CARRIER_CLAUSES,
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_COPY_WITH_CHARGES,

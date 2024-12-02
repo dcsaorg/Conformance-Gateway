@@ -61,8 +61,10 @@
   ],
   "advanceManifestFilings": [
     {
-      "manifestTypeCode": "ENS",
-      "advanceManifestFilingsHouseBLPerformedBy": "CARRIER"
+      "manifestTypeCode": "ACE",
+      "advanceManifestFilingsHouseBLPerformedBy": "SELF",
+      "selfFilerCode": "FLXP"
+
     }
   ],
   "isHouseBillOfLadingsIssued": true,
@@ -75,7 +77,25 @@
         "shipper": {
           "partyName": "DCSA CTK",
          "typeOfPerson": "NATURAL_PERSON"
+        },
+        "notifyParty": {
+          "partyName": "DCSA CTK",
+          "typeOfPerson": "NATURAL_PERSON",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "no-reply@dcsa.example.org"
+            }
+          ]
         }
+      },
+      "placeOfAcceptance": {
+        "locationName": "NLRTM",
+        "countryCode": "NL"
+      },
+      "placeOfFinalDelivery": {
+        "locationName": "NLRTM",
+        "countryCode": "DE"
       },
       "isCargoDeliveredInICS2Zone": false,
       "routingOfConsignmentCountries": ["NL", "DE"],

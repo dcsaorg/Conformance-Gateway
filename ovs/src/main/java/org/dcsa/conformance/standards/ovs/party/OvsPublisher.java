@@ -44,11 +44,6 @@ public class OvsPublisher extends ConformanceParty {
         orchestratorAuthHeader);
   }
 
-  private static final boolean RETURN_EMPTY_RESPONSE = false;
-  private static final boolean USE_WRONG_ATTRIBUTE_VALUES = false;
-  private static final boolean USE_WRONG_DATE_TIMES = false;
-  private static final boolean USE_WRONG_RESPONSE_STRUCTURE = false;
-
   @Override
   protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
 
@@ -135,38 +130,9 @@ public class OvsPublisher extends ConformanceParty {
     }
 
     Map<String, Collection<String>> headers =
-      new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+        new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
 
-    if (RETURN_EMPTY_RESPONSE) {
-      return request.createResponse(
-        200, headers, new ConformanceMessageBody(OBJECT_MAPPER.createArrayNode()));
-    } else if (USE_WRONG_ATTRIBUTE_VALUES) {
-      return request.createResponse(
-        200,
-        headers,
-        new ConformanceMessageBody(
-          JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-300-response-wrong-attribute-values.json",
-            Map.ofEntries())));
-    } else if (USE_WRONG_DATE_TIMES) {
-      return request.createResponse(
-        200,
-        headers,
-        new ConformanceMessageBody(
-          JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-300-response-wrong-date-times.json",
-            Map.ofEntries())));
-    } else if (USE_WRONG_RESPONSE_STRUCTURE) {
-      return request.createResponse(
-        200,
-        headers,
-        new ConformanceMessageBody(
-          JsonToolkit.templateFileToJsonNode(
-            "/standards/ovs/messages/ovs-300-response-wrong-structure.json",
-            Map.ofEntries())));
-    } else {
-      return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
-    }
+    return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
   }
 
   private ArrayNode applyFilter(

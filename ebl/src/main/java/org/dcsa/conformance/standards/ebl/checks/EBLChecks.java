@@ -5,6 +5,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATIO
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REQUESTED_CARRIER_CLAUSES;
 
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -44,6 +45,9 @@ public class EBLChecks {
   private static final String UTILIZED_TRANSPORT_EQUIPMENTS = "utilizedTransportEquipments";
   private static final String DOCUMENT_PARTIES = "documentParties";
   private static final String CUSTOMS_REFERENCES = "customsReferences";
+  private static final String ROUTING_OF_CONSIGNMENT_COUNTRIES = "routingOfConsignmentCountries";
+  private static final String MANIFEST_TYPE_CODE = "manifestTypeCode";
+
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
@@ -80,6 +84,11 @@ public class EBLChecks {
       }
     };
 
+  private static final JsonRebaseableContentCheck VALID_REQUESTED_CARRIER_CLAUSES = JsonAttribute.allIndividualMatchesMustBeValid(
+    "Validate that 'requestedCarrierClauses' is valid",
+    mav -> mav.submitAllMatching("requestedCarrierClauses.*"),
+    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CLAUSES)
+  );
   public static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>>
       SI_ARRAY_ORDER_DEFINITIONS =
           (rootNode, arrayNodeHandler) -> {
@@ -142,7 +151,7 @@ public class EBLChecks {
             for (var hbl : rootNode.path("houseBillOfLadings")) {
               DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path(DOCUMENT_PARTIES), arrayNodeHandler);
               arrayNodeHandler.accept(
-                hbl, "routingOfConsignmentCountries", ArrayOrderHandler.inputPreservedArrayOrder());
+                hbl, ROUTING_OF_CONSIGNMENT_COUNTRIES, ArrayOrderHandler.inputPreservedArrayOrder());
             }
             arrayNodeHandler.accept(
               rootNode, "houseBillOfLadings", ArrayOrderHandler.toStringSortableArray());
@@ -450,10 +459,10 @@ public class EBLChecks {
 
   private static final JsonRebaseableContentCheck ADVANCED_MANIFEST_FILING_CODES_UNIQUE = JsonAttribute.customValidator(
     "The combination of 'countryCode' and 'manifestTypeCode' in 'advanceManifestFilings' must be unique",
-    JsonAttribute.unique("countryCode", "manifestTypeCode")
+    JsonAttribute.unique("countryCode", MANIFEST_TYPE_CODE)
   );
 
-  private static final JsonRebaseableContentCheck ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED =
+  static JsonRebaseableContentCheck ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED =
       JsonAttribute.ifThen(
           "If any manifestTypeCode in advanceManifestFilings is ENS, isHouseBillOfLadingsIssued is required",
           node -> {
@@ -462,7 +471,7 @@ public class EBLChecks {
               return false;
             }
             for (JsonNode filing : advanceManifestFilings) {
-              if ("ENS".equals(filing.path("manifestTypeCode").asText())) {
+              if ("ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())) {
                 return true;
               }
             }
@@ -471,180 +480,179 @@ public class EBLChecks {
           JsonAttribute.mustBePresent(JsonPointer.compile("/isHouseBillOfLadingsIssued")));
 
   private static final JsonRebaseableContentCheck HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
+          mav -> mav.submitAllMatching("houseBillOfLadings.*"),
+          (node, contextPath) -> {
+            JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
+            if (routingOfConsignmentCountries.isMissingNode()
+                || !routingOfConsignmentCountries.isArray()) {
+              return Set.of();
             }
-            for (JsonNode hbl : houseBillOfLadings) {
-              if (hbl.path("isToOrder").asBoolean(true)) {
-                if (!hbl.path("documentParties").has("notifyParty")) {
-                  return true;
-                }
-              }
+            boolean isToOrder = node.path("isToOrder").asBoolean(false);
+            if (isToOrder && node.path(DOCUMENT_PARTIES).path("notifyParty").isMissingNode()) {
+              return Set.of(
+                  "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading at %s"
+                      .formatted(contextPath));
             }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/documentParties/notifyParty")));
+            return Set.of();
+          });
 
+  private static final Predicate<JsonNode> NUMBER_OF_PACKAGES_REQUIRED =
+      packaging -> {
+        String packageCode = packaging.path("packageCode").asText(null);
+        return packageCode != null && !EXEMPT_PACKAGE_CODES.contains(packageCode);
+      };
   private static final JsonRebaseableContentCheck NUMBER_OF_PACKAGES_CONDITIONAL_CHECK =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If packageCode in outerPackaging is not exempt, numberOfPackages is required",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
-            }
-            for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode consignmentItems = hbl.path("consignmentItems");
-              if (consignmentItems.isMissingNode() || !consignmentItems.isArray()) {
-                continue;
-              }
-              for (JsonNode consignmentItem : consignmentItems) {
-                JsonNode cargoItems = consignmentItem.path("cargoItems");
-                if (cargoItems.isMissingNode() || !cargoItems.isArray()) {
-                  continue;
-                }
-                for (JsonNode cargoItem : cargoItems) {
-                  JsonNode outerPackaging = cargoItem.path("outerPackaging");
-                  if (outerPackaging.isMissingNode()) {
-                    continue;
-                  }
-                  String packageCode = outerPackaging.path("packageCode").asText();
-                  if (packageCode != null
-                      && !EXEMPT_PACKAGE_CODES.contains(packageCode)
-                      && outerPackaging.path("numberOfPackages").isMissingNode()) {
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile(
-                  "/houseBillOfLadings/*/consignmentItems/*/cargoItems/*/outerPackaging/numberOfPackages")));
+          mav ->
+              mav.submitAllMatching(
+                  "houseBillOfLadings.*.consignmentItems.*.cargoItems.*.outerPackaging"),
+          JsonAttribute.ifMatchedThen(
+              NUMBER_OF_PACKAGES_REQUIRED,
+              JsonAttribute.path("numberOfPackages", JsonAttribute.matchedMustBePresent())));
+
+  private static final Predicate<JsonNode> IDENTIFICATION_NUMBER_REQUIRED =
+      filingsNode -> {
+        return "ENS".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText())
+            && "SELF".equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
+      };
+
   private static final JsonRebaseableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If manifestTypeCode is ENS and advanceManifestFilingsHouseBLPerformedBy is SELF, identificationNumber is required",
-          node -> {
-            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
-            if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-              return false;
-            }
-            for (JsonNode filing : advanceManifestFilings) {
-              if ("ENS".equals(filing.path("manifestTypeCode").asText())
-                  && "SELF"
-                      .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText()) && filing.path("identificationNumber").isMissingNode()) {
-                return true;
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/advanceManifestFilings/*/identificationNumber")));
+          mav -> mav.submitAllMatching("advanceManifestFilings.*"),
+          JsonAttribute.ifMatchedThen(
+              IDENTIFICATION_NUMBER_REQUIRED,
+              JsonAttribute.path("identificationNumber", JsonAttribute.matchedMustBePresent())));
+
+  private static final Predicate<JsonNode> SELF_FILER_CODE_REQUIRED =
+      filingsNode -> {
+        return ("ACI".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText())
+                || "ACE".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText()))
+            && "SELF".equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
+      };
 
   private static final JsonRebaseableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
-    JsonAttribute.ifThen(
-      "If manifestTypeCode is ACE/ACI and advanceManifestFilingsHouseBLPerformedBy is SELF, selfFilerCode is required",
-      node -> {
-        JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
-        if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-          return false;
-        }
-        for (JsonNode filing : advanceManifestFilings) {
-          if (("ACI".equals(filing.path("manifestTypeCode").asText()) || "ACE".equals(filing.path("manifestTypeCode").asText()))
-            && "SELF".equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())
-            && filing.path("selfFilerCode").isMissingNode()) {
-            return true;
-          }
-        }
-        return false;
-      },
-      JsonAttribute.mustBePresent(
-        JsonPointer.compile("/advanceManifestFilings/*/selfFilerCode")));
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "If manifestTypeCode is ACE/ACI and advanceManifestFilingsHouseBLPerformedBy is SELF, selfFilerCode is required",
+          mav -> mav.submitAllMatching("advanceManifestFilings.*"),
+          JsonAttribute.ifMatchedThen(
+              SELF_FILER_CODE_REQUIRED,
+              JsonAttribute.path("selfFilerCode", JsonAttribute.matchedMustBePresent())));
+
+  private static final Predicate<JsonNode> LOCATION_NAME_REQUIRED =
+      place -> {
+        return (place.path("UNLocationCode").isMissingNode()
+            && (place.path("locationName").isMissingNode()));
+      };
+
+  private static final Predicate<JsonNode> COUNTRY_CODE_REQUIRED =
+      place -> {
+        return (place.path("UNLocationCode").isMissingNode()
+            && (place.path("countryCode").isMissingNode()));
+      };
 
   private static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POA =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfAcceptance, locationName is required",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
-            }
-            for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode placeOfAcceptance = hbl.path("placeOfAcceptance");
-              if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("locationName").isMissingNode()) {
-                return true;
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/placeOfAcceptance/locationName")));
+          mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfAcceptance"),
+          JsonAttribute.ifMatchedThen(
+              LOCATION_NAME_REQUIRED,
+              JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
 
   private static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POFD =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfFinalDelivery, locationName is required",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
-            }
-            for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode placeOfAcceptance = hbl.path("placeOfFinalDelivery");
-              if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("locationName").isMissingNode()) {
-                return true;
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/placeOfFinalDelivery/locationName")));
+          mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfFinalDelivery"),
+          JsonAttribute.ifMatchedThen(
+              LOCATION_NAME_REQUIRED,
+              JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
+
   private static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POA =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfAcceptance, countryCode is required",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
-            }
-            for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode placeOfAcceptance = hbl.path("placeOfAcceptance");
-              if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode() && placeOfAcceptance.path("countryCode").isMissingNode()) {
-                return true;
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/placeOfAcceptance/countryCode")));
+          mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfAcceptance"),
+          JsonAttribute.ifMatchedThen(
+              COUNTRY_CODE_REQUIRED,
+              JsonAttribute.path("countryCode", JsonAttribute.matchedMustBePresent())));
 
   private static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD =
-      JsonAttribute.ifThen(
+      JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfFinalDelivery, countryCode is required",
-          node -> {
+          mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfFinalDelivery"),
+          JsonAttribute.ifMatchedThen(
+              COUNTRY_CODE_REQUIRED,
+              JsonAttribute.path("countryCode", JsonAttribute.matchedMustBePresent())));
+
+  private static final JsonRebaseableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "If first country in routingOfConsignmentCountries in houseBillOfLadings should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery",
+          mav -> mav.submitAllMatching("houseBillOfLadings.*"),
+          (node, contextPath) -> {
+            JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
+            if (routingOfConsignmentCountries.isMissingNode()
+                || !routingOfConsignmentCountries.isArray()) {
+              return Set.of();
+            }
+            String placeOfAcceptanceCountry =
+                node.path("placeOfAcceptance").path("countryCode").asText(null);
+            System.out.println("placeOfAcceptanceCountry: " + placeOfAcceptanceCountry);
+            String placeOfFinalDeliveryCountry =
+                node.path("placeOfFinalDelivery").path("countryCode").asText(null);
+            if ((placeOfAcceptanceCountry != null
+                    && !placeOfAcceptanceCountry.equals(
+                        routingOfConsignmentCountries.path(0).asText()))
+                || (placeOfFinalDeliveryCountry != null
+                    && routingOfConsignmentCountries.size() > 1
+                    && !placeOfFinalDeliveryCountry.equals(
+                        routingOfConsignmentCountries
+                            .path(routingOfConsignmentCountries.size() - 1)
+                            .asText()))) {
+              return Set.of(
+                  "The first country in routingOfConsignmentCountries should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery at %s"
+                      .formatted(contextPath));
+            }
+            return Set.of();
+          });
+
+  private static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
+      JsonAttribute.customValidator(
+          "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer and Seller is required",
+          (node, contextPath) -> {
             JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
+              return Set.of();
             }
+            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+            if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
+              return Set.of();
+            }
+            int index = 0;
             for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode placeOfAcceptance = hbl.path("placeOfFinalDelivery");
-              if (!placeOfAcceptance.isMissingNode()
-                  && placeOfAcceptance.path("UNLocationCode").isMissingNode()  && placeOfAcceptance.path("countryCode").isMissingNode()) {
-                return true;
+              if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(false)) {
+                for (JsonNode filing : advanceManifestFilings) {
+                  if ("CARRIER"
+                          .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())
+                      && "ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())) {
+                    if (hbl.path(DOCUMENT_PARTIES).path("buyer").isMissingNode()
+                        || hbl.path(DOCUMENT_PARTIES).path("seller").isMissingNode()) {
+                      String specificContextPath =
+                          concatContextPath(
+                              contextPath, "houseBillOfLadings[" + index + "].documentParties");
+                      return Set.of(
+                          "Buyer and Seller is required in documentParties in houseBillOfLadings when isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' at %s"
+                              .formatted(specificContextPath));
+                    }
+                  }
+                }
               }
+              index++;
             }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/placeOfFinalDelivery/countryCode")));
+            return Set.of();
+          });
+
   private static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
       JsonAttribute.ifThenElse(
           "'isElectronic' and 'transportDocumentTypeCode' BOL implies 'sendToPlatform'",
@@ -655,91 +663,6 @@ public class EBLChecks {
               JsonAttribute.mustBePresent(SI_REQUEST_SEND_TO_PLATFORM),
               JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)),
           JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM));
-  private static final JsonRebaseableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK =
-      JsonAttribute.ifThen(
-          "If houseBillOfLadings is present, the first country in routingOfConsignmentCountries should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery",
-          node -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-            if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-              return false;
-            }
-            for (JsonNode hbl : houseBillOfLadings) {
-              JsonNode routingOfConsignmentCountries = hbl.path("routingOfConsignmentCountries");
-              if (routingOfConsignmentCountries.isMissingNode()
-                  || !routingOfConsignmentCountries.isArray()) {
-                continue;
-              }
-              String placeOfAcceptanceCountry = hbl.path("placeOfAcceptance.countryCode").asText(null);
-              String placeOfFinalDeliveryCountry = hbl.path("placeOfFinalDelivery.countryCode").asText(null);
-              if ((placeOfAcceptanceCountry != null
-                      && !placeOfAcceptanceCountry.equals(routingOfConsignmentCountries.path(0).asText()))
-                  || (placeOfFinalDeliveryCountry != null
-                      && routingOfConsignmentCountries.size() > 1
-                      && !placeOfFinalDeliveryCountry.equals(
-                          routingOfConsignmentCountries
-                              .path(routingOfConsignmentCountries.size() - 1)
-                              .asText()))) {
-                return true;
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/routingOfConsignmentCountries")));
-  private static final JsonRebaseableContentCheck BUYER_CONDITIONAL_CHECK =
-      JsonAttribute.ifThen(
-          "If isCargoDeliveredInICS2Zone is true, advancedManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer is required",
-          node -> {
-            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
-            if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-              return false;
-            }
-            for (JsonNode filing : advanceManifestFilings) {
-              if ("ENS".equals(filing.path("manifestTypeCode").asText())
-                  && "CARRIER"
-                      .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())) {
-                JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-                if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-                  return false;
-                }
-                for (JsonNode hbl : houseBillOfLadings) {
-                  if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(true)) {
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/documentParties/buyer")));
-  private static final JsonRebaseableContentCheck SELLER_CONDITIONAL_CHECK =
-      JsonAttribute.ifThen(
-          "If isCargoDeliveredInICS2Zone is true, advancedManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Seller is required",
-          node -> {
-            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
-            if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
-              return false;
-            }
-            for (JsonNode filing : advanceManifestFilings) {
-              if ("ENS".equals(filing.path("manifestTypeCode").asText())
-                  && "CARRIER"
-                      .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())) {
-                JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
-                if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
-                  return false;
-                }
-                for (JsonNode hbl : houseBillOfLadings) {
-                  if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(true)) {
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          },
-          JsonAttribute.mustBePresent(
-              JsonPointer.compile("/houseBillOfLadings/*/documentParties/seller")));
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
@@ -757,8 +680,8 @@ public class EBLChecks {
     COUNTRY_CODE_CONDITIONAL_VALIDATION_POA,
     COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD,
     ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
-    BUYER_CONDITIONAL_CHECK,
-    SELLER_CONDITIONAL_CHECK,
+    VALID_REQUESTED_CARRIER_CLAUSES,
+    BUYER_AND_SELLER_CONDITIONAL_CHECK,
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_COPY_WITH_CHARGES,

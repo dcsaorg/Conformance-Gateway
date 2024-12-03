@@ -66,7 +66,6 @@
       "selfFilerCode": "FLXP"
     }
   ],
-  "isHouseBillOfLadingsIssued": true,
   "houseBillOfLadings": [
     {
       "houseBillOfLadingReference": "HBOL001",
@@ -83,7 +82,7 @@
           "partyContactDetails": [
             {
               "name": "DCSA test person",
-              "email": "no-reply@dcsa.example.org"
+              "email": "tets@test.com"
             }
           ]
         }
@@ -163,5 +162,6 @@
         }
       ]
     }
-  }
+  },
+"requestedCarrierClauses": ["CARGO_CARGOSPECIFICS"]
 }

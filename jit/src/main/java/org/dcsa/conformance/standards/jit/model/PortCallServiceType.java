@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.jit.model;
 
 import lombok.Getter;
+import org.dcsa.conformance.core.UserFacingException;
 
 import java.util.List;
 
@@ -79,6 +80,6 @@ public enum PortCallServiceType {
         return portCallServiceType;
       }
     }
-    return null;
+    throw new UserFacingException("Unknown PortCallServiceType: " + name);
   }
 }

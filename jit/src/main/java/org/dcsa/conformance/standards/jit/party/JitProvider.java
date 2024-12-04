@@ -24,6 +24,7 @@ import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
@@ -100,7 +101,9 @@ public class JitProvider extends ConformanceParty {
           new JitTimestamp(
               UUID.randomUUID().toString(),
               previousTimestamp != null ? previousTimestamp.timestampID() : null,
-              previousTimestamp != null ? previousTimestamp.portCallServiceID() : UUID.randomUUID().toString(),
+              previousTimestamp != null
+                  ? previousTimestamp.portCallServiceID()
+                  : UUID.randomUUID().toString(),
               timestampType.getClassifierCode(),
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
               "STR",
@@ -140,7 +143,11 @@ public class JitProvider extends ConformanceParty {
             "SERVICE_TYPE_PLACEHOLDER",
             serviceType,
             "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-            portCallServiceId));
+            portCallServiceId,
+            "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
+            PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType)
+                .getFirst()
+                .name()));
   }
 
   @Override

@@ -13,11 +13,14 @@ import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class JitChecks {
+
+  static final String SPECIFICATION = "specification";
 
   public static ActionCheck createChecksForPortCallService(
       Predicate<String> isRelevantForRoleName,
@@ -29,15 +32,15 @@ public class JitChecks {
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion,
-        List.of(checkPortCallService(serviceType)));
+        List.of(checkPortCallService(serviceType), checkRightFields()));
   }
 
-  private static JsonContentCheck checkPortCallService(PortCallServiceType serviceType) {
+  static JsonContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.customValidator(
         "Check if the correct Port Call Service ('%s') was supplied.".formatted(serviceType.name()),
         body -> {
-          if (body.has("specification")) {
-            var actualServiceType = body.get("specification").get("portCallServiceType").asText();
+          if (body.has(SPECIFICATION)) {
+            var actualServiceType = body.get(SPECIFICATION).get("portCallServiceType").asText();
             if (!serviceType.name().equals(actualServiceType)) {
               return Set.of(
                   "Expected Port Call Service type '%s' but got '%s'"
@@ -46,6 +49,24 @@ public class JitChecks {
           }
           return Collections.emptySet();
         });
+  }
+
+  static JsonContentCheck checkRightFields() {
+    return JsonAttribute.customValidator(
+      "Check if the correct PortCallServiceEventTypeCode was supplied.",
+      body -> {
+        if (body.has(SPECIFICATION)) {
+          String actualServiceType = body.get(SPECIFICATION).get("portCallServiceType").asText();
+          String portCallServiceEventTypeCode = body.get(SPECIFICATION).get("portCallServiceEventTypeCode").asText();
+          PortCallServiceEventTypeCode code = PortCallServiceEventTypeCode.fromString(portCallServiceEventTypeCode);
+          if (!PortCallServiceEventTypeCode.getValidPortCallServiceTypes(code).contains(PortCallServiceType.fromName(actualServiceType))) {
+            return Set.of(
+              "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
+                .formatted(actualServiceType, portCallServiceEventTypeCode));
+          }
+        }
+        return Collections.emptySet();
+      });
   }
 
   public static ActionCheck createChecksForTimestamp(
@@ -65,7 +86,7 @@ public class JitChecks {
         checks);
   }
 
-  private static JsonContentCheck checkPlannedMatchesRequestedTimestamp(
+  static JsonContentCheck checkPlannedMatchesRequestedTimestamp(
       DynamicScenarioParameters dsp) {
     return JsonAttribute.customValidator(
         "Check if the Planned timestamp matches the Requested timestamp.",

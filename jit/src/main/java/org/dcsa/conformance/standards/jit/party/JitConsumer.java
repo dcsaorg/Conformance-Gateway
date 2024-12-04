@@ -117,7 +117,6 @@ public class JitConsumer extends ConformanceParty {
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
-      // TODO: verify if received timestamp is correct, in JitChecks class
     }
 
     return request.createResponse(

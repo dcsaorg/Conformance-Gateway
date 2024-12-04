@@ -9,16 +9,15 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import lombok.Getter;
 import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 
-public class JsonAttributeBasedCheck extends ActionCheck {
+class JsonAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;
-  @Getter private final List<JsonContentCheck> validators;
+  private final List<JsonContentCheck> validators;
 
   JsonAttributeBasedCheck(
     String titlePrefix,

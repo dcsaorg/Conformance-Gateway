@@ -1,27 +1,22 @@
-package org.dcsa.conformance.standards.ovs;
+package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.check.JsonAttributeBasedCheck;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
-import org.dcsa.conformance.standards.ovs.checks.OvsChecks;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
-import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OvsChecksTest {
-
-  private final ObjectMapper objectMapper = new ObjectMapper();
+class OvsChecksTest {
 
   private JsonNode serviceNodes;
 
@@ -73,16 +68,9 @@ public class OvsChecksTest {
 
   private Set<String> executeResponseChecks(
       Map<OvsFilterParameter, String> ovsFilterParameterStringMap, JsonNode serviceNodes) {
-    UUID matchedId = UUID.randomUUID();
-    String standardVersion = "3.0.0";
-    Supplier<SuppliedScenarioParameters> sspSupplier =
-        () -> SuppliedScenarioParameters.fromMap(ovsFilterParameterStringMap);
     Set<String> issues = new HashSet<>();
 
-    ActionCheck actionCheck =
-        OvsChecks.responseContentChecks(matchedId, standardVersion, sspSupplier);
-    ((JsonAttributeBasedCheck) actionCheck)
-        .getValidators()
+    OvsChecks.buildResponseContentChecks(ovsFilterParameterStringMap)
         .forEach(
             validator -> {
               issues.addAll(validator.validate(serviceNodes));
@@ -325,7 +313,7 @@ public class OvsChecksTest {
     JsonNode transportCalls = vesselSchedules.get(0).get("transportCalls");
 
     ObjectNode newTransportCall =
-        new ObjectMapper().createObjectNode().put("transportCallReference", "TCREF1");
+      OBJECT_MAPPER.createObjectNode().put("transportCallReference", "TCREF1");
     ((ArrayNode) transportCalls).add(newTransportCall);
 
     Set<String> result = OvsChecks.validateUniqueTransportCallReference(serviceNodes);
@@ -342,14 +330,14 @@ public class OvsChecksTest {
 
   @Test
   void testFindMatchingNodes_rootMatch() {
-    JsonNode root = objectMapper.createObjectNode().put("value", "test");
+    JsonNode root = OBJECT_MAPPER.createObjectNode().put("value", "test");
     Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "/").map(Map.Entry::getValue);
     assertEquals(1, result.count());
   }
 
   @Test
   void testFindMatchingNodes_arrayMatch() throws IOException {
-    JsonNode root = objectMapper.readTree("[{\"a\": 1}, {\"b\": 2}]");
+    JsonNode root = OBJECT_MAPPER.readTree("[{\"a\": 1}, {\"b\": 2}]");
     Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);
     ;
     assertEquals(2, result.count());
@@ -357,7 +345,7 @@ public class OvsChecksTest {
 
   @Test
   void testFindMatchingNodes_emptyArrayMatch() throws IOException {
-    JsonNode root = objectMapper.readTree("[]");
+    JsonNode root = OBJECT_MAPPER.readTree("[]");
     Stream<JsonNode> result = OvsChecks.findMatchingNodes(root, "*").map(Map.Entry::getValue);
     ;
     assertEquals(0, result.count());
@@ -365,7 +353,7 @@ public class OvsChecksTest {
 
   @Test
   void testCheckServiceSchedulesExist_emptyServiceSchedules() {
-    JsonNode body = objectMapper.createArrayNode();
+    JsonNode body = OBJECT_MAPPER.createArrayNode();
     Set<String> result = OvsChecks.checkServiceSchedulesExist(body);
     assertEquals(1, result.size());
   }
@@ -390,7 +378,7 @@ public class OvsChecksTest {
             .get("timestamps");
 
     ObjectNode invalidTimeStamp =
-        new ObjectMapper().createObjectNode().put("eventDateTime", "TCREF1");
+      OBJECT_MAPPER.createObjectNode().put("eventDateTime", "TCREF1");
     ((ArrayNode) timeStamps).add(invalidTimeStamp);
 
     Set<String> result =
@@ -405,13 +393,12 @@ public class OvsChecksTest {
       String carrierServiceCode,
       String universalServiceReference,
       JsonNode vesselSchedules) {
-    ObjectMapper objectMapper = new ObjectMapper();
 
     // Create the root ArrayNode
-    ArrayNode rootArrayNode = objectMapper.createArrayNode();
+    ArrayNode rootArrayNode = OBJECT_MAPPER.createArrayNode();
 
     // Create the first ObjectNode
-    ObjectNode firstObjectNode = objectMapper.createObjectNode();
+    ObjectNode firstObjectNode = OBJECT_MAPPER.createObjectNode();
     firstObjectNode.put("carrierServiceName", carrierServiceName);
     firstObjectNode.put("carrierServiceCode", carrierServiceCode);
     firstObjectNode.put("universalServiceReference", universalServiceReference);
@@ -422,8 +409,8 @@ public class OvsChecksTest {
   }
 
   private JsonNode createServiceVesselSchedules(String vesselIMONumber, String vesselName) {
-    ArrayNode vesselSchedulesArrayNode = objectMapper.createArrayNode();
-    ObjectNode vesselSchedule = objectMapper.createObjectNode();
+    ArrayNode vesselSchedulesArrayNode = OBJECT_MAPPER.createArrayNode();
+    ObjectNode vesselSchedule = OBJECT_MAPPER.createObjectNode();
     vesselSchedule.put("vesselIMONumber", vesselIMONumber);
     vesselSchedule.put("vesselName", vesselName);
     vesselSchedule.set(
@@ -441,8 +428,8 @@ public class OvsChecksTest {
       String universalExportVoyageReference,
       String UNLocationCode) {
     // Create the transportCalls ArrayNode for the vesselSchedule
-    ArrayNode transportCallsArrayNode = objectMapper.createArrayNode();
-    ObjectNode transportCall = objectMapper.createObjectNode();
+    ArrayNode transportCallsArrayNode = OBJECT_MAPPER.createArrayNode();
+    ObjectNode transportCall = OBJECT_MAPPER.createObjectNode();
     transportCall.put("transportCallReference", transportCallReference);
     transportCall.put("carrierImportVoyageNumber", carrierImportVoyageNumber);
     transportCall.put("carrierExportVoyageNumber", carrierExportVoyageNumber);
@@ -450,7 +437,7 @@ public class OvsChecksTest {
     transportCall.put("universalExportVoyageReference", universalExportVoyageReference);
 
     // Create the location ObjectNode for the first transportCall
-    ObjectNode location = objectMapper.createObjectNode();
+    ObjectNode location = OBJECT_MAPPER.createObjectNode();
     location.put("UNLocationCode", UNLocationCode);
     transportCall.set("location", location);
     transportCall.set("timestamps", createTimestamps());
@@ -460,7 +447,7 @@ public class OvsChecksTest {
 
   private JsonNode createEventDateTime(String eventDateTime) {
     // Create a timestamp for timestamps ArrayNode
-    ObjectNode timestamp = objectMapper.createObjectNode();
+    ObjectNode timestamp = OBJECT_MAPPER.createObjectNode();
     timestamp.put("eventTypeCode", "ARRI");
     timestamp.put("eventClassifierCode", "PLN");
     timestamp.put("eventDateTime", eventDateTime);
@@ -469,7 +456,7 @@ public class OvsChecksTest {
 
   private JsonNode createTimestamps() {
     // Create the timestamps ArrayNode
-    ArrayNode timestampsArrayNode = objectMapper.createArrayNode();
+    ArrayNode timestampsArrayNode = OBJECT_MAPPER.createArrayNode();
     timestampsArrayNode.add(createEventDateTime("2024-07-21T10:00:00Z"));
     timestampsArrayNode.add(createEventDateTime("2024-07-22T10:00:00Z"));
     timestampsArrayNode.add(createEventDateTime("2024-07-23T10:00:00Z"));

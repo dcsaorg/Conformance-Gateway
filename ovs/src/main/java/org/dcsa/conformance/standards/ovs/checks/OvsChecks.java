@@ -26,99 +26,99 @@ import java.util.stream.StreamSupport;
 @UtilityClass
 public class OvsChecks {
 
+  public List<JsonContentCheck> buildResponseContentChecks(Map<OvsFilterParameter, String> filterParametersMap) {
+    var checks = new ArrayList<JsonContentCheck>();
+    checks.add(
+      JsonAttribute.customValidator(
+        "Every response received during a conformance test must contain schedules",
+        body -> {
+          Set<String> validationErrors = new LinkedHashSet<>();
+          checkServiceSchedulesExist(body)
+            .forEach(
+              validationError ->
+                validationErrors.add(
+                  "CheckServiceSchedules failed: %s".formatted(validationError)));
+          if (validationErrors.isEmpty()) {
+            return Set.of();
+          }
+          return validationErrors;
+        }));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "If present, at least one schedule attribute must match the corresponding query parameters",
+        body -> {
+          Set<String> validationErrors = new LinkedHashSet<>();
+          checkThatScheduleValuesMatchParamValues(body, filterParametersMap)
+            .forEach(
+              validationError ->
+                validationErrors.add(
+                  "Schedule Param Value Validation failed: %s"
+                    .formatted(validationError)));
+          return validationErrors;
+        }));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "Check eventDateTime is greater than startDate filter parameter if present",
+        body -> {
+          Set<String> validationErrors = new LinkedHashSet<>();
+          validateDate(
+            body, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore)
+            .forEach(
+              validationError ->
+                validationErrors.add(
+                  "Start Date EventDateTime validation failed: %s"
+                    .formatted(validationError)));
+          return validationErrors;
+        }));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "Check eventDateTime is less than endDate filter parameter if present",
+        body -> {
+          Set<String> validationErrors = new LinkedHashSet<>();
+          validateDate(
+            body, filterParametersMap, OvsFilterParameter.END_DATE, LocalDate::isAfter)
+            .forEach(
+              validationError ->
+                validationErrors.add(
+                  "EndDate EventDateTime validation failed: %s"
+                    .formatted(validationError)));
+          return validationErrors;
+        }));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "Check transportCallReference is unique across each service schedules",
+        OvsChecks::validateUniqueTransportCallReference));
+
+    checks.add(
+      JsonAttribute.customValidator(
+        "Validate limit exists and the number of schedules does not exceed the limit",
+        body -> {
+          Optional<Map.Entry<OvsFilterParameter, String>> limitParam =
+            filterParametersMap.entrySet().stream()
+              .filter(e -> e.getKey().equals(OvsFilterParameter.LIMIT))
+              .findFirst();
+
+          if (limitParam.isPresent()) {
+            int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
+            if (body.size() > expectedLimit) {
+              return Set.of(
+                "The number of service schedules exceeds the limit parameter: "
+                  + expectedLimit);
+            }
+          }
+          return Set.of();
+        }));
+    return checks;
+  }
+
   public static ActionCheck responseContentChecks(
       UUID matched, String standardVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
-
-    var checks = new ArrayList<JsonContentCheck>();
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Every response received during a conformance test must contain schedules",
-            body -> {
-              Set<String> validationErrors = new LinkedHashSet<>();
-              checkServiceSchedulesExist(body)
-                  .forEach(
-                      validationError ->
-                          validationErrors.add(
-                              "CheckServiceSchedules failed: %s".formatted(validationError)));
-              if (validationErrors.isEmpty()) {
-                return Set.of();
-              }
-              return validationErrors;
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "If present, at least schedule attribute must match the corresponding query parameters",
-            body -> {
-              Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
-              Set<String> validationErrors = new LinkedHashSet<>();
-              checkThatScheduleValuesMatchParamValues(body, filterParametersMap)
-                  .forEach(
-                      validationError ->
-                          validationErrors.add(
-                              "Schedule Param Value Validation failed: %s"
-                                  .formatted(validationError)));
-              return validationErrors;
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Check eventDateTime is greater than startDate filter parameter if present",
-            body -> {
-              Set<String> validationErrors = new LinkedHashSet<>();
-              Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
-              validateDate(
-                      body, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore)
-                  .forEach(
-                      validationError ->
-                          validationErrors.add(
-                              "Start Date EventDateTime validation failed: %s"
-                                  .formatted(validationError)));
-              return validationErrors;
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Check eventDateTime is less than endDate filter parameter if present",
-            body -> {
-              Set<String> validationErrors = new LinkedHashSet<>();
-              Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
-              validateDate(
-                      body, filterParametersMap, OvsFilterParameter.END_DATE, LocalDate::isAfter)
-                  .forEach(
-                      validationError ->
-                          validationErrors.add(
-                              "EndDate EventDateTime validation failed: %s"
-                                  .formatted(validationError)));
-              return validationErrors;
-            }));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Check transportCallReference is unique across each service schedules",
-            OvsChecks::validateUniqueTransportCallReference));
-
-    checks.add(
-        JsonAttribute.customValidator(
-            "Validate limit exists and the number of schedules does not exceed the limit",
-            body -> {
-              Optional<Map.Entry<OvsFilterParameter, String>> limitParam =
-                  sspSupplier.get().getMap().entrySet().stream()
-                      .filter(e -> e.getKey().equals(OvsFilterParameter.LIMIT))
-                      .findFirst();
-
-              if (limitParam.isPresent()) {
-                int expectedLimit = Integer.parseInt(limitParam.get().getValue().trim());
-                if (body.size() > expectedLimit) {
-                  return Set.of(
-                      "The number of service schedules exceeds the limit parameter: "
-                          + expectedLimit);
-                }
-              }
-              return Set.of();
-            }));
-
+    Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
+    var checks = buildResponseContentChecks(filterParametersMap);
     return JsonAttribute.contentChecks(
         OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);
   }
@@ -302,9 +302,9 @@ public class OvsChecks {
   }
 
   public Set<String> checkServiceSchedulesExist(JsonNode body) {
-    Set<String> validationErrors = new LinkedHashSet<>();
+
     if (body == null || body.isMissingNode() || body.isNull()) {
-      validationErrors.add("Response body is missing or null.");
+      return Set.of("Response body is missing or null.");
     } else {
       boolean hasVesselSchedules =
           findMatchingNodes(body, "*/vesselSchedules")
@@ -314,9 +314,9 @@ public class OvsChecks {
                           && node.getValue().isArray()
                           && !node.getValue().isEmpty());
       if (!hasVesselSchedules) {
-        validationErrors.add("Response doesn't have schedules.");
+        return Set.of("Response doesn't have schedules.");
       }
     }
-    return validationErrors;
+    return Set.of();
   }
 }

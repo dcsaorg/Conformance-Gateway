@@ -15,19 +15,19 @@ class JitChecksTest {
 
   @Test
   void checkPortCallService() {
-    assertTrue(
-        JitChecks.checkPortCallService(PortCallServiceType.BERTH)
-            .validate(
-                createPortCallServiceRequest(
-                    PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI))
-            .isEmpty());
+    JsonNode request =
+        createPortCallServiceRequest(PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI);
+    assertTrue(JitChecks.IS_PORT_CALL_SERVICE.test(request));
+    assertTrue(JitChecks.checkPortCallService(PortCallServiceType.BERTH).validate(request).isEmpty());
 
-    assertTrue(
+    assertEquals(
+        "The value of 'specification.portCallServiceType' was 'BUNKERING' instead of 'BERTH'",
         JitChecks.checkPortCallService(PortCallServiceType.BERTH)
             .validate(
                 createPortCallServiceRequest(
                     PortCallServiceType.BUNKERING, PortCallServiceEventTypeCode.ARRI))
-            .contains("Expected Port Call Service type 'BERTH' but got 'BUNKERING'"));
+            .iterator()
+            .next());
   }
 
   @Test

@@ -84,11 +84,12 @@ public class EBLChecks {
       }
     };
 
-  private static final JsonRebaseableContentCheck VALID_REQUESTED_CARRIER_CLAUSES = JsonAttribute.allIndividualMatchesMustBeValid(
-    "Validate that 'requestedCarrierClauses' is valid",
-    mav -> mav.submitAllMatching("requestedCarrierClauses.*"),
-    JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CLAUSES)
-  );
+  static final JsonRebaseableContentCheck VALID_REQUESTED_CARRIER_CLAUSES =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'requestedCarrierClauses' is valid",
+          mav -> mav.submitAllMatching("requestedCarrierClauses.*"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(REQUESTED_CARRIER_CLAUSES));
+
   public static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>>
       SI_ARRAY_ORDER_DEFINITIONS =
           (rootNode, arrayNodeHandler) -> {
@@ -479,16 +480,11 @@ public class EBLChecks {
           },
           JsonAttribute.mustBePresent(JsonPointer.compile("/isHouseBillOfLadingsIssued")));
 
-  private static final JsonRebaseableContentCheck HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER =
+  static final JsonRebaseableContentCheck HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading",
           mav -> mav.submitAllMatching("houseBillOfLadings.*"),
           (node, contextPath) -> {
-            JsonNode routingOfConsignmentCountries = node.path(ROUTING_OF_CONSIGNMENT_COUNTRIES);
-            if (routingOfConsignmentCountries.isMissingNode()
-                || !routingOfConsignmentCountries.isArray()) {
-              return Set.of();
-            }
             boolean isToOrder = node.path("isToOrder").asBoolean(false);
             if (isToOrder && node.path(DOCUMENT_PARTIES).path("notifyParty").isMissingNode()) {
               return Set.of(
@@ -503,7 +499,7 @@ public class EBLChecks {
         String packageCode = packaging.path("packageCode").asText(null);
         return packageCode != null && !EXEMPT_PACKAGE_CODES.contains(packageCode);
       };
-  private static final JsonRebaseableContentCheck NUMBER_OF_PACKAGES_CONDITIONAL_CHECK =
+  static final JsonRebaseableContentCheck NUMBER_OF_PACKAGES_CONDITIONAL_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If packageCode in outerPackaging is not exempt, numberOfPackages is required",
           mav ->
@@ -519,7 +515,7 @@ public class EBLChecks {
             && "SELF".equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
       };
 
-  private static final JsonRebaseableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF =
+  static final JsonRebaseableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If manifestTypeCode is ENS and advanceManifestFilingsHouseBLPerformedBy is SELF, identificationNumber is required",
           mav -> mav.submitAllMatching("advanceManifestFilings.*"),
@@ -534,7 +530,7 @@ public class EBLChecks {
             && "SELF".equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
       };
 
-  private static final JsonRebaseableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
+  static final JsonRebaseableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If manifestTypeCode is ACE/ACI and advanceManifestFilingsHouseBLPerformedBy is SELF, selfFilerCode is required",
           mav -> mav.submitAllMatching("advanceManifestFilings.*"),
@@ -554,7 +550,7 @@ public class EBLChecks {
             && (place.path("countryCode").isMissingNode()));
       };
 
-  private static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POA =
+  static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POA =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfAcceptance, locationName is required",
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfAcceptance"),
@@ -562,7 +558,7 @@ public class EBLChecks {
               LOCATION_NAME_REQUIRED,
               JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POFD =
+  static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POFD =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfFinalDelivery, locationName is required",
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfFinalDelivery"),
@@ -570,7 +566,7 @@ public class EBLChecks {
               LOCATION_NAME_REQUIRED,
               JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POA =
+  static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POA =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfAcceptance, countryCode is required",
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfAcceptance"),
@@ -578,7 +574,7 @@ public class EBLChecks {
               COUNTRY_CODE_REQUIRED,
               JsonAttribute.path("countryCode", JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD =
+  static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If UNLocationCode is not provided in PlaceOfFinalDelivery, countryCode is required",
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfFinalDelivery"),
@@ -586,7 +582,7 @@ public class EBLChecks {
               COUNTRY_CODE_REQUIRED,
               JsonAttribute.path("countryCode", JsonAttribute.matchedMustBePresent())));
 
-  private static final JsonRebaseableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK =
+  static final JsonRebaseableContentCheck ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "If first country in routingOfConsignmentCountries in houseBillOfLadings should be placeOfAcceptance and the last country (if more than one) should be placeOfFinalDelivery",
           mav -> mav.submitAllMatching("houseBillOfLadings.*"),
@@ -617,7 +613,7 @@ public class EBLChecks {
             return Set.of();
           });
 
-  private static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
+  static final JsonRebaseableContentCheck BUYER_AND_SELLER_CONDITIONAL_CHECK =
       JsonAttribute.customValidator(
           "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer and Seller is required",
           (node, contextPath) -> {

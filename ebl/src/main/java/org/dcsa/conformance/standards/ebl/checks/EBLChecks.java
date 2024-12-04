@@ -594,7 +594,6 @@ public class EBLChecks {
             }
             String placeOfAcceptanceCountry =
                 node.path("placeOfAcceptance").path("countryCode").asText(null);
-            System.out.println("placeOfAcceptanceCountry: " + placeOfAcceptanceCountry);
             String placeOfFinalDeliveryCountry =
                 node.path("placeOfFinalDelivery").path("countryCode").asText(null);
             if ((placeOfAcceptanceCountry != null

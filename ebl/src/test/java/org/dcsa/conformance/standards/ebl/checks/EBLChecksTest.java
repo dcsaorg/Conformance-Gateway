@@ -112,85 +112,85 @@ class EBLChecksTest {
     assertEquals(0, errors.size());
   }
 
-    @Test
-    void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
-      ObjectNode rootNode = objectMapper.createObjectNode();
-      ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
-      ObjectNode hbl = houseBillOfLadings.addObject();
-      ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
+  @Test
+  void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
+    ObjectNode rootNode = objectMapper.createObjectNode();
+    ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
+    ObjectNode hbl = houseBillOfLadings.addObject();
+    ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
 
-      Set<String> errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(1, errors.size());
+    Set<String> errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, errors.size());
 
-      placeOfAcceptance.put("locationName", "Amsterdam");
-      errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(0, errors.size());
+    placeOfAcceptance.put("locationName", "Amsterdam");
+    errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(0, errors.size());
 
-      placeOfAcceptance.put("UNLocationCode", "NLAMS");
-      placeOfAcceptance.remove("locationName");
-      errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(0, errors.size());
-    }
+    placeOfAcceptance.put("UNLocationCode", "NLAMS");
+    placeOfAcceptance.remove("locationName");
+    errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
 
-    @Test
-    void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
-      ObjectNode rootNode = objectMapper.createObjectNode();
-      ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
-      ObjectNode hbl = houseBillOfLadings.addObject();
-      ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
+  @Test
+  void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
+    ObjectNode rootNode = objectMapper.createObjectNode();
+    ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
+    ObjectNode hbl = houseBillOfLadings.addObject();
+    ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
 
-      Set<String> errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(1, errors.size());
+    Set<String> errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, errors.size());
 
-      placeOfFinalDelivery.put("locationName", "Berlin");
-      errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(0, errors.size());
+    placeOfFinalDelivery.put("locationName", "Berlin");
+    errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(0, errors.size());
 
-      placeOfFinalDelivery.put("UNLocationCode", "DEBER");
-      placeOfFinalDelivery.remove("locationName");
-      errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(0, errors.size());
-    }
+    placeOfFinalDelivery.put("UNLocationCode", "DEBER");
+    placeOfFinalDelivery.remove("locationName");
+    errors = LOCATION_NAME_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
 
-    @Test
-    void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
-      ObjectNode rootNode = objectMapper.createObjectNode();
-      ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
-      ObjectNode hbl = houseBillOfLadings.addObject();
-      ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
+  @Test
+  void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
+    ObjectNode rootNode = objectMapper.createObjectNode();
+    ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
+    ObjectNode hbl = houseBillOfLadings.addObject();
+    ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
 
-      Set<String> errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(1, errors.size());
+    Set<String> errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(1, errors.size());
 
-      placeOfAcceptance.put("countryCode", "NL");
-      errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(0, errors.size());
+    placeOfAcceptance.put("countryCode", "NL");
+    errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(0, errors.size());
 
-      placeOfAcceptance.put("UNLocationCode", "NLAMS");
-      placeOfAcceptance.remove("countryCode");
-      errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
-      assertEquals(0, errors.size());
-    }
+    placeOfAcceptance.put("UNLocationCode", "NLAMS");
+    placeOfAcceptance.remove("countryCode");
+    errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POA.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
 
-    @Test
-    void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
-      ObjectNode rootNode = objectMapper.createObjectNode();
-      ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
-      ObjectNode hbl = houseBillOfLadings.addObject();
-      ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
+  @Test
+  void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
+    ObjectNode rootNode = objectMapper.createObjectNode();
+    ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
+    ObjectNode hbl = houseBillOfLadings.addObject();
+    ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
 
-      Set<String> errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(1, errors.size());
+    Set<String> errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(1, errors.size());
 
-      placeOfFinalDelivery.put("countryCode", "DE");
-      errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(0, errors.size());
+    placeOfFinalDelivery.put("countryCode", "DE");
+    errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(0, errors.size());
 
-      placeOfFinalDelivery.put("UNLocationCode", "DEBER");
-      placeOfFinalDelivery.remove("countryCode");
-      errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
-      assertEquals(0, errors.size());
-    }
+    placeOfFinalDelivery.put("UNLocationCode", "DEBER");
+    placeOfFinalDelivery.remove("countryCode");
+    errors = COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
 
   @Test
   void testBuyerAndSellerConditionalCheck() {
@@ -205,10 +205,8 @@ class EBLChecksTest {
     filing.put("manifestTypeCode", "ENS");
     filing.put("advanceManifestFilingsHouseBLPerformedBy", "CARRIER");
 
-
     Set<String> errors = BUYER_AND_SELLER_CONDITIONAL_CHECK.validate(rootNode);
     assertEquals(1, errors.size());
-
 
     documentParties.putObject("buyer");
     documentParties.putObject("seller");
@@ -275,13 +273,12 @@ class EBLChecksTest {
     routingOfConsignmentCountries.add("BE");
     routingOfConsignmentCountries.add("FR");
 
-
     Set<String> errors = ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK.validate(rootNode);
     assertEquals(1, errors.size());
   }
 
   @Test
-  void testValidRequestedCarrierClauses(){
+  void testValidRequestedCarrierClauses() {
     ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode requestedCarrierClauses = rootNode.putArray("requestedCarrierClauses");
     requestedCarrierClauses.add("CARGO_CARGOSPECIFICS");
@@ -293,7 +290,5 @@ class EBLChecksTest {
     requestedCarrierClauses.add("CARGO_CARGO");
     Set<String> invalidErrors = VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode);
     assertEquals(1, invalidErrors.size());
-
   }
-
 }

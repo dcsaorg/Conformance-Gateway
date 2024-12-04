@@ -38,9 +38,6 @@ public class OvsChecks {
               validationError ->
                 validationErrors.add(
                   "CheckServiceSchedules failed: %s".formatted(validationError)));
-          if (validationErrors.isEmpty()) {
-            return Set.of();
-          }
           return validationErrors;
         }));
 
@@ -117,7 +114,9 @@ public class OvsChecks {
 
   public static ActionCheck responseContentChecks(
       UUID matched, String standardVersion, Supplier<SuppliedScenarioParameters> sspSupplier) {
-    Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get().getMap();
+    Map<OvsFilterParameter, String> filterParametersMap = sspSupplier.get() != null
+      ? sspSupplier.get().getMap()
+      : Map.of();
     var checks = buildResponseContentChecks(filterParametersMap);
     return JsonAttribute.contentChecks(
         OvsRole::isPublisher, matched, HttpMessageType.RESPONSE, standardVersion, checks);

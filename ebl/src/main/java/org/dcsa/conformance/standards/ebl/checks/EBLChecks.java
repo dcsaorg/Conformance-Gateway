@@ -272,12 +272,18 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.WOOD_DECLARATION_VALUES)
   );
 
-  private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All reference 'type' fields must be valid",
-        ALL_REFERENCE_TYPES,
-        JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
-  );
+  private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All reference 'type' fields must be valid",
+          ALL_REFERENCE_TYPES,
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE));
 
+  static final JsonRebaseableContentCheck VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All consignmentItems reference 'type' fields must be valid",
+          mav -> mav.submitAllMatching("consignmentItems.*.references.*.type"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              EblDatasets.CONSIGNMENT_ITEMS_REFERENCE_TYPE));
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each document party can be used at most once",
@@ -689,6 +695,7 @@ public class EBLChecks {
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
+    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
     EBL_DISPLAYED_ADDRESS_LIMIT,
@@ -740,6 +747,7 @@ public class EBLChecks {
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
+    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,

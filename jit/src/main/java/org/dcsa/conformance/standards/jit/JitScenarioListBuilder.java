@@ -19,6 +19,8 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     JitScenarioContext context =
         new JitScenarioContext(providerPartyName, consumerPartyName, componentFactory);
 
+    // Scenario suite: "Service negotiation conformance"
+
     // Scenario group: "S-ERP-A service types"
     var scenarioList = new LinkedHashMap<String, JitScenarioListBuilder>();
     scenarioList.put(
@@ -35,7 +37,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .toList()
                     .toArray(new JitScenarioListBuilder[] {})));
 
-    // Scenario group: "S-A service types”
+    // Scenario group: "S-A service types"
     scenarioList.put(
         "S-A service types",
         supplyScenarioParameters(context)
@@ -48,7 +50,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .toList()
                     .toArray(new JitScenarioListBuilder[] {})));
 
-    // Scenario group: "S service type with variations”  TODO: Implement
+    // Scenario group: "S service type with variations"  TODO: Implement
 
     // Scenario group: "S-ERP-A in-band ERP variations"
     scenarioList.put(
@@ -177,7 +179,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     // Scenario group: "S-ERP-A in-band S-resend variations"
     scenarioList.put(
-        "S-ERP-A in-band S-resend variations - S - E - R - P - A",
+        "S-ERP-A in-band S-resend variations - S - S - E - R - P - A",
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
@@ -194,6 +196,59 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .toList()
                     .toArray(new JitScenarioListBuilder[] {})));
 
+    scenarioList.put(
+        "S-ERP-A in-band S-resend variations - S - E - S - R - P - A",
+        supplyScenarioParameters(context)
+            .thenEither(
+                PortCallServiceType.getServicesWithERPAndA().stream()
+                    .filter(PortCallServiceType::isCommon)
+                    .map(
+                        serviceType ->
+                            portCallService(context, serviceType)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                                        .then(
+                                            portCallService(context, serviceType)
+                                                .then(
+                                                    sendTimestamp(
+                                                            context, JitTimestampType.REQUESTED)
+                                                        .then(
+                                                            sendTimestamp(
+                                                                    context,
+                                                                    JitTimestampType.PLANNED)
+                                                                .then(
+                                                                    sendTimestamp(
+                                                                        context,
+                                                                        JitTimestampType
+                                                                            .ACTUAL)))))))
+                    .toList()
+                    .toArray(new JitScenarioListBuilder[] {})));
+
+    // Scenario: "S(service type) - E - R - S - P - A"
+    // Scenario: "S(service type) - E - R - P - S - A"
+    // Scenario: "S(service type) - E - R - P - A - S"
+
+    // Scenario group: "S-ERP-A out-of-band variations"
+
+    // Scenario group: "S-A variations"
+
+    // Scenario group: "S-ERP-A cancel"
+
+    // Scenario group: "S-ERP-A decline"
+
+    // Scenario suite: "Secondary sender and receiver conformance"
+
+    // Scenario group: "S-ERP-A as FYI messages"
+    //     Scenario group: "S-ERP-A as FYI messages"
+    //            Scenario: "S(service type) - E - R(forwarded by provider) - P - A"
+    //            Scenario: "S(service type) - E - R(forwarded by provider) - P - C"
+    //            Scenario: "S(service type) - E - R(forwarded by provider) - P - D(forwarded by
+    // provider)"
+    //
+    //    Scenario group: "S-A as FYI messages"
+    //            Scenario: "S(service type) - A"
+    //    Scenario group: "S as FYI message"
+    //        Scenario: "S(Moves)"
     return scenarioList;
   }
 

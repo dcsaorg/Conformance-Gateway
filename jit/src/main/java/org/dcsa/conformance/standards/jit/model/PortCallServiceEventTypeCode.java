@@ -20,7 +20,8 @@ public enum PortCallServiceEventTypeCode {
     this.fullName = fullName;
   }
 
-  public static List<PortCallServiceType> getValidPortCallServiceTypes(PortCallServiceEventTypeCode code) {
+  public static List<PortCallServiceType> getValidPortCallServiceTypes(
+      PortCallServiceEventTypeCode code) {
     return switch (code) {
       case STRT, CMPL ->
           List.of(
@@ -48,6 +49,12 @@ public enum PortCallServiceEventTypeCode {
               MOVES);
       case DEPA -> List.of(SAFETY, BERTH);
     };
+  }
+
+  public static boolean isValidCombination(
+      PortCallServiceType portCallServiceType, String portCallServiceEventTypeCode) {
+    PortCallServiceEventTypeCode code = fromString(portCallServiceEventTypeCode);
+    return getValidPortCallServiceTypes(code).contains(portCallServiceType);
   }
 
   public static List<PortCallServiceEventTypeCode> getCodesForPortCallServiceType(

@@ -41,7 +41,7 @@
     "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
     "portCallServiceType": "SERVICE_TYPE_PLACEHOLDER",
     "portCallServiceEventTypeCode": "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-    "portCallPhaseTypeCode": "ALGS",
+    "portCallPhaseTypeCode": "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
     "facilityTypeCode": "BRTH",
     "portCallServiceLocation": {
       "locationName": "CMP Container Terminal Copenhagen",

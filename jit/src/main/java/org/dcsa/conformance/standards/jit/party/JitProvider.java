@@ -24,6 +24,7 @@ import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
+import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 
 @Slf4j
@@ -135,19 +136,36 @@ public class JitProvider extends ConformanceParty {
 
   private JsonNode replacePlaceHolders(
       String portCallId, String portCallServiceId, String serviceType) {
-    return JsonToolkit.templateFileToJsonNode(
-        "/standards/jit/messages/jit-200-port-call-service-request.json",
-        Map.of(
-            "PORT_CALL_ID_PLACEHOLDER",
-            portCallId,
-            "SERVICE_TYPE_PLACEHOLDER",
-            serviceType,
-            "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-            portCallServiceId,
-            "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-            PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType)
-                .getFirst()
-                .name()));
+    String portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType);
+    JsonNode jsonNode =
+        JsonToolkit.templateFileToJsonNode(
+            "/standards/jit/messages/jit-200-port-call-service-request.json",
+            Map.of(
+                "PORT_CALL_ID_PLACEHOLDER",
+                portCallId,
+                "SERVICE_TYPE_PLACEHOLDER",
+                serviceType,
+                "PORT_CALL_SERVICE_ID_PLACEHOLDER",
+                portCallServiceId,
+                "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
+                PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType)
+                    .getFirst()
+                    .name(),
+                "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
+                portCallPhaseTypeCode));
+    // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
+    if (portCallPhaseTypeCode.isEmpty())
+      ((ObjectNode) jsonNode.path("specification")).remove("portCallPhaseTypeCode");
+    return jsonNode;
+  }
+
+  private static String calculatePortCallPhaseTypeCode(String serviceType) {
+    List<PortCallPhaseTypeCode> typeCodes =
+        PortCallPhaseTypeCode.getCodesForPortCallServiceType(serviceType);
+    if (typeCodes.isEmpty()) {
+      return "";
+    }
+    return typeCodes.getFirst().name();
   }
 
   @Override

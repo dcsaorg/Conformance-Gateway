@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.JsonAttribute;
@@ -16,6 +19,7 @@ import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
+import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
@@ -35,7 +39,7 @@ public class JitChecks {
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion,
-        List.of(checkPortCallService(serviceType), checkRightFields()));
+        List.of(checkPortCallService(serviceType), checkRightFieldValues()));
   }
 
   static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(SPECIFICATION);
@@ -50,25 +54,40 @@ public class JitChecks {
             serviceType::name));
   }
 
-  static JsonContentCheck checkRightFields() {
+  static JsonContentCheck checkRightFieldValues() {
     return JsonAttribute.customValidator(
-        "Check if the correct PortCallServiceEventTypeCode was supplied.",
+        "Check if valid combinations of values are supplied.",
         body -> {
-          if (body.has(SPECIFICATION)) {
+          Set<String> issues = new HashSet<>();
+          if (IS_PORT_CALL_SERVICE.test(body)) {
             String actualServiceType = body.get(SPECIFICATION).get("portCallServiceType").asText();
-            String portCallServiceEventTypeCode =
-                body.get(SPECIFICATION).get("portCallServiceEventTypeCode").asText();
-            PortCallServiceEventTypeCode code =
-                PortCallServiceEventTypeCode.fromString(portCallServiceEventTypeCode);
-            if (!PortCallServiceEventTypeCode.getValidPortCallServiceTypes(code)
-                .contains(PortCallServiceType.fromName(actualServiceType))) {
-              return Set.of(
-                  "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
-                      .formatted(actualServiceType, portCallServiceEventTypeCode));
-            }
+            issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
+            issues.add(verifyPortCallPhaseTypeCode(body, actualServiceType));
           }
-          return Collections.emptySet();
+          return issues.stream().filter(Objects::nonNull).collect(Collectors.toSet());
         });
+  }
+
+  private static String verifyPortCallPhaseTypeCode(JsonNode body, String actualServiceType) {
+    String portCallPhaseTypeCode = body.get(SPECIFICATION).path("portCallPhaseTypeCode").asText("");
+    if (!PortCallPhaseTypeCode.isValidCombination(
+            PortCallServiceType.fromName(actualServiceType), portCallPhaseTypeCode)) {
+      return "Expected matching Port Call Service type with PortCallPhaseTypeCode. Found non-matching type: '%s' combined with code: '%s'"
+          .formatted(actualServiceType, portCallPhaseTypeCode);
+    }
+    return null;
+  }
+
+  private static String verifyPortCallServiceEventTypeCode(
+      JsonNode body, String actualServiceType) {
+    String portCallServiceEventTypeCode =
+        body.get(SPECIFICATION).get("portCallServiceEventTypeCode").asText();
+    if (!PortCallServiceEventTypeCode.isValidCombination(
+        PortCallServiceType.fromName(actualServiceType), portCallServiceEventTypeCode)) {
+      return "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
+          .formatted(actualServiceType, portCallServiceEventTypeCode);
+    }
+    return null;
   }
 
   public static ActionCheck createChecksForTimestamp(

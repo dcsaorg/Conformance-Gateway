@@ -59,6 +59,83 @@
       ]
     }
   ],
+  "advanceManifestFilings": [
+    {
+      "manifestTypeCode": "ACE",
+      "advanceManifestFilingsHouseBLPerformedBy": "SELF",
+      "selfFilerCode": "FLXP"
+    }
+  ],
+  "houseBillOfLadings": [
+    {
+      "houseBillOfLadingReference": "HBOL001",
+      "isToOrder": true,
+      "methodOfPayment": "A",
+      "documentParties": {
+        "shipper": {
+          "partyName": "DCSA CTK",
+         "typeOfPerson": "NATURAL_PERSON"
+        },
+        "notifyParty": {
+          "partyName": "DCSA CTK",
+          "typeOfPerson": "NATURAL_PERSON",
+          "partyContactDetails": [
+            {
+              "name": "DCSA test person",
+              "email": "tets@test.com"
+            }
+          ]
+        }
+      },
+      "placeOfAcceptance": {
+        "locationName": "NLRTM",
+        "countryCode": "NL"
+      },
+      "placeOfFinalDelivery": {
+        "locationName": "NLRTM",
+        "countryCode": "DE"
+      },
+      "isCargoDeliveredInICS2Zone": false,
+      "routingOfConsignmentCountries": ["NL", "DE"],
+      "consignmentItems": [
+        {
+          "carrierBookingReference": "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+          "descriptionOfGoods": "blue shoes size 47",
+          "nationalCommodityCode":
+            {
+              "type": "NCM",
+              "countryCode": "BR",
+              "values": ["1515"]
+            },
+          "HSCodes": [
+            "CONSIGNMENT_ITEM_HS_CODE"
+          ],
+          "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+          "cargoItems": [
+            {
+              "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+              "cargoGrossWeight": {
+                "value": 12000,
+                "unit": "KGM"
+              },
+              "outerPackaging": {
+                "packageCode": "SH",
+                "numberOfPackages": 400
+              }
+            }
+          ]
+        }
+      ],
+      "utilizedTransportEquipments": [
+        {
+          "isShipperOwned": false,
+          "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
+          "ISOEquipmentCode": "42G0",
+          "emptyIndicatorCode":  "EMPTY"
+        }
+      ]
+    }
+  ],
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
@@ -85,5 +162,6 @@
         }
       ]
     }
-  }
+  },
+"requestedCarrierClauses": ["CARGO_CARGOSPECIFICS"]
 }

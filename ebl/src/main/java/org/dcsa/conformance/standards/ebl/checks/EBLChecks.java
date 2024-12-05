@@ -266,7 +266,6 @@ public class EBLChecks {
   private static final Consumer<MultiAttributeValidator> ALL_REFERENCE_TYPES = mav -> {
     mav.submitAllMatching("references.*.type");
     mav.submitAllMatching("utilizedTransportEquipments.*.references.*.type");
-    mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
   public static final JsonRebaseableContentCheck VALID_WOOD_DECLARATIONS = JsonAttribute.allIndividualMatchesMustBeValid(

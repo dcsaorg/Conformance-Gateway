@@ -18,9 +18,9 @@ info:
 
     For explanation of specific values or objects please refer to the [Information Model](https://developer.dcsa.org/documentation/information_models). This API specification does not define the allowable updates and their timing in accordance with the established business rules. **All use cases mentioned in this API specification refer to use cases defined in [DCSA Interface Standard for the Bill of Lading 3.0](https://dcsa.org/standards/bill-of-lading/documentation-bill-of-lading-3)**.
 
-    All other documents related to the Electronic Bill of Lading publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)
+    All other documents related to the electronic Bill of Lading (referred to as `eBL`) publication can be found [here](https://dcsa.org/standards/ebill-of-lading/)
 
-    ### EBL (Implemented by provider)
+    ### eBL (Implemented by provider)
 
     It is possible to use the eBL API as a standalone API. In that case use one of the poll endPoints:
 
@@ -47,12 +47,12 @@ info:
     This API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)
 
     ### Changelog and GitHub
-    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). Please [create a GitHub issue](https://github.com/dcsaorg/DCSA-OpenAPI/issues/new) if you have any questions/comments.
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/ebl/v3#v300). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
 
     API specification issued by [DCSA.org](https://dcsa.org/).
   license:
     name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
   contact:
     name: Digital Container Shipping Association (DCSA)
     url: 'https://dcsa.org'
@@ -426,7 +426,7 @@ paths:
                     Shipping Instructions updated by consumer
                   description: |
                     An `Updated Shipping Instructions` received and accepted by provider, the `Updated Shipping Instructions` now awaits provider action, the `shippingInstructionStatus` does not change.
-                  value:
+                  value: null
         '400':
           description: |
             In case the updated `Shipping Instructions` does not schema validate a `400` (Bad Request) is returned
@@ -743,7 +743,7 @@ paths:
                   summary: |
                     Updated Shipping Instructions with DG cargo
                   description: |
-                    A `Shipping Instructions` with `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jarricans.
+                    A `Shipping Instructions` with `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jerricans.
 
                     The `Shipping Instructions` has already been applied an update which has been confirmed by the provider (`updatedShippingInstructions='UPDATE_CONFIRMED'`). The `Shipping Instructions` is now waiting for the provider to `DRAFT` a `Transport Document`.
 
@@ -1019,7 +1019,7 @@ paths:
                     Cancel a Shipping Instructions update
                   description: |
                     Consumer wants to cancel an update provided to a `Shipping Instructions`.
-                  value:
+                  value: null
         '400':
           description: |
             In case the cancel payload does not schema validate a `400` (Bad Request) is returned
@@ -1233,7 +1233,7 @@ paths:
                     shippedOnBoardDate: '2023-12-20'
                     termsAndConditions: |
                       You agree that this transport document exist is name only for the sake of
-                      testing your conformance with the DCSA EBL API. This transport document is NOT backed
+                      testing your conformance with the DCSA eBL API. This transport document is NOT backed
                       by a real shipment with ANY carrier and NONE of the requested services will be
                       carried out in real life.
 
@@ -1342,7 +1342,7 @@ paths:
                     shippedOnBoardDate: '2023-12-20'
                     termsAndConditions: |
                       You agree that this transport document exist is name only for the sake of
-                      testing your conformance with the DCSA EBL API. This transport document is NOT backed
+                      testing your conformance with the DCSA eBL API. This transport document is NOT backed
                       by a real shipment with ANY carrier and NONE of the requested services will be
                       carried out in real life.
 
@@ -1442,7 +1442,7 @@ paths:
                   summary: |
                     Issued Transport Document with DG (Dangerous Goods) cargo
                   description: |
-                    An `ISSUED` Transport Document by the provider containing DG (Dangerous Goods). The cargo is `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jarricans.
+                    An `ISSUED` Transport Document by the provider containing DG (Dangerous Goods). The cargo is `Environmentally hazardous substance, liquid, N.O.S (Propiconazole)` which is transported in steel Jerricans.
                   value:
                     transportDocumentReference: 4AD3FA470BB541B980CE
                     shippingInstructionsReference: b36484d0-1115-43c2-93e4-a378823a8386
@@ -1455,7 +1455,7 @@ paths:
                     shippedOnBoardDate: '2023-12-20'
                     termsAndConditions: |
                       You agree that this transport document exist is name only for the sake of
-                      testing your conformance with the DCSA EBL API. This transport document is NOT backed
+                      testing your conformance with the DCSA eBL API. This transport document is NOT backed
                       by a real shipment with ANY carrier and NONE of the requested services will be
                       carried out in real life.
 
@@ -1722,7 +1722,7 @@ paths:
                     Approve Draft Transport Document
                   description: |
                     Consumer approves the drafted `Transport Document` and now awaits further processing by provider.
-                  value:
+                  value: null
         '400':
           description: |
             In case the Approve payload does not schema validate a `400` (Bad Request) is returned
@@ -1889,7 +1889,7 @@ paths:
       description: |
         Creates a new [`Shipping Instructions Notification`](#/ShippingInstructionsNotification). This endPoint is called whenever a `Shipping Instructions` that a consumer has subscribed to changes state or is updated.
 
-        **This endPoint is to be implemented by a consumer of the EBL API in order to receive Notifications**
+        **This endPoint is to be implemented by a consumer of the eBL API in order to receive Notifications**
       parameters:
         - $ref: '#/components/parameters/Api-Version-Major'
       requestBody:
@@ -2189,7 +2189,7 @@ paths:
 
                         POST /v3/shipping-instructions-notifications
 
-                    too many times within a timeperiod.
+                    too many times within a time period.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
                   value:
@@ -2212,9 +2212,9 @@ paths:
       summary: Send a new Transport Document Notification
       operationId: transport-document-notifications
       description: |
-        Creates a new [`Transport Document Notification`](#/TransportDocumentNotification). This endPoint is called whenever a `Transport Document` that a cosumer has subscribed to changes state or is updated.
+        Creates a new [`Transport Document Notification`](#/TransportDocumentNotification). This endPoint is called whenever a `Transport Document` that a consumer has subscribed to changes state or is updated.
 
-        **This endPoint is to be implemented by a consumer of the EBL API in order to receive Notifications**
+        **This endPoint is to be implemented by a consumer of the eBL API in order to receive Notifications**
       parameters:
         - $ref: '#/components/parameters/Api-Version-Major'
       requestBody:
@@ -2269,7 +2269,7 @@ paths:
                       shippedOnBoardDate: '2023-12-20'
                       termsAndConditions: |
                         You agree that this transport document exist is name only for the sake of
-                        testing your conformance with the DCSA EBL API. This transport document is NOT backed
+                        testing your conformance with the DCSA eBL API. This transport document is NOT backed
                         by a real shipment with ANY carrier and NONE of the requested services will be
                         carried out in real life.
 
@@ -2405,7 +2405,7 @@ paths:
                       shippedOnBoardDate: '2023-12-20'
                       termsAndConditions: |
                         You agree that this transport document exist is name only for the sake of
-                        testing your conformance with the DCSA EBL API. This transport document is NOT backed
+                        testing your conformance with the DCSA eBL API. This transport document is NOT backed
                         by a real shipment with ANY carrier and NONE of the requested services will be
                         carried out in real life.
 
@@ -4530,7 +4530,7 @@ components:
 
         **Condition:** Mandatory for non-negotiable BL (`isToOrder=false`)
 
-        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4571,8 +4571,6 @@ components:
         identifyingCodes:
           type: array
           minItems: 1
-          description: |
-            **Condition:** Either the `address` or a party `identifyingCode` must be provided.
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4747,7 +4745,7 @@ components:
 
         **Condition:** Can only be provided for negotiable BLs (`isToOrder=true`). If a negotiable BL does not have an `Endorsee`, the BL is said to be "blank endorsed". Note `Consignee` and `Endorsee` are mutually exclusive.
 
-        **Condition:** Either the `address` or a party `identifyingCode` must be provided in the `Shipping Instructions`. If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
+        **Condition:** If a `displayedAddress` is provided, it must be included in the `Transport Document` instead of the `address`.
       properties:
         partyName:
           type: string
@@ -4778,8 +4776,6 @@ components:
         identifyingCodes:
           type: array
           minItems: 1
-          description: |
-            **Condition:** Either the `address` or a party `identifyingCode` must be provided.
           items:
             $ref: '#/components/schemas/IdentifyingCode'
         taxLegalReferences:
@@ -4899,7 +4895,7 @@ components:
           pattern: ^\S+$
           maxLength: 4
           description: |
-            The EBL platform of the transaction party.
+            The eBL platform of the transaction party.
             The value **MUST** be one of:
             - `WAVE` (Wave)
             - `CARX` (CargoX)
@@ -5056,6 +5052,55 @@ components:
       title: Seller
       description: |
         The seller is the last known entity by whom the goods are sold or agreed to be sold to the buyer. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.
+
+        **Condition:** Buyer and Seller are mandatory if `isCargoDeliveredInICS2Zone=true` and `manifesttypecode='ENS'` and `advancedManifestFilingPerformedBy='CARRIER'` and `isHouseBillofLadingsIssued=false`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        typeOfPerson:
+          type: string
+          maxLength: 50
+          pattern: ^\S(?:.*\S)?$
+          description: |
+            Can be one of the following values as per the Union Customs Code art. 5(4):
+            - `NATURAL_PERSON` (A person that is an individual living human being)
+            - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
+            - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
+          example: 'NATURAL_PERSON'
+        address:
+          $ref: '#/components/schemas/Address'
+        identifyingCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+        taxLegalReferences:
+          description: |
+            A list of `Tax References` for a `Party`
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLegalReference'
+        partyContactDetails:
+          type: array
+          description: |
+            A list of contact details
+          items:
+            $ref: '#/components/schemas/PartyContactDetailWithPattern'
+      required:
+        - partyName
+        - typeOfPerson
+
+    SellerHBL:
+      type: object
+      title: Seller (House B/L)
+      description: |
+        The seller is the last known entity by whom the goods are sold or agreed to be sold to the buyer. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.
+
+        **Condition:** Buyer and Seller are mandatory if `isCargoDeliveredInICS2Zone=true` (on House B/L level) and `manifesttypecode='ENS'` and `advancedManifestFilingPerformedBy='CARRIER'`.
       properties:
         partyName:
           type: string
@@ -5101,6 +5146,55 @@ components:
       title: Buyer
       description: |
         The buyer is the last known entity to whom the goods are sold or agreed to be sold. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.
+
+        **Condition:** Buyer and Seller are mandatory if `isCargoDeliveredInICS2Zone=true` and `manifesttypecode='ENS'` and `advancedManifestFilingPerformedBy='CARRIER'` and `isHouseBillofLadingsIssued=false`.
+      properties:
+        partyName:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 70
+          description: |
+            Name of the party.
+          example: IKEA Denmark
+        typeOfPerson:
+          type: string
+          maxLength: 50
+          pattern: ^\S(?:.*\S)?$
+          description: |
+            Can be one of the following values as per the Union Customs Code art. 5(4):
+            - `NATURAL_PERSON` (A person that is an individual living human being)
+            - `LEGAL_PERSON` (person (including a human being and public or private organizations) that can perform legal actions, such as own a property, sue and be sued)
+            - `ASSOCIATION_OF_PERSONS` (Not a legal person, but recognised under Union or National law as having the capacity to perform legal acts)
+          example: 'NATURAL_PERSON'
+        address:
+          $ref: '#/components/schemas/Address'
+        identifyingCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifyingCode'
+        taxLegalReferences:
+          description: |
+            A list of `Tax References` for a `Party`
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLegalReference'
+        partyContactDetails:
+          type: array
+          description: |
+            A list of contact details
+          items:
+            $ref: '#/components/schemas/PartyContactDetailWithPattern'
+      required:
+        - partyName
+        - typeOfPerson
+
+    BuyerHBL:
+      type: object
+      title: Buyer (House B/L)
+      description: |
+        The buyer is the last known entity to whom the goods are sold or agreed to be sold. If the goods are to be imported otherwise than in pursuance of a purchase, the details of the owner of the goods shall be provided.
+
+        **Condition:** Buyer and Seller are mandatory if `isCargoDeliveredInICS2Zone=true` (on House B/L level) and `manifesttypecode='ENS'` and `advancedManifestFilingPerformedBy='CARRIER'`.
       properties:
         partyName:
           type: string
@@ -5313,6 +5407,54 @@ components:
     PartyContactDetailHBL:
       type: object
       title: Party Contact Detail (House B/L)
+      description: |
+        The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.
+      example:
+        name: Henrik
+        phone: +45 51801234
+      properties:
+        name:
+          type: string
+          pattern: ^\S(?:.*\S)?$
+          maxLength: 35
+          description: |
+            Name of the contact
+          example: Henrik
+      anyOf:
+        - type: object
+          title: Phone required
+          description: |
+            `Phone` is mandatory to provide
+          properties:
+            phone:
+              type: string
+              pattern: ^\+(?:[0-9] ?){6,14}[0-9]$
+              maxLength: 30
+              description: |
+                Phone number for the contact. Phone **MUST** include an international phone number format as defined in the [ITU-T recommendation E.123](https://www.itu.int/rec/T-REC-E.123/en).
+              example: +45 70262970
+          required:
+            - phone
+        - type: object
+          title: Email required
+          description: |
+            `Email` is mandatory to provide
+          properties:
+            email:
+              type: string
+              pattern: ^.+@\S+$
+              maxLength: 100
+              description: |
+                `E-mail` address to be used
+              example: info@dcsa.org
+          required:
+            - email
+      required:
+        - name
+
+    PartyContactDetailWithPattern:
+      type: object
+      title: Party Contact Detail
       description: |
         The contact details of the person to contact. It is mandatory to provide either `phone` and/or `email` along with the `name`, both can be provided.
       example:
@@ -8255,7 +8397,7 @@ components:
       description: |
         An object to capture where the original Transport Document (`Bill of Lading`) will be issued.
 
-        The location can be specified as one of `UN Location Code` or `CountryCode`.
+        **Condition:** The location can be specified as one of `UN Location Code` or `CountryCode`, but not both.
       properties:
         locationName:
           type: string
@@ -8424,9 +8566,9 @@ components:
         notifyParty:
           $ref: '#/components/schemas/NotifyPartyHBL'
         seller:
-          $ref: '#/components/schemas/Seller'
+          $ref: '#/components/schemas/SellerHBL'
         buyer:
-          $ref: '#/components/schemas/Buyer'
+          $ref: '#/components/schemas/BuyerHBL'
         other:
           type: array
           description: A list of document parties that can be optionally provided in the `Shipping Instructions` and `Transport Document`.
@@ -8570,7 +8712,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 35
           description: |
-            Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that athorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
+            Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
           example: EMC007123
         issueDate:
           type: string
@@ -8605,7 +8747,7 @@ components:
           pattern: ^\S(?:.*\S)?$
           maxLength: 35
           description: |
-            Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that athorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
+            Reference number assigned to an `Import License` or permit, issued by countries exercising import controls that authorizes the importation of the articles stated in the license. The `Import License` must be valid at time of arrival.
           example: EMC007123
         issueDate:
           type: string

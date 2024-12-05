@@ -5,6 +5,10 @@ import org.dcsa.conformance.core.check.KeywordDataset;
 
 public class EblDatasets {
 
+  private EblDatasets() {
+    throw new IllegalStateException("EblDatasets is a utility class");
+  }
+
   public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset(
     "WAVE",
     "CARX",

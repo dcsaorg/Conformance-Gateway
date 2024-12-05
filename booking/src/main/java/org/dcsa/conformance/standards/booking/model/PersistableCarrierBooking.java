@@ -351,19 +351,19 @@ public class PersistableCarrierBooking {
 
   public BookingState getOriginalBookingState() {
     var booking = getBooking();
-    return BookingState.valueOf(booking.required(BOOKING_STATUS).asText());
+    return BookingState.fromString(booking.required(BOOKING_STATUS).asText());
   }
 
   public BookingState getBookingAmendedState() {
     var booking = getBooking();
     var s = booking.path(AMENDED_BOOKING_STATUS);
-    return !s.asText("").isEmpty()? BookingState.valueOf(s.asText()) : null;
+    return !s.asText("").isEmpty()? BookingState.fromString(s.asText()) : null;
   }
 
   public BookingCancellationState getBookingCancellationState() {
     var booking = getBooking();
     var s = booking.path(CANCELLATION_BOOKING_STATUS);
-    return !s.asText("").isEmpty()? BookingCancellationState.valueOf(s.asText()) : null;
+    return !s.asText("").isEmpty()? BookingCancellationState.fromString(s.asText()) : null;
   }
 
   public static PersistableCarrierBooking initializeFromBookingRequest(ObjectNode bookingRequest) {

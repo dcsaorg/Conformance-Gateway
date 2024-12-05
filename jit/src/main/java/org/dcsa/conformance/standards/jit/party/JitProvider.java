@@ -119,9 +119,16 @@ public class JitProvider extends ConformanceParty {
                   UUID.randomUUID().toString()) // Create new ID, because it's a new timestamp
               .withReplyToTimestampID(
                   previousTimestamp.timestampID()) // Respond to the previous timestamp
-              .withDateTime(
-                  LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T16:16:16+08:30");
+              .withDateTime(generateRandomDateTime());
     };
+  }
+
+  // Random date/time in the future (3 - 7 hours from now), with a random offset of up to 4 hours.
+  private static String generateRandomDateTime() {
+    return LocalDateTime.now()
+        .plusHours(3)
+        .plusSeconds(new Random().nextInt(60 * 60 * 4))
+        .format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT);
   }
 
   private void sendTimestampPutRequest(
@@ -175,7 +182,7 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
 
     addOperatorLogEntry(
-        "Handled %s timestamp accepted for date/time: %s and remark: %s"
+        "Handled %s timestamp accepted for: %s and remark: %s"
             .formatted(
                 JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                 timestamp.dateTime(),

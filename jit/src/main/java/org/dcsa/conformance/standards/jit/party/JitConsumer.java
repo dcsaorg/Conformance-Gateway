@@ -113,7 +113,7 @@ public class JitConsumer extends ConformanceParty {
     } else {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
       addOperatorLogEntry(
-          "Handled %s timestamp accepted for date/time: %s"
+          "Handled %s timestamp accepted for: %s"
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));

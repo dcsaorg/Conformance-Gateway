@@ -56,7 +56,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     // “S service type with variations” TODO: Implement
 
     scenarioList.put(
-        "S-ERP-A in-band ERP variations - S(service type) - E - R - P - A - A",
+        "S-ERP-A in-band ERP variations - S - E - R - P - A - A",
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()

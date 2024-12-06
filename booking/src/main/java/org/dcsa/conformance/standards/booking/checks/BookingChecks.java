@@ -409,7 +409,7 @@ public class BookingChecks {
     body -> {
       var bookingStatus = body.path("bookingStatus").asText("");
       var issues = new LinkedHashSet<String>();
-      if (PENDING_CHANGES_STATES.contains(BookingState.valueOf(bookingStatus))) {
+      if (PENDING_CHANGES_STATES.contains(BookingState.fromString(bookingStatus))) {
         var feedbacks = body.get("feedbacks");
         if (feedbacks == null) {
           issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
@@ -428,11 +428,11 @@ public class BookingChecks {
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
       var reason = body.get("reason");
-      if (REASON_PRESENCE_STATES.contains(BookingState.valueOf(status.asText())) && reason == null) {
+      if (REASON_PRESENCE_STATES.contains(BookingState.fromString(status.asText())) && reason == null) {
           issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_STATES));
         }
       if(!bookingCancellationStatus.isMissingNode() && REASON_PRESENCE_CANCELLATION_STATES
-        .contains(BookingCancellationState.valueOf(bookingCancellationStatus.asText()))
+        .contains(BookingCancellationState.fromString(bookingCancellationStatus.asText()))
         && reason == null) {
           issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_CANCELLATION_STATES));
         }
@@ -448,7 +448,7 @@ public class BookingChecks {
       var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
       var issues = new LinkedHashSet<String>();
       var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      if (REASON_ABSENCE_STATES.contains(BookingState.valueOf(status.asText())) && bookingCancellationStatus == null) {
+      if (REASON_ABSENCE_STATES.contains(BookingState.fromString(status.asText())) && bookingCancellationStatus == null) {
         if (body.hasNonNull("reason")) {
           issues.add("reason must not be in the Booking States %s".formatted(REASON_ABSENCE_STATES));
         }
@@ -463,7 +463,7 @@ public class BookingChecks {
     body -> {
       var issues = new LinkedHashSet<String>();
       var bookingStatus = body.path("bookingStatus").asText("");
-      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.valueOf(bookingStatus))) {
+      if (NON_CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
         if (body.hasNonNull("termsAndConditions")) {
           issues.add("termsAndConditions must not be present in %s".formatted(bookingStatus));
         }
@@ -494,7 +494,7 @@ public class BookingChecks {
     body -> {
       var issues = new LinkedHashSet<String>();
       var bookingStatus = body.path("bookingStatus").asText("");
-      if (CONFIRMED_BOOKING_STATES.contains(BookingState.valueOf(bookingStatus))) {
+      if (CONFIRMED_BOOKING_STATES.contains(BookingState.fromString(bookingStatus))) {
         if (body.path("confirmedEquipments").isEmpty()) {
           issues.add("confirmedEquipments for confirmed booking is not present");
         }

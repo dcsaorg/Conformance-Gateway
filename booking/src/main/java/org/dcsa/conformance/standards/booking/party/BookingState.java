@@ -14,5 +14,14 @@ public enum BookingState {
     AMENDMENT_CONFIRMED,
     AMENDMENT_DECLINED,
     AMENDMENT_CANCELLED,
-    COMPLETED
+    COMPLETED;
+
+  public static BookingState fromString(String bookingStateName) {
+    try {
+      return valueOf(bookingStateName); // Case-sensitive
+    } catch (IllegalArgumentException | NullPointerException e) {
+      throw new IllegalArgumentException("Unknown booking state: " + bookingStateName);
+    }
+  }
+
 }

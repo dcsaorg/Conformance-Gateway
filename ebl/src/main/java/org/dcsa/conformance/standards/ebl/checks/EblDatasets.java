@@ -1,8 +1,9 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
 
+import lombok.NoArgsConstructor;
 import org.dcsa.conformance.core.check.KeywordDataset;
-
+@NoArgsConstructor
 public class EblDatasets {
 
   public static final KeywordDataset EBL_PLATFORMS_DATASET = KeywordDataset.staticDataset(
@@ -26,6 +27,10 @@ public class EblDatasets {
     "CR",
     "AKG"
   );
+
+  public static final KeywordDataset CONSIGNMENT_ITEMS_REFERENCE_TYPE =
+      KeywordDataset.staticDataset("CR", "AKG", "SPO", "CPO");
+
   public static final KeywordDataset EXEMPT_PACKAGE_CODES = KeywordDataset.staticDataset("VY", "VS", "VR", "VQ", "VO", "VL", "NG", "NF", "NE", "VG");
 
   public static final KeywordDataset DG_INHALATION_ZONES = KeywordDataset.fromCSV("/standards/ebl/datasets/inhalationzones.csv");

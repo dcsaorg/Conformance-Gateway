@@ -3,33 +3,53 @@ package org.dcsa.conformance.standards.ebl.crypto;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import lombok.SneakyThrows;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
-import org.bouncycastle.util.io.pem.PemWriter;
-import org.dcsa.conformance.core.UserFacingException;
-import org.dcsa.conformance.standards.ebl.crypto.impl.RSAPayloadSigner;
-
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.cert.CertificateFactory;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
+import javax.security.auth.x500.X500Principal;
+import lombok.SneakyThrows;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
+import org.dcsa.conformance.core.UserFacingException;
+import org.dcsa.conformance.standards.ebl.crypto.impl.X509BackedPayloadSigner;
 
 public class PayloadSignerFactory {
 
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     // Generated with `openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 4 -subj "/C=US/ST=Delaware/L=Delaware/O=SELFSIGNED/CN=foo" -nodes`
     // Contents in the `key.pem`
+    @SuppressWarnings("secrets:S6706")
     private static final String CTK_SENDER_PRIVATE_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXTD3XOeBMYVZS
@@ -61,6 +81,7 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
+    @SuppressWarnings("secrets:S6706")
     private static final String CTK_CARRIER_PRIVATE_RSA_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC588633cONawxd
@@ -92,47 +113,21 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
+  @SuppressWarnings("secrets:S6706")
   private static final String CTK_RECEIVER_PRIVATE_KEY_PEM = """
-            -----BEGIN PRIVATE KEY-----
-            MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC/rvvQhg5xRz+u
-            92MsFlPac5TeheeoGREmi/KTT4V2TbhgdwZ3MnYt4/mp2G1DFf+nqVHOAKTpix91
-            saNAY5WE+gvxVyCWV3xXTfP35RsEmltJpqJ3DcPGYQiTm5EXnaDvplE9+yjSgXGg
-            S6QmjLNLMTLsg1vCYQGyulg6tJvNJajhVDVpQwDoH6X4h2vLBtT/tsXKhoqT3ZNI
-            XVjC9A7uS4pn59NiGbK/B9ulx0zUzCWS/D92laUdJ0fJYSAReERzENq5qbjUwmvL
-            oiz3vRsyRRZlKMLPV2hAGXCmFQz9iKdQrpqnfmM9suGrfrmI774xVFGfh9J6XV74
-            SLBexhYZAgMBAAECggEABrGFEJCF05XR1vnDiEgVUIUFt0mEv910OFzdsSAvQGTR
-            Yej2HFZyQwL5dmFc22Faxo+GkEN8fr1BcXotAbQYhga3QQuyUx2l9WR+9vKUoXIE
-            awt7E94yrmw4APOHOwRhmMy9fIUXNVaY0aiiiEgUgLUsmo6xtxVtGkEgkJg68oxl
-            HAf3UCQg6Bka1ZRNzu0ZRhEy2+AdF1L09HRiGdSsGOr/OKsTVk3fxGu1Uq0COjFc
-            6C3PrRQ0PcHFLHBNXOVnNjMIwyaICeONfkxL9ai/p1TStyfUgC7NW+7/aK4NJUBc
-            PFjsdtBJGSa2w1TV0Q8Vj5an0hJQIKcPot4HGLV6UwKBgQDrU0pcYa5bj/BwloI0
-            O3DCfIj563XI1ac2qDj84XMnlqTs42R+l6NR4/3ykqhu8jgLZtr7qt9xgd4mJxes
-            Inm+fE3ngOaJX1qqvKfBRR9/3jOaCo9yl1jc0IrGWY8YEBo8dc1x09Txw7/xj+du
-            uKNLtnlxyWtBhBtVmHKLl1Sf6wKBgQDQhiTEtuCm4p1KOZDyg+goa0yRMMjxrv5X
-            xPaZt7Ef/cIBnfwWYmfT/H0aTsNC4BuAheBJyvEsgfKAMPjD8yjLsw52XHhT0r7M
-            GAG4DLLTa0hZgsC6UemtanvHI88w6JCJidEEKjdoenkvFPrj6TMKbWg5aeyqlSOi
-            Idh/McLlCwKBgG/9unTOk+DFVqLuLdbXtukHxVRS50IF08ciNcS7MkdT3PdTnF7W
-            oYX2X8OSYhAyu9NJRsvgXOgy6trzXcOwwImTtKuI363esFJy588Fq2D6CUq03eGl
-            /0dPA8wzkPLdru65DWWvbzcDdpRqbLR3sFb250LsnVuXmD6bB2BBS6ezAoGBALYf
-            8408jQo1c1uY29h1DRgAX2eQTHGKfer6xMeNgM6IPCJdcge6+yRTqpCHqlOGmX6v
-            by4EapCNDtiX7S53+nGvejo2mYHc13g6n4W40ZeGZDKJ2PrjAE3Oaz2LMTNubI80
-            J7KTjMFb9uwATwEwdLvuwtEiiuqSSAUbupOdSrPxAoGBANtVFaBAvt6DwYm5TfPJ
-            TXoIcUmuf0FrqQg2CarBFTzgBV759c7Dk1P2TnWAeB+grh/AcU5WFBpJIrvenKrw
-            u1IYO4pbMvjwiL2yzMruF7/GcoFONaCy2TMKdzu7ftpiCvXOcU9pb3IO5vUPssZ2
-            5fqQLI2XCduGjbk9bpe+pwat
-            -----END PRIVATE KEY-----
+            -----BEGIN EC PRIVATE KEY-----
+            MHcCAQEEIJTPoxr2hvrglK9q4L8UUBZk1QYm9Yv4wstC5BKPaxPYoAoGCCqGSM49
+            AwEHoUQDQgAEBHrpbOJO5f60HZIq0p8Ia/Xp5SA+xQf6xk0JfVNi6Ny7bjCHy7bK
+            0eQ2k/puDGgQiT0nzfW5SC0LwTGc712uZw==
+            -----END EC PRIVATE KEY-----
             """;
 
     private static final KeyPair CTK_SENDER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_SENDER_PRIVATE_KEY_PEM);
     private static final KeyPair CTK_CARRIER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_CARRIER_PRIVATE_RSA_KEY_PEM);
-    private static final KeyPair CTK_RECEIVER_RSA_KEY_PAIR = parsePEMPrivateRSAKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
+    private static final KeyPair CTK_RECEIVER_EC_KEY_PAIR = parsePEMPrivateECKey(CTK_RECEIVER_PRIVATE_KEY_PEM);
     private static final PayloadSignerWithKey CTK_SENDER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_SENDER_RSA_KEY_PAIR);
     private static final PayloadSignerWithKey CTK_SENDER_INCORRECT_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_CARRIER_RSA_KEY_PAIR);
-    private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER = rsaBasedPayloadSigner(CTK_RECEIVER_RSA_KEY_PAIR);
-
-    public static String getCarrierPublicKeyInPemFormat() {
-        return pemEncodeKey((RSAPublicKey) CTK_CARRIER_RSA_KEY_PAIR.getPublic());
-    }
+    private static final PayloadSignerWithKey CTK_RECEIVER_KEY_PAYLOAD_SIGNER = ecBasedPayloadSigner(CTK_RECEIVER_EC_KEY_PAIR);
 
     public static PayloadSignerWithKey senderPayloadSigner() {
         return CTK_SENDER_KEY_PAYLOAD_SIGNER;
@@ -147,14 +142,25 @@ public class PayloadSignerFactory {
     }
 
     private static PayloadSignerWithKey rsaBasedPayloadSigner(KeyPair keyPair) {
-        return new RSAPayloadSigner(
+        return new X509BackedPayloadSigner(
                 new JWSSignerDetails(
                         JWSAlgorithm.PS256,
                         new RSASSASigner(keyPair.getPrivate())
                 ),
-              (RSAPublicKey) keyPair.getPublic()
+                generateSelfSignedCertificateSecret(keyPair)
         );
     }
+
+  @SneakyThrows
+  private static PayloadSignerWithKey ecBasedPayloadSigner(KeyPair keyPair) {
+    return new X509BackedPayloadSigner(
+      new JWSSignerDetails(
+        JWSAlgorithm.ES256,
+        new ECDSASigner((ECPrivateKey) keyPair.getPrivate())
+      ),
+      generateSelfSignedCertificateSecret(keyPair)
+    );
+  }
 
     @SneakyThrows
     private static KeyPair parsePEMPrivateRSAKey(String pem) {
@@ -171,27 +177,41 @@ public class PayloadSignerFactory {
         return new KeyPair(publicKey, privateKey);
     }
 
+
+  @SneakyThrows
+  private static KeyPair parsePEMPrivateECKey(String pem) {
+    ECPrivateKey privateKey;
+    try (var pemParser = new PEMParser(new StringReader(pem))) {
+      var privateKeyInfo = (PEMKeyPair)pemParser.readObject();
+      privateKey = (ECPrivateKey) new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo.getPrivateKeyInfo());
+      var publicKey = (ECPublicKey) new JcaPEMKeyConverter().getPublicKey(privateKeyInfo.getPublicKeyInfo());
+      return new KeyPair(publicKey, privateKey);
+    }
+  }
+
     @SneakyThrows
     public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey) {
       if (publicKey instanceof RSAPublicKey rsaPublicKey) {
-        return new SingleExportableKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey), rsaPublicKey);
+        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
       }
       if (publicKey instanceof ECPublicKey ecPublicKey) {
         return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
       }
-      throw new IllegalArgumentException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
+      throw new UserFacingException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
     }
 
     @SneakyThrows
     public static SignatureVerifier verifierFromPemEncodedPublicKey(String publicKeyPem) {
-      try (var reader = new PemReader(new StringReader(publicKeyPem))) {
-        var encoded = reader.readPemObject().getContent();
-        var keySpec = new X509EncodedKeySpec(encoded);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        var rsaPublicKey = (RSAPublicKey)kf.generatePublic(keySpec);
-        return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
+      try (var reader = new PEMParser(new StringReader(publicKeyPem))) {
+        var parsedObject = reader.readObject();
+        if (parsedObject instanceof X509CertificateHolder x509CertificateHolder) {
+          var cert = CertificateFactory.getInstance("X.509")
+            .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
+          return verifierFromPublicKey(cert.getPublicKey());
+        }
+        throw new UserFacingException("The provided PEM object was a X509 encoded certificate. Please provide a CERTIFICATE instead");
       } catch (Exception e) {
-        throw new UserFacingException("Could not parse provided string as an X509 PEM encoded RSA public key");
+        throw new UserFacingException("Could not parse the PEM content string as an X509 encoded PEM certificate");
       }
     }
 
@@ -204,26 +224,45 @@ public class PayloadSignerFactory {
         }
     }
 
-    private record SingleExportableKeySignatureVerifier(JWSVerifier jwsVerifier, RSAPublicKey rsaPublicKey) implements SignatureVerifierWithKey {
-
-      @SneakyThrows
-      @Override
-      public boolean verifySignature(JWSObject jwsObject) {
-        return jwsObject.verify(jwsVerifier);
-      }
-
-      @Override
-      public String getPublicKeyInPemFormat() {
-        return pemEncodeKey(this.rsaPublicKey);
-      }
-    }
-
     @SneakyThrows
-    public static String pemEncodeKey(RSAPublicKey key) {
+    public static String pemEncodeCertificate(X509CertificateHolder x509CertificateHolder) {
       var w = new StringWriter();
       try (var pemWriter = new PemWriter(w)) {
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", key.getEncoded()));
+        pemWriter.writeObject(new PemObject("CERTIFICATE", x509CertificateHolder.getEncoded()));
       }
       return w.getBuffer().toString();
     }
+
+  private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
+    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Toolkit");
+
+    long notBefore = System.currentTimeMillis();
+    // 2500 days (several) years should be sufficient.
+    long notAfter = notBefore + (1000L * 3600L * 24 * 2500);
+    byte[] serialBytes = new byte[16];
+    SECURE_RANDOM.nextBytes(serialBytes);
+    X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+      subject,
+      new BigInteger(serialBytes),
+      new Date(notBefore),
+      new Date(notAfter),
+      subject,
+      keyPair.getPublic()
+    );
+
+    try {
+      certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+      certBuilder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+
+      var algo = switch (keyPair.getPrivate()) {
+        case ECPrivateKey ignored -> "SHA256withECDSA";
+        case RSAPrivateKey ignored -> "SHA256withRSA";
+        default -> throw new UnsupportedOperationException("Unsupported key");
+      };
+      final ContentSigner signer = new JcaContentSignerBuilder(algo).build(keyPair.getPrivate());
+      return certBuilder.build(signer);
+    } catch (Exception e) {
+      throw new UserFacingException("Error while generating a self-certificate: " + e.getMessage(), e);
+    }
+  }
 }

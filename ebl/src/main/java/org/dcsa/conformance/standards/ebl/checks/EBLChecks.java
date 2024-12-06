@@ -48,8 +48,11 @@ public class EBLChecks {
   private static final String ROUTING_OF_CONSIGNMENT_COUNTRIES = "routingOfConsignmentCountries";
   private static final String MANIFEST_TYPE_CODE = "manifestTypeCode";
   private static final String COUNTRY_CODE = "countryCode";
-
-
+  private static final String LOCATION_NAME = "locationName";
+  private static final String IS_TO_ORDER = "isToOrder";
+  private static final String AMF_HBL_PERFORMED_BY = "advanceManifestFilingsHouseBLPerformedBy";
+  private static final String ADVANCE_MANIFEST_FILINGS = "advanceManifestFilings";
+  private static final String HOUSE_BILL_OF_LADINGS = "houseBillOfLadings";
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
@@ -140,7 +143,7 @@ public class EBLChecks {
             arrayNodeHandler.accept(
               rootNode, UTILIZED_TRANSPORT_EQUIPMENTS, ArrayOrderHandler.toStringSortableArray());
             arrayNodeHandler.accept(
-                rootNode, "advanceManifestFilings", ArrayOrderHandler.toStringSortableArray());
+                rootNode, ADVANCE_MANIFEST_FILINGS, ArrayOrderHandler.toStringSortableArray());
             arrayNodeHandler.accept(
                 rootNode, "references", ArrayOrderHandler.toStringSortableArray());
             for (var cr : rootNode.path(CUSTOMS_REFERENCES)) {
@@ -151,13 +154,13 @@ public class EBLChecks {
 
             DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(rootNode.path(DOCUMENT_PARTIES), arrayNodeHandler);
 
-            for (var hbl : rootNode.path("houseBillOfLadings")) {
+            for (var hbl : rootNode.path(HOUSE_BILL_OF_LADINGS)) {
               DOC_PARTIES_ARRAY_ORDER_DEFINITIONS.accept(hbl.path(DOCUMENT_PARTIES), arrayNodeHandler);
               arrayNodeHandler.accept(
                 hbl, ROUTING_OF_CONSIGNMENT_COUNTRIES, ArrayOrderHandler.inputPreservedArrayOrder());
             }
             arrayNodeHandler.accept(
-              rootNode, "houseBillOfLadings", ArrayOrderHandler.toStringSortableArray());
+              rootNode, HOUSE_BILL_OF_LADINGS, ArrayOrderHandler.toStringSortableArray());
             arrayNodeHandler.accept(
                 rootNode,
                 "requestedCarrierCertificates",
@@ -256,14 +259,13 @@ public class EBLChecks {
 
   private static final JsonRebaseableContentCheck NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS = JsonAttribute.ifThen(
     "The 'documentParties.notifyParties' attribute is mandatory for negotiable B/Ls",
-    JsonAttribute.isTrue("isToOrder"),
+    JsonAttribute.isTrue(IS_TO_ORDER),
     JsonAttribute.at(JsonPointer.compile("/documentParties/notifyParties"), JsonAttribute.matchedMustBeNonEmpty())
   );
 
   private static final Consumer<MultiAttributeValidator> ALL_REFERENCE_TYPES = mav -> {
     mav.submitAllMatching("references.*.type");
     mav.submitAllMatching("utilizedTransportEquipments.*.references.*.type");
-    mav.submitAllMatching("consignmentItems.*.references.*.type");
   };
 
   public static final JsonRebaseableContentCheck VALID_WOOD_DECLARATIONS = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -272,12 +274,18 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.WOOD_DECLARATION_VALUES)
   );
 
-  private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES = JsonAttribute.allIndividualMatchesMustBeValid(
-    "All reference 'type' fields must be valid",
-        ALL_REFERENCE_TYPES,
-        JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE)
-  );
+  private static final JsonRebaseableContentCheck VALID_REFERENCE_TYPES =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All reference 'type' fields must be valid",
+          ALL_REFERENCE_TYPES,
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(EblDatasets.REFERENCE_TYPE));
 
+  static final JsonRebaseableContentCheck VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "All consignmentItems reference 'type' fields must be valid",
+          mav -> mav.submitAllMatching("consignmentItems.*.references.*.type"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(
+              EblDatasets.CONSIGNMENT_ITEMS_REFERENCE_TYPE));
 
   private static final JsonRebaseableContentCheck TLR_CC_T_COMBINATION_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each document party can be used at most once",
@@ -391,13 +399,13 @@ public class EBLChecks {
     (body, contextPath) -> {
       var issues = new LinkedHashSet<String>();
       var documentParties = body.path(DOCUMENT_PARTIES);
-      var isToOrder = body.path("isToOrder").asBoolean(false);
+      var isToOrder = body.path(IS_TO_ORDER).asBoolean(false);
 
       if (!documentParties.has("shipper")) {
         var documentPartiesPath = concatContextPath(contextPath, "documentParties.shipper");
         issues.add("The '%s' party is mandatory in the eBL phase (SI/TD)".formatted(documentPartiesPath));
       }
-      var isToOrderPath = concatContextPath(contextPath, "isToOrder");
+      var isToOrderPath = concatContextPath(contextPath, IS_TO_ORDER);
 
       if (isToOrder) {
         if (documentParties.has("consignee")) {
@@ -469,7 +477,7 @@ public class EBLChecks {
       JsonAttribute.ifThen(
           "If any manifestTypeCode in advanceManifestFilings is ENS, isHouseBillOfLadingsIssued is required",
           node -> {
-            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+            JsonNode advanceManifestFilings = node.path(ADVANCE_MANIFEST_FILINGS);
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
               return false;
             }
@@ -487,7 +495,7 @@ public class EBLChecks {
           "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading",
           mav -> mav.submitAllMatching("houseBillOfLadings.*"),
           (node, contextPath) -> {
-            boolean isToOrder = node.path("isToOrder").asBoolean(false);
+            boolean isToOrder = node.path(IS_TO_ORDER).asBoolean(false);
             if (isToOrder && node.path(DOCUMENT_PARTIES).path("notifyParty").isMissingNode()) {
               return Set.of(
                   "If isToOrder is true in any houseBillOfLading, notifyParty is required in documentParties of that houseBillOfLading at %s"
@@ -515,7 +523,7 @@ public class EBLChecks {
       filingsNode ->
           "ENS".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText())
               && "SELF"
-                  .equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
+                  .equals(filingsNode.path(AMF_HBL_PERFORMED_BY).asText());
 
   static final JsonRebaseableContentCheck IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -530,7 +538,7 @@ public class EBLChecks {
           ("ACI".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText())
                   || "ACE".equals(filingsNode.path(MANIFEST_TYPE_CODE).asText()))
               && "SELF"
-                  .equals(filingsNode.path("advanceManifestFilingsHouseBLPerformedBy").asText());
+                  .equals(filingsNode.path(AMF_HBL_PERFORMED_BY).asText());
 
   static final JsonRebaseableContentCheck SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -543,7 +551,7 @@ public class EBLChecks {
   private static final Predicate<JsonNode> LOCATION_NAME_REQUIRED =
       place ->
           (place.path("UNLocationCode").isMissingNode()
-              && (place.path("locationName").isMissingNode()));
+              && (place.path(LOCATION_NAME).isMissingNode()));
 
   private static final Predicate<JsonNode> COUNTRY_CODE_REQUIRED =
       place ->
@@ -556,7 +564,7 @@ public class EBLChecks {
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfAcceptance"),
           JsonAttribute.ifMatchedThen(
               LOCATION_NAME_REQUIRED,
-              JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
+              JsonAttribute.path(LOCATION_NAME, JsonAttribute.matchedMustBePresent())));
 
   static final JsonRebaseableContentCheck LOCATION_NAME_CONDITIONAL_VALIDATION_POFD =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -564,7 +572,7 @@ public class EBLChecks {
           mav -> mav.submitAllMatching("houseBillOfLadings.*.placeOfFinalDelivery"),
           JsonAttribute.ifMatchedThen(
               LOCATION_NAME_REQUIRED,
-              JsonAttribute.path("locationName", JsonAttribute.matchedMustBePresent())));
+              JsonAttribute.path(LOCATION_NAME, JsonAttribute.matchedMustBePresent())));
 
   static final JsonRebaseableContentCheck COUNTRY_CODE_CONDITIONAL_VALIDATION_POA =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -616,11 +624,11 @@ public class EBLChecks {
       JsonAttribute.customValidator(
           "If isCargoDeliveredInICS2Zone is true, advanceManifestFilingPerformedBy is 'CARRIER' and manifestTypeCode is 'ENS' then Buyer and Seller is required",
           (node, contextPath) -> {
-            JsonNode houseBillOfLadings = node.path("houseBillOfLadings");
+            JsonNode houseBillOfLadings = node.path(HOUSE_BILL_OF_LADINGS);
             if (houseBillOfLadings.isMissingNode() || !houseBillOfLadings.isArray()) {
               return Set.of();
             }
-            JsonNode advanceManifestFilings = node.path("advanceManifestFilings");
+            JsonNode advanceManifestFilings = node.path(ADVANCE_MANIFEST_FILINGS);
             if (advanceManifestFilings.isMissingNode() || !advanceManifestFilings.isArray()) {
               return Set.of();
             }
@@ -629,7 +637,7 @@ public class EBLChecks {
               if (hbl.path("isCargoDeliveredInICS2Zone").asBoolean(false)) {
                 for (JsonNode filing : advanceManifestFilings) {
                   if ("CARRIER"
-                          .equals(filing.path("advanceManifestFilingsHouseBLPerformedBy").asText())
+                          .equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
                       && "ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())
                       && (hbl.path(DOCUMENT_PARTIES).path("buyer").isMissingNode()
                           || hbl.path(DOCUMENT_PARTIES).path("seller").isMissingNode())) {
@@ -689,6 +697,7 @@ public class EBLChecks {
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
+    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     UTE_EQUIPMENT_REFERENCE_UNIQUE,
     EBL_DISPLAYED_ADDRESS_LIMIT,
@@ -740,6 +749,7 @@ public class EBLChecks {
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
     VALID_REFERENCE_TYPES,
+    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
     ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,

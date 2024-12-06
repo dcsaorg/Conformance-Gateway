@@ -18,16 +18,17 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SELF_FILER_COD
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_REQUESTED_CARRIER_CLAUSES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EBLChecksTest {
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectNode rootNode = objectMapper.createObjectNode();
 
   @Test
   void testENSManifestTypeRequiresHBLIssued() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode advanceManifestFilings = rootNode.putArray("advanceManifestFilings");
     advanceManifestFilings.addObject().put("manifestTypeCode", "ENS");
 
@@ -42,7 +43,6 @@ class EBLChecksTest {
 
   @Test
   void testHBLNotifyPartyRequiredIfToOrder() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     hbl.put("isToOrder", true);
@@ -59,7 +59,6 @@ class EBLChecksTest {
 
   @Test
   void testNumberOfPackagesConditionalCheck() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ArrayNode consignmentItems = hbl.putArray("consignmentItems");
@@ -80,7 +79,6 @@ class EBLChecksTest {
 
   @Test
   void testIdentificationNumberRequiredIfENSAndSelf() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode advanceManifestFilings = rootNode.putArray("advanceManifestFilings");
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ENS");
@@ -97,7 +95,6 @@ class EBLChecksTest {
 
   @Test
   void testSelfFilerCodeRequiredIfAceOrAciAndSelf() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode advanceManifestFilings = rootNode.putArray("advanceManifestFilings");
     ObjectNode filing = advanceManifestFilings.addObject();
     filing.put("manifestTypeCode", "ACE");
@@ -114,7 +111,6 @@ class EBLChecksTest {
 
   @Test
   void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
@@ -134,7 +130,6 @@ class EBLChecksTest {
 
   @Test
   void testLocationNameRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
@@ -154,7 +149,6 @@ class EBLChecksTest {
 
   @Test
   void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfAcceptance() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfAcceptance = hbl.putObject("placeOfAcceptance");
@@ -174,7 +168,6 @@ class EBLChecksTest {
 
   @Test
   void testCountryCodeRequiredIfNoUNLocationCodeInPlaceOfFinalDelivery() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     ObjectNode placeOfFinalDelivery = hbl.putObject("placeOfFinalDelivery");
@@ -194,7 +187,6 @@ class EBLChecksTest {
 
   @Test
   void testBuyerAndSellerConditionalCheck() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
     hbl.put("isCargoDeliveredInICS2Zone", true);
@@ -217,7 +209,6 @@ class EBLChecksTest {
 
   @Test
   void testValidRoutingOfConsignmentCountries() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
 
@@ -238,7 +229,6 @@ class EBLChecksTest {
 
   @Test
   void testInvalidFirstCountryInRouting() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
 
@@ -258,7 +248,6 @@ class EBLChecksTest {
 
   @Test
   void testInvalidLastCountryInRouting() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
     ObjectNode hbl = houseBillOfLadings.addObject();
 
@@ -279,7 +268,6 @@ class EBLChecksTest {
 
   @Test
   void testValidRequestedCarrierClauses() {
-    ObjectNode rootNode = objectMapper.createObjectNode();
     ArrayNode requestedCarrierClauses = rootNode.putArray("requestedCarrierClauses");
     requestedCarrierClauses.add("CARGO_CARGOSPECIFICS");
     requestedCarrierClauses.add("VESSELCONVEYANCE_COUNTRYSPECIFIC");
@@ -289,6 +277,22 @@ class EBLChecksTest {
 
     requestedCarrierClauses.add("CARGO_CARGO");
     Set<String> invalidErrors = VALID_REQUESTED_CARRIER_CLAUSES.validate(rootNode);
+    assertEquals(1, invalidErrors.size());
+  }
+
+  @Test
+  void testValidConsignmentItemsReferenceTypes() {
+    ArrayNode consignmentItems = rootNode.putArray("consignmentItems");
+    ObjectNode consignmentItem = consignmentItems.addObject();
+    ArrayNode references = consignmentItem.putArray("references");
+    references.addObject().put("type", "CR");
+    references.addObject().put("type", "SPO");
+
+    Set<String> errors = VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    references.addObject().put("type", "CRR");
+    Set<String> invalidErrors = VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode);
     assertEquals(1, invalidErrors.size());
   }
 }

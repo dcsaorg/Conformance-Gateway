@@ -1,6 +1,11 @@
 package org.dcsa.conformance.standards.booking.party;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BookingStateTest {
@@ -11,18 +16,16 @@ class BookingStateTest {
     assertEquals(BookingState.RECEIVED, BookingState.fromString("RECEIVED"));
   }
 
-  @Test
-  void testFromString_invalidInput() {
-    assertThrowsExactly(
-        IllegalArgumentException.class, () -> BookingState.fromString("INVALID_STATE"));
-    assertThrowsExactly(IllegalArgumentException.class, () -> BookingState.fromString(null));
-    assertThrowsExactly(IllegalArgumentException.class, () -> BookingState.fromString(" "));
-    assertThrowsExactly(IllegalArgumentException.class, () -> BookingState.fromString(""));
+  @ParameterizedTest
+  @NullSource
+  @EmptySource
+  @CsvSource({
+    "INVALID_STATE",
+    "start",
+    "received",
+  })
+  void testFromString_invalidInput(String input) {
+    assertThrows(IllegalArgumentException.class, () -> BookingState.fromString(input));
   }
 
-  @Test
-  void testFromString_caseInsensitiveInput() {
-    assertThrowsExactly(IllegalArgumentException.class, () -> BookingState.fromString("start"));
-    assertThrowsExactly(IllegalArgumentException.class, () -> BookingState.fromString("received"));
-  }
 }

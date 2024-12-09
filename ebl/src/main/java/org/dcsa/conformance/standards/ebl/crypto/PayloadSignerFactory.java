@@ -49,7 +49,7 @@ public class PayloadSignerFactory {
 
     // Generated with `openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 4 -subj "/C=US/ST=Delaware/L=Delaware/O=SELFSIGNED/CN=foo" -nodes`
     // Contents in the `key.pem`
-    @SuppressWarnings("secrets:S6706")
+    @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
     private static final String CTK_SENDER_PRIVATE_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXTD3XOeBMYVZS
@@ -81,7 +81,7 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-    @SuppressWarnings("secrets:S6706")
+    @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
     private static final String CTK_CARRIER_PRIVATE_RSA_KEY_PEM = """
             -----BEGIN PRIVATE KEY-----
             MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC588633cONawxd
@@ -113,7 +113,7 @@ public class PayloadSignerFactory {
             -----END PRIVATE KEY-----
             """;
 
-  @SuppressWarnings("secrets:S6706")
+  @SuppressWarnings("secrets:S6706") // It is a non-issue to us that the key is "leaked".
   private static final String CTK_RECEIVER_PRIVATE_KEY_PEM = """
             -----BEGIN EC PRIVATE KEY-----
             MHcCAQEEIJTPoxr2hvrglK9q4L8UUBZk1QYm9Yv4wstC5BKPaxPYoAoGCCqGSM49

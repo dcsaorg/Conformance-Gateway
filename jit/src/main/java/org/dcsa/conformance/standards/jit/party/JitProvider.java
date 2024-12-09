@@ -30,6 +30,8 @@ import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 @Slf4j
 public class JitProvider extends ConformanceParty {
 
+  private static final Random RANDOM = new Random();
+
   public JitProvider(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -47,13 +49,19 @@ public class JitProvider extends ConformanceParty {
   }
 
   @Override
-  protected void exportPartyJsonState(ObjectNode targetObjectNode) {}
+  protected void exportPartyJsonState(ObjectNode targetObjectNode) {
+    // No state to export.
+  }
 
   @Override
-  protected void importPartyJsonState(ObjectNode sourceObjectNode) {}
+  protected void importPartyJsonState(ObjectNode sourceObjectNode) {
+    // No state to import.
+  }
 
   @Override
-  protected void doReset() {}
+  protected void doReset() {
+    // No state to reset.
+  }
 
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
@@ -127,7 +135,7 @@ public class JitProvider extends ConformanceParty {
   private static String generateRandomDateTime() {
     return LocalDateTime.now()
         .plusHours(3)
-        .plusSeconds(new Random().nextInt(60 * 60 * 4))
+        .plusSeconds(RANDOM.nextInt(60 * 60 * 4))
         .format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT);
   }
 

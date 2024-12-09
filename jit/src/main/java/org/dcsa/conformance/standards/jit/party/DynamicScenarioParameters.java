@@ -23,6 +23,10 @@ public record DynamicScenarioParameters(
     String portCallServiceID)
     implements ScenarioParameters {
 
+  public DynamicScenarioParameters() {
+    this(null, null, null, null, null, null, null, null);
+  }
+
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {
     return OBJECT_MAPPER.convertValue(jsonNode, DynamicScenarioParameters.class);
   }

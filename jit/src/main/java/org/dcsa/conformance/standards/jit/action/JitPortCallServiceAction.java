@@ -55,18 +55,22 @@ public class JitPortCallServiceAction extends JitAction {
         "JitPortCallServiceAction.doHandleExchange() requestJsonNode: {}",
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider
+    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    if (dsp == null) {
+      dsp = new DynamicScenarioParameters();
+    }
+    updateDspFromResponse(requestJsonNode);
+  }
+
+  private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        new DynamicScenarioParameters(
-            null,
-            null,
-            null,
-            PortCallServiceType.fromName(
-                requestJsonNode.get("specification").get("portCallServiceType").asText()),
-            null,
-            requestJsonNode.get("portCall").get("portCallID").asText(),
-            requestJsonNode.get("terminalCall").get("terminalCallID").asText(),
-            requestJsonNode.get("specification").get("portCallServiceID").asText());
+        dsp.withPortCallServiceType(
+                PortCallServiceType.fromName(
+                    requestJsonNode.get("specification").get("portCallServiceType").asText()))
+            .withPortCallID(requestJsonNode.get("portCall").get("portCallID").asText())
+            .withTerminalCallID(requestJsonNode.get("terminalCall").get("terminalCallID").asText())
+            .withPortCallServiceID(
+                requestJsonNode.get("specification").get("portCallServiceID").asText());
   }
 
   @Override

@@ -30,6 +30,7 @@ import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 @Slf4j
 public class JitProvider extends ConformanceParty {
 
+  @SuppressWarnings("java:S2245") // Random is used for generating random timestamps. Secure enough.
   private static final Random RANDOM = new Random();
 
   public JitProvider(

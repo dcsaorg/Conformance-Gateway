@@ -24,6 +24,7 @@ import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.VESSE
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.dcsa.conformance.core.UserFacingException;
 
@@ -38,12 +39,12 @@ public enum PortCallPhaseTypeCode {
   public static final List<PortCallServiceType> EMPTY_PHASE_TYPE_CODES =
       List.of(ANCHORAGE, SLUDGE, ANCHORAGE_OPERATIONS, MOVES);
 
-  public static List<PortCallServiceType> getValidPortCallPhaseTypeCode(
+  public static Set<PortCallServiceType> getValidPortCallPhaseTypeCode(
       PortCallPhaseTypeCode code) {
     return switch (code) {
-      case INBD -> List.of(BERTH, PILOTAGE, TOWAGE, MOORING, PILOT_BOARDING_PLACE, SEA_PASSAGE);
+      case INBD -> Set.of(BERTH, PILOTAGE, TOWAGE, MOORING, PILOT_BOARDING_PLACE, SEA_PASSAGE);
       case ALGS ->
-          List.of(
+          Set.of(
               BERTH,
               BUNKERING,
               CARGO_OPERATIONS,
@@ -56,8 +57,8 @@ public enum PortCallPhaseTypeCode {
               LASHING,
               SAFETY,
               SHORE_POWER);
-      case SHIF -> List.of(PILOTAGE, TOWAGE, MOORING);
-      case OUTB -> List.of(BERTH, PILOTAGE, TOWAGE, MOORING, SEA_PASSAGE);
+      case SHIF -> Set.of(PILOTAGE, TOWAGE, MOORING);
+      case OUTB -> Set.of(BERTH, PILOTAGE, TOWAGE, MOORING, SEA_PASSAGE);
     };
   }
 

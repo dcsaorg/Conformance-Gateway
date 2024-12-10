@@ -1,11 +1,12 @@
 package org.dcsa.conformance.standards.jit.model;
 
+import java.util.Set;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.dcsa.conformance.core.UserFacingException;
 
-import java.util.List;
-
 @Getter
+@RequiredArgsConstructor
 public enum PortCallServiceType {
   // Port Call Services negotiable through an `ERP`-cycle including an `A`, can be one of:
   BERTH("Berth"),
@@ -35,12 +36,8 @@ public enum PortCallServiceType {
 
   private final String fullName;
 
-  PortCallServiceType(String fullName) {
-    this.fullName = fullName;
-  }
-
-  public static List<PortCallServiceType> getServicesWithERPAndA() {
-    return List.of(
+  public static Set<PortCallServiceType> getServicesWithERPAndA() {
+    return Set.of(
         BERTH,
         CARGO_OPERATIONS,
         PILOTAGE,
@@ -52,8 +49,8 @@ public enum PortCallServiceType {
         SLUDGE);
   }
 
-  public static List<PortCallServiceType> getServicesHavingOnlyA() {
-    return List.of(
+  public static Set<PortCallServiceType> getServicesHavingOnlyA() {
+    return Set.of(
         SEA_PASSAGE,
         ALL_FAST,
         GANGWAY_DOWN_AND_SECURE,

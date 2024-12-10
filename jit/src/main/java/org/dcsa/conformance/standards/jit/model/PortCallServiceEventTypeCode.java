@@ -4,10 +4,13 @@ import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.dcsa.conformance.core.UserFacingException;
 
 @Getter
+@RequiredArgsConstructor
 public enum PortCallServiceEventTypeCode {
   STRT("Started"),
   CMPL("Completed"),
@@ -16,15 +19,11 @@ public enum PortCallServiceEventTypeCode {
 
   private final String fullName;
 
-  PortCallServiceEventTypeCode(String fullName) {
-    this.fullName = fullName;
-  }
-
-  public static List<PortCallServiceType> getValidPortCallServiceTypes(
+  public static Set<PortCallServiceType> getValidPortCallServiceTypes(
       PortCallServiceEventTypeCode code) {
     return switch (code) {
       case STRT, CMPL ->
-          List.of(
+          Set.of(
               CARGO_OPERATIONS,
               PILOTAGE,
               TOWAGE,
@@ -39,7 +38,7 @@ public enum PortCallServiceEventTypeCode {
               ANCHORAGE_OPERATIONS,
               SHORE_POWER);
       case ARRI ->
-          List.of(
+          Set.of(
               BERTH,
               PILOT_BOARDING_PLACE,
               ALL_FAST,
@@ -47,7 +46,7 @@ public enum PortCallServiceEventTypeCode {
               VESSEL_READY_FOR_CARGO_OPERATIONS,
               VESSEL_READY_TO_SAIL,
               MOVES);
-      case DEPA -> List.of(SAFETY, BERTH);
+      case DEPA -> Set.of(SAFETY, BERTH);
     };
   }
 

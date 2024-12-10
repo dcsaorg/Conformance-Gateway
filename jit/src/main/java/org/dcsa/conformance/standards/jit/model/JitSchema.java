@@ -1,8 +1,10 @@
 package org.dcsa.conformance.standards.jit.model;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum JitSchema {
   PORT_CALL_SERVICE("PortCallService"),
   ESTIMATED_TIMESTAMP(Constants.TIMESTAMP),
@@ -13,10 +15,6 @@ public enum JitSchema {
   DECLINE("Decline");
 
   private final String schemaName;
-
-  JitSchema(String schemaName) {
-    this.schemaName = schemaName;
-  }
 
   private static class Constants {
     public static final String TIMESTAMP = "Timestamp";

@@ -1,8 +1,10 @@
 package org.dcsa.conformance.standards.jit.model;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum JitTimestampType {
   ESTIMATED(JitSchema.ESTIMATED_TIMESTAMP, JitClassifierCode.EST),
   PLANNED(JitSchema.PLANNED_TIMESTAMP, JitClassifierCode.PLN),
@@ -11,11 +13,6 @@ public enum JitTimestampType {
 
   private final JitSchema jitSchema;
   private final JitClassifierCode classifierCode;
-
-  JitTimestampType(JitSchema jitSchema, JitClassifierCode classifierCode) {
-    this.jitSchema = jitSchema;
-    this.classifierCode = classifierCode;
-  }
 
   public static JitTimestampType fromClassifierCode(final JitClassifierCode classifierCode) {
     for (JitTimestampType jitTimestampType : values()) {

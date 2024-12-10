@@ -246,13 +246,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder sendTimestamp(
       JitScenarioContext context, JitTimestampType timestampType) {
-    if (timestampType == JitTimestampType.REQUESTED) {
-      return new JitScenarioListBuilder(
-          previousAction ->
-              new JitTimestampAction(context, previousAction, JitTimestampType.REQUESTED, false));
-    }
     return new JitScenarioListBuilder(
-        previousAction -> new JitTimestampAction(context, previousAction, timestampType, true));
+        previousAction ->
+            new JitTimestampAction(
+                context,
+                previousAction,
+                timestampType,
+                timestampType != JitTimestampType.REQUESTED));
   }
 
   private static JitScenarioListBuilder sendERPTimestamps(

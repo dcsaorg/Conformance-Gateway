@@ -58,7 +58,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -76,7 +75,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -97,7 +95,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -115,7 +112,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -136,7 +132,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -164,7 +159,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -183,7 +177,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)
@@ -201,7 +194,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         supplyScenarioParameters(context)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
-                    .filter(PortCallServiceType::isCommon)
                     .map(
                         serviceType ->
                             portCallService(context, serviceType)

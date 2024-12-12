@@ -92,4 +92,8 @@ public class EblDatasets {
     "INTRANSITCLAUSE"
   );
 
+  public static final KeywordDataset PARTY_FUNCTION_CODE =
+      KeywordDataset.staticDataset("SCO", "DDR", "DDS", "COW", "COX", "CS", "MF", "WH");
+  public static final KeywordDataset PARTY_FUNCTION_CODE_HBL =
+      KeywordDataset.staticDataset("DDR", "DDS", "CS", "MF", "WH");
 }

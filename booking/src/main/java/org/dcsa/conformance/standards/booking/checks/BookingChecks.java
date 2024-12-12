@@ -517,14 +517,15 @@ public class BookingChecks {
             var cargoGrossWeight = nodeToValidate.path("cargoGrossWeight");
             if (cargoGrossWeight.isMissingNode() || cargoGrossWeight.isNull()) {
               var commodities = nodeToValidate.path("commodities");
-              if (commodities.isArray()) {
+              if (!(commodities.isMissingNode() || commodities.isNull()) && commodities.isArray()) {
                 AtomicInteger commodityCounter = new AtomicInteger(0);
                 StreamSupport.stream(commodities.spliterator(), false)
                     .forEach(
                         commodity -> {
                           var commodityGrossWeight = commodity.path("cargoGrossWeight");
                           int currentCommodityCount = commodityCounter.getAndIncrement();
-                          if (commodityGrossWeight.isMissingNode() || commodityGrossWeight.isNull()) {
+                          if (commodityGrossWeight.isMissingNode()
+                              || commodityGrossWeight.isNull()) {
                             issues.add(
                                 "The '%s' must have cargo gross weight at commodities position %s"
                                     .formatted(contextPath, currentCommodityCount));

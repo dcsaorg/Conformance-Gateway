@@ -508,6 +508,34 @@ public class BookingChecks {
       return issues;
     });
 
+  static final JsonContentCheck CHECK_CARGO_GROSS_WEIGHT_CONDITIONS =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Check Cargo Gross Weight conditions",
+          mav -> mav.submitAllMatching("requestedEquipments.*"),
+          (nodeToValidate, contextPath) -> {
+            var issues = new LinkedHashSet<String>();
+            var cargoGrossWeight = nodeToValidate.path("cargoGrossWeight");
+            if (cargoGrossWeight.isMissingNode() || cargoGrossWeight.isNull()) {
+              var commodities = nodeToValidate.path("commodities");
+              if (!(commodities.isMissingNode() || commodities.isNull()) && commodities.isArray()) {
+                AtomicInteger commodityCounter = new AtomicInteger(0);
+                StreamSupport.stream(commodities.spliterator(), false)
+                    .forEach(
+                        commodity -> {
+                          var commodityGrossWeight = commodity.path("cargoGrossWeight");
+                          int currentCommodityCount = commodityCounter.getAndIncrement();
+                          if (commodityGrossWeight.isMissingNode()
+                              || commodityGrossWeight.isNull()) {
+                            issues.add(
+                                "The '%s' must have cargo gross weight at commodities position %s"
+                                    .formatted(contextPath, currentCommodityCount));
+                          }
+                        });
+              }
+            }
+            return issues;
+          });
+
   private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
     return () -> {
       var csp = cspSupplier.get();
@@ -611,6 +639,7 @@ public class BookingChecks {
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
     VALIDATE_DOCUMENT_PARTY,
     NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
+    CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
     JsonAttribute.atLeastOneOf(
       JsonPointer.compile("/expectedDepartureDate"),
       JsonPointer.compile("/expectedArrivalAtPlaceOfDeliveryStartDate"),

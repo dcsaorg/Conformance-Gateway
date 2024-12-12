@@ -670,13 +670,13 @@ public class EBLChecks {
 
   static final JsonRebaseableContentCheck VALID_PARTY_FUNCTION =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "The partyFunction is valid",
+          "The partyFunction in OtherDocumentParty is valid",
           mav -> mav.submitAllMatching("documentParties.other.*.partyFunction"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE));
 
   static final JsonRebaseableContentCheck VALID_PARTY_FUNCTION_HBL =
       JsonAttribute.allIndividualMatchesMustBeValid(
-          "The partyFunction in houseBillOfLadings is valid",
+          "The partyFunction in OtherDocumentParty of houseBillOfLadings is valid",
           mav ->
               mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.*.partyFunction"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE_HBL));

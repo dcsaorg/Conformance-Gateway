@@ -27,8 +27,6 @@ import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class JitChecks {
 
-  static final String SPECIFICATION = "specification";
-
   public static ActionCheck createChecksForPortCallService(
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
@@ -42,7 +40,7 @@ public class JitChecks {
         List.of(checkPortCallService(serviceType), checkRightFieldValues()));
   }
 
-  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(SPECIFICATION);
+  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceID");
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.ifThen(
@@ -50,7 +48,7 @@ public class JitChecks {
         IS_PORT_CALL_SERVICE,
         JsonAttribute.mustEqual(
             "Check if the correct Port Call Service was supplied.",
-            JsonPointer.compile("/" + SPECIFICATION + "/portCallServiceType"),
+            JsonPointer.compile("/portCallServiceType"),
             serviceType::name));
   }
 
@@ -60,7 +58,7 @@ public class JitChecks {
         body -> {
           Set<String> issues = new HashSet<>();
           if (IS_PORT_CALL_SERVICE.test(body)) {
-            String actualServiceType = body.get(SPECIFICATION).get("portCallServiceType").asText();
+            String actualServiceType = body.path("portCallServiceType").asText();
             issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
             issues.add(verifyPortCallPhaseTypeCode(body, actualServiceType));
           }
@@ -69,9 +67,9 @@ public class JitChecks {
   }
 
   private static String verifyPortCallPhaseTypeCode(JsonNode body, String actualServiceType) {
-    String portCallPhaseTypeCode = body.get(SPECIFICATION).path("portCallPhaseTypeCode").asText("");
+    String portCallPhaseTypeCode = body.path("portCallPhaseTypeCode").asText("");
     if (!PortCallPhaseTypeCode.isValidCombination(
-            PortCallServiceType.fromName(actualServiceType), portCallPhaseTypeCode)) {
+        PortCallServiceType.fromName(actualServiceType), portCallPhaseTypeCode)) {
       return "Expected matching Port Call Service type with PortCallPhaseTypeCode. Found non-matching type: '%s' combined with code: '%s'"
           .formatted(actualServiceType, portCallPhaseTypeCode);
     }
@@ -80,8 +78,7 @@ public class JitChecks {
 
   private static String verifyPortCallServiceEventTypeCode(
       JsonNode body, String actualServiceType) {
-    String portCallServiceEventTypeCode =
-        body.get(SPECIFICATION).get("portCallServiceEventTypeCode").asText();
+    String portCallServiceEventTypeCode = body.path("portCallServiceEventTypeCode").asText();
     if (!PortCallServiceEventTypeCode.isValidCombination(
         PortCallServiceType.fromName(actualServiceType), portCallServiceEventTypeCode)) {
       return "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
@@ -93,7 +90,9 @@ public class JitChecks {
   public static ActionCheck createChecksForTimestamp(
       UUID matchedExchangeUuid, String expectedApiVersion, DynamicScenarioParameters dsp) {
     List<JsonContentCheck> checks = new ArrayList<>();
-    if (dsp != null && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
+    if (dsp != null
+        && dsp.currentTimestamp() != null
+        && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
       checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
     }
     if (checks.isEmpty()) return null;

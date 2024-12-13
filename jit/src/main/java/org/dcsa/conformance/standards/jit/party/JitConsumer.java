@@ -106,23 +106,16 @@ public class JitConsumer extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("JitConsumer.handleRequest()");
     int statusCode = 204;
-    if (request.message().body().getJsonBody().has("specification")) {
-      String portCallServiceType =
-          request
-              .message()
-              .body()
-              .getJsonBody()
-              .get("specification")
-              .get("portCallServiceType")
-              .asText();
-      addOperatorLogEntry("Handled Port Call Service accepted: %s".formatted(portCallServiceType));
-    } else {
+    if (request.message().body().getJsonBody().has("timestampID")) {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
       addOperatorLogEntry(
           "Handled %s timestamp accepted for: %s"
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
+    } else {
+      addOperatorLogEntry(
+        "Handled request accepted.");
     }
 
     return request.createResponse(

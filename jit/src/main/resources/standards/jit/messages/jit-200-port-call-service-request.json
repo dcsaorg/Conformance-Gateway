@@ -1,60 +1,54 @@
 {
-  "portCall": {
-    "portCallID": "PORT_CALL_ID_PLACEHOLDER",
-    "portVisitReference": "NLAMS1234589",
-    "carrierServiceName": "Great Lion Service",
-    "carrierServiceCode": "FE1",
-    "universalServiceReference": "SR12345A",
-    "UNLocationCode": "NLAMS"
-  },
-  "terminalCall": {
-    "terminalCallID": "0342254a-5927-4856-b9c9-aa12e7c00563",
-    "terminalCallReference": "15063401",
-    "terminalCallSequenceNumber": 2,
-    "carrierImportVoyageNumber": "2103N",
-    "carrierExportVoyageNumber": "2103S",
-    "universalImportVoyageReference": "2103N",
-    "universalExportVoyageReference": "2103N"
-  },
-  "vessel": {
-    "vesselIMONumber": "9321483",
-    "MMSINumber": "278111222",
-    "name": "King of the Seas",
-    "lengthOverall": 245.45,
-    "width": 37.33,
-    "callSign": "NCVV",
-    "typeCode": "CONT",
-    "draft": 12.5,
-    "airDraft": 60,
-    "dimensionUnit": "MTR",
-    "vesselPosition": {
-      "locationName": "CMP Container Terminal Copenhagen",
-      "UNLocationCode": "DKCPH",
-      "facility": {
-        "facilityCode": "CMPDK",
-        "facilityCodeListProvider": "SMDG"
-      }
-    },
-    "milesToDestinationPort": 245.45
-  },
-  "specification": {
-    "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-    "portCallServiceType": "SERVICE_TYPE_PLACEHOLDER",
-    "portCallServiceEventTypeCode": "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-    "portCallPhaseTypeCode": "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-    "facilityTypeCode": "BRTH",
-    "portCallServiceLocation": {
-      "locationName": "CMP Container Terminal Copenhagen",
-      "UNLocationCode": "DKCPH",
-      "facility": {
-        "facilityCode": "CMPDK",
-        "facilityCodeListProvider": "SMDG"
-      }
-    },
-    "moves": {
-      "restowMoves": 20,
-      "totalMoves": 155
+  "terminalCallID": "TERMINAL_CALL_ID_PLACEHOLDER",
+  "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
+  "portCallServiceType": "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+  "portCallServiceEventTypeCode": "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
+  "portCallPhaseTypeCode": "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
+  "facilityTypeCode": "BRTH",
+  "portCallServiceLocation": {
+    "locationName": "CMP Container Terminal Copenhagen",
+    "UNLocationCode": "DKCPH",
+    "facility": {
+      "facilityCode": "CMPDK",
+      "facilityCodeListProvider": "SMDG"
     }
   },
+  "moves": [
+    {
+      "totalMoves": 155,
+      "carrierCode": "MAEU",
+      "carrierCodeListProvider": "NMFTA",
+      "restowMoves": 20
+    },
+    {
+      "loadMoves": {
+        "ladenContainerMoves": {
+          "totalMoves": 155
+        },
+        "emptyContainerMoves": {
+          "totalMoves": 155
+        },
+        "reeferPluggedContainerMoves": {
+          "totalMoves": 155
+        },
+        "oogUnits": 2
+      },
+      "dischargeMoves": {
+        "ladenContainerMoves": {
+          "totalMoves": 155
+        },
+        "emptyContainerMoves": {
+          "totalMoves": 155
+        },
+        "reeferPluggedContainerMoves": {
+          "totalMoves": 155
+        },
+        "oogUnits": 2
+      },
+      "carrierCode": "MAEU",
+      "carrierCodeListProvider": "NMFTA",
+      "restowMoves": 20
+    }
+  ],
   "isFYI": false
 }

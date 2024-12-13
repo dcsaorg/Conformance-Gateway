@@ -1,0 +1,16 @@
+{
+  "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
+  "draft": 12.5,
+  "airDraft": 60,
+  "dimensionUnit": "MTR",
+  "vesselPosition": {
+    "locationName": "CMP Container Terminal Copenhagen",
+    "UNLocationCode": "DKCPH",
+    "facility": {
+      "facilityCode": "CMPDK",
+      "facilityCodeListProvider": "SMDG"
+    }
+  },
+  "milesToDestinationPort": 245.45,
+  "isFYI": false
+}

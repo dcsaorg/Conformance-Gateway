@@ -20,12 +20,16 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
+import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
+import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
@@ -67,21 +71,60 @@ public class JitProvider extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
+        Map.entry(JitPortCallAction.class, this::portCallRequest),
+        Map.entry(JitTerminalCallAction.class, this::terminalCallRequest),
         Map.entry(JitPortCallServiceAction.class, this::portCallServiceRequest),
+        Map.entry(JitVesselStatusAction.class, this::vesselStatusRequest),
         Map.entry(JitTimestampAction.class, this::timestampRequest));
+  }
+
+  private void portCallRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.portCallRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    JsonNode jsonBody = replacePlaceHolders("port-call", dsp);
+    syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
+
+    addOperatorLogEntry(
+        "Submitted Port Call request for portCallID: %s".formatted(dsp.portCallID()));
+  }
+
+  private void terminalCallRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.terminalCallRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    if (dsp.terminalCallID() == null) {
+      dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
+    }
+    JsonNode jsonBody = replacePlaceHolders("terminal-call", dsp);
+    syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
+
+    addOperatorLogEntry(
+        "Submitted Terminal Call request for portCallID: %s".formatted(dsp.portCallID()));
   }
 
   private void portCallServiceRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallServiceRequest({})", actionPrompt.toPrettyString());
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
-
     String serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
-    JsonNode jsonBody = replacePlaceHolders(dsp.portCallID(), dsp.portCallServiceID(), serviceType);
+    dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
+    JsonNode jsonBody = replacePlaceHolders("port-call-service", dsp);
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
-    addOperatorLogEntry("Submitted %s Port Call Service".formatted(serviceType));
+    addOperatorLogEntry("Submitted %s Port Call Service request".formatted(serviceType));
+  }
+
+  private void vesselStatusRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.vesselStatusRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    JsonNode jsonBody = replacePlaceHolders("vessel-status", dsp);
+    syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
+
+    addOperatorLogEntry(
+        "Submitted Vessel Status for portCallServiceID: %s".formatted(dsp.portCallServiceID()));
   }
 
   private void timestampRequest(JsonNode actionPrompt) {
@@ -142,36 +185,43 @@ public class JitProvider extends ConformanceParty {
 
   private void sendTimestampPutRequest(
       @NonNull JitTimestampType timestampType, @NonNull JitTimestamp timestamp) {
-    syncCounterpartPut(
-        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
-        timestamp.toJson());
+    syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
   }
 
-  private JsonNode replacePlaceHolders(
-      String portCallId, String portCallServiceId, String serviceType) {
-    String portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType);
+  private JsonNode replacePlaceHolders(String fileType, DynamicScenarioParameters dsp) {
+    PortCallServiceType serviceType = dsp.portCallServiceType();
+    String portCallPhaseTypeCode = "";
+    String portCallServiceEventTypeCode = "";
+    if (serviceType != null) {
+      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType.name());
+      portCallServiceEventTypeCode =
+          PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType.name())
+              .getFirst()
+              .name();
+    }
+
     JsonNode jsonNode =
         JsonToolkit.templateFileToJsonNode(
-            "/standards/jit/messages/jit-200-port-call-service-request.json",
+            "/standards/jit/messages/jit-200-%s-request.json".formatted(fileType),
             Map.of(
                 "PORT_CALL_ID_PLACEHOLDER",
-                portCallId,
-                "SERVICE_TYPE_PLACEHOLDER",
-                serviceType,
+                Objects.requireNonNullElse(dsp.portCallID(), ""),
+                "TERMINAL_CALL_ID_PLACEHOLDER",
+                Objects.requireNonNullElse(dsp.terminalCallID(), ""),
+                "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+                serviceType != null ? serviceType.name() : "",
                 "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-                portCallServiceId,
+                Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
                 "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-                PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType)
-                    .getFirst()
-                    .name(),
+                portCallServiceEventTypeCode,
                 "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
                 portCallPhaseTypeCode));
     // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
-    if (portCallPhaseTypeCode.isEmpty())
-      ((ObjectNode) jsonNode.path("specification")).remove("portCallPhaseTypeCode");
+    if (serviceType != null && portCallPhaseTypeCode.isEmpty())
+      ((ObjectNode) jsonNode).remove("portCallPhaseTypeCode");
     return jsonNode;
   }
 

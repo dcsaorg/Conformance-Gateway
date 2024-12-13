@@ -10,30 +10,18 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
-import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
 @ToString
-public class JitPortCallServiceAction extends JitAction {
-  public static final String SERVICE_TYPE = "serviceType";
-
+public class JitTerminalCallAction extends JitAction {
   private final JsonSchemaValidator validator;
-  private final PortCallServiceType serviceType;
 
-  public JitPortCallServiceAction(
-      JitScenarioContext context,
-      ConformanceAction previousAction,
-      PortCallServiceType serviceType) {
+  public JitTerminalCallAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(
-        context.providerPartyName(),
-        context.consumerPartyName(),
-        previousAction,
-        "Port Call Service: " + serviceType.name());
-    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
-    this.serviceType = serviceType;
+        context.providerPartyName(), context.consumerPartyName(), previousAction, "Terminal Call");
+    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.TERMINAL_CALL);
   }
 
   @Override
@@ -41,7 +29,6 @@ public class JitPortCallServiceAction extends JitAction {
     ObjectNode jsonNode = super.asJsonNode();
     dsp = ((JitAction) previousAction).getDsp();
     jsonNode.set("dsp", dsp.toJson());
-    jsonNode.put(SERVICE_TYPE, serviceType.name());
     return jsonNode;
   }
 
@@ -60,15 +47,13 @@ public class JitPortCallServiceAction extends JitAction {
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText())
-            .withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText())
-            .withPortCallServiceType(
-                PortCallServiceType.fromName(requestJsonNode.path("portCallServiceType").asText()));
+        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText(null))
+            .withPortCallID(requestJsonNode.path("portCallID").asText(null));
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
+    return "Send a Terminal Call (PUT)";
   }
 
   @Override
@@ -80,9 +65,7 @@ public class JitPortCallServiceAction extends JitAction {
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), "PUT"),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(
-                JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
-            JitChecks.createChecksForPortCallService(
-                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, serviceType));
+                JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }
     };
   }

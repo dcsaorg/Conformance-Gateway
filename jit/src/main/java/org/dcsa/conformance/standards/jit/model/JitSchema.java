@@ -6,13 +6,18 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum JitSchema {
+  PORT_CALL("PortCall"),
+  TERMINAL_CALL("TerminalCall"),
   PORT_CALL_SERVICE("PortCallService"),
+  VESSEL("Vessel"),
   ESTIMATED_TIMESTAMP(Constants.TIMESTAMP),
   PLANNED_TIMESTAMP(Constants.TIMESTAMP),
   REQUESTED_TIMESTAMP(Constants.TIMESTAMP),
   ACTUAL_TIMESTAMP(Constants.TIMESTAMP),
   CANCEL("Cancel"),
-  DECLINE("Decline");
+  DECLINE("Decline"),
+  MOVES("Moves"),
+  ;
 
   private final String schemaName;
 

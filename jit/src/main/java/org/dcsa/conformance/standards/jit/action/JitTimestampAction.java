@@ -22,7 +22,7 @@ import org.dcsa.conformance.standards.jit.party.JitRole;
 @Slf4j
 public class JitTimestampAction extends JitAction {
   private final JitTimestampType timestampType;
-  private final JsonSchemaValidator responseSchemaValidator;
+  private final JsonSchemaValidator validator;
   private final boolean sendByProvider;
 
   public JitTimestampAction(
@@ -39,8 +39,7 @@ public class JitTimestampAction extends JitAction {
             : "Receive %s".formatted(timestampType));
     this.timestampType = timestampType;
     this.sendByProvider = sendByProvider;
-    responseSchemaValidator =
-        context.componentFactory().getMessageSchemaValidator(timestampType.getJitSchema());
+    validator = context.componentFactory().getMessageSchemaValidator(timestampType.getJitSchema());
   }
 
   @Override
@@ -48,7 +47,8 @@ public class JitTimestampAction extends JitAction {
     super.doHandleExchange(exchange);
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
     log.info(
-        "JitTimestampAction.doHandleExchange() requestJsonNode: {}",
+        "{}.doHandleExchange() requestJsonNode: {}",
+        getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
@@ -89,7 +89,7 @@ public class JitTimestampAction extends JitAction {
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
-                  responseSchemaValidator),
+                  validator),
               checksForTimestamp);
         }
         // Consumer sends requested timestamp
@@ -97,10 +97,7 @@ public class JitTimestampAction extends JitAction {
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), "PUT"),
             new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(
-                JitRole::isConsumer,
-                getMatchedExchangeUuid(),
-                HttpMessageType.REQUEST,
-                responseSchemaValidator),
+                JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             checksForTimestamp);
       }
     };

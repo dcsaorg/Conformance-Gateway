@@ -1,10 +1,11 @@
 package org.dcsa.conformance.standards.jit.checks;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
@@ -25,7 +26,7 @@ class JitChecksTest {
         JitChecks.checkPortCallService(PortCallServiceType.BERTH).validate(request).isEmpty());
 
     assertEquals(
-        "The value of 'specification.portCallServiceType' was 'BUNKERING' instead of 'BERTH'",
+        "The value of 'portCallServiceType' was 'BUNKERING' instead of 'BERTH'",
         JitChecks.checkPortCallService(PortCallServiceType.BERTH)
             .validate(
                 createPortCallServiceRequest(
@@ -105,15 +106,19 @@ class JitChecksTest {
       PortCallServiceType serviceType,
       PortCallServiceEventTypeCode code,
       PortCallPhaseTypeCode phaseTypeCode) {
-    ObjectNode specification =
-        OBJECT_MAPPER
-            .createObjectNode()
-            .put("portCallServiceType", serviceType.name())
-            .put("portCallServiceEventTypeCode", code.name());
-    if (phaseTypeCode != null) {
-      specification.put("portCallPhaseTypeCode", phaseTypeCode.name());
+    ObjectNode jsonNode =
+      (ObjectNode)JsonToolkit.templateFileToJsonNode(
+        "/standards/jit/messages/jit-200-port-call-service-request.json",
+        Map.of(
+          "PORT_CALL_SERVICE_TYPE_PLACEHOLDER", serviceType.name(),
+          "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER", code.name(),
+          "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER", phaseTypeCode == null ? "" : phaseTypeCode.name()
+        ));
+
+    if (phaseTypeCode == null) {
+      jsonNode.remove("portCallPhaseTypeCode");
     }
-    return OBJECT_MAPPER.createObjectNode().set(JitChecks.SPECIFICATION, specification);
+    return jsonNode;
   }
 
   private JitTimestamp createTimestamp() {

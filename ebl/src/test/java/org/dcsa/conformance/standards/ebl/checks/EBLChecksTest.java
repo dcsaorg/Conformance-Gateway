@@ -19,6 +19,8 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_C
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_REQUESTED_CARRIER_CLAUSES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -294,5 +296,37 @@ class EBLChecksTest {
     references.addObject().put("type", "CRR");
     Set<String> invalidErrors = VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES.validate(rootNode);
     assertEquals(1, invalidErrors.size());
+  }
+
+  @Test
+  void testValidPartyFunction() {
+    ObjectNode documentParties = rootNode.putObject("documentParties");
+    ArrayNode otherParties = documentParties.putArray("other");
+    ObjectNode otherParty = otherParties.addObject();
+    otherParty.put("partyFunction", "SCO");
+
+    Set<String> errors = VALID_PARTY_FUNCTION.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    otherParty.put("partyFunction", "SSS");
+    errors = VALID_PARTY_FUNCTION.validate(rootNode);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testValidPartyFunctionHBL() {
+    ArrayNode houseBillOfLadings = rootNode.putArray("houseBillOfLadings");
+    ObjectNode hbl = houseBillOfLadings.addObject();
+    ObjectNode documentParties = hbl.putObject("documentParties");
+    ArrayNode otherParties = documentParties.putArray("other");
+    ObjectNode otherParty = otherParties.addObject();
+    otherParty.put("partyFunction", "CS");
+
+    Set<String> errors = VALID_PARTY_FUNCTION_HBL.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    otherParty.put("partyFunction", "SSS");
+    errors = VALID_PARTY_FUNCTION_HBL.validate(rootNode);
+    assertEquals(1, errors.size());
   }
 }

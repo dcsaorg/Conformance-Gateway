@@ -5,6 +5,8 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATIO
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REQUESTED_CARRIER_CLAUSES;
 
 
@@ -666,6 +668,19 @@ public class EBLChecks {
               JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)),
           JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM));
 
+  static final JsonRebaseableContentCheck VALID_PARTY_FUNCTION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The partyFunction in OtherDocumentParty is valid",
+          mav -> mav.submitAllMatching("documentParties.other.*.partyFunction"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE));
+
+  static final JsonRebaseableContentCheck VALID_PARTY_FUNCTION_HBL =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The partyFunction in OtherDocumentParty of houseBillOfLadings is valid",
+          mav ->
+              mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.*.partyFunction"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE_HBL));
+
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
@@ -684,6 +699,8 @@ public class EBLChecks {
     ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
     VALID_REQUESTED_CARRIER_CLAUSES,
     BUYER_AND_SELLER_CONDITIONAL_CHECK,
+    VALID_PARTY_FUNCTION,
+    VALID_PARTY_FUNCTION_HBL,
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
     EBL_AT_MOST_ONE_COPY_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_COPY_WITH_CHARGES,
@@ -811,7 +828,8 @@ public class EBLChecks {
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(MODE_OF_TRANSPORT)
     ),
     NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_CC_T_COMBINATION_UNIQUE
+    TLR_CC_T_COMBINATION_UNIQUE,
+    VALID_PARTY_FUNCTION
   );
 
   public static final JsonContentCheck SIR_REQUIRED_IN_NOTIFICATION = JsonAttribute.mustBePresent(SI_NOTIFICATION_SIR_PTR);

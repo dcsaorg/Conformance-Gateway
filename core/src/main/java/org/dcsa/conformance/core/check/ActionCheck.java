@@ -55,11 +55,11 @@ public abstract class ActionCheck extends ConformanceCheck {
       switch (httpMessageType) {
         case REQUEST -> {
           if (isRelevantForRole(exchange.getRequest().message().sourcePartyRole()))
-            this.addResult(ConformanceResult.forSourceParty(exchange, conformanceErrors));
+            this.addResult(ConformanceResult.forSourceParty(conformanceErrors));
         }
         case RESPONSE -> {
           if (isRelevantForRole(exchange.getRequest().message().targetPartyRole()))
-            this.addResult(ConformanceResult.forTargetParty(exchange, conformanceErrors));
+            this.addResult(ConformanceResult.forTargetParty(conformanceErrors));
         }
       }
     }

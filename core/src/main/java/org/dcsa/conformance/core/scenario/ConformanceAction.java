@@ -202,7 +202,6 @@ public abstract class ConformanceAction implements StatefulEntity {
                           Function<UUID, ConformanceExchange> getExchangeByUuid) {
                         addResult(
                             ConformanceResult.forSourceParty(
-                                getExchangeByUuid.apply(matchedExchangeUuid),
                                 Set.of(exchangeHandlingExceptionMessage)));
                       }
                     },
@@ -214,7 +213,6 @@ public abstract class ConformanceAction implements StatefulEntity {
                           Function<UUID, ConformanceExchange> getExchangeByUuid) {
                         addResult(
                             ConformanceResult.forTargetParty(
-                                getExchangeByUuid.apply(matchedNotificationExchangeUuid),
                                 Set.of(notificationHandlingExceptionMessage)));
                       }
                     },

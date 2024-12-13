@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.dcsa.conformance.standards.booking.checks.BookingChecks.IS_EXPORT_DECLARATION_REFERENCE_PRESENCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BookingChecksTest {
@@ -92,5 +94,48 @@ public class BookingChecksTest {
     assertTrue(
         errors.contains(
             "The 'requestedEquipments[0]' must have cargo gross weight at commodities position 0"));
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_requiredAndPresent() {
+    booking.put("isExportDeclarationRequired", true);
+    booking.put("exportDeclarationReference", "testReference");
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_requiredAndAbsent() {
+    booking.put("isExportDeclarationRequired", true);
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_notRequiredAndAbsent() {
+    booking.put("isExportDeclarationRequired", false);
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_notRequiredAndPresent() {
+    booking.put("isExportDeclarationRequired", false);
+    booking.put("exportDeclarationReference", "testReferenceValue");
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_missingFlagAndAbsent() {
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  void testIsExportDeclarationReferencePresence_missingFlagAndPresent() {
+    booking.put("exportDeclarationReference", "testReference");
+    Set<String> errors = IS_EXPORT_DECLARATION_REFERENCE_PRESENCE.validate(booking);
+    assertEquals(1, errors.size());
   }
 }

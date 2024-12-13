@@ -298,22 +298,22 @@ public class EBLChecks {
     JsonAttribute.unique(COUNTRY_CODE, "type")
   );
 
-
-
-  private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT = JsonAttribute.ifThen(
-    "Validate displayed address length for EBLs",
-      td -> td.path("isElectronic").asBoolean(false),
-      JsonAttribute.allIndividualMatchesMustBeValid(
-      "(not used)",
+  private static final Consumer<MultiAttributeValidator> DISPLAYED_ADDRESS_MAV_CONSUMER =
       mav -> {
         mav.submitAllMatching("documentParties.shipper.displayedAddress");
         mav.submitAllMatching("documentParties.consignee.displayedAddress");
         mav.submitAllMatching("documentParties.endorsee.displayedAddress");
         mav.submitAllMatching("documentParties.notifyParties.*.displayedAddress");
-      },
-      JsonAttribute.matchedMaxLength(2)
-    )
-  );
+      };
+
+  private static final JsonRebaseableContentCheck EBL_DISPLAYED_ADDRESS_LIMIT =
+      JsonAttribute.ifThenElse(
+          "Validate displayed address length for EBLs",
+          td -> td.path("isElectronic").asBoolean(true),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(6)),
+          JsonAttribute.allIndividualMatchesMustBeValid(
+              "(not used)", DISPLAYED_ADDRESS_MAV_CONSUMER, JsonAttribute.matchedMaxLength(2)));
 
   private static final Consumer<MultiAttributeValidator> ALL_UTE = mav -> mav.submitAllMatching("utilizedTransportEquipments.*");
 

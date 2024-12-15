@@ -13,6 +13,7 @@ import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
+
 class JsonAttributeBasedCheck extends ActionCheck {
 
   private final String standardsVersion;

@@ -482,6 +482,7 @@ components:
               maxLength: 75
     UNLocationLocation:
       title: UNLocation Location
+      additionalProperties: false
       x-stoplight:
         id: x4suin19xkq6q
       type: object

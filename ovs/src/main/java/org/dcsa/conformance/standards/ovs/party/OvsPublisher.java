@@ -120,6 +120,7 @@ public class OvsPublisher extends ConformanceParty {
             request.queryParams().containsKey("limit")
                 ? request.queryParams().get("limit").iterator().next()
                 : "100");
+
     if (filteredArray.size() > limit) {
       ArrayNode limitedArray = OBJECT_MAPPER.createArrayNode();
       for (int i = 0; i < limit; i++) {
@@ -129,7 +130,8 @@ public class OvsPublisher extends ConformanceParty {
     }
 
     Map<String, Collection<String>> headers =
-      new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+        new HashMap<>(Map.of(API_VERSION, List.of(apiVersion)));
+
     return request.createResponse(200, headers, new ConformanceMessageBody(filteredArray));
   }
 

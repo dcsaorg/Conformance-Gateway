@@ -6,8 +6,6 @@
   "serviceContractReference": "SERVICE_CONTRACT_REFERENCE_PLACEHOLDER",
   "carrierExportVoyageNumber": "CARRIER_EXPORT_VOYAGE_NUMBER_PLACEHOLDER",
   "carrierServiceName": "CARRIER_SERVICE_NAME_PLACEHOLDER",
-  "isExportDeclarationRequired": false,
-  "isImportLicenseRequired": false,
   "isEquipmentSubstitutionAllowed": true,
   "carrierServiceCode": "TA1",
   "vessel": {

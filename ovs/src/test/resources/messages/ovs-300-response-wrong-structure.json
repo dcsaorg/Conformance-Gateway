@@ -1,9 +1,9 @@
 [
   {
-    "carrierServiceName": "Great Lion Service",
+    "carrierServiceName": "Great Lion Servicedd",
     "carrierServiceCode": "FE1",
     "universalServiceReference": "SR12345A",
-    "vesselSchedules": [
+    "vessels": [
       {
         "vesselOperatorSMDGLinerCode": "HLC",
         "vesselIMONumber": "9321483",
@@ -13,7 +13,7 @@
         "transportCalls": [
           {
             "portVisitReference": "NLAMS1234589",
-            "transportCallReference": "SR12345X-9321483-2107W-NLAMS-ACT-1-1",
+            "transportCallReference": "SR11111X-9321483-2107W-NLAMS-ACT-1-1",
             "carrierImportVoyageNumber": "2103N",
             "carrierExportVoyageNumber": "2103S",
             "universalImportVoyageReference": "2103N",
@@ -28,7 +28,7 @@
               {
                 "eventTypeCode": "ARRI",
                 "eventClassifierCode": "PLN",
-                "eventDateTime": "2024-01-14T09:21:00+01:00",
+                "eventDateTime": "2025-01-14T09:21:00+01:00",
                 "delayReasonCode": "WEA",
                 "changeRemark": "Bad weather"
               }
@@ -39,7 +39,7 @@
     ]
   },
   {
-    "carrierServiceName": "Blue Whale Service",
+    "carrierServiceName": "Great Lion Servicedd",
     "carrierServiceCode": "BW1",
     "universalServiceReference": "SR67890B",
     "vesselSchedules": [
@@ -115,45 +115,5 @@
         ]
       }
     ]
-  },
-  {
-    "carrierServiceName": "Red Eagle Service",
-    "carrierServiceCode": "RF1",
-    "universalServiceReference": "SR54821C",
-    "vesselSchedules": [
-      {
-        "vesselOperatorSMDGLinerCode": "MAE",
-        "vesselIMONumber": "9876543",
-        "vesselName": "Eagle of the Seas",
-        "vesselCallSign": "EGLS",
-        "isDummyVessel": false,
-        "transportCalls": [
-          {
-            "portVisitReference": "USNYC1234567",
-            "transportCallReference": "SR12345Z-9876543-2109W-USNYC-ACT-3-3",
-            "carrierImportVoyageNumber": "2105N",
-            "carrierExportVoyageNumber": "2105S",
-            "universalImportVoyageReference": "2105N",
-            "universalExportVoyageReference": "2105S",
-            "location": {
-              "locationType": "FACS",
-              "UNLocationCode": "USNYC",
-              "facilitySMDGCode": "APM"
-            },
-            "statusCode": "ARRI",
-            "timestamps": [
-              {
-                "eventTypeCode": "ARRI",
-                "eventClassifierCode": "ACT",
-                "eventDateTime": "2025-03-15T10:00:00-05:00",
-                "delayReasonCode": "TRF",
-                "changeRemark": "Heavy traffic"
-              }
-            ]
-          }
-        ]
-      }
-    ]
   }
-
 ]

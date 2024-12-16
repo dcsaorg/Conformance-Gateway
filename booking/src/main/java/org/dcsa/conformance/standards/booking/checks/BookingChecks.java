@@ -191,16 +191,11 @@ public class BookingChecks {
     return mav -> consumer.accept(mav.path("requestedEquipments").all().path("commodities").all().path("outerPackaging").path("dangerousGoods").all());
   }
 
-  private static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
-    "Check Export declaration reference absence",
-    JsonAttribute.isFalse("/isExportDeclarationRequired"),
+  static final JsonContentCheck IS_EXPORT_DECLARATION_REFERENCE_PRESENCE = JsonAttribute.ifThenElse(
+    "Check Export declaration reference presence",
+    JsonAttribute.isTrue(JsonPointer.compile("/isExportDeclarationRequired")),
+    JsonAttribute.mustBePresent(JsonPointer.compile("/exportDeclarationReference")),
     JsonAttribute.mustBeAbsent(JsonPointer.compile("/exportDeclarationReference"))
-  );
-
-  private static final JsonContentCheck IS_IMPORT_DECLARATION_REFERENCE_ABSENCE = JsonAttribute.ifThen(
-    "Check Import declaration reference absence",
-    JsonAttribute.isFalse("/isImportLicenseRequired"),
-    JsonAttribute.mustBeAbsent(JsonPointer.compile("/importLicenseReference"))
   );
 
   private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
@@ -630,8 +625,7 @@ public class BookingChecks {
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
     REFERENCE_TYPE_VALIDATION,
-    IS_EXPORT_DECLARATION_REFERENCE_ABSENCE,
-    IS_IMPORT_DECLARATION_REFERENCE_ABSENCE,
+    IS_EXPORT_DECLARATION_REFERENCE_PRESENCE,
     DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE,
     UNIVERSAL_SERVICE_REFERENCE,
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,

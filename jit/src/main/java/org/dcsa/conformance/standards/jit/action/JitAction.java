@@ -21,17 +21,12 @@ public abstract class JitAction extends ConformanceAction {
     if (previousAction instanceof JitAction previousJitAction && previousJitAction.dsp != null) {
       dsp = previousJitAction.dsp;
     }
-    if (dsp == null) {
-      dsp = new DynamicScenarioParameters();
-    }
   }
 
   @Override
   public void reset() {
     super.reset();
-    if (previousAction != null) {
-      dsp = new DynamicScenarioParameters();
-    }
+    dsp = null;
   }
 
   @Override

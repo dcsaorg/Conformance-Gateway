@@ -34,7 +34,7 @@ public class JitPortCallServiceAction extends JitAction {
         serviceType != null ? "Port Call Service: " + serviceType.name() : "Port Call Service");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
     if (serviceType == null && previousAction instanceof JitPortCallServiceAction && dsp != null) {
-      serviceType = dsp.chosenServiceType();
+      serviceType = dsp.portCallServiceType();
     }
     this.serviceType = serviceType;
   }

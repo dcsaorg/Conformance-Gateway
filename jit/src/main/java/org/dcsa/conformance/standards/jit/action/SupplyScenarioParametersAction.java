@@ -60,13 +60,10 @@ public class SupplyScenarioParametersAction extends JitAction {
         new DynamicScenarioParameters(
             null,
             null,
-            null,
-            null,
-            null,
+            suppliedScenarioParameters.serviceType(),
             suppliedScenarioParameters.portCallID(),
             suppliedScenarioParameters.terminalCallID(),
             suppliedScenarioParameters.portCallServiceID(),
-            suppliedScenarioParameters.serviceType(),
             selector);
   }
 }

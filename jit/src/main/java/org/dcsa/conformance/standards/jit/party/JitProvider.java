@@ -111,7 +111,7 @@ public class JitProvider extends ConformanceParty {
     if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
       serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
     } else {
-      serviceType = dsp.chosenServiceType().name();
+      serviceType = dsp.portCallServiceType().name();
     }
     dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
     JsonNode jsonBody = replacePlaceHolders("port-call-service", dsp);

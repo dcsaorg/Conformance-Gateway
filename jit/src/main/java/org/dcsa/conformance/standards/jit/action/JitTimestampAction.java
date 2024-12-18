@@ -54,10 +54,7 @@ public class JitTimestampAction extends JitAction {
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
     dsp =
         dsp.withPreviousTimestamp(dsp.currentTimestamp())
-            .withCurrentTimestamp(receivedTimestamp)
-            .withTimestampDateTime(receivedTimestamp.dateTime())
-            .withTimestampType(
-                JitTimestampType.fromClassifierCode(receivedTimestamp.classifierCode()));
+            .withCurrentTimestamp(receivedTimestamp);
   }
 
   @Override

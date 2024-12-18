@@ -31,8 +31,11 @@ public class JitPortCallServiceAction extends JitAction {
         context.providerPartyName(),
         context.consumerPartyName(),
         previousAction,
-        "Port Call Service: " + serviceType.name());
+        serviceType != null ? "Port Call Service: " + serviceType.name() : "Port Call Service");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
+    if (serviceType == null && previousAction instanceof JitPortCallServiceAction && dsp != null) {
+      serviceType = dsp.chosenServiceType();
+    }
     this.serviceType = serviceType;
   }
 
@@ -41,7 +44,7 @@ public class JitPortCallServiceAction extends JitAction {
     ObjectNode jsonNode = super.asJsonNode();
     dsp = ((JitAction) previousAction).getDsp();
     jsonNode.set("dsp", dsp.toJson());
-    jsonNode.put(SERVICE_TYPE, serviceType.name());
+    if (serviceType != null) jsonNode.put(SERVICE_TYPE, serviceType.name());
     return jsonNode;
   }
 
@@ -60,15 +63,24 @@ public class JitPortCallServiceAction extends JitAction {
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText())
-            .withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText())
+        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText(null))
+            .withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null))
             .withPortCallServiceType(
-                PortCallServiceType.fromName(requestJsonNode.path("portCallServiceType").asText()));
+                PortCallServiceType.fromName(
+                    requestJsonNode.path("portCallServiceType").asText(null)));
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
+    if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
+    return switch (dsp.selector()) {
+      case FULL_ERP:
+        yield "Send a Port Call Service (PUT) for Full ERP negotiation";
+      case S_A_PATTERN:
+        yield "Send a Port Call Service (PUT) for the 'S-A' pattern";
+      case GIVEN:
+        yield "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
+    };
   }
 
   @Override
@@ -82,7 +94,7 @@ public class JitPortCallServiceAction extends JitAction {
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             JitChecks.createChecksForPortCallService(
-                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, serviceType));
+                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, serviceType, dsp));
       }
     };
   }

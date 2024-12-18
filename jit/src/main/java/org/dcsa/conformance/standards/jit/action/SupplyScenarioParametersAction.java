@@ -1,9 +1,11 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.jit.party.JitConsumer;
 import org.dcsa.conformance.standards.jit.party.SuppliedScenarioParameters;
@@ -11,11 +13,13 @@ import org.dcsa.conformance.standards.jit.party.SuppliedScenarioParameters;
 @Slf4j
 public class SupplyScenarioParametersAction extends JitAction {
 
-  public static final String PARAMETERS = "suppliedScenarioParameters";
   @Getter private SuppliedScenarioParameters suppliedScenarioParameters;
+  private final JitServiceTypeSelector selector;
 
-  public SupplyScenarioParametersAction(JitScenarioContext context) {
+  public SupplyScenarioParametersAction(
+      JitScenarioContext context, JitServiceTypeSelector selector) {
     super(context.consumerPartyName(), null, null, "SupplyScenarioParameters");
+    this.selector = selector;
   }
 
   @Override
@@ -25,13 +29,20 @@ public class SupplyScenarioParametersAction extends JitAction {
   }
 
   @Override
+  public ObjectNode asJsonNode() {
+    ObjectNode jsonNode = super.asJsonNode();
+    jsonNode.put("selector", selector.name());
+    return jsonNode;
+  }
+
+  @Override
   public String getHumanReadablePrompt() {
     return "Supply the parameters required by the scenario:";
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return JitConsumer.createSuppliedScenarioParameters().toJson();
+    return JitConsumer.createSuppliedScenarioParameters(selector).toJson();
   }
 
   @Override
@@ -46,14 +57,16 @@ public class SupplyScenarioParametersAction extends JitAction {
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
 
     dsp =
-      new DynamicScenarioParameters(
-        null,
-        null,
-        null,
-        null,
-        null,
-        suppliedScenarioParameters.portCallID(),
-        null,
-        suppliedScenarioParameters.portCallServiceID());
+        new DynamicScenarioParameters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            suppliedScenarioParameters.portCallID(),
+            suppliedScenarioParameters.terminalCallID(),
+            suppliedScenarioParameters.portCallServiceID(),
+            suppliedScenarioParameters.serviceType(),
+            selector);
   }
 }

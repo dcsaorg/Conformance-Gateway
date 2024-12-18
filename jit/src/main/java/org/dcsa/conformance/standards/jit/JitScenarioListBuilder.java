@@ -11,6 +11,7 @@ import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
@@ -27,8 +28,8 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     // 1. Scenario group: "PC - TC - S - V - E - R - P - A"
     var scenarioList = new LinkedHashMap<String, JitScenarioListBuilder>();
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "1. PC - TC - S - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.GIVEN)
             .thenEither(
                 PortCallServiceType.getServicesWithERPAndA().stream()
                     .map(
@@ -42,8 +43,8 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     // 2. Scenario group: "S-A service types"
     scenarioList.put(
-        "PC - TC - S - V - A",
-        supplyScenarioParameters(context)
+        "2. PC - TC - S - V - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.GIVEN)
             .thenEither(
                 PortCallServiceType.getServicesHavingOnlyA().stream()
                     .map(
@@ -74,294 +75,221 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroup4(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - A - A",
-        supplyScenarioParameters(context)
+        "4. PC - TC - S - V - E - R - P - A - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.ACTUAL)
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
 
     // TODO: Not sure, to add this one: PC - TC - S - V - E - R - P - P - A
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - R - P - A",
-        supplyScenarioParameters(context)
+        "4. PC - TC - S - V - E - R - P - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.REQUESTED)
+                            .then(
+                                sendTimestamp(context, JitTimestampType.PLANNED)
+                                    .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))));
+
+    scenarioList.put(
+        "4. PC - TC - S - V - E - R - P - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendERPTimestamps(
+                            context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
+
+    scenarioList.put(
+        "4. PC - TC - S - V - E - R - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendERPTimestamps(
+                                        context,
+                                        sendTimestamp(context, JitTimestampType.ACTUAL)))))));
+
+    scenarioList.put(
+        "4. PC - TC - S - V - E - R - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
                                     sendTimestamp(context, JitTimestampType.REQUESTED)
                                         .then(
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))
-                    .toList()));
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - E - R - P - A",
-        supplyScenarioParameters(context)
+        "4. PC - TC - S - V - E - E - R - P - A service types",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendERPTimestamps(
-                                        context, sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - E - R - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.REQUESTED)
-                                            .then(
-                                                sendERPTimestamps(
-                                                    context,
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - R - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.REQUESTED)
-                                            .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - E - R - P - A service types",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendERPTimestamps(
-                                            context,
-                                            sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendERPTimestamps(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
   }
 
   // 5. Scenario group: "PC-TC-S-V-ERP-A in-band PC-resend variations"
   private static void addScenarioGroup5(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "PC - PC - TC - S - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "5. PC - PC - TC - S - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            portCall(context)
-                                .then(
-                                    portCall(context)
-                                        .then(
-                                            sendPC_TC_PCS_VS(
-                                                context,
-                                                serviceType,
-                                                sendERPTimestamps(
-                                                    context,
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))
-                    .toList()));
+                portCall(context)
+                    .then(
+                        portCall(context)
+                            .then(
+                                sendPC_TC_PCS_VS(
+                                    context,
+                                    null,
+                                    sendERPTimestamps(
+                                        context,
+                                        sendTimestamp(context, JitTimestampType.ACTUAL)))))));
 
     scenarioList.put(
-        "PC - TC - PC - S - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "5. PC - TC - PC - S - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                portCall(context)
+                                    .then(
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendERPTimestamps(
+                                                            context,
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
+
+    scenarioList.put(
+        "5. PC - TC - S - PC - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
+                                    .then(
+                                        portCall(context)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendERPTimestamps(
+                                                            context,
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
+
+    scenarioList.put(
+        "5. PC - TC - S - V - PC - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    portCall(context)
+                        .then(
+                            sendERPTimestamps(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
+
+    scenarioList.put(
+        "5. PC - TC - S - V - E - PC - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
                             portCall(context)
                                 .then(
-                                    terminalCall(context)
+                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
+
+    scenarioList.put(
+        "5. PC - TC - S - V - E - R - PC - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            portCall(context)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.REQUESTED)
                                         .then(
                                             portCall(context)
                                                 .then(
-                                                    serviceCall(context, serviceType)
+                                                    sendTimestamp(context, JitTimestampType.PLANNED)
                                                         .then(
-                                                            vesselStatus(context)
-                                                                .then(
-                                                                    sendERPTimestamps(
-                                                                        context,
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
 
     scenarioList.put(
-        "PC - TC - S - PC - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "5. PC - TC - S - V - E - R - P - PC - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            portCall(context)
-                                .then(
-                                    terminalCall(context)
-                                        .then(
-                                            serviceCall(context, serviceType)
-                                                .then(
-                                                    portCall(context)
-                                                        .then(
-                                                            vesselStatus(context)
-                                                                .then(
-                                                                    sendERPTimestamps(
-                                                                        context,
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
 
     scenarioList.put(
-        "PC - TC - S - V - PC - E - R - P - A",
-        supplyScenarioParameters(context)
+        "5. PC - TC - S - V - E - R - P - A - PC",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                portCall(context)
-                                    .then(
-                                        sendERPTimestamps(
-                                            context,
-                                            sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - PC - R - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        portCall(context)
-                                            .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - PC - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        portCall(context)
-                                            .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
-                                                    .then(
-                                                        portCall(context)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                        context,
-                                                                        JitTimestampType.PLANNED)
-                                                                    .then(
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - P - PC - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    portCall(context)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - P - A - PC",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                                        .then(portCall(context)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))))));
   }
 
   // 6. Scenario group: "PC-TC-S-V-ERP-A in-band TC-resend variations"
@@ -369,378 +297,288 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
 
     scenarioList.put(
-        "PC - TC - TC - S - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "6. PC - TC - TC - S - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            portCall(context)
-                                .then(
-                                    terminalCall(context)
-                                        .then(
-                                            terminalCall(context)
-                                                .then(
-                                                    serviceCall(context, serviceType)
-                                                        .then(
-                                                            vesselStatus(context)
-                                                                .then(
-                                                                    sendERPTimestamps(
-                                                                        context,
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - TC - V - E - R - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            portCall(context)
-                                .then(
-                                    terminalCall(context)
-                                        .then(
-                                            serviceCall(context, serviceType)
-                                                .then(
-                                                    terminalCall(context)
-                                                        .then(
-                                                            vesselStatus(context)
-                                                                .then(
-                                                                    sendERPTimestamps(
-                                                                        context,
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - TC - E - R - P - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
                                 terminalCall(context)
                                     .then(
-                                        sendERPTimestamps(
-                                            context,
-                                            sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendERPTimestamps(
+                                                            context,
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - TC - R - P - A",
-        supplyScenarioParameters(context)
+        "6. PC - TC - S - TC - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
                                     .then(
                                         terminalCall(context)
                                             .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
+                                                vesselStatus(context)
                                                     .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
+                                                        sendERPTimestamps(
+                                                            context,
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - TC - P - A",
-        supplyScenarioParameters(context)
+        "6. PC - TC - S - V - TC - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.REQUESTED)
-                                            .then(
-                                                terminalCall(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    terminalCall(context)
+                        .then(
+                            sendERPTimestamps(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
 
     scenarioList.put(
-        "PC - TC - S- V - E - R - P - TC - A",
-        supplyScenarioParameters(context)
+        "6. PC - TC - S - V - E - TC - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            terminalCall(context)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
+
+    scenarioList.put(
+        "6. PC - TC - S - V - E - R - TC - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
                                     terminalCall(context)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - A - TC",
-        supplyScenarioParameters(context)
+        "6. PC - TC - S- V - E - R - P - TC - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                                        .then(terminalCall(context)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        terminalCall(context)
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
+
+    scenarioList.put(
+        "6. PC - TC - S - V - E - R - P - A - TC",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.ACTUAL)
+                            .then(terminalCall(context))))));
   }
 
   // 7. Scenario group: "PC-TC-S-V-ERP-A in-band S-resend variations"
   private static void addScenarioGroup7(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "PC - TC - S - S - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "7. PC - TC - S - S - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            portCall(context)
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
+                                    .then(
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendERPTimestamps(
+                                                            context,
+                                                            sendTimestamp(
+                                                                context,
+                                                                JitTimestampType.ACTUAL)))))))));
+
+    scenarioList.put(
+        "7. PC - TC - S - V - S - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    serviceCall(context, null)
+                        .then(
+                            sendERPTimestamps(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
+
+    scenarioList.put(
+        "7. PC - TC - S - V - E - S - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            serviceCall(context, null)
                                 .then(
-                                    terminalCall(context)
+                                    sendTimestamp(context, JitTimestampType.REQUESTED)
                                         .then(
-                                            serviceCall(context, serviceType)
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
-                                                    serviceCall(context, serviceType)
-                                                        .then(
-                                                            vesselStatus(context)
-                                                                .then(
-                                                                    sendERPTimestamps(
-                                                                        context,
-                                                                        sendTimestamp(
-                                                                            context,
-                                                                            JitTimestampType
-                                                                                .ACTUAL))))))))
-                    .toList()));
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - S - E - R - P - A",
-        supplyScenarioParameters(context)
+        "7. PC - TC - S - V - E - R - S - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                serviceCall(context, serviceType)
-                                    .then(
-                                        sendERPTimestamps(
-                                            context,
-                                            sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    serviceCall(context, null)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - S - R - P - A",
-        supplyScenarioParameters(context)
+        "7. PC - TC - S - V - E - R - P - S - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        serviceCall(context, serviceType)
-                                            .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        serviceCall(context, null)
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - S - P - A",
-        supplyScenarioParameters(context)
+        "7. PC - TC - S - V - E - R - P - A - S",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.REQUESTED)
-                                            .then(
-                                                serviceCall(context, serviceType)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - P - S - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    serviceCall(context, serviceType)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - P - A - S",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                                        .then(serviceCall(context, serviceType)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.ACTUAL)
+                            .then(serviceCall(context, null))))));
   }
 
   // 8. Scenario group: "PC-TC-S-V-ERP-A in-band V-resend variations"
   private static void addScenarioGroup8(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "PC - TC - S - V - V - E - R - P - A",
-        supplyScenarioParameters(context)
+        "8. PC - TC - S - V - V - E - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                vesselStatus(context)
-                                    .then(
-                                        sendERPTimestamps(
-                                            context,
-                                            sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    vesselStatus(context)
+                        .then(
+                            sendERPTimestamps(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - V - R - P - A",
-        supplyScenarioParameters(context)
+        "8. PC - TC - S - V - E - V - R - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        vesselStatus(context)
-                                            .then(
-                                                sendTimestamp(context, JitTimestampType.REQUESTED)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            vesselStatus(context)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - V - P - A",
-        supplyScenarioParameters(context)
+        "8. PC - TC - S - V - E - R - V - P - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendTimestamp(context, JitTimestampType.ESTIMATED)
-                                    .then(
-                                        sendTimestamp(context, JitTimestampType.REQUESTED)
-                                            .then(
-                                                vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                                context, JitTimestampType.PLANNED)
-                                                            .then(
-                                                                sendTimestamp(
-                                                                    context,
-                                                                    JitTimestampType.ACTUAL)))))))
-                    .toList()));
-
-    scenarioList.put(
-        "PC - TC - S - V - E - R - P - V - A",
-        supplyScenarioParameters(context)
-            .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
                                     vesselStatus(context)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))
-                    .toList()));
+                                        .then(
+                                            sendTimestamp(context, JitTimestampType.PLANNED)
+                                                .then(
+                                                    sendTimestamp(
+                                                        context, JitTimestampType.ACTUAL))))))));
 
     scenarioList.put(
-        "PC - TC - S - V - E - R - P - A - V",
-        supplyScenarioParameters(context)
+        "8. PC - TC - S - V - E - R - P - V - A",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
-                    .map(
-                        serviceType ->
-                            sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                sendERPTimestamps(
-                                    context,
-                                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                                        .then(vesselStatus(context)))))
-                    .toList()));
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        vesselStatus(context)
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
+
+    scenarioList.put(
+        "8. PC - TC - S - V - E - R - P - A - V",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, JitTimestampType.ACTUAL)
+                            .then(vesselStatus(context))))));
   }
 
   // 9. Scenario group: "PC-TC-S-V-ERP-A out-of-band variations"
@@ -790,9 +628,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     super(actionBuilder);
   }
 
-  private static JitScenarioListBuilder supplyScenarioParameters(JitScenarioContext context) {
+  private static JitScenarioListBuilder supplyScenarioParameters(
+      JitScenarioContext context, JitServiceTypeSelector selector) {
     return new JitScenarioListBuilder(
-        previousAction -> new SupplyScenarioParametersAction(context));
+        previousAction -> new SupplyScenarioParametersAction(context, selector));
   }
 
   private static JitScenarioListBuilder portCall(JitScenarioContext context) {

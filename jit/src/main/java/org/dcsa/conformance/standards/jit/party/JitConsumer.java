@@ -20,8 +20,10 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
 @Slf4j
 public class JitConsumer extends ConformanceParty {
@@ -67,7 +69,9 @@ public class JitConsumer extends ConformanceParty {
   private void supplyScenarioParameters(JsonNode actionPrompt) {
     log.info("JitConsumer.supplyScenarioParameters({})", actionPrompt.toPrettyString());
 
-    SuppliedScenarioParameters parameters = createSuppliedScenarioParameters();
+    JitServiceTypeSelector selector =
+        JitServiceTypeSelector.valueOf(actionPrompt.required("selector").asText(null));
+    SuppliedScenarioParameters parameters = createSuppliedScenarioParameters(selector);
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(), parameters.toJson());
 
@@ -75,9 +79,19 @@ public class JitConsumer extends ConformanceParty {
         "Submitted SuppliedScenarioParameters: %s".formatted(parameters.toJson().toPrettyString()));
   }
 
-  public static SuppliedScenarioParameters createSuppliedScenarioParameters() {
+  public static SuppliedScenarioParameters createSuppliedScenarioParameters(
+      JitServiceTypeSelector selector) {
+    PortCallServiceType type =
+        switch (selector) {
+          case FULL_ERP -> PortCallServiceType.getServicesWithERPAndA().iterator().next();
+          case S_A_PATTERN -> PortCallServiceType.getServicesHavingOnlyA().iterator().next();
+          case GIVEN -> null;
+        };
     return new SuppliedScenarioParameters(
-        UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        UUID.randomUUID().toString(),
+        UUID.randomUUID().toString(),
+        UUID.randomUUID().toString(),
+        type);
   }
 
   private void timestampRequest(JsonNode actionPrompt) {
@@ -91,8 +105,7 @@ public class JitConsumer extends ConformanceParty {
     }
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
-    JitTimestamp timestamp =
-        JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
+    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
@@ -114,8 +127,7 @@ public class JitConsumer extends ConformanceParty {
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
     } else {
-      addOperatorLogEntry(
-        "Handled request accepted.");
+      addOperatorLogEntry("Handled request accepted.");
     }
 
     return request.createResponse(

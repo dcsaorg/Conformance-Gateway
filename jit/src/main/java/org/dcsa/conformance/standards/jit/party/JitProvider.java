@@ -107,7 +107,12 @@ public class JitProvider extends ConformanceParty {
     log.info("JitProvider.portCallServiceRequest({})", actionPrompt.toPrettyString());
 
     DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
-    String serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
+    String serviceType;
+    if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
+      serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
+    } else {
+      serviceType = dsp.chosenServiceType().name();
+    }
     dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
     JsonNode jsonBody = replacePlaceHolders("port-call-service", dsp);
 

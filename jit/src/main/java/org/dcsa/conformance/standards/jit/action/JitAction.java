@@ -8,9 +8,10 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 
 @Slf4j
+@Getter
 public abstract class JitAction extends ConformanceAction {
 
-  @Getter protected DynamicScenarioParameters dsp;
+  protected DynamicScenarioParameters dsp;
 
   protected JitAction(
       String sourcePartyName,

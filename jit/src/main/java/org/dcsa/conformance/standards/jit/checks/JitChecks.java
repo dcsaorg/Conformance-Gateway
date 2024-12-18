@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.check.JsonContentCheck;
 import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
@@ -31,16 +32,25 @@ public class JitChecks {
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      PortCallServiceType serviceType) {
+      PortCallServiceType serviceType,
+      DynamicScenarioParameters dsp) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(checkRightFieldValues());
+    if (serviceType != null) {
+      checks.add(checkPortCallService(serviceType));
+    }
+    if (dsp != null) {
+      checks = List.of(checkPortCallServiceRightType(dsp));
+    }
     return JsonAttribute.contentChecks(
         isRelevantForRoleName,
         matchedExchangeUuid,
         HttpMessageType.REQUEST,
         expectedApiVersion,
-        List.of(checkPortCallService(serviceType), checkRightFieldValues()));
+        checks);
   }
 
-  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceID");
+  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceType");
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.ifThen(
@@ -50,6 +60,26 @@ public class JitChecks {
             "Check if the correct Port Call Service was supplied.",
             JsonPointer.compile("/portCallServiceType"),
             serviceType::name));
+  }
+
+  static JsonContentCheck checkPortCallServiceRightType(DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Port Call Service type should match scenario '%s'.".formatted(dsp.selector().name()),
+        body -> {
+          if (IS_PORT_CALL_SERVICE.test(body)) {
+            String actualServiceType = body.path("portCallServiceType").asText();
+            PortCallServiceType serviceType = PortCallServiceType.fromName(actualServiceType);
+            if ((dsp.selector() == JitServiceTypeSelector.FULL_ERP
+                    && !PortCallServiceType.getServicesWithERPAndA().contains(serviceType))
+                || (dsp.selector() == JitServiceTypeSelector.S_A_PATTERN
+                    && !PortCallServiceType.getServicesHavingOnlyA().contains(serviceType))) {
+              return Set.of(
+                  "Expected matching Port Call Service type with scenario '%s'. Found non-matching type: '%s'"
+                      .formatted(dsp.selector().getFullName(), actualServiceType));
+            }
+          }
+          return Collections.emptySet();
+        });
   }
 
   static JsonContentCheck checkRightFieldValues() {

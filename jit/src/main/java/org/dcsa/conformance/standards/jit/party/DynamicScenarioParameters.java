@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.With;
 import org.dcsa.conformance.core.party.ScenarioParameters;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
@@ -20,11 +21,13 @@ public record DynamicScenarioParameters(
     String timestampDateTime,
     String portCallID,
     String terminalCallID,
-    String portCallServiceID)
+    String portCallServiceID,
+    PortCallServiceType chosenServiceType,
+    JitServiceTypeSelector selector)
     implements ScenarioParameters {
 
   public DynamicScenarioParameters() {
-    this(null, null, null, null, null, null, null, null);
+    this(null, null, null, null, null, null, null, null, null, null);
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {

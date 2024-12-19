@@ -116,6 +116,11 @@ public class JitProvider extends ConformanceParty {
     dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
     JsonNode jsonBody = replacePlaceHolders("port-call-service", dsp);
 
+    // Only MOVES service type requires the Moves part of the request. Removing it from the others.
+    if (dsp.portCallServiceType() != PortCallServiceType.MOVES) {
+      ((ObjectNode) jsonBody).remove("moves");
+    }
+
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
     addOperatorLogEntry("Submitted %s Port Call Service request".formatted(serviceType));

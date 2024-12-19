@@ -39,8 +39,8 @@ public class JitChecks {
     if (serviceType != null) {
       checks.add(checkPortCallService(serviceType));
     }
-    if (dsp != null) {
-      checks = List.of(checkPortCallServiceRightType(dsp));
+    if (dsp != null && dsp.selector() != JitServiceTypeSelector.GIVEN) {
+      checks.add(checkPortCallServiceRightType(dsp));
     }
     return JsonAttribute.contentChecks(
         isRelevantForRoleName,

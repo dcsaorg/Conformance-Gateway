@@ -14,6 +14,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
+import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
@@ -78,7 +79,7 @@ public class JitTimestampAction extends JitAction {
             JitChecks.createChecksForTimestamp(getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
-              new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), "PUT"),
+              new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
               new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
               new JsonSchemaCheck(
                   JitRole::isProvider,
@@ -89,7 +90,7 @@ public class JitTimestampAction extends JitAction {
         }
         // Consumer sends requested timestamp
         return Stream.of(
-            new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), "PUT"),
+            new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(
                 JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),

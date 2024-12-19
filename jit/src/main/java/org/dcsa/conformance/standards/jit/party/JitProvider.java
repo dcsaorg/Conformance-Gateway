@@ -84,7 +84,8 @@ public class JitProvider extends ConformanceParty {
   private void portCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody = replacePlaceHolders("port-call", dsp);
     syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
 
@@ -95,7 +96,8 @@ public class JitProvider extends ConformanceParty {
   private void terminalCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.terminalCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     if (dsp.terminalCallID() == null) {
       dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
     }
@@ -109,7 +111,8 @@ public class JitProvider extends ConformanceParty {
   private void portCallServiceRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallServiceRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     String serviceType;
     if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
       serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
@@ -126,13 +129,14 @@ public class JitProvider extends ConformanceParty {
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
-    addOperatorLogEntry("Submitted %s Port Call Service request".formatted(serviceType));
+    addOperatorLogEntry("Submitted %s Port Call Service request with portCallServiceID: %s".formatted(serviceType, dsp.portCallServiceID()));
   }
 
   private void vesselStatusRequest(JsonNode actionPrompt) {
     log.info("JitProvider.vesselStatusRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody = replacePlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
@@ -146,7 +150,8 @@ public class JitProvider extends ConformanceParty {
     JitTimestampType timestampType =
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp previousTimestamp =
         dsp.currentTimestamp(); // currentTimestamp is still the value from the previous action.
 
@@ -163,7 +168,8 @@ public class JitProvider extends ConformanceParty {
   private void cancelCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.cancelCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()
@@ -267,15 +273,17 @@ public class JitProvider extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("JitProvider.handleRequest({})", request);
 
-    JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
-
-    addOperatorLogEntry(
-        "Handled %s timestamp accepted for: %s and remark: %s"
-            .formatted(
-                JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
-                timestamp.dateTime(),
-                timestamp.remark()));
-
+    if (request.url().endsWith("/decline")) {
+      addOperatorLogEntry("Handled Decline request accepted.");
+    } else {
+      JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
+      addOperatorLogEntry(
+          "Handled %s timestamp accepted for: %s and remark: %s"
+              .formatted(
+                  JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
+                  timestamp.dateTime(),
+                  timestamp.remark()));
+    }
     return request.createResponse(
         204,
         Map.of(API_VERSION, List.of(apiVersion)),

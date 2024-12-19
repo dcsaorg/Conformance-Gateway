@@ -19,6 +19,7 @@ import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
+import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -64,7 +65,9 @@ public class JitConsumer extends ConformanceParty {
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
-        Map.entry(JitTimestampAction.class, this::timestampRequest));
+        Map.entry(JitTimestampAction.class, this::timestampRequest),
+        Map.entry(JitDeclineAction.class, this::declineRequest)
+    );
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -114,6 +117,22 @@ public class JitConsumer extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
+  }
+
+  private void declineRequest(JsonNode actionPrompt) {
+    log.info("JitConsumer.decline({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    JsonNode jsonBody =
+      OBJECT_MAPPER
+        .createObjectNode()
+        .put("reason", "Declined, because crane broken.")
+        .put("isFYI", false);
+    syncCounterpartPost(
+      JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+
+    addOperatorLogEntry(
+      "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
   }
 
   @Override

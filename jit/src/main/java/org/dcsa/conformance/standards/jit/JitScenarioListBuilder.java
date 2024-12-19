@@ -159,11 +159,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     // Scenario: “PC - TC - S(Moves) - D” - Decline
   }
 
-  // 4. Scenario group: "PC-TC-S-V-ERP-A in-band ERP variations"
   private static void addScenarioGroup4(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+
+    // TODO: Not sure, to add this one: PC - TC - S - V - E - R - P - P - A
+
     scenarioList.put(
-        "4. PC - TC - S - V - E - R - P - A - A",
+        "4. PC-TC-S-V-ERP-A in-band ERP variations",
         supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
                 sendPC_TC_PCS_VS(
@@ -172,14 +174,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    // TODO: Not sure, to add this one: PC - TC - S - V - E - R - P - P - A
-
-    scenarioList.put(
-        "4. PC - TC - S - V - E - R - P - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -188,24 +183,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         sendTimestamp(context, JitTimestampType.REQUESTED)
                             .then(
                                 sendTimestamp(context, JitTimestampType.PLANNED)
-                                    .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))));
-
-    scenarioList.put(
-        "4. PC - TC - S - V - E - R - P - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                    .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     sendERPTimestamps(
                         context,
                         sendERPTimestamps(
-                            context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "4. PC - TC - S - V - E - R - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                            context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -215,12 +200,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 .then(
                                     sendERPTimestamps(
                                         context,
-                                        sendTimestamp(context, JitTimestampType.ACTUAL)))))));
-
-    scenarioList.put(
-        "4. PC - TC - S - V - E - R - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                        sendTimestamp(context, JitTimestampType.ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -233,12 +213,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "4. PC - TC - S - V - E - E - R - P - A service types",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -248,11 +223,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
   }
 
-  // 5. Scenario group: "PC-TC-S-V-ERP-A in-band PC-resend variations"
   private static void addScenarioGroup5(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "5. PC - PC - TC - S - V - E - R - P - A",
+        "5. PC-TC-S-V-ERP-A in-band PC-resend variations",
         supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
                 portCall(context)
@@ -264,12 +238,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                     null,
                                     sendERPTimestamps(
                                         context,
-                                        sendTimestamp(context, JitTimestampType.ACTUAL)))))));
-
-    scenarioList.put(
-        "5. PC - TC - PC - S - V - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                        sendTimestamp(context, JitTimestampType.ACTUAL))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -284,12 +253,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                             context,
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - PC - V - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -304,24 +268,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                             context,
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - V - PC - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     portCall(context)
                         .then(
                             sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - V - E - PC - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -334,12 +288,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - V - E - R - PC - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -355,23 +304,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                         .then(
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - V - E - R - P - PC - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     sendERPTimestamps(
                         context,
-                        portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "5. PC - TC - S - V - E - R - P - A - PC",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                        portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -380,12 +319,11 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))))));
   }
 
-  // 6. Scenario group: "PC-TC-S-V-ERP-A in-band TC-resend variations"
   private static void addScenarioGroup6(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
 
     scenarioList.put(
-        "6. PC - TC - TC - S - V - E - R - P - A",
+        "6. PC-TC-S-V-ERP-A in-band TC-resend variations",
         supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
                 portCall(context)
@@ -402,12 +340,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                             context,
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "6. PC - TC - S - TC - V - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -422,24 +355,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                             context,
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "6. PC - TC - S - V - TC - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     terminalCall(context)
                         .then(
                             sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "6. PC - TC - S - V - E - TC - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -452,12 +375,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "6. PC - TC - S - V - E - R - TC - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -470,24 +388,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "6. PC - TC - S- V - E - R - P - TC - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     sendERPTimestamps(
                         context,
                         terminalCall(context)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "6. PC - TC - S - V - E - R - P - A - TC",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -497,11 +405,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(terminalCall(context))))));
   }
 
-  // 7. Scenario group: "PC-TC-S-V-ERP-A in-band S-resend variations"
   private static void addScenarioGroup7(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "7. PC - TC - S - S - V - E - R - P - A",
+        "7. PC-TC-S-V-ERP-A in-band S-resend variations",
         supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
                 portCall(context)
@@ -518,24 +425,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                             context,
                                                             sendTimestamp(
                                                                 context,
-                                                                JitTimestampType.ACTUAL)))))))));
-
-    scenarioList.put(
-        "7. PC - TC - S - V - S - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                                JitTimestampType.ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     serviceCall(context, null)
                         .then(
                             sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "7. PC - TC - S - V - E - S - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -548,12 +445,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "7. PC - TC - S - V - E - R - S - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -566,24 +458,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "7. PC - TC - S - V - E - R - P - S - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     sendERPTimestamps(
                         context,
                         serviceCall(context, null)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "7. PC - TC - S - V - E - R - P - A - S",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -593,11 +475,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(serviceCall(context, null))))));
   }
 
-  // 8. Scenario group: "PC-TC-S-V-ERP-A in-band V-resend variations"
   private static void addScenarioGroup8(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "8. PC - TC - S - V - V - E - R - P - A",
+        "8. PC-TC-S-V-ERP-A in-band V-resend variations",
         supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
             .thenEither(
                 sendPC_TC_PCS_VS(
@@ -606,12 +487,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     vesselStatus(context)
                         .then(
                             sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "8. PC - TC - S - V - E - V - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -624,12 +500,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "8. PC - TC - S - V - E - R - V - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
@@ -642,24 +513,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
                                                     sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL))))))));
-
-    scenarioList.put(
-        "8. PC - TC - S - V - E - R - P - V - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                                                        context, JitTimestampType.ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     sendERPTimestamps(
                         context,
                         vesselStatus(context)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL))))));
-
-    scenarioList.put(
-        "8. PC - TC - S - V - E - R - P - A - V",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
-            .thenEither(
+                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,

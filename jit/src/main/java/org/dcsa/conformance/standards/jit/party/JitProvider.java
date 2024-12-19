@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -75,7 +76,8 @@ public class JitProvider extends ConformanceParty {
         Map.entry(JitTerminalCallAction.class, this::terminalCallRequest),
         Map.entry(JitPortCallServiceAction.class, this::portCallServiceRequest),
         Map.entry(JitVesselStatusAction.class, this::vesselStatusRequest),
-        Map.entry(JitTimestampAction.class, this::timestampRequest));
+        Map.entry(JitTimestampAction.class, this::timestampRequest),
+        Map.entry(JitCancelAction.class, this::cancelCallRequest));
   }
 
   private void portCallRequest(JsonNode actionPrompt) {
@@ -155,6 +157,22 @@ public class JitProvider extends ConformanceParty {
     }
     JitTimestamp timestamp = getTimestampForType(timestampType, previousTimestamp);
     sendTimestampPutRequest(timestampType, timestamp);
+  }
+
+  private void cancelCallRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.cancelCallRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    JsonNode jsonBody =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("reason", "Cancelled, because storm is coming.")
+            .put("isFYI", false);
+    syncCounterpartPost(
+        JitStandard.CANCEL_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+
+    addOperatorLogEntry(
+        "Submitted Cancel for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
   }
 
   static JitTimestamp getTimestampForType(

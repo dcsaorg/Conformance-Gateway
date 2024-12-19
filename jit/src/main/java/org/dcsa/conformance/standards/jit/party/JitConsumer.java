@@ -126,7 +126,10 @@ public class JitConsumer extends ConformanceParty {
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
-    } else {
+    } else if (request.url().endsWith("/cancel")) {
+      addOperatorLogEntry("Handled Cancel request accepted.");
+    }
+    else {
       addOperatorLogEntry("Handled request accepted.");
     }
 

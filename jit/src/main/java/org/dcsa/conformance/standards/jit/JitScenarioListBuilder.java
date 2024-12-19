@@ -5,6 +5,7 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
+import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -151,10 +152,20 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         terminalCall(context)
                             .then(
                                 serviceCall(context, PortCallServiceType.MOVES)
-                                    .then(vesselStatus(context).then(vesselStatus(context)))))));
+                                    .then(vesselStatus(context).then(vesselStatus(context))))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, PortCallServiceType.MOVES)
+                                    .then(vesselStatus(context).then(cancelCall(context))))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, PortCallServiceType.MOVES)
+                                    .then(cancelCall(context))))));
     // TODO:
-    // Scenario: “PC - TC - S(Moves) - V - C” - Cancel
-    // Scenario: “PC - TC - S(Moves) - C” - Cancel
     // Scenario: “PC - TC - S(Moves) - V - D” - Decline
     // Scenario: “PC - TC - S(Moves) - D” - Decline
   }
@@ -602,6 +613,11 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static JitScenarioListBuilder vesselStatus(JitScenarioContext context) {
     return new JitScenarioListBuilder(
         previousAction -> new JitVesselStatusAction(context, previousAction));
+  }
+
+  private static JitScenarioListBuilder cancelCall(JitScenarioContext context) {
+    return new JitScenarioListBuilder(
+        previousAction -> new JitCancelAction(context, previousAction));
   }
 
   private static JitScenarioListBuilder sendPC_TC_PCS_VS(

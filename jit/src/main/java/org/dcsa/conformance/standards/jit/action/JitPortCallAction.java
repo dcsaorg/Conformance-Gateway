@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +20,6 @@ public class JitPortCallAction extends JitAction {
   public JitPortCallAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(context.providerPartyName(), context.consumerPartyName(), previousAction, "Port Call");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL);
-  }
-
-  @Override
-  public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = super.asJsonNode();
-    dsp = ((JitAction) previousAction).getDsp();
-    jsonNode.set("dsp", dsp.toJson());
-    return jsonNode;
   }
 
   @Override

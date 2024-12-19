@@ -61,8 +61,6 @@ public class JitTimestampAction extends JitAction {
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("timestampType", timestampType.name());
-    dsp = ((JitAction) previousAction).getDsp();
-    jsonNode.set("dsp", dsp.toJson());
     return jsonNode;
   }
 

@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
@@ -83,7 +84,7 @@ public class JitProvider extends ConformanceParty {
   private void portCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody = replacePlaceHolders("port-call", dsp);
     syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
 
@@ -94,7 +95,7 @@ public class JitProvider extends ConformanceParty {
   private void terminalCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.terminalCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     if (dsp.terminalCallID() == null) {
       dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
     }
@@ -108,7 +109,7 @@ public class JitProvider extends ConformanceParty {
   private void portCallServiceRequest(JsonNode actionPrompt) {
     log.info("JitProvider.portCallServiceRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     String serviceType;
     if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
       serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
@@ -131,7 +132,7 @@ public class JitProvider extends ConformanceParty {
   private void vesselStatusRequest(JsonNode actionPrompt) {
     log.info("JitProvider.vesselStatusRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody = replacePlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
@@ -145,7 +146,7 @@ public class JitProvider extends ConformanceParty {
     JitTimestampType timestampType =
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp previousTimestamp =
         dsp.currentTimestamp(); // currentTimestamp is still the value from the previous action.
 
@@ -162,7 +163,7 @@ public class JitProvider extends ConformanceParty {
   private void cancelCallRequest(JsonNode actionPrompt) {
     log.info("JitProvider.cancelCallRequest({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()

@@ -42,8 +42,6 @@ public class JitPortCallServiceAction extends JitAction {
   @Override
   public ObjectNode asJsonNode() {
     ObjectNode jsonNode = super.asJsonNode();
-    dsp = ((JitAction) previousAction).getDsp();
-    jsonNode.set("dsp", dsp.toJson());
     if (serviceType != null) jsonNode.put(SERVICE_TYPE, serviceType.name());
     return jsonNode;
   }

@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +21,6 @@ public class JitTerminalCallAction extends JitAction {
     super(
         context.providerPartyName(), context.consumerPartyName(), previousAction, "Terminal Call");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.TERMINAL_CALL);
-  }
-
-  @Override
-  public ObjectNode asJsonNode() {
-    ObjectNode jsonNode = super.asJsonNode();
-    dsp = ((JitAction) previousAction).getDsp();
-    jsonNode.set("dsp", dsp.toJson());
-    return jsonNode;
   }
 
   @Override

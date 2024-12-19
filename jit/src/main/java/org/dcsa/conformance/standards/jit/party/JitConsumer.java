@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -104,7 +105,7 @@ public class JitConsumer extends ConformanceParty {
           "Only REQUESTED timestamps are supported for a Consumer party.");
     }
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path("dsp"));
+    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
 
     syncCounterpartPut(

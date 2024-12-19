@@ -11,6 +11,8 @@ import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 @Getter
 public abstract class JitAction extends ConformanceAction {
 
+  public static final String DSP_TAG = "dsp";
+
   protected DynamicScenarioParameters dsp;
 
   protected JitAction(
@@ -31,10 +33,20 @@ public abstract class JitAction extends ConformanceAction {
   }
 
   @Override
+  public ObjectNode asJsonNode() {
+    ObjectNode jsonNode = super.asJsonNode();
+    if (previousAction != null) {
+      dsp = ((JitAction) previousAction).getDsp();
+      jsonNode.set(DSP_TAG, dsp.toJson());
+    }
+    return jsonNode;
+  }
+
+  @Override
   public ObjectNode exportJsonState() {
     ObjectNode jsonState = super.exportJsonState();
     if (dsp != null) {
-      jsonState.set("dsp", dsp.toJson());
+      jsonState.set(DSP_TAG, dsp.toJson());
     }
     return jsonState;
   }
@@ -42,7 +54,7 @@ public abstract class JitAction extends ConformanceAction {
   @Override
   public void importJsonState(JsonNode jsonState) {
     super.importJsonState(jsonState);
-    JsonNode dspNode = jsonState.get("dsp");
+    JsonNode dspNode = jsonState.get(DSP_TAG);
     if (dspNode != null) {
       dsp = DynamicScenarioParameters.fromJson(dspNode);
     }

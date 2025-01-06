@@ -10,6 +10,8 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
+import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -72,6 +74,11 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     addScenarioGroup10(scenarioList, context);
     addScenarioGroup11(scenarioList, context);
     addScenarioGroup12(scenarioList, context);
+
+    // Scenario suite: "Secondary sender and receiver conformance"
+    addScenarioGroupSecondary1(scenarioList, context);
+    addScenarioGroupSecondary2(scenarioList, context);
+    addScenarioGroupSecondary3(scenarioList, context);
 
     return scenarioList;
   }
@@ -782,6 +789,40 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
   }
 
+  // 1. "PC-TC-S-V-ERP-A as FYI messages"
+  private static void addScenarioGroupSecondary1(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "1. PC-TC-S-V-ERP-A as FYI messages",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(portCall(context).then(omitPortCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(portCall(context).then(omitTerminalCall(context))))));
+    // TODO
+  }
+
+  // 2. Scenario group: "S-A as FYI messages"
+  private static void addScenarioGroupSecondary2(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    // TODO
+  }
+
+  // 3. Scenario group: "S as FYI message"
+  private static void addScenarioGroupSecondary3(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    // TODO
+  }
+
   private static JitScenarioListBuilder sendTimestamp(
       JitScenarioContext context, JitTimestampType timestampType) {
     return new JitScenarioListBuilder(
@@ -846,6 +887,16 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static JitScenarioListBuilder declineCall(JitScenarioContext context) {
     return new JitScenarioListBuilder(
         previousAction -> new JitDeclineAction(context, previousAction));
+  }
+
+  private static JitScenarioListBuilder omitPortCall(JitScenarioContext context) {
+    return new JitScenarioListBuilder(
+        previousAction -> new JitOmitPortCallAction(context, previousAction));
+  }
+
+  private static JitScenarioListBuilder omitTerminalCall(JitScenarioContext context) {
+    return new JitScenarioListBuilder(
+        previousAction -> new JitOmitTerminalCallAction(context, previousAction));
   }
 
   private static JitScenarioListBuilder sendPC_TC_PCS_VS(

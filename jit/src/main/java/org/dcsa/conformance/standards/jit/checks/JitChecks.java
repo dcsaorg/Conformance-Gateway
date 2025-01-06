@@ -54,7 +54,7 @@ public class JitChecks {
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.ifThen(
-        "Expected Port Call Service type should match scenario (%s).".formatted(serviceType.name()),
+        "Expected Port Call Service type should match scenario (%s).".formatted(serviceType.getFullName()),
         IS_PORT_CALL_SERVICE,
         JsonAttribute.mustEqual(
             "Check if the correct Port Call Service was supplied.",
@@ -64,7 +64,7 @@ public class JitChecks {
 
   static JsonContentCheck checkPortCallServiceRightType(DynamicScenarioParameters dsp) {
     return JsonAttribute.customValidator(
-        "Port Call Service type should match scenario '%s'.".formatted(dsp.selector().name()),
+        "Port Call Service type should match scenario '%s'.".formatted(dsp.selector().getFullName()),
         body -> {
           if (IS_PORT_CALL_SERVICE.test(body)) {
             String actualServiceType = body.path("portCallServiceType").asText();

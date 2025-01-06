@@ -13,21 +13,21 @@ import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
 @ToString
-public class JitCancelAction extends JitAction {
+public class JitOmitTerminalCallAction extends JitAction {
   private final JsonSchemaValidator validator;
 
-  public JitCancelAction(JitScenarioContext context, ConformanceAction previousAction) {
+  public JitOmitTerminalCallAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(
         context.providerPartyName(),
         context.consumerPartyName(),
         previousAction,
-        "Cancel Port Call Service");
-    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.CANCEL);
+        "Omit Terminal Call");
+    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.OMIT_PORT_CALL);
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a %s (POST) request".formatted(getActionTitle());
+    return "Send an %s (POST) request".formatted(getActionTitle());
   }
 
   @Override

@@ -16,6 +16,8 @@ public class JitStandard extends AbstractStandard {
   public static final String TIMESTAMP_URL = "/v2/timestamps/";
   public static final String CANCEL_URL = "/v2/port-call-services/{portCallServiceID}/cancel";
   public static final String DECLINE_URL = "/v2/port-call-services/{portCallServiceID}/decline";
+  public static final String OMIT_PORT_CALL_URL = "/v2/port-calls/{portCallID}/omit";
+  public static final String OMIT_TERMINAL_CALL_URL = "/v2/terminal-calls/{terminalCallID}/omit";
 
   public static final String PUT = "PUT";
   public static final String POST = "POST";

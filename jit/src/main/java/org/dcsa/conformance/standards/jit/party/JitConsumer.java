@@ -66,8 +66,7 @@ public class JitConsumer extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(JitTimestampAction.class, this::timestampRequest),
-        Map.entry(JitDeclineAction.class, this::declineRequest)
-    );
+        Map.entry(JitDeclineAction.class, this::declineRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -108,7 +107,8 @@ public class JitConsumer extends ConformanceParty {
           "Only REQUESTED timestamps are supported for a Consumer party.");
     }
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
 
     syncCounterpartPut(
@@ -122,17 +122,18 @@ public class JitConsumer extends ConformanceParty {
   private void declineRequest(JsonNode actionPrompt) {
     log.info("JitConsumer.decline({})", actionPrompt.toPrettyString());
 
-    DynamicScenarioParameters dsp = DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JsonNode jsonBody =
-      OBJECT_MAPPER
-        .createObjectNode()
-        .put("reason", "Declined, because crane broken.")
-        .put("isFYI", false);
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("reason", "Declined, because crane broken.")
+            .put("isFYI", false);
     syncCounterpartPost(
-      JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+        JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
 
     addOperatorLogEntry(
-      "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
+        "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
   }
 
   @Override
@@ -148,8 +149,9 @@ public class JitConsumer extends ConformanceParty {
                   timestamp.dateTime()));
     } else if (request.url().endsWith("/cancel")) {
       addOperatorLogEntry("Handled Cancel request accepted.");
-    }
-    else {
+    } else if (request.url().endsWith("/omit")) {
+      addOperatorLogEntry("Handled Omit request accepted.");
+    } else {
       addOperatorLogEntry("Handled request accepted.");
     }
 

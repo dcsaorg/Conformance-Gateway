@@ -22,6 +22,8 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
+import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
+import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -78,7 +80,9 @@ public class JitProvider extends ConformanceParty {
         Map.entry(JitPortCallServiceAction.class, this::portCallServiceRequest),
         Map.entry(JitVesselStatusAction.class, this::vesselStatusRequest),
         Map.entry(JitTimestampAction.class, this::timestampRequest),
-        Map.entry(JitCancelAction.class, this::cancelCallRequest));
+        Map.entry(JitCancelAction.class, this::cancelCallRequest),
+        Map.entry(JitOmitPortCallAction.class, this::omitPortCallRequest),
+        Map.entry(JitOmitTerminalCallAction.class, this::omitTerminalCallRequest));
   }
 
   private void portCallRequest(JsonNode actionPrompt) {
@@ -105,7 +109,8 @@ public class JitProvider extends ConformanceParty {
     syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
 
     addOperatorLogEntry(
-        "Submitted Terminal Call request for portCallID: %s".formatted(dsp.portCallID()));
+        "Submitted Terminal Call request for portCallID: %s and TerminalCallId: %s "
+            .formatted(dsp.portCallID(), dsp.terminalCallID()));
   }
 
   private void portCallServiceRequest(JsonNode actionPrompt) {
@@ -129,7 +134,9 @@ public class JitProvider extends ConformanceParty {
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
-    addOperatorLogEntry("Submitted %s Port Call Service request with portCallServiceID: %s".formatted(serviceType, dsp.portCallServiceID()));
+    addOperatorLogEntry(
+        "Submitted %s Port Call Service request with portCallServiceID: %s"
+            .formatted(serviceType, dsp.portCallServiceID()));
   }
 
   private void vesselStatusRequest(JsonNode actionPrompt) {
@@ -180,6 +187,39 @@ public class JitProvider extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitted Cancel for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
+  }
+
+  private void omitPortCallRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.omitPortCallRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    JsonNode jsonBody =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("reason", "Omitted PC, because engine failure.")
+            .put("isFYI", true);
+    syncCounterpartPost(
+        JitStandard.OMIT_PORT_CALL_URL.replace("{portCallID}", dsp.portCallID()), jsonBody);
+
+    addOperatorLogEntry("Submitted Omit Port Call with ID: %s".formatted(dsp.portCallID()));
+  }
+
+  private void omitTerminalCallRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.omitTerminalCallRequest({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    JsonNode jsonBody =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put("reason", "Omitted TC, because engine failure.")
+            .put("isFYI", true);
+    syncCounterpartPost(
+        JitStandard.OMIT_TERMINAL_CALL_URL.replace("{terminalCallID}", dsp.terminalCallID()),
+        jsonBody);
+
+    addOperatorLogEntry("Submitted Omit Terminal Call with ID: %s".formatted(dsp.terminalCallID()));
   }
 
   static JitTimestamp getTimestampForType(

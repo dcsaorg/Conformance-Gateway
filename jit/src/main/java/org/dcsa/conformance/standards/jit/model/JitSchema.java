@@ -17,6 +17,8 @@ public enum JitSchema {
   CANCEL("Cancel"),
   DECLINE("Decline"),
   MOVES("Moves"),
+  OMIT_PORT_CALL("OmitPortCall"),
+  OMIT_TERMINAL_CALL("OmitTerminalCall"),
   ;
 
   private final String schemaName;

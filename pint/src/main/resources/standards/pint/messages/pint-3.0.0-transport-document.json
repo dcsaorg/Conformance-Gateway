@@ -23,6 +23,12 @@
           "name": "DCSA test person",
           "email": "no-reply@dcsa.example.org"
         }
+      ],
+      "identifyingCodes": [
+        {
+          "partyCode": "SHIPPER",
+          "codeListProvider": "ZZZ"
+        }
       ]
     },
     "consignee": {
@@ -31,6 +37,12 @@
         {
           "name": "DCSA test person",
           "email": "no-reply@dcsa.example.org"
+        }
+      ],
+      "identifyingCodes": [
+        {
+          "partyCode": "CONSIGNEE",
+          "codeListProvider": "ZZZ"
         }
       ]
     },

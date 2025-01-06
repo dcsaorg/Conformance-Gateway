@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.jit;
 
+import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
+
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +34,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     var scenarioList = new LinkedHashMap<String, JitScenarioListBuilder>();
     scenarioList.put(
         "1. PC - TC - S - V - E - R - P - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.GIVEN)
+        supplyScenarioParameters(context, GIVEN)
             .thenEither(
-                PortCallServiceType.getServicesWithERPAndA().stream()
+                getServicesWithERPAndA().stream()
                     .map(
                         serviceType ->
                             sendPC_TC_PCS_VS(
                                 context,
                                 serviceType,
+                                GIVEN,
                                 sendERPTimestamps(
                                     context, sendTimestamp(context, JitTimestampType.ACTUAL))))
                     .toList()));
@@ -46,14 +50,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     // 2. Scenario group: "S-A service types"
     scenarioList.put(
         "2. PC - TC - S - V - A",
-        supplyScenarioParameters(context, JitServiceTypeSelector.GIVEN)
+        supplyScenarioParameters(context, GIVEN)
             .thenEither(
-                PortCallServiceType.getServicesHavingOnlyA().stream()
+                getServicesHavingOnlyA().stream()
                     .map(
                         serviceType ->
                             sendPC_TC_PCS_VS(
                                 context,
                                 serviceType,
+                                GIVEN,
                                 sendTimestamp(context, JitTimestampType.ACTUAL)))
                     .toList()));
 
@@ -75,21 +80,19 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "3. S-service type with variations (Moves only)",
-        supplyScenarioParameters(context, JitServiceTypeSelector.GIVEN)
+        supplyScenarioParameters(context, GIVEN)
             .thenEither(
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
-                                    .then(vesselStatus(context)))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(vesselStatus(context)))),
                 portCall(context)
                     .then(
                         portCall(context)
                             .then(
                                 terminalCall(context)
                                     .then(
-                                        serviceCall(context, PortCallServiceType.MOVES)
+                                        serviceCall(context, MOVES, GIVEN)
                                             .then(vesselStatus(context))))),
                 portCall(context)
                     .then(
@@ -97,19 +100,19 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 portCall(context)
                                     .then(
-                                        serviceCall(context, PortCallServiceType.MOVES)
+                                        serviceCall(context, MOVES, GIVEN)
                                             .then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(portCall(context).then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(vesselStatus(context).then(portCall(context))))),
                 portCall(context)
                     .then(
@@ -117,62 +120,57 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 terminalCall(context)
                                     .then(
-                                        serviceCall(context, PortCallServiceType.MOVES)
+                                        serviceCall(context, MOVES, GIVEN)
                                             .then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(terminalCall(context).then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(vesselStatus(context).then(terminalCall(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(
-                                        serviceCall(context, PortCallServiceType.MOVES)
+                                        serviceCall(context, MOVES, GIVEN)
                                             .then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(
                                         vesselStatus(context)
-                                            .then(
-                                                serviceCall(context, PortCallServiceType.MOVES))))),
+                                            .then(serviceCall(context, MOVES, GIVEN))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(vesselStatus(context).then(vesselStatus(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
+                                serviceCall(context, MOVES, GIVEN)
                                     .then(vesselStatus(context).then(cancelCall(context))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
-                                    .then(cancelCall(context)))),
-                sendPC_TC_PCS_VS(context, PortCallServiceType.MOVES, declineCall(context)),
+                            .then(serviceCall(context, MOVES, GIVEN).then(cancelCall(context)))),
+                sendPC_TC_PCS_VS(context, MOVES, GIVEN, declineCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, PortCallServiceType.MOVES)
-                                    .then(declineCall(context))))));
+                            .then(serviceCall(context, MOVES, GIVEN).then(declineCall(context))))));
   }
 
   private static void addScenarioGroup4(
@@ -182,11 +180,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     scenarioList.put(
         "4. PC-TC-S-V-ERP-A in-band ERP variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL)
@@ -194,6 +193,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -203,6 +203,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendERPTimestamps(
@@ -210,6 +211,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -220,6 +222,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -233,6 +236,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendERPTimestamps(
@@ -243,7 +247,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "5. PC-TC-S-V-ERP-A in-band PC-resend variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 portCall(context)
                     .then(
@@ -252,6 +256,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 sendPC_TC_PCS_VS(
                                     context,
                                     null,
+                                    FULL_ERP,
                                     sendERPTimestamps(
                                         context,
                                         sendTimestamp(context, JitTimestampType.ACTUAL))))),
@@ -261,7 +266,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 portCall(context)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, FULL_ERP)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -274,7 +279,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, FULL_ERP)
                                     .then(
                                         portCall(context)
                                             .then(
@@ -288,6 +293,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     portCall(context)
                         .then(
                             sendERPTimestamps(
@@ -295,6 +301,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             portCall(context)
@@ -308,6 +315,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             portCall(context)
@@ -324,12 +332,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))))));
@@ -340,7 +350,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     scenarioList.put(
         "6. PC-TC-S-V-ERP-A in-band TC-resend variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 portCall(context)
                     .then(
@@ -348,7 +358,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 terminalCall(context)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, FULL_ERP)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -361,7 +371,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, FULL_ERP)
                                     .then(
                                         terminalCall(context)
                                             .then(
@@ -375,6 +385,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     terminalCall(context)
                         .then(
                             sendERPTimestamps(
@@ -382,6 +393,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             terminalCall(context)
@@ -395,6 +407,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -408,6 +421,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         terminalCall(context)
@@ -415,6 +429,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL)
@@ -425,15 +440,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "7. PC-TC-S-V-ERP-A in-band S-resend variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, FULL_ERP)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, FULL_ERP)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -445,16 +460,18 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
-                    serviceCall(context, null)
+                    FULL_ERP,
+                    serviceCall(context, null, FULL_ERP)
                         .then(
                             sendERPTimestamps(
                                 context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
-                            serviceCall(context, null)
+                            serviceCall(context, null, FULL_ERP)
                                 .then(
                                     sendTimestamp(context, JitTimestampType.REQUESTED)
                                         .then(
@@ -465,11 +482,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
                                 .then(
-                                    serviceCall(context, null)
+                                    serviceCall(context, null, FULL_ERP)
                                         .then(
                                             sendTimestamp(context, JitTimestampType.PLANNED)
                                                 .then(
@@ -478,28 +496,31 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
-                        serviceCall(context, null)
+                        serviceCall(context, null, FULL_ERP)
                             .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL)
-                            .then(serviceCall(context, null))))));
+                            .then(serviceCall(context, null, FULL_ERP))))));
   }
 
   private static void addScenarioGroup8(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "8. PC-TC-S-V-ERP-A in-band V-resend variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     vesselStatus(context)
                         .then(
                             sendERPTimestamps(
@@ -507,6 +528,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             vesselStatus(context)
@@ -520,6 +542,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -533,6 +556,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         vesselStatus(context)
@@ -540,6 +564,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendERPTimestamps(
                         context,
                         sendTimestamp(context, JitTimestampType.ACTUAL)
@@ -556,13 +581,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "10. PC-TC-S-V-A variations",
-        supplyScenarioParameters(context, JitServiceTypeSelector.S_A_PATTERN)
+        supplyScenarioParameters(context, S_A_PATTERN)
             .thenEither(
                 portCall(context)
                     .then(
                         sendPC_TC_PCS_VS(
                             context,
                             null,
+                            S_A_PATTERN,
                             vesselStatus(context)
                                 .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
                 portCall(context)
@@ -571,7 +597,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 portCall(context)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -581,7 +607,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, S_A_PATTERN)
                                     .then(
                                         portCall(context)
                                             .then(
@@ -592,10 +618,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))),
                 portCall(context)
                     .then(
@@ -603,7 +631,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(
                                 terminalCall(context)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -613,7 +641,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, S_A_PATTERN)
                                     .then(
                                         terminalCall(context)
                                             .then(
@@ -624,18 +652,20 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     terminalCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL).then(terminalCall(context))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null)
+                                serviceCall(context, null, S_A_PATTERN)
                                     .then(
-                                        serviceCall(context, null)
+                                        serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
                                                     .then(
@@ -644,56 +674,68 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
-                    serviceCall(context, null)
+                    S_A_PATTERN,
+                    serviceCall(context, null, S_A_PATTERN)
                         .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL)
-                        .then(serviceCall(context, null))),
+                        .then(serviceCall(context, null, S_A_PATTERN))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     vesselStatus(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL).then(vesselStatus(context))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL)
                         .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL).then(cancelCall(context))),
-                sendPC_TC_PCS_VS(context, null, cancelCall(context)),
+                sendPC_TC_PCS_VS(context, null, S_A_PATTERN, cancelCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, null).then(cancelCall(context)))),
+                            .then(
+                                serviceCall(context, null, S_A_PATTERN).then(cancelCall(context)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    S_A_PATTERN,
                     sendTimestamp(context, JitTimestampType.ACTUAL).then(declineCall(context))),
-                sendPC_TC_PCS_VS(context, null, declineCall(context)),
+                sendPC_TC_PCS_VS(context, null, S_A_PATTERN, declineCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, null).then(declineCall(context))))));
+                            .then(
+                                serviceCall(context, null, S_A_PATTERN)
+                                    .then(declineCall(context))))));
   }
 
   private static void addScenarioGroup11(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "11. S-ERP-A cancel",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
-                sendPC_TC_PCS_VS(context, null, sendERPTimestamps(context, cancelCall(context))),
+                sendPC_TC_PCS_VS(
+                    context, null, FULL_ERP, sendERPTimestamps(context, cancelCall(context))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -701,24 +743,28 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED).then(cancelCall(context))),
-                sendPC_TC_PCS_VS(context, null, cancelCall(context)),
+                sendPC_TC_PCS_VS(context, null, FULL_ERP, cancelCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, null).then(cancelCall(context))))));
+                            .then(
+                                serviceCall(context, null, FULL_ERP).then(cancelCall(context))))));
   }
 
   private static void addScenarioGroup12(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "12. S-ERP-A decline",
-        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
-                sendPC_TC_PCS_VS(context, null, sendERPTimestamps(context, declineCall(context))),
+                sendPC_TC_PCS_VS(
+                    context, null, FULL_ERP, sendERPTimestamps(context, declineCall(context))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED)
                         .then(
                             sendTimestamp(context, JitTimestampType.REQUESTED)
@@ -726,12 +772,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 sendPC_TC_PCS_VS(
                     context,
                     null,
+                    FULL_ERP,
                     sendTimestamp(context, JitTimestampType.ESTIMATED).then(declineCall(context))),
-                sendPC_TC_PCS_VS(context, null, declineCall(context)),
+                sendPC_TC_PCS_VS(context, null, FULL_ERP, declineCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, null).then(declineCall(context))))));
+                            .then(
+                                serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
   }
 
   private static JitScenarioListBuilder sendTimestamp(
@@ -774,9 +822,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   }
 
   private static JitScenarioListBuilder serviceCall(
-      JitScenarioContext context, PortCallServiceType serviceType) {
+      JitScenarioContext context,
+      PortCallServiceType serviceType,
+      JitServiceTypeSelector selector) {
+    if (serviceType == null && selector == null) {
+      throw new IllegalArgumentException("Either serviceType or selector must be provided");
+    }
     return new JitScenarioListBuilder(
-        previousAction -> new JitPortCallServiceAction(context, previousAction, serviceType));
+        previousAction ->
+            new JitPortCallServiceAction(context, previousAction, serviceType, selector));
   }
 
   private static JitScenarioListBuilder vesselStatus(JitScenarioContext context) {
@@ -797,12 +851,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static JitScenarioListBuilder sendPC_TC_PCS_VS(
       JitScenarioContext context,
       PortCallServiceType serviceType,
+      JitServiceTypeSelector selector,
       JitScenarioListBuilder... thenEither) {
     return portCall(context)
         .then(
             terminalCall(context)
                 .then(
-                    serviceCall(context, serviceType)
+                    serviceCall(context, serviceType, selector)
                         .then(vesselStatus(context).thenEither(thenEither))));
   }
 }

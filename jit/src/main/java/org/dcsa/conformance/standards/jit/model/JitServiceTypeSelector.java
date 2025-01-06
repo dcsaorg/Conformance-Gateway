@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum JitServiceTypeSelector {
   GIVEN("Given"),
-  FULL_ERP("full ERP negotiation"),
+  FULL_ERP("full ERP"),
   S_A_PATTERN("S-A pattern"),
   ;
 

@@ -13,6 +13,7 @@ import org.dcsa.conformance.standards.jit.JitScenarioContext;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
@@ -27,17 +28,24 @@ public class JitPortCallServiceAction extends JitAction {
   public JitPortCallServiceAction(
       JitScenarioContext context,
       ConformanceAction previousAction,
-      PortCallServiceType serviceType) {
+      PortCallServiceType serviceType,
+      JitServiceTypeSelector selector) {
     super(
         context.providerPartyName(),
         context.consumerPartyName(),
         previousAction,
-        serviceType != null ? "Port Call Service: " + serviceType.name() : "Port Call Service");
+        calculateTitle(serviceType, selector));
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
     if (serviceType == null && previousAction instanceof JitPortCallServiceAction && dsp != null) {
       serviceType = dsp.portCallServiceType();
     }
     this.serviceType = serviceType;
+  }
+
+  private static String calculateTitle(
+      PortCallServiceType serviceType, JitServiceTypeSelector selector) {
+    if (serviceType != null) return "Port Call Service(%s)".formatted(serviceType.name());
+    return "Port Call Service(%s)".formatted(selector.getFullName());
   }
 
   @Override
@@ -93,7 +101,11 @@ public class JitPortCallServiceAction extends JitAction {
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             JitChecks.createChecksForPortCallService(
-                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, serviceType, dsp));
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                serviceType,
+                dsp));
       }
     };
   }

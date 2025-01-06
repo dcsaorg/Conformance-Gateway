@@ -552,22 +552,186 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     // TODO
   }
 
-  // 10. Scenario group: "PC-TC-S-V-A variations"
   private static void addScenarioGroup10(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "10. PC-TC-S-V-A variations",
+        supplyScenarioParameters(context, JitServiceTypeSelector.S_A_PATTERN)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        sendPC_TC_PCS_VS(
+                            context,
+                            null,
+                            vesselStatus(context)
+                                .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                portCall(context)
+                                    .then(
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendTimestamp(
+                                                            context, JitTimestampType.ACTUAL)))))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
+                                    .then(
+                                        portCall(context)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendTimestamp(
+                                                            context, JitTimestampType.ACTUAL)))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                terminalCall(context)
+                                    .then(
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendTimestamp(
+                                                            context, JitTimestampType.ACTUAL)))))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
+                                    .then(
+                                        terminalCall(context)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendTimestamp(
+                                                            context, JitTimestampType.ACTUAL)))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    terminalCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL).then(terminalCall(context))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null)
+                                    .then(
+                                        serviceCall(context, null)
+                                            .then(
+                                                vesselStatus(context)
+                                                    .then(
+                                                        sendTimestamp(
+                                                            context, JitTimestampType.ACTUAL)))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    serviceCall(context, null)
+                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL)
+                        .then(serviceCall(context, null))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    vesselStatus(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL).then(vesselStatus(context))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL)
+                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL).then(cancelCall(context))),
+                sendPC_TC_PCS_VS(context, null, cancelCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(serviceCall(context, null).then(cancelCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ACTUAL).then(declineCall(context))),
+                sendPC_TC_PCS_VS(context, null, declineCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(serviceCall(context, null).then(declineCall(context))))));
   }
 
-  // 11. Scenario group: "S-ERP-A cancel"
   private static void addScenarioGroup11(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "11. S-ERP-A cancel",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(context, null, sendERPTimestamps(context, cancelCall(context))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(cancelCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED).then(cancelCall(context))),
+                sendPC_TC_PCS_VS(context, null, cancelCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(serviceCall(context, null).then(cancelCall(context))))));
   }
 
-  // 12. Scenario group: "S-ERP-A decline"
   private static void addScenarioGroup12(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "12. S-ERP-A decline",
+        supplyScenarioParameters(context, JitServiceTypeSelector.FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(context, null, sendERPTimestamps(context, declineCall(context))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(declineCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED).then(declineCall(context))),
+                sendPC_TC_PCS_VS(context, null, declineCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(serviceCall(context, null).then(declineCall(context))))));
   }
 
   private static JitScenarioListBuilder sendTimestamp(

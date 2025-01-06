@@ -112,7 +112,7 @@ class JitChecksTest {
                     PortCallPhaseTypeCode.INBD))
             .isEmpty());
 
-    assertEquals("Expected matching Port Call Service type with scenario 'full ERP negotiation'. Found non-matching type: 'SEA_PASSAGE'",
+    assertEquals("Expected matching Port Call Service type with scenario 'full ERP'. Found non-matching type: 'SEA_PASSAGE'",
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(

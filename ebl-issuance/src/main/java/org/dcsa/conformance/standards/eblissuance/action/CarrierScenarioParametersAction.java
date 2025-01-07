@@ -42,12 +42,13 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the public key for validating the signed content using the following format:";
+    return "Supply the certificate to be used for validating the signed content using the format below. Remove all newlines from the exported X509 .pem certificate, keep the header and footer intact, and insert the four characters '\\r\\n' before and after the single-line Base64 certificate content.";
   }
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    return new CarrierScenarioParameters("Provide the public key for validating the signed content in here.")
+    return new CarrierScenarioParameters(
+            "-----BEGIN CERTIFICATE-----\\r\\nREPLACE_THIS_WITH_THE_BASE64_PEM_CONTENT\\r\\n-----END CERTIFICATE-----")
         .toJson();
   }
 
@@ -58,8 +59,10 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
-    getCspConsumer().accept(CarrierScenarioParameters.fromJson(partyInput.get("input")));
+    CarrierScenarioParameters carrierScenarioParameters = CarrierScenarioParameters.fromJson(partyInput.get("input"));
+    // validate the carrier signing key
+    PayloadSignerFactory.verifierFromPemEncodedPublicKey(carrierScenarioParameters.carrierSigningKeyPEM());
+    getCspConsumer().accept(carrierScenarioParameters);
   }
 
   @Override

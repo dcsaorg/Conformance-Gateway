@@ -48,7 +48,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return new CarrierScenarioParameters(
-            "-----BEGIN CERTIFICATE-----\\r\\nREPLACE_THIS_WITH_THE_BASE64_PEM_CONTENT\\r\\n-----END CERTIFICATE-----")
+            "-----BEGIN CERTIFICATE-----\r\nREPLACE_THIS_WITH_THE_BASE64_PEM_CONTENT\r\n-----END CERTIFICATE-----")
         .toJson();
   }
 

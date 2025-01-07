@@ -255,6 +255,8 @@ public class ConformanceOrchestrator implements StatefulEntity {
     currentScenario.popNextAction();
     try {
       nextAction.handlePartyInput(partyInput);
+    } catch (UserFacingException e) {
+      throw new UserFacingException(e.getMessage(), e);
     } catch (Exception e) {
       throw new UserFacingException(e);
     }

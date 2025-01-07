@@ -8,8 +8,8 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CarrierScenarioParameters(
     String carrierBookingReference,
-    String commoditySubreference,
-    String commoditySubreference2,
+    String commoditySubReference,
+    String commoditySubReference2,
     String equipmentReference,
     String equipmentReference2,
     String invoicePayableAtUNLocationCode,
@@ -23,8 +23,8 @@ public record CarrierScenarioParameters(
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
     return new CarrierScenarioParameters(
       jsonNode.required("carrierBookingReference").asText(),
-      jsonNode.path("commoditySubreference").asText(null),
-      jsonNode.path("commoditySubreference2").asText(null),
+      jsonNode.path("commoditySubReference").asText(null),
+      jsonNode.path("commoditySubReference2").asText(null),
       jsonNode.path("equipmentReference").asText(null),
       jsonNode.path("equipmentReference2").asText(null),
       jsonNode.required("invoicePayableAtUNLocationCode").asText(),

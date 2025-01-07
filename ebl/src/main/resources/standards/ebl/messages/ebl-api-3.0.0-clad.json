@@ -29,7 +29,7 @@
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
-      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",

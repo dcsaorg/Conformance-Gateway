@@ -209,7 +209,7 @@ public class PayloadSignerFactory {
             .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
           return verifierFromPublicKey(cert.getPublicKey());
         }
-        throw new UserFacingException("The provided PEM object was a X509 encoded certificate. Please provide a CERTIFICATE instead");
+        throw new UserFacingException("The provided PEM object was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
       } catch (Exception e) {
         throw new UserFacingException("Could not parse the PEM content string as an X509 encoded PEM certificate");
       }

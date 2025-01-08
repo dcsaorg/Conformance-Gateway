@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.jit;
 
 import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
+import static org.dcsa.conformance.standards.jit.model.JitTimestampType.*;
 import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
 
 import java.util.LinkedHashMap;
@@ -47,8 +48,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 context,
                                 serviceType,
                                 GIVEN,
-                                sendERPTimestamps(
-                                    context, sendTimestamp(context, JitTimestampType.ACTUAL))))
+                                sendERPTimestamps(context, sendTimestamp(context, ACTUAL))))
                     .toList()));
 
     // 2. Scenario group: "S-A service types"
@@ -60,10 +60,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .map(
                         serviceType ->
                             sendPC_TC_PCS_VS(
-                                context,
-                                serviceType,
-                                GIVEN,
-                                sendTimestamp(context, JitTimestampType.ACTUAL)))
+                                context, serviceType, GIVEN, sendTimestamp(context, ACTUAL)))
                     .toList()));
 
     addScenarioGroup3(scenarioList, context);
@@ -197,59 +194,49 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     FULL_ERP,
                     sendERPTimestamps(
                         context,
-                        sendTimestamp(context, JitTimestampType.ACTUAL)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
                         context,
-                        sendTimestamp(context, JitTimestampType.REQUESTED)
+                        sendTimestamp(context, REQUESTED)
                             .then(
-                                sendTimestamp(context, JitTimestampType.PLANNED)
-                                    .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                sendTimestamp(context, PLANNED)
+                                    .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        sendERPTimestamps(
-                            context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        context, sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
-                                .then(
-                                    sendERPTimestamps(
-                                        context,
-                                        sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                            sendTimestamp(context, REQUESTED)
+                                .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
-                        .then(
-                            sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL))))));
+                    sendTimestamp(context, ESTIMATED)
+                        .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL))))));
   }
 
   private static void addScenarioGroup5(
@@ -266,9 +253,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                     context,
                                     null,
                                     FULL_ERP,
-                                    sendERPTimestamps(
-                                        context,
-                                        sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendERPTimestamps(context, sendTimestamp(context, ACTUAL))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -281,9 +266,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                     .then(
                                                         sendERPTimestamps(
                                                             context,
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                            sendTimestamp(context, ACTUAL))))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -296,62 +279,51 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                     .then(
                                                         sendERPTimestamps(
                                                             context,
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                            sendTimestamp(context, ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     portCall(context)
-                        .then(
-                            sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
                             portCall(context)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
                             portCall(context)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
                                             portCall(context)
                                                 .then(
-                                                    sendTimestamp(context, JitTimestampType.PLANNED)
-                                                        .then(
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                    sendTimestamp(context, PLANNED)
+                                                        .then(sendTimestamp(context, ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        context, portCall(context).then(sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))))));
+                        context, sendTimestamp(context, ACTUAL).then(portCall(context))))));
   }
 
   private static void addScenarioGroup6(
@@ -373,9 +345,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                     .then(
                                                         sendERPTimestamps(
                                                             context,
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                            sendTimestamp(context, ACTUAL))))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -388,61 +358,49 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                     .then(
                                                         sendERPTimestamps(
                                                             context,
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                            sendTimestamp(context, ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     terminalCall(context)
-                        .then(
-                            sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
                             terminalCall(context)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
                                     terminalCall(context)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        terminalCall(context)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        context, terminalCall(context).then(sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        sendTimestamp(context, JitTimestampType.ACTUAL)
-                            .then(terminalCall(context))))));
+                        context, sendTimestamp(context, ACTUAL).then(terminalCall(context))))));
   }
 
   private static void addScenarioGroup7(
@@ -463,60 +421,51 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                     .then(
                                                         sendERPTimestamps(
                                                             context,
-                                                            sendTimestamp(
-                                                                context,
-                                                                JitTimestampType.ACTUAL))))))),
+                                                            sendTimestamp(context, ACTUAL))))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     serviceCall(context, null, FULL_ERP)
-                        .then(
-                            sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
                             serviceCall(context, null, FULL_ERP)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
                                     serviceCall(context, null, FULL_ERP)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
                         context,
-                        serviceCall(context, null, FULL_ERP)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        serviceCall(context, null, FULL_ERP).then(sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
                         context,
-                        sendTimestamp(context, JitTimestampType.ACTUAL)
+                        sendTimestamp(context, ACTUAL)
                             .then(serviceCall(context, null, FULL_ERP))))));
   }
 
@@ -531,53 +480,43 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     null,
                     FULL_ERP,
                     vesselStatus(context)
-                        .then(
-                            sendERPTimestamps(
-                                context, sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        .then(sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
                             vesselStatus(context)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.REQUESTED)
+                                    sendTimestamp(context, REQUESTED)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
                                     vesselStatus(context)
                                         .then(
-                                            sendTimestamp(context, JitTimestampType.PLANNED)
-                                                .then(
-                                                    sendTimestamp(
-                                                        context, JitTimestampType.ACTUAL)))))),
+                                            sendTimestamp(context, PLANNED)
+                                                .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        vesselStatus(context)
-                            .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                        context, vesselStatus(context).then(sendTimestamp(context, ACTUAL)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
                     sendERPTimestamps(
-                        context,
-                        sendTimestamp(context, JitTimestampType.ACTUAL)
-                            .then(vesselStatus(context))))));
+                        context, sendTimestamp(context, ACTUAL).then(vesselStatus(context))))));
   }
 
   private static void addScenarioGroup9(
@@ -590,62 +529,62 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     FULL_ERP,
-                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendOOBTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                            sendOOBTimestamp(context, REQUESTED)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                            sendTimestamp(context, REQUESTED)
                                 .then(
-                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendOOBTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendOOBTimestamp(context, ESTIMATED)
                         .then(
-                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                            sendOOBTimestamp(context, REQUESTED)
                                 .then(
-                                    sendTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendTimestamp(context, ESTIMATED)
                         .then(
-                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                            sendOOBTimestamp(context, REQUESTED)
                                 .then(
-                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                                    sendOOBTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                    sendOOBTimestamp(context, ESTIMATED)
                         .then(
-                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                            sendOOBTimestamp(context, REQUESTED)
                                 .then(
-                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
-                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))));
+                                    sendOOBTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL)))))));
   }
 
   private static void addScenarioGroup10(
@@ -660,8 +599,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             context,
                             null,
                             S_A_PATTERN,
-                            vesselStatus(context)
-                                .then(sendTimestamp(context, JitTimestampType.ACTUAL)))),
+                            vesselStatus(context).then(sendTimestamp(context, ACTUAL)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -671,9 +609,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                         serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                            context, JitTimestampType.ACTUAL)))))),
+                                                    .then(sendTimestamp(context, ACTUAL)))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -683,19 +619,17 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                         portCall(context)
                                             .then(
                                                 vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                            context, JitTimestampType.ACTUAL)))))),
+                                                    .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    portCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                    portCall(context).then(sendTimestamp(context, ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL).then(portCall(context))),
+                    sendTimestamp(context, ACTUAL).then(portCall(context))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -705,9 +639,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                         serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                            context, JitTimestampType.ACTUAL)))))),
+                                                    .then(sendTimestamp(context, ACTUAL)))))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -717,19 +649,17 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                         terminalCall(context)
                                             .then(
                                                 vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                            context, JitTimestampType.ACTUAL)))))),
+                                                    .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    terminalCall(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                    terminalCall(context).then(sendTimestamp(context, ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL).then(terminalCall(context))),
+                    sendTimestamp(context, ACTUAL).then(terminalCall(context))),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -739,42 +669,37 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                         serviceCall(context, null, S_A_PATTERN)
                                             .then(
                                                 vesselStatus(context)
-                                                    .then(
-                                                        sendTimestamp(
-                                                            context, JitTimestampType.ACTUAL)))))),
+                                                    .then(sendTimestamp(context, ACTUAL)))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    serviceCall(context, null, S_A_PATTERN)
-                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                    serviceCall(context, null, S_A_PATTERN).then(sendTimestamp(context, ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                        .then(serviceCall(context, null, S_A_PATTERN))),
+                    sendTimestamp(context, ACTUAL).then(serviceCall(context, null, S_A_PATTERN))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    vesselStatus(context).then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                    vesselStatus(context).then(sendTimestamp(context, ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL).then(vesselStatus(context))),
+                    sendTimestamp(context, ACTUAL).then(vesselStatus(context))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL)
-                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))),
+                    sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL).then(cancelCall(context))),
+                    sendTimestamp(context, ACTUAL).then(cancelCall(context))),
                 sendPC_TC_PCS_VS(context, null, S_A_PATTERN, cancelCall(context)),
                 portCall(context)
                     .then(
@@ -785,7 +710,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, JitTimestampType.ACTUAL).then(declineCall(context))),
+                    sendTimestamp(context, ACTUAL).then(declineCall(context))),
                 sendPC_TC_PCS_VS(context, null, S_A_PATTERN, declineCall(context)),
                 portCall(context)
                     .then(
@@ -807,15 +732,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
-                        .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
-                                .then(cancelCall(context)))),
+                    sendTimestamp(context, ESTIMATED)
+                        .then(sendTimestamp(context, REQUESTED).then(cancelCall(context)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED).then(cancelCall(context))),
+                    sendTimestamp(context, ESTIMATED).then(cancelCall(context))),
                 sendPC_TC_PCS_VS(context, null, FULL_ERP, cancelCall(context)),
                 portCall(context)
                     .then(
@@ -836,15 +759,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
-                        .then(
-                            sendTimestamp(context, JitTimestampType.REQUESTED)
-                                .then(declineCall(context)))),
+                    sendTimestamp(context, ESTIMATED)
+                        .then(sendTimestamp(context, REQUESTED).then(declineCall(context)))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED).then(declineCall(context))),
+                    sendTimestamp(context, ESTIMATED).then(declineCall(context))),
                 sendPC_TC_PCS_VS(context, null, FULL_ERP, declineCall(context)),
                 portCall(context)
                     .then(
@@ -892,15 +813,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     return new JitScenarioListBuilder(
         previousAction ->
             new JitTimestampAction(
-                context,
-                previousAction,
-                timestampType,
-                timestampType != JitTimestampType.REQUESTED));
+                context, previousAction, timestampType, timestampType != REQUESTED));
   }
 
   private static JitScenarioListBuilder sendOOBTimestamp(
       JitScenarioContext context, JitTimestampType timestampType) {
-    if (timestampType == JitTimestampType.REQUESTED) {
+    if (timestampType == REQUESTED) {
       return new JitScenarioListBuilder(
           previousAction ->
               new JitOOBTimestampInputAction(context, previousAction, timestampType, false));
@@ -911,10 +829,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder sendERPTimestamps(
       JitScenarioContext context, JitScenarioListBuilder... thenEither) {
-    return sendTimestamp(context, JitTimestampType.ESTIMATED)
+    return sendTimestamp(context, ESTIMATED)
         .then(
-            sendTimestamp(context, JitTimestampType.REQUESTED)
-                .then(sendTimestamp(context, JitTimestampType.PLANNED).thenEither(thenEither)));
+            sendTimestamp(context, REQUESTED)
+                .then(sendTimestamp(context, PLANNED).thenEither(thenEither)));
   }
 
   private JitScenarioListBuilder(Function<ConformanceAction, ConformanceAction> actionBuilder) {

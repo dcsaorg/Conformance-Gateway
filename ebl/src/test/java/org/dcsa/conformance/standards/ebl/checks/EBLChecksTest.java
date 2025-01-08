@@ -18,6 +18,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SELF_FILER_COD
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION_HBL;
@@ -327,6 +328,27 @@ class EBLChecksTest {
 
     otherParty.put("partyFunction", "SSS");
     errors = VALID_PARTY_FUNCTION_HBL.validate(rootNode);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testSendToPlatformConditionalCheck() {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+
+    Set<String> errors = SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.putObject("documentParties").putObject("issueTo").put("sendToPlatform", "CARX");
+    errors = SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    errors = SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", false);
+    errors = SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode);
     assertEquals(1, errors.size());
   }
 }

@@ -197,7 +197,11 @@ public class PayloadSignerFactory {
       if (publicKey instanceof ECPublicKey ecPublicKey) {
         return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
       }
-      throw new UserFacingException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
+      // We only accept RSA and ECDHE based algorithms due to the JWS standard.
+      // However, X.509 can support other key algorithms. This exception is for
+      // when users provide certificates with keys beyond what is supposed by
+      // JWS.
+      throw new UserFacingException("Unsupported certificate/public key. The underlying public key must be a RSAPublicKey or an ECPublicKey.");
     }
 
     @SneakyThrows

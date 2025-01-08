@@ -77,4 +77,16 @@ public class JsonToolkit {
                     JsonToolkit.arrayNodeToStringCollection((ArrayNode) entryNode.get("values"))));
     return map;
   }
+
+  public static JsonNode findNodeWithAttribute(JsonNode node, String name) {
+    if (node.has(name)) {
+      return node;
+    }
+    for (JsonNode child : node) {
+      if (findNodeWithAttribute(child, name) != null) {
+        return child;
+      }
+    }
+    return null;
+  }
 }

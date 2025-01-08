@@ -223,7 +223,7 @@ public class CarrierShippingInstructions {
     Map.entry("3.0.0",  (transportDocument, scenarioType) -> {
       for (var consignmentItemNode : transportDocument.path("consignmentItems")) {
         if (consignmentItemNode instanceof ObjectNode consignmentItem) {
-          consignmentItem.remove("commoditySubreference");
+          consignmentItem.remove("commoditySubReference");
         }
         for (var cargoItemNode : consignmentItemNode.path("cargoItems")) {
           if (!scenarioType.hasDG() || !cargoItemNode.isObject()) {

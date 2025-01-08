@@ -21,7 +21,7 @@
       "HSCodes": [
         "CONSIGNMENT_ITEM_HS_CODE"
       ],
-      "commoditySubreference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+      "commoditySubReference": "COMMODITY_SUBREFERENCE_PLACEHOLDER",
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",
@@ -53,7 +53,7 @@
       "HSCodes": [
         "CONSIGNMENT_ITEM_2_HS_CODE"
       ],
-      "commoditySubreference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+      "commoditySubReference": "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
       "cargoItems": [
         {
           "equipmentReference": "EQUIPMENT_REFERENCE_PLACEHOLDER",

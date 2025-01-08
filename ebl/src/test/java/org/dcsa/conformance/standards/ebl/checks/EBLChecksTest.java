@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -355,7 +354,7 @@ class EBLChecksTest {
   }
 
   @Test
-  public void testEBLSCannotHaveCopiesWithCharges() throws Exception {
+  void testEBLSCannotHaveCopiesWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
     rootNode.put("numberOfCopiesWithCharges", 1);

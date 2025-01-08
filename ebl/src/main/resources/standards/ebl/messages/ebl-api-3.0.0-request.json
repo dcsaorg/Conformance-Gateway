@@ -2,6 +2,7 @@
   "transportDocumentTypeCode": "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
   "isElectronic": true,
   "isToOrder": false,
+  "numberOfCopiesWithCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {

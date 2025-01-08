@@ -55,6 +55,10 @@ public class EBLChecks {
   private static final String AMF_HBL_PERFORMED_BY = "advanceManifestFilingsHouseBLPerformedBy";
   private static final String ADVANCE_MANIFEST_FILINGS = "advanceManifestFilings";
   private static final String HOUSE_BILL_OF_LADINGS = "houseBillOfLadings";
+  private static final String NUMBER_OF_COPIES_WITH_CHARGES = "numberOfCopiesWithCharges";
+  private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
+
+
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
@@ -188,17 +192,21 @@ public class EBLChecks {
   public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
   public static final Predicate<JsonNode> IS_AN_ESWB = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("SWB"));
 
-  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = JsonAttribute.ifThen(
-    "EBLs cannot have copies with charges",
-    IS_AN_EBL,
-    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMustBeAbsent())
-  );
-
-  private static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES = JsonAttribute.ifThen(
-    "EBLs cannot have copies without charges",
-    IS_AN_EBL,
-    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMustBeAbsent())
-  );
+  static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES =
+      JsonAttribute.customValidator(
+          "EBLs cannot have copies with charges",
+          (node, contextPath) -> {
+            JsonNode numberOfCopiesWithCharges = node.path(NUMBER_OF_COPIES_WITH_CHARGES);
+            if (IS_AN_EBL.test(node)) {
+              if (numberOfCopiesWithCharges.isMissingNode()
+                  || numberOfCopiesWithCharges.asText().equals("0")) {
+                return Set.of();
+              }
+              String path = concatContextPath(contextPath, NUMBER_OF_COPIES_WITH_CHARGES);
+              return Set.of("EBLs cannot have copies with charges at %s".formatted(path));
+            }
+            return Set.of();
+          });
 
   private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES = JsonAttribute.ifThen(
     "Electronic SWBs cannot have originals with charges",
@@ -221,7 +229,7 @@ public class EBLChecks {
   private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_COPY_WITH_CHARGES = JsonAttribute.ifThen(
     "Cannot have more than one copy with charges when isElectronic",
     IS_ELECTRONIC,
-    JsonAttribute.path("numberOfCopiesWithCharges", JsonAttribute.matchedMaximum(1))
+    JsonAttribute.path(NUMBER_OF_COPIES_WITH_CHARGES, JsonAttribute.matchedMaximum(1))
   );
 
   private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES = JsonAttribute.ifThen(
@@ -707,7 +715,6 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
     E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
     E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
@@ -732,7 +739,6 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
     E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
     E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
@@ -1149,7 +1155,7 @@ public class EBLChecks {
       return setOf(csp.commoditySubReference(), csp.commoditySubReference2());
     };
     return checkCSPAllUsedAtLeastOnce(
-      "commoditySubReference",
+      COMMODITY_SUB_REFERENCE,
       expectedValueSupplier
     );
   }
@@ -1177,7 +1183,7 @@ public class EBLChecks {
     };
     return checkCSPValueBasedOnOtherValue(
       "descriptionOfGoods",
-      "commoditySubReference",
+      COMMODITY_SUB_REFERENCE,
       expectedValueSupplier,
       resolver
     );
@@ -1206,7 +1212,7 @@ public class EBLChecks {
     };
     return checkCSPValueBasedOnOtherValue(
       "HSCodes",
-      "commoditySubReference",
+      COMMODITY_SUB_REFERENCE,
       expectedValueSupplier,
       resolver
     );

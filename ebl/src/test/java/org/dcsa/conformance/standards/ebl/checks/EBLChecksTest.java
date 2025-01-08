@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.ebl.checks;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.BUYER_AND_SELLER_CONDITIONAL_CHECK;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
@@ -350,5 +352,32 @@ class EBLChecksTest {
     rootNode.put("isElectronic", false);
     errors = SEND_TO_PLATFORM_CONDITIONAL_CHECK.validate(rootNode);
     assertEquals(1, errors.size());
+  }
+
+  @Test
+  public void testEBLSCannotHaveCopiesWithCharges() throws Exception {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfCopiesWithCharges", 1);
+    Set<String> errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfCopiesWithCharges", 0);
+    errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfCopiesWithCharges", 1);
+    errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfCopiesWithCharges", 1);
+    errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
   }
 }

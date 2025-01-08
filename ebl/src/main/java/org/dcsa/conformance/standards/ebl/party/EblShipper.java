@@ -117,9 +117,12 @@ public class EblShipper extends ConformanceParty {
           .put("name", "DCSA another test person")
           .put("email", "no-reply@dcsa-consignee.example.org");
     }
-    if(scenarioType.transportDocumentTypeCode().equals("BOL")){
-     var issueToParty = (ObjectNode) jsonRequestBody.path("documentParties").path("issueTo");
-      issueToParty.put("sendToPlatform","CARX");
+    if (scenarioType.transportDocumentTypeCode().equals("BOL")) {
+      JsonNode documentParties = jsonRequestBody.path("documentParties");
+      if (!documentParties.isMissingNode() && !documentParties.path("issueTo").isMissingNode()) {
+        var issueToParty = (ObjectNode) documentParties.path("issueTo");
+        issueToParty.put("sendToPlatform", "CARX");
+      }
     }
     return jsonRequestBody;
   }

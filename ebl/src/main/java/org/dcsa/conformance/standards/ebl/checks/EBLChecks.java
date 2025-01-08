@@ -657,13 +657,13 @@ public class EBLChecks {
             return Set.of();
           });
 
-  private static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
+  static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
       JsonAttribute.ifThenElse(
-          "'isElectronic' and 'transportDocumentTypeCode' BOL implies 'sendToPlatform'",
+          "'isElectronic' and 'transportDocumentTypeCode' BOL requires 'sendToPlatform'",
           JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
           JsonAttribute.ifThenElse(
               "'transportDocumentTypeCode' is BOL",
-              JsonAttribute.isEqualTo("/transportDocumentTypeCode", "BOL"),
+              JsonAttribute.isEqualTo("transportDocumentTypeCode", "BOL"),
               JsonAttribute.mustBePresent(SI_REQUEST_SEND_TO_PLATFORM),
               JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)),
           JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM));

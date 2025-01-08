@@ -9,6 +9,7 @@ import org.dcsa.conformance.standards.ebl.crypto.PayloadSignerFactory;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 
 public class CarrierScenarioParametersAction extends IssuanceAction {
+  public static final String HUMAN_READABLE_PROMPT = "Supply the certificate to be used for validating the signed content using the format below. Remove all newlines from the exported X509 .pem certificate, keep the header and footer intact, and insert the four characters '\\r\\n' before and after the single-line Base64 certificate content.";
   private CarrierScenarioParameters carrierScenarioParameters = null;
 
   public CarrierScenarioParametersAction(
@@ -42,7 +43,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the certificate to be used for validating the signed content using the format below. Remove all newlines from the exported X509 .pem certificate, keep the header and footer intact, and insert the four characters '\\r\\n' before and after the single-line Base64 certificate content.";
+    return HUMAN_READABLE_PROMPT;
   }
 
   @Override

@@ -10,5 +10,5 @@
   "carrierExportVoyageNumber": "2103S",
   "universalImportVoyageReference": "2103N",
   "universalExportVoyageReference": "2103N",
-  "isFYI": false
+  "isFYI": IS_FYI_PLACEHOLDER
 }

@@ -12,5 +12,5 @@
     }
   },
   "milesToDestinationPort": 245.45,
-  "isFYI": false
+  "isFYI": IS_FYI_PLACEHOLDER
 }

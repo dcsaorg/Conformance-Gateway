@@ -21,9 +21,10 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
+import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
-import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -37,6 +38,9 @@ import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
+
+  public static final String IS_FYI = "isFYI";
+  public static final String REASON = "reason";
 
   public JitProvider(
       String apiVersion,
@@ -79,6 +83,7 @@ public class JitProvider extends ConformanceParty {
         Map.entry(JitTimestampAction.class, this::timestampRequest),
         Map.entry(JitOOBTimestampAction.class, this::outOfBandTimestampRequest),
         Map.entry(JitCancelAction.class, this::cancelCallRequest),
+        Map.entry(JitDeclineAction.class, this::declineRequest),
         Map.entry(JitOmitPortCallAction.class, this::omitPortCallRequest),
         Map.entry(JitOmitTerminalCallAction.class, this::omitTerminalCallRequest));
   }
@@ -162,11 +167,13 @@ public class JitProvider extends ConformanceParty {
 
     // Create values for the first timestamp in the sequence.
     if (previousTimestamp == null) {
-      previousTimestamp = JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null);
+      previousTimestamp =
+          JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null, dsp.isFYI());
       if (dsp.portCallServiceID() != null)
         previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
     }
-    JitTimestamp timestamp = JitTimestamp.getTimestampForType(timestampType, previousTimestamp);
+    JitTimestamp timestamp =
+        JitTimestamp.getTimestampForType(timestampType, previousTimestamp, dsp.isFYI());
     sendTimestampPutRequest(timestampType, timestamp);
   }
 
@@ -189,13 +196,30 @@ public class JitProvider extends ConformanceParty {
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()
-            .put("reason", "Cancelled, because storm is coming.")
-            .put("isFYI", false);
+            .put(REASON, "Cancelled, because storm is coming.")
+            .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
         JitStandard.CANCEL_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
 
     addOperatorLogEntry(
         "Submitted Cancel for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
+  }
+
+  private void declineRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.decline({})", actionPrompt.toPrettyString());
+
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    JsonNode jsonBody =
+        OBJECT_MAPPER
+            .createObjectNode()
+            .put(REASON, "Declined, because crane broken.")
+            .put(IS_FYI, dsp.isFYI());
+    syncCounterpartPost(
+        JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+
+    addOperatorLogEntry(
+        "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
   }
 
   private void omitPortCallRequest(JsonNode actionPrompt) {
@@ -206,8 +230,8 @@ public class JitProvider extends ConformanceParty {
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()
-            .put("reason", "Omitted PC, because engine failure.")
-            .put("isFYI", true);
+            .put(REASON, "Omitted PC, because engine failure.")
+            .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
         JitStandard.OMIT_PORT_CALL_URL.replace("{portCallID}", dsp.portCallID()), jsonBody);
 
@@ -222,8 +246,8 @@ public class JitProvider extends ConformanceParty {
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()
-            .put("reason", "Omitted TC, because engine failure.")
-            .put("isFYI", true);
+            .put(REASON, "Omitted TC, because engine failure.")
+            .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
         JitStandard.OMIT_TERMINAL_CALL_URL.replace("{terminalCallID}", dsp.terminalCallID()),
         jsonBody);
@@ -266,7 +290,9 @@ public class JitProvider extends ConformanceParty {
                 "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
                 portCallServiceEventTypeCode,
                 "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-                portCallPhaseTypeCode));
+                portCallPhaseTypeCode,
+                "IS_FYI_PLACEHOLDER",
+                Boolean.toString(dsp.isFYI())));
     // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
     if (serviceType != null && portCallPhaseTypeCode.isEmpty())
       ((ObjectNode) jsonNode).remove("portCallPhaseTypeCode");

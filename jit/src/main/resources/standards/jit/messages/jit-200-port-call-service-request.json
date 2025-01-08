@@ -50,5 +50,5 @@
       "restowMoves": 20
     }
   ],
-  "isFYI": false
+  "isFYI": IS_FYI_PLACEHOLDER
 }

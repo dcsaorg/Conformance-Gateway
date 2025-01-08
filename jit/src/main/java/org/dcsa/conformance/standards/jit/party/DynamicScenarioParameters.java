@@ -19,11 +19,12 @@ public record DynamicScenarioParameters(
     String portCallID,
     String terminalCallID,
     String portCallServiceID,
-    JitServiceTypeSelector selector)
+    JitServiceTypeSelector selector,
+    boolean isFYI)
     implements ScenarioParameters {
 
   public DynamicScenarioParameters() {
-    this(null, null, null, null, null, null, null);
+    this(null, null, null, null, null, null, null, false);
   }
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {

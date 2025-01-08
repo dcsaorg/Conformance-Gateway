@@ -15,11 +15,13 @@ public class SupplyScenarioParametersAction extends JitAction {
 
   @Getter private SuppliedScenarioParameters suppliedScenarioParameters;
   private final JitServiceTypeSelector selector;
+  private final boolean isFYI;
 
   public SupplyScenarioParametersAction(
-      JitScenarioContext context, JitServiceTypeSelector selector) {
+    JitScenarioContext context, JitServiceTypeSelector selector, boolean isFYI) {
     super(context.consumerPartyName(), null, null, "SupplyScenarioParameters");
     this.selector = selector;
+    this.isFYI = isFYI;
   }
 
   @Override
@@ -64,6 +66,7 @@ public class SupplyScenarioParametersAction extends JitAction {
             suppliedScenarioParameters.portCallID(),
             suppliedScenarioParameters.terminalCallID(),
             suppliedScenarioParameters.portCallServiceID(),
-            selector);
+            selector,
+            isFYI);
   }
 }

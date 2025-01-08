@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import java.util.stream.Stream;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -12,17 +11,19 @@ import org.dcsa.conformance.standards.jit.model.JitSchema;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
-@ToString
 public class JitDeclineAction extends JitAction {
   private final JsonSchemaValidator validator;
+  private final boolean sendByProvider;
 
-  public JitDeclineAction(JitScenarioContext context, ConformanceAction previousAction) {
+  public JitDeclineAction(
+      JitScenarioContext context, ConformanceAction previousAction, boolean sendByProvider) {
     super(
-        context.consumerPartyName(),
-        context.providerPartyName(),
+        sendByProvider ? context.providerPartyName() : context.consumerPartyName(),
+        sendByProvider ? context.consumerPartyName() : context.providerPartyName(),
         previousAction,
         "Decline Port Call Service");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.DECLINE);
+    this.sendByProvider = sendByProvider;
   }
 
   @Override
@@ -35,11 +36,21 @@ public class JitDeclineAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (!sendByProvider) {
+          return Stream.of(
+              new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.POST),
+              new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
+              new JsonSchemaCheck(
+                  JitRole::isConsumer,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.REQUEST,
+                  validator));
+        }
         return Stream.of(
-            new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.POST),
-            new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
+            new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.POST),
+            new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(
-                JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
+                JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }
     };
   }

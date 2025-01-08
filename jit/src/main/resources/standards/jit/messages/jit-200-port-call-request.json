@@ -12,5 +12,5 @@
     "callSign": "NCVV",
     "typeCode": "CONT"
   },
-  "isFYI": false
+  "isFYI": IS_FYI_PLACEHOLDER
 }

@@ -35,7 +35,7 @@ public record JitTimestamp(
   private static final Random RANDOM = new Random();
 
   public static JitTimestamp getTimestampForType(
-      JitTimestampType timestampType, JitTimestamp previousTimestamp) {
+      JitTimestampType timestampType, JitTimestamp previousTimestamp, boolean isFYI) {
     return switch (timestampType) {
       case ESTIMATED ->
           new JitTimestamp(
@@ -47,7 +47,7 @@ public record JitTimestamp(
               timestampType.getClassifierCode(),
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
               "STR",
-              false,
+              isFYI,
               "Port closed due to strike");
       case PLANNED, ACTUAL ->
           previousTimestamp.withClassifierCode(timestampType.getClassifierCode());

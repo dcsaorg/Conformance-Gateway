@@ -112,7 +112,7 @@ public class JitConsumer extends ConformanceParty {
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp timestamp =
-        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp());
+        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp(), dsp.isFYI());
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
@@ -131,7 +131,7 @@ public class JitConsumer extends ConformanceParty {
         OBJECT_MAPPER
             .createObjectNode()
             .put("reason", "Declined, because crane broken.")
-            .put("isFYI", false);
+            .put("isFYI", dsp.isFYI());
     syncCounterpartPost(
         JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
 
@@ -148,12 +148,14 @@ public class JitConsumer extends ConformanceParty {
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
     JitTimestamp timestamp =
-        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp());
+        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp(), dsp.isFYI());
 
     asyncOrchestratorPostPartyInput(
         actionPrompt.required("actionId").asText(),
         OBJECT_MAPPER.createObjectNode().put("timestamp", timestamp.dateTime()));
-    addOperatorLogEntry("Submitted Out-of-Band timestamp '%s' for type: %s".formatted(timestamp.dateTime(), timestampType));
+    addOperatorLogEntry(
+        "Submitted Out-of-Band timestamp '%s' for type: %s"
+            .formatted(timestamp.dateTime(), timestampType));
   }
 
   @Override

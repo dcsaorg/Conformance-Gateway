@@ -40,7 +40,7 @@ public class JitOOBTimestampAction extends JitAction {
     if (timestampType == JitTimestampType.ESTIMATED) {
       dsp =
           dsp.withCurrentTimestamp(
-              JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null));
+              JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null, dsp.isFYI()));
     }
 
     jsonNode.put("timestampType", timestampType.name());

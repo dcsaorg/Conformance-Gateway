@@ -774,26 +774,98 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
   }
 
-  // 1. "PC-TC-S-V-ERP-A as FYI messages"
   private static void addScenarioGroupSecondary1(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "1. PC-TC-S-V-ERP-A as FYI messages",
-        supplyScenarioParameters(context, FULL_ERP)
+        supplyScenarioParameters(context, FULL_ERP, true)
             .thenEither(
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
-                        .then(portCall(context).then(omitPortCall(context)))),
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED)
+                                .then(
+                                    sendTimestamp(context, PLANNED)
+                                        .then(sendTimestamp(context, ACTUAL))))),
                 sendPC_TC_PCS_VS(
                     context,
                     null,
                     FULL_ERP,
-                    sendTimestamp(context, JitTimestampType.ESTIMATED)
-                        .then(portCall(context).then(omitTerminalCall(context))))));
-    // TODO
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED)
+                                .then(sendTimestamp(context, PLANNED).then(cancelCall(context))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED)
+                                .then(
+                                    sendTimestamp(context, PLANNED)
+                                        .then(declineCallFYI(context))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED)
+                                .then(
+                                    sendTimestamp(context, PLANNED).then(omitPortCall(context))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED)
+                                .then(
+                                    sendTimestamp(context, PLANNED)
+                                        .then(omitTerminalCall(context))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED)
+                        .then(sendTimestampFYI(context, REQUESTED).then(omitPortCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED)
+                        .then(
+                            sendTimestampFYI(context, REQUESTED).then(omitTerminalCall(context)))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED).then(omitPortCall(context))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, ESTIMATED).then(omitTerminalCall(context))),
+                sendPC_TC_PCS_VS(context, null, FULL_ERP, omitPortCall(context)),
+                sendPC_TC_PCS_VS(context, null, FULL_ERP, omitTerminalCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, FULL_ERP).then(omitPortCall(context)))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, FULL_ERP)
+                                    .then(omitTerminalCall(context)))),
+                portCall(context).then(terminalCall(context).then(omitPortCall(context))),
+                portCall(context).then(terminalCall(context).then(omitTerminalCall(context))),
+                portCall(context).then(omitPortCall(context))));
   }
 
   // 2. Scenario group: "S-A as FYI messages"
@@ -814,6 +886,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         previousAction ->
             new JitTimestampAction(
                 context, previousAction, timestampType, timestampType != REQUESTED));
+  }
+
+  private static JitScenarioListBuilder sendTimestampFYI(
+      JitScenarioContext context, JitTimestampType timestampType) {
+    return new JitScenarioListBuilder(
+        previousAction -> new JitTimestampAction(context, previousAction, timestampType, true));
   }
 
   private static JitScenarioListBuilder sendOOBTimestamp(
@@ -841,8 +919,13 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder supplyScenarioParameters(
       JitScenarioContext context, JitServiceTypeSelector selector) {
+    return supplyScenarioParameters(context, selector, false);
+  }
+
+  private static JitScenarioListBuilder supplyScenarioParameters(
+      JitScenarioContext context, JitServiceTypeSelector selector, boolean isFYI) {
     return new JitScenarioListBuilder(
-        previousAction -> new SupplyScenarioParametersAction(context, selector));
+        previousAction -> new SupplyScenarioParametersAction(context, selector, isFYI));
   }
 
   private static JitScenarioListBuilder portCall(JitScenarioContext context) {
@@ -879,7 +962,12 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder declineCall(JitScenarioContext context) {
     return new JitScenarioListBuilder(
-        previousAction -> new JitDeclineAction(context, previousAction));
+        previousAction -> new JitDeclineAction(context, previousAction, false));
+  }
+
+  private static JitScenarioListBuilder declineCallFYI(JitScenarioContext context) {
+    return new JitScenarioListBuilder(
+        previousAction -> new JitDeclineAction(context, previousAction, true));
   }
 
   private static JitScenarioListBuilder omitPortCall(JitScenarioContext context) {

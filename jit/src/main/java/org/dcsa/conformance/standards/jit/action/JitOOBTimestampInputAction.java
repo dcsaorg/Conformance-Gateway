@@ -47,7 +47,7 @@ public class JitOOBTimestampInputAction extends JitAction {
   public JsonNode getJsonForHumanReadablePrompt() {
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(
-            timestampType, ((JitAction) previousAction).dsp.currentTimestamp());
+            timestampType, ((JitAction) previousAction).dsp.currentTimestamp(), dsp.isFYI());
     return OBJECT_MAPPER.createObjectNode().put("timestamp", timestamp.dateTime());
   }
 
@@ -59,7 +59,7 @@ public class JitOOBTimestampInputAction extends JitAction {
 
     // Store supplied timestamp into the DSP
     dsp =
-      dsp.withPreviousTimestamp(dsp.currentTimestamp())
+        dsp.withPreviousTimestamp(dsp.currentTimestamp())
             .withCurrentTimestamp(
                 dsp.currentTimestamp()
                     .withDateTime(partyInput.get("input").get("timestamp").asText()));

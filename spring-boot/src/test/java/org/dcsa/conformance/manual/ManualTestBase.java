@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -394,7 +395,7 @@ public abstract class ManualTestBase {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
         } else if (promptText.contains("Setup the system for transfer and provide the following details for the sender.")) {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
-        } else if (promptText.contains("Supply the public key for validating the signed content using the following format:")) {
+        } else if (promptText.contains(CarrierScenarioParametersAction.HUMAN_READABLE_PROMPT)) {
           jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "CarrierScenarioParameters");
         }
 

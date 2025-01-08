@@ -527,7 +527,7 @@ public class PersistableCarrierBooking {
         var commoditiesNode = (ArrayNode) requestedEquipment.get("commodities");
         if (commoditiesNode != null && commoditiesNode.isArray()) {
           for(var commodity: commoditiesNode) {
-            ((ObjectNode)commodity).put("commoditySubreference", "COM"+commoditySubReferenceSequence++);
+            ((ObjectNode)commodity).put("commoditySubReference", "COM"+commoditySubReferenceSequence++);
           }
         }
         confirmedEquipments.addObject().put("ISOEquipmentCode", equipmentCode).put("units", units);

@@ -868,10 +868,39 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 portCall(context).then(omitPortCall(context))));
   }
 
-  // 2. Scenario group: "S-A as FYI messages"
   private static void addScenarioGroupSecondary2(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "2. S-A as FYI messages",
+        supplyScenarioParameters(context, FULL_ERP, true)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    vesselStatus(context).then(sendTimestamp(context, ACTUAL))),
+                sendPC_TC_PCS_VS(
+                    context, null, S_A_PATTERN, vesselStatus(context).then(omitPortCall(context))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    vesselStatus(context).then(omitTerminalCall(context))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, S_A_PATTERN)
+                                    .then(omitPortCall(context)))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, S_A_PATTERN)
+                                    .then(omitTerminalCall(context)))),
+                portCall(context).then(terminalCall(context).then(omitPortCall(context))),
+                portCall(context).then(terminalCall(context).then(omitTerminalCall(context))),
+                portCall(context).then(omitPortCall(context))));
   }
 
   // 3. Scenario group: "S as FYI message"

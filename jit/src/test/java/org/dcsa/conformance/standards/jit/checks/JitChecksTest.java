@@ -101,8 +101,7 @@ class JitChecksTest {
   @Test
   void checkScenarioServiceTypeMatchesScenarioType_FULL_ERP() {
     DynamicScenarioParameters dsp =
-        new DynamicScenarioParameters()
-          .withSelector(JitServiceTypeSelector.FULL_ERP);
+        new DynamicScenarioParameters().withSelector(JitServiceTypeSelector.FULL_ERP);
     assertTrue(
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
@@ -112,36 +111,41 @@ class JitChecksTest {
                     PortCallPhaseTypeCode.INBD))
             .isEmpty());
 
-    assertEquals("Expected matching Port Call Service type with scenario 'full ERP'. Found non-matching type: 'SEA_PASSAGE'",
+    assertEquals(
+        "Expected matching Port Call Service type with scenario 'full ERP'. Found non-matching type: 'SEA_PASSAGE'",
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(
                     PortCallServiceType.SEA_PASSAGE,
                     PortCallServiceEventTypeCode.ARRI,
-                    PortCallPhaseTypeCode.INBD)).iterator().next());
+                    PortCallPhaseTypeCode.INBD))
+            .iterator()
+            .next());
   }
 
   @Test
   void checkScenarioServiceTypeMatchesScenarioType_S_A_Pattern() {
     DynamicScenarioParameters dsp =
-      new DynamicScenarioParameters()
-        .withSelector(JitServiceTypeSelector.S_A_PATTERN);
+        new DynamicScenarioParameters().withSelector(JitServiceTypeSelector.S_A_PATTERN);
     assertTrue(
-      JitChecks.checkPortCallServiceRightType(dsp)
-        .validate(
-          createPortCallServiceRequest(
-            PortCallServiceType.ALL_FAST,
-            PortCallServiceEventTypeCode.ARRI,
-            PortCallPhaseTypeCode.INBD))
-        .isEmpty());
+        JitChecks.checkPortCallServiceRightType(dsp)
+            .validate(
+                createPortCallServiceRequest(
+                    PortCallServiceType.ALL_FAST,
+                    PortCallServiceEventTypeCode.ARRI,
+                    PortCallPhaseTypeCode.INBD))
+            .isEmpty());
 
-    assertEquals("Expected matching Port Call Service type with scenario 'S-A pattern'. Found non-matching type: 'SLUDGE'",
-      JitChecks.checkPortCallServiceRightType(dsp)
-        .validate(
-          createPortCallServiceRequest(
-            PortCallServiceType.SLUDGE,
-            PortCallServiceEventTypeCode.ARRI,
-            PortCallPhaseTypeCode.INBD)).iterator().next());
+    assertEquals(
+        "Expected matching Port Call Service type with scenario 'S-A pattern'. Found non-matching type: 'SLUDGE'",
+        JitChecks.checkPortCallServiceRightType(dsp)
+            .validate(
+                createPortCallServiceRequest(
+                    PortCallServiceType.SLUDGE,
+                    PortCallServiceEventTypeCode.ARRI,
+                    PortCallPhaseTypeCode.INBD))
+            .iterator()
+            .next());
   }
 
   private JsonNode createPortCallServiceRequest(
@@ -153,10 +157,14 @@ class JitChecksTest {
             JsonToolkit.templateFileToJsonNode(
                 "/standards/jit/messages/jit-200-port-call-service-request.json",
                 Map.of(
-                    "PORT_CALL_SERVICE_TYPE_PLACEHOLDER", serviceType.name(),
-                    "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER", code.name(),
+                    "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+                    serviceType.name(),
+                    "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
+                    code.name(),
                     "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-                        phaseTypeCode == null ? "" : phaseTypeCode.name()));
+                    phaseTypeCode == null ? "" : phaseTypeCode.name(),
+                    "IS_FYI_PLACEHOLDER",
+                    "false"));
 
     if (phaseTypeCode == null) {
       jsonNode.remove("portCallPhaseTypeCode");

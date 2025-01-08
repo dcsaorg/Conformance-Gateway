@@ -234,7 +234,7 @@ public class PayloadSignerFactory {
     }
 
   private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
-    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Toolkit");
+    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Framework");
 
     long notBefore = System.currentTimeMillis();
     // 2500 days (several) years should be sufficient.

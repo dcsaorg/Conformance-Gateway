@@ -10,6 +10,8 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
+import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
@@ -578,10 +580,72 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(vesselStatus(context))))));
   }
 
-  // 9. Scenario group: "PC-TC-S-V-ERP-A out-of-band variations"
   private static void addScenarioGroup9(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "9. PC-TC-S-V-ERP-A out-of-band variations",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL))))),
+                sendPC_TC_PCS_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendOOBTimestamp(context, JitTimestampType.ESTIMATED)
+                        .then(
+                            sendOOBTimestamp(context, JitTimestampType.REQUESTED)
+                                .then(
+                                    sendOOBTimestamp(context, JitTimestampType.PLANNED)
+                                        .then(sendTimestamp(context, JitTimestampType.ACTUAL)))))));
   }
 
   private static void addScenarioGroup10(
@@ -832,6 +896,17 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 previousAction,
                 timestampType,
                 timestampType != JitTimestampType.REQUESTED));
+  }
+
+  private static JitScenarioListBuilder sendOOBTimestamp(
+      JitScenarioContext context, JitTimestampType timestampType) {
+    if (timestampType == JitTimestampType.REQUESTED) {
+      return new JitScenarioListBuilder(
+          previousAction ->
+              new JitOOBTimestampInputAction(context, previousAction, timestampType, false));
+    }
+    return new JitScenarioListBuilder(
+        previousAction -> new JitOOBTimestampAction(context, previousAction, timestampType, true));
   }
 
   private static JitScenarioListBuilder sendERPTimestamps(

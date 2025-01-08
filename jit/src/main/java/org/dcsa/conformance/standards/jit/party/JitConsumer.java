@@ -20,6 +20,7 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -66,7 +67,8 @@ public class JitConsumer extends ConformanceParty {
     return Map.ofEntries(
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(JitTimestampAction.class, this::timestampRequest),
-        Map.entry(JitDeclineAction.class, this::declineRequest));
+        Map.entry(JitDeclineAction.class, this::declineRequest),
+        Map.entry(JitOOBTimestampInputAction.class, this::outOfBandTimestampRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -109,7 +111,8 @@ public class JitConsumer extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JitTimestamp timestamp = JitProvider.getTimestampForType(timestampType, dsp.currentTimestamp());
+    JitTimestamp timestamp =
+        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp());
 
     syncCounterpartPut(
         JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
@@ -134,6 +137,23 @@ public class JitConsumer extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
+  }
+
+  private void outOfBandTimestampRequest(JsonNode actionPrompt) {
+    log.info("JitConsumer.outOfBandTimestampRequest({})", actionPrompt.toPrettyString());
+
+    JitTimestampType timestampType =
+        JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
+
+    DynamicScenarioParameters dsp =
+        DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
+    JitTimestamp timestamp =
+        JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp());
+
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(),
+        OBJECT_MAPPER.createObjectNode().put("timestamp", timestamp.dateTime()));
+    addOperatorLogEntry("Submitted Out-of-Band timestamp '%s' for type: %s".formatted(timestamp.dateTime(), timestampType));
   }
 
   @Override

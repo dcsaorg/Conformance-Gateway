@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.NonNull;
@@ -24,6 +23,7 @@ import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
+import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
@@ -37,9 +37,6 @@ import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
-
-  @SuppressWarnings("java:S2245") // Random is used for generating random timestamps. Secure enough.
-  private static final Random RANDOM = new Random();
 
   public JitProvider(
       String apiVersion,
@@ -80,6 +77,7 @@ public class JitProvider extends ConformanceParty {
         Map.entry(JitPortCallServiceAction.class, this::portCallServiceRequest),
         Map.entry(JitVesselStatusAction.class, this::vesselStatusRequest),
         Map.entry(JitTimestampAction.class, this::timestampRequest),
+        Map.entry(JitOOBTimestampAction.class, this::outOfBandTimestampRequest),
         Map.entry(JitCancelAction.class, this::cancelCallRequest),
         Map.entry(JitOmitPortCallAction.class, this::omitPortCallRequest),
         Map.entry(JitOmitTerminalCallAction.class, this::omitTerminalCallRequest));
@@ -164,12 +162,23 @@ public class JitProvider extends ConformanceParty {
 
     // Create values for the first timestamp in the sequence.
     if (previousTimestamp == null) {
-      previousTimestamp = getTimestampForType(JitTimestampType.ESTIMATED, null);
+      previousTimestamp = JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null);
       if (dsp.portCallServiceID() != null)
         previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
     }
-    JitTimestamp timestamp = getTimestampForType(timestampType, previousTimestamp);
+    JitTimestamp timestamp = JitTimestamp.getTimestampForType(timestampType, previousTimestamp);
     sendTimestampPutRequest(timestampType, timestamp);
+  }
+
+  private void outOfBandTimestampRequest(JsonNode actionPrompt) {
+    log.info("JitProvider.outOfBandTimestampRequest({})", actionPrompt.toPrettyString());
+
+    JitTimestampType timestampType =
+        JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
+
+    asyncOrchestratorPostPartyInput(
+        actionPrompt.required("actionId").asText(), OBJECT_MAPPER.createObjectNode());
+    addOperatorLogEntry("Submitted Out-of-Band timestamp for: %s".formatted(timestampType));
   }
 
   private void cancelCallRequest(JsonNode actionPrompt) {
@@ -220,42 +229,6 @@ public class JitProvider extends ConformanceParty {
         jsonBody);
 
     addOperatorLogEntry("Submitted Omit Terminal Call with ID: %s".formatted(dsp.terminalCallID()));
-  }
-
-  static JitTimestamp getTimestampForType(
-      JitTimestampType timestampType, JitTimestamp previousTimestamp) {
-    return switch (timestampType) {
-      case ESTIMATED ->
-          new JitTimestamp(
-              UUID.randomUUID().toString(),
-              previousTimestamp != null ? previousTimestamp.timestampID() : null,
-              previousTimestamp != null
-                  ? previousTimestamp.portCallServiceID()
-                  : UUID.randomUUID().toString(),
-              timestampType.getClassifierCode(),
-              LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
-              "STR",
-              false,
-              "Port closed due to strike");
-      case PLANNED, ACTUAL ->
-          previousTimestamp.withClassifierCode(timestampType.getClassifierCode());
-      case REQUESTED ->
-          previousTimestamp
-              .withClassifierCode(timestampType.getClassifierCode())
-              .withTimestampID(
-                  UUID.randomUUID().toString()) // Create new ID, because it's a new timestamp
-              .withReplyToTimestampID(
-                  previousTimestamp.timestampID()) // Respond to the previous timestamp
-              .withDateTime(generateRandomDateTime());
-    };
-  }
-
-  // Random date/time in the future (3 - 7 hours from now), with a random offset of up to 4 hours.
-  private static String generateRandomDateTime() {
-    return LocalDateTime.now()
-        .plusHours(3)
-        .plusSeconds(RANDOM.nextInt(60 * 60 * 4))
-        .format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT);
   }
 
   private void sendTimestampPutRequest(

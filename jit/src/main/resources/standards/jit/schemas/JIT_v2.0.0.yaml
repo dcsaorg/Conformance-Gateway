@@ -63,9 +63,9 @@ info:
     It is the responsibility of the creator of a **Timestamp** (Estimated, Requested, Planned or Actual) to create the `timestampID` as an identifier for the **Timestamp** for any further referral. One **Port Call Service** can contain many **Timestamps**
 
     ### API Design & Implementation Principles
-    This API follows the guidelines defined in version 2.1 of the API Design & Implementation Principles which can be found on the [DCSA Developer page](https://developer.dcsa.org/api_design)
+    This API follows the guidelines defined in version 2.0 of the API Design & Implementation Principles which can be found on the [DCSA Developer Portal](https://developer.dcsa.org/api_design)
 
-    For a changelog please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v2#v200). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
+    For a changelog, please click [here](https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v2#v200). If you have any questions, feel free to [Contact Us](https://dcsa.org/get-involved/contact-us).
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
@@ -95,7 +95,16 @@ paths:
       operationId: put-port-call
       summary: Initiates a new or updates a Port Call
       description: |
-        Description...
+        Creates or updates a **Port Call** record. The caller must provide a unique portCallID (UUIDv4), which identifies the **Port Call**. The `portCallID` must remain consistent across all subsequent communications and linked **Terminal Calls**. If updating an existing **Port Call**, e.g. including the `portVisitReference`, the provided `portCallID` must match the existing record.
+
+        The **Port Call** includes:
+          
+          - Location information (required): `UNLocationCode`
+          - static **Vessel** information (required): `vessel`
+          - an optional business identifier for the port visit: `portVisitReference`
+          - The ability to send the record with informational purpose only, using `isFYI= true`
+
+        This call is often provided as the first call from a **Carrier** to a **Terminal** before creating a **Terminal Call** and then sending `ETA-Berth` or `Moves`.
       requestBody:
         description: Initiates a new or updates a Port Call
         required: true
@@ -103,16 +112,50 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortCall'
+            examples:
+              CreateNewPortCallForETA:
+                summary: |
+                  Create a new Port Call to be used for an ETA
+                description: |
+                  A new `Port Call` for **Port of Amsterdam** for the **YM WHOLESOME**. After this call is accepted by consumer - a **Transport Call** can be created. In this example no `portVisitReference` has yet been assigned to the **Port Call**.
+                value:
+                  portCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
+                  UNLocationCode: NLAMS
+                  vessel:
+                    vesselIMONumber: '9704611'
+                    MMSINumber: '477524700'
+                    name: YM WHOLESOME
+                    lengthOverall: 368.07
+                    dimensionUnit: MTR
+                    callSign: VROO4
+                    typeCode: CONT
+              SendFYI:
+                summary: |
+                  Send a FYI to a consumer
+                description: |
+                  A `Port Call` has already been created - now send the **Port Call** as a FYI to a (secondary) consumer. In this example all properties are the same as the example above.
+                value:
+                  portCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
+                  UNLocationCode: NLAMS
+                  vessel:
+                    vesselIMONumber: '9704611'
+                    MMSINumber: '477524700'
+                    name: YM WHOLESOME
+                    lengthOverall: 368.07
+                    dimensionUnit: MTR
+                    callSign: VROO4
+                    typeCode: CONT
+                  isFYI: true
       responses:
         '204':
           description: |
-            A new or updated Port Call accepted
+            A new or updated Port Call accepted by the consumer.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new `Port Call` fails schema validation, a `400` (Bad Request) is returned
+            In case creating a new `Port Call` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -125,7 +168,7 @@ paths:
                   summary: |
                     Port Call missing Vessel object
                   description: |
-                    `vessel` is a mandatory property in the `Port Call`. This is an example of how the error object would look in case this property is missing
+                    `vessel` is a mandatory property in the `Port Call`. This is an example of how the error object would look in case this property is missing.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example"
                   value:
@@ -143,7 +186,7 @@ paths:
                         errorCodeMessage: vessel must be provided as part of a Port Call
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -181,6 +224,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tooManyRequestsExample:
+                  summary: |
+                    Making too many Port Calls
+                  description: |
+                    Calling the endPoint
+
+                        PUT /v2/port-calls/{portCallID}
+                        
+                    too many times within a time period results in an error.
+
+                    **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
+                  value:
+                    httpMethod: PUT
+                    requestUri: /v2/port-calls/085a3207-5e45-49cf-8e1b-f8442beaf545
+                    statusCode: 429
+                    statusCodeText: Too Many Requests
+                    statusCodeMessage: Too many request to create a Port Call has been requested. Please try again in 1 hour
+                    providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
+                    errorDateTime: '2024-09-04T09:41:00Z'
+                    errors:
+                      - errorCode: 7003
+                        errorCodeText: Max Port Call creations reached
+                        errorCodeMessage: A maximum of 100 unique Port Calls can be created per hour
   '/v2/port-calls/{portCallID}/omit':
     post:
       parameters:
@@ -191,7 +258,15 @@ paths:
       operationId: omit-port-call
       summary: Omits a Port Call
       description: |
-        Provider `OMITTING` a **Port Call**
+        Allows the provider to `OMIT` a **Port Call**, signaling that the **Port Call** is no longer going to happen.
+
+        When a consumer receives an `OMIT`, it is their responsibility to propagate this information to any secondary recipients, they previously informed using the `isFYI=true` property, while creating **Port Calls** or sending related updates.
+
+        The provider is responsible for:
+          - sending an `OMIT` to all **Terminal Calls** linked to the `portCallID`
+          - **Cancel** all `PortCallServices` associatedwith the omitted **Terminal Calls** and **Port Call**
+
+            Once a **Port Call** has been `OMITTED`, this action **CANNOT** be undone. In case the `OMIT` has to be "undone" a new **Port Call** must be created with new **Terminal Calls** and new **Port Call Services**.
       requestBody:
         description: |
           Omits a **Port Call**
@@ -200,6 +275,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OmitPortCall'
+            examples:
+              omit:
+                summary: |
+                  Send an OMIT
+                description: |
+                  Send an `OMIT` to a **Port Call** because the vessel has engine problems. Sending this OMIT is irreversible.
+                value:
+                  reason: 'Engine failures'
       responses:
         '204':
           description: |
@@ -209,7 +292,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case omitting a `Port Call` fails schema validation, a `400` (Bad Request) is returned
+            In case omitting a `Port Call` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -222,7 +305,7 @@ paths:
                   summary: |
                     isFYI provided as a number
                   description: |
-                    `isFYI` is a boolean property - cannot set the value to '12'. This is an example of how the error object would look in case the value of this property is specified wrongly
+                    `isFYI` is a boolean property - cannot set the value to '12'. This is an example of how the error object would look in case the value of this property is specified wrongly.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7004` is just a "random example"
                   value:
@@ -240,7 +323,7 @@ paths:
                         errorCodeMessage: isFYI should be a boolean. '12' provided as value
         '404':
           description: |
-            In case the implementor does not know of the `portCallID` used in the request (this could be because of a `PUT` request that has not finished processing or simply because the resource does not exist) - it is possible for the implementor to reject the requests by returning a `404` (Not Found).
+            In case the implementor does not know of the `portCallID` used in the request (this could be because of a `PUT` request that has not finished processing or simply because the resource does not exist), it is possible for the implementor to reject the requests by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -270,7 +353,7 @@ paths:
                         errorCodeMessage: The Port Call does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -308,6 +391,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                conflictingOmit:
+                  summary: |
+                    Omit is being called twice on the same Port Call
+                  description: |
+                    In case a **Port Call** has already been OMITTED - it is possible to send a 409 (Conflict) indicating that the OMIT cannot be performed again.
+
+                    **NB**: `errorCode` not yet standardized by DCSA. Value `7005` is just a "random example"
+                  value:
+                    httpMethod: POST
+                    requestUri: /v2/port-calls/085a3207-5e45-49cf-8e1b-f8442beaf545/omit
+                    statusCode: 409
+                    statusCodeText: Port Call already omitted
+                    statusCodeMessage: It is not possible to Omit a Port Call twice
+                    providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
+                    errorDateTime: '2024-11-21T09:41:00Z'
+                    errors:
+                      - errorCode: 7005
+                        errorCodeText: Conflicting omit
+                        errorCodeMessage: Trying to omit an already Omitted Port Call
   '/v2/port-calls':
     get:
       parameters:
@@ -327,7 +430,7 @@ paths:
       operationId: get-port-call
       summary: Retrieves a list of Port Calls
       description: |
-        Description...
+        Retrieves a list of **Port Calls** that match the specified filter criteria. To retrieve details for a specific **Port Call**, use the `portCallID` filter. This will return an array containing at most a single object. The response will return an empty array if no **Port Call** known by the consumer is linked to the provided `portCallID`.
       responses:
         '200':
           description: |
@@ -341,7 +444,7 @@ paths:
                 $ref: '#/components/schemas/PortCalls'
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -379,6 +482,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+                tooManyRequestsExample:
+                  summary: |
+                    Making too many Port Call requests
+                  description: |
+                    Calling the endPoint
+
+                        GET /v2/port-calls
+                        
+                    too many times within a time period results in an error.
+
+                    **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
+                  value:
+                    httpMethod: GET
+                    requestUri: /v2/port-calls
+                    statusCode: 429
+                    statusCodeText: Too Many Requests
+                    statusCodeMessage: Too many request to fetch Port Calls has been requested. Please try again in 1 hour
+                    providerCorrelationReference: 4426d965-0dd8-4005-8c63-dc68b01c4962
+                    errorDateTime: '2024-09-04T09:41:00Z'
+                    errors:
+                      - errorCode: 7003
+                        errorCodeText: Max Port Call requests reached
+                        errorCodeMessage: A maximum of 500 Port Call requests can be created per hour
   '/v2/terminal-calls/{terminalCallID}':
     put:
       parameters:
@@ -406,7 +532,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new `Terminal Call` fails schema validation, a `400` (Bad Request) is returned
+            In case creating a new `Terminal Call` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -437,7 +563,7 @@ paths:
                         errorCodeMessage: carrierServiceCode must be provided as part of a Terminal Call
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -503,7 +629,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case omitting a `Terminal Call` does not schema validate a `400` (Bad Request) is returned
+            In case omitting a `Terminal Call` does not schema validate a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -564,7 +690,7 @@ paths:
                         errorCodeMessage: The Terminal Call does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -640,7 +766,7 @@ paths:
                 $ref: '#/components/schemas/TerminalCalls'
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -705,7 +831,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new `Port Call Service` fails schema validation, a `400` (Bad Request) is returned
+            In case creating a new `Port Call Service` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -736,7 +862,7 @@ paths:
                         errorCodeMessage: portCallServiceType must be provided as part of a Port Call Service
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -800,7 +926,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case cancelling a `Port Call Service` fails schema validation, a `400` (Bad Request) is returned
+            In case cancelling a `Port Call Service` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -861,7 +987,7 @@ paths:
                         errorCodeMessage: The Port Call Service does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -929,7 +1055,7 @@ paths:
                 $ref: '#/components/schemas/PortCallServices'
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -993,7 +1119,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new `Timestamp` fails schema validation, a `400` (Bad Request) is returned
+            In case creating a new `Timestamp` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1054,7 +1180,7 @@ paths:
                         errorCodeMessage: The Port Call Service does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1124,7 +1250,7 @@ paths:
                 $ref: '#/components/schemas/Timestamps'
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1189,7 +1315,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new `Timestamp` fails schema validation, a `400` (Bad Request) is returned
+            In case creating a new `Timestamp` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1250,7 +1376,7 @@ paths:
                         errorCodeMessage: The Port Call Service does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1315,7 +1441,7 @@ paths:
                 $ref: '#/components/schemas/VesselStatuses'
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1380,7 +1506,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case declining a `Port Call Service` fails schema validation, a `400` (Bad Request) is returned
+            In case declining a `Port Call Service` fails schema validation, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1441,7 +1567,7 @@ paths:
                         errorCodeMessage: The Port Call Service does not exist
         '500':
           description: |
-            In case a server error occurs in implementor system a `500` (Internal Server Error) is returned
+            In case a server error occurs in implementor system, a `500` (Internal Server Error) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -2470,7 +2596,23 @@ components:
             The vertical distance from the surface of the water to the highest point of mast or aerial.
 
             If the vertical draft is specified in feet (`FOT`) then the decimal part should be considered as a fraction of a foot and **not as a number of inches. E.g. 120.5 feet means 120 and a half foot (which would be 120'6")
-          example: 60
+          example: 55
+        afterDraft:
+          type: number
+          format: float
+          description: |
+            The vertical distance between the waterline and the bottom of the hull (keel) at the stern (after part) of the vessel. The depth to which the after part of the ship is immersed in water.
+
+            If the vertical draft is specified in feet (`FOT`) then the decimal part should be considered as a fraction of a foot and **not as a number of inches. E.g. 120.5 feet means 120 and a half foot (which would be 120'6")
+          example: 37
+        forwardDraft:
+          type: number
+          format: float
+          description: |
+            The vertical distance between the waterline and the bottom of the hull (keel) at the bow (forward part) of the vessel. The depth to which the forward part of the ship is immersed in water.
+
+            If the vertical draft is specified in feet (`FOT`) then the decimal part should be considered as a fraction of a foot and **not as a number of inches. E.g. 120.5 feet means 120 and a half foot (which would be 120'6")
+          example: 35
         dimensionUnit:
           type: string
           description: |
@@ -2750,7 +2892,7 @@ components:
       type: object
       title: Moves
       description: |
-        Forecasted container moves for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG), and Restows. These can be detailed at varying levels of granularity.
+        Forecasted units of containers to move for loading and discharging, empty or laden, covering various types such as Dry, reefer, Out-of-Gauge (OOG), and units of containers to restow at a terminal. These can be detailed at varying levels of granularity.
 
         ### Multiple Moves Objects with Carrier Codes
         If `carrierCode` and `carrierCodeListProvider` are provided for multiple `Moves` objects, any object without these fields represents the accumulated result of moves for the remaining VSA partners in the vessel.
@@ -2786,128 +2928,185 @@ components:
           enum:
             - SMDG
             - NMFTA
-        restowMoves:
-          type: integer
-          format: int32
-          description: |
-            Forecasted restow moves where containers are off loaded from on board the ship and put back onto the ship either at the same stow position or a different stow position. 
-          example: 20
+        restows:
+          $ref: '#/components/schemas/Restows'
       oneOf:
-        - $ref: '#/components/schemas/TotalMoves'
-        - $ref: '#/components/schemas/SpecificMoves'
+        - $ref: '#/components/schemas/TotalUnits'
+        - $ref: '#/components/schemas/SpecificUnits'
 
-    TotalMoves:
+    Restows:
       type: object
-      title: Total Moves (Dry + Reefer + OOG)
+      title: Restows
+      description: |
+        Forecasted container units to restow, where containers are off loaded from on board the ship and put back onto the ship either at the same stow position or a different stow position.
+      oneOf:
+        - $ref: '#/components/schemas/TotalRestows'
+        - $ref: '#/components/schemas/ContainerRestows'
+
+    TotalRestows:
+      type: object
+      title: Total Restows
       additionalProperties: false
       description: |
-        Forecasted total container moves for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+        Forecasted total container units to restow.
       properties:
-        totalMoves:
+        totalRestows:
           type: integer
           format: int32
           description: |
-            Forecasted total container moves for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+            Forecasted total container units to restow.
           example: 155
       required:
-        - totalMoves
+        - totalRestows
 
-    SpecificMoves:
+    ContainerRestows:
       type: object
-      title: Specific moves (for load and discharge)
+      title: Container Restows
       description: |
-        Forecasted moves for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
-      properties:
-        loadMoves:
-          $ref: '#/components/schemas/LoadMoves'
-        dischargeMoves:
-          $ref: '#/components/schemas/DischargeMoves'
-
-    LoadMoves:
-      type: object
-      title: Load Moves
-      description: |
-        Forecasted total container moves for loading, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
-      properties:
-        ladenContainerMoves:
-          $ref: '#/components/schemas/LadenContainerMoves'
-        emptyContainerMoves:
-          $ref: '#/components/schemas/EmptyContainerMoves'
-        reeferPluggedContainerMoves:
-          $ref: '#/components/schemas/ReeferPluggedContainerMoves'
-        oogUnits:
-          type: integer
-          format: int32
-          description: |
-            Forecasted Out-of-gauge (OOG) units
-          example: 2
-    DischargeMoves:
-      type: object
-      title: Discharge Moves
-      description: |
-        Forecasted total container moves for discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
-      properties:
-        ladenContainerMoves:
-          $ref: '#/components/schemas/LadenContainerMoves'
-        emptyContainerMoves:
-          $ref: '#/components/schemas/EmptyContainerMoves'
-        reeferPluggedContainerMoves:
-          $ref: '#/components/schemas/ReeferPluggedContainerMoves'
-        oogUnits:
-          type: integer
-          format: int32
-          description: |
-            Forecasted Out-of-gauge (OOG) units
-          example: 2
-
-    LadenContainerMoves:
-      type: object
-      title: Laden Container Moves
-      description: |
-        Forecasted laden containers
-      oneOf:
-        - $ref: '#/components/schemas/TotalMoves'
-        - $ref: '#/components/schemas/ContainerMoves'
-
-    ContainerMoves:
-      type: object
-      title: Container Moves
-      description: |
-        Forecasted container moves for 20-foot and 40-foot containers
+        Forecasted container units to restow, covering three sizes: `20-foot`, `40-foot` containers, and `45-foot` containers
       properties:
         _20_units:
           type: integer
           format: int32
           description: |
-            Forecasted moves of 20-foot containers
+            Forecasted units of `20-foot` containers
           example: 25
         _40_units:
           type: integer
           format: int32
           description: |
-            Forecasted moves of 40-foot containers
+            Forecasted units of `40-foot` containers
+          example: 30
+        _45_units:
+          type: integer
+          format: int32
+          description: |
+            Forecasted units of `45-foot` containers
           example: 30
       required:
         - _20_units
         - _40_units
+        - _45_units
 
-    EmptyContainerMoves:
+    TotalUnits:
       type: object
-      title: Empty Container Moves
+      title: Total Units (Dry + Reefer + OOG)
+      additionalProperties: false
+      description: |
+        Forecasted total units of containers to move for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+      properties:
+        totalUnits:
+          type: integer
+          format: int32
+          description: |
+            Forecasted total units of containers to move for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+          example: 155
+      required:
+        - totalUnits
+
+    SpecificUnits:
+      type: object
+      title: Specific Units (for load and discharge)
+      description: |
+        Forecasted units of containers to move for loading and discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+      properties:
+        loadUnits:
+          $ref: '#/components/schemas/LoadUnits'
+        dischargeUnits:
+          $ref: '#/components/schemas/DischargeUnits'
+
+    LoadUnits:
+      type: object
+      title: Load Units
+      description: |
+        Forecasted total units of containers to move for loading, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+      properties:
+        ladenContainerUnits:
+          $ref: '#/components/schemas/LadenContainerUnits'
+        emptyContainerUnits:
+          $ref: '#/components/schemas/EmptyContainerUnits'
+        reeferPluggedContainerUnits:
+          $ref: '#/components/schemas/ReeferPluggedContainerUnits'
+        oogUnits:
+          type: integer
+          format: int32
+          description: |
+            Forecasted Out-of-gauge (OOG) units
+          example: 2
+    DischargeUnits:
+      type: object
+      title: Discharge Units
+      description: |
+        Forecasted total units of containers to move for discharging, empty or laden, at a terminal, covering various types such as Dry, Reefer, Out-of-Gauge (OOG)
+      properties:
+        ladenContainerUnits:
+          $ref: '#/components/schemas/LadenContainerUnits'
+        emptyContainerUnits:
+          $ref: '#/components/schemas/EmptyContainerUnits'
+        reeferPluggedContainerUnits:
+          $ref: '#/components/schemas/ReeferPluggedContainerUnits'
+        oogUnits:
+          type: integer
+          format: int32
+          description: |
+            Forecasted Out-of-gauge (OOG) units
+          example: 2
+
+    LadenContainerUnits:
+      type: object
+      title: Laden Container Units
+      description: |
+        Forecasted laden containers
+      oneOf:
+        - $ref: '#/components/schemas/TotalUnits'
+        - $ref: '#/components/schemas/ContainerUnits'
+
+    ContainerUnits:
+      type: object
+      title: Container Units
+      description: |
+        Forecasted units of containers to move for `20-foot`, `40-foot` and `45-foot` containers
+      properties:
+        _20_units:
+          type: integer
+          format: int32
+          description: |
+            Forecasted units of `20-foot` containers
+          example: 25
+        _40_units:
+          type: integer
+          format: int32
+          description: |
+            Forecasted units of `40-foot` containers
+          example: 30
+        _45_units:
+          type: integer
+          format: int32
+          description: |
+            Forecasted units of `45-foot` containers
+          example: 15
+      required:
+        - _20_units
+        - _40_units
+        - _45_units
+
+    EmptyContainerUnits:
+      type: object
+      title: Empty Container Units
       description: |
         Forecasted empty containers
       oneOf:
-        - $ref: '#/components/schemas/TotalMoves'
-        - $ref: '#/components/schemas/ContainerMoves'
+        - $ref: '#/components/schemas/TotalUnits'
+        - $ref: '#/components/schemas/ContainerUnits'
 
-    ReeferPluggedContainerMoves:
+    ReeferPluggedContainerUnits:
       type: object
-      title: Reefer Plugged Container Moves
+      title: Reefer Plugged Container Units
       description: |
         Forecasted reefer containers that are plugged
       oneOf:
-        - $ref: '#/components/schemas/TotalMoves'
-        - $ref: '#/components/schemas/ContainerMoves'
+        - $ref: '#/components/schemas/TotalUnits'
+        - $ref: '#/components/schemas/ContainerUnits'
 
     ################
     # Error Response

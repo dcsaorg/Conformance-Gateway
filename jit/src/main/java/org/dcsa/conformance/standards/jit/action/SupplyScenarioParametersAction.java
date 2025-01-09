@@ -26,7 +26,10 @@ public class SupplyScenarioParametersAction extends JitAction {
 
   // Adjusting the title, to make the scenarios in the whole JIT list unique
   private static String calculateTitle(JitServiceTypeSelector selector, boolean isFYI) {
-    if (selector == JitServiceTypeSelector.GIVEN) return "SupplyScenarioParameters";
+    if (selector == JitServiceTypeSelector.GIVEN) {
+      String fyi = isFYI ? "(FYI)" : "";
+      return "SupplyScenarioParameters%s".formatted(fyi);
+    }
     String fyi = isFYI ? ", FYI" : "";
     return "SupplyScenarioParameters(%s%s)".formatted(selector.getFullName(), fyi);
   }

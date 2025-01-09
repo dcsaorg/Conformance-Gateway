@@ -45,6 +45,7 @@ public class JitOOBTimestampInputAction extends JitAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
+    if (dsp == null) dsp = ((JitAction) previousAction).dsp;
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(
             timestampType, ((JitAction) previousAction).dsp.currentTimestamp(), dsp.isFYI());

@@ -872,7 +872,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "2. S-A as FYI messages",
-        supplyScenarioParameters(context, FULL_ERP, true)
+        supplyScenarioParameters(context, S_A_PATTERN, true)
             .thenEither(
                 sendPC_TC_PCS_VS(
                     context,

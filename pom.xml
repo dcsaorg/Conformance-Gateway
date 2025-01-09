@@ -14,12 +14,12 @@
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<spring.boot.version>3.4.0</spring.boot.version>
-		<jackson.version>2.18.1</jackson.version>
+		<spring.boot.version>3.4.1</spring.boot.version>
+		<jackson.version>2.18.2</jackson.version>
 		<lombok.version>1.18.36</lombok.version>
-		<log4j.version>2.24.2</log4j.version>
+		<log4j.version>2.24.3</log4j.version>
 		<slf4j.version>2.0.16</slf4j.version>
-		<junit.version>5.11.3</junit.version>
+		<junit.version>5.11.4</junit.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
@@ -153,7 +153,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.17.1</version>
+				<version>1.17.2</version>
 			</dependency>
 
 			<dependency>

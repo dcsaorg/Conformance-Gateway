@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 
@@ -46,7 +47,10 @@ public abstract class ActionCheck extends ConformanceCheck {
     try {
       conformanceErrors = checkConformance(getExchangeByUuid);
     } catch (Exception e) {
-      String message = "Failed to perform ActionCheck: " + title;
+      var message = "Failed to perform ActionCheck '%s'".formatted(title);
+      if (e instanceof UserFacingException) {
+        message += ": %s".formatted(e.getMessage());
+      }
       log.warn(message, e);
       conformanceErrors = Set.of(message);
     }

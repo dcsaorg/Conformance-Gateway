@@ -81,10 +81,10 @@ public class EblShipper extends ConformanceParty {
             carrierScenarioParameters.carrierBookingReference()),
           Map.entry(
             "COMMODITY_SUBREFERENCE_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubreference(), "")),
+            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubReference(), "")),
           Map.entry(
             "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubreference2(), "")),
+            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubReference2(), "")),
           Map.entry(
             "EQUIPMENT_REFERENCE_PLACEHOLDER",
             Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference(), "")),
@@ -116,6 +116,13 @@ public class EblShipper extends ConformanceParty {
           .addObject()
           .put("name", "DCSA another test person")
           .put("email", "no-reply@dcsa-consignee.example.org");
+    }
+    if (scenarioType.transportDocumentTypeCode().equals("BOL")) {
+      JsonNode documentParties = jsonRequestBody.path("documentParties");
+      if (!documentParties.isMissingNode() && !documentParties.path("issueTo").isMissingNode()) {
+        var issueToParty = (ObjectNode) documentParties.path("issueTo");
+        issueToParty.put("sendToPlatform", "CARX");
+      }
     }
     return jsonRequestBody;
   }

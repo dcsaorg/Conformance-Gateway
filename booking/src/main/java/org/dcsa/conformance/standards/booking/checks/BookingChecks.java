@@ -249,7 +249,7 @@ public class BookingChecks {
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",
     mav -> mav.submitAllMatching("requestedEquipments.*.commodities"),
-    JsonAttribute.unique("commoditySubreference")
+    JsonAttribute.unique("commoditySubReference")
   );
 
   private static final JsonContentCheck VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE = JsonAttribute.allIndividualMatchesMustBeValid(
@@ -769,12 +769,12 @@ public class BookingChecks {
         CARRIER_BOOKING_REFERENCE
       ));
       checks.add(JsonAttribute.allIndividualMatchesMustBeValid(
-          "The commoditySubreference is not present for confirmed booking",
+          "The commoditySubReference is not present for confirmed booking",
           mav -> mav.submitAllMatching("requestedEquipments.*.commodities.*"),
           (nodeToValidate, contextPath) -> {
-            var commoditySubreference = nodeToValidate.path("commoditySubreference");
-            if (commoditySubreference.isMissingNode() || commoditySubreference.isNull()) {
-              return Set.of("The commoditySubreference at %s is not present for confirmed booking".formatted(contextPath));
+            var commoditySubReference = nodeToValidate.path("commoditySubReference");
+            if (commoditySubReference.isMissingNode() || commoditySubReference.isNull()) {
+              return Set.of("The commoditySubReference at %s is not present for confirmed booking".formatted(contextPath));
             }
             return Set.of();
           }

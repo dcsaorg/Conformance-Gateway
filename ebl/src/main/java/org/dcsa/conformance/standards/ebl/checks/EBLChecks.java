@@ -657,13 +657,13 @@ public class EBLChecks {
             return Set.of();
           });
 
-  private static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
+  static final JsonRebaseableContentCheck SEND_TO_PLATFORM_CONDITIONAL_CHECK =
       JsonAttribute.ifThenElse(
-          "'isElectronic' and 'transportDocumentTypeCode' BOL implies 'sendToPlatform'",
+          "'isElectronic' and 'transportDocumentTypeCode' BOL requires 'sendToPlatform'",
           JsonAttribute.isTrue(JsonPointer.compile("/isElectronic")),
           JsonAttribute.ifThenElse(
               "'transportDocumentTypeCode' is BOL",
-              JsonAttribute.isEqualTo("/transportDocumentTypeCode", "BOL"),
+              JsonAttribute.isEqualTo("transportDocumentTypeCode", "BOL"),
               JsonAttribute.mustBePresent(SI_REQUEST_SEND_TO_PLATFORM),
               JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM)),
           JsonAttribute.mustBeAbsent(SI_REQUEST_SEND_TO_PLATFORM));
@@ -771,8 +771,8 @@ public class EBLChecks {
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     NOR_IS_TRUE_IMPLIES_NO_ACTIVE_REEFER,
     JsonAttribute.allIndividualMatchesMustBeValid(
-      "The 'commoditySubreference' must not be present in the transport document",
-      mav -> mav.submitAllMatching("consignmentItems.*.commoditySubreference"),
+      "The 'commoditySubReference' must not be present in the transport document",
+      mav -> mav.submitAllMatching("consignmentItems.*.commoditySubReference"),
       JsonAttribute.matchedMustBeAbsent()
     ),
     JsonAttribute.allIndividualMatchesMustBeValid(
@@ -883,7 +883,7 @@ public class EBLChecks {
         ));
       checks.add(
         JsonAttribute.customValidator(
-          "[Scenario] Verify that the correct 'commoditySubreference' is used",
+          "[Scenario] Verify that the correct 'commoditySubReference' is used",
           JsonAttribute.path(CONSIGNMENT_ITEMS, checkCommoditySubreference(cspSupplier))));
 
       checks.add(
@@ -1146,10 +1146,10 @@ public class EBLChecks {
   private static JsonContentMatchedValidation checkCommoditySubreference(Supplier<CarrierScenarioParameters> cspSupplier) {
     Supplier<Set<String>> expectedValueSupplier = () -> {
       var csp = cspSupplier.get();
-      return setOf(csp.commoditySubreference(), csp.commoditySubreference2());
+      return setOf(csp.commoditySubReference(), csp.commoditySubReference2());
     };
     return checkCSPAllUsedAtLeastOnce(
-      "commoditySubreference",
+      "commoditySubReference",
       expectedValueSupplier
     );
   }
@@ -1159,10 +1159,10 @@ public class EBLChecks {
       var csp = cspSupplier.get();
       var m = new LinkedHashMap<String, String>();
       if (csp.descriptionOfGoods() != null) {
-        m.put(csp.descriptionOfGoods(), csp.commoditySubreference());
+        m.put(csp.descriptionOfGoods(), csp.commoditySubReference());
       }
       if (csp.descriptionOfGoods2() != null) {
-        m.put(csp.descriptionOfGoods2(), csp.commoditySubreference2());
+        m.put(csp.descriptionOfGoods2(), csp.commoditySubReference2());
       }
       return m;
     };
@@ -1177,7 +1177,7 @@ public class EBLChecks {
     };
     return checkCSPValueBasedOnOtherValue(
       "descriptionOfGoods",
-      "commoditySubreference",
+      "commoditySubReference",
       expectedValueSupplier,
       resolver
     );
@@ -1188,10 +1188,10 @@ public class EBLChecks {
       var csp = cspSupplier.get();
       var m = new LinkedHashMap<String, String>();
       if (csp.descriptionOfGoods() != null) {
-        m.put(csp.consignmentItemHSCode(), csp.commoditySubreference());
+        m.put(csp.consignmentItemHSCode(), csp.commoditySubReference());
       }
       if (csp.descriptionOfGoods2() != null) {
-        m.put(csp.consignmentItem2HSCode(), csp.commoditySubreference2());
+        m.put(csp.consignmentItem2HSCode(), csp.commoditySubReference2());
       }
       return m;
     };
@@ -1206,7 +1206,7 @@ public class EBLChecks {
     };
     return checkCSPValueBasedOnOtherValue(
       "HSCodes",
-      "commoditySubreference",
+      "commoditySubReference",
       expectedValueSupplier,
       resolver
     );

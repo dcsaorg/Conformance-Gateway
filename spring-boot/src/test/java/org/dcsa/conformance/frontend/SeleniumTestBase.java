@@ -12,6 +12,7 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.manual.ManualTestBase;
+import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.By;
@@ -137,8 +138,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
       jsonPromptText = fetchPromptAnswer("initiateState");
     }
     // Flow for ebl issuance carrier scenarios
-    else if (promptText.contains(
-        "Supply the public key for validating the signed content using the following format:")) {
+    else if (promptText.contains(CarrierScenarioParametersAction.HUMAN_READABLE_PROMPT)) {
       jsonPromptText = fetchPromptAnswer("CarrierScenarioParameters");
     }
 

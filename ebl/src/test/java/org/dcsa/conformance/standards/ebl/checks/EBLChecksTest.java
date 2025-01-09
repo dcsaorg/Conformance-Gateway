@@ -357,8 +357,13 @@ class EBLChecksTest {
   void testEBLSCannotHaveCopiesWithCharges() {
     rootNode.put("isElectronic", true);
     rootNode.put("transportDocumentTypeCode", "BOL");
-    rootNode.put("numberOfCopiesWithCharges", 1);
     Set<String> errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfCopiesWithCharges", 1);
+    errors = EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES.validate(rootNode);
     assertEquals(1, errors.size());
 
     rootNode.put("isElectronic", true);

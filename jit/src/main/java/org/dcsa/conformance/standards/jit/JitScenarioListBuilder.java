@@ -874,18 +874,9 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
         "2. S-A as FYI messages",
         supplyScenarioParameters(context, S_A_PATTERN, true)
             .thenEither(
-                sendPC_TC_PCS_VS(
-                    context,
-                    null,
-                    S_A_PATTERN,
-                    vesselStatus(context).then(sendTimestamp(context, ACTUAL))),
-                sendPC_TC_PCS_VS(
-                    context, null, S_A_PATTERN, vesselStatus(context).then(omitPortCall(context))),
-                sendPC_TC_PCS_VS(
-                    context,
-                    null,
-                    S_A_PATTERN,
-                    vesselStatus(context).then(omitTerminalCall(context))),
+                sendPC_TC_PCS_VS(context, null, S_A_PATTERN, sendTimestamp(context, ACTUAL)),
+                sendPC_TC_PCS_VS(context, null, S_A_PATTERN, omitPortCall(context)),
+                sendPC_TC_PCS_VS(context, null, S_A_PATTERN, omitTerminalCall(context)),
                 portCall(context)
                     .then(
                         terminalCall(context)
@@ -903,10 +894,27 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 portCall(context).then(omitPortCall(context))));
   }
 
-  // 3. Scenario group: "S as FYI message"
   private static void addScenarioGroupSecondary3(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-    // TODO
+    scenarioList.put(
+        "3. S(Moves) as FYI message",
+        supplyScenarioParameters(context, GIVEN, true)
+            .thenEither(
+                sendPC_TC_PCS_VS(context, MOVES, null),
+                sendPC_TC_PCS_VS(context, MOVES, null, omitPortCall(context)),
+                sendPC_TC_PCS_VS(context, MOVES, null, omitTerminalCall(context)),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(serviceCall(context, MOVES, null).then(omitPortCall(context)))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, MOVES, null).then(omitTerminalCall(context)))),
+                portCall(context).then(terminalCall(context).then(omitPortCall(context))),
+                portCall(context).then(terminalCall(context).then(omitTerminalCall(context))),
+                portCall(context).then(omitPortCall(context))));
   }
 
   private static JitScenarioListBuilder sendTimestamp(

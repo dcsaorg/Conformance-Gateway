@@ -18,10 +18,17 @@ public class SupplyScenarioParametersAction extends JitAction {
   private final boolean isFYI;
 
   public SupplyScenarioParametersAction(
-    JitScenarioContext context, JitServiceTypeSelector selector, boolean isFYI) {
-    super(context.consumerPartyName(), null, null, "SupplyScenarioParameters");
+      JitScenarioContext context, JitServiceTypeSelector selector, boolean isFYI) {
+    super(context.consumerPartyName(), null, null, calculateTitle(selector, isFYI));
     this.selector = selector;
     this.isFYI = isFYI;
+  }
+
+  // Adjusting the title, to make the scenarios in the whole JIT list unique
+  private static String calculateTitle(JitServiceTypeSelector selector, boolean isFYI) {
+    if (selector == JitServiceTypeSelector.GIVEN) return "SupplyScenarioParameters";
+    String fyi = isFYI ? ", FYI" : "";
+    return "SupplyScenarioParameters(%s%s)".formatted(selector.getFullName(), fyi);
   }
 
   @Override

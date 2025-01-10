@@ -1,13 +1,12 @@
 package org.dcsa.conformance.core.traffic;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.ToString;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 @ToString
@@ -23,23 +22,6 @@ public class ConformanceMessageBody {
     try {
       jsonBody = OBJECT_MAPPER.readTree(this.stringBody);
       isCorrectJson = true;
-      // FIXME start of temporary workaround for SD-1942
-      String overwritingValue = "Value overwritten by the DCSA Conformance sandbox as a workaround for SD-1942";
-      JsonNode termsAndConditionsParent =
-          JsonToolkit.findNodeWithAttribute(jsonBody, "termsAndConditions");
-      if (termsAndConditionsParent != null) {
-        ((ObjectNode) termsAndConditionsParent).put("termsAndConditions", overwritingValue);
-      }
-      JsonNode eBLVisualisationByCarrierParent =
-          JsonToolkit.findNodeWithAttribute(jsonBody, "eBLVisualisationByCarrier");
-      if (eBLVisualisationByCarrierParent != null) {
-        JsonNode eBLVisualisationByCarrierNode =
-            eBLVisualisationByCarrierParent.path("eBLVisualisationByCarrier");
-        if (eBLVisualisationByCarrierNode.has("content")) {
-          ((ObjectNode) eBLVisualisationByCarrierNode).put("content", overwritingValue);
-        }
-      }
-      // FIXME end of temporary workaround
     } catch (JsonProcessingException e) {
       jsonBody = OBJECT_MAPPER.createObjectNode();
       isCorrectJson = false;

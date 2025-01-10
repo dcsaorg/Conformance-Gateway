@@ -112,9 +112,6 @@ public class IssuanceChecks {
     String manifestChecksumAttribute
   ) {
     return (nodeToValidate, contextPath) -> {
-      // FIXME start of temporary workaround for SD-1942
-      if (System.currentTimeMillis() > 0) return Set.of();
-      // FIXME end of temporary workaround
       var json = nodeToValidate.path(protectedAttribute);
       var checksumValidator = JsonAttribute.matchedMustBeAbsent();
       if (!json.isMissingNode()) {

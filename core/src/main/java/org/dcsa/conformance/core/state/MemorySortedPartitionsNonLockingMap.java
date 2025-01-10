@@ -1,13 +1,14 @@
 package org.dcsa.conformance.core.state;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.SneakyThrows;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 
 public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonLockingMap {
   private final HashMap<String, TreeMap<String, JsonNode>> memoryMap = new HashMap<>();
@@ -31,21 +32,15 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
   }
 
   @Override
-  public synchronized JsonNode getFirstItemValue(String partitionKey) {
-    TreeMap<String, JsonNode> partition = memoryMap.getOrDefault(partitionKey, new TreeMap<>());
-    return partition.isEmpty() ? null : partition.get(partition.firstKey()).get("value");
-  }
-
-  @Override
-  public synchronized JsonNode getLastItemValue(String partitionKey) {
-    TreeMap<String, JsonNode> partition = memoryMap.getOrDefault(partitionKey, new TreeMap<>());
-    return partition.isEmpty() ? null : partition.get(partition.lastKey()).get("value");
-  }
-
-  @Override
-  public synchronized List<JsonNode> getPartitionValues(String partitionKey) {
-    return memoryMap.getOrDefault(partitionKey, new TreeMap<>()).values().stream()
-        .map(item -> item.get("value"))
-        .toList();
+  public synchronized LinkedHashMap<String, JsonNode> getPartitionValuesBySortKey(
+      String partitionKey, String sortKeyPrefix) {
+    return memoryMap.getOrDefault(partitionKey, new TreeMap<>()).entrySet().stream()
+        .filter(entry -> entry.getKey().startsWith(sortKeyPrefix))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (existing, replacement) -> existing,
+                LinkedHashMap::new));
   }
 }

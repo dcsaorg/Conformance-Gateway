@@ -446,7 +446,9 @@ public class ConformanceWebuiHandler {
     TreeMap<String, JsonNode> sortedSandboxesByLowercaseName = new TreeMap<>();
     persistenceProvider
         .getNonLockingMap()
-        .getPartitionValues("environment#" + accessChecker.getUserEnvironmentId(userId))
+        .getPartitionValuesBySortKey(
+            "environment#" + accessChecker.getUserEnvironmentId(userId), "")
+        .values()
         .forEach(
             sandboxNode ->
                 sortedSandboxesByLowercaseName.put(

@@ -35,7 +35,7 @@ public class TDReceiveState {
   private static final String SCENARIO_CLASS = "scenarioClass";
   private static final String ENVELOPE_REFERENCE = "envelopeReference";
 
-  private static final String EXPECTED_PUBLIC_KEY = "expectedSenderPublicKey";
+  private static final String EXPECTED_SIGNING_CERT_ATTR = "expectedSenderX509Certificate";
 
   private static final String TRANSFER_CHAIN_ENTRY_HISTORY = "transferChainEntryHistory";
 
@@ -284,8 +284,8 @@ public class TDReceiveState {
   }
 
   public SignatureVerifier getSignatureVerifierForSenderSignatures() {
-    var pem = state.path(EXPECTED_PUBLIC_KEY).asText();
-    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, EXPECTED_PUBLIC_KEY);
+    var pem = state.path(EXPECTED_SIGNING_CERT_ATTR).asText();
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, EXPECTED_SIGNING_CERT_ATTR);
   }
 
   public static TDReceiveState fromPersistentStore(JsonNode state) {
@@ -296,7 +296,7 @@ public class TDReceiveState {
     var state = OBJECT_MAPPER.createObjectNode()
       .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
       .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
-      .put(EXPECTED_PUBLIC_KEY, senderPublicKeyPEM);
+      .put(EXPECTED_SIGNING_CERT_ATTR, senderPublicKeyPEM);
     return new TDReceiveState(state);
   }
 

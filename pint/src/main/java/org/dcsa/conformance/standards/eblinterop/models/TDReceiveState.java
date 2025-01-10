@@ -285,7 +285,7 @@ public class TDReceiveState {
 
   public SignatureVerifier getSignatureVerifierForSenderSignatures() {
     var pem = state.path(EXPECTED_PUBLIC_KEY).asText();
-    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, EXPECTED_PUBLIC_KEY);
   }
 
   public static TDReceiveState fromPersistentStore(JsonNode state) {

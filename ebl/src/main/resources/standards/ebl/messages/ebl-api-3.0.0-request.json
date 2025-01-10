@@ -3,6 +3,7 @@
   "isElectronic": true,
   "isToOrder": false,
   "numberOfCopiesWithCharges": 0,
+  "numberOfCopiesWithoutCharges": 0,
   "freightPaymentTermCode": "PRE",
   "isShippedOnBoardType": true,
   "invoicePayableAt": {

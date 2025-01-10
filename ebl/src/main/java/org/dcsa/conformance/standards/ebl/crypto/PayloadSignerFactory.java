@@ -190,7 +190,7 @@ public class PayloadSignerFactory {
   }
 
     @SneakyThrows
-    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey) {
+    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey, String attributeName) {
       if (publicKey instanceof RSAPublicKey rsaPublicKey) {
         return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
       }
@@ -201,21 +201,24 @@ public class PayloadSignerFactory {
       // However, X.509 can support other key algorithms. This exception is for
       // when users provide certificates with keys beyond what is supposed by
       // JWS.
-      throw new UserFacingException("Unsupported certificate/public key. The underlying public key must be a RSAPublicKey or an ECPublicKey.");
+      throw new UserFacingException("Unsupported certificate/public key in \"" + attributeName + "\". The underlying public key must be a RSAPublicKey or an ECPublicKey.");
     }
 
     @SneakyThrows
-    public static SignatureVerifier verifierFromPemEncodedPublicKey(String publicKeyPem) {
-      try (var reader = new PEMParser(new StringReader(publicKeyPem))) {
+    public static SignatureVerifier verifierFromPemEncodedCertificate(String pemContent, String attributeName) {
+      if (pemContent == null || pemContent.trim().isEmpty()) {
+         throw new UserFacingException("The PEM certificate in \"" + attributeName + "\" cannot be null or empty");
+      }
+      try (var reader = new PEMParser(new StringReader(pemContent))) {
         var parsedObject = reader.readObject();
         if (parsedObject instanceof X509CertificateHolder x509CertificateHolder) {
           var cert = CertificateFactory.getInstance("X.509")
             .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
-          return verifierFromPublicKey(cert.getPublicKey());
+          return verifierFromPublicKey(cert.getPublicKey(), attributeName);
         }
-        throw new UserFacingException("The provided PEM object was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
+        throw new UserFacingException("The provided PEM object in \"" + attributeName + "\" was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
       } catch (Exception e) {
-        throw new UserFacingException("Could not parse the PEM content string as an X509 encoded PEM certificate");
+        throw new UserFacingException("Could not parse the PEM content in \"" + attributeName + "\" as an X509 encoded PEM certificate");
       }
     }
 

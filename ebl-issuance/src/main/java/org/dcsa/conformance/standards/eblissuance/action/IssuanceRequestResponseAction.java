@@ -154,8 +154,9 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         Supplier<SignatureVerifier> signatureVerifier =
             () ->
-                PayloadSignerFactory.verifierFromPemEncodedPublicKey(
-                    getCspSupplier().get().carriersX509SigningCertificateInPEMFormat());
+              PayloadSignerFactory.verifierFromPemEncodedCertificate(
+                getCspSupplier().get().carriersX509SigningCertificateInPEMFormat(),
+                "carriersX509SigningCertificateInPEMFormat");
         String asyncResponseChecksPrefix = "[Response]";
         UUID matchedExchangeUuid = getMatchedExchangeUuid();
         UUID matchedNotificationExchangeUuid = getMatchedNotificationExchangeUuid();

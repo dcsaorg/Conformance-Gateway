@@ -39,7 +39,7 @@ public class MemorySortedPartitionsNonLockingMap implements SortedPartitionsNonL
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey,
-                Map.Entry::getValue,
+                entry -> entry.getValue().get("value"),
                 (existing, replacement) -> existing,
                 LinkedHashMap::new));
   }

@@ -41,57 +41,29 @@ public class ConformancePersistenceProvider {
    * When chunked values are modified, a new chunk UUID is used; old chunks are neither overwritten nor cleaned up.
    */
 
-  private static final int MAX_VALUE_LENGTH =
-      8 * 1024; // FIXME after testing reset this to 128 * 1024
-  public static final String DCSA_CONFORMANCE_CHUNKED_VALUE = "DCSA_CONFORMANCE_CHUNKED_VALUE";
+  private static final int DEFAULT_MAX_VALUE_LENGTH = 64 * 1024;
+  private static final String DCSA_CONFORMANCE_CHUNKED_VALUE = "DCSA_CONFORMANCE_CHUNKED_VALUE";
+  private final int maxValueLength;
   private final SortedPartitionsNonLockingMap nonLockingMap;
   private final StatefulExecutor statefulExecutor;
-
-  private static LinkedHashMap<String, JsonNode> valueToChunks(
-      String chunkSortKeyPrefix, String value) {
-    LinkedHashMap<String, JsonNode> chunksBySortKey = new LinkedHashMap<>();
-    for (int chunkIndex = 0; chunkIndex * MAX_VALUE_LENGTH < value.length(); ++chunkIndex) {
-      int chuckStart = chunkIndex * MAX_VALUE_LENGTH;
-      int chunkEnd = Math.min(chuckStart + MAX_VALUE_LENGTH, value.length());
-      String chunk = value.substring(chuckStart, chunkEnd);
-      chunksBySortKey.put(
-          "%s#%08d".formatted(chunkSortKeyPrefix, chunkIndex), OBJECT_MAPPER.valueToTree(chunk));
-    }
-    return chunksBySortKey;
-  }
-
-  private static JsonNode chunksToValue(LinkedHashMap<String, JsonNode> chunksBySortKey) {
-    return JsonToolkit.stringToJsonNode(
-        chunksBySortKey.values().stream().map(JsonNode::asText).collect(Collectors.joining()));
-  }
-
-  private static boolean isNotChunkedValueRedirect(JsonNode internalItemValue) {
-    return internalItemValue == null
-        || !internalItemValue.isTextual()
-        || !internalItemValue.asText().startsWith(DCSA_CONFORMANCE_CHUNKED_VALUE);
-  }
-
-  private static JsonNode getChunkValueRedirect(String chunkUuid) {
-    return OBJECT_MAPPER.valueToTree("%s#%s".formatted(DCSA_CONFORMANCE_CHUNKED_VALUE, chunkUuid));
-  }
-
-  private static String getChunksUuid(JsonNode chunkValueRedirect) {
-    return chunkValueRedirect.asText().split("#")[1];
-  }
-
-  private static String getChunkSortKeyPrefix(String sortKey, String chunkUuid) {
-    return "chunk#%s#%s#".formatted(sortKey, chunkUuid);
-  }
 
   public ConformancePersistenceProvider(
       SortedPartitionsNonLockingMap internalNonLockingMap,
       SortedPartitionsLockingMap internalLockingMap) {
+    this(internalNonLockingMap, internalLockingMap, DEFAULT_MAX_VALUE_LENGTH);
+  }
+
+  ConformancePersistenceProvider(
+      SortedPartitionsNonLockingMap internalNonLockingMap,
+      SortedPartitionsLockingMap internalLockingMap,
+      int maxValueLength) {
+    this.maxValueLength = maxValueLength;
     this.nonLockingMap =
         new SortedPartitionsNonLockingMap() {
           @Override
           public void setItemValue(String partitionKey, String sortKey, JsonNode value) {
             String stringValue = value.toString();
-            if (stringValue.length() <= MAX_VALUE_LENGTH) {
+            if (stringValue.length() <= maxValueLength) {
               internalNonLockingMap.setItemValue(partitionKey, sortKey, value);
               return;
             }
@@ -152,7 +124,7 @@ public class ConformancePersistenceProvider {
               public void saveItem(
                   String lockedBy, String partitionKey, String sortKey, JsonNode value) {
                 String stringValue = value.toString();
-                if (stringValue.length() <= MAX_VALUE_LENGTH) {
+                if (stringValue.length() <= maxValueLength) {
                   internalLockingMap.saveItem(lockedBy, partitionKey, sortKey, value);
                   return;
                 }
@@ -184,5 +156,40 @@ public class ConformancePersistenceProvider {
                 internalLockingMap.unlockItem(lockedBy, partitionKey, sortKey);
               }
             });
+  }
+
+  private LinkedHashMap<String, JsonNode> valueToChunks(String chunkSortKeyPrefix, String value) {
+    LinkedHashMap<String, JsonNode> chunksBySortKey = new LinkedHashMap<>();
+    for (int chunkIndex = 0; chunkIndex * maxValueLength < value.length(); ++chunkIndex) {
+      int chuckStart = chunkIndex * maxValueLength;
+      int chunkEnd = Math.min(chuckStart + maxValueLength, value.length());
+      String chunk = value.substring(chuckStart, chunkEnd);
+      chunksBySortKey.put(
+          "%s%08d".formatted(chunkSortKeyPrefix, chunkIndex), OBJECT_MAPPER.valueToTree(chunk));
+    }
+    return chunksBySortKey;
+  }
+
+  private JsonNode chunksToValue(LinkedHashMap<String, JsonNode> chunksBySortKey) {
+    return JsonToolkit.stringToJsonNode(
+        chunksBySortKey.values().stream().map(JsonNode::asText).collect(Collectors.joining()));
+  }
+
+  private boolean isNotChunkedValueRedirect(JsonNode internalItemValue) {
+    return internalItemValue == null
+        || !internalItemValue.isTextual()
+        || !internalItemValue.asText().startsWith(DCSA_CONFORMANCE_CHUNKED_VALUE);
+  }
+
+  private JsonNode getChunkValueRedirect(String chunkUuid) {
+    return OBJECT_MAPPER.valueToTree("%s#%s".formatted(DCSA_CONFORMANCE_CHUNKED_VALUE, chunkUuid));
+  }
+
+  private String getChunksUuid(JsonNode chunkValueRedirect) {
+    return chunkValueRedirect.asText().split("#")[1];
+  }
+
+  private String getChunkSortKeyPrefix(String sortKey, String chunkUuid) {
+    return "chunk#%s#%s#".formatted(sortKey, chunkUuid);
   }
 }

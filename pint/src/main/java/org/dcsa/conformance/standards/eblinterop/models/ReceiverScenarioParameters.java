@@ -9,7 +9,7 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ReceiverScenarioParameters(JsonNode receiverParty, String receiverPublicKeyPEM)
+public record ReceiverScenarioParameters(JsonNode receiverParty, String receiversX509SigningCertificateInPEMFormat)
     implements ScenarioParameters {
 
   public static ReceiverScenarioParameters fromJson(JsonNode jsonNode) {

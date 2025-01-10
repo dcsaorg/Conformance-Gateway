@@ -62,7 +62,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   public void handlePartyInput(JsonNode partyInput) {
     CarrierScenarioParameters carrierScenarioParameters = CarrierScenarioParameters.fromJson(partyInput.get("input"));
     // validate the carrier signing key
-    PayloadSignerFactory.verifierFromPemEncodedPublicKey(carrierScenarioParameters.carrierSigningKeyPEM());
+    PayloadSignerFactory.verifierFromPemEncodedPublicKey(carrierScenarioParameters.carriersX509SigningCertificateInPEMFormat());
     getCspConsumer().accept(carrierScenarioParameters);
   }
 

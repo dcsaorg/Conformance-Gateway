@@ -10,8 +10,8 @@ import org.dcsa.conformance.core.party.ScenarioParameters;
 public record SenderScenarioParameters(
     String transportDocumentReference,
     String eblPlatform,
-    String senderPublicKeyPEM,
-    String carrierPublicKeyPEM)
+    String sendersX509SigningCertificateInPEMFormat,
+    String carriersX509SigningCertificateInPEMFormat)
     implements ScenarioParameters {
 
   public static SenderScenarioParameters fromJson(JsonNode jsonNode) {

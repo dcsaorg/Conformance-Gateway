@@ -189,55 +189,70 @@ public class EBLChecks {
 
   public static final Predicate<JsonNode> IS_ELECTRONIC = td -> td.path("isElectronic").asBoolean(false);
 
-  public static final Predicate<JsonNode> IS_AN_EBL = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
-  public static final Predicate<JsonNode> IS_AN_ESWB = IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("SWB"));
+  public static final Predicate<JsonNode> IS_AN_EBL =
+      IS_ELECTRONIC.and(td -> td.path("transportDocumentTypeCode").asText("").equals("BOL"));
 
+  static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES =
+      eblsCannotHaveCopiesCheck(
+          NUMBER_OF_COPIES_WITH_CHARGES, "EBLs cannot have copies with charges");
 
+  static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES =
+      eblsCannotHaveCopiesCheck(
+          "numberOfCopiesWithoutCharges", "EBLs cannot have copies without charges");
 
-  static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES = eblsCannotHaveCopiesCheck(NUMBER_OF_COPIES_WITH_CHARGES, "EBLs cannot have copies with charges");
-
-  static final JsonRebaseableContentCheck EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = eblsCannotHaveCopiesCheck("numberOfCopiesWithoutCharges", "EBLs cannot have copies without charges");
-
-  private static JsonRebaseableContentCheck eblsCannotHaveCopiesCheck(String fieldName, String errorMessage) {
+  private static JsonRebaseableContentCheck eblsCannotHaveCopiesCheck(
+      String fieldName, String errorMessage) {
     return JsonAttribute.customValidator(
-      errorMessage,
-      (node, contextPath) -> {
-        JsonNode numberOfCopiesNode = node.path(fieldName);
-        if (IS_AN_EBL.test(node)) {
-          if (numberOfCopiesNode.isMissingNode() || numberOfCopiesNode.asText().equals("0")) {
-            return Set.of();
+        errorMessage,
+        (node, contextPath) -> {
+          JsonNode numberOfCopiesNode = node.path(fieldName);
+          if (IS_AN_EBL.test(node)) {
+            if (numberOfCopiesNode.isMissingNode() || numberOfCopiesNode.asText().equals("0")) {
+              return Set.of();
+            }
+            String path = concatContextPath(contextPath, fieldName);
+            return Set.of("%s at %s".formatted(errorMessage, path));
           }
-          String path = concatContextPath(contextPath, fieldName);
-          return Set.of("%s at %s".formatted(errorMessage, path));
-        }
-        return Set.of();
-      }
-    );
+          return Set.of();
+        });
   }
 
-  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES = JsonAttribute.ifThen(
-    "Electronic SWBs cannot have originals with charges",
-    IS_AN_ESWB,
-    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMustBeAbsent())
-  );
+  static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES =
+      eblsCannotHaveOriginalsCheck(
+          "numberOfOriginalsWithCharges", "SWBs cannot have originals with charges");
+  static final JsonRebaseableContentCheck SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES =
+      eblsCannotHaveOriginalsCheck(
+          "numberOfOriginalsWithoutCharges", "SWBs cannot have originals without charges");
 
-  private static final JsonRebaseableContentCheck E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES = JsonAttribute.ifThen(
-    "Electronic SWBs cannot have originals without charges",
-    IS_AN_ESWB,
-    JsonAttribute.path("numberOfOriginasWithoutCharges", JsonAttribute.matchedMustBeAbsent())
-  );
+  private static JsonRebaseableContentCheck eblsCannotHaveOriginalsCheck(
+      String fieldName, String errorMessage) {
+    return JsonAttribute.customValidator(
+        errorMessage,
+        (node, contextPath) -> {
+          JsonNode numberOfOriginalsNode = node.path(fieldName);
+          if (node.path("transportDocumentTypeCode").asText("").equals("SWB")) {
+            if (numberOfOriginalsNode.isMissingNode()
+                || numberOfOriginalsNode.asText().equals("0")) {
+              return Set.of();
+            }
+            String path = concatContextPath(contextPath, fieldName);
+            return Set.of("%s at %s".formatted(errorMessage, path));
+          }
+          return Set.of();
+        });
+  }
 
-  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES = JsonAttribute.ifThen(
-    "Cannot have more than one original without charges when isElectronic",
-    IS_ELECTRONIC,
-    JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1))
-  );
+  static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES =
+      JsonAttribute.ifThen(
+          "Cannot have more than one original without charges when isElectronic",
+          IS_AN_EBL,
+          JsonAttribute.path("numberOfOriginalsWithoutCharges", JsonAttribute.matchedMaximum(1)));
 
-  private static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES = JsonAttribute.ifThen(
-    "Cannot have more than one original without charges when isElectronic",
-    IS_ELECTRONIC,
-    JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1))
-  );
+  static final JsonRebaseableContentCheck EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES =
+      JsonAttribute.ifThen(
+          "Cannot have more than one original without charges when isElectronic",
+          IS_AN_EBL,
+          JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1)));
 
   private static final JsonRebaseableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS = JsonAttribute.allIndividualMatchesMustBeValid(
     "The code in 'codeListProvider' is known",
@@ -709,8 +724,8 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
-    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
-    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+    SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
     DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
@@ -732,8 +747,8 @@ public class EBLChecks {
     EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
-    E_SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
-    E_SWBS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+    SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+    SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),

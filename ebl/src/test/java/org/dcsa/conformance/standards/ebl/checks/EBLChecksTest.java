@@ -11,6 +11,8 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.BUYER_AND_SELL
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
@@ -21,6 +23,8 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.COUNTRY_CODE_C
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POA;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_CONDITIONAL_VALIDATION_POFD;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION_HBL;
@@ -417,4 +421,167 @@ class EBLChecksTest {
     errors = EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES.validate(rootNode);
     assertEquals(0, errors.size());
   }
+
+  @Test
+  void testEBLSCannotHaveOriginalsWithCharges() {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    Set<String> errors = SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithCharges", 0);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithCharges", 1);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 1);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
+
+  @Test
+  void testEBLSCannotHaveOriginalsWithoutCharges() {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    Set<String> errors = SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    errors = SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+  }
+
+  @Test
+  void testEBLSCannotHaveMoreThanOneOriginalsWithoutCharges() {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    Set<String> errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 2);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 1);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithoutCharges", 2);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithoutCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+  }
+
+  @Test
+  void testEBLSCannotHaveMoreThanOneOriginalsWithCharges() {
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    Set<String> errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 1);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 2);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 1);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", false);
+    rootNode.put("transportDocumentTypeCode", "BOL");
+    rootNode.put("numberOfOriginalsWithCharges", 2);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    rootNode.put("isElectronic", true);
+    rootNode.put("transportDocumentTypeCode", "SWB");
+    rootNode.put("numberOfOriginalsWithCharges", 0);
+    errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
+    assertEquals(0, errors.size());
+    }
 }

@@ -41,10 +41,10 @@ public class LostAttributeCheck implements JsonRebaseableContentCheck {
         this.checkNode(leftChild, rightChild, path, issues);
       }
     } else if (!leftNode.equals(rightNode)) {
-      issues.add("The attribute '%s' was '%s' but should have been '%s'".formatted(
-        contextPath,
-        renderValue(rightNode),
-        renderValue(leftNode))
+      issues.add("Mismatch in the attribute '%s': expected '%s', but found '%s'.".formatted(
+        contextPath != null && !contextPath.isEmpty() ? contextPath : "rootNode",
+        renderValue(leftNode),
+        renderValue(rightNode))
       );
     }
   }

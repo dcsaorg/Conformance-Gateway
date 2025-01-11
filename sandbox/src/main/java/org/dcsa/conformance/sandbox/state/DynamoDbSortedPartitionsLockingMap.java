@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.state.SortedPartitionsLockingMap;
+import org.dcsa.conformance.core.state.AbstractSortedPartitionsLockingMap;
 import org.dcsa.conformance.core.state.TemporaryLockingMapException;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Slf4j
-public class DynamoDbSortedPartitionsLockingMap extends SortedPartitionsLockingMap {
+public class DynamoDbSortedPartitionsLockingMap extends AbstractSortedPartitionsLockingMap {
 
   private static final int MAX_TRANSACTION_RETRY_COUNT = 5;
 

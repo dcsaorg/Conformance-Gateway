@@ -59,17 +59,26 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
     List<Map<String, AttributeValue>> allItems = new ArrayList<>();
     Map<String, AttributeValue> lastEvaluatedKey = Collections.emptyMap();
     do {
+      // "The AttributeValue for a key attribute cannot contain an empty string value."
       QueryRequest.Builder queryRequestBuilder =
-          QueryRequest.builder()
-              .tableName(tableName)
-              .keyConditionExpression("#pk = :pkv AND begins_with(#sk, :skp)")
-              .expressionAttributeNames(
-                  Map.ofEntries(Map.entry("#pk", "PK"), Map.entry("#sk", "SK")))
-              .expressionAttributeValues(
-                  Map.ofEntries(
-                      Map.entry(":pkv", AttributeValue.fromS(partitionKey)),
-                      Map.entry(":skp", AttributeValue.fromS(sortKeyPrefix))))
-              .consistentRead(true);
+          sortKeyPrefix.isEmpty()
+              ? QueryRequest.builder()
+                  .tableName(tableName)
+                  .keyConditionExpression("#pk = :pkv")
+                  .expressionAttributeNames(Map.ofEntries(Map.entry("#pk", "PK")))
+                  .expressionAttributeValues(
+                      Map.ofEntries(Map.entry(":pkv", AttributeValue.fromS(partitionKey))))
+                  .consistentRead(true)
+              : QueryRequest.builder()
+                  .tableName(tableName)
+                  .keyConditionExpression("#pk = :pkv AND begins_with(#sk, :skp)")
+                  .expressionAttributeNames(
+                      Map.ofEntries(Map.entry("#pk", "PK"), Map.entry("#sk", "SK")))
+                  .expressionAttributeValues(
+                      Map.ofEntries(
+                          Map.entry(":pkv", AttributeValue.fromS(partitionKey)),
+                          Map.entry(":skp", AttributeValue.fromS(sortKeyPrefix))))
+                  .consistentRead(true);
       if (!lastEvaluatedKey.isEmpty()) {
         queryRequestBuilder.exclusiveStartKey(lastEvaluatedKey);
       }

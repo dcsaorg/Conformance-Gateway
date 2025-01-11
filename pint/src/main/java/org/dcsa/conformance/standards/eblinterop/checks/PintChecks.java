@@ -349,28 +349,26 @@ public class PintChecks {
     var jsonContentChecks = new ArrayList<JsonContentCheck>();
 
     generateScenarioRelatedChecksForTransferRequest(jsonContentChecks, senderTransmissionClass, sspSupplier, rspSupplier, dspSupplier);
-    // FIXME start of temporary workaround for SD-1942
-//    jsonContentChecks.add(
-//      JsonAttribute.customValidator(
-//        "Validate the transportDocument checksum in the envelopeManifestSignedContent",
-//        JsonAttribute.path(
-//          "envelopeManifestSignedContent",
-//          signedContentValidation(
-//            JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
-//          )
-//        )
-//      )
-//    );
-//    jsonContentChecks.add(
-//      JsonAttribute.allIndividualMatchesMustBeValid(
-//        "Validate the transportDocument checksum in the envelopeTransferChain",
-//        (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
-//        signedContentValidation(
-//          JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
-//        )
-//      )
-//    );
-    // FIXME end of temporary workaround for SD-1942
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate the transportDocument checksum in the envelopeManifestSignedContent",
+        JsonAttribute.path(
+          "envelopeManifestSignedContent",
+          signedContentValidation(
+            JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+          )
+        )
+      )
+    );
+    jsonContentChecks.add(
+      JsonAttribute.allIndividualMatchesMustBeValid(
+        "Validate the transportDocument checksum in the envelopeTransferChain",
+        (mav) -> mav.submitAllMatching("envelopeTransferChain.*"),
+        signedContentValidation(
+          JsonAttribute.path("transportDocumentChecksum", expectedTDChecksum(dspSupplier))
+        )
+      )
+    );
     jsonContentChecks.add(
       JsonAttribute.allIndividualMatchesMustBeValid(
         "Validate codeListProvider",
@@ -434,14 +432,12 @@ public class PintChecks {
           return issues;
         })
     );
-    // FIXME start of temporary workaround for SD-1942
-//    jsonContentChecks.add(
-//      JsonAttribute.customValidator(
-//        "Validate issuance manifest checksums",
-//        JsonAttribute.path("issuanceManifestSignedContent", signedContentValidation(JsonAttribute.path("documentChecksum", expectedTDChecksum(dspSupplier))))
-//      )
-//    );
-    // FIXME end of temporary workaround for SD-1942
+    jsonContentChecks.add(
+      JsonAttribute.customValidator(
+        "Validate issuance manifest checksums",
+        JsonAttribute.path("issuanceManifestSignedContent", signedContentValidation(JsonAttribute.path("documentChecksum", expectedTDChecksum(dspSupplier))))
+      )
+    );
     return JsonAttribute.contentChecks(
       PintRole::isSendingPlatform,
       matched,

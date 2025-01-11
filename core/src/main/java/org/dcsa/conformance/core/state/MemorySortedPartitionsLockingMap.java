@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 @Slf4j
-public class MemorySortedPartitionsLockingMap extends SortedPartitionsLockingMap {
+public class MemorySortedPartitionsLockingMap extends AbstractSortedPartitionsLockingMap {
 
   private static class MemoryMapItem {
     String lockedBy;

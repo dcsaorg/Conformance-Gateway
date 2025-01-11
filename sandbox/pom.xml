@@ -68,5 +68,17 @@
 			<artifactId>dynamodb</artifactId>
 			<version>2.29.21</version>
 		</dependency>
+		<!-- Test scoped dependencies -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.14.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

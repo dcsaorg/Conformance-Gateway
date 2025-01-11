@@ -3,8 +3,11 @@ package org.dcsa.conformance.sandbox.state;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.dcsa.conformance.core.state.SortedPartitionsNonLockingMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -51,28 +54,31 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
   }
 
   @Override
-  public JsonNode getFirstItemValue(String partitionKey) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public JsonNode getLastItemValue(String partitionKey) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<JsonNode> getPartitionValues(String partitionKey) {
-    ArrayList<JsonNode> values = new ArrayList<>();
-
+  public LinkedHashMap<String, JsonNode> getPartitionValuesBySortKey(
+      String partitionKey, String sortKeyPrefix) {
+    List<Map<String, AttributeValue>> allItems = new ArrayList<>();
     Map<String, AttributeValue> lastEvaluatedKey = Collections.emptyMap();
     do {
+      // "The AttributeValue for a key attribute cannot contain an empty string value."
       QueryRequest.Builder queryRequestBuilder =
-          QueryRequest.builder()
-              .tableName(tableName)
-              .keyConditionExpression("#k = :v")
-              .expressionAttributeNames(Map.of("#k", "PK"))
-              .expressionAttributeValues(Map.of(":v", AttributeValue.fromS(partitionKey)))
-              .consistentRead(true);
+          sortKeyPrefix.isEmpty()
+              ? QueryRequest.builder()
+                  .tableName(tableName)
+                  .keyConditionExpression("#pk = :pkv")
+                  .expressionAttributeNames(Map.ofEntries(Map.entry("#pk", "PK")))
+                  .expressionAttributeValues(
+                      Map.ofEntries(Map.entry(":pkv", AttributeValue.fromS(partitionKey))))
+                  .consistentRead(true)
+              : QueryRequest.builder()
+                  .tableName(tableName)
+                  .keyConditionExpression("#pk = :pkv AND begins_with(#sk, :skp)")
+                  .expressionAttributeNames(
+                      Map.ofEntries(Map.entry("#pk", "PK"), Map.entry("#sk", "SK")))
+                  .expressionAttributeValues(
+                      Map.ofEntries(
+                          Map.entry(":pkv", AttributeValue.fromS(partitionKey)),
+                          Map.entry(":skp", AttributeValue.fromS(sortKeyPrefix))))
+                  .consistentRead(true);
       if (!lastEvaluatedKey.isEmpty()) {
         queryRequestBuilder.exclusiveStartKey(lastEvaluatedKey);
       }
@@ -80,12 +86,17 @@ public class DynamoDbSortedPartitionsNonLockingMap implements SortedPartitionsNo
       QueryResponse queryResponse = dynamoDbClient.query(queryRequestBuilder.build());
       queryResponse.items().stream()
           .filter(item -> item.containsKey("value"))
-          .map(item -> JsonToolkit.stringToJsonNode(item.get("value").s()))
-          .forEach(values::add);
+          .forEach(allItems::add);
 
       lastEvaluatedKey = queryResponse.lastEvaluatedKey();
     } while (!lastEvaluatedKey.isEmpty());
 
-    return values;
+    return allItems.stream()
+        .collect(
+            Collectors.toMap(
+                item -> item.get("SK").s(),
+                item -> JsonToolkit.stringToJsonNode(item.get("value").s()),
+                (existing, replacement) -> existing,
+                LinkedHashMap::new));
   }
 }

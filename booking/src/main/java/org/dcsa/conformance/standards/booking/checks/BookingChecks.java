@@ -59,22 +59,6 @@ public class BookingChecks {
       checks
     );
   }
-  private static final JsonContentCheck CHECK_EXPECTED_DEPARTURE_DATE = JsonAttribute.customValidator(
-    "Check expected departure date can not be past date",
-    body -> {
-      String expectedDepartureDate = body.path("expectedDepartureDate").asText("");
-      var invalidDates = new LinkedHashSet<String>();
-      if(!expectedDepartureDate.isEmpty()) {
-        LocalDate expectedDepartureLocalDate = LocalDate.parse(expectedDepartureDate);
-        if (expectedDepartureLocalDate.isBefore(LocalDate.now())) {
-          invalidDates.add(expectedDepartureLocalDate.toString());
-        }
-      }
-      return invalidDates.stream()
-        .map("The expected departure date '%s' can not be past date"::formatted)
-        .collect(Collectors.toSet());
-    }
-  );
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'type' of 'nationalCommodityCodes' is a known code",
@@ -561,7 +545,6 @@ public class BookingChecks {
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,

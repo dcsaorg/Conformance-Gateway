@@ -41,7 +41,7 @@ public class ConformancePersistenceProvider {
    * When chunked values are modified, a new chunk UUID is used; old chunks are neither overwritten nor cleaned up.
    */
 
-  private static final int DEFAULT_MAX_VALUE_LENGTH = 64 * 1024;
+  private static final int DEFAULT_MAX_VALUE_LENGTH = 8 * 1024; // FIXME after SD-1942 testing: 64 * 1024;
   private static final String DCSA_CONFORMANCE_CHUNKED_VALUE = "DCSA_CONFORMANCE_CHUNKED_VALUE";
   private final int maxValueLength;
   private final SortedPartitionsNonLockingMap nonLockingMap;

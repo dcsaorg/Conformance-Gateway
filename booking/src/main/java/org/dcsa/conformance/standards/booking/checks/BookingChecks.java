@@ -229,11 +229,12 @@ public class BookingChecks {
 
   private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode) {
     var issues = new LinkedHashSet<String>();
-    var address = documentPartyNode.path("address");
-    var identifyingCodes = documentPartyNode.path("identifyingCodes");
-    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
-      issues.add("address or identifyingCodes must have provided.");
-    }
+    // FIXME delete when confirmed as the correct and complete fix for SD-1938
+//    var address = documentPartyNode.path("address");
+//    var identifyingCodes = documentPartyNode.path("identifyingCodes");
+//    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
+//      issues.add("address or identifyingCodes must have provided.");
+//    }
     var partyContactDetails = documentPartyNode.path("partyContactDetails");
     if (partyContactDetails.isArray()) {
       StreamSupport.stream(partyContactDetails.spliterator(), false)

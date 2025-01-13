@@ -71,7 +71,12 @@
           "name": "DCSA test person",
           "email": "no-reply@dcsa.example.org"
         }
-      ]
+      ],
+      "address": {
+        "street": "Ruijggoordweg",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      }
     },
     "issueTo": {
       "partyName": "DCSA CTK",

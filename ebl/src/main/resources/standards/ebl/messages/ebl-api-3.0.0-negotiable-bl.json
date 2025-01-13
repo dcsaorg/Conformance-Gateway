@@ -63,7 +63,12 @@
           "name": "DCSA test person",
           "email": "no-reply@dcsa.example.org"
         }
-      ]
+      ],
+      "address": {
+        "street": "Ruijggoordweg",
+        "city": "Amsterdam",
+        "countryCode": "NL"
+      }
     },
     "endorsee": {
       "partyName": "To Order of Shipper",
@@ -99,7 +104,12 @@
             "name": "DCSA test person",
             "email": "no-reply@dcsa.example.org"
           }
-        ]
+        ],
+        "address": {
+          "street": "Ruijggoordweg",
+          "city": "Amsterdam",
+          "countryCode": "NL"
+        }
       }
     ]
   }

@@ -167,48 +167,6 @@ public class BookingChecks {
       JsonAttribute.path("other", JsonAttribute.unique("partyFunction"))
     ));
 
-  private static final JsonContentCheck VALIDATE_DOCUMENT_PARTY = JsonAttribute.customValidator(
-    "Validate document party for address, identifyingCodes and partyContactDetails",
-    body -> {
-      var documentParties = body.path("documentParties");
-      var issues = new LinkedHashSet<String>();
-      Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
-      while (fields.hasNext()) {
-        Map.Entry<String, JsonNode> field = fields.next();
-        JsonNode childNode = field.getValue();
-        if(field.getKey().equals("other")) {
-          var otherDocumentParties = childNode.path("other");
-          for(JsonNode node:otherDocumentParties) {
-            issues.addAll(validateDocumentPartyFields(node.path("party")));
-          }
-        }
-        else {
-          issues.addAll(validateDocumentPartyFields(childNode));
-        }
-      }
-      return issues;
-    });
-
-  private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode) {
-    var issues = new LinkedHashSet<String>();
-    // FIXME delete when confirmed as the correct and complete fix for SD-1938
-//    var address = documentPartyNode.path("address");
-//    var identifyingCodes = documentPartyNode.path("identifyingCodes");
-//    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
-//      issues.add("address or identifyingCodes must have provided.");
-//    }
-    var partyContactDetails = documentPartyNode.path("partyContactDetails");
-    if (partyContactDetails.isArray()) {
-      StreamSupport.stream(partyContactDetails.spliterator(), false)
-        .forEach(element -> {
-          if (element.path("phone").isMissingNode() && element.path("email").isMissingNode()) {
-            issues.add("PartyContactDetails must have phone or an email id.");
-          }
-        });
-    }
-    return issues;
-  }
-
   private static final JsonContentCheck COMMODITIES_SUBREFERENCE_UNIQUE = JsonAttribute.allIndividualMatchesMustBeValid(
     "Each Subreference in commodities must be unique",
     mav -> mav.submitAllMatching("requestedEquipments.*.commodities"),
@@ -555,7 +513,6 @@ public class BookingChecks {
     VALIDATE_SHIPMENT_CUTOFF_TIME_CODE,
     VALIDATE_ALLOWED_SHIPMENT_CUTOFF_CODE,
     VALIDATE_SHIPPER_MINIMUM_REQUEST_FIELDS,
-    VALIDATE_DOCUMENT_PARTY,
     NATIONAL_COMMODITY_TYPE_CODE_VALIDATION,
     CHECK_CARGO_GROSS_WEIGHT_CONDITIONS,
     JsonAttribute.atLeastOneOf(

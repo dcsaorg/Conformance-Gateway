@@ -25,6 +25,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.LOCATION_NAME_
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SEND_TO_PLATFORM_CONDITIONAL_CHECK;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALIDATE_DOCUMENT_PARTY;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.VALID_PARTY_FUNCTION_HBL;
@@ -584,4 +585,87 @@ class EBLChecksTest {
     errors = EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES.validate(rootNode);
     assertEquals(0, errors.size());
     }
+
+  @Test
+  void testValidateDocumentPartyOther() {
+    ObjectNode documentParties = rootNode.putObject("documentParties");
+
+    ArrayNode otherParties = documentParties.putArray("other");
+    ObjectNode party = otherParties.addObject().putObject("party");
+    party.putObject("address").put("street", "Ruijggoordweg");
+    party.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
+    Set<String> errors = VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    party.remove("address");
+    errors = VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    party.remove("address");
+    party.remove("identifyingCodes");
+    errors = VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testValidateDocumentPartyNotifyParties() {
+    ObjectNode documentParties = rootNode.putObject("documentParties");
+    ArrayNode notifyParties = documentParties.putArray("notifyParties");
+    ObjectNode notifyParty = notifyParties.addObject();
+    notifyParty.putObject("address").put("street", "Ruijggoordweg");
+    notifyParty.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
+
+    Set<String> errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    notifyParty.remove("address");
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    notifyParty.remove("identifyingCodes");
+    errors = VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, errors.size());
+  }
+
+  @Test
+  void testValidateDocumentPartyBuyerAndSeller() {
+    ObjectNode documentParties = rootNode.putObject("documentParties");
+    ObjectNode buyer = documentParties.putObject("buyer");
+
+    Set<String> errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    buyer.putObject("address").put("street", "Ruijggoordweg");
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    ObjectNode seller = documentParties.putObject("seller");
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    seller.putObject("address").put("street", "Ruijggoordweg");
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+  }
+
+  @Test
+  void testValidateDocumentParty() {
+    ObjectNode documentParties = rootNode.putObject("documentParties");
+    ObjectNode shipper = documentParties.putObject("shipper");
+
+    Set<String> errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(1, errors.size());
+
+    shipper.putObject("address").put("street", "Ruijggoordweg");
+    shipper.putArray("identifyingCodes").addObject().put("codeListProvider", "WAVE");
+
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+    shipper.remove("address");
+    errors = EBLChecks.VALIDATE_DOCUMENT_PARTY.validate(rootNode);
+    assertEquals(0, errors.size());
+
+  }
 }

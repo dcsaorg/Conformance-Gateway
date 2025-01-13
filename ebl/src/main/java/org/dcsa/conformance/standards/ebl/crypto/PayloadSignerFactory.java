@@ -190,28 +190,35 @@ public class PayloadSignerFactory {
   }
 
     @SneakyThrows
-    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey) {
+    public static SignatureVerifier verifierFromPublicKey(PublicKey publicKey, String attributeName) {
       if (publicKey instanceof RSAPublicKey rsaPublicKey) {
         return new SingleKeySignatureVerifier(new RSASSAVerifier(rsaPublicKey));
       }
       if (publicKey instanceof ECPublicKey ecPublicKey) {
         return new SingleKeySignatureVerifier(new ECDSAVerifier(ecPublicKey));
       }
-      throw new UserFacingException("Unsupported public key; must be a RSAPublicKey or an ECPublicKey.");
+      // We only accept RSA and ECDHE based algorithms due to the JWS standard.
+      // However, X.509 can support other key algorithms. This exception is for
+      // when users provide certificates with keys beyond what is supposed by
+      // JWS.
+      throw new UserFacingException("Unsupported certificate/public key in \"" + attributeName + "\". The underlying public key must be a RSAPublicKey or an ECPublicKey.");
     }
 
     @SneakyThrows
-    public static SignatureVerifier verifierFromPemEncodedPublicKey(String publicKeyPem) {
-      try (var reader = new PEMParser(new StringReader(publicKeyPem))) {
+    public static SignatureVerifier verifierFromPemEncodedCertificate(String pemContent, String attributeName) {
+      if (pemContent == null || pemContent.trim().isEmpty()) {
+         throw new UserFacingException("The PEM certificate in \"" + attributeName + "\" cannot be null or empty");
+      }
+      try (var reader = new PEMParser(new StringReader(pemContent))) {
         var parsedObject = reader.readObject();
         if (parsedObject instanceof X509CertificateHolder x509CertificateHolder) {
           var cert = CertificateFactory.getInstance("X.509")
             .generateCertificate(new ByteArrayInputStream(x509CertificateHolder.getEncoded()));
-          return verifierFromPublicKey(cert.getPublicKey());
+          return verifierFromPublicKey(cert.getPublicKey(), attributeName);
         }
-        throw new UserFacingException("The provided PEM object was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
+        throw new UserFacingException("The provided PEM object in \"" + attributeName + "\" was a not X509 encoded certificate. Please provide a CERTIFICATE instead");
       } catch (Exception e) {
-        throw new UserFacingException("Could not parse the PEM content string as an X509 encoded PEM certificate");
+        throw new UserFacingException("Could not parse the PEM content in \"" + attributeName + "\" as an X509 encoded PEM certificate");
       }
     }
 
@@ -234,7 +241,7 @@ public class PayloadSignerFactory {
     }
 
   private static X509CertificateHolder generateSelfSignedCertificateSecret(KeyPair keyPair) {
-    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Toolkit");
+    X500Principal subject = new X500Principal("CN=DCSA-Conformance-Framework");
 
     long notBefore = System.currentTimeMillis();
     // 2500 days (several) years should be sufficient.

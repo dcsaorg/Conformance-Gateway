@@ -18,9 +18,8 @@ public class TrafficRecorder {
 
   public synchronized Map<String, List<ConformanceExchange>> getTrafficByScenarioRun() {
     HashMap<String, List<ConformanceExchange>> trafficMap = new HashMap<>();
-    nonLockingMap
-        .getPartitionValues(partitionKey)
-        .stream().filter(itemNode -> itemNode.has("scenarioRun"))
+    nonLockingMap.getPartitionValuesBySortKey(partitionKey, "").values().stream()
+        .filter(itemNode -> itemNode.has("scenarioRun"))
         .forEach(
             itemNode ->
                 trafficMap

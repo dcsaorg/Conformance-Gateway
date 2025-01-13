@@ -35,6 +35,7 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
     var ssp = SenderScenarioParameters.fromJson(partyInput.path("input"));
+    ssp.validate();
     this.setSsp(ssp);
     this.setDsp(this.getDsp().withDocumentCount(this.documentCount));
   }

@@ -50,10 +50,6 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
       createSubCheck(
         "[Notification] Validate 'data.carrierBookingReference' is conditionally present",
         at("/data", this::ensureCarrierBookingReferenceCompliance)
-      ),
-      createSubCheck(
-        "[Notification] Validate 'data.reason' is present for data.bookingCancellationStatus",
-        at("/data", reasonFieldRequiredForCancellation(REASON_STATES, CANCELLATION_REASON_STATES, "reason"))
       )
     );
   }

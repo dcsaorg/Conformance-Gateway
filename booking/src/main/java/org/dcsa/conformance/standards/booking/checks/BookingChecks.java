@@ -1,13 +1,9 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
+
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.NonNull;
-import lombok.experimental.UtilityClass;
-import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-import org.dcsa.conformance.standards.booking.party.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -18,8 +14,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
+import lombok.NonNull;
+import lombok.experimental.UtilityClass;
+import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.party.*;
 
 @UtilityClass
 public class BookingChecks {
@@ -42,27 +41,6 @@ public class BookingChecks {
     BookingState.PENDING_AMENDMENT
   );
 
-  private static final Set<BookingState> REASON_PRESENCE_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.DECLINED,
-    BookingState.REJECTED,
-    BookingState.CANCELLED,
-    BookingState.AMENDMENT_CANCELLED,
-    BookingState.AMENDMENT_DECLINED
-  );
-
-  private static final Set<BookingCancellationState> REASON_PRESENCE_CANCELLATION_STATES = Set.of(
-    BookingCancellationState.CANCELLATION_RECEIVED,
-    BookingCancellationState.CANCELLATION_CONFIRMED,
-    BookingCancellationState.CANCELLATION_DECLINED
-  );
-
-  private static final Set<BookingState> REASON_ABSENCE_STATES = Set.of(
-    BookingState.RECEIVED,
-    BookingState.CONFIRMED
-  );
-
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
@@ -81,22 +59,6 @@ public class BookingChecks {
       checks
     );
   }
-  private static final JsonContentCheck CHECK_EXPECTED_DEPARTURE_DATE = JsonAttribute.customValidator(
-    "Check expected departure date can not be past date",
-    body -> {
-      String expectedDepartureDate = body.path("expectedDepartureDate").asText("");
-      var invalidDates = new LinkedHashSet<String>();
-      if(!expectedDepartureDate.isEmpty()) {
-        LocalDate expectedDepartureLocalDate = LocalDate.parse(expectedDepartureDate);
-        if (expectedDepartureLocalDate.isBefore(LocalDate.now())) {
-          invalidDates.add(expectedDepartureLocalDate.toString());
-        }
-      }
-      return invalidDates.stream()
-        .map("The expected departure date '%s' can not be past date"::formatted)
-        .collect(Collectors.toSet());
-    }
-  );
 
   private static final JsonRebaseableContentCheck NATIONAL_COMMODITY_TYPE_CODE_VALIDATION = JsonAttribute.allIndividualMatchesMustBeValid(
     "Validate that 'type' of 'nationalCommodityCodes' is a known code",
@@ -229,11 +191,12 @@ public class BookingChecks {
 
   private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode) {
     var issues = new LinkedHashSet<String>();
-    var address = documentPartyNode.path("address");
-    var identifyingCodes = documentPartyNode.path("identifyingCodes");
-    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
-      issues.add("address or identifyingCodes must have provided.");
-    }
+    // FIXME delete when confirmed as the correct and complete fix for SD-1938
+//    var address = documentPartyNode.path("address");
+//    var identifyingCodes = documentPartyNode.path("identifyingCodes");
+//    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
+//      issues.add("address or identifyingCodes must have provided.");
+//    }
     var partyContactDetails = documentPartyNode.path("partyContactDetails");
     if (partyContactDetails.isArray()) {
       StreamSupport.stream(partyContactDetails.spliterator(), false)
@@ -414,44 +377,6 @@ public class BookingChecks {
     }
   );
 
-  private static final JsonContentCheck REASON_FIELD_PRESENCE = JsonAttribute.customValidator(
-    "Reason field must be present for the selected Booking Status",
-    body -> {
-      var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
-      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
-      var issues = new LinkedHashSet<String>();
-      var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      var reason = body.get("reason");
-      if (REASON_PRESENCE_STATES.contains(BookingState.fromString(status.asText())) && reason == null) {
-          issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_STATES));
-        }
-      if(!bookingCancellationStatus.isMissingNode() && REASON_PRESENCE_CANCELLATION_STATES
-        .contains(BookingCancellationState.fromString(bookingCancellationStatus.asText()))
-        && reason == null) {
-          issues.add("reason is missing in the Booking States %s".formatted(REASON_PRESENCE_CANCELLATION_STATES));
-        }
-
-      return issues;
-    }
-  );
-  private static final JsonContentCheck REASON_FIELD_ABSENCE = JsonAttribute.customValidator(
-    "Reason field must be present for the selected Booking Status",
-    body -> {
-      var bookingStatus = body.path("bookingStatus");
-      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS);
-      var bookingCancellationStatus = body.path(ATTR_BOOKING_CANCELLATION_STATUS);
-      var issues = new LinkedHashSet<String>();
-      var status = amendedBookingStatus.isMissingNode() || amendedBookingStatus.isNull() ? bookingStatus : amendedBookingStatus;
-      if (REASON_ABSENCE_STATES.contains(BookingState.fromString(status.asText())) && bookingCancellationStatus == null) {
-        if (body.hasNonNull("reason")) {
-          issues.add("reason must not be in the Booking States %s".formatted(REASON_ABSENCE_STATES));
-        }
-      }
-      return issues;
-    }
-  );
-
 
   private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
     "check absence of confirmed fields in non confirmed booking states",
@@ -620,7 +545,6 @@ public class BookingChecks {
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
-    CHECK_EXPECTED_DEPARTURE_DATE,
     CHECK_EXPECTED_ARRIVAL_POD,
     NOR_PLUS_ISO_CODE_IMPLIES_ACTIVE_REEFER,
     ISO_EQUIPMENT_CODE_AND_NOR_CHECK,
@@ -711,9 +635,7 @@ public class BookingChecks {
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
-    REQUESTED_CHANGES_PRESENCE,
-    REASON_FIELD_PRESENCE,
-    REASON_FIELD_ABSENCE
+    REQUESTED_CHANGES_PRESENCE
   );
 
   public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,

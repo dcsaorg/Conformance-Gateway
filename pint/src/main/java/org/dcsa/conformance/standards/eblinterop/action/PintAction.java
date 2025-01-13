@@ -55,18 +55,18 @@ public abstract class PintAction extends ConformanceAction {
 
 
   public SignatureVerifier resolveSignatureVerifierSenderSignatures() {
-    var pem = getSsp().senderPublicKeyPEM();
-    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+    var pem = getSsp().sendersX509SigningCertificateInPEMFormat();
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "sendersX509SigningCertificateInPEMFormat");
   }
 
   public SignatureVerifier resolveSignatureVerifierCarrierSignatures() {
-    var pem = getSsp().carrierPublicKeyPEM();
-    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+    var pem = getSsp().carriersX509SigningCertificateInPEMFormat();
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "carriersX509SigningCertificateInPEMFormat");
   }
 
   public SignatureVerifier resolveSignatureVerifierForReceiverSignatures() {
-    var pem = getRsp().receiverPublicKeyPEM();
-    return PayloadSignerFactory.verifierFromPemEncodedPublicKey(pem);
+    var pem = getRsp().receiversX509SigningCertificateInPEMFormat();
+    return PayloadSignerFactory.verifierFromPemEncodedCertificate(pem, "receiversX509SigningCertificateInPEMFormat");
   }
 
   @Override

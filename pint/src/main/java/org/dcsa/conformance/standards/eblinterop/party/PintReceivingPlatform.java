@@ -97,7 +97,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var tdr = ssp.transportDocumentReference();
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
     var receivingParameters = getReceiverScenarioParameters(ssp.eblPlatform(), scenarioClass);
-    var tdState = TDReceiveState.newInstance(tdr, ssp.senderPublicKeyPEM(), receivingParameters);
+    var tdState = TDReceiveState.newInstance(tdr, ssp.sendersX509SigningCertificateInPEMFormat(), receivingParameters);
     tdState.setExpectedReceiver(
       generateReceiverParty(
         ssp.eblPlatform(),

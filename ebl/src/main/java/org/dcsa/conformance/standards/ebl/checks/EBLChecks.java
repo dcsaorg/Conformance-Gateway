@@ -16,7 +16,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
@@ -256,33 +255,6 @@ public class EBLChecks {
           IS_AN_EBL,
           JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1)));
 
-  /*private static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY = JsonAttribute.customValidator(
-  "Validate document party for address, identifyingCodes and partyContactDetails",
-  (body,contextPath) -> {
-    var documentParties = body.path(DOCUMENT_PARTIES);
-    var issues = new LinkedHashSet<String>();
-    Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
-    while (fields.hasNext()) {
-      Map.Entry<String, JsonNode> field = fields.next();
-      JsonNode childNode = field.getValue();
-      if(field.getKey().equals("other")) {
-        var otherDocumentParties = childNode.path("other");
-        for(JsonNode node:otherDocumentParties) {
-          issues.addAll(validateDocumentPartyFields(node.path("party"),field.getKey()));
-        }
-      } else if(field.getKey().equals("notifyParties")) {
-        var notifyParties = childNode.path("notifyParties");
-        for(JsonNode node:notifyParties) {
-          issues.addAll(validateDocumentPartyFields(node,field.getKey()));
-        }
-      }else if(field.getKey().equals("buyer") || field.getKey().equals("seller")) {
-      }
-      else if (!field.getKey().equals("buyer") && !field.getKey().equals("seller")){
-        issues.addAll(validateDocumentPartyFields(childNode,field.getKey()));
-      }
-    }
-    return issues;
-  });*/
   static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY =
       JsonAttribute.customValidator(
           "Validate document party for address and identifyingCodes",
@@ -311,9 +283,7 @@ public class EBLChecks {
                 case "buyer", "seller" -> {
                   // No validation needed for buyer and seller
                 }
-                default -> {
-                  issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
-                }
+                default -> issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
               }
             }
             return issues;

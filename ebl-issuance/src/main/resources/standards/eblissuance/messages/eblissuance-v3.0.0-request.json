@@ -111,7 +111,12 @@
             "name": "Henrik",
             "phone": "+45 51801234"
           }
-        ]
+        ],
+        "address": {
+          "street": "Ruijggoordweg",
+          "city": "Amsterdam",
+          "countryCode": "NL"
+        }
       },
       "consignee": {
         "partyName": "CONSIGNEE_LEGAL_NAME_PLACEHOLDER",
@@ -160,13 +165,23 @@
               "name": "Henrik",
               "phone": "+45 51801234"
             }
-          ]
+          ],
+          "address": {
+            "street": "Ruijggoordweg",
+            "city": "Amsterdam",
+            "countryCode": "NL"
+          }
         }
       ],
       "other": [
         {
           "party": {
-            "partyName": "Asseco Denmark"
+            "partyName": "Asseco Denmark",
+            "address": {
+              "street": "Ruijggoordweg",
+              "city": "Amsterdam",
+              "countryCode": "NL"
+            }
           },
           "partyFunction": "SCO"
         }

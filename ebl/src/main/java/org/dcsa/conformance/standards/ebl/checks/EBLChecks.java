@@ -294,7 +294,7 @@ public class EBLChecks {
     var address = documentPartyNode.path("address");
     var identifyingCodes = documentPartyNode.path("identifyingCodes");
     if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
-      issues.add("address or identifyingCodes must have provided in the party '%s' ".formatted(partyName));
+      issues.add("address or identifyingCodes must be provided in party '%s' ".formatted(partyName));
     }
     return issues;
   }

@@ -10,6 +10,7 @@ import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
@@ -38,9 +39,7 @@ public class JitTerminalCallAction extends JitAction {
   }
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
-    dsp =
-        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText(null))
-            .withPortCallID(requestJsonNode.path("portCallID").asText(null));
+    dsp = dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText(null));
   }
 
   @Override
@@ -66,6 +65,12 @@ public class JitTerminalCallAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion,
+                JitChecks.checkIDsMatchesPreviousCall(dsp)),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

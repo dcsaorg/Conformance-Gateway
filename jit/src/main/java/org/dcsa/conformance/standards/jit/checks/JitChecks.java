@@ -28,6 +28,10 @@ import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class JitChecks {
 
+  public static final String TERMINAL_CALL_ID = "terminalCallID";
+  public static final String PORT_CALL_ID = "portCallID";
+  public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
+
   public static ActionCheck createChecksForPortCallService(
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
@@ -42,6 +46,7 @@ public class JitChecks {
     if (dsp != null && dsp.selector() != JitServiceTypeSelector.GIVEN) {
       checks.add(checkPortCallServiceRightType(dsp));
     }
+    checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
     return JsonAttribute.contentChecks(
         isRelevantForRoleName,
         matchedExchangeUuid,
@@ -54,7 +59,8 @@ public class JitChecks {
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.ifThen(
-        "Expected Port Call Service type should match scenario (%s).".formatted(serviceType.getFullName()),
+        "Expected Port Call Service type should match scenario (%s)."
+            .formatted(serviceType.getFullName()),
         IS_PORT_CALL_SERVICE,
         JsonAttribute.mustEqual(
             "Check if the correct Port Call Service was supplied.",
@@ -64,7 +70,8 @@ public class JitChecks {
 
   static JsonContentCheck checkPortCallServiceRightType(DynamicScenarioParameters dsp) {
     return JsonAttribute.customValidator(
-        "Port Call Service type should match scenario '%s'.".formatted(dsp.selector().getFullName()),
+        "Port Call Service type should match scenario '%s'."
+            .formatted(dsp.selector().getFullName()),
         body -> {
           if (IS_PORT_CALL_SERVICE.test(body)) {
             String actualServiceType = body.path("portCallServiceType").asText();
@@ -142,6 +149,36 @@ public class JitChecks {
                     .formatted(dsp.previousTimestamp().dateTime(), receivedTimestamp.dateTime()));
           }
           return Collections.emptySet();
+        });
+  }
+
+  public static JsonContentCheck checkIDsMatchesPreviousCall(DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Check if the used IDs matches the previous call's IDs.",
+        body -> {
+          Set<String> errors = new HashSet<>();
+          if (body.has(PORT_CALL_ID)
+              && dsp.portCallID() != null
+              && !body.path(PORT_CALL_ID).asText().equals(dsp.portCallID())) {
+            errors.add(
+                "Expected matching portCallID: '%s' but got a different portCallID: '%s'"
+                    .formatted(dsp.portCallID(), body.path(PORT_CALL_ID)));
+          }
+          if (body.has(TERMINAL_CALL_ID)
+              && dsp.terminalCallID() != null
+              && !body.path(TERMINAL_CALL_ID).asText().equals(dsp.terminalCallID())) {
+            errors.add(
+                "Expected matching terminalCallID: '%s' but got a different terminalCallID: '%s'"
+                    .formatted(dsp.terminalCallID(), body.path(TERMINAL_CALL_ID)));
+          }
+          if (body.has(PORT_CALL_SERVICE_ID)
+              && dsp.portCallServiceID() != null
+              && !body.path(PORT_CALL_SERVICE_ID).asText().equals(dsp.portCallServiceID())) {
+            errors.add(
+                "Expected matching portCallServiceID: '%s' but got a different portCallServiceID: '%s'"
+                    .formatted(dsp.portCallServiceID(), body.path(PORT_CALL_SERVICE_ID)));
+          }
+          return errors;
         });
   }
 }

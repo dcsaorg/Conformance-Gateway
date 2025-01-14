@@ -1,10 +1,12 @@
 package org.dcsa.conformance.standards.jit.checks;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.UUID;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -146,6 +148,57 @@ class JitChecksTest {
                     PortCallPhaseTypeCode.INBD))
             .iterator()
             .next());
+  }
+
+  @Test
+  void checkIDsMatchesPreviousActions() {
+    DynamicScenarioParameters dsp =
+        new DynamicScenarioParameters(
+            null,
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            null,
+            false);
+    // Happy path: reuse the IDs from the DSP, captured data from previous actions
+    assertTrue(
+        JitChecks.checkIDsMatchesPreviousCall(
+                new DynamicScenarioParameters()) // No previous data captured
+            .validate(OBJECT_MAPPER.createObjectNode())
+            .isEmpty());
+    assertTrue(
+        JitChecks.checkIDsMatchesPreviousCall(dsp)
+            .validate(
+                OBJECT_MAPPER.createObjectNode().put(JitChecks.PORT_CALL_ID, dsp.portCallID()))
+            .isEmpty());
+    assertTrue(
+        JitChecks.checkIDsMatchesPreviousCall(dsp)
+            .validate(
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put(JitChecks.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()))
+            .isEmpty());
+    assertTrue(
+        JitChecks.checkIDsMatchesPreviousCall(dsp)
+            .validate(
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put(JitChecks.TERMINAL_CALL_ID, dsp.terminalCallID()))
+            .isEmpty());
+
+    // Non-matching IDs used
+    assertEquals(
+        3,
+        JitChecks.checkIDsMatchesPreviousCall(dsp)
+            .validate(
+                OBJECT_MAPPER
+                    .createObjectNode()
+                    .put(JitChecks.TERMINAL_CALL_ID, "wrong-id")
+                    .put(JitChecks.PORT_CALL_ID, "wrong-id")
+                    .put(JitChecks.PORT_CALL_SERVICE_ID, "wrong-id"))
+            .size());
   }
 
   private JsonNode createPortCallServiceRequest(

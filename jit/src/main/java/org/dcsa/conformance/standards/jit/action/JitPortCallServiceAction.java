@@ -70,8 +70,7 @@ public class JitPortCallServiceAction extends JitAction {
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        dsp.withTerminalCallID(requestJsonNode.path("terminalCallID").asText(null))
-            .withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null))
+        dsp.withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null))
             .withPortCallServiceType(
                 PortCallServiceType.fromName(
                     requestJsonNode.path("portCallServiceType").asText(null)));

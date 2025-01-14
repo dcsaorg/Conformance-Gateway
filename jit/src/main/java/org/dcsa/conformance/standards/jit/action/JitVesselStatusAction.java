@@ -1,15 +1,14 @@
 package org.dcsa.conformance.standards.jit.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
@@ -22,23 +21,6 @@ public class JitVesselStatusAction extends JitAction {
     super(
         context.providerPartyName(), context.consumerPartyName(), previousAction, "Vessel Status");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.VESSEL);
-  }
-
-  @Override
-  protected void doHandleExchange(ConformanceExchange exchange) {
-    super.doHandleExchange(exchange);
-    JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
-    log.info(
-        "{}.doHandleExchange() requestJsonNode: {}",
-        getClass().getSimpleName(),
-        requestJsonNode.toPrettyString());
-
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
-    updateDspFromResponse(requestJsonNode);
-  }
-
-  private void updateDspFromResponse(JsonNode requestJsonNode) {
-    dsp = dsp.withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null));
   }
 
   @Override
@@ -64,6 +46,12 @@ public class JitVesselStatusAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion,
+                JitChecks.checkIDsMatchesPreviousCall(dsp)),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

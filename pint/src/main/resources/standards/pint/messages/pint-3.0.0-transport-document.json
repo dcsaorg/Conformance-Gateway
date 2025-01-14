@@ -64,7 +64,12 @@
     "other": [
       {
         "party": {
-          "partyName": "DCSA CTK Service Contract Owner"
+          "partyName": "DCSA CTK Service Contract Owner",
+          "address": {
+            "street": "Ruijggoordweg",
+            "city": "Amsterdam",
+            "countryCode": "NL"
+          }
         },
         "partyFunction": "SCO"
       }

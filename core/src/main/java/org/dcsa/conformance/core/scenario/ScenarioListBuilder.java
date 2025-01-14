@@ -55,7 +55,6 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   protected T then(T child) {
-    log.debug("ScenarioListBuilder.thenEither()");
     return thenEither(Collections.singletonList(child));
   }
 

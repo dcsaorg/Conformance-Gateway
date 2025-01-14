@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
@@ -53,9 +54,7 @@ public class JitTimestampAction extends JitAction {
         requestJsonNode.toPrettyString());
 
     JitTimestamp receivedTimestamp = JitTimestamp.fromJson(requestJsonNode);
-    dsp =
-        dsp.withPreviousTimestamp(dsp.currentTimestamp())
-            .withCurrentTimestamp(receivedTimestamp);
+    dsp = dsp.withPreviousTimestamp(dsp.currentTimestamp()).withCurrentTimestamp(receivedTimestamp);
   }
 
   @Override
@@ -81,6 +80,11 @@ public class JitTimestampAction extends JitAction {
           return Stream.of(
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
               new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
+              new ApiHeaderCheck(
+                  JitRole::isProvider,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.REQUEST,
+                  expectedApiVersion),
               new JsonSchemaCheck(
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
@@ -92,6 +96,11 @@ public class JitTimestampAction extends JitAction {
         return Stream.of(
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
+            new ApiHeaderCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
             new JsonSchemaCheck(
                 JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             checksForTimestamp);

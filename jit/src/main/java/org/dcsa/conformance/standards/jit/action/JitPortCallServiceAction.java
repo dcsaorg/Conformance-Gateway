@@ -81,10 +81,8 @@ public class JitPortCallServiceAction extends JitAction {
   public String getHumanReadablePrompt() {
     if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
     return switch (dsp.selector()) {
-      case FULL_ERP:
-        yield "Send a Port Call Service (PUT) for Full ERP negotiation";
-      case S_A_PATTERN:
-        yield "Send a Port Call Service (PUT) for the 'S-A' pattern";
+      case FULL_ERP, S_A_PATTERN:
+        yield "Send a Port Call Service (PUT) for the %s".formatted(dsp.selector().getFullName());
       case GIVEN:
         yield "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
     };
@@ -100,6 +98,16 @@ public class JitPortCallServiceAction extends JitAction {
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
+            new ApiHeaderCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
             JitChecks.createChecksForPortCallService(
                 JitRole::isProvider,
                 getMatchedExchangeUuid(),

@@ -53,6 +53,16 @@ public class JitPortCallAction extends JitAction {
         return Stream.of(
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
+            new ApiHeaderCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

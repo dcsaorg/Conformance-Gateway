@@ -18,10 +18,7 @@ public class JitOmitPortCallAction extends JitAction {
 
   public JitOmitPortCallAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(
-        context.providerPartyName(),
-        context.consumerPartyName(),
-        previousAction,
-        "Omit Port Call");
+        context.providerPartyName(), context.consumerPartyName(), previousAction, "Omit Port Call");
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.OMIT_PORT_CALL);
   }
 

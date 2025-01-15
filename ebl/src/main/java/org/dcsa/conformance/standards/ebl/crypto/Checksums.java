@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.ebl.crypto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.setl.json.Canonical;
-import io.setl.json.jackson.Convert;
 import lombok.SneakyThrows;
+import org.erdtman.jcs.JsonCanonicalizer;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -13,7 +12,7 @@ public class Checksums {
 
   @SneakyThrows
   public static String sha256CanonicalJson(JsonNode node) {
-    return sha256(((Canonical) Convert.toJson(node)).toCanonicalString());
+    return sha256(new JsonCanonicalizer(node.toString()).getEncodedString());
   }
 
   @SneakyThrows

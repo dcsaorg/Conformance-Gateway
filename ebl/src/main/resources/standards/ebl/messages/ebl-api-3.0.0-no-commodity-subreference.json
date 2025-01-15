@@ -62,6 +62,13 @@
           "name": "DCSA test person",
           "email": "no-reply@dcsa.example.org"
         }
+      ],
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
       ]
     },
     "issueTo": {

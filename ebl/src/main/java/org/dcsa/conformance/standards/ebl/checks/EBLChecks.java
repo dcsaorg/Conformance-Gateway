@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -57,7 +58,7 @@ public class EBLChecks {
   private static final String HOUSE_BILL_OF_LADINGS = "houseBillOfLadings";
   private static final String NUMBER_OF_COPIES_WITH_CHARGES = "numberOfCopiesWithCharges";
   private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
-
+  private static final String PARTY_CONTACT_DETAILS = "partyContactDetails";
 
 
 
@@ -70,7 +71,7 @@ public class EBLChecks {
       arrayNodeHandler.accept(
         documentPartyNode, "taxLegalReferences", ArrayOrderHandler.toStringSortableArray());
       arrayNodeHandler.accept(
-        documentPartyNode, "partyContactDetails", ArrayOrderHandler.toStringSortableArray());
+        documentPartyNode, PARTY_CONTACT_DETAILS, ArrayOrderHandler.toStringSortableArray());
     };
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTIES_ARRAY_ORDER_DEFINITIONS =
@@ -105,7 +106,7 @@ public class EBLChecks {
       SI_ARRAY_ORDER_DEFINITIONS =
           (rootNode, arrayNodeHandler) -> {
             arrayNodeHandler.accept(
-              rootNode, "partyContactDetails", ArrayOrderHandler.inputPreservedArrayOrder());
+              rootNode, PARTY_CONTACT_DETAILS, ArrayOrderHandler.inputPreservedArrayOrder());
             for (var ci : rootNode.path(CONSIGNMENT_ITEMS)) {
               arrayNodeHandler.accept(
                 ci, "descriptionOfGoods", ArrayOrderHandler.toStringSortableArray());
@@ -253,6 +254,50 @@ public class EBLChecks {
           "Cannot have more than one original without charges when isElectronic",
           IS_AN_EBL,
           JsonAttribute.path("numberOfOriginalsWithCharges", JsonAttribute.matchedMaximum(1)));
+
+  static final JsonRebaseableContentCheck VALIDATE_DOCUMENT_PARTY =
+      JsonAttribute.customValidator(
+          "Validate document party for address and identifyingCodes",
+          (body, contextPath) -> {
+            var documentParties = body.path(DOCUMENT_PARTIES);
+            var issues = new LinkedHashSet<String>();
+            Iterator<Map.Entry<String, JsonNode>> fields = documentParties.fields();
+
+            while (fields.hasNext()) {
+              Map.Entry<String, JsonNode> field = fields.next();
+              JsonNode childNode = field.getValue();
+
+              switch (field.getKey()) {
+                case "other" -> {
+                  var otherDocumentParties = field.getValue();
+                  for (JsonNode node : otherDocumentParties) {
+                    issues.addAll(validateDocumentPartyFields(node.path("party"), field.getKey()));
+                  }
+                }
+                case "notifyParties" -> {
+                  var notifyParties = field.getValue();
+                  for (JsonNode node : notifyParties) {
+                    issues.addAll(validateDocumentPartyFields(node, field.getKey()));
+                  }
+                }
+                case "buyer", "seller" -> {
+                  // No validation needed for buyer and seller
+                }
+                default -> issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
+              }
+            }
+            return issues;
+          });
+
+  private static Set<String> validateDocumentPartyFields(JsonNode documentPartyNode, String partyName) {
+    var issues = new LinkedHashSet<String>();
+    var address = documentPartyNode.path("address");
+    var identifyingCodes = documentPartyNode.path("identifyingCodes");
+    if (address.isMissingNode() && identifyingCodes.isMissingNode()) {
+      issues.add("address or identifyingCodes must be provided in party '%s' ".formatted(partyName));
+    }
+    return issues;
+  }
 
   private static final JsonRebaseableContentCheck DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS = JsonAttribute.allIndividualMatchesMustBeValid(
     "The code in 'codeListProvider' is known",
@@ -726,6 +771,7 @@ public class EBLChecks {
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
     SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    VALIDATE_DOCUMENT_PARTY,
     DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
     VALID_WOOD_DECLARATIONS,
     NATIONAL_COMMODITY_CODE_IS_VALID,
@@ -749,6 +795,7 @@ public class EBLChecks {
     EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
     SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
     SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+    VALIDATE_DOCUMENT_PARTY,
     JsonAttribute.ifThenElse(
       "'isShippedOnBoardType' vs. 'shippedOnBoardDate' or 'receivedForShipmentDate'",
       JsonAttribute.isTrue(JsonPointer.compile("/isShippedOnBoardType")),

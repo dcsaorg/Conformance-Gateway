@@ -141,6 +141,13 @@
   "documentParties": {
     "shipper": {
       "partyName": "DCSA CTK",
+      "identifyingCodes": [
+        {
+          "codeListProvider": "W3C",
+          "codeListName": "LCL",
+          "partyCode": "MSC"
+        }
+      ],
       "partyContactDetails": [
         {
           "name": "DCSA test person",

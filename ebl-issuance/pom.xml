@@ -22,10 +22,5 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.setl</groupId>
-			<artifactId>canonical-json</artifactId>
-			<version>3.0</version>
-		</dependency>
 	</dependencies>
 </project>

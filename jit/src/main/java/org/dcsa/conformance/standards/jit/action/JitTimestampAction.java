@@ -8,6 +8,7 @@ import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
@@ -75,7 +76,7 @@ public class JitTimestampAction extends JitAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         ActionCheck checksForTimestamp =
-            JitChecks.createChecksForTimestamp(getMatchedExchangeUuid(), expectedApiVersion, dsp);
+            JitChecks.createChecksForTimestamp(JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
@@ -85,6 +86,12 @@ public class JitTimestampAction extends JitAction {
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
                   expectedApiVersion),
+              JsonAttribute.contentChecks(
+                  JitRole::isProvider,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.REQUEST,
+                  expectedApiVersion,
+                  JitChecks.checkIDsMatchesPreviousCall(dsp)),
               new JsonSchemaCheck(
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
@@ -101,6 +108,12 @@ public class JitTimestampAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion,
+                JitChecks.checkIDsMatchesPreviousCall(dsp)),
             new JsonSchemaCheck(
                 JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             checksForTimestamp);

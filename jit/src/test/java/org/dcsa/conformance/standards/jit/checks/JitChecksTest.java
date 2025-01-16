@@ -201,6 +201,20 @@ class JitChecksTest {
             .size());
   }
 
+  @Test
+  void testIsFYICheck() {
+    assertEquals(
+        1,
+        JitChecks.IS_FYI_TRUE
+            .validate(
+                createPortCallServiceRequest(
+                    PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI, null))
+            .size());
+
+    assertFalse(JitChecks.IS_FYI_TRUE.validate(createTimestamp().toJson()).isEmpty());
+    assertTrue(JitChecks.IS_FYI_TRUE.validate(createTimestamp().withFYI(true).toJson()).isEmpty());
+  }
+
   private JsonNode createPortCallServiceRequest(
       PortCallServiceType serviceType,
       PortCallServiceEventTypeCode code,

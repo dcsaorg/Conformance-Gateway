@@ -71,6 +71,8 @@ public class JitTerminalCallAction extends JitAction {
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
                 JitChecks.checkIDsMatchesPreviousCall(dsp)),
+            JitChecks.checkIsFYIIsCorrect(
+                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

@@ -32,6 +32,12 @@ public class JitChecks {
   public static final String PORT_CALL_ID = "portCallID";
   public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
 
+  static final JsonRebaseableContentCheck IS_FYI_TRUE =
+      JsonAttribute.mustEqual(
+          "Expected isFYI=true when message is For You Information only.",
+          JsonPointer.compile("/isFYI"),
+          true);
+
   public static ActionCheck createChecksForPortCallService(
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
@@ -47,6 +53,9 @@ public class JitChecks {
       checks.add(checkPortCallServiceRightType(dsp));
     }
     checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
+    if (dsp != null && dsp.isFYI()) {
+      checks.add(IS_FYI_TRUE);
+    }
     return JsonAttribute.contentChecks(
         isRelevantForRoleName,
         matchedExchangeUuid,
@@ -125,16 +134,23 @@ public class JitChecks {
   }
 
   public static ActionCheck createChecksForTimestamp(
-      UUID matchedExchangeUuid, String expectedApiVersion, DynamicScenarioParameters dsp) {
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      DynamicScenarioParameters dsp) {
     List<JsonContentCheck> checks = new ArrayList<>();
-    if (dsp != null
-        && dsp.currentTimestamp() != null
+    if (dsp == null) return null;
+    if (dsp.currentTimestamp() != null
         && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
       checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
     }
     if (checks.isEmpty()) return null;
     return JsonAttribute.contentChecks(
-        x -> true, matchedExchangeUuid, HttpMessageType.REQUEST, expectedApiVersion, checks);
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
   }
 
   static JsonContentCheck checkPlannedMatchesRequestedTimestamp(DynamicScenarioParameters dsp) {
@@ -180,5 +196,19 @@ public class JitChecks {
           }
           return errors;
         });
+  }
+
+  public static ActionCheck checkIsFYIIsCorrect(
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      DynamicScenarioParameters dsp) {
+    if (dsp == null || !dsp.isFYI()) return null;
+    return JsonAttribute.contentChecks(
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        IS_FYI_TRUE);
   }
 }

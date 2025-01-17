@@ -76,7 +76,8 @@ public class JitTimestampAction extends JitAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         ActionCheck checksForTimestamp =
-            JitChecks.createChecksForTimestamp(JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
+            JitChecks.createChecksForTimestamp(
+                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
@@ -85,6 +86,11 @@ public class JitTimestampAction extends JitAction {
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
+                  expectedApiVersion),
+              new ApiHeaderCheck(
+                  JitRole::isConsumer,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.RESPONSE,
                   expectedApiVersion),
               JsonAttribute.contentChecks(
                   JitRole::isProvider,
@@ -107,6 +113,11 @@ public class JitTimestampAction extends JitAction {
                 JitRole::isConsumer,
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
                 expectedApiVersion),
             JsonAttribute.contentChecks(
                 JitRole::isConsumer,

@@ -47,7 +47,7 @@ public class JitStandard extends AbstractStandard {
                     new TreeMap<>(
                         Map.ofEntries(
                             createEntry(
-                                PORT_CALL_SERVICES_URL + "{portCallServiceID}/decline", POST),
+                                PORT_CALL_SERVICES_URL + PORT_CALL_SERVICE_ID + "/decline", POST),
                             // Generic endpoints
                             createEntry(PORT_CALL_URL, GET),
                             createEntry(TERMINAL_CALL_URL, GET),
@@ -65,7 +65,7 @@ public class JitStandard extends AbstractStandard {
                             createEntry(TERMINAL_CALL_URL + "{terminalCallId}/omit", POST),
                             createEntry(PORT_CALL_SERVICES_URL + PORT_CALL_SERVICE_ID, PUT),
                             createEntry(
-                                PORT_CALL_SERVICES_URL + "{portCallServiceID}/cancel", POST),
+                                PORT_CALL_SERVICES_URL + PORT_CALL_SERVICE_ID + "/cancel", POST),
                             createEntry(VESSEL_STATUS_URL + PORT_CALL_SERVICE_ID, PUT),
                             // Generic endpoints
                             createEntry(PORT_CALL_URL, GET),

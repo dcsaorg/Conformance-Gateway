@@ -23,7 +23,7 @@ public class JitOmitTerminalCallAction extends JitAction {
         context.consumerPartyName(),
         previousAction,
         "Omit Terminal Call");
-    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.OMIT_PORT_CALL);
+    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.OMIT_TERMINAL_CALL);
   }
 
   @Override
@@ -41,6 +41,16 @@ public class JitOmitTerminalCallAction extends JitAction {
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
+            new ApiHeaderCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

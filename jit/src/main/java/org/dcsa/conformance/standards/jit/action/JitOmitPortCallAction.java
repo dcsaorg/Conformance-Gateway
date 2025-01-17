@@ -38,6 +38,16 @@ public class JitOmitPortCallAction extends JitAction {
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
+            new ApiHeaderCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion),
+            new ApiHeaderCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion),
             new JsonSchemaCheck(
                 JitRole::isProvider, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }

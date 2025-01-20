@@ -320,12 +320,13 @@ public class BookingChecks {
       .orElse(null);
   }
 
-  private static final JsonContentCheck REQUESTED_CHANGES_PRESENCE = JsonAttribute.customValidator(
-    "Requested changes must be present for the selected Booking Status ",
+  private static final JsonContentCheck FEEDBACK_PRESENCE = JsonAttribute.customValidator(
+    "Feedbacks must be present for the selected Booking Status ",
     body -> {
       var bookingStatus = body.path("bookingStatus").asText("");
+      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
       var issues = new LinkedHashSet<String>();
-      if (PENDING_CHANGES_STATES.contains(BookingState.fromString(bookingStatus))) {
+      if (BookingState.PENDING_UPDATE.name().equals(bookingStatus) || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus) && amendedBookingStatus.isEmpty())) {
         var feedbacks = body.get("feedbacks");
         if (feedbacks == null) {
           issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
@@ -592,7 +593,7 @@ public class BookingChecks {
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
-    REQUESTED_CHANGES_PRESENCE
+    FEEDBACK_PRESENCE
   );
 
   public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,

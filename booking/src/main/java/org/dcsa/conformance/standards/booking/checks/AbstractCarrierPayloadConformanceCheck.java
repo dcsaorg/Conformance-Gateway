@@ -122,6 +122,21 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         Objects.requireNonNullElse(actualState, UNSET_MARKER)));
   }
 
+  protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
+    String bookingStatus = responsePayload.path("shippingInstructionsStatus").asText(null);
+   String amendedBookingStatus = responsePayload.path("updatedShippingInstructionsStatus").asText(null);
+    if (BookingState.PENDING_UPDATE.name().equals(bookingStatus) || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus) && amendedBookingStatus.isEmpty())) {
+      var feedbacks = responsePayload.get("feedbacks");
+      if (feedbacks == null) {
+        return Set.of(
+            "feedbacks is missing in allowed booking states %s"
+                .formatted(
+                    Objects.requireNonNullElse("feedbacks", UNSET_MARKER)));
+      }
+    }
+    return Set.of();
+  }
+
 
   protected boolean expectedStateMatch(Set<BookingState> states) {
     return expectedStateMatch(states::contains);

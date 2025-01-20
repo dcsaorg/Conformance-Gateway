@@ -8,6 +8,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COM
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE_HBL;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REQUESTED_CARRIER_CLAUSES;
+import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_PENDING_UPDATE;
 
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -59,7 +60,6 @@ public class EBLChecks {
   private static final String NUMBER_OF_COPIES_WITH_CHARGES = "numberOfCopiesWithCharges";
   private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
   private static final String PARTY_CONTACT_DETAILS = "partyContactDetails";
-
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
@@ -451,7 +451,7 @@ public class EBLChecks {
     JsonAttribute.matchedMustBeDatasetKeywordIfPresent(NATIONAL_COMMODITY_CODES)
   );
 
-  private static final JsonRebaseableContentCheck DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
+  private static final JsonRebaseableContentCheck  DOCUMENT_PARTY_FUNCTIONS_MUST_BE_UNIQUE = JsonAttribute.customValidator(
     "Each document party can be used at most once",
     JsonAttribute.path(
       DOCUMENT_PARTIES,
@@ -1306,6 +1306,7 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
+    checks.add(FEEDBACKS_PRESENCE);
     checks.add(JsonAttribute.lostAttributeCheck(
       "Validate that shipper provided data was not altered",
       delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
@@ -1320,6 +1321,23 @@ public class EBLChecks {
       checks
     );
   }
+
+  private static final JsonContentCheck FEEDBACKS_PRESENCE = JsonAttribute.customValidator(
+    "Feedbacks must be present for the selected shipping instructions status ",
+    body -> {
+      var siStatus = body.path("shippingInstructionsStatus").asText("");
+      var updatedSiStatus = body.path("updatedShippingInstructionsStatus").asText("");
+      var issues = new LinkedHashSet<String>();
+      if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
+        var feedbacks = body.get("feedbacks");
+        if (feedbacks == null) {
+          issues.add("feedbacks is missing for the si in status %s".formatted(SI_PENDING_UPDATE.wireName()));
+        }
+      }
+      return issues;
+    }
+  );
+
 
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
@@ -1374,6 +1392,7 @@ public class EBLChecks {
       shippingInstructionsStatus.wireName()
     ));
     jsonContentChecks.add(updatedStatusCheck);
+    jsonContentChecks.add(FEEDBACKS_PRESENCE);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,

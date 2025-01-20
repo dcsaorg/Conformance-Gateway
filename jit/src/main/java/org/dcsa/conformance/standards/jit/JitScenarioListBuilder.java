@@ -248,13 +248,11 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
             .thenEither(
                 portCall(context)
                     .then(
-                        portCall(context)
-                            .then(
-                                sendPC_TC_SC_VS(
-                                    context,
-                                    null,
-                                    FULL_ERP,
-                                    sendERPTimestamps(context, sendTimestamp(context, ACTUAL))))),
+                        sendPC_TC_SC_VS(
+                            context,
+                            null,
+                            FULL_ERP,
+                            sendERPTimestamps(context, sendTimestamp(context, ACTUAL)))),
                 portCall(context)
                     .then(
                         terminalCall(context)

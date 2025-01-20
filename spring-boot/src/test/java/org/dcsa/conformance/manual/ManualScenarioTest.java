@@ -114,10 +114,10 @@ class ManualScenarioTest extends ManualTestBase {
     }
 
     List<ScenarioDigest> sandbox1Digests = getScenarioDigests(sandbox1.sandboxId());
-    assertFalse(sandbox1Digests.isEmpty(), "No scenarios found?");
+    assertFalse(sandbox1Digests.isEmpty(), "No scenarios found!");
 
     List<ScenarioDigest> sandbox2Digests = getScenarioDigests(sandbox2.sandboxId());
-    assertTrue(sandbox2Digests.isEmpty(), "Scenarios found?");
+    assertTrue(sandbox2Digests.isEmpty(), "Scenarios found!");
     getAllSandboxes();
 
     // Run all tests for all scenarios

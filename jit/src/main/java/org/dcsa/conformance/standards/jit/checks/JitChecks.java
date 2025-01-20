@@ -34,7 +34,7 @@ public class JitChecks {
 
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(
-          "Expected isFYI=true when message is For You Information only.",
+          "Expected isFYI=true when message is For Your Information only.",
           JsonPointer.compile("/isFYI"),
           true);
 

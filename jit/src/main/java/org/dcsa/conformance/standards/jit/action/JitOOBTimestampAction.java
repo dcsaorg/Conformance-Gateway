@@ -49,11 +49,6 @@ public class JitOOBTimestampAction extends JitAction {
   }
 
   @Override
-  public boolean isConfirmationRequired() {
-    return true;
-  }
-
-  @Override
   public boolean isMissingMatchedExchange() {
     return false;
   }

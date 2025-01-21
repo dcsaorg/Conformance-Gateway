@@ -18,15 +18,12 @@ public class JitOOBTimestampInputAction extends JitAction {
   public JitOOBTimestampInputAction(
       JitScenarioContext context,
       ConformanceAction previousAction,
-      JitTimestampType timestampType,
-      boolean sendByProvider) {
+      JitTimestampType timestampType) {
     super(
-        sendByProvider ? context.providerPartyName() : context.consumerPartyName(),
-        sendByProvider ? context.consumerPartyName() : context.providerPartyName(),
+        context.consumerPartyName(),
+        context.providerPartyName(),
         previousAction,
-        sendByProvider
-            ? "Send Out-of-Band %s".formatted(timestampType)
-            : "Receive Out-of-Band: %s".formatted(timestampType));
+        "Receive Out-of-Band: %s".formatted(timestampType));
     this.timestampType = timestampType;
   }
 
@@ -39,7 +36,7 @@ public class JitOOBTimestampInputAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Process an Out-of-Band request for a %s timestamp and supply the used timestamp:"
+    return ("Supply the out-of-band %s timestamp that you (could) have received out-of-band from the service provider, using the format below:"
         .formatted(timestampType));
   }
 

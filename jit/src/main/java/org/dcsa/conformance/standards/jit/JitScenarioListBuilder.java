@@ -935,7 +935,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     if (timestampType == REQUESTED) {
       return new JitScenarioListBuilder(
           previousAction ->
-              new JitOOBTimestampInputAction(context, previousAction, timestampType, false));
+              new JitOOBTimestampInputAction(context, previousAction, timestampType));
     }
     return new JitScenarioListBuilder(
         previousAction -> new JitOOBTimestampAction(context, previousAction, timestampType, true));

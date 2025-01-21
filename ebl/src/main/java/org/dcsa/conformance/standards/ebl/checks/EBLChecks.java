@@ -1411,6 +1411,8 @@ public class EBLChecks {
     ));
     jsonContentChecks.add(updatedStatusCheck);
     jsonContentChecks.add(FEEDBACKS_PRESENCE);
+    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY);
+    jsonContentChecks.add(VALID_FEEDBACK_CODE);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,
@@ -1429,6 +1431,8 @@ public class EBLChecks {
       TD_NOTIFICATION_TD_STATUS_PTR,
       transportDocumentStatus.wireName()
     ));
+    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY);
+    jsonContentChecks.add(VALID_FEEDBACK_CODE);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,

@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_CODE;
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -504,6 +506,18 @@ public class BookingChecks {
     ));
   }
 
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback severity' is valid",
+      mav -> mav.submitAllMatching("feedbacks.*.severity"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback code' is valid",
+      mav -> mav.submitAllMatching("feedbacks.*.code"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
@@ -596,7 +610,9 @@ public class BookingChecks {
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
-    FEEDBACK_PRESENCE
+    FEEDBACK_PRESENCE,
+    VALID_FEEDBACK_SEVERITY,
+    VALID_FEEDBACK_CODE
   );
 
   public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,

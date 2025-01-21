@@ -23,6 +23,8 @@ public class JitStandard extends AbstractStandard {
   public static final String POST = "POST";
   public static final String GET = "GET";
   public static final String PORT_CALL_SERVICE_ID = "{portCallServiceID}";
+  public static final String PORT_CALL_ID = "{portCallID}";
+  public static final String TERMINAL_CALL_ID = "{terminalCallID}";
 
   private JitStandard() {
     super("JIT");

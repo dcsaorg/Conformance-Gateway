@@ -92,7 +92,12 @@ public class JitPortCallServiceAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID()),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new JsonSchemaCheck(

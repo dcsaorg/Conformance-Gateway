@@ -37,8 +37,14 @@ public class JitDeclineAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         if (!sendByProvider) {
           return Stream.of(
+              new UrlPathCheck(
+                  JitRole::isConsumer,
+                  getMatchedExchangeUuid(),
+                  JitStandard.DECLINE_URL.replace(
+                      JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID())),
               new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.POST),
               new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
               new ApiHeaderCheck(
@@ -58,6 +64,11 @@ public class JitDeclineAction extends JitAction {
                   validator));
         }
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.DECLINE_URL.replace(
+                    JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID())),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.POST),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             JitChecks.checkIsFYIIsCorrect(

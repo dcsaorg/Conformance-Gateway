@@ -36,7 +36,13 @@ public class JitCancelAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.CANCEL_URL.replace(
+                    JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID())),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.POST),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(

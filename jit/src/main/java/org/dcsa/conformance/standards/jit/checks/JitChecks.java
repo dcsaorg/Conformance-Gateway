@@ -203,7 +203,7 @@ public class JitChecks {
       UUID matchedExchangeUuid,
       String expectedApiVersion,
       DynamicScenarioParameters dsp) {
-    if (dsp == null || !dsp.isFYI()) return null;
+    if (!dsp.isFYI()) return null;
     return JsonAttribute.contentChecks(
         isRelevantForRoleName,
         matchedExchangeUuid,

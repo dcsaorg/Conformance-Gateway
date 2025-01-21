@@ -33,7 +33,12 @@ public class JitOmitPortCallAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.OMIT_PORT_CALL_URL.replace(JitStandard.PORT_CALL_ID, dsp.portCallID())),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.POST),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             JitChecks.checkIsFYIIsCorrect(

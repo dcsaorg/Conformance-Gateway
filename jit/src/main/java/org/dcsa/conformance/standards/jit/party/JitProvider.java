@@ -199,7 +199,8 @@ public class JitProvider extends ConformanceParty {
             .put(REASON, "Cancelled, because storm is coming.")
             .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.CANCEL_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+        JitStandard.CANCEL_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()),
+        jsonBody);
 
     addOperatorLogEntry(
         "Submitted Cancel for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
@@ -216,7 +217,8 @@ public class JitProvider extends ConformanceParty {
             .put(REASON, "Declined, because crane broken.")
             .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+        JitStandard.DECLINE_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()),
+        jsonBody);
 
     addOperatorLogEntry(
         "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
@@ -233,7 +235,8 @@ public class JitProvider extends ConformanceParty {
             .put(REASON, "Omitted PC, because engine failure.")
             .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.OMIT_PORT_CALL_URL.replace("{portCallID}", dsp.portCallID()), jsonBody);
+        JitStandard.OMIT_PORT_CALL_URL.replace(JitStandard.PORT_CALL_ID, dsp.portCallID()),
+        jsonBody);
 
     addOperatorLogEntry("Submitted Omit Port Call with ID: %s".formatted(dsp.portCallID()));
   }
@@ -249,7 +252,8 @@ public class JitProvider extends ConformanceParty {
             .put(REASON, "Omitted TC, because engine failure.")
             .put(IS_FYI, dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.OMIT_TERMINAL_CALL_URL.replace("{terminalCallID}", dsp.terminalCallID()),
+        JitStandard.OMIT_TERMINAL_CALL_URL.replace(
+            JitStandard.TERMINAL_CALL_ID, dsp.terminalCallID()),
         jsonBody);
 
     addOperatorLogEntry("Submitted Omit Terminal Call with ID: %s".formatted(dsp.terminalCallID()));

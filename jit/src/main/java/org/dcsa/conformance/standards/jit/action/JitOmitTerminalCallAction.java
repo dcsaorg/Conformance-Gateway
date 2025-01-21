@@ -36,7 +36,13 @@ public class JitOmitTerminalCallAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.OMIT_TERMINAL_CALL_URL.replace(
+                    JitStandard.TERMINAL_CALL_ID, dsp.terminalCallID())),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.POST),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             JitChecks.checkIsFYIIsCorrect(

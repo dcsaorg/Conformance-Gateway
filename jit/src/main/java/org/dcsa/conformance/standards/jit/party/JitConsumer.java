@@ -114,9 +114,7 @@ public class JitConsumer extends ConformanceParty {
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp(), dsp.isFYI());
 
-    syncCounterpartPut(
-        JitStandard.PORT_CALL_SERVICES_URL + timestamp.portCallServiceID() + "/timestamp",
-        timestamp.toJson());
+    syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
@@ -133,7 +131,7 @@ public class JitConsumer extends ConformanceParty {
             .put("reason", "Declined, because crane broken.")
             .put("isFYI", dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.DECLINE_URL.replace("{portCallServiceID}", dsp.portCallServiceID()), jsonBody);
+        JitStandard.DECLINE_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()), jsonBody);
 
     addOperatorLogEntry(
         "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));

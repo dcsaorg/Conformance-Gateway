@@ -12,6 +12,7 @@ import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
+import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -75,11 +76,16 @@ public class JitTimestampAction extends JitAction {
     return new ConformanceCheck(getActionTitle()) {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
+        if (dsp == null) return Stream.of();
         ActionCheck checksForTimestamp =
             JitChecks.createChecksForTimestamp(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
+              new UrlPathCheck(
+                  JitRole::isProvider,
+                  getMatchedExchangeUuid(),
+                  JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID()),
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
               new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
               new ApiHeaderCheck(
@@ -107,6 +113,10 @@ public class JitTimestampAction extends JitAction {
         }
         // Consumer sends requested timestamp
         return Stream.of(
+            new UrlPathCheck(
+                JitRole::isConsumer,
+                getMatchedExchangeUuid(),
+                JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID()),
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(

@@ -100,6 +100,19 @@ public class EblShipper extends ConformanceParty {
           Map.entry("TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER", scenarioType.transportDocumentTypeCode())
         ));
 
+    if (carrierScenarioParameters.commoditySubReference() == null || carrierScenarioParameters.commoditySubReference().isEmpty()) {
+      jsonRequestBody.withArray("consignmentItems").forEach(item -> ((ObjectNode) item).remove("commoditySubReference"));
+    }
+
+    if (carrierScenarioParameters.invoicePayableAtUNLocationCode() == null || carrierScenarioParameters.invoicePayableAtUNLocationCode().isEmpty()) {
+      ((ObjectNode) jsonRequestBody.path("invoicePayableAt")).remove("UNLocationCode");
+    }
+
+    if(carrierScenarioParameters.outerPackagingDescription() == null || carrierScenarioParameters.outerPackagingDescription().isEmpty()) {
+      jsonRequestBody.withArray("consignmentItems").forEach(consignmentItem ->
+        consignmentItem.withArray("cargoItems").forEach(cargoItem ->
+            ((ObjectNode) cargoItem.path("outerPackaging")).remove("outerPackagingDescription")));
+    }
     // Cannot substitute this because it is a boolean
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is a full element

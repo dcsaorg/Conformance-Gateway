@@ -3,6 +3,8 @@ package org.dcsa.conformance.standards.ebl.checks;
 import static org.dcsa.conformance.core.check.JsonAttribute.concatContextPath;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.EXEMPT_PACKAGE_CODES;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.FEEDBACKS_CODE;
+import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.MODE_OF_TRANSPORT;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.NATIONAL_COMMODITY_CODES;
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTION_CODE;
@@ -745,6 +747,18 @@ public class EBLChecks {
               mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.*.partyFunction"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE_HBL));
 
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback severity' is valid",
+      mav -> mav.submitAllMatching("feedbacks.*.severity"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback code' is valid",
+      mav -> mav.submitAllMatching("feedbacks.*.code"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(
       SI_REQUEST_SEND_TO_PLATFORM,
@@ -785,7 +799,9 @@ public class EBLChecks {
     ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
     CR_CC_T_CODES_UNIQUE,
     NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_CC_T_COMBINATION_UNIQUE
+    TLR_CC_T_COMBINATION_UNIQUE,
+    VALID_FEEDBACK_SEVERITY,
+    VALID_FEEDBACK_CODE
   );
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(

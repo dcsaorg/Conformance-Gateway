@@ -320,22 +320,25 @@ public class BookingChecks {
       .orElse(null);
   }
 
-  private static final JsonContentCheck FEEDBACK_PRESENCE = JsonAttribute.customValidator(
-    "Feedbacks must be present for the selected Booking Status ",
-    body -> {
-      var bookingStatus = body.path("bookingStatus").asText("");
-      var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
-      var issues = new LinkedHashSet<String>();
-      if (BookingState.PENDING_UPDATE.name().equals(bookingStatus) || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus) && amendedBookingStatus.isEmpty())) {
-        var feedbacks = body.get("feedbacks");
-        if (feedbacks == null) {
-          issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
-        }
-      }
-      return issues;
-    }
-  );
-
+  static final JsonContentCheck FEEDBACK_PRESENCE =
+      JsonAttribute.customValidator(
+          "Feedbacks must be present for the selected Booking Status ",
+          body -> {
+            var bookingStatus = body.path("bookingStatus").asText("");
+            var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
+            var issues = new LinkedHashSet<String>();
+            if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+                || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+                    && amendedBookingStatus.isEmpty())) {
+              var feedbacks = body.get("feedbacks");
+              if (feedbacks == null) {
+                issues.add(
+                    "feedbacks is missing in allowed booking states %s"
+                        .formatted(PENDING_CHANGES_STATES));
+              }
+            }
+            return issues;
+          });
 
   private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
     "check absence of confirmed fields in non confirmed booking states",

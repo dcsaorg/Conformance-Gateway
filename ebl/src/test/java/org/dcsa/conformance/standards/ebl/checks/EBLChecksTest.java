@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.ebl.checks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.BUYER_AND_SELLER_CONDITIONAL_CHECK;
@@ -12,6 +13,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBLS_CANNOT_HA
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.NUMBER_OF_PACKAGES_CONDITIONAL_CHECK;
@@ -548,5 +550,18 @@ class EBLChecksTest {
 
     shipper.remove("address");
     assertTrue(VALIDATE_DOCUMENT_PARTY.validate(rootNode).isEmpty());
+  }
+
+  @Test
+  void testFeedbacksPresence() {
+    rootNode.put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
+    assertFalse(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+
+    rootNode.putArray("feedbacks").addObject().put("code","INFORMATIONAL_MESSAGE");
+    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+
+    rootNode.put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
+    rootNode.remove("feedbacks");
+    assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
   }
 }

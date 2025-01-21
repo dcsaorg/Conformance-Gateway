@@ -52,7 +52,7 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
         at("/data", this::ensureCarrierBookingReferenceCompliance)
       ),
       createSubCheck(
-        "[Notification] Validate 'data.feedbacks' is present for states where it is allowed",
+        "[Notification] Validate 'data.feedbacks' is present for booking states where it is allowed",
         at("/data", this::ensureFeedbacksIsPresent)
       )
     );

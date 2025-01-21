@@ -60,6 +60,7 @@ public class EBLChecks {
   private static final String NUMBER_OF_COPIES_WITH_CHARGES = "numberOfCopiesWithCharges";
   private static final String COMMODITY_SUB_REFERENCE = "commoditySubReference";
   private static final String PARTY_CONTACT_DETAILS = "partyContactDetails";
+  private static final String SELLER = "seller";
 
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTY_ARRAY_ORDER_DEFINITIONS =
@@ -76,7 +77,7 @@ public class EBLChecks {
 
   private static final BiConsumer<JsonNode, TriConsumer<JsonNode, String, ArrayOrderHandler>> DOC_PARTIES_ARRAY_ORDER_DEFINITIONS =
     (documentPartyNode, arrayNodeHandler) -> {
-      for (var partyName : List.of("shipper", "consignee", "notifyParty", "seller", "buyer", "endorsee", "issueTo")) {
+      for (var partyName : List.of("shipper", "consignee", "notifyParty", SELLER, "buyer", "endorsee", "issueTo")) {
         DOC_PARTY_ARRAY_ORDER_DEFINITIONS.accept(documentPartyNode.path(partyName), arrayNodeHandler);
       }
 
@@ -280,7 +281,7 @@ public class EBLChecks {
                     issues.addAll(validateDocumentPartyFields(node, field.getKey()));
                   }
                 }
-                case "buyer", "seller" -> {
+                case "buyer", SELLER -> {
                   // No validation needed for buyer and seller
                 }
                 default -> issues.addAll(validateDocumentPartyFields(childNode, field.getKey()));
@@ -705,7 +706,7 @@ public class EBLChecks {
                           .equals(filing.path(AMF_HBL_PERFORMED_BY).asText())
                       && "ENS".equals(filing.path(MANIFEST_TYPE_CODE).asText())
                       && (hbl.path(DOCUMENT_PARTIES).path("buyer").isMissingNode()
-                          || hbl.path(DOCUMENT_PARTIES).path("seller").isMissingNode())) {
+                          || hbl.path(DOCUMENT_PARTIES).path(SELLER).isMissingNode())) {
                     String specificContextPath =
                         concatContextPath(
                             contextPath, "houseBillOfLadings[" + index + "].documentParties");
@@ -1322,22 +1323,23 @@ public class EBLChecks {
     );
   }
 
-  private static final JsonContentCheck FEEDBACKS_PRESENCE = JsonAttribute.customValidator(
-    "Feedbacks must be present for the selected shipping instructions status ",
-    body -> {
-      var siStatus = body.path("shippingInstructionsStatus").asText("");
-      var updatedSiStatus = body.path("updatedShippingInstructionsStatus").asText("");
-      var issues = new LinkedHashSet<String>();
-      if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
-        var feedbacks = body.get("feedbacks");
-        if (feedbacks == null) {
-          issues.add("feedbacks is missing for the si in status %s".formatted(SI_PENDING_UPDATE.wireName()));
-        }
-      }
-      return issues;
-    }
-  );
-
+  static final JsonContentCheck FEEDBACKS_PRESENCE =
+      JsonAttribute.customValidator(
+          "Feedbacks must be present for the selected shipping instructions status ",
+          body -> {
+            var siStatus = body.path("shippingInstructionsStatus").asText("");
+            var updatedSiStatus = body.path("updatedShippingInstructionsStatus").asText("");
+            var issues = new LinkedHashSet<String>();
+            if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
+              var feedbacks = body.get("feedbacks");
+              if (feedbacks == null) {
+                issues.add(
+                    "feedbacks is missing for the si in status %s"
+                        .formatted(SI_PENDING_UPDATE.wireName()));
+              }
+            }
+            return issues;
+          });
 
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null

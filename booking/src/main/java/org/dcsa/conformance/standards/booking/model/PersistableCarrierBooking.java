@@ -90,6 +90,10 @@ public class PersistableCarrierBooking {
     return getBooking().path(CARRIER_BOOKING_REFERENCE).asText(null);
   }
 
+  public JsonNode getfeedbacks() {
+    return getBooking().path("feedbacks");
+  }
+
   public ObjectNode getBooking() {
     return (ObjectNode) state.required(BOOKING_DATA_FIELD);
   }

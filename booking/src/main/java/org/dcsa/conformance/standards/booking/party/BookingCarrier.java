@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.booking.party;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.*;
@@ -39,6 +40,7 @@ public class BookingCarrier extends ConformanceParty {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
+  private static final String FEEDBACKS = "feedbacks";
 
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
@@ -301,7 +303,7 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray("feedbacks")
+                .putArray(FEEDBACKS)
                 .addObject()
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
@@ -344,7 +346,7 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray("feedbacks")
+                .putArray(FEEDBACKS)
                 .addObject()
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
@@ -385,6 +387,7 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .feedbacks(persistableCarrierBooking.getfeedbacks() != null ? persistableCarrierBooking.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
             .includeCarrierBookingRequestReference(includeCbrr)
             .includeCarrierBookingReference(includeCbr)
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
@@ -684,6 +687,7 @@ public class BookingCarrier extends ConformanceParty {
     private String bookingStatus;
     private String amendedBookingStatus;
     private String bookingCancellationStatus;
+    private JsonNode feedbacks;
 
 
     private JsonNode booking;
@@ -724,6 +728,9 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, BOOKING_STATUS, bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
+      if (feedbacks != null && !feedbacks.isEmpty()) {
+        data.set(FEEDBACKS, feedbacks);
+      }
       notification.set("data", data);
 
       return notification;

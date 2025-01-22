@@ -41,6 +41,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected final BookingCancellationState expectedBookingCancellationStatus;
   protected final boolean amendedContent;
 
+  private static final String FEEDBACKS = "feedbacks";
+
   protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
     this(matchedExchangeUuid, httpMessageType, bookingState, null, null,false);
   }
@@ -117,17 +119,34 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     String bookingStatus = responsePayload.path("shippingInstructionsStatus").asText(null);
    String amendedBookingStatus = responsePayload.path("updatedShippingInstructionsStatus").asText(null);
     if (BookingState.PENDING_UPDATE.name().equals(bookingStatus) || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus) && amendedBookingStatus.isEmpty())) {
-      var feedbacks = responsePayload.get("feedbacks");
+      var feedbacks = responsePayload.get(FEEDBACKS);
       if (feedbacks == null) {
         return Set.of(
             "feedbacks is missing in allowed booking states %s"
                 .formatted(
-                    Objects.requireNonNullElse("feedbacks", UNSET_MARKER)));
+                    Objects.requireNonNullElse(FEEDBACKS, UNSET_MARKER)));
       }
     }
     return Set.of();
   }
 
+  protected Set<String> ensureFeedbackSeverityAndCodeCompliance(JsonNode responsePayload) {
+    Set<String> errors = new HashSet<>();
+    JsonNode feedbacks = responsePayload.path(FEEDBACKS);
+    if (feedbacks.isArray()) {
+      for (JsonNode feedback : feedbacks) {
+        String severity = feedback.path("severity").asText(null);
+        String code = feedback.path("code").asText(null);
+        if (!BookingDataSets.FEEDBACKS_SEVERITY.contains(severity)) {
+          errors.add("Invalid feedback severity: " + severity);
+        }
+        if (!BookingDataSets.FEEDBACKS_CODE.contains(code)) {
+          errors.add("Invalid feedback code: " + code);
+        }
+      }
+    }
+    return errors;
+  }
 
   protected boolean expectedStateMatch(Set<BookingState> states) {
     return expectedStateMatch(states::contains);

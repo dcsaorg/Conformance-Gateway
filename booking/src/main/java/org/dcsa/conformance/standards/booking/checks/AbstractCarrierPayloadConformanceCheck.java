@@ -18,17 +18,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.PENDING_AMENDMENT
   );
 
-  protected static final Set<BookingState> REASON_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.DECLINED,
-    BookingState.REJECTED,
-    BookingState.CANCELLED,
-    BookingState.AMENDMENT_DECLINED,
-    BookingState.AMENDMENT_CANCELLED
-  );
 
-  protected static final Set<BookingCancellationState> CANCELLATION_REASON_STATES = Set.of(
+  protected static final Set<BookingCancellationState> CANCELLATION_FEEDBACK_STATES = Set.of(
     BookingCancellationState.CANCELLATION_RECEIVED,
     BookingCancellationState.CANCELLATION_CONFIRMED,
     BookingCancellationState.CANCELLATION_DECLINED
@@ -164,16 +155,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return payload -> fieldIsOmitted(payload, fieldName);
   }
 
-
-  protected Function<JsonNode, Set<String>> reasonFieldRequiredForCancellation(Set<BookingState> conditionalInTheseStates, Set<BookingCancellationState> cancellationConditionalStates, String fieldName) {
-    if (expectedCancellationStateMatch(cancellationConditionalStates::contains)) {
-      return payload -> nonEmptyField(payload, fieldName);
-    }
-    if (expectedStateMatch(conditionalInTheseStates)) {
-      return payload -> nonEmptyField(payload, fieldName);
-    }
-    return payload -> fieldIsOmitted(payload, fieldName);
-  }
 
   protected Set<String> fieldIsOmitted(JsonNode responsePayload, String key) {
     if (responsePayload.has(key) || responsePayload.get(key) != null) {

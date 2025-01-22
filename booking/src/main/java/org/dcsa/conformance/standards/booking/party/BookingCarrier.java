@@ -33,7 +33,6 @@ public class BookingCarrier extends ConformanceParty {
   private static final String DEBRV = "DEBRV";
   private static final String CARRIER_SERVICE = "Carrier Service %d";
   private static final String BOOKING_STATUS = "bookingStatus";
-  private static final String REASON_INFO = "Declined as required by the conformance scenario";
   private static final String CANCEL_AMENDMENT_OPERATION = "cancelAmendment";
   private static final String CANCEL_BOOKING_OPERATION = "cancelBooking";
   private static final String CANCEL_CONFIRMED_BOOKING_OPERATION = "cancelConfirmedBooking";
@@ -213,7 +212,7 @@ public class BookingCarrier extends ConformanceParty {
       persistableCarrierBooking.confirmBookingAmendment(cbr);
     } else {
       persistableCarrierBooking.declineBookingAmendment(
-          cbr, REASON_INFO);
+          cbr);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -234,10 +233,10 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
       PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     if (isCancellationConfirmed) {
-      persistableCarrierBooking.cancelConfirmedBooking(cbr, "Cancelled as required by the conformance scenario");
+      persistableCarrierBooking.cancelConfirmedBooking(cbr);
     } else {
       persistableCarrierBooking.declineConfirmedBookingCancellation(
-        cbr, REASON_INFO);
+        cbr);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -257,7 +256,7 @@ public class BookingCarrier extends ConformanceParty {
           .getBooking()
           .put("importLicenseReference", "importLicenseRefUpdate");
     }
-    persistableCarrierBooking.confirmBooking(cbrr, () -> generateAndAssociateCBR(cbrr), null);
+    persistableCarrierBooking.confirmBooking(cbrr, () -> generateAndAssociateCBR(cbrr));
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     var cbr = persistableCarrierBooking.getCarrierBookingReference();
@@ -275,7 +274,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     persistableCarrierBooking.rejectBooking(
-        cbrr, "Rejected as required by the conformance scenario");
+        cbrr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry(
@@ -291,7 +290,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     persistableCarrierBooking.declineBooking(
-        cbr, REASON_INFO);
+        cbr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry("Declined the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
@@ -299,7 +298,6 @@ public class BookingCarrier extends ConformanceParty {
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
     log.info("Carrier.requestUpdateToBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
-    String reason = "Provided input is not a valid value";
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
@@ -315,7 +313,7 @@ public class BookingCarrier extends ConformanceParty {
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
 
-    persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator, reason);
+    persistableCarrierBooking.requestUpdateToBooking(cbrr, bookingMutator);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
@@ -339,7 +337,6 @@ public class BookingCarrier extends ConformanceParty {
 
   private void requestToAmendConfirmedBooking(JsonNode actionPrompt) {
     log.info("Carrier.requestToAmendConfirmedBooking(%s)".formatted(actionPrompt.toPrettyString()));
-    String reason = "Provided input is not a valid value";
 
     String cbrr = actionPrompt.required("cbrr").asText();
     String cbr = actionPrompt.required("cbr").asText();
@@ -357,7 +354,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.updateConfirmedBooking(cbrr, bookingMutator, true, reason);
+    persistableCarrierBooking.updateConfirmedBooking(cbrr, bookingMutator, true);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
@@ -548,15 +545,14 @@ public class BookingCarrier extends ConformanceParty {
       return return404(request);
     }
     var persistableCarrierBooking = PersistableCarrierBooking.fromPersistentStore(bookingData);
-    var reason = request.message().body().getJsonBody().path("reason").asText(null);
     try {
       if (cancelOperation.equals(CANCEL_BOOKING_OPERATION)) {
-        persistableCarrierBooking.cancelBookingRequest(bookingReference, reason);
+        persistableCarrierBooking.cancelBookingRequest(bookingReference);
       } else if (cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)){
-        persistableCarrierBooking.cancelBookingAmendment(bookingReference, reason);
+        persistableCarrierBooking.cancelBookingAmendment(bookingReference);
       }
       else {
-        persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference, reason);
+        persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference);
       }
     } catch (IllegalStateException e) {
       return return409(request, "Booking was not in the correct state");
@@ -584,10 +580,6 @@ public class BookingCarrier extends ConformanceParty {
       OBJECT_MAPPER
         .createObjectNode()
         .put(CARRIER_BOOKING_REQUEST_REFERENCE, cbrr);
-    var reason = booking.get("reason");
-    if (reason != null) {
-      statusObject.set("reason", reason);
-    }
     ConformanceResponse response =
       request.createResponse(
         202,
@@ -692,7 +684,7 @@ public class BookingCarrier extends ConformanceParty {
     private String bookingStatus;
     private String amendedBookingStatus;
     private String bookingCancellationStatus;
-    private String reason;
+
 
     private JsonNode booking;
     @Builder.Default private boolean includeCarrierBookingRequestReference = true;
@@ -732,7 +724,6 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, BOOKING_STATUS, bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
-      setBookingProvidedField(data, "reason", reason);
       notification.set("data", data);
 
       return notification;

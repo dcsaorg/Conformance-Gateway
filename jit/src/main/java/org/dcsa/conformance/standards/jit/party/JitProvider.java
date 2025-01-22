@@ -314,11 +314,14 @@ public class JitProvider extends ConformanceParty {
 
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("JitProvider.handleRequest({})", request);
-
-    if (request.url().endsWith("/decline")) {
+    log.info("{}.handleRequest() type: {}", getClass().getSimpleName(), request.method());
+    int statusCode = 204;
+    if (request.message().body().getJsonBody().isEmpty()) {
+      addOperatorLogEntry("Handled an empty request, which is wrong.");
+      statusCode = 400;
+    } else if (request.url().endsWith("/decline")) {
       addOperatorLogEntry("Handled Decline request accepted.");
-    } else {
+    } else if (request.url().contains(JitStandard.TIMESTAMP_URL)) {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
       addOperatorLogEntry(
           "Handled %s timestamp accepted for: %s and remark: %s"
@@ -326,9 +329,12 @@ public class JitProvider extends ConformanceParty {
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime(),
                   timestamp.remark()));
+    } else {
+      statusCode = 400;
+      addOperatorLogEntry("Handled an unknown request, which is wrong.");
     }
     return request.createResponse(
-        204,
+        statusCode,
         Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
   }

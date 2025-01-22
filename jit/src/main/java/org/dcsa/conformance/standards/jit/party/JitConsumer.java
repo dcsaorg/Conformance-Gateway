@@ -131,7 +131,8 @@ public class JitConsumer extends ConformanceParty {
             .put("reason", "Declined, because crane broken.")
             .put("isFYI", dsp.isFYI());
     syncCounterpartPost(
-        JitStandard.DECLINE_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()), jsonBody);
+        JitStandard.DECLINE_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()),
+        jsonBody);
 
     addOperatorLogEntry(
         "Submitted Decline for Port Call Service with ID: %s".formatted(dsp.portCallServiceID()));
@@ -160,19 +161,34 @@ public class JitConsumer extends ConformanceParty {
   public ConformanceResponse handleRequest(ConformanceRequest request) {
     log.info("JitConsumer.handleRequest()");
     int statusCode = 204;
-    if (request.message().body().getJsonBody().has("timestampID")) {
+    String url = request.url();
+    if (request.message().body().getJsonBody().isEmpty()) {
+      addOperatorLogEntry("Handled an empty request, which is wrong.");
+      statusCode = 400;
+    } else if (url.contains(JitStandard.TIMESTAMP_URL)) {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
       addOperatorLogEntry(
           "Handled %s timestamp accepted for: %s"
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
-    } else if (request.url().endsWith("/cancel")) {
+    } else if (url.endsWith("/cancel")) {
       addOperatorLogEntry("Handled Cancel request accepted.");
-    } else if (request.url().endsWith("/omit")) {
+    } else if (url.endsWith("/omit")) {
       addOperatorLogEntry("Handled Omit request accepted.");
+    } else if (url.endsWith("/decline")) {
+      addOperatorLogEntry("Handled Decline request accepted.");
+    } else if (url.contains(JitStandard.PORT_CALL_URL)) {
+      addOperatorLogEntry("Handled Port Call request accepted.");
+    } else if (url.contains(JitStandard.PORT_CALL_SERVICES_URL)) {
+      addOperatorLogEntry("Handled Port Call Service request accepted.");
+    } else if (url.contains(JitStandard.TERMINAL_CALL_URL)) {
+      addOperatorLogEntry("Handled Terminal Call request accepted.");
+    } else if (url.contains(JitStandard.VESSEL_STATUS_URL)) {
+      addOperatorLogEntry("Handled Vessel Status request accepted.");
     } else {
-      addOperatorLogEntry("Handled request accepted.");
+      addOperatorLogEntry("Handled an unknown request, which is wrong.");
+      statusCode = 400;
     }
 
     return request.createResponse(

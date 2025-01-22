@@ -183,8 +183,6 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroup4(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
 
-    // TODO: Not sure, to add this one: PC - TC - S - V - E - R - P - P - A
-
     scenarioList.put(
         "4. PC-TC-S-V-ERP-A in-band ERP variations",
         supplyScenarioParameters(context, FULL_ERP)
@@ -934,8 +932,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       JitScenarioContext context, JitTimestampType timestampType) {
     if (timestampType == REQUESTED) {
       return new JitScenarioListBuilder(
-          previousAction ->
-              new JitOOBTimestampInputAction(context, previousAction, timestampType));
+          previousAction -> new JitOOBTimestampInputAction(context, previousAction, timestampType));
     }
     return new JitScenarioListBuilder(
         previousAction -> new JitOOBTimestampAction(context, previousAction, timestampType, true));

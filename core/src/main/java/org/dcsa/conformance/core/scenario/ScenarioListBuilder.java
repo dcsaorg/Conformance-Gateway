@@ -1,11 +1,12 @@
 package org.dcsa.conformance.core.scenario;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -54,23 +55,27 @@ public abstract class ScenarioListBuilder<T extends ScenarioListBuilder<T>> {
   }
 
   protected T then(T child) {
-    log.debug("ScenarioListBuilder.then()");
-    return thenEither(child);
+    return thenEither(Collections.singletonList(child));
   }
 
   @SafeVarargs
-  protected final T thenEither(T... children) {
-    log.debug("ScenarioListBuilder.thenEither(%d)".formatted(children.length));
-    if (!this.children.isEmpty()) throw new IllegalStateException();
-    Stream.of(children)
-        .forEach(
-            child -> {
-              if (child.parent != null) {
-                throw new IllegalStateException();
-              }
-            });
-    this.children.addAll(Arrays.asList(children));
-    this.children.forEach(child -> child.parent = thisAsT());
+  protected final T thenEither(T... newChildren) {
+    return thenEither(Arrays.asList(newChildren));
+  }
+
+  protected final T thenEither(@NonNull List<T> newChildren) {
+    log.debug("ScenarioListBuilder.thenEither({})", newChildren.size());
+    if (!children.isEmpty())
+      throw new IllegalStateException(
+          "Cannot add newChildren to a builder that already has children");
+    newChildren.forEach(
+        child -> {
+          if (child.parent != null) {
+            throw new IllegalStateException("Child already has a parent");
+          }
+        });
+    children.addAll(newChildren);
+    children.forEach(child -> child.parent = thisAsT());
     return thisAsT();
   }
 }

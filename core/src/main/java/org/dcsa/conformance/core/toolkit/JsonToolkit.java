@@ -18,6 +18,7 @@ public class JsonToolkit {
   public static final String JSON_UTF_8 = "application/json";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   public static final DateTimeFormatter DEFAULT_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+  public static final DateTimeFormatter ISO_8601_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
   @SneakyThrows
   public static JsonNode stringToJsonNode(String string) {

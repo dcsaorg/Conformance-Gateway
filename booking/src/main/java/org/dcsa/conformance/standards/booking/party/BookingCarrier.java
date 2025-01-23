@@ -728,7 +728,7 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, BOOKING_STATUS, bookingStatus);
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
-      if (feedbacks != null && !feedbacks.isEmpty()) {
+      if (feedbacks != null && feedbacks.size() > 0) {
         data.set(FEEDBACKS, feedbacks);
       }
       notification.set("data", data);

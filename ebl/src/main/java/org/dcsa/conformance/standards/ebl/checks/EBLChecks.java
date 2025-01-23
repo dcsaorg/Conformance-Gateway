@@ -747,6 +747,12 @@ public class EBLChecks {
               mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.*.partyFunction"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE_HBL));
 
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY_NOTIFICATION =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback severity' is valid",
+      mav -> mav.submitAllMatching("data.feedbacks.*.severity"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+
   static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "Validate that 'feedback severity' is valid",
@@ -756,7 +762,13 @@ public class EBLChecks {
   static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
     JsonAttribute.allIndividualMatchesMustBeValid(
       "Validate that 'feedback code' is valid",
-      mav -> mav.submitAllMatching("feedbacks.*.code"),
+      mav -> mav.submitAllMatching("data.feedbacks.*.code"),
+      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE_NOTIFICATION =
+    JsonAttribute.allIndividualMatchesMustBeValid(
+      "Validate that 'feedback code' is valid",
+      mav -> mav.submitAllMatching("data.feedbacks.*.code"),
       JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
   private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
@@ -1348,7 +1360,7 @@ public class EBLChecks {
             var issues = new LinkedHashSet<String>();
             if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
               var feedbacks = body.get("feedbacks");
-              if (feedbacks == null) {
+              if (feedbacks == null || feedbacks.isEmpty()) {
                 issues.add(
                     "feedbacks is missing for the si in status %s"
                         .formatted(SI_PENDING_UPDATE.wireName()));
@@ -1356,6 +1368,24 @@ public class EBLChecks {
             }
             return issues;
           });
+
+  static final JsonContentCheck FEEDBACKS_PRESENCE_NOTIFICATION =
+    JsonAttribute.customValidator(
+      "Feedbacks must be present for the selected shipping instructions status ",
+      body -> {
+        var siStatus = body.get("data").path("shippingInstructionsStatus").asText("");
+        var updatedSiStatus = body.get("data").path("updatedShippingInstructionsStatus").asText("");
+        var issues = new LinkedHashSet<String>();
+        if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
+          var feedbacks = body.get("data").path("feedbacks");
+          if (feedbacks == null || feedbacks.isEmpty()) {
+            issues.add(
+              "feedbacks is missing for the si in status %s"
+                .formatted(SI_PENDING_UPDATE.wireName()));
+          }
+        }
+        return issues;
+      });
 
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
@@ -1410,9 +1440,9 @@ public class EBLChecks {
       shippingInstructionsStatus.wireName()
     ));
     jsonContentChecks.add(updatedStatusCheck);
-    jsonContentChecks.add(FEEDBACKS_PRESENCE);
-    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY);
-    jsonContentChecks.add(VALID_FEEDBACK_CODE);
+    jsonContentChecks.add(FEEDBACKS_PRESENCE_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACK_CODE_NOTIFICATION);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,
@@ -1431,8 +1461,8 @@ public class EBLChecks {
       TD_NOTIFICATION_TD_STATUS_PTR,
       transportDocumentStatus.wireName()
     ));
-    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY);
-    jsonContentChecks.add(VALID_FEEDBACK_CODE);
+    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACK_CODE_NOTIFICATION);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,

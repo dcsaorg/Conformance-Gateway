@@ -14,6 +14,7 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ON
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.FEEDBACKS_PRESENCE;
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.FEEDBACKS_PRESENCE_NOTIFICATION;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF;
 import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.NUMBER_OF_PACKAGES_CONDITIONAL_CHECK;
@@ -563,5 +564,18 @@ class EBLChecksTest {
     rootNode.put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
     assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
+  }
+
+  @Test
+  void testFeedbacksPresenceNotification() {
+    rootNode.putObject("data").put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
+    assertFalse(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
+
+    rootNode.putObject("data").putArray("feedbacks").addObject().put("code","INFORMATIONAL_MESSAGE");
+    assertTrue(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
+
+    rootNode.putObject("data").put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
+    rootNode.remove("feedbacks");
+    assertTrue(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
   }
 }

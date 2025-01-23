@@ -18,13 +18,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.PENDING_AMENDMENT
   );
 
-
-  protected static final Set<BookingCancellationState> CANCELLATION_FEEDBACK_STATES = Set.of(
-    BookingCancellationState.CANCELLATION_RECEIVED,
-    BookingCancellationState.CANCELLATION_CONFIRMED,
-    BookingCancellationState.CANCELLATION_DECLINED
-  );
-
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
     BookingState.RECEIVED,
     BookingState.REJECTED,

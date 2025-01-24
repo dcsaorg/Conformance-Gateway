@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -72,6 +73,8 @@ public class EblShipper extends ConformanceParty {
   }
 
   static ObjectNode siFromScenarioType(ScenarioType scenarioType, CarrierScenarioParameters carrierScenarioParameters, String apiVersion) {
+
+    validateCSR(carrierScenarioParameters,scenarioType);
     var jsonRequestBody = (ObjectNode)
       JsonToolkit.templateFileToJsonNode(
         "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
@@ -293,5 +296,39 @@ public class EblShipper extends ConformanceParty {
     addOperatorLogEntry(
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
+  }
+
+  private static void validateCSR(CarrierScenarioParameters carrierScenarioParameters, ScenarioType scenarioType) {
+    validateRequiredField(carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
+    validateRequiredField(carrierScenarioParameters.equipmentReference(), "Equipment Reference");
+    validateScenarioSpecificField(carrierScenarioParameters.equipmentReference2(), "Equipment Reference 2", scenarioType, ScenarioType.REGULAR_2C_2U_2E);
+    validateRequiredField(carrierScenarioParameters.descriptionOfGoods(), "Description Of Goods");
+
+    boolean isRequiredScenario = isRequiredScenarioType(scenarioType);
+    validateConditionalField(carrierScenarioParameters.descriptionOfGoods2(), "Description Of Goods 2", isRequiredScenario);
+    validateRequiredField(carrierScenarioParameters.consignmentItemHSCode(), "Consignment Item HSCode");
+    validateConditionalField(carrierScenarioParameters.consignmentItem2HSCode(), "Consignment Item HSCode 2", isRequiredScenario);
+  }
+
+  private static void validateRequiredField(String field, String fieldName) {
+    if (field == null || field.isEmpty()) {
+      throw new UserFacingException(fieldName + " is required");
+    }
+  }
+
+  private static void validateScenarioSpecificField(String field, String fieldName, ScenarioType currentScenario, ScenarioType requiredScenario) {
+    if (currentScenario.equals(requiredScenario)) {
+      validateRequiredField(field, fieldName);
+    }
+  }
+
+  private static void validateConditionalField(String field, String fieldName, boolean condition) {
+    if (condition) {
+      validateRequiredField(field, fieldName);
+    }
+  }
+
+  private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
+    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
   }
 }

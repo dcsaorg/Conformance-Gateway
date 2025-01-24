@@ -38,11 +38,6 @@ public class BookingChecks {
     BookingState.UPDATE_RECEIVED
   );
 
-  private static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT
-  );
-
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
   private static final JsonPointer CARRIER_BOOKING_REFERENCE = JsonPointer.compile("/carrierBookingReference");
   private static final String RE_EMPTY_CONTAINER_PICKUP = "emptyContainerPickup";
@@ -322,7 +317,7 @@ public class BookingChecks {
       .orElse(null);
   }
 
-  static final JsonContentCheck FEEDBACK_PRESENCE =
+  static final JsonContentCheck FEEDBACKS_PRESENCE =
       JsonAttribute.customValidator(
           "Feedbacks must be present for the selected Booking Status ",
           body -> {
@@ -332,11 +327,10 @@ public class BookingChecks {
             if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                 || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
                     && amendedBookingStatus.isEmpty())) {
-              var feedbacks = body.get("feedbacks");
-              if (feedbacks == null) {
+              if (body.path("feedbacks").isMissingNode()) {
                 issues.add(
-                    "feedbacks is missing in allowed booking states %s"
-                        .formatted(PENDING_CHANGES_STATES));
+                    "feedbacks is missing in the allowed booking state %s"
+                        .formatted(bookingStatus));
               }
             }
             return issues;
@@ -507,16 +501,16 @@ public class BookingChecks {
   }
 
   static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback severity' is valid",
-      mav -> mav.submitAllMatching("feedbacks.*.severity"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedbacks severity' is valid",
+          mav -> mav.submitAllMatching("feedbacks.*.severity"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
   static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback code' is valid",
-      mav -> mav.submitAllMatching("feedbacks.*.code"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedbacks code' is valid",
+          mav -> mav.submitAllMatching("feedbacks.*.code"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
@@ -610,7 +604,7 @@ public class BookingChecks {
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
-    FEEDBACK_PRESENCE,
+    FEEDBACKS_PRESENCE,
     VALID_FEEDBACK_SEVERITY,
     VALID_FEEDBACK_CODE
   );

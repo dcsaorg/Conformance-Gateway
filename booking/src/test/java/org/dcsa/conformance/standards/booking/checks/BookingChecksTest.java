@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACK_PRESENCE;
+import static org.dcsa.conformance.standards.booking.checks.BookingChecks.FEEDBACKS_PRESENCE;
 import static org.dcsa.conformance.standards.booking.checks.BookingChecks.IS_EXPORT_DECLARATION_REFERENCE_PRESENCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -144,16 +144,16 @@ public class BookingChecksTest {
   @Test
   void testFeedbacksPresence() {
     booking.put("bookingStatus", BookingState.PENDING_UPDATE.name());
-    assertFalse(FEEDBACK_PRESENCE.validate(booking).isEmpty());
+    assertFalse(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
 
-    booking.putArray("feedbacks").addObject().put("code","INFORMATIONAL_MESSAGE");
-    assertTrue(FEEDBACK_PRESENCE.validate(booking).isEmpty());
+    booking.putArray("feedbacks").addObject().put("code", "INFORMATIONAL_MESSAGE");
+    assertTrue(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
 
     booking.put("bookingStatus", BookingState.PENDING_AMENDMENT.name());
     booking.put("amendedBookingStatus", "");
-    assertTrue(FEEDBACK_PRESENCE.validate(booking).isEmpty());
+    assertTrue(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
 
     booking.remove("feedbacks");
-    assertFalse(FEEDBACK_PRESENCE.validate(booking).isEmpty());
+    assertFalse(FEEDBACKS_PRESENCE.validate(booking).isEmpty());
   }
 }

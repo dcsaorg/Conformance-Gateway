@@ -34,7 +34,7 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected final BookingCancellationState expectedBookingCancellationStatus;
   protected final boolean amendedContent;
 
-  private static final String FEEDBACKS = "feedbacks";
+  protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
     this(matchedExchangeUuid, httpMessageType, bookingState, null, null,false);
@@ -110,14 +110,15 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
 
   protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
     String bookingStatus = responsePayload.path("shippingInstructionsStatus").asText(null);
-   String amendedBookingStatus = responsePayload.path("updatedShippingInstructionsStatus").asText(null);
-    if (BookingState.PENDING_UPDATE.name().equals(bookingStatus) || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus) && amendedBookingStatus.isEmpty())) {
-      var feedbacks = responsePayload.get(FEEDBACKS);
-      if (feedbacks == null) {
+    String amendedBookingStatus =
+        responsePayload.path("updatedShippingInstructionsStatus").asText(null);
+    if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+        || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+            && amendedBookingStatus.isEmpty())) {
+      if (responsePayload.path(FEEDBACKS).isMissingNode()) {
         return Set.of(
-            "feedbacks is missing in allowed booking states %s"
-                .formatted(
-                    Objects.requireNonNullElse(FEEDBACKS, UNSET_MARKER)));
+            "feedbacks property is required in the allowed booking state %s"
+                .formatted(Objects.requireNonNullElse(bookingStatus, UNSET_MARKER)));
       }
     }
     return Set.of();

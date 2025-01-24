@@ -555,26 +555,39 @@ class EBLChecksTest {
 
   @Test
   void testFeedbacksPresence() {
-    rootNode.put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
+    rootNode.put(
+        "shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
     assertFalse(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
 
-    rootNode.putArray("feedbacks").addObject().put("code","INFORMATIONAL_MESSAGE");
+    rootNode.putArray("feedbacks").addObject().put("code", "INFORMATIONAL_MESSAGE");
     assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
 
-    rootNode.put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
+    rootNode.put(
+        "updatedShippingInstructionsStatus",
+        ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
     assertTrue(FEEDBACKS_PRESENCE.validate(rootNode).isEmpty());
   }
 
   @Test
   void testFeedbacksPresenceNotification() {
-    rootNode.putObject("data").put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
+    rootNode
+        .putObject("data")
+        .put("shippingInstructionsStatus", ShippingInstructionsStatus.SI_PENDING_UPDATE.wireName());
     assertFalse(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
 
-    rootNode.putObject("data").putArray("feedbacks").addObject().put("code","INFORMATIONAL_MESSAGE");
+    rootNode
+        .putObject("data")
+        .putArray("feedbacks")
+        .addObject()
+        .put("code", "INFORMATIONAL_MESSAGE");
     assertTrue(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
 
-    rootNode.putObject("data").put("updatedShippingInstructionsStatus", ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
+    rootNode
+        .putObject("data")
+        .put(
+            "updatedShippingInstructionsStatus",
+            ShippingInstructionsStatus.SI_UPDATE_RECEIVED.wireName());
     rootNode.remove("feedbacks");
     assertTrue(FEEDBACKS_PRESENCE_NOTIFICATION.validate(rootNode).isEmpty());
   }

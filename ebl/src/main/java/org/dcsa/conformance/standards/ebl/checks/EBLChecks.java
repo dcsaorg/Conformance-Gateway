@@ -747,74 +747,72 @@ public class EBLChecks {
               mav.submitAllMatching("houseBillOfLadings.*.documentParties.other.*.partyFunction"),
           JsonAttribute.matchedMustBeDatasetKeywordIfPresent(PARTY_FUNCTION_CODE_HBL));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY_NOTIFICATION =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback severity' is valid",
-      mav -> mav.submitAllMatching("data.feedbacks.*.severity"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+  static final JsonRebaseableContentCheck VALID_FEEDBACKS_SEVERITY_NOTIFICATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedback severity' is valid",
+          mav -> mav.submitAllMatching("data.feedbacks.*.severity"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback severity' is valid",
-      mav -> mav.submitAllMatching("feedbacks.*.severity"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+  static final JsonRebaseableContentCheck VALID_FEEDBACKS_SEVERITY =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedback severity' is valid",
+          mav -> mav.submitAllMatching("feedbacks.*.severity"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback code' is valid",
-      mav -> mav.submitAllMatching("data.feedbacks.*.code"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+  static final JsonRebaseableContentCheck VALID_FEEDBACKS_CODE =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedback code' is valid",
+          mav -> mav.submitAllMatching("data.feedbacks.*.code"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE_NOTIFICATION =
-    JsonAttribute.allIndividualMatchesMustBeValid(
-      "Validate that 'feedback code' is valid",
-      mav -> mav.submitAllMatching("data.feedbacks.*.code"),
-      JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+  static final JsonRebaseableContentCheck VALID_FEEDBACKS_CODE_NOTIFICATION =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedback code' is valid",
+          mav -> mav.submitAllMatching("data.feedbacks.*.code"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
 
-  private static final List<JsonContentCheck> STATIC_SI_CHECKS = Arrays.asList(
-    JsonAttribute.mustBeDatasetKeywordIfPresent(
-      SI_REQUEST_SEND_TO_PLATFORM,
-      EblDatasets.EBL_PLATFORMS_DATASET
-    ),
-    SEND_TO_PLATFORM_CONDITIONAL_CHECK,
-    ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED,
-    HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER,
-    NUMBER_OF_PACKAGES_CONDITIONAL_CHECK,
-    IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF,
-    SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF,
-    LOCATION_NAME_CONDITIONAL_VALIDATION_POA,
-    LOCATION_NAME_CONDITIONAL_VALIDATION_POFD,
-    COUNTRY_CODE_CONDITIONAL_VALIDATION_POA,
-    COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD,
-    ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
-    VALID_REQUESTED_CARRIER_CLAUSES,
-    BUYER_AND_SELLER_CONDITIONAL_CHECK,
-    VALID_PARTY_FUNCTION,
-    VALID_PARTY_FUNCTION_HBL,
-    ONLY_EBLS_CAN_BE_NEGOTIABLE,
-    EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
-    EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
-    EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
-    SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
-    SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
-    VALIDATE_DOCUMENT_PARTY,
-    DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
-    VALID_WOOD_DECLARATIONS,
-    NATIONAL_COMMODITY_CODE_IS_VALID,
-    VALID_REFERENCE_TYPES,
-    VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
-    ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
-    UTE_EQUIPMENT_REFERENCE_UNIQUE,
-    EBL_DISPLAYED_ADDRESS_LIMIT,
-    CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
-    ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
-    CR_CC_T_CODES_UNIQUE,
-    NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
-    TLR_CC_T_COMBINATION_UNIQUE,
-    VALID_FEEDBACK_SEVERITY,
-    VALID_FEEDBACK_CODE
-  );
+  private static final List<JsonContentCheck> STATIC_SI_CHECKS =
+      Arrays.asList(
+          JsonAttribute.mustBeDatasetKeywordIfPresent(
+              SI_REQUEST_SEND_TO_PLATFORM, EblDatasets.EBL_PLATFORMS_DATASET),
+          SEND_TO_PLATFORM_CONDITIONAL_CHECK,
+          ENS_MANIFEST_TYPE_REQUIRES_HBL_ISSUED,
+          HBL_NOTIFY_PARTY_REQUIRED_IF_TO_ORDER,
+          NUMBER_OF_PACKAGES_CONDITIONAL_CHECK,
+          IDENTIFICATION_NUMBER_REQUIRED_IF_ENS_AND_SELF,
+          SELF_FILER_CODE_REQUIRED_IF_ACE_ACI_AND_SELF,
+          LOCATION_NAME_CONDITIONAL_VALIDATION_POA,
+          LOCATION_NAME_CONDITIONAL_VALIDATION_POFD,
+          COUNTRY_CODE_CONDITIONAL_VALIDATION_POA,
+          COUNTRY_CODE_CONDITIONAL_VALIDATION_POFD,
+          ROUTING_OF_CONSIGNMENT_COUNTRIES_CHECK,
+          VALID_REQUESTED_CARRIER_CLAUSES,
+          BUYER_AND_SELLER_CONDITIONAL_CHECK,
+          VALID_PARTY_FUNCTION,
+          VALID_PARTY_FUNCTION_HBL,
+          ONLY_EBLS_CAN_BE_NEGOTIABLE,
+          EBL_AT_MOST_ONE_ORIGINAL_WITHOUT_CHARGES,
+          EBL_AT_MOST_ONE_ORIGINAL_WITH_CHARGES,
+          EBLS_CANNOT_HAVE_COPIES_WITH_CHARGES,
+          EBLS_CANNOT_HAVE_COPIES_WITHOUT_CHARGES,
+          SWBS_CANNOT_HAVE_ORIGINALS_WITH_CHARGES,
+          SWBS_CANNOT_HAVE_ORIGINALS_WITHOUT_CHARGES,
+          VALIDATE_DOCUMENT_PARTY,
+          DOCUMENTATION_PARTIES_CODE_LIST_PROVIDERS,
+          VALID_WOOD_DECLARATIONS,
+          NATIONAL_COMMODITY_CODE_IS_VALID,
+          VALID_REFERENCE_TYPES,
+          VALID_CONSIGMENT_ITEMS_REFERENCE_TYPES,
+          ISO_EQUIPMENT_CODE_IMPLIES_REEFER,
+          UTE_EQUIPMENT_REFERENCE_UNIQUE,
+          EBL_DISPLAYED_ADDRESS_LIMIT,
+          CARGO_ITEM_REFERENCES_KNOWN_EQUIPMENT,
+          ADVANCED_MANIFEST_FILING_CODES_UNIQUE,
+          CR_CC_T_CODES_UNIQUE,
+          NOTIFY_PARTIES_REQUIRED_IN_NEGOTIABLE_BLS,
+          TLR_CC_T_COMBINATION_UNIQUE,
+          VALID_FEEDBACKS_SEVERITY,
+          VALID_FEEDBACKS_CODE);
 
   private static final List<JsonRebaseableContentCheck> STATIC_TD_CHECKS = Arrays.asList(
     ONLY_EBLS_CAN_BE_NEGOTIABLE,
@@ -1370,22 +1368,23 @@ public class EBLChecks {
           });
 
   static final JsonContentCheck FEEDBACKS_PRESENCE_NOTIFICATION =
-    JsonAttribute.customValidator(
-      "Feedbacks must be present for the selected shipping instructions status ",
-      body -> {
-        var siStatus = body.get("data").path("shippingInstructionsStatus").asText("");
-        var updatedSiStatus = body.get("data").path("updatedShippingInstructionsStatus").asText("");
-        var issues = new LinkedHashSet<String>();
-        if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
-          var feedbacks = body.get("data").path("feedbacks");
-          if (feedbacks == null || feedbacks.isEmpty()) {
-            issues.add(
-              "feedbacks is missing for the si in status %s"
-                .formatted(SI_PENDING_UPDATE.wireName()));
-          }
-        }
-        return issues;
-      });
+      JsonAttribute.customValidator(
+          "Feedbacks must be present for the selected shipping instructions status ",
+          body -> {
+            var siStatus = body.get("data").path("shippingInstructionsStatus").asText("");
+            var updatedSiStatus =
+                body.get("data").path("updatedShippingInstructionsStatus").asText("");
+            var issues = new LinkedHashSet<String>();
+            if (SI_PENDING_UPDATE.wireName().equals(siStatus) && updatedSiStatus.isEmpty()) {
+              var feedbacks = body.get("data").path("feedbacks");
+              if (feedbacks == null || feedbacks.isEmpty()) {
+                issues.add(
+                    "feedbacks is missing for the si in status %s"
+                        .formatted(SI_PENDING_UPDATE.wireName()));
+              }
+            }
+            return issues;
+          });
 
   public static Stream<ActionCheck> siRefStatusContentChecks(UUID matched, String standardsVersion, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, JsonContentCheck ... extraChecks) {
     var updatedStatusCheck = updatedShippingInstructionsStatus != null
@@ -1441,8 +1440,8 @@ public class EBLChecks {
     ));
     jsonContentChecks.add(updatedStatusCheck);
     jsonContentChecks.add(FEEDBACKS_PRESENCE_NOTIFICATION);
-    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY_NOTIFICATION);
-    jsonContentChecks.add(VALID_FEEDBACK_CODE_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACKS_CODE_NOTIFICATION);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,
@@ -1461,8 +1460,8 @@ public class EBLChecks {
       TD_NOTIFICATION_TD_STATUS_PTR,
       transportDocumentStatus.wireName()
     ));
-    jsonContentChecks.add(VALID_FEEDBACK_SEVERITY_NOTIFICATION);
-    jsonContentChecks.add(VALID_FEEDBACK_CODE_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACKS_SEVERITY_NOTIFICATION);
+    jsonContentChecks.add(VALID_FEEDBACKS_CODE_NOTIFICATION);
     return JsonAttribute.contentChecks(
       titlePrefix,
       null,

@@ -50,6 +50,14 @@ public class CarrierBookingNotificationDataPayloadRequestConformanceCheck extend
       createSubCheck(
         "[Notification] Validate 'data.carrierBookingReference' is conditionally present",
         at("/data", this::ensureCarrierBookingReferenceCompliance)
+      ),
+      createSubCheck(
+        "[Notification] Validate 'data.feedbacks' is present for booking states where it is allowed",
+        at("/data", this::ensureFeedbacksIsPresent)
+      ),
+      createSubCheck(
+        "[Notification] Validate 'data.feedbacks' severity and code are valid",
+        at("/data", this::ensureFeedbackSeverityAndCodeCompliance)
       )
     );
   }

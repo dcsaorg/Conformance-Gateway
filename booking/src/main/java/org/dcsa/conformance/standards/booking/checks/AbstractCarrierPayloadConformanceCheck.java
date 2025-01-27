@@ -18,22 +18,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     BookingState.PENDING_AMENDMENT
   );
 
-  protected static final Set<BookingState> REASON_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT,
-    BookingState.DECLINED,
-    BookingState.REJECTED,
-    BookingState.CANCELLED,
-    BookingState.AMENDMENT_DECLINED,
-    BookingState.AMENDMENT_CANCELLED
-  );
-
-  protected static final Set<BookingCancellationState> CANCELLATION_REASON_STATES = Set.of(
-    BookingCancellationState.CANCELLATION_RECEIVED,
-    BookingCancellationState.CANCELLATION_CONFIRMED,
-    BookingCancellationState.CANCELLATION_DECLINED
-  );
-
   protected static final Set<BookingState> BOOKING_STATES_WHERE_CBR_IS_OPTIONAL = Set.of(
     BookingState.RECEIVED,
     BookingState.REJECTED,
@@ -49,6 +33,8 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected final BookingState expectedAmendedBookingStatus;
   protected final BookingCancellationState expectedBookingCancellationStatus;
   protected final boolean amendedContent;
+
+  protected static final String FEEDBACKS = "feedbacks";
 
   protected AbstractCarrierPayloadConformanceCheck(UUID matchedExchangeUuid, HttpMessageType httpMessageType, BookingState bookingState) {
     this(matchedExchangeUuid, httpMessageType, bookingState, null, null,false);
@@ -122,6 +108,39 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
         Objects.requireNonNullElse(actualState, UNSET_MARKER)));
   }
 
+  protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
+    String bookingStatus = responsePayload.path("bookingStatus").asText(null);
+    Set<String> errors = new HashSet<>();
+    String amendedBookingStatus =
+        responsePayload.path("amendedBookingStatus").asText(null);
+    String bookingCancellationStatus =
+      responsePayload.path("bookingCancellationStatus").asText(null);
+    if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+      || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+      && (amendedBookingStatus == null || amendedBookingStatus.isBlank()) && (bookingCancellationStatus == null || bookingCancellationStatus.isBlank())))
+      && responsePayload.path(FEEDBACKS).isMissingNode()) {
+      errors.add("feedbacks property is required in the allowed booking state %s".formatted(bookingStatus));
+    }
+    return errors;
+  }
+
+  protected Set<String> ensureFeedbackSeverityAndCodeCompliance(JsonNode responsePayload) {
+    Set<String> errors = new HashSet<>();
+    JsonNode feedbacks = responsePayload.path(FEEDBACKS);
+    if (feedbacks.isArray()) {
+      for (JsonNode feedback : feedbacks) {
+        String severity = feedback.path("severity").asText(null);
+        String code = feedback.path("code").asText(null);
+        if (!BookingDataSets.FEEDBACKS_SEVERITY.contains(severity)) {
+          errors.add("Invalid feedback severity: " + severity);
+        }
+        if (!BookingDataSets.FEEDBACKS_CODE.contains(code)) {
+          errors.add("Invalid feedback code: " + code);
+        }
+      }
+    }
+    return errors;
+  }
 
   protected boolean expectedStateMatch(Set<BookingState> states) {
     return expectedStateMatch(states::contains);
@@ -149,16 +168,6 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     return payload -> fieldIsOmitted(payload, fieldName);
   }
 
-
-  protected Function<JsonNode, Set<String>> reasonFieldRequiredForCancellation(Set<BookingState> conditionalInTheseStates, Set<BookingCancellationState> cancellationConditionalStates, String fieldName) {
-    if (expectedCancellationStateMatch(cancellationConditionalStates::contains)) {
-      return payload -> nonEmptyField(payload, fieldName);
-    }
-    if (expectedStateMatch(conditionalInTheseStates)) {
-      return payload -> nonEmptyField(payload, fieldName);
-    }
-    return payload -> fieldIsOmitted(payload, fieldName);
-  }
 
   protected Set<String> fieldIsOmitted(JsonNode responsePayload, String key) {
     if (responsePayload.has(key) || responsePayload.get(key) != null) {

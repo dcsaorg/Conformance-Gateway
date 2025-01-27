@@ -109,18 +109,19 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   }
 
   protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
-    String bookingStatus = responsePayload.path("shippingInstructionsStatus").asText(null);
+    String bookingStatus = responsePayload.path("bookingStatus").asText(null);
+    Set<String> errors = new HashSet<>();
     String amendedBookingStatus =
-        responsePayload.path("updatedShippingInstructionsStatus").asText(null);
+        responsePayload.path("amendedBookingStatus").asText(null);
+    String bookingCancellationStatus =
+      responsePayload.path("bookingCancellationStatus").asText(null);
     if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
       || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-      && amendedBookingStatus.isEmpty()))
+      && (amendedBookingStatus == null || amendedBookingStatus.isBlank()) && (bookingCancellationStatus == null || bookingCancellationStatus.isBlank())))
       && responsePayload.path(FEEDBACKS).isMissingNode()) {
-      return Set.of(
-        "feedbacks property is required in the allowed booking state %s"
-          .formatted(Objects.requireNonNullElse(bookingStatus, UNSET_MARKER)));
+      errors.add("feedbacks property is required in the allowed booking state %s".formatted(bookingStatus));
     }
-    return Set.of();
+    return errors;
   }
 
   protected Set<String> ensureFeedbackSeverityAndCodeCompliance(JsonNode responsePayload) {

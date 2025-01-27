@@ -100,7 +100,7 @@ public abstract class ConformanceParty implements StatefulEntity {
 
   protected abstract void importPartyJsonState(ObjectNode sourceObjectNode);
 
-  protected void addOperatorLogEntry(String logEntry) {
+  public void addOperatorLogEntry(String logEntry) {
     operatorLog.addFirst(logEntry);
     if (operatorLog.size() > MAX_OPERATOR_LOG_RECORDS - 1) {
       operatorLog.removeLast();

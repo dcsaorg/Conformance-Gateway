@@ -20,9 +20,11 @@ import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitGetAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
@@ -68,7 +70,8 @@ public class JitConsumer extends ConformanceParty {
         Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(JitTimestampAction.class, this::timestampRequest),
         Map.entry(JitDeclineAction.class, this::declineRequest),
-        Map.entry(JitOOBTimestampInputAction.class, this::outOfBandTimestampRequest));
+        Map.entry(JitOOBTimestampInputAction.class, this::outOfBandTimestampRequest),
+        Map.entry(JitGetAction.class, this::sendGetActionRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -128,8 +131,8 @@ public class JitConsumer extends ConformanceParty {
     JsonNode jsonBody =
         OBJECT_MAPPER
             .createObjectNode()
-            .put("reason", "Declined, because crane broken.")
-            .put("isFYI", dsp.isFYI());
+            .put(JitProvider.REASON, "Declined, because crane broken.")
+            .put(JitProvider.IS_FYI, dsp.isFYI());
     syncCounterpartPost(
         JitStandard.DECLINE_URL.replace(JitStandard.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()),
         jsonBody);
@@ -157,9 +160,27 @@ public class JitConsumer extends ConformanceParty {
             .formatted(timestamp.dateTime(), timestampType));
   }
 
+  private void sendGetActionRequest(JsonNode actionPrompt) {
+    log.info(
+        "{}.sendGetActionRequest({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
+
+    JitGetType getType = JitGetType.valueOf(actionPrompt.required(JitGetAction.GET_TYPE).asText());
+    List<String> filters = OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
+    Map<String, List<String>> queryParams = new HashMap<>();
+    JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
+
+    syncCounterpartGet(getType.getUrlPath(), queryParams);
+    addOperatorLogEntry(
+        "Submitted GET %s request with URL parameters: %s."
+            .formatted(getType.getName(), queryParams));
+  }
+
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("JitConsumer.handleRequest()");
+    log.info("{}.handleRequest() type: {}", getClass().getSimpleName(), request.method());
+    if (request.method().equals(JitStandard.GET)) {
+      return JitPartyHelper.handleGetRequest(request, persistentMap, apiVersion, this);
+    }
     int statusCode = 204;
     String url = request.url();
     if (request.message().body().getJsonBody().isEmpty()) {
@@ -180,6 +201,7 @@ public class JitConsumer extends ConformanceParty {
       addOperatorLogEntry("Handled Decline request accepted.");
     } else if (url.contains(JitStandard.PORT_CALL_URL)) {
       addOperatorLogEntry("Handled Port Call request accepted.");
+      persistentMap.save(JitGetType.PORT_CALLS.name(), request.message().body().getJsonBody());
     } else if (url.contains(JitStandard.PORT_CALL_SERVICES_URL)) {
       addOperatorLogEntry("Handled Port Call Service request accepted.");
     } else if (url.contains(JitStandard.TERMINAL_CALL_URL)) {

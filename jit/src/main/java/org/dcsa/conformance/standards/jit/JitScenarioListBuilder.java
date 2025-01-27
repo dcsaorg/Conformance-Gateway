@@ -4,7 +4,9 @@ import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
 import static org.dcsa.conformance.standards.jit.model.JitTimestampType.*;
 import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitGetAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
@@ -22,6 +25,8 @@ import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
@@ -74,6 +79,9 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     addScenarioGroup10(scenarioList, context);
     addScenarioGroup11(scenarioList, context);
     addScenarioGroup12(scenarioList, context);
+
+    // Scenario suite: "GET endpoint conformance"
+    addScenarioGroupGET1(scenarioList, context);
 
     // Scenario suite: "Secondary sender and receiver conformance"
     addScenarioGroupSecondary1(scenarioList, context);
@@ -771,6 +779,108 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
   }
 
+  private static void addScenarioGroupGET1(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "1. PC-TC-S-V Provider answering GET calls",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        getAction(
+                                context,
+                                JitGetType.PORT_CALLS,
+                                Collections.singletonList(JitGetPortCallFilters.props().getFirst()),
+                                false)
+                            .then(
+                                getAction(
+                                        context,
+                                        JitGetType.PORT_CALLS,
+                                        Collections.singletonList(
+                                            JitGetPortCallFilters.props().get(1)),
+                                        false)
+                                    .then(
+                                        getAction(
+                                                context,
+                                                JitGetType.PORT_CALLS,
+                                                Collections.singletonList(
+                                                    JitGetPortCallFilters.props().get(2)),
+                                                false)
+                                            .then(
+                                                getAction(
+                                                        context,
+                                                        JitGetType.PORT_CALLS,
+                                                        Collections.singletonList(
+                                                            JitGetPortCallFilters.props().get(3)),
+                                                        false)
+                                                    .then(
+                                                        getAction(
+                                                                context,
+                                                                JitGetType.PORT_CALLS,
+                                                                Collections.singletonList(
+                                                                    JitGetPortCallFilters.props()
+                                                                        .get(4)),
+                                                                false)
+                                                            .then(
+                                                                getAction(
+                                                                    context,
+                                                                    JitGetType.PORT_CALLS,
+                                                                    Collections.singletonList(
+                                                                        JitGetPortCallFilters
+                                                                            .props()
+                                                                            .get(5)),
+                                                                    false)))))))));
+    scenarioList.put(
+        "2. PC-TC-S-V Consumer answering GET calls",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        getAction(
+                                context,
+                                JitGetType.PORT_CALLS,
+                                Collections.singletonList(JitGetPortCallFilters.props().getFirst()),
+                                true)
+                            .then(
+                                getAction(
+                                        context,
+                                        JitGetType.PORT_CALLS,
+                                        Collections.singletonList(
+                                            JitGetPortCallFilters.props().get(1)),
+                                        true)
+                                    .then(
+                                        getAction(
+                                                context,
+                                                JitGetType.PORT_CALLS,
+                                                Collections.singletonList(
+                                                    JitGetPortCallFilters.props().get(2)),
+                                                true)
+                                            .then(
+                                                getAction(
+                                                        context,
+                                                        JitGetType.PORT_CALLS,
+                                                        Collections.singletonList(
+                                                            JitGetPortCallFilters.props().get(3)),
+                                                        true)
+                                                    .then(
+                                                        getAction(
+                                                                context,
+                                                                JitGetType.PORT_CALLS,
+                                                                Collections.singletonList(
+                                                                    JitGetPortCallFilters.props()
+                                                                        .get(4)),
+                                                                true)
+                                                            .then(
+                                                                getAction(
+                                                                    context,
+                                                                    JitGetType.PORT_CALLS,
+                                                                    Collections.singletonList(
+                                                                        JitGetPortCallFilters
+                                                                            .props()
+                                                                            .get(5)),
+                                                                    true)))))))));
+  }
+
   private static void addScenarioGroupSecondary1(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
@@ -1024,5 +1134,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 .then(
                     serviceCall(context, serviceType, selector)
                         .then(vesselStatus(context).thenEither(thenEither))));
+  }
+
+  private static JitScenarioListBuilder getAction(
+      JitScenarioContext context,
+      JitGetType type,
+      List<String> filters,
+      boolean requestedByProvider) {
+    return new JitScenarioListBuilder(
+        previousAction ->
+            new JitGetAction(context, previousAction, type, filters, requestedByProvider));
   }
 }

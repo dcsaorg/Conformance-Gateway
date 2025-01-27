@@ -54,7 +54,9 @@ public class JitPortCallAction extends JitAction {
         if (dsp == null) return Stream.of();
         return Stream.of(
             new UrlPathCheck(
-                JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PORT_CALL_URL + dsp.portCallID()),
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.PORT_CALL_URL + dsp.portCallID()),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(

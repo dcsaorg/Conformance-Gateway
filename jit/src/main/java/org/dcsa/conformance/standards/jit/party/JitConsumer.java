@@ -92,7 +92,7 @@ public class JitConsumer extends ConformanceParty {
     PortCallServiceType type =
         switch (selector) {
           case FULL_ERP -> PortCallServiceType.getServicesWithERPAndA().iterator().next();
-          case S_A_PATTERN -> PortCallServiceType.getServicesHavingOnlyA().iterator().next();
+          case S_A_PATTERN, ANY -> PortCallServiceType.getServicesHavingOnlyA().iterator().next();
           case GIVEN -> null;
         };
     return new SuppliedScenarioParameters(
@@ -165,9 +165,11 @@ public class JitConsumer extends ConformanceParty {
         "{}.sendGetActionRequest({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
 
     JitGetType getType = JitGetType.valueOf(actionPrompt.required(JitGetAction.GET_TYPE).asText());
-    List<String> filters = OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
+    List<String> filters =
+        OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(
@@ -206,6 +208,7 @@ public class JitConsumer extends ConformanceParty {
       addOperatorLogEntry("Handled Port Call Service request accepted.");
     } else if (url.contains(JitStandard.TERMINAL_CALL_URL)) {
       addOperatorLogEntry("Handled Terminal Call request accepted.");
+      persistentMap.save(JitGetType.TERMINAL_CALLS.name(), request.message().body().getJsonBody());
     } else if (url.contains(JitStandard.VESSEL_STATUS_URL)) {
       addOperatorLogEntry("Handled Vessel Status request accepted.");
     } else {

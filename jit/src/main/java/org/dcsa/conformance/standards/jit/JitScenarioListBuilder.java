@@ -26,6 +26,7 @@ import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
@@ -783,102 +784,144 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
         "1. PC-TC-S-V Provider answering GET calls",
-        supplyScenarioParameters(context, FULL_ERP)
+        supplyScenarioParameters(context, ANY)
             .thenEither(
+                portCall(context).then(getPortCallActions(context, false)),
                 portCall(context)
-                    .then(
-                        getAction(
-                                context,
-                                JitGetType.PORT_CALLS,
-                                Collections.singletonList(JitGetPortCallFilters.props().getFirst()),
-                                false)
-                            .then(
-                                getAction(
-                                        context,
-                                        JitGetType.PORT_CALLS,
-                                        Collections.singletonList(
-                                            JitGetPortCallFilters.props().get(1)),
-                                        false)
-                                    .then(
-                                        getAction(
-                                                context,
-                                                JitGetType.PORT_CALLS,
-                                                Collections.singletonList(
-                                                    JitGetPortCallFilters.props().get(2)),
-                                                false)
-                                            .then(
-                                                getAction(
-                                                        context,
-                                                        JitGetType.PORT_CALLS,
-                                                        Collections.singletonList(
-                                                            JitGetPortCallFilters.props().get(3)),
-                                                        false)
-                                                    .then(
-                                                        getAction(
-                                                                context,
-                                                                JitGetType.PORT_CALLS,
-                                                                Collections.singletonList(
-                                                                    JitGetPortCallFilters.props()
-                                                                        .get(4)),
-                                                                false)
-                                                            .then(
-                                                                getAction(
-                                                                    context,
-                                                                    JitGetType.PORT_CALLS,
-                                                                    Collections.singletonList(
-                                                                        JitGetPortCallFilters
-                                                                            .props()
-                                                                            .get(5)),
-                                                                    false)))))))));
+                    .then(terminalCall(context).then(getTerminalCallActions(context, false)))));
     scenarioList.put(
         "2. PC-TC-S-V Consumer answering GET calls",
-        supplyScenarioParameters(context, FULL_ERP)
+        supplyScenarioParameters(context, ANY)
             .thenEither(
+                portCall(context).then(getPortCallActions(context, true)),
                 portCall(context)
-                    .then(
-                        getAction(
-                                context,
-                                JitGetType.PORT_CALLS,
-                                Collections.singletonList(JitGetPortCallFilters.props().getFirst()),
-                                true)
-                            .then(
-                                getAction(
-                                        context,
-                                        JitGetType.PORT_CALLS,
-                                        Collections.singletonList(
-                                            JitGetPortCallFilters.props().get(1)),
-                                        true)
-                                    .then(
-                                        getAction(
+                    .then(terminalCall(context).then(getTerminalCallActions(context, true)))));
+  }
+
+  private static JitScenarioListBuilder getPortCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.PORT_CALLS,
+            JitGetPortCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.PORT_CALLS,
+                    JitGetPortCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.PORT_CALLS,
+                            JitGetPortCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.PORT_CALLS,
+                                    JitGetPortCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.PORT_CALLS,
+                                            JitGetPortCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
                                                 context,
                                                 JitGetType.PORT_CALLS,
-                                                Collections.singletonList(
-                                                    JitGetPortCallFilters.props().get(2)),
-                                                true)
-                                            .then(
-                                                getAction(
-                                                        context,
-                                                        JitGetType.PORT_CALLS,
-                                                        Collections.singletonList(
-                                                            JitGetPortCallFilters.props().get(3)),
-                                                        true)
-                                                    .then(
-                                                        getAction(
-                                                                context,
-                                                                JitGetType.PORT_CALLS,
-                                                                Collections.singletonList(
-                                                                    JitGetPortCallFilters.props()
-                                                                        .get(4)),
-                                                                true)
-                                                            .then(
-                                                                getAction(
+                                                JitGetPortCallFilters.props().get(5),
+                                                requestedByProvider))))));
+  }
+
+  private static JitScenarioListBuilder getTerminalCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.TERMINAL_CALLS,
+            JitGetTerminalCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.TERMINAL_CALLS,
+                    JitGetTerminalCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.TERMINAL_CALLS,
+                            JitGetTerminalCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TERMINAL_CALLS,
+                                    JitGetTerminalCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TERMINAL_CALLS,
+                                            JitGetTerminalCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
+                                                    context,
+                                                    JitGetType.TERMINAL_CALLS,
+                                                    JitGetTerminalCallFilters.props().get(5),
+                                                    requestedByProvider)
+                                                .then(
+                                                    getAction(
+                                                            context,
+                                                            JitGetType.TERMINAL_CALLS,
+                                                            List.of(
+                                                                JitGetTerminalCallFilters.props()
+                                                                    .get(2),
+                                                                JitGetTerminalCallFilters.props()
+                                                                    .get(6)),
+                                                            requestedByProvider)
+                                                        .then(
+                                                            getAction(
                                                                     context,
-                                                                    JitGetType.PORT_CALLS,
-                                                                    Collections.singletonList(
-                                                                        JitGetPortCallFilters
+                                                                    JitGetType.TERMINAL_CALLS,
+                                                                    List.of(
+                                                                        JitGetTerminalCallFilters
                                                                             .props()
-                                                                            .get(5)),
-                                                                    true)))))))));
+                                                                            .get(2),
+                                                                        JitGetTerminalCallFilters
+                                                                            .props()
+                                                                            .get(7)),
+                                                                    requestedByProvider)
+                                                                .then(
+                                                                    getAction(
+                                                                            context,
+                                                                            JitGetType
+                                                                                .TERMINAL_CALLS,
+                                                                            List.of(
+                                                                                JitGetTerminalCallFilters
+                                                                                    .props()
+                                                                                    .get(3),
+                                                                                JitGetTerminalCallFilters
+                                                                                    .props()
+                                                                                    .get(8)),
+                                                                            requestedByProvider)
+                                                                        .then(
+                                                                            getAction(
+                                                                                context,
+                                                                                JitGetType
+                                                                                    .TERMINAL_CALLS,
+                                                                                List.of(
+                                                                                    JitGetTerminalCallFilters
+                                                                                        .props()
+                                                                                        .get(4),
+                                                                                    JitGetTerminalCallFilters
+                                                                                        .props()
+                                                                                        .get(9)),
+                                                                                requestedByProvider))))))))));
   }
 
   private static void addScenarioGroupSecondary1(
@@ -1134,6 +1177,18 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 .then(
                     serviceCall(context, serviceType, selector)
                         .then(vesselStatus(context).thenEither(thenEither))));
+  }
+
+  private static JitScenarioListBuilder getAction(
+      JitScenarioContext context, JitGetType type, String filter, boolean requestedByProvider) {
+    return new JitScenarioListBuilder(
+        previousAction ->
+            new JitGetAction(
+                context,
+                previousAction,
+                type,
+                Collections.singletonList(filter),
+                requestedByProvider));
   }
 
   private static JitScenarioListBuilder getAction(

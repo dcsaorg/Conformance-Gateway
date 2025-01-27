@@ -42,7 +42,7 @@ public class JitGetAction extends JitAction {
         previousAction,
         requestedByProvider
             ? "Send GET %s by %s".formatted(getType.getName(), urlFilters)
-            : "GET %s by %s".formatted(getType.getName(), urlFilters));
+            : "Receive GET %s by %s".formatted(getType.getName(), urlFilters));
     this.getType = getType;
     this.urlFilters = urlFilters;
     this.requestedByProvider = requestedByProvider;

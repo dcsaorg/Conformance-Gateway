@@ -4,6 +4,7 @@ import static org.dcsa.conformance.core.party.ConformanceParty.API_VERSION;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
@@ -29,15 +31,20 @@ public class JitPartyHelper {
       ConformanceRequest request,
       JsonNodeMap persistentMap,
       String apiVersion,
-      ConformanceParty jitConsumer) {
-    JsonNode response;
+      ConformanceParty jitParty) {
+    ArrayNode response = OBJECT_MAPPER.createArrayNode();
     if (request.url().contains(JitGetType.PORT_CALLS.getUrlPath())) {
       ObjectNode portCall = (ObjectNode) persistentMap.load(JitGetType.PORT_CALLS.name());
       portCall.remove(JitProvider.IS_FYI);
-      response = OBJECT_MAPPER.createArrayNode().add(portCall);
-      jitConsumer.addOperatorLogEntry("Handled Port Call Service request accepted.");
+      response.add(portCall);
+      jitParty.addOperatorLogEntry("Handled GET Port Calls request accepted.");
+    } else if (request.url().contains(JitGetType.TERMINAL_CALLS.getUrlPath())) {
+      ObjectNode terminalCall = (ObjectNode) persistentMap.load(JitGetType.TERMINAL_CALLS.name());
+      terminalCall.remove(JitProvider.IS_FYI);
+      response.add(terminalCall);
+      jitParty.addOperatorLogEntry("Handled GET Terminal Calls request accepted.");
     } else {
-      response = OBJECT_MAPPER.createArrayNode();
+      jitParty.addOperatorLogEntry("Unhandled GET request.");
     }
 
     return request.createResponse(
@@ -65,6 +72,22 @@ public class JitPartyHelper {
           else propertyValue = vessel.get(propertyName).asText();
           queryParams.put(propertyName, List.of(propertyValue));
         }
+      }
+    }
+  }
+
+  static void createParamsForTerminalCall(
+      JsonNodeMap persistentMap,
+      JitGetType getType,
+      List<String> filters,
+      Map<String, List<String>> queryParams) {
+    if (getType != JitGetType.TERMINAL_CALLS) return;
+
+    JsonNode terminalCall = persistentMap.load(JitGetType.TERMINAL_CALLS.name());
+    for (int i = 0; i < JitGetTerminalCallFilters.props().size(); i++) {
+      String propertyName = JitGetTerminalCallFilters.props().get(i);
+      if (filters.contains(propertyName)) {
+        queryParams.put(propertyName, List.of(terminalCall.get(propertyName).asText()));
       }
     }
   }

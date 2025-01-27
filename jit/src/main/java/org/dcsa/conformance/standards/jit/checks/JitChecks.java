@@ -49,7 +49,9 @@ public class JitChecks {
     if (serviceType != null) {
       checks.add(checkPortCallService(serviceType));
     }
-    if (dsp != null && dsp.selector() != JitServiceTypeSelector.GIVEN) {
+    if (dsp != null
+        && dsp.selector() != JitServiceTypeSelector.GIVEN
+        && dsp.selector() != JitServiceTypeSelector.ANY) {
       checks.add(checkPortCallServiceRightType(dsp));
     }
     checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));

@@ -25,6 +25,7 @@ import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
@@ -795,7 +796,16 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         terminalCall(context)
                             .then(
                                 serviceCall(context, null, ANY)
-                                    .then(getServiceCallActions(context, false))))));
+                                    .then(getServiceCallActions(context, false)))),
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    ANY,
+                    getAction(
+                        context,
+                        JitGetType.VESSEL_STATUSES,
+                        JitChecks.PORT_CALL_SERVICE_ID,
+                        false))));
     scenarioList.put(
         "2. PC-TC-S-V Consumer answering GET calls",
         supplyScenarioParameters(context, ANY)
@@ -808,7 +818,16 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         terminalCall(context)
                             .then(
                                 serviceCall(context, null, ANY)
-                                    .then(getServiceCallActions(context, true))))));
+                                    .then(getServiceCallActions(context, true)))),
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    ANY,
+                    getAction(
+                        context,
+                        JitGetType.VESSEL_STATUSES,
+                        JitChecks.PORT_CALL_SERVICE_ID,
+                        true))));
   }
 
   private static JitScenarioListBuilder getPortCallActions(

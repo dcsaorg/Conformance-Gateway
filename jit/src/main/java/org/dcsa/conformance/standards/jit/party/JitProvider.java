@@ -159,6 +159,9 @@ public class JitProvider extends ConformanceParty {
     JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
+    persistentMap.save(
+      JitGetType.VESSEL_STATUSES.name(), jsonBody); // Save the response for generating GET requests.
+
     addOperatorLogEntry(
         "Submitted Vessel Status for portCallServiceID: %s".formatted(dsp.portCallServiceID()));
   }
@@ -278,6 +281,7 @@ public class JitProvider extends ConformanceParty {
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(

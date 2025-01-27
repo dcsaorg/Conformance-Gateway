@@ -171,6 +171,7 @@ public class JitConsumer extends ConformanceParty {
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(
@@ -214,6 +215,7 @@ public class JitConsumer extends ConformanceParty {
       persistentMap.save(JitGetType.PORT_CALL_SERVICES.name(), jsonBody);
     } else if (url.contains(JitStandard.VESSEL_STATUS_URL)) {
       addOperatorLogEntry("Handled Vessel Status request accepted.");
+      persistentMap.save(JitGetType.VESSEL_STATUSES.name(), jsonBody);
     } else {
       addOperatorLogEntry("Handled an unknown request, which is wrong.");
       statusCode = 400;

@@ -50,6 +50,12 @@ public class JitPartyHelper {
       portServiceCall.remove(JitProvider.IS_FYI);
       response.add(portServiceCall);
       jitParty.addOperatorLogEntry("Handled GET Port Service Calls request accepted.");
+    } else if (request.url().contains(JitGetType.VESSEL_STATUSES.getUrlPath())) {
+      ObjectNode vesselStatusCall =
+          (ObjectNode) persistentMap.load(JitGetType.VESSEL_STATUSES.name());
+      vesselStatusCall.remove(JitProvider.IS_FYI);
+      response.add(vesselStatusCall);
+      jitParty.addOperatorLogEntry("Handled GET Vessel Status Calls request accepted.");
     } else {
       jitParty.addOperatorLogEntry("Unhandled GET request.");
     }
@@ -112,6 +118,20 @@ public class JitPartyHelper {
       if (filters.contains(propertyName)) {
         queryParams.put(propertyName, List.of(portServiceCall.get(propertyName).asText()));
       }
+    }
+  }
+
+  public static void createParamsForVesselStatusCall(
+      JsonNodeMap persistentMap,
+      JitGetType getType,
+      List<String> filters,
+      Map<String, List<String>> queryParams) {
+    if (getType != JitGetType.VESSEL_STATUSES) return;
+
+    JsonNode vesselStatus = persistentMap.load(JitGetType.VESSEL_STATUSES.name());
+    String propertyName = "portCallServiceID"; // Only one property exists for vessel status.
+    if (filters.contains(propertyName)) {
+      queryParams.put(propertyName, List.of(vesselStatus.get(propertyName).asText()));
     }
   }
 

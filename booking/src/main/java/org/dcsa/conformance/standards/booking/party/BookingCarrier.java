@@ -39,7 +39,6 @@ public class BookingCarrier extends ConformanceParty {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String BOOKING_CANCELLATION_STATUS = "bookingCancellationStatus";
-  private static final String FEEDBACKS = "feedbacks";
 
   private final Map<String, String> cbrrToCbr = new HashMap<>();
   private final Map<String, String> cbrToCbrr = new HashMap<>();
@@ -212,32 +211,29 @@ public class BookingCarrier extends ConformanceParty {
     if (acceptAmendment) {
       persistableCarrierBooking.confirmBookingAmendment(cbr);
     } else {
-      persistableCarrierBooking.declineBookingAmendment(
-          cbr);
+      persistableCarrierBooking.declineBookingAmendment(cbr);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
   }
 
   private void processConfirmedBookingCancellation(JsonNode actionPrompt) {
-    log.info("Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
+    log.info(
+        "Carrier.processConfirmedBookingCancellation(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbr = actionPrompt.required("cbr").asText();
     boolean isCancellationConfirmed = actionPrompt.path("isCancellationConfirmed").asBoolean(true);
-    addOperatorLogEntry(
-      "Cancellation of Confirmed booking with CBR '%s'"
-        .formatted(cbr));
+    addOperatorLogEntry("Cancellation of Confirmed booking with CBR '%s'".formatted(cbr));
 
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(cbr, cbr);
 
     var persistableCarrierBooking =
-      PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
+        PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
     if (isCancellationConfirmed) {
       persistableCarrierBooking.cancelConfirmedBooking(cbr);
     } else {
-      persistableCarrierBooking.declineConfirmedBookingCancellation(
-        cbr);
+      persistableCarrierBooking.declineConfirmedBookingCancellation(cbr);
     }
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
@@ -274,8 +270,7 @@ public class BookingCarrier extends ConformanceParty {
     String cbrr = actionPrompt.required("cbrr").asText();
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.rejectBooking(
-        cbrr);
+    persistableCarrierBooking.rejectBooking(cbrr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry(
@@ -290,8 +285,7 @@ public class BookingCarrier extends ConformanceParty {
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
-    persistableCarrierBooking.declineBooking(
-        cbr);
+    persistableCarrierBooking.declineBooking(cbr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
     addOperatorLogEntry("Declined the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
@@ -302,12 +296,12 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray(FEEDBACKS)
+                .putArray(PersistableCarrierBooking.FEEDBACKS)
                 .addObject()
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                  MESSAGE,
+                    MESSAGE,
                     "Please perform the changes requested by the Conformance orchestrator");
     String cbr = actionPrompt.path("cbr").asText(null);
     String cbrr = actionPrompt.required("cbrr").asText();
@@ -318,7 +312,8 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry("Requested update to the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(
+        "Requested update to the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
@@ -345,12 +340,12 @@ public class BookingCarrier extends ConformanceParty {
     Consumer<ObjectNode> bookingMutator =
         booking ->
             booking
-                .putArray(FEEDBACKS)
+                .putArray(PersistableCarrierBooking.FEEDBACKS)
                 .addObject()
                 .put("severity", "ERROR")
                 .put("code", "PROPERTY_VALUE_MUST_CHANGE")
                 .put(
-                  MESSAGE,
+                    MESSAGE,
                     "Please perform the changes requested by the Conformance orchestrator");
 
     var persistableCarrierBooking =
@@ -359,7 +354,8 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry("Requested to amend the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(
+        "Requested to amend the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
   }
 
   private String generateAndAssociateCBR(String cbrr) {
@@ -386,7 +382,10 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
-            .feedbacks(persistableCarrierBooking.getfeedbacks() != null ? persistableCarrierBooking.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
+            .feedbacks(
+                persistableCarrierBooking.getfeedbacks() != null
+                    ? persistableCarrierBooking.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
             .includeCarrierBookingRequestReference(includeCbrr)
             .includeCarrierBookingReference(includeCbr)
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
@@ -531,8 +530,8 @@ public class BookingCarrier extends ConformanceParty {
   private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
     if (!cancelOperation.equals(CANCEL_BOOKING_OPERATION)
-      && !cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)
-      && !cancelOperation.equals(CANCEL_CONFIRMED_BOOKING_OPERATION)) {
+        && !cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)
+        && !cancelOperation.equals(CANCEL_CONFIRMED_BOOKING_OPERATION)) {
       return return400(
           request,
           "The 'operation' query parameter must be given exactly one and have"
@@ -540,8 +539,10 @@ public class BookingCarrier extends ConformanceParty {
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.
-    var cbrr = cancelOperation.equals(CANCEL_BOOKING_OPERATION) ? bookingReference
-      : cbrToCbrr.getOrDefault(bookingReference, bookingReference);
+    var cbrr =
+        cancelOperation.equals(CANCEL_BOOKING_OPERATION)
+            ? bookingReference
+            : cbrToCbrr.getOrDefault(bookingReference, bookingReference);
     var bookingData = persistentMap.load(cbrr);
     if (bookingData == null || bookingData.isMissingNode()) {
       return return404(request);
@@ -550,10 +551,9 @@ public class BookingCarrier extends ConformanceParty {
     try {
       if (cancelOperation.equals(CANCEL_BOOKING_OPERATION)) {
         persistableCarrierBooking.cancelBookingRequest(bookingReference);
-      } else if (cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)){
+      } else if (cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)) {
         persistableCarrierBooking.cancelBookingAmendment(bookingReference);
-      }
-      else {
+      } else {
         persistableCarrierBooking.updateCancelConfirmedBooking(bookingReference);
       }
     } catch (IllegalStateException e) {
@@ -572,7 +572,7 @@ public class BookingCarrier extends ConformanceParty {
             .asJsonNode());
 
     return returnEmpty202Response(
-         request, persistableCarrierBooking.getBooking(), bookingReference);
+        request, persistableCarrierBooking.getBooking(), bookingReference);
   }
 
   private ConformanceResponse returnBookingCBRRResponse(ConformanceRequest request, ObjectNode booking, String bookingReference) {
@@ -728,7 +728,7 @@ public class BookingCarrier extends ConformanceParty {
       setBookingProvidedField(data, "amendedBookingStatus", amendedBookingStatus);
       setBookingProvidedField(data, BOOKING_CANCELLATION_STATUS, bookingCancellationStatus);
       if (feedbacks != null && feedbacks.size() > 0) {
-        data.set(FEEDBACKS, feedbacks);
+        data.set(PersistableCarrierBooking.FEEDBACKS, feedbacks);
       }
       notification.set("data", data);
 

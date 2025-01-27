@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import static org.dcsa.conformance.standards.booking.checks.AbstractCarrierPayloadConformanceCheck.FEEDBACKS;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_CODE;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
@@ -324,14 +325,12 @@ public class BookingChecks {
             var bookingStatus = body.path("bookingStatus").asText("");
             var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
             var issues = new LinkedHashSet<String>();
-            if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+            if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                 || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-                    && amendedBookingStatus.isEmpty())) {
-              if (body.path("feedbacks").isMissingNode()) {
+                    && amendedBookingStatus.isEmpty())) && body.path(FEEDBACKS).isMissingNode()) {
                 issues.add(
                     "feedbacks is missing in the allowed booking state %s"
                         .formatted(bookingStatus));
-              }
             }
             return issues;
           });

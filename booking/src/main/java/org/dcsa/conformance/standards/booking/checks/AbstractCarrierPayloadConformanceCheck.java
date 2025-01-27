@@ -112,14 +112,13 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
     String bookingStatus = responsePayload.path("shippingInstructionsStatus").asText(null);
     String amendedBookingStatus =
         responsePayload.path("updatedShippingInstructionsStatus").asText(null);
-    if (BookingState.PENDING_UPDATE.name().equals(bookingStatus)
-        || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-            && amendedBookingStatus.isEmpty())) {
-      if (responsePayload.path(FEEDBACKS).isMissingNode()) {
-        return Set.of(
-            "feedbacks property is required in the allowed booking state %s"
-                .formatted(Objects.requireNonNullElse(bookingStatus, UNSET_MARKER)));
-      }
+    if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+      || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+      && amendedBookingStatus.isEmpty()))
+      && responsePayload.path(FEEDBACKS).isMissingNode()) {
+      return Set.of(
+        "feedbacks property is required in the allowed booking state %s"
+          .formatted(Objects.requireNonNullElse(bookingStatus, UNSET_MARKER)));
     }
     return Set.of();
   }

@@ -63,6 +63,7 @@ public class PersistableCarrierBooking {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
+  public static final String FEEDBACKS = "feedbacks";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -91,7 +92,7 @@ public class PersistableCarrierBooking {
   }
 
   public JsonNode getfeedbacks() {
-    return getBooking().path("feedbacks");
+    return getBooking().path(FEEDBACKS);
   }
 
   public ObjectNode getBooking() {

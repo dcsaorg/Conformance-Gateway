@@ -143,6 +143,9 @@ public class JitProvider extends ConformanceParty {
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
+    persistentMap.save(
+      JitGetType.PORT_CALL_SERVICES.name(), jsonBody); // Save the response for generating GET requests.
+
     addOperatorLogEntry(
         "Submitted %s Port Call Service request with portCallServiceID: %s"
             .formatted(serviceType, dsp.portCallServiceID()));
@@ -274,6 +277,7 @@ public class JitProvider extends ConformanceParty {
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(

@@ -170,6 +170,7 @@ public class JitConsumer extends ConformanceParty {
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(
@@ -185,11 +186,12 @@ public class JitConsumer extends ConformanceParty {
     }
     int statusCode = 204;
     String url = request.url();
-    if (request.message().body().getJsonBody().isEmpty()) {
+    JsonNode jsonBody = request.message().body().getJsonBody();
+    if (jsonBody.isEmpty()) {
       addOperatorLogEntry("Handled an empty request, which is wrong.");
       statusCode = 400;
     } else if (url.contains(JitStandard.TIMESTAMP_URL)) {
-      JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
+      JitTimestamp timestamp = JitTimestamp.fromJson(jsonBody);
       addOperatorLogEntry(
           "Handled %s timestamp accepted for: %s"
               .formatted(
@@ -203,12 +205,13 @@ public class JitConsumer extends ConformanceParty {
       addOperatorLogEntry("Handled Decline request accepted.");
     } else if (url.contains(JitStandard.PORT_CALL_URL)) {
       addOperatorLogEntry("Handled Port Call request accepted.");
-      persistentMap.save(JitGetType.PORT_CALLS.name(), request.message().body().getJsonBody());
-    } else if (url.contains(JitStandard.PORT_CALL_SERVICES_URL)) {
-      addOperatorLogEntry("Handled Port Call Service request accepted.");
+      persistentMap.save(JitGetType.PORT_CALLS.name(), jsonBody);
     } else if (url.contains(JitStandard.TERMINAL_CALL_URL)) {
       addOperatorLogEntry("Handled Terminal Call request accepted.");
-      persistentMap.save(JitGetType.TERMINAL_CALLS.name(), request.message().body().getJsonBody());
+      persistentMap.save(JitGetType.TERMINAL_CALLS.name(), jsonBody);
+    } else if (url.contains(JitStandard.PORT_CALL_SERVICES_URL)) {
+      addOperatorLogEntry("Handled Port Call Service request accepted.");
+      persistentMap.save(JitGetType.PORT_CALL_SERVICES.name(), jsonBody);
     } else if (url.contains(JitStandard.VESSEL_STATUS_URL)) {
       addOperatorLogEntry("Handled Vessel Status request accepted.");
     } else {

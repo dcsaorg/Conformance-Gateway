@@ -26,6 +26,7 @@ import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
@@ -788,14 +789,26 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
             .thenEither(
                 portCall(context).then(getPortCallActions(context, false)),
                 portCall(context)
-                    .then(terminalCall(context).then(getTerminalCallActions(context, false)))));
+                    .then(terminalCall(context).then(getTerminalCallActions(context, false))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, ANY)
+                                    .then(getServiceCallActions(context, false))))));
     scenarioList.put(
         "2. PC-TC-S-V Consumer answering GET calls",
         supplyScenarioParameters(context, ANY)
             .thenEither(
                 portCall(context).then(getPortCallActions(context, true)),
                 portCall(context)
-                    .then(terminalCall(context).then(getTerminalCallActions(context, true)))));
+                    .then(terminalCall(context).then(getTerminalCallActions(context, true))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, ANY)
+                                    .then(getServiceCallActions(context, true))))));
   }
 
   private static JitScenarioListBuilder getPortCallActions(
@@ -922,6 +935,29 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                                                         .props()
                                                                                         .get(9)),
                                                                                 requestedByProvider))))))))));
+  }
+
+  private static JitScenarioListBuilder getServiceCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.PORT_CALL_SERVICES,
+            JitGetPortServiceCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.PORT_CALL_SERVICES,
+                    JitGetPortServiceCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                        context,
+                        JitGetType.PORT_CALL_SERVICES,
+                        List.of(
+                            JitGetPortServiceCallFilters.props().getFirst(),
+                            JitGetPortServiceCallFilters.props().get(2)),
+                        requestedByProvider)));
   }
 
   private static void addScenarioGroupSecondary1(

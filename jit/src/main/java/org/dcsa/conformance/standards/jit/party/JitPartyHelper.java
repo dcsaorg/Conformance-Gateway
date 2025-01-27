@@ -18,6 +18,7 @@ import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
@@ -43,6 +44,12 @@ public class JitPartyHelper {
       terminalCall.remove(JitProvider.IS_FYI);
       response.add(terminalCall);
       jitParty.addOperatorLogEntry("Handled GET Terminal Calls request accepted.");
+    } else if (request.url().contains(JitGetType.PORT_CALL_SERVICES.getUrlPath())) {
+      ObjectNode portServiceCall =
+          (ObjectNode) persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
+      portServiceCall.remove(JitProvider.IS_FYI);
+      response.add(portServiceCall);
+      jitParty.addOperatorLogEntry("Handled GET Port Service Calls request accepted.");
     } else {
       jitParty.addOperatorLogEntry("Unhandled GET request.");
     }
@@ -88,6 +95,22 @@ public class JitPartyHelper {
       String propertyName = JitGetTerminalCallFilters.props().get(i);
       if (filters.contains(propertyName)) {
         queryParams.put(propertyName, List.of(terminalCall.get(propertyName).asText()));
+      }
+    }
+  }
+
+  static void createParamsForPortServiceCall(
+      JsonNodeMap persistentMap,
+      JitGetType getType,
+      List<String> filters,
+      Map<String, List<String>> queryParams) {
+    if (getType != JitGetType.PORT_CALL_SERVICES) return;
+
+    JsonNode portServiceCall = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
+    for (int i = 0; i < JitGetPortServiceCallFilters.props().size(); i++) {
+      String propertyName = JitGetPortServiceCallFilters.props().get(i);
+      if (filters.contains(propertyName)) {
+        queryParams.put(propertyName, List.of(portServiceCall.get(propertyName).asText()));
       }
     }
   }

@@ -2,17 +2,14 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-import org.dcsa.conformance.standards.booking.party.DynamicScenarioParameters;
-
-import java.util.stream.Stream;
 
 @Getter
 @Slf4j
@@ -63,12 +60,6 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
     ObjectNode jsonNode = super.asJsonNode();
     jsonNode.put("cbr", getDspSupplier().get().carrierBookingReference());
     return jsonNode;
-  }
-
-  @Override
-  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
-    var body = exchange.getResponse().message().body().getJsonBody();
-    return dynamicScenarioParameters.withUpdatedBooking(body);
   }
 
   @Override

@@ -15,8 +15,8 @@ public record DynamicScenarioParameters(
     @NonNull ScenarioType scenarioType,
     String carrierBookingRequestReference,
     String carrierBookingReference,
-    JsonNode booking,
-    JsonNode updatedBooking)
+    @Deprecated JsonNode booking,
+    @Deprecated JsonNode updatedBooking)
     implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {

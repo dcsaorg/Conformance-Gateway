@@ -926,6 +926,7 @@ public class EBLChecks {
       JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
     if (isTD) {
+/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
       checks.add(
         JsonAttribute.ifThen(
           "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
@@ -935,6 +936,7 @@ public class EBLChecks {
           },
           JsonAttribute.path(DOCUMENT_PARTIES, JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
       ));
+*/
     } else {
       checks.add(
         JsonAttribute.ifThen(
@@ -1306,11 +1308,13 @@ public class EBLChecks {
       checks.add(updatedStatusCheck);
     }
     checks.addAll(STATIC_SI_CHECKS);
+/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
     checks.add(JsonAttribute.lostAttributeCheck(
       "Validate that shipper provided data was not altered",
       delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
       SI_NORMALIZER
     ));
+*/
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,

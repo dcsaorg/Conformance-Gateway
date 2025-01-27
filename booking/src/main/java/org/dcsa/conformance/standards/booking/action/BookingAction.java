@@ -61,11 +61,6 @@ public abstract class BookingAction extends ConformanceAction {
     }
   }
 
-  protected DynamicScenarioParameters updateDSPFromBookingAction(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
-    return dynamicScenarioParameters;
-  }
-
-
   protected BookingAction getPreviousBookingAction() {
     return (BookingAction) previousAction;
   }
@@ -93,30 +88,6 @@ public abstract class BookingAction extends ConformanceAction {
     return with.apply(value);
   }
 
-  private static BookingState parseBookingState(String v) {
-    if (v == null) {
-      return null;
-    }
-    try {
-      return BookingState.valueOf(v);
-    } catch (IllegalArgumentException e) {
-      // Do not assume conformant payload.
-      return null;
-    }
-  }
-
-  private static BookingCancellationState parseBookingCancellationState(String v) {
-    if (v == null) {
-      return null;
-    }
-    try {
-      return BookingCancellationState.valueOf(v);
-    } catch (IllegalArgumentException e) {
-      // Do not assume conformant payload.
-      return null;
-    }
-  }
-
   protected void updateDSPFromResponsePayload(ConformanceExchange exchange) {
     JsonNode responseJsonNode = exchange.getResponse().message().body().getJsonBody();
     JsonNode requestJsonNode = exchange.getRequest().message().body().getJsonBody();
@@ -129,7 +100,8 @@ public abstract class BookingAction extends ConformanceAction {
     var updatedDsp = dsp;
     updatedDsp = updateIfNotNull(updatedDsp, newCbrr, updatedDsp::withCarrierBookingRequestReference);
     updatedDsp = updateIfNotNull(updatedDsp, newCbr, updatedDsp::withCarrierBookingReference);
-    updatedDsp = updateDSPFromBookingAction(exchange, updatedDsp);
+    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
+    updatedDsp = updatedDsp.withBooking(null).withUpdatedBooking(null);
 
     if (!dsp.equals(updatedDsp)) {
       dspReference.set(updatedDsp);

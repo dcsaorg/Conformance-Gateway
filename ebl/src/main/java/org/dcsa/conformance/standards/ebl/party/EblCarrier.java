@@ -231,7 +231,7 @@ public class EblCarrier extends ConformanceParty {
     if (accept) {
       si.acceptUpdatedShippingInstructions(documentReference);
     } else {
-      si.declineUpdatedShippingInstructions(documentReference, "Declined as requested by the Conformance orchestrator");
+      si.declineUpdatedShippingInstructions(documentReference);
     }
     si.save(persistentMap);
     generateAndEmitNotificationFromShippingInstructions(actionPrompt, si, true);
@@ -415,6 +415,7 @@ public class EblCarrier extends ConformanceParty {
       ShippingInstructionsNotification.builder()
         .apiVersion(apiVersion)
         .shippingInstructions(shippingInstructions.getShippingInstructions())
+        .feedbacks(shippingInstructions.getfeedbacks() != null ? shippingInstructions.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
         .includeShippingInstructionsReference(includeShippingInstructionsReference)
         .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
@@ -431,6 +432,7 @@ public class EblCarrier extends ConformanceParty {
       TransportDocumentNotification.builder()
         .apiVersion(apiVersion)
         .transportDocument(shippingInstructions.getTransportDocument().orElseThrow())
+        .feedbacks(shippingInstructions.getfeedbacks() != null ? shippingInstructions.getfeedbacks() : OBJECT_MAPPER.createArrayNode())
         .includeShippingInstructionsReference(includeShippingInstructionsReference)
         .subscriptionReference(shippingInstructions.getSubscriptionReference())
         .build()
@@ -805,7 +807,7 @@ public class EblCarrier extends ConformanceParty {
     private String updatedShippingInstructionsStatus;
     private String transportDocumentStatus;
     private String subscriptionReference;
-    private String reason;
+    private JsonNode feedbacks;
     @Builder.Default
     private boolean includeShippingInstructionsReference = true;
 
@@ -850,7 +852,9 @@ public class EblCarrier extends ConformanceParty {
       } else {
         setDocumentProvidedField(data, "transportDocumentStatus", transportDocumentStatus);
       }
-      setDocumentProvidedField(data, "reason", reason);
+      if(feedbacks != null && feedbacks.size() > 0) {
+        data.set("feedbacks", feedbacks);
+      }
       notification.set("data", data);
 
       return notification;

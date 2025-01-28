@@ -63,7 +63,7 @@ public class ConformanceWebuiHandler {
             node.put("exception", e.getClass().getName())
               .put("message", e.getMessage());
         }
-        log.warn("Internal Server Error: {}; Message: {}", e.getClass().getName(), e.getMessage());
+        log.warn("Internal Server Error: {}", e, e);
         return node;
       }
     }

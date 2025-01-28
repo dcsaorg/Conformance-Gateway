@@ -96,4 +96,10 @@ public class EblDatasets {
       KeywordDataset.staticDataset("SCO", "DDR", "DDS", "COW", "COX", "CS", "MF", "WH");
   public static final KeywordDataset PARTY_FUNCTION_CODE_HBL =
       KeywordDataset.staticDataset("DDR", "DDS", "CS", "MF", "WH");
+
+  public static final KeywordDataset FEEDBACKS_SEVERITY =
+    KeywordDataset.staticDataset("INFO", "WARN", "ERROR");
+  public static final KeywordDataset FEEDBACKS_CODE =
+    KeywordDataset.staticDataset("INFORMATIONAL_MESSAGE", "PROPERTY_WILL_BE_IGNORED", "PROPERTY_VALUE_MUST_CHANGE", "PROPERTY_VALUE_HAS_BEEN_CHANGED", "PROPERTY_VALUE_MAY_CHANGE","PROPERTY_HAS_BEEN_DELETED");
+
 }

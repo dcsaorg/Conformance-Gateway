@@ -17,4 +17,10 @@ public class BookingDataSets {
 
   public static final KeywordDataset INHALATION_ZONE_CODE = KeywordDataset.staticDataset("A", "B", "C", "D");
 
+  public static final KeywordDataset FEEDBACKS_SEVERITY =
+    KeywordDataset.staticDataset("INFO", "WARN", "ERROR");
+  public static final KeywordDataset FEEDBACKS_CODE =
+    KeywordDataset.staticDataset("INFORMATIONAL_MESSAGE", "PROPERTY_WILL_BE_IGNORED", "PROPERTY_VALUE_MUST_CHANGE", "PROPERTY_VALUE_HAS_BEEN_CHANGED", "PROPERTY_VALUE_MAY_CHANGE","PROPERTY_HAS_BEEN_DELETED");
+
+
 }

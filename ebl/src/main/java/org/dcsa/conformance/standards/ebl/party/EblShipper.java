@@ -28,6 +28,8 @@ import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 @Slf4j
 public class EblShipper extends ConformanceParty {
 
+  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
+
   public EblShipper(
       String apiVersion,
       PartyConfiguration partyConfiguration,
@@ -74,7 +76,6 @@ public class EblShipper extends ConformanceParty {
 
   static ObjectNode siFromScenarioType(ScenarioType scenarioType, CarrierScenarioParameters carrierScenarioParameters, String apiVersion) {
 
-    validateCSR(carrierScenarioParameters,scenarioType);
     var jsonRequestBody = (ObjectNode)
       JsonToolkit.templateFileToJsonNode(
         "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
@@ -103,19 +104,7 @@ public class EblShipper extends ConformanceParty {
           Map.entry("TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER", scenarioType.transportDocumentTypeCode())
         ));
 
-    if (carrierScenarioParameters.commoditySubReference() == null || carrierScenarioParameters.commoditySubReference().isEmpty()) {
-      jsonRequestBody.withArray("consignmentItems").forEach(item -> ((ObjectNode) item).remove("commoditySubReference"));
-    }
-
-    if (carrierScenarioParameters.invoicePayableAtUNLocationCode() == null || carrierScenarioParameters.invoicePayableAtUNLocationCode().isEmpty()) {
-      ((ObjectNode) jsonRequestBody.path("invoicePayableAt")).remove("UNLocationCode");
-    }
-
-    if(carrierScenarioParameters.outerPackagingDescription() == null || carrierScenarioParameters.outerPackagingDescription().isEmpty()) {
-      jsonRequestBody.withArray("consignmentItems").forEach(consignmentItem ->
-        consignmentItem.withArray("cargoItems").forEach(cargoItem ->
-            ((ObjectNode) cargoItem.path("outerPackaging")).remove("outerPackagingDescription")));
-    }
+    removeEmptyFields(jsonRequestBody, scenarioType, carrierScenarioParameters);
     // Cannot substitute this because it is a boolean
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is a full element
@@ -141,6 +130,40 @@ public class EblShipper extends ConformanceParty {
       }
     }
     return jsonRequestBody;
+  }
+
+  private static void removeEmptyFields(
+      ObjectNode jsonRequestBody,
+      ScenarioType scenarioType,
+      CarrierScenarioParameters carrierScenarioParameters) {
+
+    if (carrierScenarioParameters.commoditySubReference() == null
+        || carrierScenarioParameters.commoditySubReference().isEmpty()) {
+      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(0))
+          .remove("commoditySubReference");
+    }
+    if (isRequiredScenarioType(scenarioType)
+        && (carrierScenarioParameters.commoditySubReference2() == null
+            || carrierScenarioParameters.commoditySubReference2().isEmpty())) {
+      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(1))
+          .remove("commoditySubReference");
+    }
+
+    if (carrierScenarioParameters.outerPackagingDescription() == null
+        || carrierScenarioParameters.outerPackagingDescription().isEmpty()
+            && scenarioType.equals(ScenarioType.DG)) {
+      jsonRequestBody
+          .withArray(CONSIGNMENT_ITEMS)
+          .forEach(
+              consignmentItem ->
+                  consignmentItem
+                      .withArray("cargoItems")
+                      .forEach(cargoItem -> ((ObjectNode) cargoItem).remove("outerPackaging")));
+    }
+  }
+
+  private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
+    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
   }
 
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
@@ -298,37 +321,5 @@ public class EblShipper extends ConformanceParty {
     return response;
   }
 
-  private static void validateCSR(CarrierScenarioParameters carrierScenarioParameters, ScenarioType scenarioType) {
-    validateRequiredField(carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
-    validateRequiredField(carrierScenarioParameters.equipmentReference(), "Equipment Reference");
-    validateScenarioSpecificField(carrierScenarioParameters.equipmentReference2(), "Equipment Reference 2", scenarioType, ScenarioType.REGULAR_2C_2U_2E);
-    validateRequiredField(carrierScenarioParameters.descriptionOfGoods(), "Description Of Goods");
 
-    boolean isRequiredScenario = isRequiredScenarioType(scenarioType);
-    validateConditionalField(carrierScenarioParameters.descriptionOfGoods2(), "Description Of Goods 2", isRequiredScenario);
-    validateRequiredField(carrierScenarioParameters.consignmentItemHSCode(), "Consignment Item HSCode");
-    validateConditionalField(carrierScenarioParameters.consignmentItem2HSCode(), "Consignment Item HSCode 2", isRequiredScenario);
-  }
-
-  private static void validateRequiredField(String field, String fieldName) {
-    if (field == null || field.isEmpty()) {
-      throw new UserFacingException(fieldName + " is required");
-    }
-  }
-
-  private static void validateScenarioSpecificField(String field, String fieldName, ScenarioType currentScenario, ScenarioType requiredScenario) {
-    if (currentScenario.equals(requiredScenario)) {
-      validateRequiredField(field, fieldName);
-    }
-  }
-
-  private static void validateConditionalField(String field, String fieldName, boolean condition) {
-    if (condition) {
-      validateRequiredField(field, fieldName);
-    }
-  }
-
-  private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
-    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
-  }
 }

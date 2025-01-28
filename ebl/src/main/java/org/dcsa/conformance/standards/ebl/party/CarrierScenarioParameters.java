@@ -25,7 +25,7 @@ public record CarrierScenarioParameters(
       jsonNode.required("carrierBookingReference").asText(),
       jsonNode.path("commoditySubReference").asText(null),
       jsonNode.path("commoditySubReference2").asText(null),
-      jsonNode.path("equipmentReference").asText(null),
+      jsonNode.required("equipmentReference").asText(),
       jsonNode.path("equipmentReference2").asText(null),
       jsonNode.required("invoicePayableAtUNLocationCode").asText(),
       jsonNode.required("consignmentItemHSCode").asText(),

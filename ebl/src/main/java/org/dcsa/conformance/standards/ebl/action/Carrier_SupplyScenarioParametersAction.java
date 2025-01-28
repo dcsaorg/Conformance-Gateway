@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.NonNull;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 import org.dcsa.conformance.standards.ebl.party.CarrierScenarioParameters;
 
@@ -175,6 +176,42 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   public void handlePartyInput(JsonNode partyInput) {
     super.handlePartyInput(partyInput);
     getCspConsumer().accept(CarrierScenarioParameters.fromJson(partyInput.get("input")));
+    validateCSR(carrierScenarioParameters, scenarioType);
+  }
+
+  private static void validateCSR(CarrierScenarioParameters carrierScenarioParameters, ScenarioType scenarioType) {
+    validateRequiredField(carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
+    validateRequiredField(carrierScenarioParameters.equipmentReference(), "Equipment Reference");
+    validateScenarioSpecificField(carrierScenarioParameters.equipmentReference2(), "Equipment Reference 2", scenarioType, ScenarioType.REGULAR_2C_2U_2E);
+    validateRequiredField(carrierScenarioParameters.descriptionOfGoods(), "Description Of Goods");
+
+    boolean isRequiredScenario = isRequiredScenarioType(scenarioType);
+    validateConditionalField(carrierScenarioParameters.descriptionOfGoods2(), "Description Of Goods 2", isRequiredScenario);
+    validateConditionalField(carrierScenarioParameters.outerPackagingDescription(), "Outer Packaging Description",!scenarioType.equals(ScenarioType.DG));
+    validateRequiredField(carrierScenarioParameters.consignmentItemHSCode(), "Consignment Item HSCode");
+    validateConditionalField(carrierScenarioParameters.consignmentItem2HSCode(), "Consignment Item HSCode 2", isRequiredScenario);
+  }
+
+  private static void validateRequiredField(String field, String fieldName) {
+    if (field == null || field.isEmpty()) {
+      throw new UserFacingException(fieldName + " is required and cannot be empty");
+    }
+  }
+
+  private static void validateScenarioSpecificField(String field, String fieldName, ScenarioType currentScenario, ScenarioType requiredScenario) {
+    if (currentScenario.equals(requiredScenario)) {
+      validateRequiredField(field, fieldName);
+    }
+  }
+
+  private static void validateConditionalField(String field, String fieldName, boolean condition) {
+    if (condition) {
+      validateRequiredField(field, fieldName);
+    }
+  }
+
+  private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
+    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
   }
 
   @Override

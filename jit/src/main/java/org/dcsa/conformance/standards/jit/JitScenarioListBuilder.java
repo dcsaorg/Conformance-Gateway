@@ -29,6 +29,7 @@ import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetTimestampCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
@@ -828,6 +829,57 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         JitGetType.VESSEL_STATUSES,
                         JitChecks.PORT_CALL_SERVICE_ID,
                         true))));
+
+    scenarioList.put(
+        "3. PC-TC-S-V-A-ERP-A Provider answering GET calls",
+        supplyScenarioParameters(context, ANY)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, ACTUAL)
+                            .then(getTimestampActions(context, false))))));
+  }
+
+  private static JitScenarioListBuilder getTimestampActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context, JitGetType.TIMESTAMPS, JitGetTimestampCallFilters.props().getFirst(), false)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.TIMESTAMPS,
+                    JitGetTimestampCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.TIMESTAMPS,
+                            JitGetTimestampCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                requestedByProvider))))));
   }
 
   private static JitScenarioListBuilder getPortCallActions(

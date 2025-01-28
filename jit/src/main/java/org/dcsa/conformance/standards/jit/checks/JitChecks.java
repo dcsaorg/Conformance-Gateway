@@ -31,6 +31,8 @@ public class JitChecks {
   public static final String TERMINAL_CALL_ID = "terminalCallID";
   public static final String PORT_CALL_ID = "portCallID";
   public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
+  public static final String TIMESTAMP_ID = "timestampID";
+  public static final String CLASSIFIER_CODE = "classifierCode";
 
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(

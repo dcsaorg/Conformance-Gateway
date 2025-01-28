@@ -118,6 +118,7 @@ public class JitConsumer extends ConformanceParty {
         JitTimestamp.getTimestampForType(timestampType, dsp.currentTimestamp(), dsp.isFYI());
 
     syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
+    JitPartyHelper.storeTimestamp(persistentMap, timestamp);
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
@@ -172,6 +173,7 @@ public class JitConsumer extends ConformanceParty {
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(
@@ -198,6 +200,7 @@ public class JitConsumer extends ConformanceParty {
               .formatted(
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime()));
+      JitPartyHelper.storeTimestamp(persistentMap, timestamp);
     } else if (url.endsWith("/cancel")) {
       addOperatorLogEntry("Handled Cancel request accepted.");
     } else if (url.endsWith("/omit")) {

@@ -115,7 +115,8 @@ public class JitProvider extends ConformanceParty {
     syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
 
     persistentMap.save(
-      JitGetType.TERMINAL_CALLS.name(), jsonBody); // Save the response for generating GET requests.
+        JitGetType.TERMINAL_CALLS.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted Terminal Call request for portCallID: %s and TerminalCallId: %s "
@@ -144,7 +145,8 @@ public class JitProvider extends ConformanceParty {
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
     persistentMap.save(
-      JitGetType.PORT_CALL_SERVICES.name(), jsonBody); // Save the response for generating GET requests.
+        JitGetType.PORT_CALL_SERVICES.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted %s Port Call Service request with portCallServiceID: %s"
@@ -160,7 +162,8 @@ public class JitProvider extends ConformanceParty {
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
     persistentMap.save(
-      JitGetType.VESSEL_STATUSES.name(), jsonBody); // Save the response for generating GET requests.
+        JitGetType.VESSEL_STATUSES.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted Vessel Status for portCallServiceID: %s".formatted(dsp.portCallServiceID()));
@@ -187,6 +190,8 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(timestampType, previousTimestamp, dsp.isFYI());
     sendTimestampPutRequest(timestampType, timestamp);
+
+    JitPartyHelper.storeTimestamp(persistentMap, timestamp);
   }
 
   private void outOfBandTimestampRequest(JsonNode actionPrompt) {
@@ -276,12 +281,14 @@ public class JitProvider extends ConformanceParty {
         "{}.sendGetActionRequest({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
 
     JitGetType getType = JitGetType.valueOf(actionPrompt.required(JitGetAction.GET_TYPE).asText());
-    List<String> filters = OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
+    List<String> filters =
+        OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
 
     syncCounterpartGet(getType.getUrlPath(), queryParams);
     addOperatorLogEntry(
@@ -317,6 +324,7 @@ public class JitProvider extends ConformanceParty {
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime(),
                   timestamp.remark()));
+      JitPartyHelper.storeTimestamp(persistentMap, timestamp);
     } else {
       statusCode = 400;
       addOperatorLogEntry("Handled an unknown request, which is wrong.");

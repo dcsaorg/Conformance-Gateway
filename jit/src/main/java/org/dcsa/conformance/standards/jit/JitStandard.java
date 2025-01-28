@@ -9,15 +9,15 @@ public class JitStandard extends AbstractStandard {
   public static final JitStandard INSTANCE = new JitStandard();
   public static final String SCENARIO_SUITE_CONFORMANCE = "Conformance";
 
-  public static final String PORT_CALL_URL = "/v2/port-calls/";
-  public static final String TERMINAL_CALL_URL = "/v2/terminal-calls/";
-  public static final String PORT_CALL_SERVICES_URL = "/v2/port-call-services/";
-  public static final String VESSEL_STATUS_URL = "/v2/vessel-statuses/";
-  public static final String TIMESTAMP_URL = "/v2/timestamps/";
-  public static final String CANCEL_URL = "/v2/port-call-services/{portCallServiceID}/cancel";
-  public static final String DECLINE_URL = "/v2/port-call-services/{portCallServiceID}/decline";
-  public static final String OMIT_PORT_CALL_URL = "/v2/port-calls/{portCallID}/omit";
-  public static final String OMIT_TERMINAL_CALL_URL = "/v2/terminal-calls/{terminalCallID}/omit";
+  public static final String PORT_CALL_URL = "/port-calls/";
+  public static final String TERMINAL_CALL_URL = "/terminal-calls/";
+  public static final String PORT_CALL_SERVICES_URL = "/port-call-services/";
+  public static final String VESSEL_STATUS_URL = "/vessel-statuses/";
+  public static final String TIMESTAMP_URL = "/timestamps/";
+  public static final String CANCEL_URL = "/port-call-services/{portCallServiceID}/cancel";
+  public static final String DECLINE_URL = "/port-call-services/{portCallServiceID}/decline";
+  public static final String OMIT_PORT_CALL_URL = "/port-calls/{portCallID}/omit";
+  public static final String OMIT_TERMINAL_CALL_URL = "/terminal-calls/{terminalCallID}/omit";
 
   public static final String PUT = "PUT";
   public static final String POST = "POST";

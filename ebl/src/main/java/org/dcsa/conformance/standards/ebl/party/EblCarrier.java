@@ -95,105 +95,109 @@ public class EblCarrier extends ConformanceParty {
     log.info("Carrier.supplyScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
     var scenarioType = ScenarioType.valueOf(actionPrompt.required("scenarioType").asText());
     CarrierScenarioParameters carrierScenarioParameters =
-      switch (scenarioType) {
-        case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
-          "CBR_123_" + scenarioType.name(),
-          "Some Commodity Subreference 123",
-          null,
-          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "NARU3472484",
-          null,
-          DKAAR,
-          "640510",
-          null,
-          "Shoes - black, 400 boxes",
-          null,
-          FIBREBOARD_BOXES
-        );
-        case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
-          "CBR_123_NO_SUBREF",
-          null,
-          null,
-          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "NARU3472484",
-          null,
-          DKAAR,
-          "640510",
-          null,
-          "Shoes - black, 400 boxes",
-          null,
-          FIBREBOARD_BOXES
-        );
-        case ACTIVE_REEFER -> new CarrierScenarioParameters(
-          "CBR_123_REEFER",
-          "Some reefer Commodity Subreference 123",
-          null,
-          // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "KKFU6671914",
-          null,
-          DKAAR,
-          "04052090",
-          null,
-          "Dairy products",
-          null,
-          "Bottles"
-        );
-        case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
-          "CBR_123_NON_OPERATING_REEFER",
-          "Some reefer Commodity Subreference 123",
-          null,
-          // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "KKFU6671914",
-          null,
-          DKAAR,
-          "220299",
-          null,
-          "Non alcoholic beverages",
-          null,
-          "Bottles"
-        );
-        case DG -> new CarrierScenarioParameters(
-          "RTM1234567",
-          "Some DG Commodity Subreference 123",
-          null,
-          // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "HLXU1234567",
-          null,
-          DKAAR,
-          "293499",
-          null,
-          "Environmentally hazardous substance",
-          null,
-          null
-        );
-        case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
-          "RG-2C-2U-2E",
-          "Commodity Subreference 123",
-          "Commodity Subreference 456",
-          // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
-          "MSKU3963442",
-          "MSKU7895860",
-          DKAAR,
-          "691110",
-          "732391",
-          "Tableware and kitchenware",
-          "Kitchen pots and pans",
-          FIBREBOARD_BOXES
-        );
-        case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
-          "RG-SOC-REFERENCES",
-          "Commodity Subreference 123",
-          null,
-          null,
-          null,
-          DKAAR,
-          "691110",
-          null,
-          "Tableware and kitchenware",
-          null,
-          FIBREBOARD_BOXES
-        );
-    };
+        switch (scenarioType) {
+          case REGULAR_SWB,
+              REGULAR_STRAIGHT_BL,
+              REGULAR_SWB_AMF,
+              REGULAR_CLAD,
+              REGULAR_NEGOTIABLE_BL ->
+              new CarrierScenarioParameters(
+                  "CBR_123_" + scenarioType.name(),
+                  "Some Commodity Subreference 123",
+                  null,
+                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "NARU3472484",
+                  null,
+                  DKAAR,
+                  "640510",
+                  null,
+                  "Shoes - black, 400 boxes",
+                  null,
+                  FIBREBOARD_BOXES);
+          case REGULAR_NO_COMMODITY_SUBREFERENCE ->
+              new CarrierScenarioParameters(
+                  "CBR_123_NO_SUBREF",
+                  null,
+                  null,
+                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "NARU3472484",
+                  null,
+                  DKAAR,
+                  "640510",
+                  null,
+                  "Shoes - black, 400 boxes",
+                  null,
+                  FIBREBOARD_BOXES);
+          case ACTIVE_REEFER ->
+              new CarrierScenarioParameters(
+                  "CBR_123_REEFER",
+                  "Some reefer Commodity Subreference 123",
+                  null,
+                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "KKFU6671914",
+                  null,
+                  DKAAR,
+                  "04052090",
+                  null,
+                  "Dairy products",
+                  null,
+                  "Bottles");
+          case NON_OPERATING_REEFER ->
+              new CarrierScenarioParameters(
+                  "CBR_123_NON_OPERATING_REEFER",
+                  "Some reefer Commodity Subreference 123",
+                  null,
+                  // A "45R1" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "KKFU6671914",
+                  null,
+                  DKAAR,
+                  "220299",
+                  null,
+                  "Non alcoholic beverages",
+                  null,
+                  "Bottles");
+          case DG ->
+              new CarrierScenarioParameters(
+                  "RTM1234567",
+                  "Some DG Commodity Subreference 123",
+                  null,
+                  // A "22GP" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "HLXU1234567",
+                  null,
+                  DKAAR,
+                  "293499",
+                  null,
+                  "Environmentally hazardous substance",
+                  null,
+                  null);
+          case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
+              new CarrierScenarioParameters(
+                  "RG-2C-2U-2E",
+                  "Commodity Subreference 123",
+                  "Commodity Subreference 456",
+                  // A "22G1" container - keep aligned with the fixupUtilizedTransportEquipments()
+                  "MSKU3963442",
+                  "MSKU7895860",
+                  DKAAR,
+                  "691110",
+                  "732391",
+                  "Tableware and kitchenware",
+                  "Kitchen pots and pans",
+                  FIBREBOARD_BOXES);
+          case REGULAR_SWB_SOC_AND_REFERENCES ->
+              new CarrierScenarioParameters(
+                  "RG-SOC-REFERENCES",
+                  "Commodity Subreference 123",
+                  null,
+                  "ABCU7341935",
+                  null,
+                  DKAAR,
+                  "691110",
+                  null,
+                  "Tableware and kitchenware",
+                  null,
+                  FIBREBOARD_BOXES);
+        };
     var json = carrierScenarioParameters.toJson();
     asyncOrchestratorPostPartyInput(
         actionPrompt.required(ACTION_ID).asText(), json);

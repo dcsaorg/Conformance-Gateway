@@ -65,105 +65,110 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
 
   @Override
   public JsonNode getJsonForHumanReadablePrompt() {
-    var csp = switch (scenarioType) {
-      case REGULAR_SWB, REGULAR_STRAIGHT_BL, REGULAR_SWB_AMF, REGULAR_CLAD, REGULAR_NEGOTIABLE_BL -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity subreference for regular (non-DG, non-reefer) cargo",
-        null,
-        // Any valid regular equipment reference will do as an example.
-        "NARU3472484",
-        null,
-        DKAAR,
-        "640510",
-        null,
-        "Shoes - black, 400 boxes",
-        null,
-        "Fibreboard boxes"
-      );
-      case REGULAR_NO_COMMODITY_SUBREFERENCE -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        null,
-        null,
-        // Any valid regular equipment reference will do as an example.
-        "NARU3472484",
-        null,
-        DKAAR,
-        "640510",
-        null,
-        "Shoes - black, 400 boxes",
-        null,
-        "Fibreboard boxes"
-      );
-      case ACTIVE_REEFER -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity subreference for cargo requiring an *active* reefer",
-        null,
-        // Any valid reefer equipment reference will do as an example.
-        "KKFU6671914",
-        null,
-        DKAAR,
-        "04052090",
-        null,
-        "Dairy products",
-        null,
-        "Bottles"
-      );
-      case NON_OPERATING_REEFER -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity subreference for cargo requiring an non-operating reefer",
-        null,
-        // Any valid reefer equipment reference will do as an example.
-        "KKFU6671914",
-        null,
-        DKAAR,
-        "220299",
-        null,
-        "Non alcoholic beverages",
-        null,
-        "Bottles"
-      );
-      case DG -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity subreference for dangerous goods cargo",
-        null,
-        // Any valid regular equipment reference will do as an example.
-        "NARU3472484",
-        null,
-        DKAAR,
-        "293499",
-        null,
-        "Environmentally hazardous substance",
-        null,
-        null
-      );
-      case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity Subreference for regular cargo 1",
-        "Commodity Subreference for regular cargo 2",
-        // Any valid reefer equipment reference will do as an example.
-        "MSKU3963442",
-        "MSKU7895860",
-        DKAAR,
-        "691110",
-        "732391",
-        "Tableware and kitchenware",
-        "Kitchen pots and pans",
-        "Fibreboard boxes"
-      );
-      case REGULAR_SWB_SOC_AND_REFERENCES -> new CarrierScenarioParameters(
-        BOOKING_REFERENCE,
-        "Commodity Subreference for regular cargo",
-        null,
-        null,
-        null,
-        DKAAR,
-        "691110",
-        null,
-        "Tableware and kitchenware",
-        null,
-        "Fibreboard boxes"
-      );
-    };
+    var csp =
+        switch (scenarioType) {
+          case REGULAR_SWB,
+              REGULAR_STRAIGHT_BL,
+              REGULAR_SWB_AMF,
+              REGULAR_CLAD,
+              REGULAR_NEGOTIABLE_BL ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity subreference for regular (non-DG, non-reefer) cargo",
+                  null,
+                  // Any valid regular equipment reference will do as an example.
+                  "NARU3472484",
+                  null,
+                  DKAAR,
+                  "640510",
+                  null,
+                  "Shoes - black, 400 boxes",
+                  null,
+                  "Fibreboard boxes");
+          case REGULAR_NO_COMMODITY_SUBREFERENCE ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  null,
+                  null,
+                  // Any valid regular equipment reference will do as an example.
+                  "NARU3472484",
+                  null,
+                  DKAAR,
+                  "640510",
+                  null,
+                  "Shoes - black, 400 boxes",
+                  null,
+                  "Fibreboard boxes");
+          case ACTIVE_REEFER ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity subreference for cargo requiring an *active* reefer",
+                  null,
+                  // Any valid reefer equipment reference will do as an example.
+                  "KKFU6671914",
+                  null,
+                  DKAAR,
+                  "04052090",
+                  null,
+                  "Dairy products",
+                  null,
+                  "Bottles");
+          case NON_OPERATING_REEFER ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity subreference for cargo requiring an non-operating reefer",
+                  null,
+                  // Any valid reefer equipment reference will do as an example.
+                  "KKFU6671914",
+                  null,
+                  DKAAR,
+                  "220299",
+                  null,
+                  "Non alcoholic beverages",
+                  null,
+                  "Bottles");
+          case DG ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity subreference for dangerous goods cargo",
+                  null,
+                  // Any valid regular equipment reference will do as an example.
+                  "NARU3472484",
+                  null,
+                  DKAAR,
+                  "293499",
+                  null,
+                  "Environmentally hazardous substance",
+                  null,
+                  null);
+          case REGULAR_2C_2U_1E, REGULAR_2C_2U_2E ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity Subreference for regular cargo 1",
+                  "Commodity Subreference for regular cargo 2",
+                  // Any valid reefer equipment reference will do as an example.
+                  "MSKU3963442",
+                  "MSKU7895860",
+                  DKAAR,
+                  "691110",
+                  "732391",
+                  "Tableware and kitchenware",
+                  "Kitchen pots and pans",
+                  "Fibreboard boxes");
+          case REGULAR_SWB_SOC_AND_REFERENCES ->
+              new CarrierScenarioParameters(
+                  BOOKING_REFERENCE,
+                  "Commodity Subreference for regular cargo",
+                  null,
+                  "ABCU7341935",
+                  null,
+                  DKAAR,
+                  "691110",
+                  null,
+                  "Tableware and kitchenware",
+                  null,
+                  "Fibreboard boxes");
+        };
     return csp.toJson();
   }
 
@@ -179,17 +184,33 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     validateCSR(carrierScenarioParameters, scenarioType);
   }
 
-  private static void validateCSR(CarrierScenarioParameters carrierScenarioParameters, ScenarioType scenarioType) {
-    validateRequiredField(carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
+  private static void validateCSR(
+      CarrierScenarioParameters carrierScenarioParameters, ScenarioType scenarioType) {
+    validateRequiredField(
+        carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
     validateRequiredField(carrierScenarioParameters.equipmentReference(), "Equipment Reference");
-    validateScenarioSpecificField(carrierScenarioParameters.equipmentReference2(), "Equipment Reference 2", scenarioType, ScenarioType.REGULAR_2C_2U_2E);
+    validateScenarioSpecificField(
+        carrierScenarioParameters.equipmentReference2(),
+        "Equipment Reference 2",
+        scenarioType,
+        ScenarioType.REGULAR_2C_2U_2E);
     validateRequiredField(carrierScenarioParameters.descriptionOfGoods(), "Description Of Goods");
 
     boolean isRequiredScenario = isRequiredScenarioType(scenarioType);
-    validateConditionalField(carrierScenarioParameters.descriptionOfGoods2(), "Description Of Goods 2", isRequiredScenario);
-    validateConditionalField(carrierScenarioParameters.outerPackagingDescription(), "Outer Packaging Description",!scenarioType.equals(ScenarioType.DG));
-    validateRequiredField(carrierScenarioParameters.consignmentItemHSCode(), "Consignment Item HSCode");
-    validateConditionalField(carrierScenarioParameters.consignmentItem2HSCode(), "Consignment Item HSCode 2", isRequiredScenario);
+    validateConditionalField(
+        carrierScenarioParameters.descriptionOfGoods2(),
+        "Description Of Goods 2",
+        isRequiredScenario);
+    validateConditionalField(
+        carrierScenarioParameters.outerPackagingDescription(),
+        "Outer Packaging Description",
+        !scenarioType.equals(ScenarioType.DG));
+    validateRequiredField(
+        carrierScenarioParameters.consignmentItemHSCode(), "Consignment Item HSCode");
+    validateConditionalField(
+        carrierScenarioParameters.consignmentItem2HSCode(),
+        "Consignment Item HSCode 2",
+        isRequiredScenario);
   }
 
   private static void validateRequiredField(String field, String fieldName) {
@@ -198,7 +219,8 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     }
   }
 
-  private static void validateScenarioSpecificField(String field, String fieldName, ScenarioType currentScenario, ScenarioType requiredScenario) {
+  private static void validateScenarioSpecificField(
+      String field, String fieldName, ScenarioType currentScenario, ScenarioType requiredScenario) {
     if (currentScenario.equals(requiredScenario)) {
       validateRequiredField(field, fieldName);
     }
@@ -211,7 +233,8 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   }
 
   private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
-    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
+    return scenarioType == ScenarioType.REGULAR_2C_2U_2E
+        || scenarioType == ScenarioType.REGULAR_2C_2U_1E;
   }
 
   @Override

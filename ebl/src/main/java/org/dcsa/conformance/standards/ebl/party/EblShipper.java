@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
 import org.dcsa.conformance.core.party.PartyConfiguration;
@@ -142,7 +141,7 @@ public class EblShipper extends ConformanceParty {
       ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(0))
           .remove("commoditySubReference");
     }
-    if (isRequiredScenarioType(scenarioType)
+    if ((scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E))
         && (carrierScenarioParameters.commoditySubReference2() == null
             || carrierScenarioParameters.commoditySubReference2().isEmpty())) {
       ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(1))
@@ -160,10 +159,6 @@ public class EblShipper extends ConformanceParty {
                       .withArray("cargoItems")
                       .forEach(cargoItem -> ((ObjectNode) cargoItem).remove("outerPackaging")));
     }
-  }
-
-  private static boolean isRequiredScenarioType(ScenarioType scenarioType) {
-    return scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E) || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E);
   }
 
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {

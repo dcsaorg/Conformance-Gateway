@@ -85,6 +85,8 @@ public class JitConsumer extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitted SuppliedScenarioParameters: %s".formatted(parameters.toJson().toPrettyString()));
+
+    JitPartyHelper.flushTimestamps(persistentMap); // Prevent timestamps from being reused
   }
 
   public static SuppliedScenarioParameters createSuppliedScenarioParameters(

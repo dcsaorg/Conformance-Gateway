@@ -210,15 +210,15 @@ public class JitPartyHelper {
           JitChecks.TIMESTAMP_ID, List.of(timestamp.get(JitChecks.TIMESTAMP_ID).asText()));
     }
     if (filters.contains(JitChecks.PORT_CALL_SERVICE_ID)) {
-      // The previous Planned timestamp has the same portCallServiceID.
-      JsonNode timestampNode = getTimestampBy(JitClassifierCode.PLN, null, timestampCalls);
+      // The previous Actual timestamp has the same portCallServiceID.
+      JsonNode timestampNode = getTimestampBy(JitClassifierCode.ACT, null, timestampCalls);
       queryParams.put(
           JitChecks.PORT_CALL_SERVICE_ID,
           List.of(timestampNode.get(JitChecks.PORT_CALL_SERVICE_ID).asText()));
     }
     if (filters.contains(JitChecks.CLASSIFIER_CODE)) {
-      // Filter by classifier code PLN.
-      JsonNode timestampNode = getTimestampBy(JitClassifierCode.PLN, null, timestampCalls);
+      // Filter by classifier code Actual.
+      JsonNode timestampNode = getTimestampBy(JitClassifierCode.ACT, null, timestampCalls);
       queryParams.put(
           JitChecks.CLASSIFIER_CODE,
           List.of(timestampNode.get(JitChecks.CLASSIFIER_CODE).asText()));
@@ -260,12 +260,13 @@ public class JitPartyHelper {
     return response;
   }
 
+  static void flushTimestamps(JsonNodeMap persistentMap) {
+    persistentMap.save(JitGetType.TIMESTAMPS.name(), OBJECT_MAPPER.createArrayNode());
+  }
+
   // Save the response for generating GET requests. Add it to the list of timestamps.
   static void storeTimestamp(JsonNodeMap persistentMap, JitTimestamp timestamp) {
     ArrayNode timestamps = (ArrayNode) persistentMap.load(JitGetType.TIMESTAMPS.name());
-    if (timestamps == null) {
-      timestamps = OBJECT_MAPPER.createArrayNode();
-    }
     ObjectNode timestampNode = timestamp.toJson();
     timestampNode.remove(JitProvider.IS_FYI);
     timestamps.add(timestampNode);

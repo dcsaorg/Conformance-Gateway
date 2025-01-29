@@ -832,7 +832,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
     scenarioList.put(
         "3. PC-TC-S-V-A-ERP-A Provider answering GET calls",
-        supplyScenarioParameters(context, ANY)
+        supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
                     context,
@@ -842,6 +842,97 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         context,
                         sendTimestamp(context, ACTUAL)
                             .then(getTimestampActions(context, false))))));
+
+    scenarioList.put(
+        "4. PC-TC-S-V-A-ERP-A Consumer answering GET calls",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, ACTUAL).then(getTimestampActions(context, true))))));
+
+    scenarioList.put(
+        "5. PC-TC-S-V-A Provider answering GET calls",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendTimestamp(context, ACTUAL)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    false)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            false)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                false)))))));
+    scenarioList.put(
+        "6. PC-TC-S-V-A Consumer answering GET calls",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendTimestamp(context, ACTUAL)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    true)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            true)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                true)))))));
+    scenarioList.put(
+        "7. Moves service type Provider answering GET calls",
+        supplyScenarioParameters(context, GIVEN)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(getServiceCallActions(context, false))))));
+    scenarioList.put(
+        "8. Moves service type Consumer answering GET calls",
+        supplyScenarioParameters(context, GIVEN)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(getServiceCallActions(context, true))))));
   }
 
   private static JitScenarioListBuilder getTimestampActions(

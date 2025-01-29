@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
@@ -58,7 +59,7 @@ public class JitPartyHelper {
       response.addAll(getMatchingURLParamsWithTimestamps(request, timestampCalls));
 
       jitParty.addOperatorLogEntry(
-          "Handled GET Timestamp Calls request accepted. Return %s timestamp objects."
+          "Handled GET Timestamp Calls request accepted. Returned %s timestamp objects."
               .formatted(response.size()));
     } else {
       jitParty.addOperatorLogEntry("Unhandled GET request!");
@@ -71,41 +72,40 @@ public class JitPartyHelper {
   private static ArrayNode getMatchingURLParamsWithTimestamps(
       ConformanceRequest request, ArrayNode timestampCalls) {
     ArrayNode results = OBJECT_MAPPER.createArrayNode();
-    Set<String> queryParams = request.queryParams().keySet();
+    var params = request.queryParams();
+    Set<String> queryParams = params.keySet();
     // Timestamp URL parameter section.
     if (queryParams.contains(JitChecks.TIMESTAMP_ID)) {
-      request.queryParams().get(JitChecks.TIMESTAMP_ID).stream()
-          .findFirst()
-          .ifPresent(
-              timestampID -> {
-                ObjectNode timestampCall =
-                    (ObjectNode) getTimestampBy(null, timestampID, timestampCalls);
-                if (timestampCall != null) {
-                  results.add(timestampCall);
-                }
-              });
+      String timestampID = params.get(JitChecks.TIMESTAMP_ID).iterator().next();
+      ObjectNode timestampCall = (ObjectNode) getTimestampBy(null, timestampID, timestampCalls);
+      if (timestampCall != null) {
+        results.add(timestampCall);
+      }
+      return results; // Only one timestamp can be returned.
     }
     // PortCallServiceID URL parameter section.
-    if (queryParams.contains(JitChecks.PORT_CALL_SERVICE_ID)) {
-      request.queryParams().get(JitChecks.PORT_CALL_SERVICE_ID).stream()
-          .findFirst()
-          .ifPresent(
-              portCallServiceID ->
-                  results.addAll(
-                      getTimestampsByPortCallServiceID(portCallServiceID, timestampCalls)));
+    if (queryParams.size() == 1 && queryParams.contains(JitChecks.PORT_CALL_SERVICE_ID)) {
+      String portCallServiceID = params.get(JitChecks.PORT_CALL_SERVICE_ID).iterator().next();
+      results.addAll(
+          getTimestampsByPortCallServiceIDClassifierCode(portCallServiceID, null, timestampCalls));
+      return results;
     }
 
     // ClassifierCode URL parameter section.
-    if (queryParams.contains(JitChecks.CLASSIFIER_CODE)) {
-      request.queryParams().get(JitChecks.CLASSIFIER_CODE).stream()
-          .findFirst()
-          .ifPresent(
-              classifierCode ->
-                  results.add(
-                      getTimestampBy(
-                          JitClassifierCode.valueOf(classifierCode), null, timestampCalls)));
+    if (queryParams.size() == 1 && queryParams.contains(JitChecks.CLASSIFIER_CODE)) {
+      String classifierCode = params.get(JitChecks.CLASSIFIER_CODE).iterator().next();
+      results.add(getTimestampBy(JitClassifierCode.valueOf(classifierCode), null, timestampCalls));
+      return results;
     }
-    // TODO: filter by multiple parameters.
+    // Filter by classifier code and portCallServiceID.
+    if (queryParams.contains(JitChecks.CLASSIFIER_CODE)
+        && queryParams.contains(JitChecks.PORT_CALL_SERVICE_ID)) {
+      String classifierCode = params.get(JitChecks.CLASSIFIER_CODE).iterator().next();
+      String portCallServiceID = params.get(JitChecks.PORT_CALL_SERVICE_ID).iterator().next();
+      results.addAll(
+          getTimestampsByPortCallServiceIDClassifierCode(
+              portCallServiceID, classifierCode, timestampCalls));
+    }
     return results;
   }
 
@@ -243,12 +243,18 @@ public class JitPartyHelper {
     return null;
   }
 
-  static ArrayNode getTimestampsByPortCallServiceID(
-      String portCallServiceID, ArrayNode timestampCalls) {
+  static ArrayNode getTimestampsByPortCallServiceIDClassifierCode(
+      @NonNull String portCallServiceID, String classifierCode, ArrayNode timestampCalls) {
     ArrayNode response = OBJECT_MAPPER.createArrayNode();
     for (JsonNode jsonNode : timestampCalls) {
       if (portCallServiceID.equals(jsonNode.get(JitChecks.PORT_CALL_SERVICE_ID).asText(null))) {
-        response.add(jsonNode);
+        if (classifierCode != null) {
+          if (jsonNode.get(JitChecks.CLASSIFIER_CODE).asText().equalsIgnoreCase(classifierCode)) {
+            response.add(jsonNode);
+          }
+        } else {
+          response.add(jsonNode);
+        }
       }
     }
     return response;

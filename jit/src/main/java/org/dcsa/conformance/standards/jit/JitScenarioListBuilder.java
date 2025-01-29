@@ -83,6 +83,8 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     addScenarioGroup10(scenarioList, context);
     addScenarioGroup11(scenarioList, context);
     addScenarioGroup12(scenarioList, context);
+    addScenarioGroup13(scenarioList, context);
+    addScenarioGroup14(scenarioList, context);
 
     // Scenario suite: "GET endpoint conformance"
     addScenarioGroupGET1(scenarioList, context);
@@ -98,98 +100,37 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroup3(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "3. S-service type with variations (Moves only)",
+        "3. Moves type with variations",
         supplyScenarioParameters(context, GIVEN)
             .thenEither(
                 portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(vesselStatus(context)))),
+                    .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN))),
                 portCall(context)
                     .then(
                         portCall(context)
-                            .then(
-                                terminalCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                portCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(portCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(portCall(context).then(vesselStatus(context))))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(portCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(portCall(context))))),
+                            .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                terminalCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(terminalCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
                                 serviceCall(context, MOVES, GIVEN)
-                                    .then(terminalCall(context).then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(terminalCall(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(
-                                        vesselStatus(context)
-                                            .then(serviceCall(context, MOVES, GIVEN))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(cancelCall(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(cancelCall(context)))),
-                sendPC_TC_SC_VS(context, MOVES, GIVEN, declineCall(context)),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(declineCall(context))))));
+                                    .then(serviceCall(context, MOVES, GIVEN))))));
   }
 
   private static void addScenarioGroup4(
@@ -703,7 +644,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL))),
+                    sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL)))));
+  }
+
+  private static void addScenarioGroup11(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "11. S-A cancel",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
                 sendPC_TC_SC_VS(
                     context,
                     null,
@@ -714,7 +663,16 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null, S_A_PATTERN).then(cancelCall(context)))),
+                                serviceCall(context, null, S_A_PATTERN)
+                                    .then(cancelCall(context))))));
+  }
+
+  private static void addScenarioGroup12(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "12. S-A decline",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
                 sendPC_TC_SC_VS(
                     context,
                     null,
@@ -729,10 +687,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                     .then(declineCall(context))))));
   }
 
-  private static void addScenarioGroup11(
+  private static void addScenarioGroup13(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "11. S-ERP-A cancel",
+        "13. S-ERP-A cancel",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -756,10 +714,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, null, FULL_ERP).then(cancelCall(context))))));
   }
 
-  private static void addScenarioGroup12(
+  private static void addScenarioGroup14(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "12. S-ERP-A decline",
+        "14. S-ERP-A decline",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -1245,21 +1203,21 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroupSecondary3(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "3. S(Moves) as FYI message",
+        "3. Moves as FYI message",
         supplyScenarioParameters(context, GIVEN, true)
             .thenEither(
-                sendPC_TC_SC_VS(context, MOVES, null),
-                sendPC_TC_SC_VS(context, MOVES, null, omitPortCall(context)),
-                sendPC_TC_SC_VS(context, MOVES, null, omitTerminalCall(context)),
+                portCall(context)
+                    .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, MOVES, null).then(omitPortCall(context)))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(omitPortCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, MOVES, null).then(omitTerminalCall(context)))),
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(omitTerminalCall(context)))),
                 portCall(context).then(terminalCall(context).then(omitPortCall(context))),
                 portCall(context).then(terminalCall(context).then(omitTerminalCall(context))),
                 portCall(context).then(omitPortCall(context))));

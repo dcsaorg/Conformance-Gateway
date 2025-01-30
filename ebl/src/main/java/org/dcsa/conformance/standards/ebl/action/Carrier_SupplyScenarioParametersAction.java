@@ -189,6 +189,9 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
     validateRequiredField(
         carrierScenarioParameters.carrierBookingReference(), "Carrier Booking Reference");
     validateRequiredField(carrierScenarioParameters.equipmentReference(), "Equipment Reference");
+    validateRequiredField(
+        carrierScenarioParameters.invoicePayableAtUNLocationCode(),
+        "Invoice Payable At UN Location Code");
     validateScenarioSpecificField(
         carrierScenarioParameters.equipmentReference2(),
         "Equipment Reference 2",

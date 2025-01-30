@@ -22,17 +22,16 @@ public record CarrierScenarioParameters(
 
   public static CarrierScenarioParameters fromJson(JsonNode jsonNode) {
     return new CarrierScenarioParameters(
-      jsonNode.required("carrierBookingReference").asText(),
-      jsonNode.path("commoditySubReference").asText(null),
-      jsonNode.path("commoditySubReference2").asText(null),
-      jsonNode.required("equipmentReference").asText(),
-      jsonNode.path("equipmentReference2").asText(null),
-      jsonNode.required("invoicePayableAtUNLocationCode").asText(),
-      jsonNode.required("consignmentItemHSCode").asText(),
-      jsonNode.path("consignmentItem2HSCode").asText(null),
-      jsonNode.required("descriptionOfGoods").asText(),
-      jsonNode.path("descriptionOfGoods2").asText(null),
-      jsonNode.path("outerPackagingDescription").asText(null)
-    );
+        jsonNode.path("carrierBookingReference").asText(null),
+        jsonNode.path("commoditySubReference").asText(null),
+        jsonNode.path("commoditySubReference2").asText(null),
+        jsonNode.path("equipmentReference").asText(null),
+        jsonNode.path("equipmentReference2").asText(null),
+        jsonNode.path("invoicePayableAtUNLocationCode").asText(null),
+        jsonNode.path("consignmentItemHSCode").asText(null),
+        jsonNode.path("consignmentItem2HSCode").asText(null),
+        jsonNode.path("descriptionOfGoods").asText(null),
+        jsonNode.path("descriptionOfGoods2").asText(null),
+        jsonNode.path("outerPackagingDescription").asText(null));
   }
 }

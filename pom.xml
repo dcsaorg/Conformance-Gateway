@@ -14,12 +14,13 @@
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<spring.boot.version>3.4.1</spring.boot.version>
+		<spring.boot.version>3.4.2</spring.boot.version>
 		<jackson.version>2.18.2</jackson.version>
 		<lombok.version>1.18.36</lombok.version>
 		<log4j.version>2.24.3</log4j.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<junit.version>5.11.4</junit.version>
+		<mockito.version>5.15.2</mockito.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dcsaorg</sonar.organization>
@@ -174,6 +175,12 @@
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
 				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

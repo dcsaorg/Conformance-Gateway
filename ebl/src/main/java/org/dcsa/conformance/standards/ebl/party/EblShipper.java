@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -178,11 +177,11 @@ public class EblShipper extends ConformanceParty {
 
   static ObjectNode updateShippingInstructions(ObjectNode si) {
     var seal = si.required("utilizedTransportEquipments").required(0).required("seals").path(0);
-    var newSealNumber = "NSL13388";
-    if (newSealNumber.equals(seal.required("number").asText())) {
-      // Ensure we do a change in case we do multiple UC3 in the same run
-      newSealNumber = "NSL13386";
-    }
+    var newSealNumber =
+        UUID.randomUUID()
+            .toString()
+            .substring(0, 8)
+            .toUpperCase(); // adding a different seal number for each UC3
     ((ObjectNode)seal).put("number", newSealNumber);
     return si;
   }

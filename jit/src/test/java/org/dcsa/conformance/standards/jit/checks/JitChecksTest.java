@@ -36,6 +36,12 @@ class JitChecksTest {
                     PortCallServiceType.BUNKERING, PortCallServiceEventTypeCode.ARRI, null))
             .iterator()
             .next());
+
+    assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
+    assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
+    ((ObjectNode) request).put("moves", "BERTH");
+    assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
+    assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
   }
 
   @Test
@@ -235,6 +241,9 @@ class JitChecksTest {
 
     if (phaseTypeCode == null) {
       jsonNode.remove("portCallPhaseTypeCode");
+    }
+    if (serviceType != PortCallServiceType.MOVES) {
+      jsonNode.remove("moves");
     }
     return jsonNode;
   }

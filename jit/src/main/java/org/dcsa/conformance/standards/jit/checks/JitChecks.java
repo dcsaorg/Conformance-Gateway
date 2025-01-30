@@ -46,18 +46,22 @@ public class JitChecks {
       String expectedApiVersion,
       PortCallServiceType serviceType,
       DynamicScenarioParameters dsp) {
+    if (dsp == null) return null;
     List<JsonContentCheck> checks = new ArrayList<>();
+
     checks.add(checkRightFieldValues());
     if (serviceType != null) {
       checks.add(checkPortCallService(serviceType));
     }
-    if (dsp != null
-        && dsp.selector() != JitServiceTypeSelector.GIVEN
+    if (dsp.selector() != JitServiceTypeSelector.GIVEN
         && dsp.selector() != JitServiceTypeSelector.ANY) {
       checks.add(checkPortCallServiceRightType(dsp));
     }
+    if (dsp.portCallServiceType() == PortCallServiceType.MOVES) {
+      checks.add(checkPortCallServiceHasMoves(true));
+    } else checks.add(checkPortCallServiceHasMoves(false));
     checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
-    if (dsp != null && dsp.isFYI()) {
+    if (dsp.isFYI()) {
       checks.add(IS_FYI_TRUE);
     }
     return JsonAttribute.contentChecks(
@@ -66,6 +70,27 @@ public class JitChecks {
         HttpMessageType.REQUEST,
         expectedApiVersion,
         checks);
+  }
+
+  static JsonContentCheck checkPortCallServiceHasMoves(boolean shouldHaveMoves) {
+    if (shouldHaveMoves) {
+      return JsonAttribute.customValidator(
+          "Check if the Port Call Service has moves.",
+          body -> {
+            if (body.has("moves")) {
+              return Collections.emptySet();
+            }
+            return Set.of("Expected Port Call Service to have moves.");
+          });
+    }
+    return JsonAttribute.customValidator(
+        "Check that the Port Call Service does NOT has moves object.",
+        body -> {
+          if (!body.has("moves")) {
+            return Collections.emptySet();
+          }
+          return Set.of("Expected Port Call Service to have no moves.");
+        });
   }
 
   static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceType");

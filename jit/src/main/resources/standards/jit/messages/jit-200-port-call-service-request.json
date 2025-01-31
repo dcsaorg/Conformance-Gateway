@@ -14,39 +14,43 @@
   },
   "moves": [
     {
-      "totalMoves": 155,
+      "totalUnits": 155,
       "carrierCode": "MAEU",
       "carrierCodeListProvider": "NMFTA",
-      "restowMoves": 20
+      "restows": {
+        "totalRestows": 155
+      }
     },
     {
-      "loadMoves": {
-        "ladenContainerMoves": {
-          "totalMoves": 155
+      "loadUnits": {
+        "ladenContainerUnits": {
+          "totalUnits": 155
         },
-        "emptyContainerMoves": {
-          "totalMoves": 155
+        "emptyContainerUnits": {
+          "totalUnits": 155
         },
-        "reeferPluggedContainerMoves": {
-          "totalMoves": 155
+        "reeferPluggedContainerUnits": {
+          "totalUnits": 155
         },
         "oogUnits": 2
       },
-      "dischargeMoves": {
-        "ladenContainerMoves": {
-          "totalMoves": 155
+      "dischargeUnits": {
+        "ladenContainerUnits": {
+          "totalUnits": 155
         },
-        "emptyContainerMoves": {
-          "totalMoves": 155
+        "emptyContainerUnits": {
+          "totalUnits": 155
         },
-        "reeferPluggedContainerMoves": {
-          "totalMoves": 155
+        "reeferPluggedContainerUnits": {
+          "totalUnits": 155
         },
         "oogUnits": 2
       },
       "carrierCode": "MAEU",
       "carrierCodeListProvider": "NMFTA",
-      "restowMoves": 155
+      "restows": {
+        "totalRestows": 155
+      }
     }
   ],
   "isFYI": IS_FYI_PLACEHOLDER

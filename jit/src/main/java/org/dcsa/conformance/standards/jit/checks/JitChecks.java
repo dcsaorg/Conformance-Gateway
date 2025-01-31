@@ -34,6 +34,18 @@ public class JitChecks {
   public static final String TIMESTAMP_ID = "timestampID";
   public static final String CLASSIFIER_CODE = "classifierCode";
 
+  static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The moves.carrierCode implies moves.carrierCodeListProvider",
+          mav -> mav.submitAllMatching("moves.*"),
+          JsonAttribute.presenceImpliesOtherField("carrierCode", "carrierCodeListProvider"));
+
+  static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "The moves.carrierCodeListProvider implies moves.carrierCode",
+          mav -> mav.submitAllMatching("moves.*"),
+          JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
+
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(
           "Expected isFYI=true when message is For Your Information only.",
@@ -59,6 +71,8 @@ public class JitChecks {
     }
     if (dsp.portCallServiceType() == PortCallServiceType.MOVES) {
       checks.add(checkPortCallServiceHasMoves(true));
+      checks.add(MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER);
+      checks.add(MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE);
     } else checks.add(checkPortCallServiceHasMoves(false));
     checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
     if (dsp.isFYI()) {

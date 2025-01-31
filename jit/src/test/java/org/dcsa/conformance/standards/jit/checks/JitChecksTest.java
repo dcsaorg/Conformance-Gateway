@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.jit.checks;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +20,7 @@ class JitChecksTest {
 
   @Test
   void checkPortCallService() {
-    JsonNode request =
+    ObjectNode request =
         createPortCallServiceRequest(
             PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI, null);
     assertTrue(JitChecks.IS_PORT_CALL_SERVICE.test(request));
@@ -39,7 +38,7 @@ class JitChecksTest {
 
     assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
     assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
-    ((ObjectNode) request).put("moves", "BERTH");
+    request.put("moves", "BERTH");
     assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
     assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
   }
@@ -258,7 +257,59 @@ class JitChecksTest {
     assertTrue(JitChecks.IS_FYI_TRUE.validate(createTimestamp().withFYI(true).toJson()).isEmpty());
   }
 
-  private JsonNode createPortCallServiceRequest(
+  @Test
+  void testMovesCarrierCodeImpliesCarrierCodeListProvider() {
+    ObjectNode request =
+        createPortCallServiceRequest(
+            PortCallServiceType.MOVES, PortCallServiceEventTypeCode.ARRI, null);
+
+    assertTrue(
+        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
+            .validate(request)
+            .isEmpty());
+
+    // Remove all carrierCodeListProvider occurrences and verify 2 errors are returned
+    request
+        .get("moves")
+        .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
+    assertEquals(
+        2,
+        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request).size());
+
+    // Remove all carrierCode occurrences and verify all is good
+    request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    assertEquals(
+        0,
+        JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request).size());
+  }
+
+  @Test
+  void testMovesCarrierCodeListProviderImpliesCarrierCode() {
+    ObjectNode request =
+        createPortCallServiceRequest(
+            PortCallServiceType.MOVES, PortCallServiceEventTypeCode.ARRI, null);
+
+    assertTrue(
+        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
+            .validate(request)
+            .isEmpty());
+
+    // Remove all carrierCodeListProvider occurrences and verify 2 errors are returned
+    request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    assertEquals(
+        2,
+        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());
+
+    // Remove all carrierCode occurrences and verify all is good
+    request
+        .get("moves")
+        .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
+    assertEquals(
+        0,
+        JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());
+  }
+
+  private ObjectNode createPortCallServiceRequest(
       PortCallServiceType serviceType,
       PortCallServiceEventTypeCode code,
       PortCallPhaseTypeCode phaseTypeCode) {

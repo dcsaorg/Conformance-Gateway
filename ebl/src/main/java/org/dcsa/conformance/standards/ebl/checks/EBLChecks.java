@@ -12,14 +12,12 @@ import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.PARTY_FUNCTI
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.REQUESTED_CARRIER_CLAUSES;
 import static org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus.SI_PENDING_UPDATE;
 
-
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -1181,12 +1179,15 @@ public class EBLChecks {
         }
         seen.add(value);
         if (!expectedValues.contains(value)) {
-          issues.add("Unexpected %s %s at %s".formatted(attributeName, value, pathBuilder.toString()));
+          issues.add(
+              "Unexpected %s %s at %s".formatted(attributeName, value, pathBuilder.toString()));
         }
       }
       for (var ref : expectedValues) {
-        if (!seen.contains(ref)) {
-          issues.add("Expected %s %s to be used by one of the elements in %s, but it was not present".formatted(attributeName, ref, contextPath));
+        if (ref != null && !seen.contains(ref)) {
+          issues.add(
+              "Expected %s %s to be used by one of the elements in %s, but it was not present"
+                  .formatted(attributeName, ref, contextPath));
         }
       }
       return issues;
@@ -1232,10 +1233,17 @@ public class EBLChecks {
    }
 
   private static JsonContentMatchedValidation checkCommoditySubreference(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Set<String>> expectedValueSupplier = () -> {
-      var csp = cspSupplier.get();
-      return setOf(csp.commoditySubReference(), csp.commoditySubReference2());
-    };
+    Supplier<Set<String>> expectedValueSupplier =
+        () -> {
+          var csp = cspSupplier.get();
+          return setOf(
+              csp.commoditySubReference() != null && !csp.commoditySubReference().isEmpty()
+                  ? csp.commoditySubReference()
+                  : null,
+              csp.commoditySubReference2() != null && !csp.commoditySubReference2().isEmpty()
+                  ? csp.commoditySubReference2()
+                  : null);
+        };
     return checkCSPAllUsedAtLeastOnce(
       COMMODITY_SUB_REFERENCE,
       expectedValueSupplier
@@ -1272,17 +1280,18 @@ public class EBLChecks {
   }
 
   private static JsonContentMatchedValidation checkHSCodes(Supplier<CarrierScenarioParameters> cspSupplier) {
-    Supplier<Map<String, String>> expectedValueSupplier = () -> {
-      var csp = cspSupplier.get();
-      var m = new LinkedHashMap<String, String>();
-      if (csp.descriptionOfGoods() != null) {
-        m.put(csp.consignmentItemHSCode(), csp.commoditySubReference());
-      }
-      if (csp.descriptionOfGoods2() != null) {
-        m.put(csp.consignmentItem2HSCode(), csp.commoditySubReference2());
-      }
-      return m;
-    };
+    Supplier<Map<String, String>> expectedValueSupplier =
+        () -> {
+          var csp = cspSupplier.get();
+          var m = new LinkedHashMap<String, String>();
+          if (csp.consignmentItemHSCode() != null) {
+            m.put(csp.consignmentItemHSCode(), csp.commoditySubReference());
+          }
+          if (csp.consignmentItem2HSCode() != null) {
+            m.put(csp.consignmentItem2HSCode(), csp.commoditySubReference2());
+          }
+          return m;
+        };
     BiFunction<JsonNode, StringBuilder, JsonNode> resolver = (consignmentItem, pathBuilder) -> {
       var hsCodes = consignmentItem.path("HSCodes");
       if (!hsCodes.isArray()) {

@@ -35,10 +35,10 @@ public class JitVesselStatusAction extends JitAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         if (dsp == null) return Stream.of();
         return Stream.of(
-          new UrlPathCheck(
-            JitRole::isProvider,
-            getMatchedExchangeUuid(),
-            JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID()),
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID()),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(
@@ -56,7 +56,7 @@ public class JitVesselStatusAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                JitChecks.checkCallIDMatchPreviousCallID(dsp)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

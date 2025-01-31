@@ -74,7 +74,7 @@ public class JitChecks {
       checks.add(MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER);
       checks.add(MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE);
     } else checks.add(checkPortCallServiceHasMoves(false));
-    checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
+    checks.add(JitChecks.checkCallIDMatchPreviousCallID(dsp));
     if (dsp.isFYI()) {
       checks.add(IS_FYI_TRUE);
     }
@@ -243,9 +243,9 @@ public class JitChecks {
         });
   }
 
-  public static JsonContentCheck checkIDsMatchesPreviousCall(DynamicScenarioParameters dsp) {
+  public static JsonContentCheck checkCallIDMatchPreviousCallID(DynamicScenarioParameters dsp) {
     return JsonAttribute.customValidator(
-        "Check if the used IDs matches the previous call's IDs.",
+        "Check if the used call ID matches the previous call' ID.",
         body -> {
           Set<String> errors = new HashSet<>();
           if (body.has(PORT_CALL_ID)

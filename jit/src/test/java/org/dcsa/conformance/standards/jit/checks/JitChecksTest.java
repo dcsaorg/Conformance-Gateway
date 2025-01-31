@@ -206,24 +206,24 @@ class JitChecksTest {
             false);
     // Happy path: reuse the IDs from the DSP, captured data from previous actions
     assertTrue(
-        JitChecks.checkIDsMatchesPreviousCall(
+        JitChecks.checkCallIDMatchPreviousCallID(
                 new DynamicScenarioParameters()) // No previous data captured
             .validate(OBJECT_MAPPER.createObjectNode())
             .isEmpty());
     assertTrue(
-        JitChecks.checkIDsMatchesPreviousCall(dsp)
+        JitChecks.checkCallIDMatchPreviousCallID(dsp)
             .validate(
                 OBJECT_MAPPER.createObjectNode().put(JitChecks.PORT_CALL_ID, dsp.portCallID()))
             .isEmpty());
     assertTrue(
-        JitChecks.checkIDsMatchesPreviousCall(dsp)
+        JitChecks.checkCallIDMatchPreviousCallID(dsp)
             .validate(
                 OBJECT_MAPPER
                     .createObjectNode()
                     .put(JitChecks.PORT_CALL_SERVICE_ID, dsp.portCallServiceID()))
             .isEmpty());
     assertTrue(
-        JitChecks.checkIDsMatchesPreviousCall(dsp)
+        JitChecks.checkCallIDMatchPreviousCallID(dsp)
             .validate(
                 OBJECT_MAPPER
                     .createObjectNode()
@@ -233,7 +233,7 @@ class JitChecksTest {
     // Non-matching IDs used
     assertEquals(
         3,
-        JitChecks.checkIDsMatchesPreviousCall(dsp)
+        JitChecks.checkCallIDMatchPreviousCallID(dsp)
             .validate(
                 OBJECT_MAPPER
                     .createObjectNode()

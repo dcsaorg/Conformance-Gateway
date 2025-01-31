@@ -105,7 +105,7 @@ public class JitTimestampAction extends JitAction {
                   HttpMessageType.REQUEST,
                   expectedApiVersion,
                   List.of(
-                      JitChecks.checkIDsMatchesPreviousCall(dsp),
+                      JitChecks.checkCallIDMatchPreviousCallID(dsp),
                       JitChecks.checkTimestampIDsMatchesPreviousCall(dsp))),
               new JsonSchemaCheck(
                   JitRole::isProvider,
@@ -138,7 +138,7 @@ public class JitTimestampAction extends JitAction {
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
                 List.of(
-                    JitChecks.checkIDsMatchesPreviousCall(dsp),
+                    JitChecks.checkCallIDMatchPreviousCallID(dsp),
                     JitChecks.checkTimestampIDsMatchesPreviousCall(dsp))),
             new JsonSchemaCheck(
                 JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),

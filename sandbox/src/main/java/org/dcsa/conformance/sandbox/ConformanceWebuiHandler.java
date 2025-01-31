@@ -57,13 +57,13 @@ public class ConformanceWebuiHandler {
       if (e instanceof UserFacingException userFacingException) {
         return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
       } else {
-        ObjectNode node = OBJECT_MAPPER
-          .createObjectNode().put("error", "Internal Server Error");
+        ObjectNode node = OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
         if (developerMode) {
-            node.put("exception", e.getClass().getName())
-              .put("message", e.getMessage());
+          node.put("exception", e.getClass().getName()).put("message", e.getMessage());
+          log.warn("Internal Server Error: {}", e.getMessage());
+        } else {
+          log.warn("Internal Server Error: {}", e, e);
         }
-        log.warn("Internal Server Error: {}", e, e);
         return node;
       }
     }

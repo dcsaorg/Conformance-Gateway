@@ -37,7 +37,7 @@ class ConformanceApplicationTest {
     // run.
     "eblissuance-300-conformance-auto-all-in-one",
     "eblsurrender-300-conformance-auto-all-in-one",
-    "jit-120-conformance-auto-all-in-one",
+    "jit-200-conformance-auto-all-in-one",
     "ovs-300-conformance-auto-all-in-one",
     "pint-300-conformance-auto-all-in-one",
     "tnt-220-conformance-auto-all-in-one"

@@ -63,7 +63,7 @@ public class PersistableCarrierBooking {
   private static final String CARRIER_BOOKING_REQUEST_REFERENCE = "carrierBookingRequestReference";
   private static final String CARRIER_BOOKING_REFERENCE = "carrierBookingReference";
   private static final String SUBSCRIPTION_REFERENCE = "subscriptionReference";
-  private static final String REASON_INFO = "Confirmed booking cancelled by shipper (no reason given)";
+  public static final String FEEDBACKS = "feedbacks";
 
   private static final String[] METADATA_FIELDS_TO_PRESERVE = {
     CARRIER_BOOKING_REQUEST_REFERENCE,
@@ -91,6 +91,10 @@ public class PersistableCarrierBooking {
     return getBooking().path(CARRIER_BOOKING_REFERENCE).asText(null);
   }
 
+  public JsonNode getfeedbacks() {
+    return getBooking().path(FEEDBACKS);
+  }
+
   public ObjectNode getBooking() {
     return (ObjectNode) state.required(BOOKING_DATA_FIELD);
   }
@@ -113,10 +117,9 @@ public class PersistableCarrierBooking {
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     removeFeedbacks();
-    setReason(null);
   }
 
-  public void confirmBooking(String reference, Supplier<String> cbrGenerator, String reason) {
+  public void confirmBooking(String reference, Supplier<String> cbrGenerator) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CONFIRMED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     if (this.getCarrierBookingReference() == null) {
@@ -127,7 +130,6 @@ public class PersistableCarrierBooking {
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
     removeFeedbacks();
-    setReason(reason);
   }
 
   private void resetAmendedBookingState() {
@@ -148,47 +150,31 @@ public class PersistableCarrierBooking {
     addAdvancedManifestFilings(booking);
   }
 
-  public void declineBooking(String reference, String reason) {
+  public void declineBooking(String reference) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(DECLINED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, DECLINED);
     if (getAmendedBooking().isPresent()) {
       changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
     }
-    setReason(reason);
   }
 
-  public void declineBookingAmendment(String reference, String reason) {
+  public void declineBookingAmendment(String reference) {
     checkState(reference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_DECLINED);
-    setReason(reason);
   }
 
-  private void setReason(String reason) {
-    if (reason != null) {
-      mutateBookingAndAmendment(b -> b.put("reason", reason));
-    } else {
-      mutateBookingAndAmendment(b -> b.remove("reason"));
-    }
-  }
-
-  public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator,String reason) {
+  public void requestUpdateToBooking(String reference, Consumer<ObjectNode> bookingMutator) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_UPDATE);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_UPDATE);
     mutateBookingAndAmendment(bookingMutator);
-    setReason(reason);
   }
 
-  public void rejectBooking(String reference, String rejectReason) {
+  public void rejectBooking(String reference) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(REJECTED);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, REJECTED);
-    if (rejectReason == null || rejectReason.isBlank()) {
-      rejectReason = "default message of rejection(reason not provided by carrier)";
-    }
-    final var reason = rejectReason;
-    mutateBookingAndAmendment((bookingContent, isAmendedContent) -> bookingContent.put("reason", reason));
   }
 
   public void confirmBookingCompleted(String reference, boolean resetAmendedBooking) {
@@ -198,10 +184,9 @@ public class PersistableCarrierBooking {
     if (resetAmendedBooking) {
       resetAmendedBookingState();
     }
-    setReason(null);
   }
 
-  public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking, String reason) {
+  public void updateConfirmedBooking(String reference, Consumer<ObjectNode> bookingMutator,boolean resetAmendedBooking) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(PENDING_AMENDMENT);
     checkState(reference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, PENDING_AMENDMENT);
@@ -209,56 +194,35 @@ public class PersistableCarrierBooking {
     if (resetAmendedBooking) {
       resetAmendedBookingState();
     }
-    setReason(reason);
   }
 
-  public void cancelBookingRequest(String bookingReference, String reason) {
+  public void cancelBookingRequest(String bookingReference) {
     var prerequisites = PREREQUISITE_STATE_FOR_TARGET_STATE.get(CANCELLED);
     checkState(bookingReference, getOriginalBookingState(), prerequisites);
     changeState(BOOKING_STATUS, CANCELLED);
-    if (reason == null || reason.isBlank()) {
-      reason = "Entire booking cancelled by shipper (no reason given)";
-    }
-    setReason(reason);
   }
 
-  public void cancelBookingAmendment(String bookingReference, String reason) {
+  public void cancelBookingAmendment(String bookingReference) {
     checkState(bookingReference, getBookingAmendedState(), s -> s == AMENDMENT_RECEIVED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CANCELLED);
-    if (reason == null || reason.isBlank()) {
-      reason = "Amendment cancelled by shipper (no reason given)";
-    }
-    setReason(reason);
   }
 
-  public void cancelConfirmedBooking(String bookingReference, String reason) {
+  public void cancelConfirmedBooking(String bookingReference) {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_CONFIRMED);
-    if (reason == null || reason.isBlank()) {
-      reason = REASON_INFO;
-    }
-    setReason(reason);
   }
 
-  public void updateCancelConfirmedBooking(String bookingReference, String reason) {
+  public void updateCancelConfirmedBooking(String bookingReference) {
     checkState(bookingReference, getOriginalBookingState(), PREREQUISITE_BOOKING_STATES_FOR_CANCELLATION::contains);
     if(getBookingAmendedState()!=null) {
       checkState(bookingReference, getBookingAmendedState(), PREREQUISITE_AMENDMENT_BOOKING_STATES_FOR_CANCELLATION::contains);
     }
     mutateBookingAndAmendment(b -> b.put(CANCELLATION_BOOKING_STATUS, CANCELLATION_RECEIVED.name()));
-    if (reason == null || reason.isBlank()) {
-      reason = REASON_INFO;
-    }
-    setReason(reason);
   }
 
-  public void declineConfirmedBookingCancellation(String bookingReference, String reason) {
+  public void declineConfirmedBookingCancellation(String bookingReference) {
     checkState(bookingReference, getBookingCancellationState(), s -> s == CANCELLATION_RECEIVED);
     changeState(CANCELLATION_DECLINED);
-    if (reason == null || reason.isBlank()) {
-      reason = REASON_INFO;
-    }
-    setReason(reason);
   }
 
   private void changeState(String attributeName, BookingState newState) {
@@ -335,7 +299,6 @@ public class PersistableCarrierBooking {
     if(!(PENDING_UPDATE.equals(bookingState) || PENDING_AMENDMENT.equals(bookingState) )) {
       removeFeedbacks();
     }
-    setReason(null);
   }
 
   private void ensureFeedbacksExist(ObjectNode booking) {

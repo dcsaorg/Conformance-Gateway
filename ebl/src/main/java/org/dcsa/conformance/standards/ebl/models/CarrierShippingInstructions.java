@@ -316,6 +316,10 @@ public class CarrierShippingInstructions {
     return this.state.required(SUBSCRIPTION_REFERENCE).asText("");
   }
 
+  public JsonNode getfeedbacks(){
+    return getShippingInstructions().path(FEEDBACKS);
+  }
+
   public String getShippingInstructionsReference() {
     return getShippingInstructions().required(SHIPPING_INSTRUCTIONS_REFERENCE).asText();
   }
@@ -350,25 +354,17 @@ public class CarrierShippingInstructions {
   }
 
 
-  private void setReason(String reason) {
-    if (reason != null) {
-      mutateShippingInstructionsAndUpdate(b -> b.put("reason", reason));
-    } else {
-      mutateShippingInstructionsAndUpdate(b -> b.remove("reason"));
-    }
-  }
-
   public void cancelShippingInstructionsUpdate(String shippingInstructionsReference) {
     checkState(shippingInstructionsReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CANCELLED);
-    setReason(null);
+
   }
 
   public void provideFeedbackToShippingInstructions(String documentReference, Consumer<ArrayNode> feedbackGenerator) {
     checkState(documentReference, getShippingInstructionsState(), s -> s != SI_PENDING_UPDATE && s != SI_COMPLETED );
     clearUpdatedShippingInstructions();
     changeSIState(SI_STATUS, SI_PENDING_UPDATE);
-    setReason(null);
+
     mutateShippingInstructionsAndUpdate(siData -> feedbackGenerator.accept(siData.putArray(FEEDBACKS)));
   }
 
@@ -376,16 +372,15 @@ public class CarrierShippingInstructions {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     var updated = getUpdatedShippingInstructions().orElseThrow();
     setShippingInstructions(updated);
-    setReason(null);
+
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(SI_STATUS, SI_RECEIVED);
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_CONFIRMED);
   }
 
-  public void declineUpdatedShippingInstructions(String documentReference, String reason) {
+  public void declineUpdatedShippingInstructions(String documentReference) {
     checkState(documentReference, getShippingInstructionsState(), s -> s == SI_UPDATE_RECEIVED);
     clearUpdatedShippingInstructions();
-    setReason(reason);
     mutateShippingInstructionsAndUpdate(siData -> siData.remove(FEEDBACKS));
     changeSIState(UPDATED_SI_STATUS, SI_UPDATE_DECLINED);
   }
@@ -393,7 +388,6 @@ public class CarrierShippingInstructions {
   public void confirmShippingInstructionsComplete(String documentReference) {
     checkState(documentReference, getOriginalShippingInstructionState(), s -> s == SI_RECEIVED);
     clearUpdatedShippingInstructions();
-    setReason(null);
     changeSIState(UPDATED_SI_STATUS, null);
     changeSIState(SI_STATUS, SI_COMPLETED);
   }

@@ -1,5 +1,8 @@
 package org.dcsa.conformance.standards.booking.checks;
 
+import static org.dcsa.conformance.standards.booking.checks.AbstractCarrierPayloadConformanceCheck.FEEDBACKS;
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_CODE;
+import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.FEEDBACKS_SEVERITY;
 import static org.dcsa.conformance.standards.booking.checks.BookingDataSets.NATIONAL_COMMODITY_TYPE_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
@@ -34,11 +37,6 @@ public class BookingChecks {
     BookingState.RECEIVED,
     BookingState.PENDING_UPDATE,
     BookingState.UPDATE_RECEIVED
-  );
-
-  private static final Set<BookingState> PENDING_CHANGES_STATES = Set.of(
-    BookingState.PENDING_UPDATE,
-    BookingState.PENDING_AMENDMENT
   );
 
   private static final JsonPointer CARRIER_BOOKING_REQUEST_REFERENCE = JsonPointer.compile("/carrierBookingRequestReference");
@@ -320,21 +318,22 @@ public class BookingChecks {
       .orElse(null);
   }
 
-  private static final JsonContentCheck REQUESTED_CHANGES_PRESENCE = JsonAttribute.customValidator(
-    "Requested changes must be present for the selected Booking Status ",
-    body -> {
-      var bookingStatus = body.path("bookingStatus").asText("");
-      var issues = new LinkedHashSet<String>();
-      if (PENDING_CHANGES_STATES.contains(BookingState.fromString(bookingStatus))) {
-        var feedbacks = body.get("feedbacks");
-        if (feedbacks == null) {
-          issues.add("feedbacks is missing in allowed booking states %s".formatted(PENDING_CHANGES_STATES));
-        }
-      }
-      return issues;
-    }
-  );
-
+  static final JsonContentCheck FEEDBACKS_PRESENCE =
+      JsonAttribute.customValidator(
+          "Feedbacks must be present for the selected Booking Status ",
+          body -> {
+            var bookingStatus = body.path("bookingStatus").asText("");
+            var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
+            var issues = new LinkedHashSet<String>();
+            if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
+                || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+                    && amendedBookingStatus.isEmpty())) && body.path(FEEDBACKS).isMissingNode()) {
+                issues.add(
+                    "feedbacks is missing in the allowed booking state %s"
+                        .formatted(bookingStatus));
+            }
+            return issues;
+          });
 
   private static final JsonContentCheck CHECK_ABSENCE_OF_CONFIRMED_FIELDS = JsonAttribute.customValidator(
     "check absence of confirmed fields in non confirmed booking states",
@@ -500,6 +499,18 @@ public class BookingChecks {
     ));
   }
 
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_SEVERITY =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedbacks severity' is valid",
+          mav -> mav.submitAllMatching("feedbacks.*.severity"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_SEVERITY));
+
+  static final JsonRebaseableContentCheck VALID_FEEDBACK_CODE =
+      JsonAttribute.allIndividualMatchesMustBeValid(
+          "Validate that 'feedbacks code' is valid",
+          mav -> mav.submitAllMatching("feedbacks.*.code"),
+          JsonAttribute.matchedMustBeDatasetKeywordIfPresent(FEEDBACKS_CODE));
+
   private static final List<JsonContentCheck> STATIC_BOOKING_CHECKS = Arrays.asList(
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtOrigin"), BookingDataSets.CARGO_MOVEMENT_TYPE),
     JsonAttribute.mustBeDatasetKeywordIfPresent(JsonPointer.compile("/cargoMovementTypeAtDestination"), BookingDataSets.CARGO_MOVEMENT_TYPE),
@@ -592,7 +603,9 @@ public class BookingChecks {
     SHIPMENT_CUTOFF_TIMES_UNIQUE,
     CHECK_CONFIRMED_BOOKING_FIELDS,
     VALIDATE_SHIPMENT_LOCATIONS,
-    REQUESTED_CHANGES_PRESENCE
+    FEEDBACKS_PRESENCE,
+    VALID_FEEDBACK_SEVERITY,
+    VALID_FEEDBACK_CODE
   );
 
   public static ActionCheck responseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier,

@@ -48,14 +48,6 @@ public class CarrierBookingRefStatusPayloadResponseConformanceCheck extends Abst
       createSubCheck(
         "Validate 'carrierBookingReference' is conditionally present",
         this::ensureCarrierBookingReferenceCompliance
-      ),
-      createSubCheck(
-        "Validate 'feedbacks' is only present on states where it is allowed",
-        requiredOrExcludedByState(PENDING_CHANGES_STATES, CANCELLATION_REASON_STATES,"feedbacks")
-      ),
-      createSubCheck(
-        "Validate 'reason' is only present on states where it is allowed",
-        reasonFieldRequiredForCancellation(REASON_STATES, CANCELLATION_REASON_STATES, "reason")
       )
     );
   }

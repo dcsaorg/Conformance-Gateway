@@ -1,0 +1,214 @@
+package org.dcsa.conformance.standards.jit.checks;
+
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import lombok.NoArgsConstructor;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
+import org.dcsa.conformance.core.check.JsonContentCheck;
+import org.dcsa.conformance.core.check.JsonRebaseableContentCheck;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
+import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
+import org.dcsa.conformance.standards.jit.model.JitTimestamp;
+import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
+
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+public class JitChecks {
+
+  public static final String TERMINAL_CALL_ID = "terminalCallID";
+  public static final String PORT_CALL_ID = "portCallID";
+  public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
+
+  static final JsonRebaseableContentCheck IS_FYI_TRUE =
+      JsonAttribute.mustEqual(
+          "Expected isFYI=true when message is For Your Information only.",
+          JsonPointer.compile("/isFYI"),
+          true);
+
+  public static ActionCheck createChecksForPortCallService(
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      PortCallServiceType serviceType,
+      DynamicScenarioParameters dsp) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    checks.add(checkRightFieldValues());
+    if (serviceType != null) {
+      checks.add(checkPortCallService(serviceType));
+    }
+    if (dsp != null && dsp.selector() != JitServiceTypeSelector.GIVEN) {
+      checks.add(checkPortCallServiceRightType(dsp));
+    }
+    checks.add(JitChecks.checkIDsMatchesPreviousCall(dsp));
+    if (dsp != null && dsp.isFYI()) {
+      checks.add(IS_FYI_TRUE);
+    }
+    return JsonAttribute.contentChecks(
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
+  }
+
+  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceType");
+
+  static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
+    return JsonAttribute.ifThen(
+        "Expected Port Call Service type should match scenario (%s)."
+            .formatted(serviceType.getFullName()),
+        IS_PORT_CALL_SERVICE,
+        JsonAttribute.mustEqual(
+            "Check if the correct Port Call Service was supplied.",
+            JsonPointer.compile("/portCallServiceType"),
+            serviceType::name));
+  }
+
+  static JsonContentCheck checkPortCallServiceRightType(DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Port Call Service type should match scenario '%s'."
+            .formatted(dsp.selector().getFullName()),
+        body -> {
+          if (IS_PORT_CALL_SERVICE.test(body)) {
+            String actualServiceType = body.path("portCallServiceType").asText();
+            PortCallServiceType serviceType = PortCallServiceType.fromName(actualServiceType);
+            if ((dsp.selector() == JitServiceTypeSelector.FULL_ERP
+                    && !PortCallServiceType.getServicesWithERPAndA().contains(serviceType))
+                || (dsp.selector() == JitServiceTypeSelector.S_A_PATTERN
+                    && !PortCallServiceType.getServicesHavingOnlyA().contains(serviceType))) {
+              return Set.of(
+                  "Expected matching Port Call Service type with scenario '%s'. Found non-matching type: '%s'"
+                      .formatted(dsp.selector().getFullName(), actualServiceType));
+            }
+          }
+          return Collections.emptySet();
+        });
+  }
+
+  static JsonContentCheck checkRightFieldValues() {
+    return JsonAttribute.customValidator(
+        "Check if valid combinations of values are supplied.",
+        body -> {
+          Set<String> issues = new HashSet<>();
+          if (IS_PORT_CALL_SERVICE.test(body)) {
+            String actualServiceType = body.path("portCallServiceType").asText();
+            issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
+            issues.add(verifyPortCallPhaseTypeCode(body, actualServiceType));
+          }
+          return issues.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+        });
+  }
+
+  private static String verifyPortCallPhaseTypeCode(JsonNode body, String actualServiceType) {
+    String portCallPhaseTypeCode = body.path("portCallPhaseTypeCode").asText("");
+    if (!PortCallPhaseTypeCode.isValidCombination(
+        PortCallServiceType.fromName(actualServiceType), portCallPhaseTypeCode)) {
+      return "Expected matching Port Call Service type with PortCallPhaseTypeCode. Found non-matching type: '%s' combined with code: '%s'"
+          .formatted(actualServiceType, portCallPhaseTypeCode);
+    }
+    return null;
+  }
+
+  private static String verifyPortCallServiceEventTypeCode(
+      JsonNode body, String actualServiceType) {
+    String portCallServiceEventTypeCode = body.path("portCallServiceEventTypeCode").asText();
+    if (!PortCallServiceEventTypeCode.isValidCombination(
+        PortCallServiceType.fromName(actualServiceType), portCallServiceEventTypeCode)) {
+      return "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
+          .formatted(actualServiceType, portCallServiceEventTypeCode);
+    }
+    return null;
+  }
+
+  public static ActionCheck createChecksForTimestamp(
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      DynamicScenarioParameters dsp) {
+    List<JsonContentCheck> checks = new ArrayList<>();
+    if (dsp == null) return null;
+    if (dsp.currentTimestamp() != null
+        && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
+      checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
+    }
+    if (checks.isEmpty()) return null;
+    return JsonAttribute.contentChecks(
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        checks);
+  }
+
+  static JsonContentCheck checkPlannedMatchesRequestedTimestamp(DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Check if the Planned timestamp matches the Requested timestamp.",
+        body -> {
+          JitTimestamp receivedTimestamp = JitTimestamp.fromJson(body);
+          if (dsp.previousTimestamp().classifierCode().equals(JitClassifierCode.REQ)
+              && !dsp.previousTimestamp().dateTime().equals(receivedTimestamp.dateTime())) {
+            return Set.of(
+                "Expected matching timestamp: '%s' but got Planned timestamp: '%s'"
+                    .formatted(dsp.previousTimestamp().dateTime(), receivedTimestamp.dateTime()));
+          }
+          return Collections.emptySet();
+        });
+  }
+
+  public static JsonContentCheck checkIDsMatchesPreviousCall(DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Check if the used IDs matches the previous call's IDs.",
+        body -> {
+          Set<String> errors = new HashSet<>();
+          if (body.has(PORT_CALL_ID)
+              && dsp.portCallID() != null
+              && !body.path(PORT_CALL_ID).asText().equals(dsp.portCallID())) {
+            errors.add(
+                "Expected matching portCallID: '%s' but got a different portCallID: '%s'"
+                    .formatted(dsp.portCallID(), body.path(PORT_CALL_ID)));
+          }
+          if (body.has(TERMINAL_CALL_ID)
+              && dsp.terminalCallID() != null
+              && !body.path(TERMINAL_CALL_ID).asText().equals(dsp.terminalCallID())) {
+            errors.add(
+                "Expected matching terminalCallID: '%s' but got a different terminalCallID: '%s'"
+                    .formatted(dsp.terminalCallID(), body.path(TERMINAL_CALL_ID)));
+          }
+          if (body.has(PORT_CALL_SERVICE_ID)
+              && dsp.portCallServiceID() != null
+              && !body.path(PORT_CALL_SERVICE_ID).asText().equals(dsp.portCallServiceID())) {
+            errors.add(
+                "Expected matching portCallServiceID: '%s' but got a different portCallServiceID: '%s'"
+                    .formatted(dsp.portCallServiceID(), body.path(PORT_CALL_SERVICE_ID)));
+          }
+          return errors;
+        });
+  }
+
+  public static ActionCheck checkIsFYIIsCorrect(
+      Predicate<String> isRelevantForRoleName,
+      UUID matchedExchangeUuid,
+      String expectedApiVersion,
+      DynamicScenarioParameters dsp) {
+    if (!dsp.isFYI()) return null;
+    return JsonAttribute.contentChecks(
+        isRelevantForRoleName,
+        matchedExchangeUuid,
+        HttpMessageType.REQUEST,
+        expectedApiVersion,
+        IS_FYI_TRUE);
+  }
+}

@@ -11,13 +11,19 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.standards.jit.party.JitPublisher;
+import org.dcsa.conformance.standards.jit.model.JitSchema;
+import org.dcsa.conformance.standards.jit.party.JitConsumer;
+import org.dcsa.conformance.standards.jit.party.JitProvider;
 import org.dcsa.conformance.standards.jit.party.JitRole;
-import org.dcsa.conformance.standards.jit.party.JitSubscriber;
 
-class JitComponentFactory extends AbstractComponentFactory {
+public class JitComponentFactory extends AbstractComponentFactory {
   JitComponentFactory(String standardName, String standardVersion, String scenarioSuite) {
-    super(standardName, standardVersion, scenarioSuite, "Publisher", "Subscriber");
+    super(
+        standardName,
+        standardVersion,
+        scenarioSuite,
+        JitRole.PROVIDER.getConfigName(),
+        JitRole.CONSUMER.getConfigName());
   }
 
   public List<ConformanceParty> createParties(
@@ -35,32 +41,31 @@ class JitComponentFactory extends AbstractComponentFactory {
 
     LinkedList<ConformanceParty> parties = new LinkedList<>();
 
-    PartyConfiguration publisherConfiguration =
-        partyConfigurationsByRoleName.get(JitRole.PUBLISHER.getConfigName());
-    if (publisherConfiguration != null) {
+    PartyConfiguration providerConfiguration =
+        partyConfigurationsByRoleName.get(JitRole.PROVIDER.getConfigName());
+    if (providerConfiguration != null) {
       parties.add(
-          new JitPublisher(
+          new JitProvider(
               standardVersion,
-              publisherConfiguration,
-              counterpartConfigurationsByRoleName.get(JitRole.SUBSCRIBER.getConfigName()),
+              providerConfiguration,
+              counterpartConfigurationsByRoleName.get(JitRole.CONSUMER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
 
-    PartyConfiguration subscriberConfiguration =
-        partyConfigurationsByRoleName.get(JitRole.SUBSCRIBER.getConfigName());
-    if (subscriberConfiguration != null) {
+    PartyConfiguration consumerConfiguration =
+        partyConfigurationsByRoleName.get(JitRole.CONSUMER.getConfigName());
+    if (consumerConfiguration != null) {
       parties.add(
-          new JitSubscriber(
+          new JitConsumer(
               standardVersion,
-              subscriberConfiguration,
-              counterpartConfigurationsByRoleName.get(JitRole.PUBLISHER.getConfigName()),
+              consumerConfiguration,
+              counterpartConfigurationsByRoleName.get(JitRole.PROVIDER.getConfigName()),
               persistentMap,
               webClient,
               orchestratorAuthHeader));
     }
-
     return parties;
   }
 
@@ -70,9 +75,9 @@ class JitComponentFactory extends AbstractComponentFactory {
     return JitScenarioListBuilder.createModuleScenarioListBuilders(
         this,
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, JitRole::isPublisher),
+            partyConfigurations, counterpartConfigurations, JitRole::isProvider),
         _findPartyOrCounterpartName(
-            partyConfigurations, counterpartConfigurations, JitRole::isSubscriber));
+            partyConfigurations, counterpartConfigurations, JitRole::isConsumer));
   }
 
   @Override
@@ -97,14 +102,8 @@ class JitComponentFactory extends AbstractComponentFactory {
         .collect(Collectors.toSet());
   }
 
-  public JsonSchemaValidator getMessageSchemaValidator(String apiProviderRole, boolean forRequest) {
-    String schemaFilePath =
-        "/standards/jit/schemas/jit-%s-%s.json"
-            .formatted(
-                standardVersion.toLowerCase().replaceAll("[.-]", ""),
-                apiProviderRole.toLowerCase());
-    String schemaName =
-        JitRole.isPublisher(apiProviderRole) ? (forRequest ? null : "operationsEvents") : null;
-    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName);
+  public JsonSchemaValidator getMessageSchemaValidator(JitSchema schemaName) {
+    String schemaFilePath = "/standards/jit/schemas/JIT_v%s.yaml".formatted(standardVersion);
+    return JsonSchemaValidator.getInstance(schemaFilePath, schemaName.getSchemaName());
   }
 }

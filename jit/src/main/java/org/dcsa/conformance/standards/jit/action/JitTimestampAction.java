@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
@@ -103,7 +104,9 @@ public class JitTimestampAction extends JitAction {
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
                   expectedApiVersion,
-                  JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                  List.of(
+                      JitChecks.checkIDsMatchesPreviousCall(dsp),
+                      JitChecks.checkTimestampIDsMatchesPreviousCall(dsp))),
               new JsonSchemaCheck(
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
@@ -134,7 +137,9 @@ public class JitTimestampAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                List.of(
+                    JitChecks.checkIDsMatchesPreviousCall(dsp),
+                    JitChecks.checkTimestampIDsMatchesPreviousCall(dsp))),
             new JsonSchemaCheck(
                 JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
             checksForTimestamp);

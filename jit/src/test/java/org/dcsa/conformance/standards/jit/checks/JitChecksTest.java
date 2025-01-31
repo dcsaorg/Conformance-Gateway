@@ -45,6 +45,43 @@ class JitChecksTest {
   }
 
   @Test
+  void checkTimestamps() {
+    // replyToTimestampID: Condition: Only applicable after initial **Timestamp** has been sent.
+    assertTrue(
+        JitChecks.checkTimestampReplyTimestampIDisAbsent()
+            .validate(createTimestamp().toJson())
+            .isEmpty());
+    assertFalse(
+        JitChecks.checkTimestampReplyTimestampIDisAbsent()
+            .validate(createTimestamp().toJson().put("replyToTimestampID", "something"))
+            .isEmpty());
+
+    // replyToTimestampID matches the previous timestamp
+    var previousTimestamp = UUID.randomUUID().toString();
+    var dsp =
+        new DynamicScenarioParameters()
+            .withPreviousTimestamp(createTimestamp().withTimestampID(previousTimestamp));
+    // Assert Matching replyToTimestampID
+    assertTrue(
+        JitChecks.checkTimestampIDsMatchesPreviousCall(dsp)
+            .validate(createTimestamp().withReplyToTimestampID(previousTimestamp).toJson())
+            .isEmpty());
+
+    // Assert No previous timestamp
+    assertTrue(
+        JitChecks.checkTimestampIDsMatchesPreviousCall(new DynamicScenarioParameters())
+            .validate(createTimestamp().toJson())
+            .isEmpty());
+
+    // Assert Non-matching replyToTimestampID
+    dsp = dsp.withPreviousTimestamp(dsp.previousTimestamp().withTimestampID("somethingElse"));
+    assertFalse(
+        JitChecks.checkTimestampIDsMatchesPreviousCall(dsp)
+            .validate(createTimestamp().withReplyToTimestampID(previousTimestamp).toJson())
+            .isEmpty());
+  }
+
+  @Test
   void checkPortCallServiceEventTypeCodeValues() {
     assertTrue(
         JitChecks.checkRightFieldValues()

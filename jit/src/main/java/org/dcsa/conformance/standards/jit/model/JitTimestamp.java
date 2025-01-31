@@ -36,28 +36,29 @@ public record JitTimestamp(
 
   public static JitTimestamp getTimestampForType(
       JitTimestampType timestampType, JitTimestamp previousTimestamp, boolean isFYI) {
-    return switch (timestampType) {
-      case ESTIMATED ->
+    if (previousTimestamp == null) {
+      previousTimestamp =
           new JitTimestamp(
+              null,
+              null,
               UUID.randomUUID().toString(),
-              previousTimestamp != null ? previousTimestamp.timestampID() : null,
-              previousTimestamp != null
-                  ? previousTimestamp.portCallServiceID()
-                  : UUID.randomUUID().toString(),
-              timestampType.getClassifierCode(),
+              null,
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
               "STR",
               isFYI,
               "Port closed due to strike");
-      case PLANNED, ACTUAL ->
-          previousTimestamp.withClassifierCode(timestampType.getClassifierCode());
+    }
+    return switch (timestampType) {
+      case ESTIMATED, PLANNED, ACTUAL ->
+          previousTimestamp
+              .withTimestampID(UUID.randomUUID().toString())
+              .withClassifierCode(timestampType.getClassifierCode())
+              .withReplyToTimestampID(previousTimestamp.timestampID());
       case REQUESTED ->
           previousTimestamp
+              .withTimestampID(UUID.randomUUID().toString())
               .withClassifierCode(timestampType.getClassifierCode())
-              .withTimestampID(
-                  UUID.randomUUID().toString()) // Create new ID, because it's a new timestamp
-              .withReplyToTimestampID(
-                  previousTimestamp.timestampID()) // Respond to the previous timestamp
+              .withReplyToTimestampID(previousTimestamp.timestampID())
               .withDateTime(generateRandomDateTime());
     };
   }

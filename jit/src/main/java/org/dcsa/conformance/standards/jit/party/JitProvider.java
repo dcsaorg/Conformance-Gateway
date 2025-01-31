@@ -181,15 +181,14 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp previousTimestamp =
         dsp.currentTimestamp(); // currentTimestamp is still the value from the previous action.
 
-    // Create values for the first timestamp in the sequence.
-    if (previousTimestamp == null) {
-      previousTimestamp =
-          JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null, dsp.isFYI());
-      if (dsp.portCallServiceID() != null)
-        previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
-    }
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(timestampType, previousTimestamp, dsp.isFYI());
+
+    // Reuse portCallServiceID from previous calls
+    if (previousTimestamp == null) {
+      timestamp = timestamp.withPortCallServiceID(dsp.portCallServiceID());
+    }
+
     sendTimestampPutRequest(timestampType, timestamp);
 
     JitPartyHelper.storeTimestamp(persistentMap, timestamp);

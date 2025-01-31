@@ -167,11 +167,14 @@ public class JitChecks {
       UUID matchedExchangeUuid,
       String expectedApiVersion,
       DynamicScenarioParameters dsp) {
-    List<JsonContentCheck> checks = new ArrayList<>();
     if (dsp == null) return null;
+    List<JsonContentCheck> checks = new ArrayList<>();
     if (dsp.currentTimestamp() != null
         && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
       checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
+    }
+    if (dsp.previousTimestamp() == null) {
+      checks.add(checkTimestampReplyTimestampIDisAbsent());
     }
     if (checks.isEmpty()) return null;
     return JsonAttribute.contentChecks(
@@ -180,6 +183,35 @@ public class JitChecks {
         HttpMessageType.REQUEST,
         expectedApiVersion,
         checks);
+  }
+
+  public static JsonContentCheck checkTimestampIDsMatchesPreviousCall(
+      DynamicScenarioParameters dsp) {
+    return JsonAttribute.customValidator(
+        "Check if the reply timestamp matches the previous timestamp.",
+        body -> {
+          if (dsp.previousTimestamp() == null) return Collections.emptySet();
+          String previousTimestampID = dsp.previousTimestamp().timestampID();
+          JitTimestamp timestamp = JitTimestamp.fromJson(body);
+          if (!previousTimestampID.equals(timestamp.replyToTimestampID())) {
+            return Set.of(
+                "Expected replyToTimestampID matches previous sent timestampId: '%s' but found replyToTimestampID: '%s'"
+                    .formatted(previousTimestampID, timestamp.replyToTimestampID()));
+          }
+          return Collections.emptySet();
+        });
+  }
+
+  static JsonContentCheck checkTimestampReplyTimestampIDisAbsent() {
+    return JsonAttribute.customValidator(
+        "Check that the replyToTimestampID is absent.",
+        body -> {
+          if (body.has("replyToTimestampID")) {
+            return Set.of(
+                "Expected replyToTimestampID to be absent, since no previous timestamp was sent.");
+          }
+          return Collections.emptySet();
+        });
   }
 
   static JsonContentCheck checkPlannedMatchesRequestedTimestamp(DynamicScenarioParameters dsp) {

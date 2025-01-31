@@ -1209,7 +1209,6 @@ public class EBLChecks {
     Supplier<Set<String>> expectedValueSupplier =
         () -> {
           var csp = cspSupplier.get();
-          // return setOf(csp.commoditySubReference(), csp.commoditySubReference2());
           return setOf(
               csp.commoditySubReference() != null && !csp.commoditySubReference().isEmpty()
                   ? csp.commoditySubReference()

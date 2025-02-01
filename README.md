@@ -39,7 +39,7 @@ Just run `docker compose up` in the root directory of the project. This will bui
 2. Install dependencies & build & run the Angular application:
     ```sh
     npm install
-    ng serve
+    npm run ng serve
     ```
 3. Open a browser and navigate to `http://localhost:4200/environment`
 

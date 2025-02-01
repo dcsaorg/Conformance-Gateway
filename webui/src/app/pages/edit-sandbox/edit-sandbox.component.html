@@ -22,13 +22,13 @@
             type="text"
             autocomplete="off"
             name="sandboxNameTextField"
-            [(ngModel)]="updatedSandboxConfig!.sandboxName"
+            [(ngModel)]="updatedSandboxConfig.sandboxName"
           />
         </mat-form-field>
       </div>
     </mat-card>
 
-    <div [ngStyle]="{'color': !originalSandboxConfig.sandboxEndpointUriMethods.length ? 'grey' : 'initial'}">
+    <div [ngStyle]="{'color': originalSandboxConfig.sandboxEndpointUriMethods.length == 0 ? 'grey' : 'initial'}">
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Connecting to the sandbox (read-only)</div>
         <div class="paragraph">Sandbox base URL:</div>
@@ -39,21 +39,21 @@
           readonly="readonly"
           [value]="originalSandboxConfig.sandboxUrl"
         />
-        <div *ngIf="!originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.sandboxEndpointUriMethods.length == 0" style="margin-top: 1em;">
           This type of sandbox has no endpoints to which your application can make API calls.
         </div>
-        <div *ngIf="originalSandboxConfig?.sandboxEndpointUriMethods?.length">
+        <div *ngIf="originalSandboxConfig.sandboxEndpointUriMethods.length > 0">
           <div style="margin-top: 1em;">
             Configure your application to make all API requests to these sandbox endpoint URLs:
           </div>
-          <div *ngFor="let endpointUriAndMethods of originalSandboxConfig?.sandboxEndpointUriMethods">
+          <div *ngFor="let endpointUriAndMethods of originalSandboxConfig.sandboxEndpointUriMethods">
             <div *ngFor="let method of endpointUriAndMethods.methods">
               <div class="paragraph">{{ method }} {{ endpointUriAndMethods.endpointUri }}</div>
               <input
                 class="readOnlyInput"
                 type="text"
                 readonly="readonly"
-                [value]="originalSandboxConfig!.sandboxUrl + endpointUriAndMethods.endpointUri"
+                [value]="originalSandboxConfig.sandboxUrl + endpointUriAndMethods.endpointUri"
               />
             </div>
           </div>
@@ -62,7 +62,7 @@
 
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Authenticating to the sandbox (read-only)</div>
-        <div *ngIf="originalSandboxConfig?.sandboxEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.sandboxEndpointUriMethods.length > 0" style="margin-top: 1em;">
           Configure your application to include this header when making API requests to the sandbox:
         </div>
         <div class="paragraph">Sandbox authentication header name:</div>
@@ -71,7 +71,7 @@
           class="readOnlyInput"
           type="text"
           readonly="readonly"
-          [value]="originalSandboxConfig!.sandboxAuthHeaderName"
+          [value]="originalSandboxConfig.sandboxAuthHeaderName"
         />
         <div class="paragraph">Sandbox authentication header value:</div>
         <input
@@ -79,18 +79,18 @@
           class="readOnlyInput"
           type="text"
           readonly="readonly"
-          [value]="originalSandboxConfig!.sandboxAuthHeaderValue"
+          [value]="originalSandboxConfig.sandboxAuthHeaderValue"
         />
       </mat-card>
     </div>
 
-    <div [ngStyle]="{'color': !originalSandboxConfig.externalPartyEndpointUriMethods.length ? 'grey' : 'initial'}">
+    <div [ngStyle]="{'color': originalSandboxConfig.externalPartyEndpointUriMethods.length == 0 ? 'grey' : 'initial'}">
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Connecting to your application</div>
-        <div *ngIf="!originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.externalPartyEndpointUriMethods.length == 0" style="margin-top: 1em;">
           This type of sandbox does not make API calls to your application.
         </div>
-        <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.externalPartyEndpointUriMethods.length > 0" style="margin-top: 1em;">
           Enter the base URL of all your application's endpoints to which the sandbox makes API calls:
         </div>
         <div>
@@ -102,18 +102,18 @@
               type="text"
               autocomplete="off"
               name="externalPartyUrlTextField"
-              [(ngModel)]="updatedSandboxConfig!.externalPartyUrl"
+              [(ngModel)]="updatedSandboxConfig.externalPartyUrl"
             />
           </mat-form-field>
         </div>
-        <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length">
+        <div *ngIf="originalSandboxConfig.externalPartyEndpointUriMethods.length > 0">
           <div>
             <mat-checkbox
-              [checked]="!!originalSandboxConfig.externalPartyEndpointUriOverrides.length"
+              [checked]="originalSandboxConfig.externalPartyEndpointUriOverrides.length > 0"
               (change)="onUsingCustomEndpointUrisChange($event.checked)"
             >Use custom endpoint URIs</mat-checkbox>
           </div>
-          <div *ngIf="!updatedSandboxConfig?.externalPartyEndpointUriOverrides?.length">
+          <div *ngIf="updatedSandboxConfig.externalPartyEndpointUriOverrides.length == 0">
             <div style="margin-top: 1em; margin-bottom: .5em;">The sandbox will make all API requests for each endpoint to these URLs:</div>
             <div *ngFor="let endpointUriAndMethods of originalSandboxConfig?.externalPartyEndpointUriMethods">
               <div *ngFor="let method of endpointUriAndMethods.methods">
@@ -124,13 +124,13 @@
                   class="readOnlyInput"
                   type="text"
                   readonly="readonly"
-                  [value]="updatedSandboxConfig!.externalPartyUrl + endpointUriAndMethods.endpointUri"
+                  [value]="updatedSandboxConfig.externalPartyUrl + endpointUriAndMethods.endpointUri"
                 />
               </div>
             </div>
           </div>
-          <div *ngIf="!!updatedSandboxConfig?.externalPartyEndpointUriOverrides?.length">
-            <div *ngFor="let endpointUriOverride of updatedSandboxConfig?.externalPartyEndpointUriOverrides; let i = index">
+          <div *ngIf="updatedSandboxConfig.externalPartyEndpointUriOverrides.length > 0">
+            <div *ngFor="let endpointUriOverride of updatedSandboxConfig.externalPartyEndpointUriOverrides; let i = index">
               <mat-card [ngClass]="'configCard'">
                 <div class="paragraph" style="margin-bottom: 1em; font-weight: bold;">
                   {{ endpointUriOverride.method }}
@@ -151,7 +151,7 @@
                   class="readOnlyInput"
                   type="text"
                   readonly="readonly"
-                  [value]="updatedSandboxConfig!.externalPartyUrl + endpointUriOverride.baseUriOverride + endpointUriOverride.endpointSuffix"
+                  [value]="updatedSandboxConfig.externalPartyUrl + endpointUriOverride.baseUriOverride + endpointUriOverride.endpointSuffix"
                 />
               </mat-card>
             </div>
@@ -172,10 +172,10 @@
 
       <mat-card [ngClass]="'configCard'">
         <div class="configPageSubtitle">Authenticating to your application</div>
-        <div *ngIf="!originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.externalPartyEndpointUriMethods.length == 0" style="margin-top: 1em;">
           This type of sandbox does not make API calls to your application.
         </div>
-        <div *ngIf="originalSandboxConfig?.externalPartyEndpointUriMethods?.length" style="margin-top: 1em;">
+        <div *ngIf="originalSandboxConfig.externalPartyEndpointUriMethods.length > 0" style="margin-top: 1em;">
           Enter the header name and value to be included by the sandbox in all API requests that it makes to your application:
         </div>
         <div>
@@ -187,7 +187,7 @@
               type="text"
               autocomplete="off"
               name="externalPartyAuthHeaderNameTextField"
-              [(ngModel)]="updatedSandboxConfig!.externalPartyAuthHeaderName"
+              [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderName"
             />
           </mat-form-field>
         </div>
@@ -199,7 +199,7 @@
               type="text"
               autocomplete="off"
               name="externalPartyAuthHeaderValueTextField"
-              [(ngModel)]="updatedSandboxConfig!.externalPartyAuthHeaderValue"
+              [(ngModel)]="updatedSandboxConfig.externalPartyAuthHeaderValue"
             />
           </mat-form-field>
         </div>
@@ -221,14 +221,14 @@
             mat-mini-fab
             color="primary"
             type="button"
-            [disabled]="updatedSandboxConfig!.externalPartyAdditionalHeaders.length < 1"
+            [disabled]="updatedSandboxConfig.externalPartyAdditionalHeaders.length == 0"
             (click)="onRemoveHeader()"
           >
             <mat-icon>remove</mat-icon>
           </button>
         </div>
 
-        <div *ngFor="let additionalHeader of updatedSandboxConfig!.externalPartyAdditionalHeaders">
+        <div *ngFor="let additionalHeader of updatedSandboxConfig.externalPartyAdditionalHeaders">
           <hr/>
           <app-edit-header [headerNameAndValue]="additionalHeader"></app-edit-header>
         </div>
@@ -262,4 +262,3 @@
     <br/>
   </form>
 </div>
-

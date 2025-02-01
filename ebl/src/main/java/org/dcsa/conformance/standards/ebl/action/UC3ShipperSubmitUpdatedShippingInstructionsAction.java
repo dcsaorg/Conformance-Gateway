@@ -5,10 +5,8 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
@@ -33,12 +31,6 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
     this.expectedSiStatus = expectedSiStatus;
     this.requestSchemaValidator = requestSchemaValidator;
     this.notificationSchemaValidator = notificationSchemaValidator;
-  }
-
-  @Override
-  protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
-    var body = exchange.getRequest().message().body().getJsonBody();
-    return dynamicScenarioParameters.withUpdatedShippingInstructions(body);
   }
 
   @Override

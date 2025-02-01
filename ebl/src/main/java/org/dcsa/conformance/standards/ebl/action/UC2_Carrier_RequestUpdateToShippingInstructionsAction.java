@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
-import org.dcsa.conformance.standards.ebl.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 
 @Getter
@@ -20,11 +18,6 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
       JsonSchemaValidator requestSchemaValidator) {
     super(carrierPartyName, shipperPartyName, previousAction, "UC2", 204);
     this.requestSchemaValidator = requestSchemaValidator;
-  }
-
-  @Override
-  protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
-    return dynamicScenarioParameters.withUpdatedShippingInstructions(null);
   }
 
   @Override

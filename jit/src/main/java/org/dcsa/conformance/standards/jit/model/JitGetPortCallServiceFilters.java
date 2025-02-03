@@ -4,11 +4,11 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-public record JitGetPortServiceCallFilters(
+public record JitGetPortCallServiceFilters(
     String terminalCallID, String portCallServiceID, String portCallServiceType) {
 
   public static List<String> props() {
-    return Arrays.stream(JitGetPortServiceCallFilters.class.getDeclaredFields())
+    return Arrays.stream(JitGetPortCallServiceFilters.class.getDeclaredFields())
         .map(Field::getName)
         .toList();
   }

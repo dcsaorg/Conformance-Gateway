@@ -43,10 +43,10 @@ public class JitPartyHelper {
       response.add(terminalCall);
       jitParty.addOperatorLogEntry("Handled GET Terminal Calls request accepted.");
     } else if (request.url().contains(JitGetType.PORT_CALL_SERVICES.getUrlPath())) {
-      ObjectNode portServiceCall =
+      ObjectNode portCallService =
           (ObjectNode) persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
-      portServiceCall.remove(JitProvider.IS_FYI);
-      response.add(portServiceCall);
+      portCallService.remove(JitProvider.IS_FYI);
+      response.add(portCallService);
       jitParty.addOperatorLogEntry("Handled GET Port Service Calls request accepted.");
     } else if (request.url().contains(JitGetType.VESSEL_STATUSES.getUrlPath())) {
       ObjectNode vesselStatusCall =
@@ -150,18 +150,18 @@ public class JitPartyHelper {
     }
   }
 
-  static void createParamsForPortServiceCall(
+  static void createParamsForPortCallService(
       JsonNodeMap persistentMap,
       JitGetType getType,
       List<String> filters,
       Map<String, List<String>> queryParams) {
     if (getType != JitGetType.PORT_CALL_SERVICES) return;
 
-    JsonNode portServiceCall = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
-    for (int i = 0; i < JitGetPortServiceCallFilters.props().size(); i++) {
-      String propertyName = JitGetPortServiceCallFilters.props().get(i);
+    JsonNode portCallService = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
+    for (int i = 0; i < JitGetPortCallServiceFilters.props().size(); i++) {
+      String propertyName = JitGetPortCallServiceFilters.props().get(i);
       if (filters.contains(propertyName)) {
-        queryParams.put(propertyName, List.of(portServiceCall.get(propertyName).asText()));
+        queryParams.put(propertyName, List.of(portCallService.get(propertyName).asText()));
       }
     }
   }

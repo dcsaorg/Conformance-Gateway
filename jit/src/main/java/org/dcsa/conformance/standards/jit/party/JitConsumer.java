@@ -173,7 +173,7 @@ public class JitConsumer extends ConformanceParty {
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
-    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortCallService(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
 

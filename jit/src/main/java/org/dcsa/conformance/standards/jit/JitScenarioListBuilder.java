@@ -27,7 +27,7 @@ import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
-import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetPortCallServiceFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTimestampCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
@@ -1062,21 +1062,21 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     return getAction(
             context,
             JitGetType.PORT_CALL_SERVICES,
-            JitGetPortServiceCallFilters.props().getFirst(),
+            JitGetPortCallServiceFilters.props().getFirst(),
             requestedByProvider)
         .then(
             getAction(
                     context,
                     JitGetType.PORT_CALL_SERVICES,
-                    JitGetPortServiceCallFilters.props().get(1),
+                    JitGetPortCallServiceFilters.props().get(1),
                     requestedByProvider)
                 .then(
                     getAction(
                         context,
                         JitGetType.PORT_CALL_SERVICES,
                         List.of(
-                            JitGetPortServiceCallFilters.props().getFirst(),
-                            JitGetPortServiceCallFilters.props().get(2)),
+                            JitGetPortCallServiceFilters.props().getFirst(),
+                            JitGetPortCallServiceFilters.props().get(2)),
                         requestedByProvider)));
   }
 

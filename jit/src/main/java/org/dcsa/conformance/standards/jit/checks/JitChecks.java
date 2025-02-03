@@ -58,11 +58,14 @@ public class JitChecks {
                     jsonPointers.add(JsonPointer.compile("/vessel/MMSINumber"));
                   }));
 
-  public static final JsonRebaseableContentCheck VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT =
-      JsonAttribute.ifThen(
-          "Vessel/lengthOverall requires dimensionUnit",
-          jsonNode -> jsonNode.path("vessel").has("lengthOverall"),
-          JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
+  public static final JsonRebaseableContentCheck
+      VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT =
+          JsonAttribute.ifThen(
+              "Vessel: width or lengthOverall requires dimensionUnit property.",
+              jsonNode ->
+                  jsonNode.path("vessel").has("width")
+                      || jsonNode.path("vessel").has("lengthOverall"),
+              JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
 
   public static final JsonRebaseableContentCheck VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT =
       JsonAttribute.ifThen(

@@ -77,8 +77,7 @@ public class JitPortCallAction extends JitAction {
                 expectedApiVersion,
                 List.of(
                     JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER,
-                    JitChecks.VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT,
-                    JitChecks.VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT)),
+                    JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

@@ -58,6 +58,18 @@ public class JitChecks {
                     jsonPointers.add(JsonPointer.compile("/vessel/MMSINumber"));
                   }));
 
+  public static final JsonRebaseableContentCheck VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT =
+      JsonAttribute.ifThen(
+          "Vessel/lengthOverall requires dimensionUnit",
+          jsonNode -> jsonNode.path("vessel").has("lengthOverall"),
+          JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
+
+  public static final JsonRebaseableContentCheck VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT =
+      JsonAttribute.ifThen(
+          "Vessel/width requires dimensionUnit",
+          jsonNode -> jsonNode.path("vessel").has("width"),
+          JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
+
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(
           "Expected isFYI=true when message is For Your Information only.",

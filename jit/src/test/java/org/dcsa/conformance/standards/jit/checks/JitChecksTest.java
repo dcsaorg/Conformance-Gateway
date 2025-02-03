@@ -331,6 +331,29 @@ class JitChecksTest {
             .isEmpty());
   }
 
+  @Test
+  void testPortCallHasDimensionUnitWhenRequired() {
+    var portCall = createPortCall();
+    assertTrue(
+        JitChecks.VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+    assertTrue(JitChecks.VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+
+    // Remove lengthOverall and width and verify still valid
+    ((ObjectNode) portCall.required("vessel")).remove("lengthOverall");
+    assertTrue(
+        JitChecks.VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+
+    ((ObjectNode) portCall.required("vessel")).remove("width");
+    assertTrue(JitChecks.VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+
+    // Remove dimensionUnit and verify invalid
+    portCall = createPortCall();
+    ((ObjectNode) portCall.required("vessel")).remove("dimensionUnit");
+    assertFalse(
+        JitChecks.VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+    assertFalse(JitChecks.VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT.validate(portCall).isEmpty());
+  }
+
   private ObjectNode createPortCall() {
     var dsp =
         new DynamicScenarioParameters(

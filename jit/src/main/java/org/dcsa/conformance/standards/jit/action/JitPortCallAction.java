@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +75,10 @@ public class JitPortCallAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER),
+                List.of(
+                    JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER,
+                    JitChecks.VESSEL_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT,
+                    JitChecks.VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

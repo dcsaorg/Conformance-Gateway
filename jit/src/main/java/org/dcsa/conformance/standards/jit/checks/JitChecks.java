@@ -248,15 +248,7 @@ public class JitChecks {
   }
 
   static JsonContentCheck checkTimestampReplyTimestampIDisAbsent() {
-    return JsonAttribute.customValidator(
-        "Check that the replyToTimestampID is absent.",
-        body -> {
-          if (body.has("replyToTimestampID")) {
-            return Set.of(
-                "Expected replyToTimestampID to be absent, since no previous timestamp was sent.");
-          }
-          return Collections.emptySet();
-        });
+    return JsonAttribute.mustBeAbsent(JsonPointer.compile("/replyToTimestampID"));
   }
 
   static JsonContentCheck checkPlannedMatchesRequestedTimestamp(DynamicScenarioParameters dsp) {

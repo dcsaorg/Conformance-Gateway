@@ -56,7 +56,7 @@ public class JitPartyHelper {
       jitParty.addOperatorLogEntry("Handled GET Vessel Status Calls request accepted.");
     } else if (request.url().contains(JitGetType.TIMESTAMPS.getUrlPath())) {
       ArrayNode timestampCalls = (ArrayNode) persistentMap.load(JitGetType.TIMESTAMPS.name());
-      response.addAll(getMatchingURLParamsWithTimestamps(request, timestampCalls));
+      response.addAll(getTimestampsByMatchingURLParams(request, timestampCalls));
 
       jitParty.addOperatorLogEntry(
           "Handled GET Timestamp Calls request accepted. Returned %s timestamp objects."
@@ -69,7 +69,13 @@ public class JitPartyHelper {
         200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
-  private static ArrayNode getMatchingURLParamsWithTimestamps(
+  /**
+   * Get the timestamps by matching the URL parameters.
+   *
+   * @param timestampCalls Stored timestamp calls.
+   * @return ArrayNode with 0 or many timestamp objects.
+   */
+  private static ArrayNode getTimestampsByMatchingURLParams(
       ConformanceRequest request, ArrayNode timestampCalls) {
     ArrayNode results = OBJECT_MAPPER.createArrayNode();
     var params = request.queryParams();

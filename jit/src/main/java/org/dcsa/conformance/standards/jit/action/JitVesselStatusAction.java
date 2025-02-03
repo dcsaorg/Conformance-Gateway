@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.jit.action;
 
+import java.util.List;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,9 @@ public class JitVesselStatusAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkCallIDMatchPreviousCallID(dsp)),
+                List.of(
+                    JitChecks.checkCallIDMatchPreviousCallID(dsp),
+                    JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

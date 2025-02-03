@@ -361,11 +361,40 @@ class JitChecksTest {
             .isEmpty());
   }
 
+  @Test
+  void testVesselStatus() {
+    var vesselStatus = createVesselStatus();
+    // Happy path
+    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    vesselStatus.remove("draft");
+    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    vesselStatus.remove("airDraft");
+    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+
+    // Remove dimensionUnit and verify invalid
+    vesselStatus = createVesselStatus();
+    vesselStatus.remove("dimensionUnit");
+    assertFalse(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+    vesselStatus.remove("draft");
+    assertFalse(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+
+    // Now all required fields are removed, should be good again.
+    vesselStatus.remove("airDraft");
+    assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
+  }
+
   private ObjectNode createPortCall() {
     var dsp =
         new DynamicScenarioParameters(
             null, null, null, UUID.randomUUID().toString(), null, null, null, false);
     return JitPartyHelper.getFileWithReplacedPlaceHolders("port-call", dsp);
+  }
+
+  private ObjectNode createVesselStatus() {
+    var dsp =
+        new DynamicScenarioParameters(
+            null, null, null, UUID.randomUUID().toString(), null, null, null, false);
+    return JitPartyHelper.getFileWithReplacedPlaceHolders("vessel-status", dsp);
   }
 
   private ObjectNode createPortCallServiceRequest(

@@ -67,11 +67,15 @@ public class JitChecks {
                       || jsonNode.path("vessel").has("lengthOverall"),
               JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
 
-  public static final JsonRebaseableContentCheck VESSEL_WIDTH_REQUIRES_DIMENSION_UNIT =
+  public static final JsonRebaseableContentCheck VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT =
       JsonAttribute.ifThen(
-          "Vessel/width requires dimensionUnit",
-          jsonNode -> jsonNode.path("vessel").has("width"),
-          JsonAttribute.mustBePresent(JsonPointer.compile("/vessel/dimensionUnit")));
+          "Property dimensionUnit is mandatory to provide if 'draft', 'airDraft', 'aftDraft' or 'forwardDraft' is provided.",
+          jsonNode ->
+              jsonNode.has("draft")
+                  || jsonNode.has("airDraft")
+                  || jsonNode.has("aftDraft")
+                  || jsonNode.has("forwardDraft"),
+          JsonAttribute.mustBePresent(JsonPointer.compile("/dimensionUnit")));
 
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(

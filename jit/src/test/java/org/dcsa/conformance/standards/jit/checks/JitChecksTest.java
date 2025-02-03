@@ -4,9 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
 import java.util.UUID;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
@@ -14,6 +12,7 @@ import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
+import org.dcsa.conformance.standards.jit.party.JitPartyHelper;
 import org.junit.jupiter.api.Test;
 
 class JitChecksTest {
@@ -309,31 +308,51 @@ class JitChecksTest {
         JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());
   }
 
+  @Test
+  void testPortCallVesselValidation() {
+    var portCall = createPortCall();
+    assertTrue(
+        JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
+            .validate(portCall)
+            .isEmpty());
+
+    // Remove vesselIMONumber and verify still valid
+    ((ObjectNode) portCall.required("vessel")).remove("vesselIMONumber");
+    assertTrue(
+        JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
+            .validate(portCall)
+            .isEmpty());
+
+    // Remove MMSINumber as well and verify invalid
+    ((ObjectNode) portCall.required("vessel")).remove("MMSINumber");
+    assertFalse(
+        JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER
+            .validate(portCall)
+            .isEmpty());
+  }
+
+  private ObjectNode createPortCall() {
+    var dsp =
+        new DynamicScenarioParameters(
+            null, null, null, UUID.randomUUID().toString(), null, null, null, false);
+    return JitPartyHelper.getFileWithReplacedPlaceHolders("port-call", dsp);
+  }
+
   private ObjectNode createPortCallServiceRequest(
       PortCallServiceType serviceType,
       PortCallServiceEventTypeCode code,
       PortCallPhaseTypeCode phaseTypeCode) {
-    ObjectNode jsonNode =
-        (ObjectNode)
-            JsonToolkit.templateFileToJsonNode(
-                "/standards/jit/messages/jit-200-port-call-service-request.json",
-                Map.of(
-                    "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
-                    serviceType.name(),
-                    "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-                    code.name(),
-                    "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-                    phaseTypeCode == null ? "" : phaseTypeCode.name(),
-                    "IS_FYI_PLACEHOLDER",
-                    "false"));
+    var dsp =
+        new DynamicScenarioParameters(
+            null, null, serviceType, null, null, UUID.randomUUID().toString(), null, false);
+    ObjectNode node = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call-service", dsp);
 
-    if (phaseTypeCode == null) {
-      jsonNode.remove("portCallPhaseTypeCode");
-    }
+    if (code != null) node.put("portCallServiceEventTypeCode", code.name());
+    if (phaseTypeCode != null) node.put("portCallPhaseTypeCode", phaseTypeCode.name());
     if (serviceType != PortCallServiceType.MOVES) {
-      jsonNode.remove("moves");
+      node.remove("moves");
     }
-    return jsonNode;
+    return node;
   }
 
   private JitTimestamp createTimestamp() {

@@ -69,6 +69,12 @@ public class JitPortCallAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion,
+                JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

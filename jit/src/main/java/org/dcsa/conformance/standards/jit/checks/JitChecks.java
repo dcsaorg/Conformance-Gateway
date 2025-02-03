@@ -33,6 +33,7 @@ public class JitChecks {
   public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
   public static final String TIMESTAMP_ID = "timestampID";
   public static final String CLASSIFIER_CODE = "classifierCode";
+  public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceType";
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -45,6 +46,17 @@ public class JitChecks {
           "The moves.carrierCodeListProvider implies moves.carrierCode",
           mav -> mav.submitAllMatching("moves.*"),
           JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
+
+  public static final JsonRebaseableContentCheck
+      VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER =
+          JsonAttribute.ifThen(
+              "Vessel should at least have vesselIMONumber or MMSINumber",
+              jsonNode -> jsonNode.has("vessel"),
+              JsonAttribute.atLeastOneOfMatched(
+                  (jsonNode, jsonPointers) -> {
+                    jsonPointers.add(JsonPointer.compile("/vessel/vesselIMONumber"));
+                    jsonPointers.add(JsonPointer.compile("/vessel/MMSINumber"));
+                  }));
 
   static final JsonRebaseableContentCheck IS_FYI_TRUE =
       JsonAttribute.mustEqual(
@@ -107,7 +119,7 @@ public class JitChecks {
         });
   }
 
-  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has("portCallServiceType");
+  static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(PORT_CALL_SERVICE_TYPE);
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
     return JsonAttribute.ifThen(
@@ -126,7 +138,7 @@ public class JitChecks {
             .formatted(dsp.selector().getFullName()),
         body -> {
           if (IS_PORT_CALL_SERVICE.test(body)) {
-            String actualServiceType = body.path("portCallServiceType").asText();
+            String actualServiceType = body.path(PORT_CALL_SERVICE_TYPE).asText();
             PortCallServiceType serviceType = PortCallServiceType.fromName(actualServiceType);
             if ((dsp.selector() == JitServiceTypeSelector.FULL_ERP
                     && !PortCallServiceType.getServicesWithERPAndA().contains(serviceType))
@@ -147,7 +159,7 @@ public class JitChecks {
         body -> {
           Set<String> issues = new HashSet<>();
           if (IS_PORT_CALL_SERVICE.test(body)) {
-            String actualServiceType = body.path("portCallServiceType").asText();
+            String actualServiceType = body.path(PORT_CALL_SERVICE_TYPE).asText();
             issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
             issues.add(verifyPortCallPhaseTypeCode(body, actualServiceType));
           }

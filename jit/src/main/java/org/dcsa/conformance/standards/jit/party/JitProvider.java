@@ -93,7 +93,7 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call", dsp);
     syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
 
     persistentMap.save(
@@ -112,7 +112,7 @@ public class JitProvider extends ConformanceParty {
     if (dsp.terminalCallID() == null) {
       dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
     }
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("terminal-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("terminal-call", dsp);
     syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
 
     persistentMap.save(
@@ -136,12 +136,7 @@ public class JitProvider extends ConformanceParty {
       serviceType = dsp.portCallServiceType().name();
     }
     dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call-service", dsp);
-
-    // Only MOVES service type requires the Moves part of the request. Removing it from the others.
-    if (dsp.portCallServiceType() != PortCallServiceType.MOVES) {
-      ((ObjectNode) jsonBody).remove("moves");
-    }
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call-service", dsp);
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
@@ -159,7 +154,7 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("vessel-status", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
     persistentMap.save(

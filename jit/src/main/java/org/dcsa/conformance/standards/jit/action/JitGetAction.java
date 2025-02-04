@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
@@ -15,6 +16,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
@@ -66,6 +68,9 @@ public class JitGetAction extends JitAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         if (dsp == null) return Stream.of();
+        ActionCheck checksForTimestamp =
+            JitChecks.createChecksForTimestamp(
+                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (requestedByProvider) {
           return Stream.of(
               new UrlPathCheck(JitRole::isProvider, getMatchedExchangeUuid(), getType.getUrlPath()),

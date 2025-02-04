@@ -269,7 +269,7 @@ public class ConformanceWebuiHandler {
         persistenceProvider
             .getNonLockingMap()
             .getItemValue("configuration", "outboundApiCallsSourceIpAddress");
-    if (ipAddressConfigValue.isTextual()) {
+    if (ipAddressConfigValue != null && ipAddressConfigValue.isTextual()) {
       jsonSandboxConfig.put("outboundApiCallsSourceIpAddress", ipAddressConfigValue.asText());
     }
 

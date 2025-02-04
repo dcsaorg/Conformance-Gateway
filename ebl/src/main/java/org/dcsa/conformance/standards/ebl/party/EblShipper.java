@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -26,6 +25,8 @@ import org.dcsa.conformance.standards.ebl.models.OutOfOrderMessageType;
 
 @Slf4j
 public class EblShipper extends ConformanceParty {
+
+  private static final String CONSIGNMENT_ITEMS = "consignmentItems";
 
   public EblShipper(
       String apiVersion,
@@ -72,34 +73,56 @@ public class EblShipper extends ConformanceParty {
   }
 
   static ObjectNode siFromScenarioType(ScenarioType scenarioType, CarrierScenarioParameters carrierScenarioParameters, String apiVersion) {
-    var jsonRequestBody = (ObjectNode)
-      JsonToolkit.templateFileToJsonNode(
-        "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
-        Map.ofEntries(
-          Map.entry(
-            "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
-            carrierScenarioParameters.carrierBookingReference()),
-          Map.entry(
-            "COMMODITY_SUBREFERENCE_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubReference(), "")),
-          Map.entry(
-            "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.commoditySubReference2(), "")),
-          Map.entry(
-            "EQUIPMENT_REFERENCE_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference(), "")),
-          Map.entry(
-            "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
-            Objects.requireNonNullElse(carrierScenarioParameters.equipmentReference2(), "")),
-          Map.entry("INVOICE_PAYABLE_AT_UNLOCATION_CODE", carrierScenarioParameters.invoicePayableAtUNLocationCode()),
-          Map.entry("CONSIGNMENT_ITEM_HS_CODE", carrierScenarioParameters.consignmentItemHSCode()),
-          Map.entry("CONSIGNMENT_ITEM_2_HS_CODE", Objects.requireNonNullElse(carrierScenarioParameters.consignmentItem2HSCode(), "")),
-          Map.entry("DESCRIPTION_OF_GOODS_PLACEHOLDER", carrierScenarioParameters.descriptionOfGoods()),
-          Map.entry("DESCRIPTION_OF_GOODS_2_PLACEHOLDER", Objects.requireNonNullElse(carrierScenarioParameters.descriptionOfGoods2(), "")),
-          Map.entry("OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER", Objects.requireNonNullElse(carrierScenarioParameters.outerPackagingDescription(), "")),
-          Map.entry("TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER", scenarioType.transportDocumentTypeCode())
-        ));
 
+    var jsonRequestBody =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/ebl/messages/" + scenarioType.shipperTemplate(apiVersion),
+                Map.ofEntries(
+                    Map.entry(
+                        "CARRIER_BOOKING_REFERENCE_PLACEHOLDER",
+                        carrierScenarioParameters.carrierBookingReference()),
+                    Map.entry(
+                        "COMMODITY_SUBREFERENCE_PLACEHOLDER",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.commoditySubReference(), "")),
+                    Map.entry(
+                        "COMMODITY_SUBREFERENCE_2_PLACEHOLDER",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.commoditySubReference2(), "")),
+                    Map.entry(
+                        "EQUIPMENT_REFERENCE_PLACEHOLDER",
+                        carrierScenarioParameters.equipmentReference()),
+                    Map.entry(
+                        "EQUIPMENT_REFERENCE_2_PLACEHOLDER",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.equipmentReference2(), "")),
+                    Map.entry(
+                        "INVOICE_PAYABLE_AT_UNLOCATION_CODE",
+                        carrierScenarioParameters.invoicePayableAtUNLocationCode()),
+                    Map.entry(
+                        "CONSIGNMENT_ITEM_HS_CODE",
+                        carrierScenarioParameters.consignmentItemHSCode()),
+                    Map.entry(
+                        "CONSIGNMENT_ITEM_2_HS_CODE",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.consignmentItem2HSCode(), "")),
+                    Map.entry(
+                        "DESCRIPTION_OF_GOODS_PLACEHOLDER",
+                        carrierScenarioParameters.descriptionOfGoods()),
+                    Map.entry(
+                        "DESCRIPTION_OF_GOODS_2_PLACEHOLDER",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.descriptionOfGoods2(), "")),
+                    Map.entry(
+                        "OUTER_PACKAGING_DESCRIPTION_PLACEHOLDER",
+                        Objects.requireNonNullElse(
+                            carrierScenarioParameters.outerPackagingDescription(), "")),
+                    Map.entry(
+                        "TRANSPORT_DOCUMENT_TYPE_CODE_PLACEHOLDER",
+                        scenarioType.transportDocumentTypeCode())));
+
+    removeEmptyFields(jsonRequestBody, scenarioType, carrierScenarioParameters);
     // Cannot substitute this because it is a boolean
     if (!scenarioType.isToOrder()) {
       // Cannot substitute this because it is a full element
@@ -125,6 +148,37 @@ public class EblShipper extends ConformanceParty {
       }
     }
     return jsonRequestBody;
+  }
+
+  private static void removeEmptyFields(
+      ObjectNode jsonRequestBody,
+      ScenarioType scenarioType,
+      CarrierScenarioParameters carrierScenarioParameters) {
+
+    if (carrierScenarioParameters.commoditySubReference() == null
+        || carrierScenarioParameters.commoditySubReference().isEmpty()) {
+      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(0))
+          .remove("commoditySubReference");
+    }
+    if ((scenarioType.equals(ScenarioType.REGULAR_2C_2U_2E)
+            || scenarioType.equals(ScenarioType.REGULAR_2C_2U_1E))
+        && (carrierScenarioParameters.commoditySubReference2() == null
+            || carrierScenarioParameters.commoditySubReference2().isEmpty())) {
+      ((ObjectNode) jsonRequestBody.withArray(CONSIGNMENT_ITEMS).get(1))
+          .remove("commoditySubReference");
+    }
+
+    if (carrierScenarioParameters.outerPackagingDescription() == null
+        || carrierScenarioParameters.outerPackagingDescription().isEmpty()
+            && scenarioType.equals(ScenarioType.DG)) {
+      jsonRequestBody
+          .withArray(CONSIGNMENT_ITEMS)
+          .forEach(
+              consignmentItem ->
+                  consignmentItem
+                      .withArray("cargoItems")
+                      .forEach(cargoItem -> ((ObjectNode) cargoItem).remove("outerPackaging")));
+    }
   }
 
   private void sendShippingInstructionsRequest(JsonNode actionPrompt) {
@@ -178,11 +232,11 @@ public class EblShipper extends ConformanceParty {
 
   static ObjectNode updateShippingInstructions(ObjectNode si) {
     var seal = si.required("utilizedTransportEquipments").required(0).required("seals").path(0);
-    var newSealNumber = "NSL13388";
-    if (newSealNumber.equals(seal.required("number").asText())) {
-      // Ensure we do a change in case we do multiple UC3 in the same run
-      newSealNumber = "NSL13386";
-    }
+    var newSealNumber =
+        UUID.randomUUID()
+            .toString()
+            .substring(0, 8)
+            .toUpperCase(); // adding a different seal number for each UC3
     ((ObjectNode)seal).put("number", newSealNumber);
     return si;
   }
@@ -281,4 +335,6 @@ public class EblShipper extends ConformanceParty {
         "Handled lightweight notification: %s".formatted(request.message().body().getJsonBody()));
     return response;
   }
+
+
 }

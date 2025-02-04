@@ -93,10 +93,6 @@ public abstract class EblAction extends ConformanceAction {
     return dspReference::set;
   }
 
-  protected DynamicScenarioParameters updateDSPFromSIHook(ConformanceExchange exchange, DynamicScenarioParameters dynamicScenarioParameters) {
-    return dynamicScenarioParameters;
-  }
-
   protected void updateDSPFromSIResponsePayload(ConformanceExchange exchange) {
     DynamicScenarioParameters dsp = dspReference.get();
 
@@ -116,7 +112,8 @@ public abstract class EblAction extends ConformanceAction {
         updateIfNotNull(
             updatedDsp, newTransportDocumentReference, updatedDsp::withTransportDocumentReference);
 
-    updatedDsp = updateDSPFromSIHook(exchange, updatedDsp);
+    // SD-1997 gradually wiping out from production orchestrator states the big docs that should not have been added to the DSP
+    updatedDsp = updatedDsp.withShippingInstructions(null).withUpdatedShippingInstructions(null);
 
     if (!dsp.equals(updatedDsp)) {
       dspReference.set(updatedDsp);

@@ -127,10 +127,15 @@ export class ConformanceService {
   }
 
   async getSandboxConfig(sandboxId: string): Promise<SandboxConfig> {
-    return await this.apiService.call({
+    const sandboxConfig: SandboxConfig = await this.apiService.call({
       operation: "getSandboxConfig",
       sandboxId
     });
+    sandboxConfig.sandboxEndpointUriMethods ||= [];
+    sandboxConfig.externalPartyEndpointUriMethods ||= [];
+    sandboxConfig.externalPartyEndpointUriOverrides ||= [];
+    sandboxConfig.externalPartyAdditionalHeaders ||= [];
+    return sandboxConfig;
   }
 
   async updateSandboxConfig(

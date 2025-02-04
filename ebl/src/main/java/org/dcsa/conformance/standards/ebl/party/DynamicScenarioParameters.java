@@ -17,8 +17,8 @@ public record DynamicScenarioParameters(
     JsonNode shippingInstructions,
     JsonNode updatedShippingInstructions,
     boolean newTransportDocumentContent,
-    JsonNode transportDocument,
-    JsonNode previousTransportDocument)
+    @Deprecated JsonNode transportDocument,
+    @Deprecated JsonNode previousTransportDocument)
     implements ScenarioParameters {
 
   public static DynamicScenarioParameters fromJson(JsonNode jsonNode) {

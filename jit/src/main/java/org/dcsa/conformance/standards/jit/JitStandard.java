@@ -25,6 +25,7 @@ public class JitStandard extends AbstractStandard {
   public static final String PORT_CALL_SERVICE_ID = "{portCallServiceID}";
   public static final String PORT_CALL_ID = "{portCallID}";
   public static final String TERMINAL_CALL_ID = "{terminalCallID}";
+  public static final String TIMESTAMP_ID = "{timestampID}";
 
   private JitStandard() {
     super("JIT");
@@ -54,17 +55,17 @@ public class JitStandard extends AbstractStandard {
                             createEntry(PORT_CALL_URL, GET),
                             createEntry(TERMINAL_CALL_URL, GET),
                             createEntry(PORT_CALL_SERVICES_URL, GET),
-                            createEntry(TIMESTAMP_URL + "${timestampID}", PUT),
+                            createEntry(TIMESTAMP_URL + TIMESTAMP_ID, PUT),
                             createEntry(TIMESTAMP_URL, GET),
                             createEntry(VESSEL_STATUS_URL, GET)))),
                 Map.entry(
                     JitRole.CONSUMER.getConfigName(),
                     new TreeMap<>(
                         Map.ofEntries(
-                            createEntry(PORT_CALL_URL + "{portCallID}", PUT),
-                            createEntry(PORT_CALL_URL + "{portCallID}/omit", POST),
-                            createEntry(TERMINAL_CALL_URL + "{terminalCallId}", PUT),
-                            createEntry(TERMINAL_CALL_URL + "{terminalCallId}/omit", POST),
+                            createEntry(PORT_CALL_URL + PORT_CALL_ID, PUT),
+                            createEntry(PORT_CALL_URL + PORT_CALL_ID + "/omit", POST),
+                            createEntry(TERMINAL_CALL_URL + TERMINAL_CALL_ID, PUT),
+                            createEntry(TERMINAL_CALL_URL + TERMINAL_CALL_ID + "/omit", POST),
                             createEntry(PORT_CALL_SERVICES_URL + PORT_CALL_SERVICE_ID, PUT),
                             createEntry(
                                 PORT_CALL_SERVICES_URL + PORT_CALL_SERVICE_ID + "/cancel", POST),
@@ -73,7 +74,7 @@ public class JitStandard extends AbstractStandard {
                             createEntry(PORT_CALL_URL, GET),
                             createEntry(TERMINAL_CALL_URL, GET),
                             createEntry(PORT_CALL_SERVICES_URL, GET),
-                            createEntry(TIMESTAMP_URL + "${timestampID}", PUT),
+                            createEntry(TIMESTAMP_URL + TIMESTAMP_ID, PUT),
                             createEntry(TIMESTAMP_URL, GET),
                             createEntry(VESSEL_STATUS_URL, GET)))))));
   }

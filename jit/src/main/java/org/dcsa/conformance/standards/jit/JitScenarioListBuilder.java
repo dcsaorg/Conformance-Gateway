@@ -4,7 +4,9 @@ import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
 import static org.dcsa.conformance.standards.jit.model.JitTimestampType.*;
 import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Function;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.ScenarioListBuilder;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitGetAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
@@ -22,6 +25,12 @@ import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
+import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetTimestampCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
@@ -74,6 +83,11 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     addScenarioGroup10(scenarioList, context);
     addScenarioGroup11(scenarioList, context);
     addScenarioGroup12(scenarioList, context);
+    addScenarioGroup13(scenarioList, context);
+    addScenarioGroup14(scenarioList, context);
+
+    // Scenario suite: "GET endpoint conformance"
+    addScenarioGroupGET1(scenarioList, context);
 
     // Scenario suite: "Secondary sender and receiver conformance"
     addScenarioGroupSecondary1(scenarioList, context);
@@ -86,104 +100,41 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroup3(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "3. S-service type with variations (Moves only)",
+        "3. Moves type with variations",
         supplyScenarioParameters(context, GIVEN)
             .thenEither(
                 portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(vesselStatus(context)))),
+                    .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN))),
                 portCall(context)
                     .then(
                         portCall(context)
-                            .then(
-                                terminalCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                portCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(portCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(portCall(context).then(vesselStatus(context))))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(portCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(portCall(context))))),
+                            .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(
-                                terminalCall(context)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(terminalCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
                                 serviceCall(context, MOVES, GIVEN)
-                                    .then(terminalCall(context).then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(terminalCall(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(
-                                        serviceCall(context, MOVES, GIVEN)
-                                            .then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(
-                                        vesselStatus(context)
-                                            .then(serviceCall(context, MOVES, GIVEN))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(vesselStatus(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(
-                                serviceCall(context, MOVES, GIVEN)
-                                    .then(vesselStatus(context).then(cancelCall(context))))),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(cancelCall(context)))),
-                sendPC_TC_SC_VS(context, MOVES, GIVEN, declineCall(context)),
-                portCall(context)
-                    .then(
-                        terminalCall(context)
-                            .then(serviceCall(context, MOVES, GIVEN).then(declineCall(context))))));
+                                    .then(serviceCall(context, MOVES, GIVEN))))));
   }
 
   private static void addScenarioGroup4(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
-
-    // TODO: Not sure, to add this one: PC - TC - S - V - E - R - P - P - A
 
     scenarioList.put(
         "4. PC-TC-S-V-ERP-A in-band ERP variations",
@@ -693,7 +644,15 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     context,
                     null,
                     S_A_PATTERN,
-                    sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL))),
+                    sendTimestamp(context, ACTUAL).then(sendTimestamp(context, ACTUAL)))));
+  }
+
+  private static void addScenarioGroup11(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "11. S-A cancel",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
                 sendPC_TC_SC_VS(
                     context,
                     null,
@@ -704,7 +663,16 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, null, S_A_PATTERN).then(cancelCall(context)))),
+                                serviceCall(context, null, S_A_PATTERN)
+                                    .then(cancelCall(context))))));
+  }
+
+  private static void addScenarioGroup12(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "12. S-A decline",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
                 sendPC_TC_SC_VS(
                     context,
                     null,
@@ -719,10 +687,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                     .then(declineCall(context))))));
   }
 
-  private static void addScenarioGroup11(
+  private static void addScenarioGroup13(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "11. S-ERP-A cancel",
+        "13. S-ERP-A cancel",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -746,10 +714,10 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, null, FULL_ERP).then(cancelCall(context))))));
   }
 
-  private static void addScenarioGroup12(
+  private static void addScenarioGroup14(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "12. S-ERP-A decline",
+        "14. S-ERP-A decline",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -771,6 +739,345 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         terminalCall(context)
                             .then(
                                 serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
+  }
+
+  private static void addScenarioGroupGET1(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "1. PC-TC-S-V Provider answering GET calls",
+        supplyScenarioParameters(context, ANY)
+            .thenEither(
+                portCall(context).then(getPortCallActions(context, false)),
+                portCall(context)
+                    .then(terminalCall(context).then(getTerminalCallActions(context, false))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, ANY)
+                                    .then(getServiceCallActions(context, false)))),
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    ANY,
+                    getAction(
+                        context,
+                        JitGetType.VESSEL_STATUSES,
+                        JitChecks.PORT_CALL_SERVICE_ID,
+                        false))));
+    scenarioList.put(
+        "2. PC-TC-S-V Consumer answering GET calls",
+        supplyScenarioParameters(context, ANY)
+            .thenEither(
+                portCall(context).then(getPortCallActions(context, true)),
+                portCall(context)
+                    .then(terminalCall(context).then(getTerminalCallActions(context, true))),
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, null, ANY)
+                                    .then(getServiceCallActions(context, true)))),
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    ANY,
+                    getAction(
+                        context,
+                        JitGetType.VESSEL_STATUSES,
+                        JitChecks.PORT_CALL_SERVICE_ID,
+                        true))));
+
+    scenarioList.put(
+        "3. PC-TC-S-V-A-ERP-A Provider answering GET calls",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    FULL_ERP,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, ACTUAL)
+                            .then(getTimestampActions(context, false))))));
+
+    scenarioList.put(
+        "4. PC-TC-S-V-A-ERP-A Consumer answering GET calls",
+        supplyScenarioParameters(context, FULL_ERP)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendERPTimestamps(
+                        context,
+                        sendTimestamp(context, ACTUAL).then(getTimestampActions(context, true))))));
+
+    scenarioList.put(
+        "5. PC-TC-S-V-A Provider answering GET calls",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendTimestamp(context, ACTUAL)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    false)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            false)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                false)))))));
+    scenarioList.put(
+        "6. PC-TC-S-V-A Consumer answering GET calls",
+        supplyScenarioParameters(context, S_A_PATTERN)
+            .thenEither(
+                sendPC_TC_SC_VS(
+                    context,
+                    null,
+                    S_A_PATTERN,
+                    sendTimestamp(context, ACTUAL)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    true)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            true)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                true)))))));
+    scenarioList.put(
+        "7. Moves service type Provider answering GET calls",
+        supplyScenarioParameters(context, GIVEN)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(getServiceCallActions(context, false))))));
+    scenarioList.put(
+        "8. Moves service type Consumer answering GET calls",
+        supplyScenarioParameters(context, GIVEN)
+            .thenEither(
+                portCall(context)
+                    .then(
+                        terminalCall(context)
+                            .then(
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(getServiceCallActions(context, true))))));
+  }
+
+  private static JitScenarioListBuilder getTimestampActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context, JitGetType.TIMESTAMPS, JitGetTimestampCallFilters.props().getFirst(), false)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.TIMESTAMPS,
+                    JitGetTimestampCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.TIMESTAMPS,
+                            JitGetTimestampCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TIMESTAMPS,
+                                    JitGetTimestampCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TIMESTAMPS,
+                                            JitGetTimestampCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.TIMESTAMPS,
+                                                List.of(
+                                                    JitGetTimestampCallFilters.props().get(4),
+                                                    JitGetTimestampCallFilters.props().get(5)),
+                                                requestedByProvider))))));
+  }
+
+  private static JitScenarioListBuilder getPortCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.PORT_CALLS,
+            JitGetPortCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.PORT_CALLS,
+                    JitGetPortCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.PORT_CALLS,
+                            JitGetPortCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.PORT_CALLS,
+                                    JitGetPortCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.PORT_CALLS,
+                                            JitGetPortCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
+                                                context,
+                                                JitGetType.PORT_CALLS,
+                                                JitGetPortCallFilters.props().get(5),
+                                                requestedByProvider))))));
+  }
+
+  private static JitScenarioListBuilder getTerminalCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.TERMINAL_CALLS,
+            JitGetTerminalCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.TERMINAL_CALLS,
+                    JitGetTerminalCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                            context,
+                            JitGetType.TERMINAL_CALLS,
+                            JitGetTerminalCallFilters.props().get(2),
+                            requestedByProvider)
+                        .then(
+                            getAction(
+                                    context,
+                                    JitGetType.TERMINAL_CALLS,
+                                    JitGetTerminalCallFilters.props().get(3),
+                                    requestedByProvider)
+                                .then(
+                                    getAction(
+                                            context,
+                                            JitGetType.TERMINAL_CALLS,
+                                            JitGetTerminalCallFilters.props().get(4),
+                                            requestedByProvider)
+                                        .then(
+                                            getAction(
+                                                    context,
+                                                    JitGetType.TERMINAL_CALLS,
+                                                    JitGetTerminalCallFilters.props().get(5),
+                                                    requestedByProvider)
+                                                .then(
+                                                    getAction(
+                                                            context,
+                                                            JitGetType.TERMINAL_CALLS,
+                                                            List.of(
+                                                                JitGetTerminalCallFilters.props()
+                                                                    .get(2),
+                                                                JitGetTerminalCallFilters.props()
+                                                                    .get(6)),
+                                                            requestedByProvider)
+                                                        .then(
+                                                            getAction(
+                                                                    context,
+                                                                    JitGetType.TERMINAL_CALLS,
+                                                                    List.of(
+                                                                        JitGetTerminalCallFilters
+                                                                            .props()
+                                                                            .get(2),
+                                                                        JitGetTerminalCallFilters
+                                                                            .props()
+                                                                            .get(7)),
+                                                                    requestedByProvider)
+                                                                .then(
+                                                                    getAction(
+                                                                            context,
+                                                                            JitGetType
+                                                                                .TERMINAL_CALLS,
+                                                                            List.of(
+                                                                                JitGetTerminalCallFilters
+                                                                                    .props()
+                                                                                    .get(3),
+                                                                                JitGetTerminalCallFilters
+                                                                                    .props()
+                                                                                    .get(8)),
+                                                                            requestedByProvider)
+                                                                        .then(
+                                                                            getAction(
+                                                                                context,
+                                                                                JitGetType
+                                                                                    .TERMINAL_CALLS,
+                                                                                List.of(
+                                                                                    JitGetTerminalCallFilters
+                                                                                        .props()
+                                                                                        .get(4),
+                                                                                    JitGetTerminalCallFilters
+                                                                                        .props()
+                                                                                        .get(9)),
+                                                                                requestedByProvider))))))))));
+  }
+
+  private static JitScenarioListBuilder getServiceCallActions(
+      JitScenarioContext context, boolean requestedByProvider) {
+    return getAction(
+            context,
+            JitGetType.PORT_CALL_SERVICES,
+            JitGetPortServiceCallFilters.props().getFirst(),
+            requestedByProvider)
+        .then(
+            getAction(
+                    context,
+                    JitGetType.PORT_CALL_SERVICES,
+                    JitGetPortServiceCallFilters.props().get(1),
+                    requestedByProvider)
+                .then(
+                    getAction(
+                        context,
+                        JitGetType.PORT_CALL_SERVICES,
+                        List.of(
+                            JitGetPortServiceCallFilters.props().getFirst(),
+                            JitGetPortServiceCallFilters.props().get(2)),
+                        requestedByProvider)));
   }
 
   private static void addScenarioGroupSecondary1(
@@ -896,21 +1203,21 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroupSecondary3(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "3. S(Moves) as FYI message",
+        "3. Moves as FYI message",
         supplyScenarioParameters(context, GIVEN, true)
             .thenEither(
-                sendPC_TC_SC_VS(context, MOVES, null),
-                sendPC_TC_SC_VS(context, MOVES, null, omitPortCall(context)),
-                sendPC_TC_SC_VS(context, MOVES, null, omitTerminalCall(context)),
+                portCall(context)
+                    .then(terminalCall(context).then(serviceCall(context, MOVES, GIVEN))),
                 portCall(context)
                     .then(
                         terminalCall(context)
-                            .then(serviceCall(context, MOVES, null).then(omitPortCall(context)))),
+                            .then(serviceCall(context, MOVES, GIVEN).then(omitPortCall(context)))),
                 portCall(context)
                     .then(
                         terminalCall(context)
                             .then(
-                                serviceCall(context, MOVES, null).then(omitTerminalCall(context)))),
+                                serviceCall(context, MOVES, GIVEN)
+                                    .then(omitTerminalCall(context)))),
                 portCall(context).then(terminalCall(context).then(omitPortCall(context))),
                 portCall(context).then(terminalCall(context).then(omitTerminalCall(context))),
                 portCall(context).then(omitPortCall(context))));
@@ -934,8 +1241,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       JitScenarioContext context, JitTimestampType timestampType) {
     if (timestampType == REQUESTED) {
       return new JitScenarioListBuilder(
-          previousAction ->
-              new JitOOBTimestampInputAction(context, previousAction, timestampType));
+          previousAction -> new JitOOBTimestampInputAction(context, previousAction, timestampType));
     }
     return new JitScenarioListBuilder(
         previousAction -> new JitOOBTimestampAction(context, previousAction, timestampType, true));
@@ -1027,5 +1333,27 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                 .then(
                     serviceCall(context, serviceType, selector)
                         .then(vesselStatus(context).thenEither(thenEither))));
+  }
+
+  private static JitScenarioListBuilder getAction(
+      JitScenarioContext context, JitGetType type, String filter, boolean requestedByProvider) {
+    return new JitScenarioListBuilder(
+        previousAction ->
+            new JitGetAction(
+                context,
+                previousAction,
+                type,
+                Collections.singletonList(filter),
+                requestedByProvider));
+  }
+
+  private static JitScenarioListBuilder getAction(
+      JitScenarioContext context,
+      JitGetType type,
+      List<String> filters,
+      boolean requestedByProvider) {
+    return new JitScenarioListBuilder(
+        previousAction ->
+            new JitGetAction(context, previousAction, type, filters, requestedByProvider));
   }
 }

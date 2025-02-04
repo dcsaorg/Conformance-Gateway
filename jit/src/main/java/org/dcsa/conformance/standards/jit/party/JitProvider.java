@@ -14,7 +14,6 @@ import org.dcsa.conformance.core.party.PartyConfiguration;
 import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
-import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -22,6 +21,7 @@ import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.action.JitAction;
 import org.dcsa.conformance.standards.jit.action.JitCancelAction;
 import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
+import org.dcsa.conformance.standards.jit.action.JitGetAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitPortCallAction;
 import org.dcsa.conformance.standards.jit.action.JitOmitTerminalCallAction;
@@ -30,10 +30,9 @@ import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
+import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 
 @Slf4j
@@ -85,7 +84,8 @@ public class JitProvider extends ConformanceParty {
         Map.entry(JitCancelAction.class, this::cancelCallRequest),
         Map.entry(JitDeclineAction.class, this::declineRequest),
         Map.entry(JitOmitPortCallAction.class, this::omitPortCallRequest),
-        Map.entry(JitOmitTerminalCallAction.class, this::omitTerminalCallRequest));
+        Map.entry(JitOmitTerminalCallAction.class, this::omitTerminalCallRequest),
+        Map.entry(JitGetAction.class, this::sendGetActionRequest));
   }
 
   private void portCallRequest(JsonNode actionPrompt) {
@@ -93,8 +93,12 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = replacePlaceHolders("port-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call", dsp);
     syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
+
+    persistentMap.save(
+        JitGetType.PORT_CALLS.name(), jsonBody); // Save the response for generating GET requests.
+    JitPartyHelper.flushTimestamps(persistentMap); // Prevent timestamps from being reused (if any).
 
     addOperatorLogEntry(
         "Submitted Port Call request for portCallID: %s".formatted(dsp.portCallID()));
@@ -108,8 +112,12 @@ public class JitProvider extends ConformanceParty {
     if (dsp.terminalCallID() == null) {
       dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
     }
-    JsonNode jsonBody = replacePlaceHolders("terminal-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("terminal-call", dsp);
     syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
+
+    persistentMap.save(
+        JitGetType.TERMINAL_CALLS.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted Terminal Call request for portCallID: %s and TerminalCallId: %s "
@@ -128,7 +136,7 @@ public class JitProvider extends ConformanceParty {
       serviceType = dsp.portCallServiceType().name();
     }
     dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
-    JsonNode jsonBody = replacePlaceHolders("port-call-service", dsp);
+    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call-service", dsp);
 
     // Only MOVES service type requires the Moves part of the request. Removing it from the others.
     if (dsp.portCallServiceType() != PortCallServiceType.MOVES) {
@@ -136,6 +144,10 @@ public class JitProvider extends ConformanceParty {
     }
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
+
+    persistentMap.save(
+        JitGetType.PORT_CALL_SERVICES.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted %s Port Call Service request with portCallServiceID: %s"
@@ -147,8 +159,12 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = replacePlaceHolders("vessel-status", dsp);
+    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
+
+    persistentMap.save(
+        JitGetType.VESSEL_STATUSES.name(),
+        jsonBody); // Save the response for generating GET requests.
 
     addOperatorLogEntry(
         "Submitted Vessel Status for portCallServiceID: %s".formatted(dsp.portCallServiceID()));
@@ -175,6 +191,8 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(timestampType, previousTimestamp, dsp.isFYI());
     sendTimestampPutRequest(timestampType, timestamp);
+
+    JitPartyHelper.storeTimestamp(persistentMap, timestamp);
   }
 
   private void outOfBandTimestampRequest(JsonNode actionPrompt) {
@@ -259,6 +277,26 @@ public class JitProvider extends ConformanceParty {
     addOperatorLogEntry("Submitted Omit Terminal Call with ID: %s".formatted(dsp.terminalCallID()));
   }
 
+  void sendGetActionRequest(JsonNode actionPrompt) {
+    log.info(
+        "{}.sendGetActionRequest({})", getClass().getSimpleName(), actionPrompt.toPrettyString());
+
+    JitGetType getType = JitGetType.valueOf(actionPrompt.required(JitGetAction.GET_TYPE).asText());
+    List<String> filters =
+        OBJECT_MAPPER.convertValue(actionPrompt.get(JitGetAction.FILTERS), List.class);
+    Map<String, List<String>> queryParams = new HashMap<>();
+    JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
+
+    syncCounterpartGet(getType.getUrlPath(), queryParams);
+    addOperatorLogEntry(
+        "Submitted GET %s request with URL parameters: %s."
+            .formatted(getType.getName(), queryParams));
+  }
+
   private void sendTimestampPutRequest(
       @NonNull JitTimestampType timestampType, @NonNull JitTimestamp timestamp) {
     syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
@@ -267,58 +305,19 @@ public class JitProvider extends ConformanceParty {
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
   }
 
-  private JsonNode replacePlaceHolders(String fileType, DynamicScenarioParameters dsp) {
-    PortCallServiceType serviceType = dsp.portCallServiceType();
-    String portCallPhaseTypeCode = "";
-    String portCallServiceEventTypeCode = "";
-    if (serviceType != null) {
-      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType.name());
-      portCallServiceEventTypeCode =
-          PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType.name())
-              .getFirst()
-              .name();
-    }
-
-    JsonNode jsonNode =
-        JsonToolkit.templateFileToJsonNode(
-            "/standards/jit/messages/jit-200-%s-request.json".formatted(fileType),
-            Map.of(
-                "PORT_CALL_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.portCallID(), ""),
-                "TERMINAL_CALL_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.terminalCallID(), ""),
-                "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
-                serviceType != null ? serviceType.name() : "",
-                "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
-                "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-                portCallServiceEventTypeCode,
-                "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-                portCallPhaseTypeCode,
-                "IS_FYI_PLACEHOLDER",
-                Boolean.toString(dsp.isFYI())));
-    // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
-    if (serviceType != null && portCallPhaseTypeCode.isEmpty())
-      ((ObjectNode) jsonNode).remove("portCallPhaseTypeCode");
-    return jsonNode;
-  }
-
-  private static String calculatePortCallPhaseTypeCode(String serviceType) {
-    List<PortCallPhaseTypeCode> typeCodes =
-        PortCallPhaseTypeCode.getCodesForPortCallServiceType(serviceType);
-    if (typeCodes.isEmpty()) {
-      return "";
-    }
-    return typeCodes.getFirst().name();
-  }
-
   @Override
   public ConformanceResponse handleRequest(ConformanceRequest request) {
-    log.info("JitProvider.handleRequest({})", request);
-
-    if (request.url().endsWith("/decline")) {
+    log.info("{}.handleRequest() type: {}", getClass().getSimpleName(), request.method());
+    if (request.method().equals(JitStandard.GET)) {
+      return JitPartyHelper.handleGetRequest(request, persistentMap, apiVersion, this);
+    }
+    int statusCode = 204;
+    if (request.message().body().getJsonBody().isEmpty()) {
+      addOperatorLogEntry("Handled an empty request, which is wrong.");
+      statusCode = 400;
+    } else if (request.url().endsWith("/decline")) {
       addOperatorLogEntry("Handled Decline request accepted.");
-    } else {
+    } else if (request.url().contains(JitStandard.TIMESTAMP_URL)) {
       JitTimestamp timestamp = JitTimestamp.fromJson(request.message().body().getJsonBody());
       addOperatorLogEntry(
           "Handled %s timestamp accepted for: %s and remark: %s"
@@ -326,9 +325,13 @@ public class JitProvider extends ConformanceParty {
                   JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
                   timestamp.dateTime(),
                   timestamp.remark()));
+      JitPartyHelper.storeTimestamp(persistentMap, timestamp);
+    } else {
+      statusCode = 400;
+      addOperatorLogEntry("Handled an unknown request, which is wrong.");
     }
     return request.createResponse(
-        204,
+        statusCode,
         Map.of(API_VERSION, List.of(apiVersion)),
         new ConformanceMessageBody(OBJECT_MAPPER.createObjectNode()));
   }

@@ -84,6 +84,8 @@ public class JitPortCallServiceAction extends JitAction {
         yield "Send a Port Call Service (PUT) for the %s".formatted(dsp.selector().getFullName());
       case GIVEN:
         yield "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
+      case ANY:
+        yield "Send a Port Call Service (PUT) for a service you supply";
     };
   }
 

@@ -19,6 +19,12 @@ public enum JitSchema {
   MOVES("Moves"),
   OMIT_PORT_CALL("OmitPortCall"),
   OMIT_TERMINAL_CALL("OmitTerminalCall"),
+  // GET actions
+  PORT_CALLS("PortCalls"),
+  TERMINAL_CALLS("TerminalCalls"),
+  PORT_CALL_SERVICES("PortCallServices"),
+  TIMESTAMPS("Timestamps"),
+  VESSEL_STATUSES("VesselStatuses"),
   ;
 
   private final String schemaName;

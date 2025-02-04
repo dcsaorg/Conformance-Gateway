@@ -39,7 +39,13 @@ public class JitPortCallAction extends JitAction {
   }
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
-    dsp = dsp.withPortCallID(requestJsonNode.path("portCallID").asText(null));
+    // Only overwrite the portCallID if the previous action was SupplyScenarioParametersAction or
+    // when the PortCallAction is rehearsed to start from the beginning.
+    if (previousAction instanceof SupplyScenarioParametersAction
+        || (previousAction instanceof JitPortCallAction portCallAction
+            && portCallAction.previousAction instanceof SupplyScenarioParametersAction)) {
+      dsp = dsp.withPortCallID(requestJsonNode.path("portCallID").asText(null));
+    }
   }
 
   @Override
@@ -77,7 +83,8 @@ public class JitPortCallAction extends JitAction {
                 expectedApiVersion,
                 List.of(
                     JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER,
-                    JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT)),
+                    JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT,
+                    JitChecks.checkCallIDMatchPreviousCallID(dsp))),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

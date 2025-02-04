@@ -25,8 +25,6 @@ import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.VESSE
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.dcsa.conformance.core.UserFacingException;
 
 public enum PortCallPhaseTypeCode {
   INBD, // (Inbound)
@@ -39,8 +37,7 @@ public enum PortCallPhaseTypeCode {
   public static final List<PortCallServiceType> EMPTY_PHASE_TYPE_CODES =
       List.of(ANCHORAGE, SLUDGE, ANCHORAGE_OPERATIONS, MOVES);
 
-  public static Set<PortCallServiceType> getValidPortCallPhaseTypeCode(
-      PortCallPhaseTypeCode code) {
+  public static Set<PortCallServiceType> getValidPortCallPhaseTypeCode(PortCallPhaseTypeCode code) {
     return switch (code) {
       case INBD -> Set.of(BERTH, PILOTAGE, TOWAGE, MOORING, PILOT_BOARDING_PLACE, SEA_PASSAGE);
       case ALGS ->
@@ -62,34 +59,11 @@ public enum PortCallPhaseTypeCode {
     };
   }
 
-  public static boolean isValidCombination(
-      PortCallServiceType portCallServiceType, String portCallServiceEventTypeCode) {
-    if (EMPTY_PHASE_TYPE_CODES.contains(portCallServiceType)
-        && StringUtils.isBlank(portCallServiceEventTypeCode)) {
-      return true;
-    }
-    PortCallPhaseTypeCode code = fromString(portCallServiceEventTypeCode);
-    if (code == null) return false;
-    return getValidPortCallPhaseTypeCode(code).contains(portCallServiceType);
-  }
-
   public static List<PortCallPhaseTypeCode> getCodesForPortCallServiceType(
       String portCallServiceType) {
     PortCallServiceType serviceType = PortCallServiceType.fromName(portCallServiceType);
     return Arrays.stream(PortCallPhaseTypeCode.values())
         .filter(code -> getValidPortCallPhaseTypeCode(code).contains(serviceType))
         .toList();
-  }
-
-  public static PortCallPhaseTypeCode fromString(String name) {
-    if (StringUtils.isBlank(name)) {
-      return null;
-    }
-    for (PortCallPhaseTypeCode code : PortCallPhaseTypeCode.values()) {
-      if (code.name().equals(name)) {
-        return code;
-      }
-    }
-    throw new UserFacingException("Unknown PortCallPhaseTypeCode: " + name);
   }
 }

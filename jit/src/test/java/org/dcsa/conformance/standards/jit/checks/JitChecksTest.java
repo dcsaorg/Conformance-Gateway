@@ -101,29 +101,6 @@ class JitChecksTest {
   }
 
   @Test
-  void checkPortCallPhaseTypeCodeValues() {
-    assertTrue(
-        JitChecks.checkRightFieldValues()
-            .validate(
-                createPortCallServiceRequest(
-                    PortCallServiceType.BERTH,
-                    PortCallServiceEventTypeCode.ARRI,
-                    PortCallPhaseTypeCode.ALGS))
-            .isEmpty());
-
-    assertEquals(
-        "Expected matching Port Call Service type with PortCallPhaseTypeCode. Found non-matching type: 'SLUDGE' combined with code: 'SHIF'",
-        JitChecks.checkRightFieldValues()
-            .validate(
-                createPortCallServiceRequest(
-                    PortCallServiceType.SLUDGE,
-                    PortCallServiceEventTypeCode.DEPA,
-                    PortCallPhaseTypeCode.SHIF))
-            .iterator()
-            .next());
-  }
-
-  @Test
   void checkPlannedMatchesRequestedTimestamp() {
     DynamicScenarioParameters dsp =
         new DynamicScenarioParameters()

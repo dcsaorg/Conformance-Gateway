@@ -20,7 +20,6 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
-import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
@@ -180,20 +179,9 @@ public class JitChecks {
           if (IS_PORT_CALL_SERVICE.test(body)) {
             String actualServiceType = body.path(PORT_CALL_SERVICE_TYPE).asText();
             issues.add(verifyPortCallServiceEventTypeCode(body, actualServiceType));
-            issues.add(verifyPortCallPhaseTypeCode(body, actualServiceType));
           }
           return issues.stream().filter(Objects::nonNull).collect(Collectors.toSet());
         });
-  }
-
-  private static String verifyPortCallPhaseTypeCode(JsonNode body, String actualServiceType) {
-    String portCallPhaseTypeCode = body.path("portCallPhaseTypeCode").asText("");
-    if (!PortCallPhaseTypeCode.isValidCombination(
-        PortCallServiceType.fromName(actualServiceType), portCallPhaseTypeCode)) {
-      return "Expected matching Port Call Service type with PortCallPhaseTypeCode. Found non-matching type: '%s' combined with code: '%s'"
-          .formatted(actualServiceType, portCallPhaseTypeCode);
-    }
-    return null;
   }
 
   private static String verifyPortCallServiceEventTypeCode(

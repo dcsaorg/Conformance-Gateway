@@ -19,6 +19,7 @@ public record JitTimestamp(
     String portCallServiceID,
     JitClassifierCode classifierCode,
     String dateTime,
+    PortCallServiceLocationTimestamp portCallServiceLocation,
     String delayReasonCode,
     boolean isFYI,
     String remark) {
@@ -44,6 +45,7 @@ public record JitTimestamp(
               UUID.randomUUID().toString(),
               null,
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
+              null,
               "STR",
               isFYI,
               "Port closed due to strike");

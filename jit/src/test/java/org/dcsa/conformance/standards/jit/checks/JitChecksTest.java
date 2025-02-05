@@ -10,6 +10,7 @@ import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceLocationTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.jit.party.JitPartyHelper;
@@ -360,6 +361,52 @@ class JitChecksTest {
     assertTrue(JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT.validate(vesselStatus).isEmpty());
   }
 
+  @Test
+  void testFromTimestampWithOptionalFields() {
+    ObjectNode jsonBody = createTimestamp().toJson();
+    var portCallServiceLocation = OBJECT_MAPPER.createObjectNode();
+    portCallServiceLocation
+        .put("locationName", "CMP Container Terminal Copenhagen")
+        .put("UNLocationCode", "DKCPH")
+        .put("geoCoordinate", "55.7036,12.5951");
+    portCallServiceLocation.set(
+        "facility", OBJECT_MAPPER.createObjectNode().put("facilityCode", "DKCPH"));
+    jsonBody.set("portCallServiceLocation", portCallServiceLocation);
+    // Validate all given data fits into POJO
+    JitTimestamp timestamp = JitTimestamp.fromJson(jsonBody);
+    assertNotNull(timestamp);
+  }
+
+  @Test
+  void testTimestampAllowedToHavePortCallServiceLocation() {
+    var timestamp =
+        createTimestamp()
+            .withPortCallServiceLocation(new PortCallServiceLocationTimestamp("name", "code"));
+    // validate it does not work with PLN.
+    assertFalse(
+        JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION
+            .validate(timestamp.toJson())
+            .isEmpty());
+    // validate it only works with REQ.
+    timestamp = timestamp.withClassifierCode(JitClassifierCode.REQ);
+    assertTrue(
+        JitChecks.TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION
+            .validate(timestamp.toJson())
+            .isEmpty());
+
+    // validate it only works with UNLocationCode (being filled).
+    assertTrue(
+        JitChecks.TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION
+            .validate(timestamp.toJson())
+            .isEmpty());
+    timestamp =
+        timestamp.withPortCallServiceLocation(new PortCallServiceLocationTimestamp("name", null));
+    assertFalse(
+        JitChecks.TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION
+            .validate(timestamp.toJson())
+            .isEmpty());
+  }
+
   private ObjectNode createPortCall() {
     var dsp =
         new DynamicScenarioParameters(
@@ -392,6 +439,7 @@ class JitChecksTest {
   }
 
   private JitTimestamp createTimestamp() {
-    return new JitTimestamp(null, null, null, JitClassifierCode.PLN, "dateTime", null, false, null);
+    return new JitTimestamp(
+        null, null, null, JitClassifierCode.PLN, "dateTime", null, null, false, null);
   }
 }

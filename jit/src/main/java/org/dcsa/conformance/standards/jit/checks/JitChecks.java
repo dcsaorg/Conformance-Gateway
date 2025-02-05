@@ -46,6 +46,21 @@ public class JitChecks {
           mav -> mav.submitAllMatching("moves.*"),
           JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
 
+  static final JsonRebaseableContentCheck TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION =
+      JsonAttribute.ifThen(
+          "If timestamp is not of type REQ, it should not have a portCallServiceLocation",
+          jsonNode ->
+              !jsonNode.path(CLASSIFIER_CODE).asText("").equals(JitClassifierCode.REQ.name()),
+          JsonAttribute.mustBeAbsent(JsonPointer.compile("/portCallServiceLocation")));
+
+  static final JsonRebaseableContentCheck TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION =
+      JsonAttribute.ifThen(
+          "If timestamp has a portCallServiceLocation, it should have an UNLocationCode field.",
+          jsonNode -> jsonNode.has("portCallServiceLocation"),
+          JsonAttribute.mustBeNotNull(
+              JsonPointer.compile("/portCallServiceLocation/UNLocationCode"),
+              "it is a mandatory property of portCallServiceLocation."));
+
   public static final JsonRebaseableContentCheck
       VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER =
           JsonAttribute.ifThen(
@@ -195,13 +210,9 @@ public class JitChecks {
     return null;
   }
 
-  public static ActionCheck createChecksForTimestamp(
-      Predicate<String> isRelevantForRoleName,
-      UUID matchedExchangeUuid,
-      String expectedApiVersion,
-      DynamicScenarioParameters dsp) {
-    if (dsp == null) return null;
+  public static List<JsonContentCheck> createChecksForTimestamp(DynamicScenarioParameters dsp) {
     List<JsonContentCheck> checks = new ArrayList<>();
+
     if (dsp.currentTimestamp() != null
         && dsp.currentTimestamp().classifierCode().equals(JitClassifierCode.PLN)) {
       checks.add(checkPlannedMatchesRequestedTimestamp(dsp));
@@ -209,17 +220,14 @@ public class JitChecks {
     if (dsp.previousTimestamp() == null) {
       checks.add(checkTimestampReplyTimestampIDisAbsent());
     }
-    if (checks.isEmpty()) return null;
-    return JsonAttribute.contentChecks(
-        isRelevantForRoleName,
-        matchedExchangeUuid,
-        HttpMessageType.REQUEST,
-        expectedApiVersion,
-        checks);
+    checks.add(checkCallIDMatchPreviousCallID(dsp));
+    checks.add(checkTimestampIDsMatchesPreviousCall(dsp));
+    checks.add(TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION);
+    checks.add(TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION);
+    return checks;
   }
 
-  public static JsonContentCheck checkTimestampIDsMatchesPreviousCall(
-      DynamicScenarioParameters dsp) {
+  static JsonContentCheck checkTimestampIDsMatchesPreviousCall(DynamicScenarioParameters dsp) {
     return JsonAttribute.customValidator(
         "Check if the reply timestamp matches the previous timestamp.",
         body -> {

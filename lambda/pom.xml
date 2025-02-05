@@ -30,9 +30,9 @@
 			<version>3.14.0</version>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>lambda</artifactId>
-			<version>2.29.50</version>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-lambda</artifactId>
+			<version>1.12.780</version>
 		</dependency>
 
 		<dependency>

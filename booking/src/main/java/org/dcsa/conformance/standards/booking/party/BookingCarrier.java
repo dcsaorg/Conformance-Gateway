@@ -202,8 +202,7 @@ public class BookingCarrier extends ConformanceParty {
     String cbr = actionPrompt.required("cbr").asText();
     String cbrr = actionPrompt.required("cbrr").asText();
     boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
-    addOperatorLogEntry(
-        createLogEntry("Confirmed the booking amendment for booking with", cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Confirmed the booking amendment for booking", cbr, cbrr));
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);

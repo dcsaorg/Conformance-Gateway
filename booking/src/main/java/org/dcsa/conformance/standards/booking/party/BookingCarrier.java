@@ -203,8 +203,7 @@ public class BookingCarrier extends ConformanceParty {
     String cbrr = actionPrompt.required("cbrr").asText();
     boolean acceptAmendment = actionPrompt.path("acceptAmendment").asBoolean(true);
     addOperatorLogEntry(
-        "Confirmed the booking amendment for booking with CBR '%s' and CBRR '%s'"
-            .formatted(cbr, cbrr));
+        createLogEntry("Confirmed the booking amendment for booking with", cbr, cbrr));
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
@@ -223,7 +222,7 @@ public class BookingCarrier extends ConformanceParty {
 
     String cbr = actionPrompt.required("cbr").asText();
     boolean isCancellationConfirmed = actionPrompt.path("isCancellationConfirmed").asBoolean(true);
-    addOperatorLogEntry("Cancellation of Confirmed booking with CBR '%s'".formatted(cbr));
+    addOperatorLogEntry(createLogEntry("Cancellation of Confirmed booking", cbr, null));
 
     // bookingReference can either be a CBR or CBRR.
     var cbrr = cbrToCbrr.getOrDefault(cbr, cbr);
@@ -243,7 +242,7 @@ public class BookingCarrier extends ConformanceParty {
     log.info("Carrier.confirmBookingRequest(%s)".formatted(actionPrompt.toPrettyString()));
 
     String cbrr = actionPrompt.required("cbrr").asText();
-    addOperatorLogEntry("Confirmed the booking request with CBRR '%s'".formatted(cbrr));
+    addOperatorLogEntry(createLogEntry("Confirmed the booking request", null, cbrr));
 
     var persistableCarrierBooking =
         PersistableCarrierBooking.fromPersistentStore(persistentMap, cbrr);
@@ -259,8 +258,7 @@ public class BookingCarrier extends ConformanceParty {
     var cbr = persistableCarrierBooking.getCarrierBookingReference();
     assert cbr != null;
 
-    addOperatorLogEntry(
-        "Confirmed the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Confirmed the booking request", cbr, cbrr));
   }
 
   private void rejectBookingRequest(JsonNode actionPrompt) {
@@ -273,8 +271,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.rejectBooking(cbrr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-    addOperatorLogEntry(
-        "Rejected the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Rejected the booking request", cbr, cbrr));
   }
 
   private void declineBooking(JsonNode actionPrompt) {
@@ -288,7 +285,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.declineBooking(cbr);
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
-    addOperatorLogEntry("Declined the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Declined the booking", cbr, cbrr));
   }
 
   private void requestUpdateToBookingRequest(JsonNode actionPrompt) {
@@ -312,8 +309,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry(
-        "Requested update to the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Requested update to the booking request", cbr, cbrr));
   }
 
   private void confirmBookingCompleted(JsonNode actionPrompt) {
@@ -328,7 +324,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, false);
 
-    addOperatorLogEntry("Completed the booking request with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Completed the booking request", cbr, cbrr));
   }
 
   private void requestToAmendConfirmedBooking(JsonNode actionPrompt) {
@@ -354,8 +350,7 @@ public class BookingCarrier extends ConformanceParty {
     persistableCarrierBooking.save(persistentMap);
     generateAndEmitNotificationFromBooking(actionPrompt, persistableCarrierBooking, true);
 
-    addOperatorLogEntry(
-        "Requested to amend the booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Requested to amend the booking", cbr, cbrr));
   }
 
   private String generateAndAssociateCBR(String cbrr) {
@@ -671,6 +666,13 @@ public class BookingCarrier extends ConformanceParty {
         request,
         bookingRequestPayload,
         persistableCarrierBooking.getCarrierBookingRequestReference());
+  }
+
+  private String createLogEntry(String message, String cbr, String cbrr) {
+    return message
+        + (cbr != null ? " with CBR '%s'".formatted(cbr) : "")
+        + (cbr != null && cbrr != null ? " and" : "")
+        + (cbrr != null ? " with CBRR '%s'".formatted(cbrr) : "");
   }
 
   @Builder

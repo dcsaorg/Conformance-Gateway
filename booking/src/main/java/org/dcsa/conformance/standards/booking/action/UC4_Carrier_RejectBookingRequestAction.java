@@ -1,14 +1,13 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.stream.Stream;
 
 @Getter
 public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBookingAction {
@@ -25,10 +24,10 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC4: Reject the booking request with CBR '%s' and CBRR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference(),
-            getDspSupplier().get().carrierBookingRequestReference()));
+    return createHumanReadablePromptMessage(
+        "UC4: Reject the booking request",
+        getDspSupplier().get().carrierBookingReference(),
+        getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override

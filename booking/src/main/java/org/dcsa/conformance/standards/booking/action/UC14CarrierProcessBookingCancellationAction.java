@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Objects;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -8,9 +10,6 @@ import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationD
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.Objects;
-import java.util.stream.Stream;
 
 @Getter
 public class UC14CarrierProcessBookingCancellationAction extends StateChangingBookingAction {
@@ -36,9 +35,10 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC14: Process the confirmed booking cancellation  CBR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference()));
+    return createHumanReadablePromptMessage(
+        "UC14: Process the confirmed booking cancellation",
+        getDspSupplier().get().carrierBookingReference(),
+        null);
   }
 
   @Override

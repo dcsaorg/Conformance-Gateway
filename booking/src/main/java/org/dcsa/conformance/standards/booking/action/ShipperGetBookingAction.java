@@ -1,9 +1,8 @@
 package org.dcsa.conformance.standards.booking.action;
 
 
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.BookingChecks;
@@ -51,11 +50,13 @@ public class ShipperGetBookingAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the booking with CBR '%s' and CBRR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference(),
-            getDspSupplier().get().carrierBookingRequestReference());
+    return createHumanReadablePromptMessage(
+        "GET the booking",
+        getDspSupplier().get().carrierBookingReference(),
+        getDspSupplier().get().carrierBookingRequestReference());
   }
+
+
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

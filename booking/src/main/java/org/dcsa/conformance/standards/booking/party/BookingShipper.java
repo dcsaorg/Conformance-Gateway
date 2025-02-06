@@ -82,8 +82,7 @@ public class BookingShipper extends ConformanceParty {
       : Collections.emptyMap();
 
     syncCounterpartGet("/v2/bookings/" + reference, queryParams);
-
-    addOperatorLogEntry("Sent a GET request for booking with CBR '%s' and CBRR '%s'".formatted(cbr, cbrr));
+    addOperatorLogEntry(createLogEntry("Sent a GET request for booking with", cbr, cbrr));
   }
 
   private void sendBookingRequest(JsonNode actionPrompt) {
@@ -151,7 +150,7 @@ public class BookingShipper extends ConformanceParty {
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.name()));
 
-    addOperatorLogEntry("Sent a cancel booking request of '%s'".formatted(cbrr));
+    addOperatorLogEntry(createLogEntry("Sent a cancel booking request of", null, cbrr));
   }
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
@@ -165,7 +164,7 @@ public class BookingShipper extends ConformanceParty {
         .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
         .put("reason", "Cancelling due to internal issues"));
 
-    addOperatorLogEntry("Sent a confirmed booking cancellation of '%s'".formatted(cbr));
+    addOperatorLogEntry(createLogEntry("Sent a confirmed booking cancellation of", cbr, null));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {
@@ -192,7 +191,7 @@ public class BookingShipper extends ConformanceParty {
       case CANCEL_BOOKING  -> sendCancelBookingRequest(actionPrompt);
       default -> throw new AssertionError("Missing case for " + invalidBookingMessageType.name());
     }
-    addOperatorLogEntry("Sent a invalid booking action request of '%s'".formatted(cbrr));
+    addOperatorLogEntry(createLogEntry("Sent a invalid booking action request of", null, cbrr));
   }
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {
@@ -244,5 +243,10 @@ public class BookingShipper extends ConformanceParty {
     return  cbr != null ? cbr : cbrr;
   }
 
-
+  private String createLogEntry(String message, String cbr, String cbrr) {
+    return message
+        + (cbr != null ? " CBR '%s'".formatted(cbr) : "")
+        + (cbr != null && cbrr != null ? " and" : "")
+        + (cbrr != null ? " CBRR '%s'".formatted(cbrr) : "");
+  }
 }

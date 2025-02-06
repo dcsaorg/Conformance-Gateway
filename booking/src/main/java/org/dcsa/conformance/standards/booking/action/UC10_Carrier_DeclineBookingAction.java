@@ -27,10 +27,10 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC10: Decline the booking request with CBR '%s' and CBRR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference(),
-            getDspSupplier().get().carrierBookingRequestReference()));
+    return createHumanReadablePromptMessage(
+        "UC10: Decline the booking request",
+        getDspSupplier().get().carrierBookingReference(),
+        getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override

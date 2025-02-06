@@ -27,10 +27,10 @@ public class Shipper_GetAmendedBooking404Action extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the (non-existing) amendment to the booking with CBR '%s' and CBRR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference(),
-            getDspSupplier().get().carrierBookingRequestReference());
+    return createHumanReadablePromptMessage(
+        "GET the (non-existing) amendment to the booking",
+        getDspSupplier().get().carrierBookingReference(),
+        getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override

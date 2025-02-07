@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -15,7 +16,6 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
-import org.dcsa.conformance.standards.adoption.AdoptionStandard;
 import org.dcsa.conformance.standards.adoption.action.GetAdoptionStatsAction;
 
 @Slf4j
@@ -58,20 +58,23 @@ public class AdoptionDCSA extends ConformanceParty {
   }
 
   private void getAdoptionStats(JsonNode actionPrompt) {
-    syncCounterpartGet(GetAdoptionStatsAction.GET_ADOPTION_STATS_URL, Collections.emptyMap());
+    log.info("AdoptionAdopter.getAdoptionStats({})", actionPrompt);
+    syncCounterpartGet(
+        GetAdoptionStatsAction.GET_ADOPTION_STATS_URL,
+        SuppliedScenarioParameters.fromJson(actionPrompt.get("suppliedScenarioParameters"))
+            .getMap()
+            .entrySet()
+            .stream()
+            .map(entry -> Map.entry(entry.getKey().getQueryParamName(), Set.of(entry.getValue())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 
   @Override
-  public ConformanceResponse handleRequest(ConformanceRequest request) {
+  public ConformanceResponse handleRequest(ConformanceRequest request) { // PUT
     log.info("AdoptionDCSA.handleRequest()");
-
-    JsonNode jsonResponseBody =
-        JsonToolkit.templateFileToJsonNode(
-            AdoptionStandard.ADOPTION_STATS_EXAMPLE.formatted(apiVersion), null);
-
     return request.createResponse(
         204,
         Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+        new ConformanceMessageBody(JsonToolkit.OBJECT_MAPPER.createObjectNode()));
   }
 }

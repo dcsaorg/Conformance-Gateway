@@ -33,7 +33,7 @@ import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
@@ -133,9 +133,9 @@ public class JitProvider extends ConformanceParty {
     if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
       serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
     } else {
-      serviceType = dsp.portCallServiceType().name();
+      serviceType = dsp.portCallServiceTypeCode().name();
     }
-    dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
+    dsp = dsp.withPortCallServiceTypeCode(PortCallServiceTypeCode.fromName(serviceType));
     JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call-service", dsp);
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);

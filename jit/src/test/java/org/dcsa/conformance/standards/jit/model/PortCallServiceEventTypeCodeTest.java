@@ -1,32 +1,32 @@
 package org.dcsa.conformance.standards.jit.model;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class PortCallServiceEventTypeCodeTest {
 
   @Test
-  void testGetValidPortCallServiceTypes() {
+  void testGetValidPortCallServiceTypeCodes() {
     assertEquals(
-        PortCallServiceEventTypeCode.getValidPortCallServiceTypes(
+        PortCallServiceEventTypeCode.getValidPortCallServiceTypeCodes(
             PortCallServiceEventTypeCode.STRT),
-        PortCallServiceEventTypeCode.getValidPortCallServiceTypes(
+        PortCallServiceEventTypeCode.getValidPortCallServiceTypeCodes(
             PortCallServiceEventTypeCode.CMPL));
     assertTrue(
-        PortCallServiceEventTypeCode.getValidPortCallServiceTypes(PortCallServiceEventTypeCode.STRT)
-            .contains(PortCallServiceType.CARGO_OPERATIONS));
+        PortCallServiceEventTypeCode.getValidPortCallServiceTypeCodes(
+                PortCallServiceEventTypeCode.STRT)
+            .contains(PortCallServiceTypeCode.CARGO_OPERATIONS));
   }
 
   @Test
-  void testGetCodesForPortCallServiceType() {
+  void testGetCodesForPortCallServiceTypeCode() {
     assertEquals(
         List.of(PortCallServiceEventTypeCode.STRT, PortCallServiceEventTypeCode.CMPL),
-        PortCallServiceEventTypeCode.getCodesForPortCallServiceType("CARGO_OPERATIONS"));
+        PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode("CARGO_OPERATIONS"));
     assertTrue(
-        PortCallServiceEventTypeCode.getCodesForPortCallServiceType("SAFETY")
+        PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode("SAFETY")
             .contains(PortCallServiceEventTypeCode.DEPA));
   }
 

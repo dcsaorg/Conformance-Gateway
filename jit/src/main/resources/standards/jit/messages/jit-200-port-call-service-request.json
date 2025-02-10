@@ -1,7 +1,7 @@
 {
   "terminalCallID": "TERMINAL_CALL_ID_PLACEHOLDER",
   "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-  "portCallServiceType": "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+  "portCallServiceTypeCode": "PORT_CALL_SERVICE_TYPE_CODE_PLACEHOLDER",
   "portCallServiceEventTypeCode": "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
   "portCallPhaseTypeCode": "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
   "portCallServiceLocation": {

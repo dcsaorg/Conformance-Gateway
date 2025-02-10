@@ -14,7 +14,7 @@ import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
@@ -23,12 +23,12 @@ public class JitPortCallServiceAction extends JitAction {
   public static final String SERVICE_TYPE = "serviceType";
 
   private final JsonSchemaValidator validator;
-  private final PortCallServiceType serviceType;
+  private final PortCallServiceTypeCode serviceType;
 
   public JitPortCallServiceAction(
       JitScenarioContext context,
       ConformanceAction previousAction,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector) {
     super(
         context.providerPartyName(),
@@ -37,13 +37,13 @@ public class JitPortCallServiceAction extends JitAction {
         calculateTitle(serviceType, selector));
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
     if (serviceType == null && previousAction instanceof JitPortCallServiceAction && dsp != null) {
-      serviceType = dsp.portCallServiceType();
+      serviceType = dsp.portCallServiceTypeCode();
     }
     this.serviceType = serviceType;
   }
 
   private static String calculateTitle(
-      PortCallServiceType serviceType, JitServiceTypeSelector selector) {
+      PortCallServiceTypeCode serviceType, JitServiceTypeSelector selector) {
     if (serviceType != null) return "Port Call Service(%s)".formatted(serviceType.name());
     return "Port Call Service(%s)".formatted(selector.getFullName());
   }
@@ -70,10 +70,10 @@ public class JitPortCallServiceAction extends JitAction {
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        dsp.withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null))
-            .withPortCallServiceType(
-                PortCallServiceType.fromName(
-                    requestJsonNode.path("portCallServiceType").asText(null)));
+        dsp.withPortCallServiceID(requestJsonNode.path(JitChecks.PORT_CALL_SERVICE_ID).asText(null))
+            .withPortCallServiceTypeCode(
+                PortCallServiceTypeCode.fromName(
+                    requestJsonNode.path(JitChecks.PORT_CALL_SERVICE_TYPE).asText(null)));
   }
 
   @Override

@@ -1,26 +1,22 @@
 package org.dcsa.conformance.standards.jit.model;
 
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.ALL_FAST;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.ANCHORAGE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.ANCHORAGE_OPERATIONS;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.BERTH;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.BUNKERING;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.CARGO_OPERATIONS;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.DISCHARGE_CARGO_OPERATIONS;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.GANGWAY_DOWN_AND_SECURE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.LASHING;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.LOADING_CARGO_OPERATIONS;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.MOORING;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.MOVES;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.PILOTAGE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.PILOT_BOARDING_PLACE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.SAFETY;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.SEA_PASSAGE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.SHORE_POWER;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.SLUDGE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.TOWAGE;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.VESSEL_READY_FOR_CARGO_OPERATIONS;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.VESSEL_READY_TO_SAIL;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.ALL_FAST;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.BERTH;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.BUNKERING;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.CARGO_OPERATIONS;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.DISCHARGE_CARGO_OPERATIONS;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.GANGWAY_DOWN_AND_SECURE;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.LASHING;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.LOADING_CARGO_OPERATIONS;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.MOORING;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.PILOTAGE;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.PILOT_BOARDING_PLACE;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.SAFETY;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.SEA_PASSAGE;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.SHORE_POWER;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.TOWAGE;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.VESSEL_READY_FOR_CARGO_OPERATIONS;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.VESSEL_READY_TO_SAIL;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,11 +29,8 @@ public enum PortCallPhaseTypeCode {
   OUTB, // (Outbound)
   ;
 
-  // Some PortCallServiceType codes are not associated with a PortCallPhaseTypeCode (keep empty)
-  public static final List<PortCallServiceType> EMPTY_PHASE_TYPE_CODES =
-      List.of(ANCHORAGE, SLUDGE, ANCHORAGE_OPERATIONS, MOVES);
-
-  public static Set<PortCallServiceType> getValidPortCallPhaseTypeCode(PortCallPhaseTypeCode code) {
+  public static Set<PortCallServiceTypeCode> getValidPortCallPhaseTypeCode(
+      PortCallPhaseTypeCode code) {
     return switch (code) {
       case INBD -> Set.of(BERTH, PILOTAGE, TOWAGE, MOORING, PILOT_BOARDING_PLACE, SEA_PASSAGE);
       case ALGS ->
@@ -61,7 +54,7 @@ public enum PortCallPhaseTypeCode {
 
   public static List<PortCallPhaseTypeCode> getCodesForPortCallServiceType(
       String portCallServiceType) {
-    PortCallServiceType serviceType = PortCallServiceType.fromName(portCallServiceType);
+    PortCallServiceTypeCode serviceType = PortCallServiceTypeCode.fromName(portCallServiceType);
     return Arrays.stream(PortCallPhaseTypeCode.values())
         .filter(code -> getValidPortCallPhaseTypeCode(code).contains(serviceType))
         .toList();

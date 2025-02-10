@@ -283,13 +283,13 @@ public class JitPartyHelper {
 
   public static ObjectNode getFileWithReplacedPlaceHolders(
       String fileType, DynamicScenarioParameters dsp) {
-    PortCallServiceType serviceType = dsp.portCallServiceType();
+    PortCallServiceTypeCode serviceType = dsp.portCallServiceTypeCode();
     String portCallPhaseTypeCode = "";
     String portCallServiceEventTypeCode = "";
     if (serviceType != null) {
       portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType.name());
       portCallServiceEventTypeCode =
-          PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType.name())
+          PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode(serviceType.name())
               .getFirst()
               .name();
     }
@@ -303,7 +303,7 @@ public class JitPartyHelper {
                     Objects.requireNonNullElse(dsp.portCallID(), ""),
                     "TERMINAL_CALL_ID_PLACEHOLDER",
                     Objects.requireNonNullElse(dsp.terminalCallID(), ""),
-                    "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+                    "PORT_CALL_SERVICE_TYPE_CODE_PLACEHOLDER",
                     serviceType != null ? serviceType.name() : "",
                     "PORT_CALL_SERVICE_ID_PLACEHOLDER",
                     Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
@@ -319,7 +319,7 @@ public class JitPartyHelper {
 
     // Only MOVES service type requires the Moves part of the request. Removing it from other types.
     if ("port-call-service".equals(fileType)
-        && dsp.portCallServiceType() != PortCallServiceType.MOVES) {
+        && dsp.portCallServiceTypeCode() != PortCallServiceTypeCode.MOVES) {
       node.remove("moves");
     }
 

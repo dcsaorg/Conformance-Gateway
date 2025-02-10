@@ -1,6 +1,6 @@
 package org.dcsa.conformance.standards.jit.model;
 
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +19,7 @@ public enum PortCallServiceEventTypeCode {
 
   private final String fullName;
 
-  public static Set<PortCallServiceType> getValidPortCallServiceTypes(
+  public static Set<PortCallServiceTypeCode> getValidPortCallServiceTypeCodes(
       PortCallServiceEventTypeCode code) {
     return switch (code) {
       case STRT, CMPL ->
@@ -51,16 +51,16 @@ public enum PortCallServiceEventTypeCode {
   }
 
   public static boolean isValidCombination(
-      PortCallServiceType portCallServiceType, String portCallServiceEventTypeCode) {
+      PortCallServiceTypeCode portCallServiceTypeCode, String portCallServiceEventTypeCode) {
     PortCallServiceEventTypeCode code = fromString(portCallServiceEventTypeCode);
-    return getValidPortCallServiceTypes(code).contains(portCallServiceType);
+    return getValidPortCallServiceTypeCodes(code).contains(portCallServiceTypeCode);
   }
 
-  public static List<PortCallServiceEventTypeCode> getCodesForPortCallServiceType(
-      String portCallServiceType) {
-    PortCallServiceType givenCode = PortCallServiceType.fromName(portCallServiceType);
+  public static List<PortCallServiceEventTypeCode> getCodesForPortCallServiceTypeCode(
+      String portCallServiceTypeCode) {
+    PortCallServiceTypeCode givenCode = PortCallServiceTypeCode.fromName(portCallServiceTypeCode);
     return Arrays.stream(PortCallServiceEventTypeCode.values())
-        .filter(code -> getValidPortCallServiceTypes(code).contains(givenCode))
+        .filter(code -> getValidPortCallServiceTypeCodes(code).contains(givenCode))
         .toList();
   }
 

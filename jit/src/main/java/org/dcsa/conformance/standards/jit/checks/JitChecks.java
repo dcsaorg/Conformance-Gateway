@@ -21,7 +21,7 @@ import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -32,7 +32,7 @@ public class JitChecks {
   public static final String PORT_CALL_SERVICE_ID = "portCallServiceID";
   public static final String TIMESTAMP_ID = "timestampID";
   public static final String CLASSIFIER_CODE = "classifierCode";
-  public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceType";
+  public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceTypeCode";
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -101,7 +101,7 @@ public class JitChecks {
       Predicate<String> isRelevantForRoleName,
       UUID matchedExchangeUuid,
       String expectedApiVersion,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       DynamicScenarioParameters dsp) {
     if (dsp == null) return null;
     List<JsonContentCheck> checks = new ArrayList<>();
@@ -114,7 +114,7 @@ public class JitChecks {
         && dsp.selector() != JitServiceTypeSelector.ANY) {
       checks.add(checkPortCallServiceRightType(dsp));
     }
-    if (dsp.portCallServiceType() == PortCallServiceType.MOVES) {
+    if (dsp.portCallServiceTypeCode() == PortCallServiceTypeCode.MOVES) {
       checks.add(checkPortCallServiceHasMoves(true));
       checks.add(MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER);
       checks.add(MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE);
@@ -154,14 +154,14 @@ public class JitChecks {
 
   static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(PORT_CALL_SERVICE_TYPE);
 
-  static JsonRebaseableContentCheck checkPortCallService(PortCallServiceType serviceType) {
+  static JsonRebaseableContentCheck checkPortCallService(PortCallServiceTypeCode serviceType) {
     return JsonAttribute.ifThen(
         "Expected Port Call Service type should match scenario (%s)."
             .formatted(serviceType.getFullName()),
         IS_PORT_CALL_SERVICE,
         JsonAttribute.mustEqual(
             "Check if the correct Port Call Service was supplied.",
-            JsonPointer.compile("/portCallServiceType"),
+            JsonPointer.compile("/portCallServiceTypeCode"),
             serviceType::name));
   }
 
@@ -172,11 +172,12 @@ public class JitChecks {
         body -> {
           if (IS_PORT_CALL_SERVICE.test(body)) {
             String actualServiceType = body.path(PORT_CALL_SERVICE_TYPE).asText();
-            PortCallServiceType serviceType = PortCallServiceType.fromName(actualServiceType);
+            PortCallServiceTypeCode serviceType =
+                PortCallServiceTypeCode.fromName(actualServiceType);
             if ((dsp.selector() == JitServiceTypeSelector.FULL_ERP
-                    && !PortCallServiceType.getServicesWithERPAndA().contains(serviceType))
+                    && !PortCallServiceTypeCode.getServicesWithERPAndA().contains(serviceType))
                 || (dsp.selector() == JitServiceTypeSelector.S_A_PATTERN
-                    && !PortCallServiceType.getServicesHavingOnlyA().contains(serviceType))) {
+                    && !PortCallServiceTypeCode.getServicesHavingOnlyA().contains(serviceType))) {
               return Set.of(
                   "Expected matching Port Call Service type with scenario '%s'. Found non-matching type: '%s'"
                       .formatted(dsp.selector().getFullName(), actualServiceType));
@@ -203,7 +204,7 @@ public class JitChecks {
       JsonNode body, String actualServiceType) {
     String portCallServiceEventTypeCode = body.path("portCallServiceEventTypeCode").asText();
     if (!PortCallServiceEventTypeCode.isValidCombination(
-        PortCallServiceType.fromName(actualServiceType), portCallServiceEventTypeCode)) {
+        PortCallServiceTypeCode.fromName(actualServiceType), portCallServiceEventTypeCode)) {
       return "Expected matching Port Call Service type with PortCallServiceEventTypeCode. Found non-matching type: '%s' combined with code: '%s'"
           .formatted(actualServiceType, portCallServiceEventTypeCode);
     }

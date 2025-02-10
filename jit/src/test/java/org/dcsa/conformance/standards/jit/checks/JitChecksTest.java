@@ -11,7 +11,7 @@ import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.PortCallPhaseTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceEventTypeCode;
 import org.dcsa.conformance.standards.jit.model.PortCallServiceLocationTimestamp;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.jit.party.JitPartyHelper;
 import org.junit.jupiter.api.Test;
@@ -22,17 +22,17 @@ class JitChecksTest {
   void checkPortCallService() {
     ObjectNode request =
         createPortCallServiceRequest(
-            PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI, null);
+            PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null);
     assertTrue(JitChecks.IS_PORT_CALL_SERVICE.test(request));
     assertTrue(
-        JitChecks.checkPortCallService(PortCallServiceType.BERTH).validate(request).isEmpty());
+        JitChecks.checkPortCallService(PortCallServiceTypeCode.BERTH).validate(request).isEmpty());
 
     assertEquals(
-        "The value of 'portCallServiceType' was 'BUNKERING' instead of 'BERTH'",
-        JitChecks.checkPortCallService(PortCallServiceType.BERTH)
+        "The value of 'portCallServiceTypeCode' was 'BUNKERING' instead of 'BERTH'",
+        JitChecks.checkPortCallService(PortCallServiceTypeCode.BERTH)
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.BUNKERING, PortCallServiceEventTypeCode.ARRI, null))
+                    PortCallServiceTypeCode.BUNKERING, PortCallServiceEventTypeCode.ARRI, null))
             .iterator()
             .next());
 
@@ -86,7 +86,7 @@ class JitChecksTest {
         JitChecks.checkRightFieldValues()
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.BERTH,
+                    PortCallServiceTypeCode.BERTH,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
             .isEmpty());
@@ -96,7 +96,7 @@ class JitChecksTest {
         JitChecks.checkRightFieldValues()
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.SLUDGE, PortCallServiceEventTypeCode.DEPA, null))
+                    PortCallServiceTypeCode.SLUDGE, PortCallServiceEventTypeCode.DEPA, null))
             .iterator()
             .next());
   }
@@ -127,7 +127,7 @@ class JitChecksTest {
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.BERTH,
+                    PortCallServiceTypeCode.BERTH,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
             .isEmpty());
@@ -137,7 +137,7 @@ class JitChecksTest {
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.SEA_PASSAGE,
+                    PortCallServiceTypeCode.SEA_PASSAGE,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
             .iterator()
@@ -152,7 +152,7 @@ class JitChecksTest {
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.ALL_FAST,
+                    PortCallServiceTypeCode.ALL_FAST,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
             .isEmpty());
@@ -162,7 +162,7 @@ class JitChecksTest {
         JitChecks.checkPortCallServiceRightType(dsp)
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.SLUDGE,
+                    PortCallServiceTypeCode.SLUDGE,
                     PortCallServiceEventTypeCode.ARRI,
                     PortCallPhaseTypeCode.INBD))
             .iterator()
@@ -227,7 +227,7 @@ class JitChecksTest {
         JitChecks.IS_FYI_TRUE
             .validate(
                 createPortCallServiceRequest(
-                    PortCallServiceType.BERTH, PortCallServiceEventTypeCode.ARRI, null))
+                    PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null))
             .size());
 
     assertFalse(JitChecks.IS_FYI_TRUE.validate(createTimestamp().toJson()).isEmpty());
@@ -238,7 +238,7 @@ class JitChecksTest {
   void testMovesCarrierCodeImpliesCarrierCodeListProvider() {
     ObjectNode request =
         createPortCallServiceRequest(
-            PortCallServiceType.MOVES, PortCallServiceEventTypeCode.ARRI, null);
+            PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
 
     assertTrue(
         JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER
@@ -264,7 +264,7 @@ class JitChecksTest {
   void testMovesCarrierCodeListProviderImpliesCarrierCode() {
     ObjectNode request =
         createPortCallServiceRequest(
-            PortCallServiceType.MOVES, PortCallServiceEventTypeCode.ARRI, null);
+            PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
 
     assertTrue(
         JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE
@@ -422,7 +422,7 @@ class JitChecksTest {
   }
 
   private ObjectNode createPortCallServiceRequest(
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       PortCallServiceEventTypeCode code,
       PortCallPhaseTypeCode phaseTypeCode) {
     var dsp =
@@ -432,7 +432,7 @@ class JitChecksTest {
 
     if (code != null) node.put("portCallServiceEventTypeCode", code.name());
     if (phaseTypeCode != null) node.put("portCallPhaseTypeCode", phaseTypeCode.name());
-    if (serviceType != PortCallServiceType.MOVES) {
+    if (serviceType != PortCallServiceTypeCode.MOVES) {
       node.remove("moves");
     }
     return node;

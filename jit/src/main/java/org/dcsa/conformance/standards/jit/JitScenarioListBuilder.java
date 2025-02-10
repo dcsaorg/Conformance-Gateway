@@ -2,7 +2,7 @@ package org.dcsa.conformance.standards.jit;
 
 import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
 import static org.dcsa.conformance.standards.jit.model.JitTimestampType.*;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.*;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -33,7 +33,7 @@ import org.dcsa.conformance.standards.jit.model.JitGetTimestampCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @Slf4j
 class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder> {
@@ -1282,7 +1282,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder serviceCall(
       JitScenarioContext context,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector) {
     if (serviceType == null && selector == null) {
       throw new IllegalArgumentException("Either serviceType or selector must be provided");
@@ -1324,7 +1324,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder sendPC_TC_SC_VS(
       @NonNull JitScenarioContext context,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector,
       JitScenarioListBuilder... thenEither) {
     return portCall(context)

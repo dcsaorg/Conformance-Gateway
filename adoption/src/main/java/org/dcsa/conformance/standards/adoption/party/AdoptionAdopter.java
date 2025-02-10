@@ -1,7 +1,5 @@
 package org.dcsa.conformance.standards.adoption.party;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
@@ -23,8 +21,6 @@ import org.dcsa.conformance.standards.adoption.action.SupplyScenarioParametersAc
 
 @Slf4j
 public class AdoptionAdopter extends ConformanceParty {
-
-  public static final String ACTION_ID = "actionId";
 
   public AdoptionAdopter(
       String apiVersion,
@@ -60,39 +56,33 @@ public class AdoptionAdopter extends ConformanceParty {
   @Override
   protected Map<Class<? extends ConformanceAction>, Consumer<JsonNode>> getActionPromptHandlers() {
     return Map.ofEntries(
-        Map.entry(SupplyScenarioParametersAction.class, this::getAdoptionStats),
+        Map.entry(SupplyScenarioParametersAction.class, this::supplyScenarioParameters),
         Map.entry(PutAdoptionStatsAction.class, this::putAdoptionStats));
   }
 
-  private void getAdoptionStats(JsonNode actionPrompt) {
-    log.info("AdoptionAdopter.getAdoptionStats({})", actionPrompt);
-
+  private void supplyScenarioParameters(JsonNode actionPrompt) {
+    log.info("AdoptionAdopter.supplyScenarioParameters({})", actionPrompt.toPrettyString());
     asyncOrchestratorPostPartyInput(
-        actionPrompt.required(ACTION_ID).asText(),
-        OBJECT_MAPPER.createObjectNode().put("interval", "week").put("date", "2024-12-31"));
-    addOperatorLogEntry(
-        "Provided AdoptionScenarioParameters: %s".formatted(actionPrompt.get(ACTION_ID)));
+        actionPrompt.required("actionId").asText(),
+        JsonToolkit.OBJECT_MAPPER
+            .createObjectNode()
+            .put("interval", "day")
+            .put("date", "2024-06-16"));
   }
 
   private void putAdoptionStats(JsonNode actionPrompt) {
-    log.info("AdoptionAdopter.putAdoptionStats()");
-
-    String fileName = AdoptionStandard.ADOPTION_STATS_EXAMPLE.formatted(apiVersion);
-    JsonNode jsonResponseBody = JsonToolkit.templateFileToJsonNode(fileName, null);
-    syncCounterpartPut(PutAdoptionStatsAction.PUT_ADOPTION_STATS_URL, jsonResponseBody);
-
-    addOperatorLogEntry("Provided response body, contents of file: %s".formatted(fileName));
+    log.info("AdoptionAdopter.putAdoptionStats({})", actionPrompt);
+    syncCounterpartPut(PutAdoptionStatsAction.PUT_ADOPTION_STATS_URL, adoptionStats());
   }
 
   @Override
-  public ConformanceResponse handleRequest(ConformanceRequest request) {
-    JsonNode jsonResponseBody =
-        JsonToolkit.templateFileToJsonNode(
-            AdoptionStandard.ADOPTION_STATS_EXAMPLE.formatted(apiVersion), Map.ofEntries());
-
+  public ConformanceResponse handleRequest(ConformanceRequest request) { // GET
     return request.createResponse(
-        200,
-        Map.of(API_VERSION, List.of(apiVersion)),
-        new ConformanceMessageBody(jsonResponseBody));
+        200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(adoptionStats()));
+  }
+
+  private JsonNode adoptionStats() {
+    return JsonToolkit.templateFileToJsonNode(
+        AdoptionStandard.ADOPTION_STATS_EXAMPLE.formatted(apiVersion), Map.ofEntries());
   }
 }

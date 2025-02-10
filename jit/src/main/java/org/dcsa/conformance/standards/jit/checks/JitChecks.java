@@ -187,6 +187,24 @@ public class JitChecks {
         });
   }
 
+  public static JsonContentCheck checkExpectedResultCount(
+      int expectedResults, boolean moreResultsAllowed) {
+    String orMore = moreResultsAllowed ? " or more" : "";
+    return JsonAttribute.customValidator(
+        "GET action should receive the right amount of results: %s%s."
+            .formatted(expectedResults, orMore),
+        body -> {
+          if (!body.isArray()
+              || (!moreResultsAllowed && body.size() != expectedResults)
+              || (moreResultsAllowed && body.size() < expectedResults)) {
+            return Set.of(
+                "Expected %s%s result(s), but got %s result(s)."
+                    .formatted(expectedResults, orMore, body.size()));
+          }
+          return Collections.emptySet();
+        });
+  }
+
   static JsonContentCheck checkRightFieldValues() {
     return JsonAttribute.customValidator(
         "Check if valid combinations of values are supplied.",

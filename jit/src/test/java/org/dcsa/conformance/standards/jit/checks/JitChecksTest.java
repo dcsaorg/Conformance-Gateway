@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.jit.checks;
 import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.UUID;
 import org.dcsa.conformance.standards.jit.model.JitClassifierCode;
@@ -405,6 +406,22 @@ class JitChecksTest {
         JitChecks.TIMESTAMP_VALIDATE_PORT_CALL_SERVICE_LOCATION
             .validate(timestamp.toJson())
             .isEmpty());
+  }
+
+  @Test
+  void testCheckExpectedResultCount() {
+    ObjectNode timestamp = createTimestamp().toJson();
+    ArrayNode body = OBJECT_MAPPER.createArrayNode().add(timestamp).add(timestamp);
+    assertEquals(
+        "Expected 1 result(s), but got 2 result(s).",
+        JitChecks.checkExpectedResultCount(1, false).validate(body).iterator().next());
+    assertTrue(JitChecks.checkExpectedResultCount(2, false).validate(body).isEmpty());
+
+    // Assert that moreResultsAllowed is respected
+    body.add(timestamp).add(timestamp);
+    assertTrue(JitChecks.checkExpectedResultCount(2, true).validate(body).isEmpty());
+    assertTrue(JitChecks.checkExpectedResultCount(4, true).validate(body).isEmpty());
+    assertFalse(JitChecks.checkExpectedResultCount(5, true).validate(body).isEmpty());
   }
 
   private ObjectNode createPortCall() {

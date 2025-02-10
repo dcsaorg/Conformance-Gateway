@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
+import org.dcsa.conformance.core.check.JsonAttribute;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.check.ResponseStatusCheck;
@@ -15,6 +16,7 @@ import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
 import org.dcsa.conformance.standards.jit.JitStandard;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
@@ -27,13 +29,16 @@ public class JitGetAction extends JitAction {
   private final JsonSchemaValidator validator;
   private final boolean requestedByProvider;
   private final List<String> urlFilters;
+  private final int expectedResults;
+  private final boolean moreResultsAllowed;
 
   public JitGetAction(
       JitScenarioContext context,
       ConformanceAction previousAction,
       JitGetType getType,
       List<String> urlFilters,
-      boolean requestedByProvider) {
+      boolean requestedByProvider,
+      int expectedResults) {
     super(
         requestedByProvider ? context.providerPartyName() : context.consumerPartyName(),
         requestedByProvider ? context.consumerPartyName() : context.providerPartyName(),
@@ -44,7 +49,22 @@ public class JitGetAction extends JitAction {
     this.getType = getType;
     this.urlFilters = urlFilters;
     this.requestedByProvider = requestedByProvider;
+    this.expectedResults = expectedResults;
+    this.moreResultsAllowed = determineMoreResultsAllowed(urlFilters);
     validator = context.componentFactory().getMessageSchemaValidator(getType.getJitSchema());
+  }
+
+  // Some GET request might return multiple results. This method determines if that is allowed,
+  // depending on the applied URL filters
+  private boolean determineMoreResultsAllowed(List<String> urlFilters) {
+    if (urlFilters == null || urlFilters.size() > 1)
+      return false; // Specifying multiple filters result in a strict match
+    else
+      return urlFilters.contains("UNLocationCode")
+          || urlFilters.contains("carrierServiceName")
+          || urlFilters.contains("carrierServiceCode")
+          || urlFilters.contains("vesselIMONumber")
+          || urlFilters.contains("vesselName");
   }
 
   @Override
@@ -81,6 +101,12 @@ public class JitGetAction extends JitAction {
                   getMatchedExchangeUuid(),
                   HttpMessageType.RESPONSE,
                   expectedApiVersion),
+              JsonAttribute.contentChecks(
+                  JitRole::isConsumer,
+                  getMatchedExchangeUuid(),
+                  HttpMessageType.RESPONSE,
+                  expectedApiVersion,
+                  JitChecks.checkExpectedResultCount(expectedResults, moreResultsAllowed)),
               new JsonSchemaCheck(
                   JitRole::isConsumer,
                   getMatchedExchangeUuid(),
@@ -102,6 +128,12 @@ public class JitGetAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion,
+                JitChecks.checkExpectedResultCount(expectedResults, moreResultsAllowed)),
             new JsonSchemaCheck(
                 JitRole::isProvider,
                 getMatchedExchangeUuid(),

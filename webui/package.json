@@ -23,6 +23,7 @@
     "@types/node": "^20.6.3",
     "@types/uuid": "^9.0.4",
     "amazon-cognito-identity-js": "^6.3.6",
+    "ngx-markdown": "^16.0.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",

@@ -31,6 +31,7 @@ import { EditSandboxComponent } from './pages/edit-sandbox/edit-sandbox.componen
 import { ReportComponent } from './pages/report/report.component';
 import {TextWaitingComponent} from "./text/waiting/text-waiting.component";
 import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
+import {MarkdownModule} from "ngx-markdown";
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
     BrowserModule,
     FormsModule,
     HttpClientModule,
+    MarkdownModule.forRoot(),
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,

@@ -24,7 +24,7 @@ public class UC2_Carrier_RequestUpdateToBookingRequestAction extends StateChangi
 
   @Override
   public String getHumanReadablePrompt() {
-    return createHumanReadablePromptMessage(
+    return createMessageForUIPrompt(
         "UC2: Request update to the booking request",
         getDspSupplier().get().carrierBookingReference(),
         getDspSupplier().get().carrierBookingRequestReference());

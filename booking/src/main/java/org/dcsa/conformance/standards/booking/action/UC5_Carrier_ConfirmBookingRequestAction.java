@@ -24,7 +24,7 @@ public class UC5_Carrier_ConfirmBookingRequestAction extends StateChangingBookin
 
   @Override
   public String getHumanReadablePrompt() {
-    return createHumanReadablePromptMessage(
+    return createMessageForUIPrompt(
         "UC5: Confirm the booking request",
         getDspSupplier().get().carrierBookingReference(),
         getDspSupplier().get().carrierBookingRequestReference());

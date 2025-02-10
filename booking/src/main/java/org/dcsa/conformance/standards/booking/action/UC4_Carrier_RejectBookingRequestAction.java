@@ -24,7 +24,7 @@ public class UC4_Carrier_RejectBookingRequestAction extends StateChangingBooking
 
   @Override
   public String getHumanReadablePrompt() {
-    return createHumanReadablePromptMessage(
+    return createMessageForUIPrompt(
         "UC4: Reject the booking request",
         getDspSupplier().get().carrierBookingReference(),
         getDspSupplier().get().carrierBookingRequestReference());

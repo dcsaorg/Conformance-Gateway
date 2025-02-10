@@ -82,7 +82,8 @@ public class BookingShipper extends ConformanceParty {
       : Collections.emptyMap();
 
     syncCounterpartGet("/v2/bookings/" + reference, queryParams);
-    addOperatorLogEntry(createLogEntry("Sent a GET request for booking with", cbr, cbrr));
+    addOperatorLogEntry(
+        BookingAction.createMessageForUIPrompt("Sent a GET request for booking", cbr, cbrr));
   }
 
   private void sendBookingRequest(JsonNode actionPrompt) {
@@ -150,7 +151,9 @@ public class BookingShipper extends ConformanceParty {
             .createObjectNode()
             .put("bookingStatus", BookingState.CANCELLED.name()));
 
-    addOperatorLogEntry(createLogEntry("Sent a cancel booking request of", null, cbrr));
+    addOperatorLogEntry(
+        BookingAction.createMessageForUIPrompt(
+            "Sent a cancel booking request to cancel booking", null, cbrr));
   }
 
   private void sendConfirmedBookingCancellationRequest(JsonNode actionPrompt) {
@@ -164,7 +167,9 @@ public class BookingShipper extends ConformanceParty {
         .put("bookingCancellationStatus", BookingCancellationState.CANCELLATION_RECEIVED.name())
         .put("reason", "Cancelling due to internal issues"));
 
-    addOperatorLogEntry(createLogEntry("Sent a confirmed booking cancellation of", cbr, null));
+    addOperatorLogEntry(
+        BookingAction.createMessageForUIPrompt(
+            "Sent a confirmed booking cancellation of booking", cbr, null));
   }
 
   private void sendCancelBookingAmendment(JsonNode actionPrompt) {
@@ -191,7 +196,9 @@ public class BookingShipper extends ConformanceParty {
       case CANCEL_BOOKING  -> sendCancelBookingRequest(actionPrompt);
       default -> throw new AssertionError("Missing case for " + invalidBookingMessageType.name());
     }
-    addOperatorLogEntry(createLogEntry("Sent a invalid booking action request of", null, cbrr));
+    addOperatorLogEntry(
+        BookingAction.createMessageForUIPrompt(
+            "Sent a invalid booking action request for booking", null, cbrr));
   }
 
   private void sendUpdatedBooking(JsonNode actionPrompt) {
@@ -243,10 +250,4 @@ public class BookingShipper extends ConformanceParty {
     return  cbr != null ? cbr : cbrr;
   }
 
-  private String createLogEntry(String message, String cbr, String cbrr) {
-    return message
-        + (cbr != null ? " CBR '%s'".formatted(cbr) : "")
-        + (cbr != null && cbrr != null ? " and" : "")
-        + (cbrr != null ? " CBRR '%s'".formatted(cbrr) : "");
-  }
 }

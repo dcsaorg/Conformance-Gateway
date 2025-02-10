@@ -27,7 +27,7 @@ public class Shipper_GetAmendedBooking404Action extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return createHumanReadablePromptMessage(
+    return createMessageForUIPrompt(
         "GET the (non-existing) amendment to the booking",
         getDspSupplier().get().carrierBookingReference(),
         getDspSupplier().get().carrierBookingRequestReference());

@@ -35,7 +35,7 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
 
   @Override
   public String getHumanReadablePrompt() {
-    return createHumanReadablePromptMessage(
+    return createMessageForUIPrompt(
         "UC14: Process the confirmed booking cancellation",
         getDspSupplier().get().carrierBookingReference(),
         null);

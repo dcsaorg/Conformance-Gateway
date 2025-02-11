@@ -27,10 +27,8 @@ public class UC10_Carrier_DeclineBookingAction extends StateChangingBookingActio
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "UC10: Decline the booking request",
-        getDspSupplier().get().carrierBookingReference(),
-        getDspSupplier().get().carrierBookingRequestReference());
+    return getMarkdownHumanReadablePrompt(
+        "prompt-carrier-uc10.md", "prompt-carrier-notification.md");
   }
 
   @Override

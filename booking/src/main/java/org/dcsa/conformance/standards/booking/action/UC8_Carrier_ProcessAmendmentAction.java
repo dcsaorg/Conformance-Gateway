@@ -39,10 +39,9 @@ public class UC8_Carrier_ProcessAmendmentAction extends StateChangingBookingActi
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "UC8: Process the booking amendment",
-        getDspSupplier().get().carrierBookingReference(),
-        getDspSupplier().get().carrierBookingRequestReference());
+    return getMarkdownHumanReadablePrompt(
+        "prompt-carrier-uc8%s.md".formatted(acceptAmendment ? "c" : "d"),
+        "prompt-carrier-notification.md");
   }
 
   @Override

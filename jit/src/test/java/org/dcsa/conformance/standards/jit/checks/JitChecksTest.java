@@ -37,11 +37,27 @@ class JitChecksTest {
             .iterator()
             .next());
 
+    // Moves checks
     assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
     assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
-    request.put("moves", "BERTH");
+
+    request =
+        createPortCallServiceRequest(
+            PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
     assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
     assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
+
+    assertTrue(
+        JitChecks.MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST
+            .validate(request)
+            .isEmpty());
+
+    // Remove all carrierCode occurrences and verify an error is returned
+    request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    assertFalse(
+        JitChecks.MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST
+            .validate(request)
+            .isEmpty());
   }
 
   @Test

@@ -33,6 +33,7 @@ public class JitChecks {
   public static final String TIMESTAMP_ID = "timestampID";
   public static final String CLASSIFIER_CODE = "classifierCode";
   public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceTypeCode";
+  public static final String MOVES_PROPERTY = "moves";
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
@@ -45,6 +46,23 @@ public class JitChecks {
           "The moves.carrierCodeListProvider implies moves.carrierCode",
           mav -> mav.submitAllMatching("moves.*"),
           JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
+
+  static final JsonContentCheck MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST =
+      JsonAttribute.customValidator(
+          "If there are > 1 moves objects, at least 1 must have a carrierCode",
+          body -> {
+            JsonNode moves = body.path(MOVES_PROPERTY);
+            if (!moves.isMissingNode() && moves.isArray() && moves.size() > 1) {
+              for (JsonNode move : moves) {
+                if (move.has("carrierCode")) {
+                  return Collections.emptySet();
+                }
+              }
+              return Set.of(
+                  "Expected carrierCode to be present in one of the given moves objects; found none!");
+            }
+            return Collections.emptySet();
+          });
 
   static final JsonRebaseableContentCheck TIMESTAMP_ALLOWS_PORT_CALL_SERVICE_LOCATION =
       JsonAttribute.ifThen(
@@ -118,6 +136,7 @@ public class JitChecks {
       checks.add(checkPortCallServiceHasMoves(true));
       checks.add(MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER);
       checks.add(MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE);
+      checks.add(MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST);
     } else checks.add(checkPortCallServiceHasMoves(false));
     checks.add(JitChecks.checkCallIDMatchPreviousCallID(dsp));
     if (dsp.isFYI()) {
@@ -133,23 +152,9 @@ public class JitChecks {
 
   static JsonContentCheck checkPortCallServiceHasMoves(boolean shouldHaveMoves) {
     if (shouldHaveMoves) {
-      return JsonAttribute.customValidator(
-          "Check if the Port Call Service has moves.",
-          body -> {
-            if (body.has("moves")) {
-              return Collections.emptySet();
-            }
-            return Set.of("Expected Port Call Service to have moves.");
-          });
+      return JsonAttribute.mustBePresent(JsonPointer.compile("/moves"));
     }
-    return JsonAttribute.customValidator(
-        "Check that the Port Call Service does NOT has moves object.",
-        body -> {
-          if (!body.has("moves")) {
-            return Collections.emptySet();
-          }
-          return Set.of("Expected Port Call Service to have no moves.");
-        });
+    return JsonAttribute.mustBeAbsent(JsonPointer.compile("/moves"));
   }
 
   static final Predicate<JsonNode> IS_PORT_CALL_SERVICE = node -> node.has(PORT_CALL_SERVICE_TYPE);

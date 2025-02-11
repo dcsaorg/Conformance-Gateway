@@ -112,6 +112,13 @@ public abstract class BookingAction extends ConformanceAction {
     return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
   }
 
+  public static String createMessageForUIPrompt(String message, String cbr, String cbrr) {
+    return message
+        + (cbr != null ? " with CBR '%s'".formatted(cbr) : "")
+        + (cbr != null && cbrr != null ? " and" : "")
+        + (cbrr != null ? " with CBRR '%s'".formatted(cbrr) : "");
+  }
+
   protected Stream<ActionCheck> getNotificationChecks(
     String expectedApiVersion,
     JsonSchemaValidator notificationSchemaValidator,

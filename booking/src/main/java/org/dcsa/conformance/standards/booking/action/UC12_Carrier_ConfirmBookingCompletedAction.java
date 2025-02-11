@@ -24,10 +24,8 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "UC12: Complete the booking request",
-        getDspSupplier().get().carrierBookingReference(),
-        getDspSupplier().get().carrierBookingRequestReference());
+    return getMarkdownHumanReadablePrompt(
+        "prompt-carrier-uc12.md", "prompt-carrier-notification.md");
   }
 
   @Override

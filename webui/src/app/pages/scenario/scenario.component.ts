@@ -65,17 +65,20 @@ export class ScenarioComponent {
     this.scenarioStatus = undefined;
 
     const sandboxStatusCheckStartTime = new Date().getTime();
-    do {
+    while (true) {
       this.sandboxStatus = await this.conformanceService.getSandboxStatus(this.sandbox!.id);
-      console.log("sandboxStatus=" + JSON.stringify(this.sandboxStatus));
+      if (this.sandboxStatus.waiting.length == 0
+        || new Date().getTime() - sandboxStatusCheckStartTime >= 60 * 1000) {
+        break;
+      }
       await sleep(1000);
-    } while (this.sandboxStatus.waiting.length > 0
-      && new Date().getTime() - sandboxStatusCheckStartTime < 60 * 1000);
+    }
 
     this.scenarioStatus = await this.conformanceService.getScenarioStatus(
       this.sandbox!.id,
       this.scenario!.id
     );
+    this.actionInput = JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
   }
 
   formattedSandboxWaiting(sandboxWaiting: SandboxWaiting): string {
@@ -106,10 +109,6 @@ export class ScenarioComponent {
     if (this.activatedRouteSubscription) {
       this.activatedRouteSubscription.unsubscribe();
     }
-  }
-
-  getJsonForPromptText(): string {
-    return JSON.stringify(this.scenarioStatus?.jsonForPromptText, null, 4);
   }
 
   getCurrentActionTitle(): string {

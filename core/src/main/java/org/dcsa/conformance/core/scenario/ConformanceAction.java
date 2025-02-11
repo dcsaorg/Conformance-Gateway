@@ -93,13 +93,6 @@ public abstract class ConformanceAction implements StatefulEntity {
 
   public abstract String getHumanReadablePrompt();
 
-  /**
-   * @return true if the web UI should render the prompt as Markdown text, false otherwise
-   */
-  public boolean hasMarkdownHumanReadablePrompt() {
-    return false;
-  }
-
   public JsonNode getJsonForHumanReadablePrompt() {
     return null;
   }

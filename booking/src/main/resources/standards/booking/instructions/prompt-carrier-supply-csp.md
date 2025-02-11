@@ -1,5 +1,3 @@
-#### ▶️ Carrier action
-
 The DCSA reference implementation of a shipper running in the sandbox needs to exchange API calls with your carrier application in order to measure its conformance, but out of the box the DCSA shipper does not have any information about your organization's data. Therefore, at the beginning of the scenario you need to provide a number of parameters, which the DCSA shipper will use to customize the requests and responses that it sends to your carrier application throughout the scenario.
 
 The DCSA shipper uses the following parameters:

@@ -4,7 +4,6 @@ export interface ScenarioStatus {
     isRunning: boolean,
     nextActions: string,
     promptText: string,
-    promptIsMarkdown: boolean,
     jsonForPromptText: any,
     promptActionId: string,
     confirmationRequired: boolean,

@@ -36,25 +36,21 @@
         <div *ngIf="scenarioStatus.nextActions">
             <div class="paragraph" id="nextActions">Remaining actions: {{scenarioStatus.nextActions}}</div>
 
-            <div class="pageTitle">Current action: <b>{{getCurrentActionTitle()}}</b></div>
+            <div class="pageTitle">Current action: <span *ngIf="scenarioStatus.promptText">▶️</span> <b>{{getCurrentActionTitle()}}</b></div>
 
             <div *ngIf="scenarioStatus.promptText" id="promptText">
-                <div *ngIf="!scenarioStatus.promptIsMarkdown" class="paragraph" testId="promptText">▶️ {{scenarioStatus.promptText}}</div>
-                <div *ngIf="scenarioStatus.promptIsMarkdown" class="paragraph" testId="promptText"><markdown [data]="scenarioStatus.promptText"></markdown></div>
-
-                <div *ngIf="scenarioStatus.jsonForPromptText" class="paragraph" id="jsonForPromptText">
-                    <pre>{{getJsonForPromptText()}}</pre>
-                </div>
+                <div class="paragraph" testId="promptText"><markdown [data]="scenarioStatus.promptText"></markdown></div>
 
                 <div *ngIf="scenarioStatus.inputRequired">
                     <div class="paragraph">
                         <mat-form-field
-                        class="fullWidth"
+                        [ngClass]="'fullWidth'"
+                        [ngStyle]="{'font-family': 'monospace'}"
                         >
                             <textarea
                             id="actionInput"
                             matInput
-                            rows="3"
+                            rows="8"
                             name="actionInput"
                             [(ngModel)]="actionInput"
                             ></textarea>

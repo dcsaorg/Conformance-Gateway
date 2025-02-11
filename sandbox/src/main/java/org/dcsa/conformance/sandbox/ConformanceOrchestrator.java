@@ -430,7 +430,6 @@ public class ConformanceOrchestrator implements StatefulEntity {
         && Objects.equals(nextAction.getSourcePartyName(), _getManualCounterpart().getName())) {
       scenarioNode.put("promptActionId", nextAction.getId().toString());
       scenarioNode.put("promptText", nextAction.getHumanReadablePrompt());
-      scenarioNode.put("promptIsMarkdown", nextAction.hasMarkdownHumanReadablePrompt());
       JsonNode jsonForHumanReadablePrompt = nextAction.getJsonForHumanReadablePrompt();
       if (jsonForHumanReadablePrompt != null) {
         scenarioNode.set("jsonForPromptText", jsonForHumanReadablePrompt);

@@ -61,11 +61,6 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
   }
 
   @Override
-  public boolean hasMarkdownHumanReadablePrompt() {
-    return true;
-  }
-
-  @Override
   public JsonNode getJsonForHumanReadablePrompt() {
     return BookingCarrier.getCarrierScenarioParameters(scenarioType).toJson();
   }

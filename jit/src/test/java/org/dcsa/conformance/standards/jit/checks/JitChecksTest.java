@@ -36,28 +36,39 @@ class JitChecksTest {
                     PortCallServiceTypeCode.BUNKERING, PortCallServiceEventTypeCode.ARRI, null))
             .iterator()
             .next());
+  }
 
+  @Test
+  void checkPortCallServiceMoves() {
+    ObjectNode nonMovesRequest =
+        createPortCallServiceRequest(
+            PortCallServiceTypeCode.BERTH, PortCallServiceEventTypeCode.ARRI, null);
     // Moves checks
-    assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
-    assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
+    assertTrue(JitChecks.checkPortCallServiceHasMoves(false).validate(nonMovesRequest).isEmpty());
+    assertFalse(JitChecks.checkPortCallServiceHasMoves(true).validate(nonMovesRequest).isEmpty());
 
-    request =
+    ObjectNode movesRequest =
         createPortCallServiceRequest(
             PortCallServiceTypeCode.MOVES, PortCallServiceEventTypeCode.ARRI, null);
-    assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(request).isEmpty());
-    assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(request).isEmpty());
+    assertFalse(JitChecks.checkPortCallServiceHasMoves(false).validate(movesRequest).isEmpty());
+    assertTrue(JitChecks.checkPortCallServiceHasMoves(true).validate(movesRequest).isEmpty());
 
-    assertTrue(
-        JitChecks.MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST
-            .validate(request)
-            .isEmpty());
+    assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
 
-    // Remove all carrierCode occurrences and verify an error is returned
-    request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
-    assertFalse(
-        JitChecks.MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST
-            .validate(request)
-            .isEmpty());
+    // Remove the carrierCode and verify an error is returned
+    movesRequest.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    assertFalse(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
+
+    // Verify 2 the same carrierCodes are NOT allowed
+    movesRequest
+        .get("moves")
+        .forEach(jsonNode -> ((ObjectNode) jsonNode).put("carrierCode", "NVOCC"));
+    assertEquals(
+        "Expected carrierCodes to be different in the given moves objects; found multiple are the same!",
+        JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).iterator().next());
+    // Verify 2 different carrierCodes are allowed
+    ((ObjectNode) movesRequest.get("moves").get(0)).put("carrierCode", "ABCD");
+    assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
   }
 
   @Test
@@ -262,7 +273,9 @@ class JitChecksTest {
             .validate(request)
             .isEmpty());
 
-    // Remove all carrierCodeListProvider occurrences and verify 2 errors are returned
+    // Add one carrierCode without the listProvider.
+    // Remove the carrierCodeListProvider and verify 2 errors are returned
+    ((ObjectNode) request.get("moves").get(1)).put("carrierCode", "NVOCC");
     request
         .get("moves")
         .forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCodeListProvider"));
@@ -270,7 +283,7 @@ class JitChecksTest {
         2,
         JitChecks.MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER.validate(request).size());
 
-    // Remove all carrierCode occurrences and verify all is good
+    // Remove the carrierCode occurrence and verify all is good
     request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
     assertEquals(
         0,
@@ -288,8 +301,10 @@ class JitChecksTest {
             .validate(request)
             .isEmpty());
 
-    // Remove all carrierCodeListProvider occurrences and verify 2 errors are returned
-    request.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
+    // Remove the carrierCodeListProvider occurrence; add one carrierCodeListProvider and verify 2
+    // errors are returned
+    ((ObjectNode) request.get("moves").get(0)).remove("carrierCode");
+    ((ObjectNode) request.get("moves").get(1)).put("carrierCodeListProvider", "NMFTA");
     assertEquals(
         2,
         JitChecks.MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE.validate(request).size());

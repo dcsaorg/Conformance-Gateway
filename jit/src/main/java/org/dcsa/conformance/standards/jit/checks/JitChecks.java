@@ -47,19 +47,30 @@ public class JitChecks {
           mav -> mav.submitAllMatching("moves.*"),
           JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
 
-  static final JsonContentCheck MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST =
+  static final JsonContentCheck MOVES_OBJECTS_VERIFY_CARRIER_CODES =
       JsonAttribute.customValidator(
-          "If there are > 1 moves objects, at least 1 must have a carrierCode",
+          "If there are > 1 moves objects, at least 1 must have a carrierCode. & Having same carrierCodes in multiple moves objects is not allowed.",
           body -> {
             JsonNode moves = body.path(MOVES_PROPERTY);
             if (!moves.isMissingNode() && moves.isArray() && moves.size() > 1) {
+              List<String> carrierCodes = new ArrayList<>();
               for (JsonNode move : moves) {
                 if (move.has("carrierCode")) {
-                  return Collections.emptySet();
+                  carrierCodes.add(move.path("carrierCode").asText());
                 }
               }
+              if (carrierCodes.isEmpty()) {
+                return Set.of(
+                    "Expected carrierCode to be present in one of the given moves objects; found none!");
+              }
+              if (carrierCodes.size() == 1) {
+                return Collections.emptySet();
+              }
+              if (carrierCodes.stream().distinct().count() > 1) {
+                return Collections.emptySet();
+              }
               return Set.of(
-                  "Expected carrierCode to be present in one of the given moves objects; found none!");
+                  "Expected carrierCodes to be different in the given moves objects; found multiple are the same!");
             }
             return Collections.emptySet();
           });
@@ -136,7 +147,7 @@ public class JitChecks {
       checks.add(checkPortCallServiceHasMoves(true));
       checks.add(MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER);
       checks.add(MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE);
-      checks.add(MOVES_MULTIPLE_OBJECTS_VERIFY_CARRIER_CODE_DOES_EXIST);
+      checks.add(MOVES_OBJECTS_VERIFY_CARRIER_CODES);
     } else checks.add(checkPortCallServiceHasMoves(false));
     checks.add(JitChecks.checkCallIDMatchPreviousCallID(dsp));
     if (dsp.isFYI()) {

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 import lombok.With;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
 @With
@@ -29,7 +30,12 @@ public record JitTimestamp(
   }
 
   public static JitTimestamp fromJson(JsonNode jsonNode) {
-    return OBJECT_MAPPER.convertValue(jsonNode, JitTimestamp.class);
+    try {
+      return OBJECT_MAPPER.convertValue(jsonNode, JitTimestamp.class);
+    } catch (IllegalArgumentException e) {
+      throw new UserFacingException(
+          "Could not correctly read the given Timestamp object. Invalid JSON or missing properties");
+    }
   }
 
   @SuppressWarnings("java:S2245") // Random is used for generating random timestamps. Secure enough.

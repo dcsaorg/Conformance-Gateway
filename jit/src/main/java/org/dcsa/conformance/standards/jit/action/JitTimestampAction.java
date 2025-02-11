@@ -78,10 +78,12 @@ public class JitTimestampAction extends JitAction {
         if (dsp == null) return Stream.of();
         if (sendByProvider) {
           return Stream.of(
-              new UrlPathCheck(
-                  JitRole::isProvider,
-                  getMatchedExchangeUuid(),
-                  JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID()),
+              dsp.currentTimestamp() != null
+                  ? new UrlPathCheck(
+                      JitRole::isProvider,
+                      getMatchedExchangeUuid(),
+                      JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID())
+                  : null,
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
               new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
               new ApiHeaderCheck(

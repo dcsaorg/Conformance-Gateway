@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.tnt;
 
 import static org.dcsa.conformance.standards.tnt.party.TntFilterParameter.*;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -179,7 +180,12 @@ class TntScenarioListBuilder extends ScenarioListBuilder<TntScenarioListBuilder>
                         scenarioWithBadRequestFilterBy(
                             Map.of(EVENT_TYPE, "EQUIPMENT", SHIPMENT_EVENT_TYPE_CODE, "DRFT")),
                         scenarioWithFilterByPagination(
-                            getEvents(), Map.of(EVENT_TYPE, "EQUIPMENT", LIMIT, "1")))))
+                            getEvents(), Map.of(EVENT_TYPE, "EQUIPMENT", LIMIT, "1")))),
+            Map.entry(
+                "Flexible filtering (use any supported query parameters)",
+                noAction()
+                    .thenEither(
+                        supplyScenarioParameters(Collections.emptyMap()).then(getEvents()))))
         .collect(
             Collectors.toMap(
                 Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

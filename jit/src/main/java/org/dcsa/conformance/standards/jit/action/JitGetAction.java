@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
@@ -24,6 +25,19 @@ import org.dcsa.conformance.standards.jit.party.JitRole;
 public class JitGetAction extends JitAction {
   public static final String GET_TYPE = "getType";
   public static final String FILTERS = "filters";
+  public static final Set<String> MULTIPLE_RESULTS_URL_PARAMS =
+      Set.of(
+          "UNLocationCode",
+          "carrierServiceName",
+          "carrierServiceCode",
+          "vesselIMONumber",
+          "vesselName",
+          "MMSINumber",
+          "universalServiceReference",
+          "carrierImportVoyageNumber",
+          "carrierExportVoyageNumber",
+          "universalImportVoyageReference",
+          "universalExportVoyageReference");
 
   private final JitGetType getType;
   private final JsonSchemaValidator validator;
@@ -54,17 +68,14 @@ public class JitGetAction extends JitAction {
     validator = context.componentFactory().getMessageSchemaValidator(getType.getJitSchema());
   }
 
-  // Some GET request might return multiple results. This method determines if that is allowed,
-  // depending on the applied URL filters
+  // Some GET requests might return multiple results. This method determines if that is allowed,
+  // depending on the applied URL filter(s). Likely, implementers have example data in their
+  // systems, so it is possible that other results are returned. This method is a (good enough)
+  // effort to determine if multiple results are allowed.
   private boolean determineMoreResultsAllowed(List<String> urlFilters) {
-    if (urlFilters == null || urlFilters.size() > 1)
+    if (urlFilters == null || urlFilters.size() != 1)
       return false; // Specifying multiple filters result in a strict match
-    else
-      return urlFilters.contains("UNLocationCode")
-          || urlFilters.contains("carrierServiceName")
-          || urlFilters.contains("carrierServiceCode")
-          || urlFilters.contains("vesselIMONumber")
-          || urlFilters.contains("vesselName");
+    else return MULTIPLE_RESULTS_URL_PARAMS.contains(urlFilters.getFirst());
   }
 
   @Override

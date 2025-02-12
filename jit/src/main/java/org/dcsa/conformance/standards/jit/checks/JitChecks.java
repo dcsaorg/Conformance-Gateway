@@ -34,18 +34,19 @@ public class JitChecks {
   public static final String CLASSIFIER_CODE = "classifierCode";
   public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceTypeCode";
   public static final String MOVES_PROPERTY = "moves";
+  public static final String CARRIER_CODE = "carrierCode";
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "The moves.carrierCode implies moves.carrierCodeListProvider",
           mav -> mav.submitAllMatching("moves.*"),
-          JsonAttribute.presenceImpliesOtherField("carrierCode", "carrierCodeListProvider"));
+          JsonAttribute.presenceImpliesOtherField(CARRIER_CODE, "carrierCodeListProvider"));
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_LIST_PROVIDER_IMPLIES_CARRIER_CODE =
       JsonAttribute.allIndividualMatchesMustBeValid(
           "The moves.carrierCodeListProvider implies moves.carrierCode",
           mav -> mav.submitAllMatching("moves.*"),
-          JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", "carrierCode"));
+          JsonAttribute.presenceImpliesOtherField("carrierCodeListProvider", CARRIER_CODE));
 
   static final JsonContentCheck MOVES_OBJECTS_VERIFY_CARRIER_CODES =
       JsonAttribute.customValidator(
@@ -55,8 +56,8 @@ public class JitChecks {
             if (!moves.isMissingNode() && moves.isArray() && moves.size() > 1) {
               List<String> carrierCodes = new ArrayList<>();
               for (JsonNode move : moves) {
-                if (move.has("carrierCode")) {
-                  carrierCodes.add(move.path("carrierCode").asText());
+                if (move.has(CARRIER_CODE)) {
+                  carrierCodes.add(move.path(CARRIER_CODE).asText());
                 }
               }
               if (carrierCodes.isEmpty()) {
@@ -172,8 +173,7 @@ public class JitChecks {
 
   static JsonRebaseableContentCheck checkPortCallService(PortCallServiceTypeCode serviceType) {
     return JsonAttribute.ifThen(
-        "Expected Port Call Service type should match scenario (%s)."
-            .formatted(serviceType.getFullName()),
+        "Expected Port Call Service type should match scenario (%s).".formatted(serviceType.name()),
         IS_PORT_CALL_SERVICE,
         JsonAttribute.mustEqual(
             "Check if the correct Port Call Service was supplied.",

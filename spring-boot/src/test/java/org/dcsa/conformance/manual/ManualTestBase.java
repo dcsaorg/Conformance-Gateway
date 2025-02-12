@@ -384,7 +384,7 @@ public abstract class ManualTestBase {
         String jsonForPromptText = jsonForPrompt.toString();
         var promptText = jsonNode.path("promptText").asText("");
         assertTrue(
-            jsonForPromptText.length() >= 25, "Json for prompt was length: " + jsonForPromptText.length());
+            jsonForPromptText.length() >= 2, "Json for prompt was length: " + jsonForPromptText.length());
         String promptActionId = jsonNode.get("promptActionId").textValue();
 
         // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)

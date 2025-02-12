@@ -24,10 +24,10 @@ public class UC12_Carrier_ConfirmBookingCompletedAction extends StateChangingBoo
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC12: Complete the booking request with CBR '%s' and CBRR '%s'"
-        .formatted(
-            getDspSupplier().get().carrierBookingReference(),
-            getDspSupplier().get().carrierBookingRequestReference()));
+    return createMessageForUIPrompt(
+        "UC12: Complete the booking request",
+        getDspSupplier().get().carrierBookingReference(),
+        getDspSupplier().get().carrierBookingRequestReference());
   }
 
   @Override

@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.adoption.action;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.JsonSchemaCheck;
@@ -9,8 +11,6 @@ import org.dcsa.conformance.core.check.UrlPathCheck;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.adoption.party.AdoptionRole;
-
-import java.util.stream.Stream;
 
 public class GetAdoptionStatsAction extends ConformanceAction {
 
@@ -25,6 +25,15 @@ public class GetAdoptionStatsAction extends ConformanceAction {
       JsonSchemaValidator schemaValidator) {
     super(sourcePartyName, targetPartyName, previousAction, "GetAdoptionStats");
     this.schemaValidator = schemaValidator;
+  }
+
+  @Override
+  public ObjectNode asJsonNode() {
+    ObjectNode actionNode = super.asJsonNode();
+    actionNode.set(
+        "suppliedScenarioParameters",
+        ((SupplyScenarioParametersAction) previousAction).getSuppliedScenarioParameters().toJson());
+    return actionNode;
   }
 
   @Override

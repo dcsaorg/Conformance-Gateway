@@ -73,9 +73,10 @@ public class JitGetAction extends JitAction {
   // systems, so it is possible that other results are returned. This method is a (good enough)
   // effort to determine if multiple results are allowed.
   private boolean determineMoreResultsAllowed(List<String> urlFilters) {
-    if (urlFilters == null || urlFilters.size() != 1)
-      return false; // Specifying multiple filters result in a strict match
-    else return MULTIPLE_RESULTS_URL_PARAMS.contains(urlFilters.getFirst());
+    if (urlFilters == null || urlFilters.isEmpty()) return true; // No filters applied
+    if (urlFilters.size() == 1) return MULTIPLE_RESULTS_URL_PARAMS.contains(urlFilters.getFirst());
+
+    return false; // Specifying multiple filters result in a strict match
   }
 
   @Override

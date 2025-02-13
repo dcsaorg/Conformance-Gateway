@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
@@ -99,14 +100,14 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        var documentReference = useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
+        var documentReference =
+            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
         return Stream.of(
             new UrlPathCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
                 "/v3/shipping-instructions/" + documentReference),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -118,13 +119,30 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator),
-              EBLChecks.siResponseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedSiStatus, expectedAmendedSiStatus, requestAmendedStatus)
-          );
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            EBLChecks.siResponseContentChecks(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                getCspSupplier(),
+                getDspSupplier(),
+                expectedSiStatus,
+                expectedAmendedSiStatus,
+                requestAmendedStatus,
+                previousAction.getMatchedExchangeUuid()));
       }
     };
+  }
+
+  private JsonNode getRequestOrResponseBody() {
+    ConformanceExchange exchange =
+        ConformanceExchange.getExchangeByUuid(previousAction.getMatchedExchangeUuid());
+    if (previousAction instanceof UC1_Shipper_SubmitShippingInstructionsAction
+        || previousAction instanceof UC3ShipperSubmitUpdatedShippingInstructionsAction) {
+      return exchange.getRequest().message().body().getJsonBody();
+    }
+    return exchange.getResponse().message().body().getJsonBody();
   }
 }

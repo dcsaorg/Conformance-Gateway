@@ -1325,7 +1325,7 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, boolean requestedAmendment) {
+  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, boolean requestedAmendment,UUID matchedPreviousAction) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       SI_REF_SIR_PTR,
@@ -1345,13 +1345,18 @@ public class EBLChecks {
     }
     checks.addAll(STATIC_SI_CHECKS);
     checks.add(FEEDBACKS_PRESENCE);
-/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-    checks.add(JsonAttribute.lostAttributeCheck(
-      "Validate that shipper provided data was not altered",
-      delayedValue(dspSupplier, dsp -> requestedAmendment ? dsp.updatedShippingInstructions() : dsp.shippingInstructions()),
-      SI_NORMALIZER
-    ));
-*/
+    /* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action*/
+
+    checks.add(
+        JsonAttribute.lostAttributeCheck(
+            "Validate that shipper provided data was not altered",
+            delayedValue(
+                dspSupplier,
+                dsp ->
+                    requestedAmendment
+                        ? dsp.updatedShippingInstructions()
+                        : dsp.shippingInstructions()),
+            SI_NORMALIZER));
     generateScenarioRelatedChecks(checks, standardVersion, cspSupplier, dspSupplier, false);
     return JsonAttribute.contentChecks(
       EblRole::isCarrier,

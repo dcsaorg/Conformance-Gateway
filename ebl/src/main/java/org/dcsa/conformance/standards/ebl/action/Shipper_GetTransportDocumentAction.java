@@ -1,11 +1,15 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
+import org.dcsa.conformance.standards.ebl.crypto.Checksums;
 import org.dcsa.conformance.standards.ebl.party.*;
 
 public class Shipper_GetTransportDocumentAction extends EblAction {
@@ -55,11 +59,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         return Stream.of(
             new UrlPathCheck(
-                EblRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v3/transport-documents/" + tdr),
-            new ResponseStatusCheck(
-                EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
+                EblRole::isShipper, getMatchedExchangeUuid(), "/v3/transport-documents/" + tdr),
+            new ResponseStatusCheck(EblRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
                 EblRole::isShipper,
                 getMatchedExchangeUuid(),
@@ -71,14 +72,94 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
             new JsonSchemaCheck(
-              EblRole::isCarrier,
-              getMatchedExchangeUuid(),
-              HttpMessageType.RESPONSE,
-              responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
-            // checkTDChanged(getMatchedExchangeUuid(), expectedApiVersion, dsp), // see commit history
-            EBLChecks.tdPlusScenarioContentChecks(getMatchedExchangeUuid(), expectedApiVersion, expectedTdStatus, getCspSupplier(), getDspSupplier()));
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                responseSchemaValidator),
+            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
+            // an earlier action
+            checkTDChanged(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                dsp,
+                previousAction.getMatchedExchangeUuid()), // see commit history
+            EBLChecks.tdPlusScenarioContentChecks(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                expectedTdStatus,
+                getCspSupplier(),
+                getDspSupplier()));
       }
     };
+  }
+
+  private static ActionCheck checkTDChanged(
+      UUID matched,
+      String standardsVersion,
+      DynamicScenarioParameters dsp,
+      UUID previousActionMatched) {
+    JsonNode previousTransportDocument =
+        previousActionMatched == null
+            ? null
+            : ConformanceExchange.getExchangeByUuid(previousActionMatched)
+                .getResponse()
+                .message()
+                .body()
+                .getJsonBody();
+    var deltaCheck =
+        JsonAttribute.lostAttributeCheck(
+            "(ignored)",
+            () -> previousTransportDocument,
+            (baselineTD, currentTD) -> {
+              if (baselineTD instanceof ObjectNode td) {
+                td.remove("transportDocumentStatus");
+              }
+            });
+    JsonContentMatchedValidation hadChangesCheck =
+        (nodeToValidate, contextPath) -> {
+          var currentStatus = nodeToValidate.path("transportDocumentStatus").asText("");
+          var comparisonTD = previousTransportDocument;
+          var comparisonStatus = comparisonTD.path("transportDocumentStatus").asText("");
+          if (dsp.newTransportDocumentContent()) {
+            return Set.of();
+          }
+          if (!(nodeToValidate instanceof ObjectNode currentTDObj)
+              || !(comparisonTD instanceof ObjectNode comparisonTDObj)) {
+            // Schema validation takes care of this.
+            return Set.of();
+          }
+
+          var currentTDObjCopy = currentTDObj.deepCopy();
+          var comparisonTDObjCopy = comparisonTDObj.deepCopy();
+          currentTDObjCopy.remove("transportDocumentStatus");
+          comparisonTDObjCopy.remove("transportDocumentStatus");
+          var checksum = Checksums.sha256CanonicalJson(currentTDObjCopy);
+          var previousChecksum = Checksums.sha256CanonicalJson(comparisonTDObjCopy);
+          if (checksum.equals(previousChecksum)) {
+            return Set.of(
+                "Expected a change, but it is the same TD. "
+                    + currentStatus
+                    + " - "
+                    + comparisonStatus);
+          }
+          return Set.of();
+        };
+    return JsonAttribute.contentChecks(
+        "",
+        "[Scenario] Validate TD changes match the expected",
+        EblRole::isCarrier,
+        matched,
+        HttpMessageType.RESPONSE,
+        standardsVersion,
+        JsonAttribute.customValidator(
+            "The TD match the scenario step",
+            JsonAttribute.ifMatchedThenElse(
+                // For some cases, we assume the TD will change in ways we cannot predict, so here
+                // we just effectively skip the check
+                //
+                // Common cases are new drafts and amendments.
+                (ignored) -> dsp.newTransportDocumentContent(),
+                hadChangesCheck,
+                deltaCheck::validate)));
   }
 }

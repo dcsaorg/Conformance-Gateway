@@ -35,7 +35,8 @@ public class UC3_Shipper_SubmitUpdatedBookingRequestAction extends StateChanging
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC3: Submit an updated booking request");
+    return getMarkdownHumanReadablePrompt(
+        "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override

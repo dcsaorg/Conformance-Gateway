@@ -37,7 +37,8 @@ public class UC7_Shipper_SubmitBookingAmendment extends StateChangingBookingActi
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC7: Submit Amendment to confirmed booking");
+    return getMarkdownHumanReadablePrompt(
+        "prompt-shipper-uc7.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override

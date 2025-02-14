@@ -27,6 +27,7 @@ public class Shipper_GetAmendedBooking404Action extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    // no markdown instructions needed: never expected to be performed by a human operator
     return createMessageForUIPrompt(
         "GET the (non-existing) amendment to the booking",
         getDspSupplier().get().carrierBookingReference(),

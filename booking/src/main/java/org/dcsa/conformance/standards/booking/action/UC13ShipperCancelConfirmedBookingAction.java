@@ -42,7 +42,8 @@ public class UC13ShipperCancelConfirmedBookingAction extends StateChangingBookin
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC11: Cancel a confirmed booking");
+    return getMarkdownHumanReadablePrompt(
+        "prompt-shipper-uc13.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override

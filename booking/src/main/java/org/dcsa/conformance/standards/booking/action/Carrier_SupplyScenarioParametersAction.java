@@ -56,8 +56,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return IOToolkit.templateFileToText(
-        "/standards/booking/instructions/prompt-carrier-supply-csp.md", Collections.emptyMap());
+    return getMarkdownHumanReadablePrompt("prompt-carrier-supply-csp.md");
   }
 
   @Override

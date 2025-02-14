@@ -3,9 +3,6 @@ name: Web UI Testing
 on:
   push:
     branches: ["dev", "test", "master"]
-  # REMOVE BEFORE MERGING TO DEV!!! Just to test this PR.
-  pull_request:
-    types: [ opened, synchronize, reopened ]
 
 env:
   NG_CLI_ANALYTICS: "ci"

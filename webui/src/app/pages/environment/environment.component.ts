@@ -5,9 +5,10 @@ import { AuthService } from "../../auth/auth.service";
 import { Sandbox } from "../../model/sandbox";
 
 @Component({
-  selector: 'app-environment',
-  templateUrl: './environment.component.html',
-  styleUrls: ['../../shared-styles.css']
+    selector: 'app-environment',
+    templateUrl: './environment.component.html',
+    styleUrls: ['../../shared-styles.css'],
+    standalone: false
 })
 export class EnvironmentComponent {
 

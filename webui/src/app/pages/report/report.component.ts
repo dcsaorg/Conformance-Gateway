@@ -5,9 +5,10 @@ import { getConformanceStatusEmoji,
 import { ScenarioConformanceReport } from "src/app/model/scenario-status";
 
 @Component({
-  selector: 'app-report',
-  templateUrl: './report.component.html',
-  styleUrls: ['../../shared-styles.css']
+    selector: 'app-report',
+    templateUrl: './report.component.html',
+    styleUrls: ['../../shared-styles.css'],
+    standalone: false
 })
 export class ReportComponent {
   @Input() folded!: boolean;

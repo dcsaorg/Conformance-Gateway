@@ -8,9 +8,10 @@ export interface MessageDialogData {
 }
 
 @Component({
-  selector: 'app-message-dialog',
-  templateUrl: './message-dialog.component.html',
-  styleUrls: []
+    selector: 'app-message-dialog',
+    templateUrl: './message-dialog.component.html',
+    styleUrls: [],
+    standalone: false
 })
 export class MessageDialog {
 

@@ -55,17 +55,18 @@ class JitChecksTest {
 
     assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
 
-    // Remove the carrierCode and verify an error is returned
+    // Verify: Max only one `moves` object without a 'carrierCode'
     movesRequest.get("moves").forEach(jsonNode -> ((ObjectNode) jsonNode).remove("carrierCode"));
     assertFalse(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());
 
-    // Verify 2 the same carrierCodes are NOT allowed
+    // Verify: If there are multiple `moves` objects, a `carrierCode` MUST NOT be repeated.
     movesRequest
         .get("moves")
         .forEach(jsonNode -> ((ObjectNode) jsonNode).put("carrierCode", "NVOCC"));
     assertEquals(
         "Expected carrierCodes to be different in the given moves objects; found multiple are the same!",
         JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).iterator().next());
+
     // Verify 2 different carrierCodes are allowed
     ((ObjectNode) movesRequest.get("moves").get(0)).put("carrierCode", "ABCD");
     assertTrue(JitChecks.MOVES_OBJECTS_VERIFY_CARRIER_CODES.validate(movesRequest).isEmpty());

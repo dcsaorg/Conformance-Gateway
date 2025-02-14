@@ -21,7 +21,7 @@ public class JitVesselStatusAction extends JitAction {
   public JitVesselStatusAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(
         context.providerPartyName(), context.consumerPartyName(), previousAction, "Vessel Status");
-    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.VESSEL);
+    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.VESSEL_STATUS);
   }
 
   @Override

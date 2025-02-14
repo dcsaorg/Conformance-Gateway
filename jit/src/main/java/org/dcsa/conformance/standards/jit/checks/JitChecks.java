@@ -33,7 +33,7 @@ public class JitChecks {
   public static final String TIMESTAMP_ID = "timestampID";
   public static final String CLASSIFIER_CODE = "classifierCode";
   public static final String PORT_CALL_SERVICE_TYPE = "portCallServiceTypeCode";
-  public static final String MOVES_PROPERTY = "moves";
+  public static final String MOVES = "moves";
   public static final String CARRIER_CODE = "carrierCode";
 
   static final JsonRebaseableContentCheck MOVES_CARRIER_CODE_IMPLIES_CARRIER_CODE_LIST_PROVIDER =
@@ -50,28 +50,26 @@ public class JitChecks {
 
   static final JsonContentCheck MOVES_OBJECTS_VERIFY_CARRIER_CODES =
       JsonAttribute.customValidator(
-          "If there are > 1 moves objects, at least 1 must have a carrierCode. & Having same carrierCodes in multiple moves objects is not allowed.",
+          "Max only one `moves` object without a 'carrierCode' & all 'carrierCode' values should be different.",
           body -> {
-            JsonNode moves = body.path(MOVES_PROPERTY);
+            JsonNode moves = body.path(MOVES);
             if (!moves.isMissingNode() && moves.isArray() && moves.size() > 1) {
               List<String> carrierCodes = new ArrayList<>();
+              int emptyCount = 0;
               for (JsonNode move : moves) {
                 if (move.has(CARRIER_CODE)) {
                   carrierCodes.add(move.path(CARRIER_CODE).asText());
-                }
+                } else emptyCount++;
               }
-              if (carrierCodes.isEmpty()) {
+              if (emptyCount > 1) {
                 return Set.of(
-                    "Expected carrierCode to be present in one of the given moves objects; found none!");
+                    "Expected at most one moves object without a carrierCode; found %s!"
+                        .formatted(emptyCount));
               }
-              if (carrierCodes.size() == 1) {
-                return Collections.emptySet();
+              if (carrierCodes.stream().distinct().count() != carrierCodes.size()) {
+                return Set.of(
+                    "Expected carrierCodes to be different in the given moves objects; found multiple are the same!");
               }
-              if (carrierCodes.stream().distinct().count() > 1) {
-                return Collections.emptySet();
-              }
-              return Set.of(
-                  "Expected carrierCodes to be different in the given moves objects; found multiple are the same!");
             }
             return Collections.emptySet();
           });

@@ -17,9 +17,10 @@ import {SandboxStatus, SandboxWaiting} from "../../model/sandbox-status";
 import {MessageDialog} from "../../dialogs/message/message-dialog.component";
 
 @Component({
-  selector: 'app-scenario',
-  templateUrl: './scenario.component.html',
-  styleUrls: ['../../shared-styles.css']
+    selector: 'app-scenario',
+    templateUrl: './scenario.component.html',
+    styleUrls: ['../../shared-styles.css'],
+    standalone: false
 })
 export class ScenarioComponent {
 

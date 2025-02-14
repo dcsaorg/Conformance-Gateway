@@ -15,9 +15,10 @@ import { MatDialog } from "@angular/material/dialog";
 import {StandardModule} from "../../model/standard-module";
 
 @Component({
-  selector: 'app-sandbox',
-  templateUrl: './sandbox.component.html',
-  styleUrls: ['../../shared-styles.css']
+    selector: 'app-sandbox',
+    templateUrl: './sandbox.component.html',
+    styleUrls: ['../../shared-styles.css'],
+    standalone: false
 })
 export class SandboxComponent {
   sandboxId: string = '';

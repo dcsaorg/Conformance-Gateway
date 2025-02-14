@@ -189,22 +189,10 @@ public class ConformanceWebuiHandler {
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     CounterpartConfiguration sandboxPartyCounterpartConfig =
-        Arrays.stream(sandboxConfiguration.getCounterparts())
-            .filter(
-                counterpart ->
-                    Arrays.stream(sandboxConfiguration.getParties())
-                        .anyMatch(party -> party.getName().equals(counterpart.getName())))
-            .findFirst()
-            .orElseThrow();
+        sandboxConfiguration.getSandboxPartyCounterpartConfiguration();
 
     CounterpartConfiguration externalPartyCounterpartConfig =
-        Arrays.stream(sandboxConfiguration.getCounterparts())
-            .filter(
-                counterpart ->
-                    Arrays.stream(sandboxConfiguration.getParties())
-                        .noneMatch(party -> party.getName().equals(counterpart.getName())))
-            .findFirst()
-            .orElseThrow();
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
 
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
             .createObjectNode()
@@ -448,36 +436,58 @@ public class ConformanceWebuiHandler {
         .getNonLockingMap()
         .getPartitionValuesBySortKey(
             "environment#" + accessChecker.getUserEnvironmentId(userId), "")
-        .values()
         .forEach(
-            sandboxNode ->
+            (key, value) ->
                 sortedSandboxesByLowercaseName.put(
-                    sandboxNode.get("name").asText().toLowerCase(), sandboxNode));
+                    value.get("name").asText().toLowerCase(),
+                    _loadSandbox(userId, key.substring("sandbox#".length()), false)));
     ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
     sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
-  private JsonNode _getSandbox(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+  private ObjectNode _loadSandbox(String userId, String sandboxId, boolean includeOperatorLog) {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ObjectNode sandboxNode =
-        (ObjectNode)
-            persistenceProvider
-                .getNonLockingMap()
-                .getItemValue(
-                    "environment#" + accessChecker.getUserEnvironmentId(userId),
-                    "sandbox#" + sandboxId);
+      (ObjectNode)
+        persistenceProvider
+          .getNonLockingMap()
+          .getItemValue(
+            "environment#" + accessChecker.getUserEnvironmentId(userId),
+            "sandbox#" + sandboxId);
 
-    boolean includeOperatorLog = requestNode.get("includeOperatorLog").asBoolean();
+    SandboxConfiguration sandboxConfiguration =
+      ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+    sandboxNode.put("standardName", sandboxConfiguration.getStandard().getName());
+    sandboxNode.put("standardVersion", sandboxConfiguration.getStandard().getVersion());
+    sandboxNode.put("scenarioSuite", sandboxConfiguration.getScenarioSuite());
+    CounterpartConfiguration testedCounterpartConfiguration = sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+    sandboxNode.put(
+        "testedPartyRole",
+        testedCounterpartConfiguration == null
+            ? "both roles" // in dev mode, all-in-one sandboxes don't have an "external party"
+            : testedCounterpartConfiguration.getRole());
+    sandboxNode.put(
+        "isDefault",
+        testedCounterpartConfiguration != null // showing all-in-one dev sandboxes as DCSA internal
+            && testedCounterpartConfiguration.isInManualMode()
+            && sandboxConfiguration.getOrchestrator().isActive());
+
     if (includeOperatorLog) {
       ArrayNode operatorLog =
-          ConformanceSandbox.getOperatorLog(
-              persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+        ConformanceSandbox.getOperatorLog(
+          persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
       sandboxNode.set("operatorLog", operatorLog);
       sandboxNode.put("canNotifyParty", operatorLog != null);
     }
     return sandboxNode;
+  }
+
+  private JsonNode _getSandbox(String userId, JsonNode requestNode) {
+    return _loadSandbox(
+        userId,
+        requestNode.get(SANDBOX_ID).asText(),
+        requestNode.get("includeOperatorLog").asBoolean());
   }
 
   private JsonNode _notifyParty(String userId, JsonNode requestNode) {

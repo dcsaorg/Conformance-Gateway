@@ -71,6 +71,7 @@ export class ScenarioComponent {
         || new Date().getTime() - sandboxStatusCheckStartTime >= 60 * 1000) {
         break;
       }
+      console.log("loadScenarioStatus() sandbox waiting: " + JSON.stringify(this.sandboxStatus.waiting, null, 4));
       await sleep(1000);
     }
 

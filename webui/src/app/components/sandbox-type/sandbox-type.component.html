@@ -1,0 +1,8 @@
+<div *ngIf="sandbox">
+  <span *ngIf="!sandbox.isDefault" testId="dcsaInternal" style="font-weight: bold; color: red;">DCSA INTERNAL SANDBOX:&nbsp;</span>
+  <span testId="standardName">{{ sandbox.standardName }}</span>&nbsp;
+  <span testId="standardVersion">{{ sandbox.standardVersion }}</span>&nbsp;
+  <span testId="scenarioSuite">{{ sandbox.scenarioSuite }}</span>&nbsp;
+  for&nbsp;
+  <span testId="testedPartyRole">{{ sandbox.testedPartyRole }}</span>
+</div>

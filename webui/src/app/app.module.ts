@@ -32,6 +32,7 @@ import { ReportComponent } from './pages/report/report.component';
 import {TextWaitingComponent} from "./text/waiting/text-waiting.component";
 import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 import {MarkdownModule} from "ngx-markdown";
+import {SandboxTypeComponent} from "./components/sandbox-type/sandbox-type.component";
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import {MarkdownModule} from "ngx-markdown";
     MessageDialog,
     ReportComponent,
     SandboxComponent,
+    SandboxTypeComponent,
     ScenarioComponent,
     SimpleTextComponent,
     TextWaitingComponent,

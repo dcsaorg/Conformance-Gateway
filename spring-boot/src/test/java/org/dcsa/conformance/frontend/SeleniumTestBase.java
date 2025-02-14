@@ -2,8 +2,8 @@ package org.dcsa.conformance.frontend;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
 import java.util.List;
@@ -12,7 +12,16 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.manual.ManualTestBase;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.eblinterop.PintStandard;
+import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
+import org.dcsa.conformance.standards.eblinterop.action.SenderSupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblinterop.party.PintRole;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.openqa.selenium.By;
@@ -64,13 +73,13 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     String readableStandardSpec = "%s, version: %s, suite: %s, role: %s".formatted(standard.name(), version, suiteName, role);
     log.info("Starting standard: {}", readableStandardSpec);
     switchToTab(0);
-    SandboxConfig sandBox1 = createSandBox(standard, version, suiteName, role, 0);
+    SandboxConfig sandBox1 = createSandbox(standard, version, suiteName, role, 0);
     openNewTab();
     switchToTab(1);
-    SandboxConfig sandBox2 = createSandBox(standard, version, suiteName, role, 1);
+    SandboxConfig sandBox2 = createSandbox(standard, version, suiteName, role, 1);
     updateSandboxConfigBeforeStarting(sandBox1, sandBox2);
 
-    runScenarioGroups(readableStandardSpec);
+    runScenarios(readableStandardSpec);
     log.info("Finished with standard: {}", readableStandardSpec);
 
     // Close tab and switch back to first tab.
@@ -78,28 +87,38 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.switchTo().window(driver.getWindowHandles().iterator().next());
   }
 
-  void runScenarioGroups(String name) {
+  void runScenarios(String name) {
     waitForUIReadiness();
     // WebElement can not be reused after the page is refreshed. Therefore, using the index to get the button.
-    int scenarioGroupButtonIndex =
+    int scenarioCount =
       driver
         .findElement(By.tagName("app-sandbox"))
         .findElements(By.className(("scenarioActionButton")))
         .size();
 
     String storedBaseSandboxURL = driver.getCurrentUrl();
-    for (int i = 0; i < scenarioGroupButtonIndex; i++) {
-      log.info("Starting scenario group {} of {}", i + 1, scenarioGroupButtonIndex);
+    assertNotNull(storedBaseSandboxURL);
+    for (int scenarioIndex = 0; scenarioIndex < scenarioCount; scenarioIndex++) {
       driver.get(storedBaseSandboxURL);
       waitForUIReadiness();
+      log.info(
+          "Starting scenario {} of {}: {}",
+          scenarioIndex + 1,
+          scenarioCount,
+          driver
+              .findElement(By.tagName("app-sandbox"))
+              .findElements(By.className(("wrappingText")))
+              .get(scenarioIndex)
+              .getText());
       driver
         .findElement(By.tagName("app-sandbox"))
         .findElements(By.className(("scenarioActionButton")))
-        .get(i)
+        .get(scenarioIndex)
         .click();
       waitForUIReadiness();
 
       do {
+        log.info("Current action: {}", driver.findElement(By.cssSelector("[testId='currentAction']")).getText());
         if (handleJsonPromptForText()) continue;
         handlePromptText();
         completeAction();
@@ -108,45 +127,49 @@ public abstract class SeleniumTestBase extends ManualTestBase {
         log.info("Stopping after first scenario group");
         break;
       }
-      log.info("Finished scenario group {}.", i + 1);
     }
   }
 
   private boolean handleJsonPromptForText() {
-    String jsonPromptText;
-    By jsonForPromptText = By.id("jsonForPromptText");
+    String jsonForPrompt;
+    By jsonPromptTextSelector = By.cssSelector("[testId='jsonPromptText']");
+    WebElement jsonPromptTextElement;
     try {
-      jsonPromptText = driver.findElement(jsonForPromptText).getText();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(jsonForPromptText));
+      jsonPromptTextElement = driver.findElement(jsonPromptTextSelector);
+      jsonForPrompt = jsonPromptTextElement.getText();
     } catch (org.openqa.selenium.NoSuchElementException e) {
-      log.debug("No jsonForPromptText text.");
+      log.debug("No JSON prompt text.");
       return false;
     }
 
-    String promptText = driver.findElement(By.cssSelector("[testId='promptText']")).getText();
+    String standardName = driver.findElement(By.cssSelector("[testId='standardName']")).getText();
+    String testedPartyRole =
+        driver.findElement(By.cssSelector("[testId='testedPartyRole']")).getText();
+    String currentAction = driver.findElement(By.cssSelector("[testId='currentAction']")).getText();
 
-    // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
-    if (promptText.contains(
-        "UC6: Publish draft transport document matching the scenario parameters provided")) {
-      jsonPromptText = fetchTransportDocument(jsonPromptText);
-    } else // Flow for PINT scenarios
-    if (promptText.contains(
-        "Please provide these scenario details. Additional documents required:")) {
-      jsonPromptText = fetchPromptAnswer("supplyScenarioParameters");
-    } else if (promptText.contains(
-        "Setup the system for transfer and provide the following details for the sender.")) {
-      jsonPromptText = fetchPromptAnswer("initiateState");
-    }
-    // Flow for ebl issuance carrier scenarios
-    else if (promptText.contains(CarrierScenarioParametersAction.HUMAN_READABLE_PROMPT)) {
-      jsonPromptText = fetchPromptAnswer("CarrierScenarioParameters");
+    if (standardName.equals(EblStandard.INSTANCE.getName())) {
+      if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
+          && currentAction.equals(UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
+        jsonForPrompt = fetchTransportDocument(jsonForPrompt);
+      }
+    } else if (standardName.equals(PintStandard.INSTANCE.getName())) {
+      if (testedPartyRole.equals(PintRole.SENDING_PLATFORM.getConfigName())
+          && currentAction.startsWith(SenderSupplyScenarioParametersAction.ACTION_PREFIX)) {
+        jsonForPrompt = fetchPromptAnswer("supplyScenarioParameters");
+      } else if (testedPartyRole.equals(PintRole.RECEIVING_PLATFORM.getConfigName())
+          && currentAction.startsWith(
+              ReceiverSupplyScenarioParametersAndStateSetupAction.ACTION_PREFIX)) {
+        jsonForPrompt = fetchPromptAnswer("initiateState");
+      }
+    } else if (standardName.equals(EblIssuanceStandard.INSTANCE.getName())) {
+      if (testedPartyRole.equals(EblIssuanceRole.CARRIER.getConfigName())
+          && currentAction.equals(CarrierScenarioParametersAction.ACTION_TITLE)) {
+        jsonForPrompt = fetchPromptAnswer("CarrierScenarioParameters");
+      }
     }
 
-    if (driver.findElements(By.id("actionInput")).isEmpty()) {
-      log.error("Error: No actionInput element found, while a jsonForPromptText was displayed!");
-      fail();
-    }
-    driver.findElement(By.id("actionInput")).sendKeys(jsonPromptText);
+    jsonPromptTextElement.clear();
+    jsonPromptTextElement.sendKeys(jsonForPrompt);
     driver.findElement(By.id("submitActionButton")).click();
     waitForUIReadiness();
     waitForAsyncCalls(lambdaDelay * 2); // Extra delay for the async calls to finish.
@@ -190,7 +213,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
   private void handlePromptText() {
     try {
-      WebElement promptTextElement = driver.findElement(By.id("promptText"));
+      WebElement promptTextElement = driver.findElement(By.cssSelector("[testId='yourTurnIcon']"));
       if (promptTextElement.isDisplayed() && promptTextElement.isEnabled()) {
         // notify tab 2.
         switchToTab(1);
@@ -214,9 +237,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   // If there are no more actions, the scenario is finished and should be conformant.
   private static boolean hasNoMoreActionsDisplayed(String name) {
     if (driver.findElements(By.id("nextActions")).isEmpty()
-      && driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
+      && driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       String titleValue =
-        driver.findElement(By.className("conformanceStatus")).getAttribute("title");
+        driver.findElement(By.className("conformanceStatus")).getDomProperty("title");
       assertEquals(
           "Conformant",
           titleValue,
@@ -228,9 +251,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
   }
 
   protected static void waitForUIReadiness() {
-    if (!driver.findElements(By.tagName("app-text-waiting")).isEmpty()) {
+    if (!driver.findElements(By.cssSelector("app-text-waiting")).isEmpty()) {
       StopWatch stopWatch = StopWatch.createStarted();
-      wait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("app-text-waiting")));
+      wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("app-text-waiting")));
       log.debug("Waited for UI readiness: {}", stopWatch);
       waitForUIReadiness();
     }
@@ -246,7 +269,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     // Avoid ElementClickInterceptedException by using JavascriptExecutor to click the button.
     WebElement button = driver
-      .findElement(By.tagName("app-confirmation-dialog"))
+      .findElement(By.cssSelector("app-confirmation-dialog"))
       .findElements(By.tagName("button"))
       .getFirst();
     JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -288,7 +311,6 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     driver.get(baseUrl);
     waitForAsyncCalls(lambdaDelay); // First redirect might be slow
     assertEquals(baseUrl + "/login", driver.getCurrentUrl());
-    assertEquals("DCSA Conformance", driver.getTitle().substring(0, 16));
 
     WebElement textBoxEmail = driver.findElement(By.id("login_email"));
     WebElement textBoxPassword = driver.findElement(By.id("login_password"));
@@ -306,7 +328,7 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     alreadyLoggedIn = true;
   }
 
-  SandboxConfig createSandBox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
+  SandboxConfig createSandbox(Standard standard, String version, String suiteName, String roleName, int sandboxType) {
     loginUser();
     log.info("Creating Sandbox: {}, {}, {}, {}, type: {}", standard.name(), version, suiteName, roleName, sandboxType);
     driver.get(baseUrl + "/create-sandbox");
@@ -330,9 +352,9 @@ public abstract class SeleniumTestBase extends ManualTestBase {
 
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[testId='sandboxNameInput']")));
     boolean noSandboxUrlInput = driver.findElements(By.cssSelector("[testId='sandboxUrlInput']")).isEmpty();
-    String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getAttribute("value");
-    String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getAttribute("value");
-    String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getAttribute("value");
+    String sandboxURL = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxUrlInput']")).getDomProperty("value");
+    String sandboxAuthHeaderName = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderNameInput']")).getDomProperty("value");
+    String sandboxAuthHeaderValue = noSandboxUrlInput ? null : driver.findElement(By.cssSelector("[testId='sandboxAuthHeaderValueInput']")).getDomProperty("value");
     return new SandboxConfig(
       null,
       sandboxName,

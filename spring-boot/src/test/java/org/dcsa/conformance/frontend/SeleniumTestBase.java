@@ -136,7 +136,8 @@ public abstract class SeleniumTestBase extends ManualTestBase {
     WebElement jsonPromptTextElement;
     try {
       jsonPromptTextElement = driver.findElement(jsonPromptTextSelector);
-      jsonForPrompt = jsonPromptTextElement.getText();
+      jsonForPrompt = jsonPromptTextElement.getDomProperty("value");
+      assertNotNull(jsonForPrompt);
     } catch (org.openqa.selenium.NoSuchElementException e) {
       log.debug("No JSON prompt text.");
       return false;

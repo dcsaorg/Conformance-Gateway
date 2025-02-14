@@ -5,10 +5,9 @@ import { AuthService } from "../../auth/auth.service";
 import { Standard, StandardVersion } from "src/app/model/standard";
 
 @Component({
-    selector: 'app-create-sandbox',
-    templateUrl: './create-sandbox.component.html',
-    styleUrls: ['../../shared-styles.css'],
-    standalone: false
+  selector: 'app-create-sandbox',
+  templateUrl: './create-sandbox.component.html',
+  styleUrls: ['../../shared-styles.css']
 })
 export class CreateSandboxComponent {
   SANDBOX_TYPES: string[] = [

@@ -8,10 +8,9 @@ import { MessageDialog } from "../../dialogs/message/message-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
 
 @Component({
-    selector: 'app-edit-sandbox',
-    templateUrl: './edit-sandbox.component.html',
-    styleUrls: ['../../shared-styles.css'],
-    standalone: false
+  selector: 'app-edit-sandbox',
+  templateUrl: './edit-sandbox.component.html',
+  styleUrls: ['../../shared-styles.css']
 })
 export class EditSandboxComponent {
   sandboxId: string = '';

@@ -6,10 +6,9 @@ import { MessageDialog } from "src/app/dialogs/message/message-dialog.component"
 import { AuthService } from "../../auth/auth.service";
 
 @Component({
-    selector: 'app-auth-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css'],
-    standalone: false
+  selector: 'app-auth-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
   isLoading = true;
@@ -52,7 +51,7 @@ export class LoginComponent implements OnInit {
       form.reset();
       return;
     }
-
+    
     this.isLoading = false;
     this.router.navigate(['/']);
   }

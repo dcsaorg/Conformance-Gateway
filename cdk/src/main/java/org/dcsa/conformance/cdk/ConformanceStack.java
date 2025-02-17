@@ -391,7 +391,7 @@ public class ConformanceStack extends Stack {
         BucketDeploymentProps.builder()
             .destinationBucket(ngBucket)
             .distribution(distribution)
-            .sources(List.of(Source.asset("../webui/dist/webui")))
+            .sources(List.of(Source.asset("../webui/dist/webui/browser")))
             .build());
 
     IPublicHostedZone publicHostedZone =

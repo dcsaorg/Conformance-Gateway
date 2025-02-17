@@ -23,7 +23,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { MessageDialog } from './dialogs/message/message-dialog.component';
 import { SimpleTextComponent } from './text/simple/simple-text.component';
 import { EnvironmentComponent } from './pages/environment/environment.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { SandboxComponent } from './pages/sandbox/sandbox.component';
 import { ScenarioComponent } from './pages/scenario/scenario.component';
 import { CreateSandboxComponent } from './pages/create-sandbox/create-sandbox.component';
@@ -34,47 +34,40 @@ import {EditHeaderComponent} from "./pages/edit-header/edit-header.component";
 import {MarkdownModule} from "ngx-markdown";
 import {SandboxTypeComponent} from "./components/sandbox-type/sandbox-type.component";
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    ConfirmationDialog,
-    CreateSandboxComponent,
-    EditHeaderComponent,
-    EditSandboxComponent,
-    EnvironmentComponent,
-    FooterComponent,
-    HeaderComponent,
-    HomeComponent,
-    LoginComponent,
-    MessageDialog,
-    ReportComponent,
-    SandboxComponent,
+@NgModule({ declarations: [
+        AppComponent,
+        ConfirmationDialog,
+        CreateSandboxComponent,
+        EditHeaderComponent,
+        EditSandboxComponent,
+        EnvironmentComponent,
+        FooterComponent,
+        HeaderComponent,
+        HomeComponent,
+        LoginComponent,
+        MessageDialog,
+        ReportComponent,
+        SandboxComponent,
     SandboxTypeComponent,
-    ScenarioComponent,
-    SimpleTextComponent,
-    TextWaitingComponent,
-  ],
-  imports: [
-    BrowserAnimationsModule,
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
+        ScenarioComponent,
+        SimpleTextComponent,
+        TextWaitingComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserAnimationsModule,
+        BrowserModule,
+        FormsModule,
     MarkdownModule.forRoot(),
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatDialogModule,
-    MatIconModule,
-    MatInputModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatToolbarModule,
-    ReactiveFormsModule,
-    // import as last module!
-    AppRoutingModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+        MatButtonModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatDialogModule,
+        MatIconModule,
+        MatInputModule,
+        MatMenuModule,
+        MatProgressSpinnerModule,
+        MatSelectModule,
+        MatToolbarModule,
+        ReactiveFormsModule,
+        // import as last module!
+        AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }

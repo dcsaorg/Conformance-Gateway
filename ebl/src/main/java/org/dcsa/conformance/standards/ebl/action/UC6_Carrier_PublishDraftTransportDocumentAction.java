@@ -13,6 +13,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
+  public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
 
@@ -22,7 +23,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       EblAction previousAction,
       JsonSchemaValidator notificationSchemaValidator,
       boolean skipSI) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC6", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
   }

@@ -33,18 +33,7 @@ public class JsonToolkit {
   @SneakyThrows
   public static JsonNode templateFileToJsonNode(
       String templatePath, Map<String, String> replacements) {
-    AtomicReference<String> jsonString = new AtomicReference<>();
-    try (InputStream inputStream = JsonToolkit.class.getResourceAsStream(templatePath)) {
-      if (inputStream == null) {
-        throw new IllegalArgumentException("Could not find file: " + templatePath);
-      }
-      jsonString.set(
-          new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-    }
-    if (replacements != null)
-      replacements.forEach(
-          (key, value) -> jsonString.set(jsonString.get().replace(key, value)));
-    return OBJECT_MAPPER.readTree(jsonString.get());
+    return OBJECT_MAPPER.readTree(IOToolkit.templateFileToText(templatePath, replacements));
   }
 
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {

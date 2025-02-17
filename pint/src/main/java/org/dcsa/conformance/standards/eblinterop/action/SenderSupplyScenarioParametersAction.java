@@ -9,7 +9,7 @@ import org.dcsa.conformance.standards.eblinterop.party.PintSendingPlatform;
 @Getter
 @Slf4j
 public class SenderSupplyScenarioParametersAction extends PintAction {
-
+  public static final String ACTION_PREFIX = "SupplyScenarioParameters";
   private final int documentCount;
 
   public SenderSupplyScenarioParametersAction(
@@ -21,7 +21,7 @@ public class SenderSupplyScenarioParametersAction extends PintAction {
         carrierPartyName,
         platformPartyName,
         previousAction,
-        "SupplyScenarioParameters[D:%d]".formatted(documentCount),
+        "%s[D:%d]".formatted(ACTION_PREFIX, documentCount),
         -1);
     this.documentCount = documentCount;
   }

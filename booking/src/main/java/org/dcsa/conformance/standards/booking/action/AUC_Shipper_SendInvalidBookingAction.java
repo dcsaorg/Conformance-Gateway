@@ -29,6 +29,7 @@ public class AUC_Shipper_SendInvalidBookingAction extends StateChangingBookingAc
 
   @Override
   public String getHumanReadablePrompt() {
+    // no markdown instructions needed: never expected to be performed by a human operator
     var dsp = getDspSupplier().get();
     return ("AUC: Send an invalid booking action but otherwise valid message of type %s (%s) to the booking reference %s".formatted(
       invalidBookingMessageType.name(),

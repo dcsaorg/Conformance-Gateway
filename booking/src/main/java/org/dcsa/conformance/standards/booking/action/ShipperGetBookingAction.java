@@ -50,13 +50,10 @@ public class ShipperGetBookingAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "GET the booking",
-        getDspSupplier().get().carrierBookingReference(),
-        getDspSupplier().get().carrierBookingRequestReference());
+    return getMarkdownHumanReadablePrompt(
+            "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md")
+        .replace("ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedContent ? "AMENDED" : "ORIGINAL");
   }
-
-
 
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {

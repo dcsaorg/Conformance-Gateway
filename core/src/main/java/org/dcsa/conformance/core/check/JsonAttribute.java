@@ -296,6 +296,9 @@ public class JsonAttribute {
   }
 
   public static JsonContentMatchedValidation path(String path, JsonContentMatchedValidation delegate) {
+    if (path.contains("/")) {
+      throw new IllegalArgumentException("The path must not contain slashes");
+    }
     return (nodeToValidate, contextPath) -> {
       var fullContext = concatContextPath(contextPath, path);
       return delegate.validate(nodeToValidate.path(path), fullContext);

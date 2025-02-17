@@ -1,7 +1,7 @@
 {
   "terminalCallID": "TERMINAL_CALL_ID_PLACEHOLDER",
   "portCallServiceID": "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-  "portCallServiceType": "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
+  "portCallServiceTypeCode": "PORT_CALL_SERVICE_TYPE_CODE_PLACEHOLDER",
   "portCallServiceEventTypeCode": "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
   "portCallPhaseTypeCode": "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
   "portCallServiceLocation": {
@@ -14,39 +14,41 @@
   },
   "moves": [
     {
-      "totalMoves": 155,
+      "totalUnits": 155,
       "carrierCode": "MAEU",
       "carrierCodeListProvider": "NMFTA",
-      "restowMoves": 20
+      "restows": {
+        "totalRestows": 155
+      }
     },
     {
-      "loadMoves": {
-        "ladenContainerMoves": {
-          "totalMoves": 155
+      "loadUnits": {
+        "ladenContainerUnits": {
+          "totalUnits": 155
         },
-        "emptyContainerMoves": {
-          "totalMoves": 155
+        "emptyContainerUnits": {
+          "totalUnits": 155
         },
-        "reeferPluggedContainerMoves": {
-          "totalMoves": 155
-        },
-        "oogUnits": 2
-      },
-      "dischargeMoves": {
-        "ladenContainerMoves": {
-          "totalMoves": 155
-        },
-        "emptyContainerMoves": {
-          "totalMoves": 155
-        },
-        "reeferPluggedContainerMoves": {
-          "totalMoves": 155
+        "reeferPluggedContainerUnits": {
+          "totalUnits": 155
         },
         "oogUnits": 2
       },
-      "carrierCode": "MAEU",
-      "carrierCodeListProvider": "NMFTA",
-      "restowMoves": 155
+      "dischargeUnits": {
+        "ladenContainerUnits": {
+          "totalUnits": 155
+        },
+        "emptyContainerUnits": {
+          "totalUnits": 155
+        },
+        "reeferPluggedContainerUnits": {
+          "totalUnits": 155
+        },
+        "oogUnits": 2
+      },
+      "restows": {
+        "totalRestows": 155
+      }
     }
   ],
   "isFYI": IS_FYI_PLACEHOLDER

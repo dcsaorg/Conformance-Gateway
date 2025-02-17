@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 import lombok.With;
+import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 
 @With
@@ -19,6 +20,7 @@ public record JitTimestamp(
     String portCallServiceID,
     JitClassifierCode classifierCode,
     String dateTime,
+    PortCallServiceLocationTimestamp portCallServiceLocation,
     String delayReasonCode,
     boolean isFYI,
     String remark) {
@@ -28,7 +30,12 @@ public record JitTimestamp(
   }
 
   public static JitTimestamp fromJson(JsonNode jsonNode) {
-    return OBJECT_MAPPER.convertValue(jsonNode, JitTimestamp.class);
+    try {
+      return OBJECT_MAPPER.convertValue(jsonNode, JitTimestamp.class);
+    } catch (IllegalArgumentException e) {
+      throw new UserFacingException(
+          "Could not correctly read the given Timestamp object. Invalid JSON or missing properties");
+    }
   }
 
   @SuppressWarnings("java:S2245") // Random is used for generating random timestamps. Secure enough.
@@ -36,28 +43,30 @@ public record JitTimestamp(
 
   public static JitTimestamp getTimestampForType(
       JitTimestampType timestampType, JitTimestamp previousTimestamp, boolean isFYI) {
-    return switch (timestampType) {
-      case ESTIMATED ->
+    if (previousTimestamp == null) {
+      previousTimestamp =
           new JitTimestamp(
+              null,
+              null,
               UUID.randomUUID().toString(),
-              previousTimestamp != null ? previousTimestamp.timestampID() : null,
-              previousTimestamp != null
-                  ? previousTimestamp.portCallServiceID()
-                  : UUID.randomUUID().toString(),
-              timestampType.getClassifierCode(),
+              null,
               LocalDateTime.now().format(JsonToolkit.DEFAULT_DATE_FORMAT) + "T07:41:00+08:30",
+              null,
               "STR",
               isFYI,
               "Port closed due to strike");
-      case PLANNED, ACTUAL ->
-          previousTimestamp.withClassifierCode(timestampType.getClassifierCode());
+    }
+    return switch (timestampType) {
+      case ESTIMATED, PLANNED, ACTUAL ->
+          previousTimestamp
+              .withTimestampID(UUID.randomUUID().toString())
+              .withClassifierCode(timestampType.getClassifierCode())
+              .withReplyToTimestampID(previousTimestamp.timestampID());
       case REQUESTED ->
           previousTimestamp
+              .withTimestampID(UUID.randomUUID().toString())
               .withClassifierCode(timestampType.getClassifierCode())
-              .withTimestampID(
-                  UUID.randomUUID().toString()) // Create new ID, because it's a new timestamp
-              .withReplyToTimestampID(
-                  previousTimestamp.timestampID()) // Respond to the previous timestamp
+              .withReplyToTimestampID(previousTimestamp.timestampID())
               .withDateTime(generateRandomDateTime());
     };
   }

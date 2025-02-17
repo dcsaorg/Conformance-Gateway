@@ -2,7 +2,7 @@ package org.dcsa.conformance.standards.jit;
 
 import static org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector.*;
 import static org.dcsa.conformance.standards.jit.model.JitTimestampType.*;
-import static org.dcsa.conformance.standards.jit.model.PortCallServiceType.*;
+import static org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode.*;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -27,13 +27,13 @@ import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
-import org.dcsa.conformance.standards.jit.model.JitGetPortServiceCallFilters;
+import org.dcsa.conformance.standards.jit.model.JitGetPortCallServiceFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTerminalCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetTimestampCallFilters;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @Slf4j
 class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder> {
@@ -823,25 +823,22 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     S_A_PATTERN,
                     sendTimestamp(context, ACTUAL)
                         .then(
-                            getAction(
-                                    context,
-                                    JitGetType.TIMESTAMPS,
-                                    JitGetTimestampCallFilters.props().get(3),
-                                    false)
+                            getTimestamps(
+                                    context, JitGetTimestampCallFilters.props().get(3), false, 1)
                                 .then(
-                                    getAction(
+                                    getTimestamps(
                                             context,
-                                            JitGetType.TIMESTAMPS,
                                             JitGetTimestampCallFilters.props().get(4),
-                                            false)
+                                            false,
+                                            1)
                                         .then(
-                                            getAction(
+                                            getTimestamps(
                                                 context,
-                                                JitGetType.TIMESTAMPS,
                                                 List.of(
                                                     JitGetTimestampCallFilters.props().get(4),
                                                     JitGetTimestampCallFilters.props().get(5)),
-                                                false)))))));
+                                                false,
+                                                1)))))));
     scenarioList.put(
         "6. PC-TC-S-V-A Consumer answering GET calls",
         supplyScenarioParameters(context, S_A_PATTERN)
@@ -852,25 +849,22 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                     S_A_PATTERN,
                     sendTimestamp(context, ACTUAL)
                         .then(
-                            getAction(
-                                    context,
-                                    JitGetType.TIMESTAMPS,
-                                    JitGetTimestampCallFilters.props().get(3),
-                                    true)
+                            getTimestamps(
+                                    context, JitGetTimestampCallFilters.props().get(3), true, 1)
                                 .then(
-                                    getAction(
+                                    getTimestamps(
                                             context,
-                                            JitGetType.TIMESTAMPS,
                                             JitGetTimestampCallFilters.props().get(4),
-                                            true)
+                                            true,
+                                            1)
                                         .then(
-                                            getAction(
+                                            getTimestamps(
                                                 context,
-                                                JitGetType.TIMESTAMPS,
                                                 List.of(
                                                     JitGetTimestampCallFilters.props().get(4),
                                                     JitGetTimestampCallFilters.props().get(5)),
-                                                true)))))));
+                                                true,
+                                                1)))))));
     scenarioList.put(
         "7. Moves service type Provider answering GET calls",
         supplyScenarioParameters(context, GIVEN)
@@ -895,40 +889,36 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder getTimestampActions(
       JitScenarioContext context, boolean requestedByProvider) {
-    return getAction(
-            context, JitGetType.TIMESTAMPS, JitGetTimestampCallFilters.props().getFirst(), false)
+    return getTimestamps(context, JitGetTimestampCallFilters.props().getFirst(), false, 1)
         .then(
-            getAction(
-                    context,
-                    JitGetType.TIMESTAMPS,
-                    JitGetTimestampCallFilters.props().get(1),
-                    requestedByProvider)
+            getTimestamps(
+                    context, JitGetTimestampCallFilters.props().get(1), requestedByProvider, 1)
                 .then(
-                    getAction(
+                    getTimestamps(
                             context,
-                            JitGetType.TIMESTAMPS,
                             JitGetTimestampCallFilters.props().get(2),
-                            requestedByProvider)
+                            requestedByProvider,
+                            1)
                         .then(
-                            getAction(
+                            getTimestamps(
                                     context,
-                                    JitGetType.TIMESTAMPS,
                                     JitGetTimestampCallFilters.props().get(3),
-                                    requestedByProvider)
+                                    requestedByProvider,
+                                    1)
                                 .then(
-                                    getAction(
+                                    getTimestamps(
                                             context,
-                                            JitGetType.TIMESTAMPS,
                                             JitGetTimestampCallFilters.props().get(4),
-                                            requestedByProvider)
+                                            requestedByProvider,
+                                            4)
                                         .then(
-                                            getAction(
+                                            getTimestamps(
                                                 context,
-                                                JitGetType.TIMESTAMPS,
                                                 List.of(
                                                     JitGetTimestampCallFilters.props().get(4),
                                                     JitGetTimestampCallFilters.props().get(5)),
-                                                requestedByProvider))))));
+                                                requestedByProvider,
+                                                1))))));
   }
 
   private static JitScenarioListBuilder getPortCallActions(
@@ -1062,21 +1052,21 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     return getAction(
             context,
             JitGetType.PORT_CALL_SERVICES,
-            JitGetPortServiceCallFilters.props().getFirst(),
+            JitGetPortCallServiceFilters.props().getFirst(),
             requestedByProvider)
         .then(
             getAction(
                     context,
                     JitGetType.PORT_CALL_SERVICES,
-                    JitGetPortServiceCallFilters.props().get(1),
+                    JitGetPortCallServiceFilters.props().get(1),
                     requestedByProvider)
                 .then(
                     getAction(
                         context,
                         JitGetType.PORT_CALL_SERVICES,
                         List.of(
-                            JitGetPortServiceCallFilters.props().getFirst(),
-                            JitGetPortServiceCallFilters.props().get(2)),
+                            JitGetPortCallServiceFilters.props().getFirst(),
+                            JitGetPortCallServiceFilters.props().get(2)),
                         requestedByProvider)));
   }
 
@@ -1282,7 +1272,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder serviceCall(
       JitScenarioContext context,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector) {
     if (serviceType == null && selector == null) {
       throw new IllegalArgumentException("Either serviceType or selector must be provided");
@@ -1324,7 +1314,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder sendPC_TC_SC_VS(
       @NonNull JitScenarioContext context,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector,
       JitScenarioListBuilder... thenEither) {
     return portCall(context)
@@ -1337,14 +1327,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder getAction(
       JitScenarioContext context, JitGetType type, String filter, boolean requestedByProvider) {
-    return new JitScenarioListBuilder(
-        previousAction ->
-            new JitGetAction(
-                context,
-                previousAction,
-                type,
-                Collections.singletonList(filter),
-                requestedByProvider));
+    return getAction(context, type, Collections.singletonList(filter), requestedByProvider);
   }
 
   private static JitScenarioListBuilder getAction(
@@ -1354,6 +1337,28 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
       boolean requestedByProvider) {
     return new JitScenarioListBuilder(
         previousAction ->
-            new JitGetAction(context, previousAction, type, filters, requestedByProvider));
+            new JitGetAction(context, previousAction, type, filters, requestedByProvider, 1));
+  }
+
+  private static JitScenarioListBuilder getTimestamps(
+      JitScenarioContext context, String filter, boolean requestedByProvider, int expectedResults) {
+    return getTimestamps(
+        context, Collections.singletonList(filter), requestedByProvider, expectedResults);
+  }
+
+  private static JitScenarioListBuilder getTimestamps(
+      JitScenarioContext context,
+      List<String> filters,
+      boolean requestedByProvider,
+      int expectedResults) {
+    return new JitScenarioListBuilder(
+        previousAction ->
+            new JitGetAction(
+                context,
+                previousAction,
+                JitGetType.TIMESTAMPS,
+                filters,
+                requestedByProvider,
+                expectedResults));
   }
 }

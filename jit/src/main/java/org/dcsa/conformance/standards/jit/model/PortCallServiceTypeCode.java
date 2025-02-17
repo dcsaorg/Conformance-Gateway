@@ -7,7 +7,7 @@ import org.dcsa.conformance.core.UserFacingException;
 
 @Getter
 @RequiredArgsConstructor
-public enum PortCallServiceType {
+public enum PortCallServiceTypeCode {
   // Port Call Services negotiable through an `ERP`-cycle including an `A`, can be one of:
   BERTH("Berth"),
   CARGO_OPERATIONS("Cargo operations"),
@@ -36,7 +36,7 @@ public enum PortCallServiceType {
 
   private final String fullName;
 
-  public static Set<PortCallServiceType> getServicesWithERPAndA() {
+  public static Set<PortCallServiceTypeCode> getServicesWithERPAndA() {
     return Set.of(
         BERTH,
         CARGO_OPERATIONS,
@@ -49,7 +49,7 @@ public enum PortCallServiceType {
         SLUDGE);
   }
 
-  public static Set<PortCallServiceType> getServicesHavingOnlyA() {
+  public static Set<PortCallServiceTypeCode> getServicesHavingOnlyA() {
     return Set.of(
         SEA_PASSAGE,
         ALL_FAST,
@@ -64,12 +64,12 @@ public enum PortCallServiceType {
         SHORE_POWER);
   }
 
-  public static PortCallServiceType fromName(String name) {
-    for (PortCallServiceType portCallServiceType : values()) {
-      if (portCallServiceType.name().equals(name)) {
-        return portCallServiceType;
+  public static PortCallServiceTypeCode fromName(String name) {
+    for (PortCallServiceTypeCode code : values()) {
+      if (code.name().equals(name)) {
+        return code;
       }
     }
-    throw new UserFacingException("Unknown PortCallServiceType: " + name);
+    throw new UserFacingException("Unknown PortCallServiceTypeCode: " + name);
   }
 }

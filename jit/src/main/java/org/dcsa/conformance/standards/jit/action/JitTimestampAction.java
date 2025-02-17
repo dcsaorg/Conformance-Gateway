@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.dcsa.conformance.core.check.ActionCheck;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
 import org.dcsa.conformance.core.check.ConformanceCheck;
 import org.dcsa.conformance.core.check.HttpMethodCheck;
@@ -77,15 +76,14 @@ public class JitTimestampAction extends JitAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         if (dsp == null) return Stream.of();
-        ActionCheck checksForTimestamp =
-            JitChecks.createChecksForTimestamp(
-                JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp);
         if (sendByProvider) {
           return Stream.of(
-              new UrlPathCheck(
-                  JitRole::isProvider,
-                  getMatchedExchangeUuid(),
-                  JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID()),
+              dsp.currentTimestamp() != null
+                  ? new UrlPathCheck(
+                      JitRole::isProvider,
+                      getMatchedExchangeUuid(),
+                      JitStandard.TIMESTAMP_URL + dsp.currentTimestamp().timestampID())
+                  : null,
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
               new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
               new ApiHeaderCheck(
@@ -103,13 +101,12 @@ public class JitTimestampAction extends JitAction {
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
                   expectedApiVersion,
-                  JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                  JitChecks.createChecksForTimestamp(dsp)),
               new JsonSchemaCheck(
                   JitRole::isProvider,
                   getMatchedExchangeUuid(),
                   HttpMessageType.REQUEST,
-                  validator),
-              checksForTimestamp);
+                  validator));
         }
         // Consumer sends requested timestamp
         return Stream.of(
@@ -134,10 +131,9 @@ public class JitTimestampAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                JitChecks.createChecksForTimestamp(dsp)),
             new JsonSchemaCheck(
-                JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator),
-            checksForTimestamp);
+                JitRole::isConsumer, getMatchedExchangeUuid(), HttpMessageType.REQUEST, validator));
       }
     };
   }

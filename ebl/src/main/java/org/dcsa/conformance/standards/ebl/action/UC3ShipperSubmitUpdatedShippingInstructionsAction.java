@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,12 +36,20 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC3: Submit an updated shipping instructions request using the following parameters:");
+    Map<String, String> replacementsMap =
+        Map.ofEntries(
+            Map.entry(
+                "REFERENCE",
+                this.useTDRef
+                    ? getDSP().transportDocumentReference()
+                    : getDSP().shippingInstructionsReference()));
+    return getMarkdownHumanReadablePrompt(
+        replacementsMap, "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    var dsp = getDspSupplier().get();
+    var dsp = getDSP();
     var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     if (documentReference == null) {
       throw new IllegalStateException("Missing document reference for use-case 3");

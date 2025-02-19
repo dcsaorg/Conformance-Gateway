@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -31,8 +32,10 @@ public class UC7_Shipper_ApproveDraftTransportDocumentAction extends StateChangi
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC7: Approve the draft transport document with document reference %s".formatted(
-      getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-shipper-uc7.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override

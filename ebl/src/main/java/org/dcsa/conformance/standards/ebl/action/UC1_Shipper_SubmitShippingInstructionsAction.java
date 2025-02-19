@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,29 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a shipping instructions using the following parameters:");
+    Map<String, String> replacementsMap =
+        Map.ofEntries(Map.entry("SCENARIO_TYPE", getScenarioType()));
+    return getMarkdownHumanReadablePrompt(
+        replacementsMap, "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md");
+  }
+
+  private String getScenarioType() {
+    return switch (getDspSupplier().get().scenarioType()) {
+      case REGULAR_2C_2U_1E ->
+          "SI with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
+      case REGULAR_2C_2U_2E ->
+          "SI with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> "SI with No Commodity Subreference";
+      case REGULAR_SWB_SOC_AND_REFERENCES -> "Regular SWB and SI with SOC References";
+      case REGULAR_SWB_AMF -> "Regular SWB with Advance Manifest Filing";
+      case DG -> "Dangerous Goods";
+      case REGULAR_SWB -> "Regular SWB";
+      case REGULAR_STRAIGHT_BL -> "Regular Straight BL";
+      case ACTIVE_REEFER -> "Active Reefer";
+      case NON_OPERATING_REEFER -> "Non-operating Reefer";
+      case REGULAR_NEGOTIABLE_BL -> "Negotiable BL";
+      case REGULAR_CLAD -> "Clad";
+    };
   }
 
   @Override

@@ -1,15 +1,17 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
@@ -31,10 +33,13 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   @Override
   public String getHumanReadablePrompt() {
     if (skipSI) {
-      return "UC6: Publish draft transport document matching the scenario parameters provided in the previous step and provide its transport document reference here";
+      return getMarkdownHumanReadablePrompt(
+          null, "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
     }
-    return ("UC6: Publish draft transport document for shipping instructions with reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+        "prompt-carrier-uc6-si-td.md",
+        "prompt-carrier-notification.md");
   }
 
 

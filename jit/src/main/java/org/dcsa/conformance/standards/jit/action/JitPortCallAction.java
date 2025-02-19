@@ -50,7 +50,7 @@ public class JitPortCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Port Call (PUT)";
+    return getMarkdownFile("prompt-send-port-call.md");
   }
 
   @Override

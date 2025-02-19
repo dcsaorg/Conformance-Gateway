@@ -1272,14 +1272,14 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
 
   private static JitScenarioListBuilder serviceCall(
       JitScenarioContext context,
-      PortCallServiceTypeCode serviceType,
+      PortCallServiceTypeCode serviceTypeCode,
       JitServiceTypeSelector selector) {
-    if (serviceType == null && selector == null) {
-      throw new IllegalArgumentException("Either serviceType or selector must be provided");
+    if (serviceTypeCode == null && selector == null) {
+      throw new IllegalArgumentException("Either serviceTypeCode or selector must be provided");
     }
     return new JitScenarioListBuilder(
         previousAction ->
-            new JitPortCallServiceAction(context, previousAction, serviceType, selector));
+            new JitPortCallServiceAction(context, previousAction, serviceTypeCode, selector));
   }
 
   private static JitScenarioListBuilder vesselStatus(JitScenarioContext context) {

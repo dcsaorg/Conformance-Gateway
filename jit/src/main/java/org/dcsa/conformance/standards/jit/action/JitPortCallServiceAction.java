@@ -20,7 +20,7 @@ import org.dcsa.conformance.standards.jit.party.JitRole;
 @Slf4j
 @ToString
 public class JitPortCallServiceAction extends JitAction {
-  public static final String SERVICE_TYPE = "serviceType";
+  public static final String SERVICE_TYPE = "serviceTypeCode";
 
   private final JsonSchemaValidator validator;
   private final PortCallServiceTypeCode serviceType;
@@ -79,14 +79,16 @@ public class JitPortCallServiceAction extends JitAction {
   @Override
   public String getHumanReadablePrompt() {
     if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
-    return switch (dsp.selector()) {
-      case FULL_ERP, S_A_PATTERN:
-        yield "Send a Port Call Service (PUT) for the %s".formatted(dsp.selector().getFullName());
-      case GIVEN:
-        yield "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
-      case ANY:
-        yield "Send a Port Call Service (PUT) for a service you supply";
-    };
+    String replacement =
+        switch (dsp.selector()) {
+          case FULL_ERP, S_A_PATTERN:
+            yield "the %s".formatted(dsp.selector().getFullName());
+          case GIVEN:
+            yield "%s".formatted(serviceType.name());
+          case ANY:
+            yield "a service you supply";
+        };
+    return getMarkdownFile("prompt-send-port-call-service.md").formatted(replacement);
   }
 
   @Override

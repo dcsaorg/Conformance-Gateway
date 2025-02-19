@@ -67,7 +67,7 @@ public class JitTimestampAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send %s timestamp (PUT) call".formatted(timestampType);
+    return getMarkdownFile("prompt-send-timestamp.md").formatted(timestampType.name());
   }
 
   @Override

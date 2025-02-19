@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.standards.jit.party.DynamicScenarioParameters;
 
 @Slf4j
@@ -58,5 +59,9 @@ public abstract class JitAction extends ConformanceAction {
     if (dspNode != null) {
       dsp = DynamicScenarioParameters.fromJson(dspNode);
     }
+  }
+
+  protected String getMarkdownFile(String fileName) {
+    return IOToolkit.templateFileToText("/standards/jit/instructions/" + fileName, null);
   }
 }

@@ -89,7 +89,7 @@ public class JitGetAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Get %s (GET) request".formatted(getType);
+    return getMarkdownFile("prompt-get-request.md").formatted(getType, getType);
   }
 
   @Override

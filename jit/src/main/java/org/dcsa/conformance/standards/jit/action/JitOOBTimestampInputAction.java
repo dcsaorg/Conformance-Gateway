@@ -36,8 +36,7 @@ public class JitOOBTimestampInputAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Supply the out-of-band %s timestamp that you (could) have received out-of-band from the service provider, using the format below:"
-        .formatted(timestampType));
+    return getMarkdownFile("prompt-process-oob-input.md").formatted(timestampType);
   }
 
   @Override

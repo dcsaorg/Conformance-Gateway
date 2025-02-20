@@ -72,17 +72,6 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       .put("amendedContent", requestAmendedStatus);
   }
 
-  /*  @Override
-  public String getHumanReadablePrompt() {
-    var dsp = getDspSupplier().get();
-    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
-    if (documentReference == null) {
-      throw new IllegalStateException("Missing document reference for get SI");
-    }
-    return "GET the SI with reference '%s'"
-        .formatted(documentReference);
-  }*/
-
   @Override
   public String getHumanReadablePrompt() {
     var dsp = getDspSupplier().get();

@@ -1,1 +1,1 @@
-Perform Use Case 1 : Submit a shipping instructions request for SCENARIO_TYPE
+Perform Use Case 1 : Submit a shipping instructions request SCENARIO_TYPE

@@ -33,28 +33,28 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
 
   @Override
   public String getHumanReadablePrompt() {
-    Map<String, String> replacementsMap =
-        Map.ofEntries(Map.entry("SCENARIO_TYPE", getScenarioType()));
     return getMarkdownHumanReadablePrompt(
-        replacementsMap, "prompt-shipper-uc1.md", "prompt-shipper-refresh-complete.md");
+        Map.of("SCENARIO_TYPE", getScenarioType()),
+        "prompt-shipper-uc1.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   private String getScenarioType() {
     return switch (getDspSupplier().get().scenarioType()) {
       case REGULAR_2C_2U_1E ->
-          "SI with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
+          "with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
       case REGULAR_2C_2U_2E ->
-          "SI with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
-      case REGULAR_NO_COMMODITY_SUBREFERENCE -> "SI with No Commodity Subreference";
-      case REGULAR_SWB_SOC_AND_REFERENCES -> "Regular SWB and SI with SOC References";
-      case REGULAR_SWB_AMF -> "Regular SWB with Advance Manifest Filing";
-      case DG -> "Dangerous Goods";
-      case REGULAR_SWB -> "Regular SWB";
-      case REGULAR_STRAIGHT_BL -> "Regular Straight BL";
-      case ACTIVE_REEFER -> "Active Reefer";
-      case NON_OPERATING_REEFER -> "Non-operating Reefer";
-      case REGULAR_NEGOTIABLE_BL -> "Negotiable BL";
-      case REGULAR_CLAD -> "Clad";
+          "with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
+      case REGULAR_SWB_SOC_AND_REFERENCES -> "for Regular SWB and with SOC References";
+      case REGULAR_SWB_AMF -> "for Regular SWB with Advance Manifest Filing";
+      case DG -> "with Dangerous Goods";
+      case REGULAR_SWB -> "for Regular SWB";
+      case REGULAR_STRAIGHT_BL -> "for Regular Straight BL";
+      case ACTIVE_REEFER -> "with Active Reefer";
+      case NON_OPERATING_REEFER -> "with Non-operating Reefer";
+      case REGULAR_NEGOTIABLE_BL -> "for Negotiable BL";
+      case REGULAR_CLAD -> "for Clad";
     };
   }
 

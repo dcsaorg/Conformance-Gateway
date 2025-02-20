@@ -35,9 +35,9 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
   @Override
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
-      Map.of("REFERENCE", getDspSupplier().get().transportDocumentReference()),
-      "prompt-shipper-get-td.md",
-      "prompt-shipper-refresh-complete.md");
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-shipper-get-td.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override

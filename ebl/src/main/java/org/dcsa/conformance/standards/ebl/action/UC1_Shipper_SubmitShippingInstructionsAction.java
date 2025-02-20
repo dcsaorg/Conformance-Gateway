@@ -40,7 +40,7 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
   }
 
   private String getScenarioType() {
-    return switch (getDspSupplier().get().scenarioType()) {
+    return switch (getDSP().scenarioType()) {
       case REGULAR_2C_2U_1E ->
           "with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
       case REGULAR_2C_2U_2E ->

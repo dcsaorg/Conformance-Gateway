@@ -36,20 +36,19 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
 
   @Override
   public String getHumanReadablePrompt() {
-    Map<String, String> replacementsMap =
-        Map.ofEntries(
-            Map.entry(
-                "REFERENCE",
-                this.useTDRef
-                    ? getDSP().transportDocumentReference()
-                    : getDSP().shippingInstructionsReference()));
     return getMarkdownHumanReadablePrompt(
-        replacementsMap, "prompt-shipper-uc3.md", "prompt-shipper-refresh-complete.md");
+        Map.of(
+            "REFERENCE",
+            this.useTDRef
+                ? getDSP().transportDocumentReference()
+                : getDSP().shippingInstructionsReference()),
+        "prompt-shipper-uc3.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    var dsp = getDSP();
+    var dsp = getDspSupplier().get();
     var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
     if (documentReference == null) {
       throw new IllegalStateException("Missing document reference for use-case 3");

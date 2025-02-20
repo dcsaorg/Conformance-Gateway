@@ -15,6 +15,7 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
 
   @Override
   public String getHumanReadablePrompt() {
+    // no markdown instructions needed: never expected to be performed by a human operator
     return ("Process and accept an out of band request for a change to the TD with reference %s"
         .formatted(getDspSupplier().get().transportDocumentReference()));
   }

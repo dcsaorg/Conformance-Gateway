@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -22,8 +23,10 @@ public class UC11i_Carrier_IssueAmendedTransportDocumentAction extends StateChan
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC11i: Issue amended transport document to replace the transport document with reference %s."
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-carrier-uc11i.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

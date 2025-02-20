@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -26,11 +27,15 @@ public class UC13_Carrier_ProcessSurrenderRequestForDeliveryAction extends State
   @Override
   public String getHumanReadablePrompt() {
     if (acceptDeliveryRequest) {
-      return ("UC13a: Accept surrender request for delivery for transport document with reference %s"
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+      return getMarkdownHumanReadablePrompt(
+          Map.of("REFERENCE", getDSP().transportDocumentReference()),
+          "prompt-carrier-uc13a.md",
+          "prompt-carrier-notification.md");
     }
-    return ("UC13r: Reject surrender request for delivery for transport document with reference %s"
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-carrier-uc13r.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

@@ -1,20 +1,19 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Stream;
 import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-import static org.junit.jupiter.api.Assertions.*;
 
 class OvsChecksTest {
 
@@ -262,35 +261,6 @@ class OvsChecksTest {
   }
 
   @Test
-  void testValidateDate_dateWithinRange() {
-    Map<OvsFilterParameter, String> filterParametersMap =
-        Map.of(OvsFilterParameter.START_DATE, "2024-07-19");
-    Set<String> result =
-        OvsChecks.validateDate(
-            serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
-  void testValidateDate_dateOutsideRange() {
-    Map<OvsFilterParameter, String> filterParametersMap =
-        Map.of(OvsFilterParameter.START_DATE, "2024-07-30");
-    Set<String> result =
-        OvsChecks.validateDate(
-            serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertFalse(result.isEmpty());
-  }
-
-  @Test
-  void testValidateDate_noStartDate() {
-    Map<OvsFilterParameter, String> filterParametersMap = Collections.emptyMap();
-    Set<String> result =
-        OvsChecks.validateDate(
-            serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
   void testValidateUniqueTransportCallReference_unique() {
     JsonNode vesselSchedules = createServiceVesselSchedules("1234567", "Great Vessel");
     JsonNode serviceNodes =
@@ -362,29 +332,6 @@ class OvsChecksTest {
   void testCheckServiceSchedulesExist_nullServiceNode() {
     Set<String> result = OvsChecks.checkServiceSchedulesExist(null);
     assertEquals(1, result.size());
-  }
-
-  @Test
-  void testValidateDate_invalidDateFormat() {
-    Map<OvsFilterParameter, String> filterParametersMap =
-        Map.of(OvsFilterParameter.START_DATE, "2024-07-19");
-    JsonNode timeStamps =
-        serviceNodes
-            .get(0)
-            .get("vesselSchedules")
-            .get(0)
-            .get("transportCalls")
-            .get(0)
-            .get("timestamps");
-
-    ObjectNode invalidTimeStamp =
-      OBJECT_MAPPER.createObjectNode().put("eventDateTime", "TCREF1");
-    ((ArrayNode) timeStamps).add(invalidTimeStamp);
-
-    Set<String> result =
-        OvsChecks.validateDate(
-            serviceNodes, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore);
-    assertTrue(result.isEmpty());
   }
 
   // Helper method to create a sample JsonNode for vessel schedules

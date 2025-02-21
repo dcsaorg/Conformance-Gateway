@@ -28,7 +28,7 @@ public class JitCancelAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownFile("prompt-send-cancel.md").formatted(getActionTitle());
+    return getMarkdownFile("prompt-send-cancel.md");
   }
 
   @Override

@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +80,7 @@ public class JitPortCallServiceAction extends JitAction {
   @Override
   public String getHumanReadablePrompt() {
     if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
-    String replacement =
+    String typeOfServiceText =
         switch (dsp.selector()) {
           case FULL_ERP, S_A_PATTERN:
             yield "the %s".formatted(dsp.selector().getFullName());
@@ -88,7 +89,8 @@ public class JitPortCallServiceAction extends JitAction {
           case ANY:
             yield "a service you supply";
         };
-    return getMarkdownFile("prompt-send-port-call-service.md").formatted(replacement);
+    return getMarkdownFile(
+        "prompt-send-port-call-service.md", Map.of("SERVICE_TYPE_PLACEHOLDER", typeOfServiceText));
   }
 
   @Override

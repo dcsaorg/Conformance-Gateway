@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -62,6 +63,10 @@ public abstract class JitAction extends ConformanceAction {
   }
 
   protected String getMarkdownFile(String fileName) {
-    return IOToolkit.templateFileToText("/standards/jit/instructions/" + fileName, null);
+    return getMarkdownFile(fileName, null);
+  }
+
+  protected String getMarkdownFile(String fileName, Map<String, String> replacements) {
+    return IOToolkit.templateFileToText("/standards/jit/instructions/" + fileName, replacements);
   }
 }

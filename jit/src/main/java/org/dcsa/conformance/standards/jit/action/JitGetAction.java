@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,8 @@ public class JitGetAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownFile("prompt-get-request.md").formatted(getType, getType);
+    return getMarkdownFile(
+        "prompt-get-request.md", Map.of("GET_TYPE_PLACEHOLDER", getType.getName()));
   }
 
   @Override

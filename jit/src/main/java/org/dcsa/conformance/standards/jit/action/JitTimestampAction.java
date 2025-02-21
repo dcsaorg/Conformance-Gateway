@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ApiHeaderCheck;
@@ -67,7 +68,8 @@ public class JitTimestampAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownFile("prompt-send-timestamp.md").formatted(timestampType.name());
+    return getMarkdownFile(
+        "prompt-send-timestamp.md", Map.of("TIMESTAMP_TYPE_PLACEHOLDER", timestampType.name()));
   }
 
   @Override

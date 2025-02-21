@@ -1,2 +1,2 @@
-Supply the out-of-band %s timestamp that you (could) have received out-of-band from the service provider, using the
-format below:
+Adjust and submit the out-of-band TIMESTAMP_TYPE_PLACEHOLDER timestamp that you (could) have received out-of-band from
+the service provider:

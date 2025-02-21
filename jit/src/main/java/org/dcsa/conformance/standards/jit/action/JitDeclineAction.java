@@ -29,7 +29,7 @@ public class JitDeclineAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownFile("prompt-send-decline.md").formatted(getActionTitle());
+    return getMarkdownFile("prompt-send-decline.md");
   }
 
   @Override

@@ -1,4 +1,4 @@
-Send a Port Call Service (PUT) for %s.
+Send a Port Call Service (PUT) for SERVICE_TYPE_PLACEHOLDER.
 
 * You must provide a unique `portCallServiceID` (UUIDv4), which identifies the Port Call Service.
 * The `portCallServiceID` must remain consistent across all subsequent communications and linked Timestamps.

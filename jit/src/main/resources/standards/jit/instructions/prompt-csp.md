@@ -12,5 +12,5 @@ The synthetic provider uses the following parameters:
 * `serviceTypeCode` (optional): Only use this attribute when it is displayed below. Copied into the
   `/portCallServiceTypeCode` attribute of the Port Call Service request.
 
-Provide the scenario parameters in JSON format, optionally adjusting the value of each parameter as needed, so that
-your application can complete the scenario successfully. If the defaults are fine, just press `Submit`.
+Below you find the scenario parameters in JSON format. Optionally, adjust the values as needed, so that your application
+can complete the scenario successfully. If the defaults are fine, just press `Submit`.

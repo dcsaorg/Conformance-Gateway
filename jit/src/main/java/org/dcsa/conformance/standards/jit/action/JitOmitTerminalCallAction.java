@@ -28,7 +28,7 @@ public class JitOmitTerminalCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return getMarkdownFile("prompt-send-omit-terminal-call.md").formatted(getActionTitle());
+    return getMarkdownFile("prompt-send-omit-terminal-call.md");
   }
 
   @Override

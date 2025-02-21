@@ -1,8 +1,8 @@
-In this screen, you can influence the data what the synthetic provider will send to you. At the beginning of the
-scenario, you need to provide a number of parameters, which the provider will use to customize the requests and
+In this screen, you can influence the data what the synthetic service provider will send to you. At the beginning of the
+scenario, you need to provide a number of parameters, which the service provider will use to customize the requests and
 responses that it sends to your endpoint throughout the scenario.
 
-The synthetic provider uses the following parameters:
+The synthetic service provider uses the following parameters:
 
 * `portCallID` (mandatory): Copied into the `/portCallID` attribute of the Port Call and Terminal Call request.
 * `terminalCallID` (mandatory): Copied into the `/terminalCallID` attribute of both the Terminal Call and the Port Call

@@ -3,6 +3,8 @@ package org.dcsa.conformance.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -197,7 +199,7 @@ public abstract class AbstractComponentFactory {
                                                 roleName.equals(testedPartyRole)
                                                     ? "tested-party"
                                                     : "testing-counterparts"),
-                                    roleName));
+                                    URLEncoder.encode(roleName, StandardCharsets.UTF_8)));
                 if (isManual && roleName.equals(testedPartyRole))
                   roleCounterpartNode.put("inManualMode", true);
                 if (!isManual) {

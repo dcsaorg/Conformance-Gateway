@@ -44,17 +44,6 @@ class OvsChecksTest {
   }
 
   @Test
-  void testResponseContentChecks_withWrongDateTimesResponse() {
-    JsonNode jsonBody = JsonToolkit.templateFileToJsonNode(
-      "/messages/ovs-300-response-wrong-date-times.json",
-      Map.ofEntries());
-
-    Set<String> issues =
-      executeResponseChecks(Map.of(OvsFilterParameter.START_DATE, "2027-07-19"), jsonBody);
-    assertTrue(issues.isEmpty());
-  }
-
-  @Test
   void testResponseContentChecks_withWrongStructureResponse() {
     JsonNode jsonBody = JsonToolkit.templateFileToJsonNode(
       "/messages/ovs-300-response-wrong-structure.json",

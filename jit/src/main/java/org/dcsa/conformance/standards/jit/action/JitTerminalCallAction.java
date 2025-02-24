@@ -44,7 +44,7 @@ public class JitTerminalCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Terminal Call (PUT)";
+    return getMarkdownFile("prompt-send-terminal-call.md");
   }
 
   @Override

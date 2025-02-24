@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
@@ -28,8 +29,9 @@ public class JitOOBTimestampAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Process and accept an Out-of-Band request for a %s timestamp"
-        .formatted(timestampType));
+    return getMarkdownFile(
+        "prompt-process-oob-request.md",
+        Map.of("TIMESTAMP_TYPE_PLACEHOLDER", timestampType.name()));
   }
 
   @Override

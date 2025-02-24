@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -58,7 +56,7 @@ public class JsonToolkit {
 
   public static Map<String, ? extends Collection<String>> mapOfStringToStringCollectionFromJson(
       ArrayNode arrayNode) {
-    HashMap<String, Collection<String>> map = new HashMap<>();
+    Map<String, Collection<String>> map = new HashMap<>();
     StreamSupport.stream(arrayNode.spliterator(), false)
         .forEach(
             entryNode ->

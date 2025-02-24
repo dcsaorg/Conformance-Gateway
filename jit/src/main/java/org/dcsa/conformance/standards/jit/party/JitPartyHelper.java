@@ -278,18 +278,17 @@ public class JitPartyHelper {
     timestampNode.remove(JitProvider.IS_FYI);
     timestamps.add(timestampNode);
     persistentMap.save(JitGetType.TIMESTAMPS.name(), timestamps);
-    // TODO: deal with previous received timestamps with the same type.
   }
 
   public static ObjectNode getFileWithReplacedPlaceHolders(
       String fileType, DynamicScenarioParameters dsp) {
-    PortCallServiceTypeCode serviceType = dsp.portCallServiceTypeCode();
+    PortCallServiceTypeCode serviceTypeCode = dsp.portCallServiceTypeCode();
     String portCallPhaseTypeCode = "";
     String portCallServiceEventTypeCode = "";
-    if (serviceType != null) {
-      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType.name());
+    if (serviceTypeCode != null) {
+      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceTypeCode.name());
       portCallServiceEventTypeCode =
-          PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode(serviceType.name())
+          PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode(serviceTypeCode.name())
               .getFirst()
               .name();
     }
@@ -304,7 +303,7 @@ public class JitPartyHelper {
                     "TERMINAL_CALL_ID_PLACEHOLDER",
                     Objects.requireNonNullElse(dsp.terminalCallID(), ""),
                     "PORT_CALL_SERVICE_TYPE_CODE_PLACEHOLDER",
-                    serviceType != null ? serviceType.name() : "",
+                    serviceTypeCode != null ? serviceTypeCode.name() : "",
                     "PORT_CALL_SERVICE_ID_PLACEHOLDER",
                     Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
                     "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
@@ -313,8 +312,8 @@ public class JitPartyHelper {
                     portCallPhaseTypeCode,
                     "IS_FYI_PLACEHOLDER",
                     Boolean.toString(dsp.isFYI())));
-    // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
-    if (serviceType != null && portCallPhaseTypeCode.isEmpty())
+    // Some serviceTypeCode do not have a portCallPhaseTypeCode; remove it, since it is an enum.
+    if (serviceTypeCode != null && portCallPhaseTypeCode.isEmpty())
       node.remove("portCallPhaseTypeCode");
 
     // Only MOVES service type requires the Moves part of the request. Removing it from other types.

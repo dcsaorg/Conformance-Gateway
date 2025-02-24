@@ -21,7 +21,7 @@ public final class ConformanceApp {
         "arn:aws:acm:eu-north-1:468100668426:certificate/a6ea21c7-a709-406d-b0df-a3c3b0120672",
         "arn:aws:acm:eu-north-1:468100668426:certificate/00bd8fef-16a9-4c4e-800a-ea4e61ffc24e",
         "arn:aws:acm:us-east-1:468100668426:certificate/b3d816d1-8224-4256-85f5-057e2a3da9e7",
-        true);
+        false);
 
     new ConformanceStack(
         app,

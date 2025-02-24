@@ -54,7 +54,8 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
       case ACTIVE_REEFER -> "with Active Reefer";
       case NON_OPERATING_REEFER -> "with Non-operating Reefer";
       case REGULAR_NEGOTIABLE_BL -> "for Negotiable BL";
-      case REGULAR_CLAD -> "for Clad";
+      case REGULAR_CLAD ->
+          "for Clad (scenario where property `isCarriersAgentAtDestinationRequired` is required)";
     };
   }
 

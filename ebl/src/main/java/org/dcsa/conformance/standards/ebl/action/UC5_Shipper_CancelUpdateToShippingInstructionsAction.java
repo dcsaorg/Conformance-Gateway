@@ -38,15 +38,12 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
   @Override
   public String getHumanReadablePrompt() {
     var dsp = getDSP();
-    Map<String, String> replacementsMap =
-      Map.ofEntries(
-        Map.entry(
-          "REFERENCE",
-          this.useTDRef
-            ? getDSP().transportDocumentReference()
-            : getDSP().shippingInstructionsReference()));
     return getMarkdownHumanReadablePrompt(
-      replacementsMap, "prompt-shipper-uc5.md", "prompt-shipper-refresh-complete.md");
+        Map.of(
+            "REFERENCE",
+            this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()),
+        "prompt-shipper-uc5.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override

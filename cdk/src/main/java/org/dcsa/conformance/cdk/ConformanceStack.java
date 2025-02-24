@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import software.amazon.awscdk.BundlingOptions;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
@@ -399,8 +397,8 @@ public class ConformanceStack extends Stack {
             .build());
   }
 
-  private @NotNull Function createLambda(
-      String name, AssetCode assetCode, String handler, @Nullable Vpc vpc) {
+  private Function createLambda(
+      String name, AssetCode assetCode, String handler, Vpc vpc) {
     FunctionProps.Builder functionPropsBuilder =
         FunctionProps.builder()
             .functionName(name)

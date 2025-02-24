@@ -110,7 +110,7 @@ public class JitTimestampAction extends JitAction {
                   HttpMessageType.REQUEST,
                   validator));
         }
-        // Consumer sends requested timestamp
+        // Service Consumer sends requested timestamp
         return Stream.of(
             new UrlPathCheck(
                 JitRole::isConsumer,

@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.eblissuance.action;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -106,11 +107,11 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
   public String getHumanReadablePrompt() {
     String tdr = getTdrSupplier().get();
     var eblType = getDsp().eblType();
-    return ("Send an issuance request for %s")
-        .formatted(
-            tdr == null
-                ? "an eBL of type %s that has not yet been issued".formatted(eblType)
-                : "the eBL with transportDocumentReference '%s'".formatted(tdr));
+
+    return tdr == null
+        ? getMarkdownHumanReadablePrompt(
+            Map.of("EBL_TYPE", eblType.name()), "prompt-iss-reqres-ebltype.md")
+        : getMarkdownHumanReadablePrompt(Map.of("REFERENCE", tdr), "prompt-iss-reqres-tdr.md");
   }
 
   @Override

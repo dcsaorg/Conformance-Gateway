@@ -110,8 +110,11 @@ public class IssuanceRequestResponseAction extends IssuanceAction {
 
     return tdr == null
         ? getMarkdownHumanReadablePrompt(
-            Map.of("EBL_TYPE", eblType.name()), "prompt-iss-reqres-ebltype.md")
-        : getMarkdownHumanReadablePrompt(Map.of("REFERENCE", tdr), "prompt-iss-reqres-tdr.md");
+            Map.of("EBL_TYPE", eblType.name(), "RESPONSE_CODE", issuanceResponseCode.standardCode),
+            "prompt-iss-reqres-ebltype.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of("REFERENCE", tdr, "RESPONSE_CODE", issuanceResponseCode.standardCode),
+            "prompt-iss-reqres-tdr.md");
   }
 
   @Override

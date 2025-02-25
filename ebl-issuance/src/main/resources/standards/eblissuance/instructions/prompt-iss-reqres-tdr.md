@@ -1,4 +1,4 @@
-Send an issuance request for the eBL with transportDocumentReference REFERENCE
+Send an issuance request for the eBL with transportDocumentReference REFERENCE to get response code RESPONSE_CODE.
 
 Process an automatic response from the platform.
 

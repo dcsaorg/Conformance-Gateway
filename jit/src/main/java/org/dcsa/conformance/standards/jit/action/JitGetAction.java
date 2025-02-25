@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,8 @@ public class JitGetAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Get %s (GET) request".formatted(getType);
+    return getMarkdownFile(
+        "prompt-get-request.md", Map.of("GET_TYPE_PLACEHOLDER", getType.getName()));
   }
 
   @Override
@@ -125,7 +127,7 @@ public class JitGetAction extends JitAction {
                   HttpMessageType.RESPONSE,
                   validator));
         }
-        // Consumer sends request
+        // Service Consumer sends request
         return Stream.of(
             new UrlPathCheck(JitRole::isConsumer, getMatchedExchangeUuid(), getType.getUrlPath()),
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.GET),

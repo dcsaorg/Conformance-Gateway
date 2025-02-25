@@ -34,7 +34,7 @@ public class JitPortCallAction extends JitAction {
         getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    // Update DSP with the Port Call Service response from the service provider, or create a new one.
     updateDspFromResponse(requestJsonNode);
   }
 
@@ -50,7 +50,7 @@ public class JitPortCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Port Call (PUT)";
+    return getMarkdownFile("prompt-send-port-call.md");
   }
 
   @Override

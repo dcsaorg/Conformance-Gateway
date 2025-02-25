@@ -1,6 +1,10 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.ActionCheck;
@@ -10,17 +14,6 @@ import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
 import org.dcsa.conformance.standards.ovs.party.OvsRole;
 import org.dcsa.conformance.standards.ovs.party.SuppliedScenarioParameters;
-
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @UtilityClass
@@ -51,36 +44,6 @@ public class OvsChecks {
               validationError ->
                 validationErrors.add(
                   "Schedule Param Value Validation failed: %s"
-                    .formatted(validationError)));
-          return validationErrors;
-        }));
-
-    checks.add(
-      JsonAttribute.customValidator(
-        "Check eventDateTime is greater than startDate filter parameter if present",
-        body -> {
-          Set<String> validationErrors = new LinkedHashSet<>();
-          validateDate(
-            body, filterParametersMap, OvsFilterParameter.START_DATE, LocalDate::isBefore)
-            .forEach(
-              validationError ->
-                validationErrors.add(
-                  "Start Date EventDateTime validation failed: %s"
-                    .formatted(validationError)));
-          return validationErrors;
-        }));
-
-    checks.add(
-      JsonAttribute.customValidator(
-        "Check eventDateTime is less than endDate filter parameter if present",
-        body -> {
-          Set<String> validationErrors = new LinkedHashSet<>();
-          validateDate(
-            body, filterParametersMap, OvsFilterParameter.END_DATE, LocalDate::isAfter)
-            .forEach(
-              validationError ->
-                validationErrors.add(
-                  "EndDate EventDateTime validation failed: %s"
                     .formatted(validationError)));
           return validationErrors;
         }));
@@ -184,62 +147,6 @@ public class OvsChecks {
     return validationErrors;
   }
 
-  public Set<String> validateDate(
-      JsonNode body,
-      Map<OvsFilterParameter, String> filterParametersMap,
-      OvsFilterParameter dateParameter,
-      BiPredicate<LocalDate, LocalDate> dateComparison) {
-
-    Optional<Map.Entry<OvsFilterParameter, String>> dateParam =
-        filterParametersMap.entrySet().stream()
-            .filter(e -> e.getKey().equals(dateParameter))
-            .findFirst();
-
-    if (dateParam.isEmpty()) {
-      return Set.of();
-    }
-
-    LocalDate expectedDate =
-        LocalDate.parse(dateParam.get().getValue().trim(), DateTimeFormatter.ISO_DATE);
-
-    Set<String> errors =
-        findMatchingNodes(body, "*/vesselSchedules/*/transportCalls/*/timestamps")
-            .flatMap(
-                timestampsNode ->
-                    StreamSupport.stream(timestampsNode.getValue().spliterator(), false)
-                        .filter(
-                            eventDateTimeNode ->
-                                !eventDateTimeNode.isMissingNode() && !eventDateTimeNode.isNull())
-                        .filter(
-                            timestampNode -> {
-                              LocalDate eventDateTime =
-                                  stringToISODateTime(timestampNode.path("eventDateTime").asText());
-                              if (eventDateTime != null) {
-                                return dateComparison.test(eventDateTime, expectedDate);
-                              }
-                              return false;
-                            }))
-            .map(
-                timestampNode ->
-                    "Event DateTime "
-                        + timestampNode.path("eventDateTime").asText()
-                        + (dateParameter == OvsFilterParameter.START_DATE
-                            ? " is before the startDate: "
-                            : " is after the endDate: ")
-                        + expectedDate)
-            .collect(Collectors.toSet());
-
-    return errors.isEmpty() ? Set.of() : errors;
-  }
-
-  private static LocalDate stringToISODateTime(String dateTimeString) {
-    try {
-      return OffsetDateTime.parse(dateTimeString, DateTimeFormatter.ISO_DATE_TIME).toLocalDate();
-    } catch (DateTimeParseException e) {
-      log.error("Failed to parse date time string: {}", dateTimeString, e);
-      return null;
-    }
-  }
 
   public Set<String> validateUniqueTransportCallReference(JsonNode body) {
     Set<String> errors = new HashSet<>();

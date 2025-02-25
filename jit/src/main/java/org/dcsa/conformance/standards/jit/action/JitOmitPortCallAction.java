@@ -25,7 +25,7 @@ public class JitOmitPortCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send an %s (POST) request".formatted(getActionTitle());
+    return getMarkdownFile("prompt-send-omit-port-call.md");
   }
 
   @Override

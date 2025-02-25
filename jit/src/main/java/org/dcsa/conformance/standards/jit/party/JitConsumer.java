@@ -112,7 +112,7 @@ public class JitConsumer extends ConformanceParty {
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
     if (timestampType != JitTimestampType.REQUESTED) {
       throw new UserFacingException(
-          "Only REQUESTED timestamps are supported for a Consumer party.");
+          "Only REQUESTED timestamps are supported for a Service Consumer party.");
     }
 
     DynamicScenarioParameters dsp =

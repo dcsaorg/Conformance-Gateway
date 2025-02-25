@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.ebl.party;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.NonNull;
 import lombok.With;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
@@ -11,7 +10,7 @@ import org.dcsa.conformance.standards.ebl.checks.ScenarioType;
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DynamicScenarioParameters(
-    @NonNull ScenarioType scenarioType,
+    ScenarioType scenarioType,
     String shippingInstructionsReference,
     String transportDocumentReference,
     JsonNode shippingInstructions,

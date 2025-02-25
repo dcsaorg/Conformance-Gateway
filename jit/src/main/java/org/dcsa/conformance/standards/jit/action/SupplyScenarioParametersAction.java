@@ -49,7 +49,7 @@ public class SupplyScenarioParametersAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters required by the scenario:";
+    return getMarkdownFile("prompt-csp.md");
   }
 
   @Override
@@ -72,7 +72,7 @@ public class SupplyScenarioParametersAction extends JitAction {
         new DynamicScenarioParameters(
             null,
             null,
-            suppliedScenarioParameters.serviceType(),
+            suppliedScenarioParameters.serviceTypeCode(),
             suppliedScenarioParameters.portCallID(),
             suppliedScenarioParameters.terminalCallID(),
             suppliedScenarioParameters.portCallServiceID(),

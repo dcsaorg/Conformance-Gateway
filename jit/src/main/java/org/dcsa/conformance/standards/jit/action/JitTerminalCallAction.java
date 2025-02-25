@@ -34,7 +34,7 @@ public class JitTerminalCallAction extends JitAction {
         getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    // Update DSP with the Port Call Service response from the service provider, or create a new one.
     updateDspFromResponse(requestJsonNode);
   }
 

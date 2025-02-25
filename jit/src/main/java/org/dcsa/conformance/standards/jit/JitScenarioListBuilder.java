@@ -744,7 +744,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroupGET1(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "1. PC-TC-S-V Provider answering GET calls",
+        "1. PC-TC-S-V Service Provider answering GET calls",
         supplyScenarioParameters(context, ANY)
             .thenEither(
                 portCall(context).then(getPortCallActions(context, false)),
@@ -766,7 +766,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         JitChecks.PORT_CALL_SERVICE_ID,
                         false))));
     scenarioList.put(
-        "2. PC-TC-S-V Consumer answering GET calls",
+        "2. PC-TC-S-V Service Consumer answering GET calls",
         supplyScenarioParameters(context, ANY)
             .thenEither(
                 portCall(context).then(getPortCallActions(context, true)),
@@ -789,7 +789,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         true))));
 
     scenarioList.put(
-        "3. PC-TC-S-V-A-ERP-A Provider answering GET calls",
+        "3. PC-TC-S-V-A-ERP-A Service Provider answering GET calls",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -802,7 +802,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                             .then(getTimestampActions(context, false))))));
 
     scenarioList.put(
-        "4. PC-TC-S-V-A-ERP-A Consumer answering GET calls",
+        "4. PC-TC-S-V-A-ERP-A Service Consumer answering GET calls",
         supplyScenarioParameters(context, FULL_ERP)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -814,7 +814,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         sendTimestamp(context, ACTUAL).then(getTimestampActions(context, true))))));
 
     scenarioList.put(
-        "5. PC-TC-S-V-A Provider answering GET calls",
+        "5. PC-TC-S-V-A Service Provider answering GET calls",
         supplyScenarioParameters(context, S_A_PATTERN)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -840,7 +840,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                 false,
                                                 1)))))));
     scenarioList.put(
-        "6. PC-TC-S-V-A Consumer answering GET calls",
+        "6. PC-TC-S-V-A Service Consumer answering GET calls",
         supplyScenarioParameters(context, S_A_PATTERN)
             .thenEither(
                 sendPC_TC_SC_VS(
@@ -866,7 +866,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                                 true,
                                                 1)))))));
     scenarioList.put(
-        "7. Moves service type Provider answering GET calls",
+        "7. Moves service type Service Provider answering GET calls",
         supplyScenarioParameters(context, GIVEN)
             .thenEither(
                 portCall(context)
@@ -876,7 +876,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                                 serviceCall(context, MOVES, GIVEN)
                                     .then(getServiceCallActions(context, false))))));
     scenarioList.put(
-        "8. Moves service type Consumer answering GET calls",
+        "8. Moves service type Service Consumer answering GET calls",
         supplyScenarioParameters(context, GIVEN)
             .thenEither(
                 portCall(context)

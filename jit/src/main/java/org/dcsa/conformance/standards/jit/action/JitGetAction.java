@@ -127,7 +127,7 @@ public class JitGetAction extends JitAction {
                   HttpMessageType.RESPONSE,
                   validator));
         }
-        // Consumer sends request
+        // Service Consumer sends request
         return Stream.of(
             new UrlPathCheck(JitRole::isConsumer, getMatchedExchangeUuid(), getType.getUrlPath()),
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.GET),

@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -158,7 +160,9 @@ public abstract class ConformanceParty implements StatefulEntity {
         new ConformanceRequest(
             "POST",
             partyConfiguration.getOrchestratorUrl()
-                + "/party/%s/input".formatted(partyConfiguration.getName()),
+                + "/party/%s/input"
+                    .formatted(
+                        URLEncoder.encode(partyConfiguration.getName(), StandardCharsets.UTF_8)),
             Collections.emptyMap(),
             new ConformanceMessage(
                 partyConfiguration.getName(),
@@ -315,7 +319,9 @@ public abstract class ConformanceParty implements StatefulEntity {
     URI uri =
         URI.create(
             partyConfiguration.getOrchestratorUrl()
-                + "/party/%s/prompt/json".formatted(partyConfiguration.getName()));
+                + "/party/%s/prompt/json"
+                    .formatted(
+                        URLEncoder.encode(partyConfiguration.getName(), StandardCharsets.UTF_8)));
     log.info("ConformanceParty.getPartyPrompt() calling: %s".formatted(uri));
     // Allow long debugging sessions or slow business logic at customer's side
     HttpRequest.Builder httpRequestBuilder =

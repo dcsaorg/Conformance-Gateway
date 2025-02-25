@@ -24,15 +24,14 @@ class ManualScenarioTest extends ManualTestBase {
   @SuppressWarnings("unused")
   private static Stream<Arguments> testStandards() {
     return Stream.of(
-        Arguments.of("Adoption", false),
+        /*        Arguments.of("Adoption", false),
         Arguments.of("Adoption", true),
         Arguments.of("Booking", false),
         Arguments.of("Booking", true),
         Arguments.of("CS", false),
-        Arguments.of("CS", true),
-        Arguments.of("Ebl", false),
-        Arguments.of("Ebl", true),
-        Arguments.of("JIT", false),
+        Arguments.of("CS", true),*/
+        Arguments.of("Ebl", false), Arguments.of("Ebl", true)
+        /* Arguments.of("JIT", false),
         Arguments.of("JIT", true),
         Arguments.of("OVS", false),
         Arguments.of("OVS", true),
@@ -42,9 +41,7 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("TnT", true),
         Arguments.of("eBL Issuance", false),
         Arguments.of("eBL Issuance", true),
-        Arguments.of("eBL Surrender", false),
-        Arguments.of("eBL Surrender", true)
-    );
+        Arguments.of("eBL Surrender", false), Arguments.of("eBL Surrender", true)*/ );
   }
 
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")

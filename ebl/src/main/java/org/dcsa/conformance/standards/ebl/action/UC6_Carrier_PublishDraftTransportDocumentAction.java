@@ -4,7 +4,6 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -36,12 +35,15 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       return getMarkdownHumanReadablePrompt(
           null, "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
     }
+    String reference =
+        getDSP().shippingInstructionsReference() != null
+            ? getDSP().shippingInstructionsReference()
+            : getDSP().transportDocumentReference();
     return getMarkdownHumanReadablePrompt(
-        Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+        Map.of("REFERENCE", reference),
         "prompt-carrier-uc6-si-td.md",
         "prompt-carrier-notification.md");
   }
-
 
   @Override
   protected void doHandleExchange(ConformanceExchange exchange) {

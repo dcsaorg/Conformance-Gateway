@@ -18,8 +18,6 @@ public class UCX_Carrier_TDOnlyProcessOutOfBandUpdateOrAmendmentRequestDraftTran
   public String getHumanReadablePrompt() {
     return getMarkdownHumanReadablePrompt(
         Map.of("REFERENCE", getDSP().transportDocumentReference()), "prompt-carrier-oob.md");
-    /*    return ("Process and accept an out of band request for a change to the TD with reference %s"
-    .formatted(getDspSupplier().get().transportDocumentReference()));*/
   }
 
   @Override

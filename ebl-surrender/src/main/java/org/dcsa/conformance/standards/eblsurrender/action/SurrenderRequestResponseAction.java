@@ -5,6 +5,7 @@ import static org.dcsa.conformance.standards.eblsurrender.SurrenderChecks.surren
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -69,11 +70,13 @@ public class SurrenderRequestResponseAction extends EblSurrenderAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send a surrender request for %s "
-            + "for the eBL with the transport document reference '%s'")
-        .formatted(
+    return getMarkdownHumanReadablePrompt(
+        Map.of(
+            "SURRENDER_TYPE",
             forAmendment ? "amendment" : "delivery",
-            sspSupplier.get().transportDocumentReference());
+            "REFERENCE",
+            sspSupplier.get().transportDocumentReference()),
+        "prompt-surrender-reqres.md");
   }
 
   @Override

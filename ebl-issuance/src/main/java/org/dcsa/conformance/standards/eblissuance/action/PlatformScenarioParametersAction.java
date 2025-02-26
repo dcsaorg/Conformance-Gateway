@@ -2,11 +2,10 @@ package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import lombok.Getter;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
 
@@ -65,8 +64,8 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters that the synthetic carrier should use when constructing an issuance request, such that when your platform system receives the issuance request, it sends back an asynchronous response with the code "
-        + responseCode.standardCode;
+    return getMarkdownHumanReadablePrompt(
+        Map.of("RESPONSE_CODE", responseCode.standardCode), "prompt-platform-psp.md");
   }
 
   @Override

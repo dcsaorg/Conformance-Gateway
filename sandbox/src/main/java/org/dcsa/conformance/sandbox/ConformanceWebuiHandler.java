@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -156,7 +158,11 @@ public class ConformanceWebuiHandler {
 
     sandboxPartyCounterpartConfig.setUrl(
         "%s/conformance/sandbox/%s/party/%s/api"
-            .formatted(environmentBaseUrl, sandboxId, sandboxPartyCounterpartConfig.getName()));
+            .formatted(
+                environmentBaseUrl,
+                sandboxId,
+                URLEncoder.encode(
+                    sandboxPartyCounterpartConfig.getName(), StandardCharsets.UTF_8)));
     sandboxPartyCounterpartConfig.setAuthHeaderName(sandboxConfiguration.getAuthHeaderName());
     sandboxPartyCounterpartConfig.setAuthHeaderValue(sandboxConfiguration.getAuthHeaderValue());
 

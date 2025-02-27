@@ -12,7 +12,7 @@ public record SuppliedScenarioParameters(
     String portCallID,
     String terminalCallID,
     String portCallServiceID,
-    PortCallServiceTypeCode serviceType)
+    PortCallServiceTypeCode serviceTypeCode)
     implements ScenarioParameters {
 
   public static SuppliedScenarioParameters fromJson(JsonNode jsonNode) {

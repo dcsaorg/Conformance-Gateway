@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum JitRole {
-  PROVIDER("Provider"),
-  CONSUMER("Consumer");
+  PROVIDER("Service Provider"),
+  CONSUMER("Service Consumer");
 
   private final String configName;
 

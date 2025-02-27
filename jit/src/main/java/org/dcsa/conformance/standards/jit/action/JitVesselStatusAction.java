@@ -26,7 +26,7 @@ public class JitVesselStatusAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Vessel Status (PUT)";
+    return getMarkdownFile("prompt-send-vessel-status.md");
   }
 
   @Override

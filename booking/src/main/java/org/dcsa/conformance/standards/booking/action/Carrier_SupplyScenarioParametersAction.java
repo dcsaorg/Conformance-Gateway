@@ -2,11 +2,9 @@ package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.NonNull;
-import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.standards.booking.checks.ScenarioType;
 import org.dcsa.conformance.standards.booking.party.BookingCarrier;
 import org.dcsa.conformance.standards.booking.party.CarrierScenarioParameters;

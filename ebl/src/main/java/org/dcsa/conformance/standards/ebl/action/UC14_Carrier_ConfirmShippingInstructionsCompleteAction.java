@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -21,8 +22,10 @@ public class UC14_Carrier_ConfirmShippingInstructionsCompleteAction extends Stat
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC14: Confirm shipping instructions with reference %s is complete."
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+        "prompt-carrier-uc14.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

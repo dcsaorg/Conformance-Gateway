@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,14 @@ public class UC3ShipperSubmitUpdatedShippingInstructionsAction extends StateChan
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC3: Submit an updated shipping instructions request using the following parameters:");
+    return getMarkdownHumanReadablePrompt(
+        Map.of(
+            "REFERENCE",
+            this.useTDRef
+                ? getDSP().transportDocumentReference()
+                : getDSP().shippingInstructionsReference()),
+        "prompt-shipper-uc3.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override

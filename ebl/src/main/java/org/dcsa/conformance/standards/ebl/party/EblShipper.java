@@ -201,8 +201,8 @@ public class EblShipper extends ConformanceParty {
     persistentMap.save(shippingInstructionsReference, updatedShippingInstructions);
 
     addOperatorLogEntry(
-      "Sent a booking request with the parameters: %s"
-        .formatted(carrierScenarioParameters.toJson()));
+        "Sent a shipping instructions request with the parameters: %s"
+            .formatted(carrierScenarioParameters.toJson()));
   }
 
   private void sendUpdatedShippingInstructionsRequest(JsonNode actionPrompt) {

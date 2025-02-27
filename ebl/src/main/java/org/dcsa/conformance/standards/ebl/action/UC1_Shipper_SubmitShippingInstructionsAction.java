@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,30 @@ public class UC1_Shipper_SubmitShippingInstructionsAction extends StateChangingS
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC1: Submit a shipping instructions using the following parameters:");
+    return getMarkdownHumanReadablePrompt(
+        Map.of("SCENARIO_TYPE", getScenarioType()),
+        "prompt-shipper-uc1.md",
+        "prompt-shipper-refresh-complete.md");
+  }
+
+  private String getScenarioType() {
+    return switch (getDSP().scenarioType()) {
+      case REGULAR_2C_2U_1E ->
+          "with 2 Commodities, 2 Utilized transport equipments and 1 Equipment";
+      case REGULAR_2C_2U_2E ->
+          "with  2 Commodities, 2 Utilized transport equipments and 2 Equipments";
+      case REGULAR_NO_COMMODITY_SUBREFERENCE -> "with No Commodity Subreference";
+      case REGULAR_SWB_SOC_AND_REFERENCES -> "for Regular SWB and with SOC References";
+      case REGULAR_SWB_AMF -> "for Regular SWB with Advance Manifest Filing";
+      case DG -> "with Dangerous Goods";
+      case REGULAR_SWB -> "for Regular SWB";
+      case REGULAR_STRAIGHT_BL -> "for Regular Straight BL";
+      case ACTIVE_REEFER -> "with Active Reefer";
+      case NON_OPERATING_REEFER -> "with Non-operating Reefer";
+      case REGULAR_NEGOTIABLE_BL -> "for Negotiable BL";
+      case REGULAR_CLAD ->
+          "for Clad (scenario where property `isCarriersAgentAtDestinationRequired` is required)";
+    };
   }
 
   @Override

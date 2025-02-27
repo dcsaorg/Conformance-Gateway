@@ -4,15 +4,19 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.EBLChecks;
@@ -71,6 +75,21 @@ public abstract class EblAction extends ConformanceAction {
     if (dspNode != null) {
       dspReference.set(DynamicScenarioParameters.fromJson(dspNode));
     }
+  }
+
+  protected DynamicScenarioParameters getDSP() {
+    return getDspSupplier().get();
+  }
+
+  protected String getMarkdownHumanReadablePrompt(
+      Map<String, String> replacementsMap, String... fileNames) {
+
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/ebl/instructions/" + fileName, replacementsMap))
+        .collect(Collectors.joining());
   }
 
   protected EblAction getPreviousEblAction() {

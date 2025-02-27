@@ -36,11 +36,12 @@ public class AUC_Shipper_SendOutOfOrderSIMessageAction extends StateChangingSIAc
   @Override
   public String getHumanReadablePrompt() {
     var dsp = getDspSupplier().get();
-    return ("AUC: Send an out of order but otherwise valid message of type %s (%s) to the document reference %s".formatted(
-      outOfOrderMessageType.name(),
-      outOfOrderMessageType.getUC(),
-      useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()
-    ));
+    // no markdown instructions needed: never expected to be performed by a human operator
+    return ("AUC: Send an out of order but otherwise valid message of type %s (%s) to the document reference %s"
+        .formatted(
+            outOfOrderMessageType.name(),
+            outOfOrderMessageType.getUC(),
+            useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()));
   }
 
   @Override

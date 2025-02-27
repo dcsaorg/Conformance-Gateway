@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -22,8 +24,10 @@ public class UC2_Carrier_RequestUpdateToShippingInstructionsAction extends State
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC2: Request update to the shipping instructions with shipping instructions reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+        "prompt-carrier-uc2.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -33,8 +34,10 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the TD with reference '%s'"
-        .formatted(getDspSupplier().get().transportDocumentReference());
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-shipper-get-td.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override

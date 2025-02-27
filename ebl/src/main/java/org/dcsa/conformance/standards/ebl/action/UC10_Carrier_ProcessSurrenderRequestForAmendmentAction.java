@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -26,11 +27,15 @@ public class UC10_Carrier_ProcessSurrenderRequestForAmendmentAction extends Stat
   @Override
   public String getHumanReadablePrompt() {
     if (acceptAmendmentRequest) {
-      return ("UC10a: Accept surrender request for amendment for transport document with reference %s"
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+      return getMarkdownHumanReadablePrompt(
+          Map.of("REFERENCE", getDSP().transportDocumentReference()),
+          "prompt-carrier-uc10a.md",
+          "prompt-carrier-notification.md");
     }
-    return ("UC10r: Reject surrender request for amendment for transport document with reference %s"
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-carrier-uc10r.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

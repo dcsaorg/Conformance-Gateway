@@ -491,4 +491,44 @@ public class ConformanceOrchestrator implements StatefulEntity {
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Manual counterpart not found"));
   }
+
+  public ObjectNode getCurrentActionExchanges(String scenarioId) {
+    ConformanceScenario scenario = _getScenario(UUID.fromString(scenarioId));
+    boolean isActive = scenario.getId().equals(currentScenarioId);
+    if (!isActive) {
+      _loadInactiveScenario(scenario);
+    }
+    ObjectNode exchangesNode = OBJECT_MAPPER.createObjectNode();
+    ConformanceAction nextAction = scenario.peekNextAction();
+    if (nextAction == null) {
+      return exchangesNode;
+    }
+    UUID matchedExchangeUuid = nextAction.getMatchedExchangeUuid();
+    UUID matchedNotificationExchangeUuid = nextAction.getMatchedNotificationExchangeUuid();
+    if (matchedExchangeUuid != null || matchedNotificationExchangeUuid != null) {
+      List<ConformanceExchange> conformanceExchanges =
+          this.trafficRecorder
+              .getTrafficByScenarioRun()
+              .get(latestRunIdsByScenarioId.get(scenario.getId()).toString());
+      if (matchedExchangeUuid != null) {
+        exchangesNode.set(
+            "primaryExchange",
+            conformanceExchanges.stream()
+                .filter(exchange -> exchange.getUuid().equals(matchedExchangeUuid))
+                .findFirst()
+                .orElseThrow()
+                .toJson());
+      }
+      if (matchedNotificationExchangeUuid != null) {
+        exchangesNode.set(
+            "secondaryExchange",
+            conformanceExchanges.stream()
+                .filter(exchange -> exchange.getUuid().equals(matchedNotificationExchangeUuid))
+                .findFirst()
+                .orElseThrow()
+                .toJson());
+      }
+    }
+    return exchangesNode;
+  }
 }

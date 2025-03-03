@@ -520,6 +520,20 @@ public class ConformanceSandbox {
     return OBJECT_MAPPER.createObjectNode();
   }
 
+  public static ObjectNode getCurrentActionExchanges(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
+    AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "getting from sandbox %s and scenario %s the current action exchanges"
+                .formatted(sandboxId, scenarioId),
+            orchestrator -> resultReference.set(orchestrator.getCurrentActionExchanges(scenarioId)))
+        .run();
+    return resultReference.get();
+  }
+
   private static ConformanceWebResponse _handlePartyNotification(
       ConformancePersistenceProvider persistenceProvider,
       Consumer<JsonNode> deferredSandboxTaskConsumer,

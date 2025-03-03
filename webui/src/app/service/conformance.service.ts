@@ -158,4 +158,12 @@ export class ConformanceService {
       externalPartyEndpointUriOverrides,
     });
   }
+
+  async getCurrentActionExchanges(sandboxId: string, scenarioId: string): Promise<any> {
+    return await this.apiService.call({
+      operation: "getCurrentActionExchanges",
+      sandboxId,
+      scenarioId,
+    });
+  }
 }

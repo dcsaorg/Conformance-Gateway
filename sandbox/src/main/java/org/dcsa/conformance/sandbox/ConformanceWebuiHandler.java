@@ -90,6 +90,7 @@ public class ConformanceWebuiHandler {
           case "handleActionInput" -> _handleActionInput(userId, requestNode);
           case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
           case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
+          case "getCurrentActionExchanges" -> _getCurrentActionExchanges(userId, requestNode);
           default -> throw new UnsupportedOperationException(operation);
         };
     log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
@@ -568,5 +569,12 @@ public class ConformanceWebuiHandler {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
         persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+  }
+
+  private JsonNode _getCurrentActionExchanges(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getCurrentActionExchanges(
+        persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 }

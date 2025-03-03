@@ -72,7 +72,6 @@ public class CsGetRoutingsAction extends CsAction {
             CsChecks.getPayloadChecksForPtp(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                sspSupplier,
                 getDspSupplier(),
                 previousAction instanceof CsGetRoutingsAction));
       }

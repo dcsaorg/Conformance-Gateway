@@ -448,7 +448,9 @@ public class ConformanceWebuiHandler {
                     value.get("name").asText().toLowerCase(),
                     _loadSandbox(userId, key.substring("sandbox#".length()), false)));
     ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
-    sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
+    sortedSandboxesByLowercaseName.values().stream()
+        .filter(sandboxNode -> !sandboxNode.path("isAuto").asBoolean())
+        .forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
@@ -464,6 +466,13 @@ public class ConformanceWebuiHandler {
 
     SandboxConfiguration sandboxConfiguration =
       ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+
+    if (Arrays.stream(sandboxConfiguration.getCounterparts())
+        .noneMatch(CounterpartConfiguration::isInManualMode)) {
+      // just a flag to filter them out of the "all sandboxes" list
+      return OBJECT_MAPPER.createObjectNode().put("isAuto", true);
+    }
+
     sandboxNode.put("standardName", sandboxConfiguration.getStandard().getName());
     sandboxNode.put("standardVersion", sandboxConfiguration.getStandard().getVersion());
     sandboxNode.put("scenarioSuite", sandboxConfiguration.getScenarioSuite());

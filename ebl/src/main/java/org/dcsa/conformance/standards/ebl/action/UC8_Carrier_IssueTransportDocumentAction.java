@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -22,8 +24,10 @@ public class UC8_Carrier_IssueTransportDocumentAction extends StateChangingSIAct
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC8: Issue transport document with transport document reference %s"
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-carrier-uc8.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

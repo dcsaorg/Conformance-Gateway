@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -22,8 +24,10 @@ public class UC11v_Carrier_VoidTransportDocumentAction extends StateChangingSIAc
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC11v: Void original transport document with reference %s."
-        .formatted(getDspSupplier().get().transportDocumentReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-carrier-uc11v.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

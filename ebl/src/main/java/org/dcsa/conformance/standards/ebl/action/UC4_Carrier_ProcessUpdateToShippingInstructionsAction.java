@@ -1,6 +1,8 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -30,11 +32,15 @@ public class UC4_Carrier_ProcessUpdateToShippingInstructionsAction extends State
   @Override
   public String getHumanReadablePrompt() {
     if (acceptChanges) {
-      return ("UC4a: Accept updated shipping instructions with document reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+      return getMarkdownHumanReadablePrompt(
+          Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+          "prompt-carrier-uc4a.md",
+          "prompt-carrier-notification.md");
     }
-    return ("UC4d: Decline updated shipping instructions with document reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().shippingInstructionsReference()),
+        "prompt-carrier-uc4d.md",
+        "prompt-carrier-notification.md");
   }
 
   @Override

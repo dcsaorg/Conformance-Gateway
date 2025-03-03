@@ -60,7 +60,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters required by the scenario using the following format:";
+    return getMarkdownHumanReadablePrompt(null, "prompt-carrier-supply-csp.md");
   }
 
   @Override

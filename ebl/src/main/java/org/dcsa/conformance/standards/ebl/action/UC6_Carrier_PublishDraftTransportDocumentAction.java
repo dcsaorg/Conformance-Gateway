@@ -1,7 +1,10 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
@@ -9,10 +12,9 @@ import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Getter
 public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangingSIAction {
+  public static final String ACTION_TITLE = "UC6";
   private final JsonSchemaValidator notificationSchemaValidator;
   private final boolean skipSI;
 
@@ -22,7 +24,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
       EblAction previousAction,
       JsonSchemaValidator notificationSchemaValidator,
       boolean skipSI) {
-    super(carrierPartyName, shipperPartyName, previousAction, "UC6", 204);
+    super(carrierPartyName, shipperPartyName, previousAction, ACTION_TITLE, 204);
     this.notificationSchemaValidator = notificationSchemaValidator;
     this.skipSI = skipSI;
   }
@@ -30,12 +32,18 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   @Override
   public String getHumanReadablePrompt() {
     if (skipSI) {
-      return "UC6: Publish draft transport document matching the scenario parameters provided in the previous step and provide its transport document reference here";
+      return getMarkdownHumanReadablePrompt(
+          null, "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
     }
-    return ("UC6: Publish draft transport document for shipping instructions with reference %s"
-        .formatted(getDspSupplier().get().shippingInstructionsReference()));
+    String reference =
+        getDSP().shippingInstructionsReference() != null
+            ? getDSP().shippingInstructionsReference()
+            : getDSP().transportDocumentReference();
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", reference),
+        "prompt-carrier-uc6-si-td.md",
+        "prompt-carrier-notification.md");
   }
-
 
   @Override
   protected void doHandleExchange(ConformanceExchange exchange) {

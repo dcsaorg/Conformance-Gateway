@@ -7,6 +7,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -75,8 +78,14 @@ class SeleniumTest extends SeleniumTestBase {
   @Test
   @Disabled("Only for debugging")
   void testOnlyOneSpecificScenario() {
-//    try {
-      createSandboxesAndRunGroups(new Standard("Booking", null), "2.0.0", "Conformance", "Carrier");
+    //    try {
+    createSandboxesAndRunGroups(
+        new Standard(EblStandard.INSTANCE.getName(), null),
+        EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet().stream()
+            .findFirst()
+            .orElseThrow(),
+        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+        EblRole.CARRIER.getConfigName());
 //    } catch (Exception e) {
 //      waitForAsyncCalls(5 * 60_000);
 //    }

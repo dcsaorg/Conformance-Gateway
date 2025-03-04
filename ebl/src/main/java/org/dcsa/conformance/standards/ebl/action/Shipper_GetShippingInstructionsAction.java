@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -75,12 +76,17 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
   @Override
   public String getHumanReadablePrompt() {
     var dsp = getDspSupplier().get();
-    var documentReference = this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference();
-    if (documentReference == null) {
-      throw new IllegalStateException("Missing document reference for get SI");
-    }
-    return "GET the SI with reference '%s'"
-        .formatted(documentReference);
+    Map<String, String> replacementsMap =
+        Map.ofEntries(
+            Map.entry(
+                "REFERENCE",
+                this.useTDRef
+                    ? dsp.transportDocumentReference()
+                    : dsp.shippingInstructionsReference()),
+            Map.entry(
+                "ORIGINAL_OR_AMENDED_PLACEHOLDER", requestAmendedStatus ? "AMENDED" : "ORIGINAL"));
+    return getMarkdownHumanReadablePrompt(
+        replacementsMap, "prompt-shipper-get.md", "prompt-shipper-refresh-complete.md");
   }
 
   protected void doHandleExchange(ConformanceExchange exchange) {

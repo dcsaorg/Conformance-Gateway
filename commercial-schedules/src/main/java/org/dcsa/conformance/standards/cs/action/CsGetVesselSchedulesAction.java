@@ -66,7 +66,6 @@ public class CsGetVesselSchedulesAction extends CsAction {
             CsChecks.getPayloadChecksForVs(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
-                sspSupplier,
                 getDspSupplier(),
                 previousAction instanceof CsGetVesselSchedulesAction));
       }

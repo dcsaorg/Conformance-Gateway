@@ -22,9 +22,9 @@ import org.dcsa.conformance.standards.ebl.party.ShippingInstructionsStatus;
 import org.dcsa.conformance.standards.ebl.party.TransportDocumentStatus;
 
 @Slf4j
-class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
-  static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
-  static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
+public class EblScenarioListBuilder extends ScenarioListBuilder<EblScenarioListBuilder> {
+  public static final String SCENARIO_SUITE_CONFORMANCE_SI_ONLY = "Conformance SI-only";
+  public static final String SCENARIO_SUITE_CONFORMANCE_TD_ONLY = "Conformance TD-only";
   static final String SCENARIO_SUITE_RI = "Reference Implementation";
 
   static final Set<String> SCENARIOS = Set.of(

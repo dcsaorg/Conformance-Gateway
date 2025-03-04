@@ -4,6 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -51,9 +52,12 @@ public class SupplyScenarioParametersAction extends ConformanceAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    String responseAction = response.equals("SURR")?"accept":"reject";
-    return "Use the following format to provide the transport document reference and additional info "
-        + "of a "+ eblType +" for which your party can "+responseAction+ " a surrender request:";
+    String responseAction = response.equals("SURR") ? "accept" : "reject";
+    return EblSurrenderAction.getMarkdownHumanReadablePrompt(
+        Map.of(
+            "EBL_TYPE", eblType,
+            "RESPONSE", responseAction),
+        "prompt-surrender-ssp.md");
   }
 
   @Override

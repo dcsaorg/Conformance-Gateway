@@ -43,10 +43,10 @@ public class JitPartyHelper {
       response.add(terminalCall);
       jitParty.addOperatorLogEntry("Handled GET Terminal Calls request accepted.");
     } else if (request.url().contains(JitGetType.PORT_CALL_SERVICES.getUrlPath())) {
-      ObjectNode portServiceCall =
+      ObjectNode portCallService =
           (ObjectNode) persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
-      portServiceCall.remove(JitProvider.IS_FYI);
-      response.add(portServiceCall);
+      portCallService.remove(JitProvider.IS_FYI);
+      response.add(portCallService);
       jitParty.addOperatorLogEntry("Handled GET Port Service Calls request accepted.");
     } else if (request.url().contains(JitGetType.VESSEL_STATUSES.getUrlPath())) {
       ObjectNode vesselStatusCall =
@@ -56,7 +56,7 @@ public class JitPartyHelper {
       jitParty.addOperatorLogEntry("Handled GET Vessel Status Calls request accepted.");
     } else if (request.url().contains(JitGetType.TIMESTAMPS.getUrlPath())) {
       ArrayNode timestampCalls = (ArrayNode) persistentMap.load(JitGetType.TIMESTAMPS.name());
-      response.addAll(getMatchingURLParamsWithTimestamps(request, timestampCalls));
+      response.addAll(getTimestampsByMatchingURLParams(request, timestampCalls));
 
       jitParty.addOperatorLogEntry(
           "Handled GET Timestamp Calls request accepted. Returned %s timestamp objects."
@@ -69,7 +69,13 @@ public class JitPartyHelper {
         200, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 
-  private static ArrayNode getMatchingURLParamsWithTimestamps(
+  /**
+   * Get the timestamps by matching the URL parameters.
+   *
+   * @param timestampCalls Stored timestamp calls.
+   * @return ArrayNode with 0 or many timestamp objects.
+   */
+  private static ArrayNode getTimestampsByMatchingURLParams(
       ConformanceRequest request, ArrayNode timestampCalls) {
     ArrayNode results = OBJECT_MAPPER.createArrayNode();
     var params = request.queryParams();
@@ -150,18 +156,18 @@ public class JitPartyHelper {
     }
   }
 
-  static void createParamsForPortServiceCall(
+  static void createParamsForPortCallService(
       JsonNodeMap persistentMap,
       JitGetType getType,
       List<String> filters,
       Map<String, List<String>> queryParams) {
     if (getType != JitGetType.PORT_CALL_SERVICES) return;
 
-    JsonNode portServiceCall = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
-    for (int i = 0; i < JitGetPortServiceCallFilters.props().size(); i++) {
-      String propertyName = JitGetPortServiceCallFilters.props().get(i);
+    JsonNode portCallService = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
+    for (int i = 0; i < JitGetPortCallServiceFilters.props().size(); i++) {
+      String propertyName = JitGetPortCallServiceFilters.props().get(i);
       if (filters.contains(propertyName)) {
-        queryParams.put(propertyName, List.of(portServiceCall.get(propertyName).asText()));
+        queryParams.put(propertyName, List.of(portCallService.get(propertyName).asText()));
       }
     }
   }
@@ -272,43 +278,51 @@ public class JitPartyHelper {
     timestampNode.remove(JitProvider.IS_FYI);
     timestamps.add(timestampNode);
     persistentMap.save(JitGetType.TIMESTAMPS.name(), timestamps);
-    // TODO: deal with previous received timestamps with the same type.
   }
 
-  static JsonNode replacePlaceHolders(String fileType, DynamicScenarioParameters dsp) {
-    PortCallServiceType serviceType = dsp.portCallServiceType();
+  public static ObjectNode getFileWithReplacedPlaceHolders(
+      String fileType, DynamicScenarioParameters dsp) {
+    PortCallServiceTypeCode serviceTypeCode = dsp.portCallServiceTypeCode();
     String portCallPhaseTypeCode = "";
     String portCallServiceEventTypeCode = "";
-    if (serviceType != null) {
-      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceType.name());
+    if (serviceTypeCode != null) {
+      portCallPhaseTypeCode = calculatePortCallPhaseTypeCode(serviceTypeCode.name());
       portCallServiceEventTypeCode =
-          PortCallServiceEventTypeCode.getCodesForPortCallServiceType(serviceType.name())
+          PortCallServiceEventTypeCode.getCodesForPortCallServiceTypeCode(serviceTypeCode.name())
               .getFirst()
               .name();
     }
 
-    JsonNode jsonNode =
-        JsonToolkit.templateFileToJsonNode(
-            "/standards/jit/messages/jit-200-%s-request.json".formatted(fileType),
-            Map.of(
-                "PORT_CALL_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.portCallID(), ""),
-                "TERMINAL_CALL_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.terminalCallID(), ""),
-                "PORT_CALL_SERVICE_TYPE_PLACEHOLDER",
-                serviceType != null ? serviceType.name() : "",
-                "PORT_CALL_SERVICE_ID_PLACEHOLDER",
-                Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
-                "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
-                portCallServiceEventTypeCode,
-                "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
-                portCallPhaseTypeCode,
-                "IS_FYI_PLACEHOLDER",
-                Boolean.toString(dsp.isFYI())));
-    // Some serviceType do not have a portCallPhaseTypeCode; remove it, since it is an enum.
-    if (serviceType != null && portCallPhaseTypeCode.isEmpty())
-      ((ObjectNode) jsonNode).remove("portCallPhaseTypeCode");
-    return jsonNode;
+    ObjectNode node =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/jit/messages/jit-200-%s-request.json".formatted(fileType),
+                Map.of(
+                    "PORT_CALL_ID_PLACEHOLDER",
+                    Objects.requireNonNullElse(dsp.portCallID(), ""),
+                    "TERMINAL_CALL_ID_PLACEHOLDER",
+                    Objects.requireNonNullElse(dsp.terminalCallID(), ""),
+                    "PORT_CALL_SERVICE_TYPE_CODE_PLACEHOLDER",
+                    serviceTypeCode != null ? serviceTypeCode.name() : "",
+                    "PORT_CALL_SERVICE_ID_PLACEHOLDER",
+                    Objects.requireNonNullElse(dsp.portCallServiceID(), ""),
+                    "PORT_CALL_SERVICE_EVENT_TYPE_CODE_PLACEHOLDER",
+                    portCallServiceEventTypeCode,
+                    "PORT_CALL_PHASE_TYPE_CODE_PLACEHOLDER",
+                    portCallPhaseTypeCode,
+                    "IS_FYI_PLACEHOLDER",
+                    Boolean.toString(dsp.isFYI())));
+    // Some serviceTypeCode do not have a portCallPhaseTypeCode; remove it, since it is an enum.
+    if (serviceTypeCode != null && portCallPhaseTypeCode.isEmpty())
+      node.remove("portCallPhaseTypeCode");
+
+    // Only MOVES service type requires the Moves part of the request. Removing it from other types.
+    if ("port-call-service".equals(fileType)
+        && dsp.portCallServiceTypeCode() != PortCallServiceTypeCode.MOVES) {
+      node.remove("moves");
+    }
+
+    return node;
   }
 
   private static String calculatePortCallPhaseTypeCode(String serviceType) {

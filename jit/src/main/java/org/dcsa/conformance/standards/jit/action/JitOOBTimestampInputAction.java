@@ -4,6 +4,7 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.standards.jit.JitScenarioContext;
@@ -36,8 +37,8 @@ public class JitOOBTimestampInputAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Supply the out-of-band %s timestamp that you (could) have received out-of-band from the service provider, using the format below:"
-        .formatted(timestampType));
+    return getMarkdownFile(
+        "prompt-process-oob-input.md", Map.of("TIMESTAMP_TYPE_PLACEHOLDER", timestampType.name()));
   }
 
   @Override

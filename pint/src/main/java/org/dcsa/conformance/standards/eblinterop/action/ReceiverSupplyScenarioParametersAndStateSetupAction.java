@@ -7,11 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.standards.eblinterop.models.ReceiverScenarioParameters;
 import org.dcsa.conformance.standards.eblinterop.party.PintReceivingPlatform;
 
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
-
 @Getter
 @Slf4j
 public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAction {
+  public static final String ACTION_PREFIX = "ReceiverScenarioParametersAndSetup";
   private final ScenarioClass scenarioClass;
 
   public ReceiverSupplyScenarioParametersAndStateSetupAction(
@@ -23,8 +22,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
         receivingPlatform,
         sendingPlatform,
         previousAction,
-        "ReceiverScenarioParametersAndSetup(%s)"
-            .formatted(scenarioClass.name()),
+        "%s(%s)".formatted(ACTION_PREFIX, scenarioClass.name()),
       -1
       );
     this.scenarioClass = scenarioClass;

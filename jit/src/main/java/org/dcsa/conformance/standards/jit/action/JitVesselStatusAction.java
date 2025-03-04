@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.jit.action;
 
+import java.util.List;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,12 @@ public class JitVesselStatusAction extends JitAction {
   public JitVesselStatusAction(JitScenarioContext context, ConformanceAction previousAction) {
     super(
         context.providerPartyName(), context.consumerPartyName(), previousAction, "Vessel Status");
-    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.VESSEL);
+    validator = context.componentFactory().getMessageSchemaValidator(JitSchema.VESSEL_STATUS);
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Vessel Status (PUT)";
+    return getMarkdownFile("prompt-send-vessel-status.md");
   }
 
   @Override
@@ -35,10 +36,10 @@ public class JitVesselStatusAction extends JitAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         if (dsp == null) return Stream.of();
         return Stream.of(
-          new UrlPathCheck(
-            JitRole::isProvider,
-            getMatchedExchangeUuid(),
-            JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID()),
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID()),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(
@@ -56,7 +57,9 @@ public class JitVesselStatusAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                List.of(
+                    JitChecks.checkCallIDMatchPreviousCallID(dsp),
+                    JitChecks.VESSELSTATUS_DRAFTS_NEED_DIMENSION_UNIT)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

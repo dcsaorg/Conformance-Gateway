@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -33,18 +31,7 @@ public class JsonToolkit {
   @SneakyThrows
   public static JsonNode templateFileToJsonNode(
       String templatePath, Map<String, String> replacements) {
-    AtomicReference<String> jsonString = new AtomicReference<>();
-    try (InputStream inputStream = JsonToolkit.class.getResourceAsStream(templatePath)) {
-      if (inputStream == null) {
-        throw new IllegalArgumentException("Could not find file: " + templatePath);
-      }
-      jsonString.set(
-          new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-    }
-    if (replacements != null)
-      replacements.forEach(
-          (key, value) -> jsonString.set(jsonString.get().replace(key, value)));
-    return OBJECT_MAPPER.readTree(jsonString.get());
+    return OBJECT_MAPPER.readTree(IOToolkit.templateFileToText(templatePath, replacements));
   }
 
   public static ArrayNode stringCollectionToArrayNode(Collection<String> strings) {
@@ -69,7 +56,7 @@ public class JsonToolkit {
 
   public static Map<String, ? extends Collection<String>> mapOfStringToStringCollectionFromJson(
       ArrayNode arrayNode) {
-    HashMap<String, Collection<String>> map = new HashMap<>();
+    Map<String, Collection<String>> map = new HashMap<>();
     StreamSupport.stream(arrayNode.spliterator(), false)
         .forEach(
             entryNode ->

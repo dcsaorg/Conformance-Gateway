@@ -11,14 +11,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.EndpointUriOverrideConfiguration;
 import org.dcsa.conformance.core.party.HttpHeaderConfiguration;
 import org.dcsa.conformance.sandbox.ConformanceWebuiHandler;
 import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.ebl.action.UC6_Carrier_PublishDraftTransportDocumentAction;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
+import org.dcsa.conformance.standards.eblinterop.PintStandard;
+import org.dcsa.conformance.standards.eblinterop.action.ReceiverSupplyScenarioParametersAndStateSetupAction;
+import org.dcsa.conformance.standards.eblinterop.action.SenderSupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.eblinterop.party.PintRole;
+import org.dcsa.conformance.standards.eblissuance.EblIssuanceStandard;
 import org.dcsa.conformance.standards.eblissuance.action.CarrierScenarioParametersAction;
+import org.dcsa.conformance.standards.eblissuance.party.EblIssuanceRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -375,39 +383,53 @@ public abstract class ManualTestBase {
 
     boolean isRunning;
     do {
-      JsonNode jsonNode = getScenarioStatus(sandbox1, scenarioId);
-      boolean inputRequired = jsonNode.has("inputRequired") && jsonNode.get("inputRequired").asBoolean();
-      boolean hasPromptText = jsonNode.has("promptText");
-      isRunning = jsonNode.get("isRunning").booleanValue();
+      JsonNode scenarioStatusJsonNode = getScenarioStatus(sandbox1, scenarioId);
+      boolean inputRequired = scenarioStatusJsonNode.has("inputRequired") && scenarioStatusJsonNode.get("inputRequired").asBoolean();
+      boolean hasPromptText = scenarioStatusJsonNode.has("promptText");
+      isRunning = scenarioStatusJsonNode.get("isRunning").booleanValue();
       if (inputRequired) {
-        JsonNode jsonForPrompt = jsonNode.get("jsonForPromptText");
-        String jsonForPromptText = jsonForPrompt.toString();
-        var promptText = jsonNode.path("promptText").asText("");
-        assertTrue(
-            jsonForPromptText.length() >= 25, "Json for prompt was length: " + jsonForPromptText.length());
-        String promptActionId = jsonNode.get("promptActionId").textValue();
+        SandboxItem sandbox = getSandbox(sandbox1);
+        String standardName = sandbox.standardName;
+        String testedPartyRole = sandbox.testedPartyRole;
+        String currentAction = scenarioStatusJsonNode.get("nextActions").asText().split(" - ")[0];
 
-        // Special flow for: eBL TD-only UC6 in Carrier mode (DT-1681)
-        if (jsonForPromptText.contains("Insert TDR here")) {
-          jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
-          // PINT flow
-        } else if (promptText.contains("Please provide these scenario details. Additional documents required:")) {
-          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
-        } else if (promptText.contains("Setup the system for transfer and provide the following details for the sender.")) {
-          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
-        } else if (promptText.contains(CarrierScenarioParametersAction.HUMAN_READABLE_PROMPT)) {
-          jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "CarrierScenarioParameters");
+        JsonNode jsonForPrompt = scenarioStatusJsonNode.get("jsonForPromptText");
+        if (standardName.equals(EblStandard.INSTANCE.getName())) {
+          if (testedPartyRole.equals(EblRole.CARRIER.getConfigName())
+              && currentAction.equals(
+                  UC6_Carrier_PublishDraftTransportDocumentAction.ACTION_TITLE)) {
+            jsonForPrompt = fetchTransportDocument(sandbox2, sandbox1);
+          }
+        } else if (standardName.equals(PintStandard.INSTANCE.getName())) {
+          if (testedPartyRole.equals(PintRole.SENDING_PLATFORM.getConfigName())
+              && currentAction.startsWith(SenderSupplyScenarioParametersAction.ACTION_PREFIX)) {
+            jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "supplyScenarioParameters");
+          } else if (testedPartyRole.equals(PintRole.RECEIVING_PLATFORM.getConfigName())
+              && currentAction.startsWith(
+                  ReceiverSupplyScenarioParametersAndStateSetupAction.ACTION_PREFIX)) {
+            jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "initiateState");
+          }
+        } else if (standardName.equals(EblIssuanceStandard.INSTANCE.getName())) {
+          if (testedPartyRole.equals(EblIssuanceRole.CARRIER.getConfigName())
+              && currentAction.equals(CarrierScenarioParametersAction.ACTION_TITLE)) {
+            jsonForPrompt = fetchPromptAnswer(sandbox2, sandbox1, "CarrierScenarioParameters");
+          }
         }
 
-        handleActionInput(sandbox1, scenarioId, promptActionId, jsonForPrompt);
+        String promptActionId = scenarioStatusJsonNode.get("promptActionId").textValue();
+        handleActionInput(
+            sandbox1,
+            scenarioId,
+            promptActionId,
+            jsonForPrompt);
         if (lambdaDelay > 0) waitForAsyncCalls(lambdaDelay * 2);
         continue;
       }
-      if (jsonNode.has("jsonForPromptText")) {
-        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, jsonNode.get("jsonForPromptText"));
+      if (scenarioStatusJsonNode.has("jsonForPromptText")) {
+        log.error("While running '{}', found an unexpected jsonForPromptText, while no input is required, got text: {}", scenarioName, scenarioStatusJsonNode.get("jsonForPromptText"));
         fail();
       }
-      if (hasPromptText && !jsonNode.get("promptText").textValue().isEmpty()) {
+      if (hasPromptText && !scenarioStatusJsonNode.get("promptText").textValue().isEmpty()) {
         notifyAction(sandbox2, sandbox1);
       }
       waitForCleanSandboxStatus(sandbox2);
@@ -460,7 +482,16 @@ public abstract class ManualTestBase {
       String sandboxName) {}
 
   // Possible result of getAllSandboxes
-  protected record SandboxItem(String id, String name, List<String> operatorLog, boolean canNotifyParty) {}
+  protected record SandboxItem(
+      String id,
+      String name,
+      String standardName,
+      String standardVersion,
+      String scenarioSuite,
+      String testedPartyRole,
+      boolean isDefault,
+      List<String> operatorLog,
+      boolean canNotifyParty) {}
 
   public record EndpointUriMethod(
     String endpointUri,

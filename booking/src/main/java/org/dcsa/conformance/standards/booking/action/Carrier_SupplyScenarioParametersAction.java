@@ -54,7 +54,7 @@ public class Carrier_SupplyScenarioParametersAction extends BookingAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Supply the parameters required by the scenario using the following format:";
+    return getMarkdownHumanReadablePrompt("prompt-carrier-supply-csp.md");
   }
 
   @Override

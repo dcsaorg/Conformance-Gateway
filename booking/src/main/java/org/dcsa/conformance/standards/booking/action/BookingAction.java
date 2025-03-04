@@ -3,14 +3,18 @@ package org.dcsa.conformance.standards.booking.action;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.checks.CarrierBookingNotificationDataPayloadRequestConformanceCheck;
@@ -112,11 +116,31 @@ public abstract class BookingAction extends ConformanceAction {
     return requestJsonNode.path("data").path("carrierBookingReference").asText(null);
   }
 
+  protected String getMarkdownHumanReadablePrompt(String... fileNames) {
+    Map<String, String> replacementsMap =
+        Map.ofEntries(
+            Map.entry(
+                "WITH_CBR_OR_CBRR_PLACEHOLDER",
+                withCbrOrCbrr(
+                    getDspSupplier().get().carrierBookingReference(),
+                    getDspSupplier().get().carrierBookingRequestReference())));
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/booking/instructions/" + fileName,
+                    replacementsMap))
+        .collect(Collectors.joining());
+  }
+
+  protected static String withCbrOrCbrr(String cbr, String cbrr) {
+    return (cbr != null ? "with CBR '%s'".formatted(cbr) : "")
+      + (cbr != null && cbrr != null ? " and " : "")
+      + (cbrr != null ? "with CBRR '%s'".formatted(cbrr) : "");
+  }
+
   public static String createMessageForUIPrompt(String message, String cbr, String cbrr) {
-    return message
-        + (cbr != null ? " with CBR '%s'".formatted(cbr) : "")
-        + (cbr != null && cbrr != null ? " and" : "")
-        + (cbrr != null ? " with CBRR '%s'".formatted(cbrr) : "");
+    return message + " " + withCbrOrCbrr(cbr, cbrr);
   }
 
   protected Stream<ActionCheck> getNotificationChecks(

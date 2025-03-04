@@ -33,7 +33,7 @@ import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @Slf4j
 public class JitProvider extends ConformanceParty {
@@ -93,7 +93,7 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call", dsp);
     syncCounterpartPut(JitStandard.PORT_CALL_URL + dsp.portCallID(), jsonBody);
 
     persistentMap.save(
@@ -112,7 +112,7 @@ public class JitProvider extends ConformanceParty {
     if (dsp.terminalCallID() == null) {
       dsp = dsp.withTerminalCallID(UUID.randomUUID().toString());
     }
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("terminal-call", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("terminal-call", dsp);
     syncCounterpartPut(JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID(), jsonBody);
 
     persistentMap.save(
@@ -133,15 +133,10 @@ public class JitProvider extends ConformanceParty {
     if (actionPrompt.has(JitPortCallServiceAction.SERVICE_TYPE)) {
       serviceType = actionPrompt.required(JitPortCallServiceAction.SERVICE_TYPE).asText();
     } else {
-      serviceType = dsp.portCallServiceType().name();
+      serviceType = dsp.portCallServiceTypeCode().name();
     }
-    dsp = dsp.withPortCallServiceType(PortCallServiceType.fromName(serviceType));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("port-call-service", dsp);
-
-    // Only MOVES service type requires the Moves part of the request. Removing it from the others.
-    if (dsp.portCallServiceType() != PortCallServiceType.MOVES) {
-      ((ObjectNode) jsonBody).remove("moves");
-    }
+    dsp = dsp.withPortCallServiceTypeCode(PortCallServiceTypeCode.fromName(serviceType));
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("port-call-service", dsp);
 
     syncCounterpartPut(JitStandard.PORT_CALL_SERVICES_URL + dsp.portCallServiceID(), jsonBody);
 
@@ -159,7 +154,7 @@ public class JitProvider extends ConformanceParty {
 
     DynamicScenarioParameters dsp =
         DynamicScenarioParameters.fromJson(actionPrompt.path(JitAction.DSP_TAG));
-    JsonNode jsonBody = JitPartyHelper.replacePlaceHolders("vessel-status", dsp);
+    JsonNode jsonBody = JitPartyHelper.getFileWithReplacedPlaceHolders("vessel-status", dsp);
     syncCounterpartPut(JitStandard.VESSEL_STATUS_URL + dsp.portCallServiceID(), jsonBody);
 
     persistentMap.save(
@@ -181,15 +176,14 @@ public class JitProvider extends ConformanceParty {
     JitTimestamp previousTimestamp =
         dsp.currentTimestamp(); // currentTimestamp is still the value from the previous action.
 
-    // Create values for the first timestamp in the sequence.
-    if (previousTimestamp == null) {
-      previousTimestamp =
-          JitTimestamp.getTimestampForType(JitTimestampType.ESTIMATED, null, dsp.isFYI());
-      if (dsp.portCallServiceID() != null)
-        previousTimestamp = previousTimestamp.withPortCallServiceID(dsp.portCallServiceID());
-    }
     JitTimestamp timestamp =
         JitTimestamp.getTimestampForType(timestampType, previousTimestamp, dsp.isFYI());
+
+    // Reuse portCallServiceID from previous calls
+    if (previousTimestamp == null) {
+      timestamp = timestamp.withPortCallServiceID(dsp.portCallServiceID());
+    }
+
     sendTimestampPutRequest(timestampType, timestamp);
 
     JitPartyHelper.storeTimestamp(persistentMap, timestamp);
@@ -287,7 +281,7 @@ public class JitProvider extends ConformanceParty {
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
-    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortCallService(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
 

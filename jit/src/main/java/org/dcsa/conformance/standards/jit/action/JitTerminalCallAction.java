@@ -34,7 +34,7 @@ public class JitTerminalCallAction extends JitAction {
         getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    // Update DSP with the Port Call Service response from the service provider, or create a new one.
     updateDspFromResponse(requestJsonNode);
   }
 
@@ -44,7 +44,7 @@ public class JitTerminalCallAction extends JitAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Terminal Call (PUT)";
+    return getMarkdownFile("prompt-send-terminal-call.md");
   }
 
   @Override
@@ -54,10 +54,10 @@ public class JitTerminalCallAction extends JitAction {
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         if (dsp == null) return Stream.of();
         return Stream.of(
-          new UrlPathCheck(
-            JitRole::isProvider,
-            getMatchedExchangeUuid(),
-            JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID()),
+            new UrlPathCheck(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                JitStandard.TERMINAL_CALL_URL + dsp.terminalCallID()),
             new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
             new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 204),
             new ApiHeaderCheck(
@@ -75,7 +75,7 @@ public class JitTerminalCallAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 expectedApiVersion,
-                JitChecks.checkIDsMatchesPreviousCall(dsp)),
+                JitChecks.checkCallIDMatchPreviousCallID(dsp)),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

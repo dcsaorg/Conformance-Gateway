@@ -24,10 +24,8 @@ public class UC6_Carrier_RequestToAmendConfirmedBookingAction extends StateChang
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "UC6: Request to amend the confirmed booking",
-        getDspSupplier().get().carrierBookingReference(),
-        getDspSupplier().get().carrierBookingRequestReference());
+    return getMarkdownHumanReadablePrompt(
+        "prompt-carrier-uc6.md", "prompt-carrier-notification.md");
   }
 
   @Override

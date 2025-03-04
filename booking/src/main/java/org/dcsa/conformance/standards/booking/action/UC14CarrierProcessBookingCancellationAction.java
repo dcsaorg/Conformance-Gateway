@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.booking.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.dcsa.conformance.core.check.*;
@@ -35,10 +34,9 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
 
   @Override
   public String getHumanReadablePrompt() {
-    return createMessageForUIPrompt(
-        "UC14: Process the confirmed booking cancellation",
-        getDspSupplier().get().carrierBookingReference(),
-        null);
+    return getMarkdownHumanReadablePrompt(
+        "prompt-carrier-uc14%s.md".formatted(isCancellationConfirmed ? "c" : "d"),
+        "prompt-carrier-notification.md");
   }
 
   @Override
@@ -82,7 +80,7 @@ public class UC14CarrierProcessBookingCancellationAction extends StateChangingBo
                 getMatchedExchangeUuid(),
                 HttpMessageType.REQUEST,
                 requestSchemaValidator)
-          ).filter(Objects::nonNull);
+          );
       }
     };
   }

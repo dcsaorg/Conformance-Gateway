@@ -38,7 +38,8 @@ public class UC9_Shipper_CancelBookingAmendment extends StateChangingBookingActi
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("UC9: Cancel Amendment to confirmed booking");
+    return getMarkdownHumanReadablePrompt(
+        "prompt-shipper-uc9.md", "prompt-shipper-refresh-complete.md");
   }
 
   @Override

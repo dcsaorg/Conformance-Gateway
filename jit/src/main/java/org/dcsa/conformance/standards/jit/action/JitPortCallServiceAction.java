@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -14,21 +15,21 @@ import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitSchema;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 import org.dcsa.conformance.standards.jit.party.JitRole;
 
 @Slf4j
 @ToString
 public class JitPortCallServiceAction extends JitAction {
-  public static final String SERVICE_TYPE = "serviceType";
+  public static final String SERVICE_TYPE = "serviceTypeCode";
 
   private final JsonSchemaValidator validator;
-  private final PortCallServiceType serviceType;
+  private final PortCallServiceTypeCode serviceType;
 
   public JitPortCallServiceAction(
       JitScenarioContext context,
       ConformanceAction previousAction,
-      PortCallServiceType serviceType,
+      PortCallServiceTypeCode serviceType,
       JitServiceTypeSelector selector) {
     super(
         context.providerPartyName(),
@@ -37,13 +38,13 @@ public class JitPortCallServiceAction extends JitAction {
         calculateTitle(serviceType, selector));
     validator = context.componentFactory().getMessageSchemaValidator(JitSchema.PORT_CALL_SERVICE);
     if (serviceType == null && previousAction instanceof JitPortCallServiceAction && dsp != null) {
-      serviceType = dsp.portCallServiceType();
+      serviceType = dsp.portCallServiceTypeCode();
     }
     this.serviceType = serviceType;
   }
 
   private static String calculateTitle(
-      PortCallServiceType serviceType, JitServiceTypeSelector selector) {
+      PortCallServiceTypeCode serviceType, JitServiceTypeSelector selector) {
     if (serviceType != null) return "Port Call Service(%s)".formatted(serviceType.name());
     return "Port Call Service(%s)".formatted(selector.getFullName());
   }
@@ -64,29 +65,32 @@ public class JitPortCallServiceAction extends JitAction {
         getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    // Update DSP with the Port Call Service response from the service provider, or create a new one.
     updateDspFromResponse(requestJsonNode);
   }
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
     dsp =
-        dsp.withPortCallServiceID(requestJsonNode.path("portCallServiceID").asText(null))
-            .withPortCallServiceType(
-                PortCallServiceType.fromName(
-                    requestJsonNode.path("portCallServiceType").asText(null)));
+        dsp.withPortCallServiceID(requestJsonNode.path(JitChecks.PORT_CALL_SERVICE_ID).asText(null))
+            .withPortCallServiceTypeCode(
+                PortCallServiceTypeCode.fromName(
+                    requestJsonNode.path(JitChecks.PORT_CALL_SERVICE_TYPE).asText(null)));
   }
 
   @Override
   public String getHumanReadablePrompt() {
     if (dsp == null) dsp = ((JitAction) previousAction).getDsp();
-    return switch (dsp.selector()) {
-      case FULL_ERP, S_A_PATTERN:
-        yield "Send a Port Call Service (PUT) for the %s".formatted(dsp.selector().getFullName());
-      case GIVEN:
-        yield "Send a Port Call Service (PUT) for %s".formatted(serviceType.name());
-      case ANY:
-        yield "Send a Port Call Service (PUT) for a service you supply";
-    };
+    String typeOfServiceText =
+        switch (dsp.selector()) {
+          case FULL_ERP, S_A_PATTERN:
+            yield "the %s".formatted(dsp.selector().getFullName());
+          case GIVEN:
+            yield "%s".formatted(serviceType.name());
+          case ANY:
+            yield "a service you supply";
+        };
+    return getMarkdownFile(
+        "prompt-send-port-call-service.md", Map.of("SERVICE_TYPE_PLACEHOLDER", typeOfServiceText));
   }
 
   @Override

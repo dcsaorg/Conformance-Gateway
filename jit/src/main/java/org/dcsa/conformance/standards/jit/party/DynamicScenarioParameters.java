@@ -8,14 +8,14 @@ import lombok.With;
 import org.dcsa.conformance.core.party.ScenarioParameters;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @With
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DynamicScenarioParameters(
     JitTimestamp previousTimestamp,
     JitTimestamp currentTimestamp,
-    PortCallServiceType portCallServiceType,
+    PortCallServiceTypeCode portCallServiceTypeCode,
     String portCallID,
     String terminalCallID,
     String portCallServiceID,

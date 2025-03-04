@@ -1,7 +1,7 @@
 package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -37,15 +37,18 @@ public class UC5_Shipper_CancelUpdateToShippingInstructionsAction extends StateC
 
   @Override
   public String getHumanReadablePrompt() {
-    var dsp = getDspSupplier().get();
-    return ("UC5: Cancel update to shipping instructions the document reference %s".formatted(
-      useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()
-    ));
+    var dsp = getDSP();
+    return getMarkdownHumanReadablePrompt(
+        Map.of(
+            "REFERENCE",
+            this.useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference()),
+        "prompt-shipper-uc5.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override
   public ObjectNode asJsonNode() {
-    var dsp = getDspSupplier().get();
+    var dsp = getDSP();
     return super.asJsonNode()
       .put("documentReference", useTDRef ? dsp.transportDocumentReference() : dsp.shippingInstructionsReference());
   }

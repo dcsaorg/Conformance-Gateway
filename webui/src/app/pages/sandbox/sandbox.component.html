@@ -13,6 +13,9 @@
             ><mat-icon>settings</mat-icon></button>
         </span>
     </div>
+    <div class="paragraph">
+        <app-sandbox-type [sandbox]="sandbox"></app-sandbox-type>
+    </div>
 </div>
 
 <app-text-waiting *ngIf="isLoading && sandbox && !sandbox.canNotifyParty" text="Retrieving scenarios..."></app-text-waiting>

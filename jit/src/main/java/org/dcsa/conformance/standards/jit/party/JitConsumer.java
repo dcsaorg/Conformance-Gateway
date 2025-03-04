@@ -28,7 +28,7 @@ import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
 import org.dcsa.conformance.standards.jit.model.JitTimestampType;
-import org.dcsa.conformance.standards.jit.model.PortCallServiceType;
+import org.dcsa.conformance.standards.jit.model.PortCallServiceTypeCode;
 
 @Slf4j
 public class JitConsumer extends ConformanceParty {
@@ -91,10 +91,11 @@ public class JitConsumer extends ConformanceParty {
 
   public static SuppliedScenarioParameters createSuppliedScenarioParameters(
       JitServiceTypeSelector selector) {
-    PortCallServiceType type =
+    PortCallServiceTypeCode type =
         switch (selector) {
-          case FULL_ERP -> PortCallServiceType.getServicesWithERPAndA().iterator().next();
-          case S_A_PATTERN, ANY -> PortCallServiceType.getServicesHavingOnlyA().iterator().next();
+          case FULL_ERP -> PortCallServiceTypeCode.getServicesWithERPAndA().iterator().next();
+          case S_A_PATTERN, ANY ->
+              PortCallServiceTypeCode.getServicesHavingOnlyA().iterator().next();
           case GIVEN -> null;
         };
     return new SuppliedScenarioParameters(
@@ -111,7 +112,7 @@ public class JitConsumer extends ConformanceParty {
         JitTimestampType.valueOf(actionPrompt.required("timestampType").asText());
     if (timestampType != JitTimestampType.REQUESTED) {
       throw new UserFacingException(
-          "Only REQUESTED timestamps are supported for a Consumer party.");
+          "Only REQUESTED timestamps are supported for a Service Consumer party.");
     }
 
     DynamicScenarioParameters dsp =
@@ -173,7 +174,7 @@ public class JitConsumer extends ConformanceParty {
     Map<String, List<String>> queryParams = new HashMap<>();
     JitPartyHelper.createParamsForPortCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTerminalCall(persistentMap, getType, filters, queryParams);
-    JitPartyHelper.createParamsForPortServiceCall(persistentMap, getType, filters, queryParams);
+    JitPartyHelper.createParamsForPortCallService(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForVesselStatusCall(persistentMap, getType, filters, queryParams);
     JitPartyHelper.createParamsForTimestampCall(persistentMap, getType, filters, queryParams);
 

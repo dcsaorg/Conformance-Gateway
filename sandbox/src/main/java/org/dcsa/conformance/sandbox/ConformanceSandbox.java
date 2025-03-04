@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -289,7 +291,8 @@ public class ConformanceSandbox {
       if (endOfPartyName < 0) {
         throw new IllegalArgumentException("Missing party name: " + webRequest.url());
       }
-      String partyName = remainingUri.substring(0, endOfPartyName);
+      String partyName =
+          URLDecoder.decode(remainingUri.substring(0, endOfPartyName), StandardCharsets.UTF_8);
       remainingUri = remainingUri.substring(endOfPartyName);
 
       if (remainingUri.equals("/api/conformance/notification")) {
@@ -515,6 +518,20 @@ public class ConformanceSandbox {
             ConformanceOrchestrator::completeCurrentAction)
         .run();
     return OBJECT_MAPPER.createObjectNode();
+  }
+
+  public static ObjectNode getCurrentActionExchanges(
+      ConformancePersistenceProvider persistenceProvider, String sandboxId, String scenarioId) {
+    AtomicReference<ObjectNode> resultReference = new AtomicReference<>();
+    new OrchestratorTask(
+            persistenceProvider,
+            null,
+            sandboxId,
+            "getting from sandbox %s and scenario %s the current action exchanges"
+                .formatted(sandboxId, scenarioId),
+            orchestrator -> resultReference.set(orchestrator.getCurrentActionExchanges(scenarioId)))
+        .run();
+    return resultReference.get();
   }
 
   private static ConformanceWebResponse _handlePartyNotification(

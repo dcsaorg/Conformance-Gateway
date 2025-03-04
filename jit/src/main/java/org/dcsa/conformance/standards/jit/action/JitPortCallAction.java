@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.jit.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
 import java.util.stream.Stream;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -33,17 +34,23 @@ public class JitPortCallAction extends JitAction {
         getClass().getSimpleName(),
         requestJsonNode.toPrettyString());
 
-    // Update DSP with the Port Call Service response from the provider, or create a new one.
+    // Update DSP with the Port Call Service response from the service provider, or create a new one.
     updateDspFromResponse(requestJsonNode);
   }
 
   private void updateDspFromResponse(JsonNode requestJsonNode) {
-    dsp = dsp.withPortCallID(requestJsonNode.path("portCallID").asText(null));
+    // Only overwrite the portCallID if the previous action was SupplyScenarioParametersAction or
+    // when the PortCallAction is rehearsed to start from the beginning.
+    if (previousAction instanceof SupplyScenarioParametersAction
+        || (previousAction instanceof JitPortCallAction portCallAction
+            && portCallAction.previousAction instanceof SupplyScenarioParametersAction)) {
+      dsp = dsp.withPortCallID(requestJsonNode.path("portCallID").asText(null));
+    }
   }
 
   @Override
   public String getHumanReadablePrompt() {
-    return "Send a Port Call (PUT)";
+    return getMarkdownFile("prompt-send-port-call.md");
   }
 
   @Override
@@ -69,6 +76,15 @@ public class JitPortCallAction extends JitAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 expectedApiVersion),
+            JsonAttribute.contentChecks(
+                JitRole::isProvider,
+                getMatchedExchangeUuid(),
+                HttpMessageType.REQUEST,
+                expectedApiVersion,
+                List.of(
+                    JitChecks.VESSEL_NEEDS_ONE_OF_VESSEL_IMO_NUMBER_OR_MMSI_NUMBER,
+                    JitChecks.VESSEL_WIDTH_OR_LENGTH_OVERALL_REQUIRES_DIMENSION_UNIT,
+                    JitChecks.checkCallIDMatchPreviousCallID(dsp))),
             JitChecks.checkIsFYIIsCorrect(
                 JitRole::isProvider, getMatchedExchangeUuid(), expectedApiVersion, dsp),
             new JsonSchemaCheck(

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.springboot.ConformanceApplication;
+import org.dcsa.conformance.standards.ebl.EblScenarioListBuilder;
+import org.dcsa.conformance.standards.ebl.EblStandard;
+import org.dcsa.conformance.standards.ebl.party.EblRole;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,8 +43,7 @@ class ManualScenarioTest extends ManualTestBase {
         Arguments.of("eBL Issuance", false),
         Arguments.of("eBL Issuance", true),
         Arguments.of("eBL Surrender", false),
-        Arguments.of("eBL Surrender", true)
-    );
+        Arguments.of("eBL Surrender", true));
   }
 
   @ParameterizedTest(name = "Standard: {0} - 2nd run: {1}")
@@ -75,7 +77,14 @@ class ManualScenarioTest extends ManualTestBase {
   @Test
   @Disabled("Only for debugging")
   void testOnlyOneSpecificScenario(){
-    runManualTests("Booking", "2.0.0", "Conformance", "Carrier", false);
+    runManualTests(
+        EblStandard.INSTANCE.getName(),
+        EblStandard.INSTANCE.getScenarioSuitesByStandardVersion().keySet().stream()
+            .findFirst()
+            .orElseThrow(),
+        EblScenarioListBuilder.SCENARIO_SUITE_CONFORMANCE_TD_ONLY,
+        EblRole.CARRIER.getConfigName(),
+        false);
   }
 
   private void runManualTests(

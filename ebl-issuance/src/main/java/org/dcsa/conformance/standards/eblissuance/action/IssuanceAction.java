@@ -2,10 +2,14 @@ package org.dcsa.conformance.standards.eblissuance.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.standards.eblissuance.party.CarrierScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.eblissuance.party.SuppliedScenarioParameters;
@@ -58,6 +62,16 @@ public abstract class IssuanceAction extends ConformanceAction {
     if (jsonState.has("dsp")) {
       this.setDsp(DynamicScenarioParameters.fromJson(jsonState.path("dsp")));
     }
+  }
+
+  protected String getMarkdownHumanReadablePrompt(
+      Map<String, String> replacements, String... fileNames) {
+    return Arrays.stream(fileNames)
+        .map(
+            fileName ->
+                IOToolkit.templateFileToText(
+                    "/standards/eblissuance/instructions/" + fileName, replacements))
+        .collect(Collectors.joining());
   }
 
   protected Consumer<SuppliedScenarioParameters> getSspConsumer() {

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
 import software.amazon.awscdk.BundlingOptions;
 import software.amazon.awscdk.DockerVolume;
 import software.amazon.awscdk.Duration;
@@ -98,7 +99,8 @@ public class ConformanceStack extends Stack {
       String lambdaInsightsArn,
       String restApiCertificateArn,
       String webuiApiCertificateArn,
-      String webuiDistCertificateArn) {
+      String webuiDistCertificateArn,
+      boolean inVpc) {
     super(parent, stackName, stackProps);
 
     UserPool userPool =
@@ -144,7 +146,10 @@ public class ConformanceStack extends Stack {
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build());
 
-    Vpc vpc = Vpc.Builder.create(this, prefix + "ConformanceVpc").maxAzs(1).natGateways(1).build();
+    Vpc vpc =
+        inVpc
+            ? Vpc.Builder.create(this, prefix + "ConformanceVpc").maxAzs(1).natGateways(1).build()
+            : null;
 
     AssetCode assetCode =
         Code.fromAsset(
@@ -172,58 +177,18 @@ public class ConformanceStack extends Stack {
                 .build());
 
     Function sandboxTaskLambda =
-        new Function(
-            this,
+        createLambda(
             prefix + "SandboxTaskLambda",
-            FunctionProps.builder()
-                .functionName(prefix + "SandboxTaskLambda")
-                .runtime(Runtime.JAVA_21)
-                .code(assetCode)
-                .handler("org.dcsa.conformance.lambda.SandboxTaskLambda")
-                .vpc(vpc)
-                .vpcSubnets(
-                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
-                .memorySize(1024)
-                .timeout(Duration.minutes(5))
-                .reservedConcurrentExecutions(16)
-                .logRetention(RetentionDays.SEVEN_YEARS)
-                .build());
+            assetCode,
+            "org.dcsa.conformance.lambda.SandboxTaskLambda",
+            vpc);
 
     Function apiLambda =
-        new Function(
-            this,
-            prefix + "ApiLambda",
-            FunctionProps.builder()
-                .functionName(prefix + "ApiLambda")
-                .runtime(Runtime.JAVA_21)
-                .code(assetCode)
-                .handler("org.dcsa.conformance.lambda.ApiLambda")
-                .vpc(vpc)
-                .vpcSubnets(
-                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
-                .memorySize(1024)
-                .timeout(Duration.minutes(5))
-                .reservedConcurrentExecutions(16)
-                .logRetention(RetentionDays.SEVEN_YEARS)
-                .build());
+        createLambda(prefix + "ApiLambda", assetCode, "org.dcsa.conformance.lambda.ApiLambda", vpc);
 
     Function webuiLambda =
-        new Function(
-            this,
-            prefix + "WebuiLambda",
-            FunctionProps.builder()
-                .functionName(prefix + "WebuiLambda")
-                .runtime(Runtime.JAVA_21)
-                .code(assetCode)
-                .handler("org.dcsa.conformance.lambda.WebuiLambda")
-                .vpc(vpc)
-                .vpcSubnets(
-                    SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build())
-                .memorySize(1024)
-                .timeout(Duration.minutes(5))
-                .reservedConcurrentExecutions(16)
-                .logRetention(RetentionDays.SEVEN_YEARS)
-                .build());
+        createLambda(
+            prefix + "WebuiLambda", assetCode, "org.dcsa.conformance.lambda.WebuiLambda", vpc);
 
     Policy invokeSandboxTaskLambdaPolicy =
         new Policy(
@@ -391,7 +356,7 @@ public class ConformanceStack extends Stack {
         BucketDeploymentProps.builder()
             .destinationBucket(ngBucket)
             .distribution(distribution)
-            .sources(List.of(Source.asset("../webui/dist/webui")))
+            .sources(List.of(Source.asset("../webui/dist/webui/browser")))
             .build());
 
     IPublicHostedZone publicHostedZone =
@@ -430,5 +395,25 @@ public class ConformanceStack extends Stack {
             .recordName(webuiDistributionUrl)
             .target(RecordTarget.fromAlias(new CloudFrontTarget(distribution)))
             .build());
+  }
+
+  private Function createLambda(
+      String name, AssetCode assetCode, String handler, Vpc vpc) {
+    FunctionProps.Builder functionPropsBuilder =
+        FunctionProps.builder()
+            .functionName(name)
+            .runtime(Runtime.JAVA_21)
+            .code(assetCode)
+            .handler(handler)
+            .memorySize(2048)
+            .timeout(Duration.minutes(5))
+            .reservedConcurrentExecutions(16)
+            .logRetention(RetentionDays.SEVEN_YEARS);
+    if (vpc != null) {
+      functionPropsBuilder
+          .vpc(vpc)
+          .vpcSubnets(SubnetSelection.builder().subnetType(SubnetType.PRIVATE_WITH_EGRESS).build());
+    }
+    return new Function(this, name, functionPropsBuilder.build());
   }
 }

@@ -5,6 +5,8 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,13 +59,13 @@ public class ConformanceWebuiHandler {
       if (e instanceof UserFacingException userFacingException) {
         return OBJECT_MAPPER.createObjectNode().put("error", userFacingException.getMessage());
       } else {
-        ObjectNode node = OBJECT_MAPPER
-          .createObjectNode().put("error", "Internal Server Error");
+        ObjectNode node = OBJECT_MAPPER.createObjectNode().put("error", "Internal Server Error");
         if (developerMode) {
-            node.put("exception", e.getClass().getName())
-              .put("message", e.getMessage());
+          node.put("exception", e.getClass().getName()).put("message", e.getMessage());
+          log.warn("Internal Server Error: {}", e.getMessage());
+        } else {
+          log.warn("Internal Server Error: {}", e, e);
         }
-        log.warn("Internal Server Error: {}", e, e);
         return node;
       }
     }
@@ -88,6 +90,7 @@ public class ConformanceWebuiHandler {
           case "handleActionInput" -> _handleActionInput(userId, requestNode);
           case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
           case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
+          case "getCurrentActionExchanges" -> _getCurrentActionExchanges(userId, requestNode);
           default -> throw new UnsupportedOperationException(operation);
         };
     log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
@@ -156,7 +159,11 @@ public class ConformanceWebuiHandler {
 
     sandboxPartyCounterpartConfig.setUrl(
         "%s/conformance/sandbox/%s/party/%s/api"
-            .formatted(environmentBaseUrl, sandboxId, sandboxPartyCounterpartConfig.getName()));
+            .formatted(
+                environmentBaseUrl,
+                sandboxId,
+                URLEncoder.encode(
+                    sandboxPartyCounterpartConfig.getName(), StandardCharsets.UTF_8)));
     sandboxPartyCounterpartConfig.setAuthHeaderName(sandboxConfiguration.getAuthHeaderName());
     sandboxPartyCounterpartConfig.setAuthHeaderValue(sandboxConfiguration.getAuthHeaderValue());
 
@@ -189,22 +196,10 @@ public class ConformanceWebuiHandler {
         ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
 
     CounterpartConfiguration sandboxPartyCounterpartConfig =
-        Arrays.stream(sandboxConfiguration.getCounterparts())
-            .filter(
-                counterpart ->
-                    Arrays.stream(sandboxConfiguration.getParties())
-                        .anyMatch(party -> party.getName().equals(counterpart.getName())))
-            .findFirst()
-            .orElseThrow();
+        sandboxConfiguration.getSandboxPartyCounterpartConfiguration();
 
     CounterpartConfiguration externalPartyCounterpartConfig =
-        Arrays.stream(sandboxConfiguration.getCounterparts())
-            .filter(
-                counterpart ->
-                    Arrays.stream(sandboxConfiguration.getParties())
-                        .noneMatch(party -> party.getName().equals(counterpart.getName())))
-            .findFirst()
-            .orElseThrow();
+        sandboxConfiguration.getExternalPartyCounterpartConfiguration();
 
     ObjectNode jsonSandboxConfig = OBJECT_MAPPER
             .createObjectNode()
@@ -448,36 +443,67 @@ public class ConformanceWebuiHandler {
         .getNonLockingMap()
         .getPartitionValuesBySortKey(
             "environment#" + accessChecker.getUserEnvironmentId(userId), "")
-        .values()
         .forEach(
-            sandboxNode ->
+            (key, value) ->
                 sortedSandboxesByLowercaseName.put(
-                    sandboxNode.get("name").asText().toLowerCase(), sandboxNode));
+                    value.get("name").asText().toLowerCase(),
+                    _loadSandbox(userId, key.substring("sandbox#".length()), false)));
     ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
-    sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
+    sortedSandboxesByLowercaseName.values().stream()
+        .filter(sandboxNode -> !sandboxNode.path("isAuto").asBoolean())
+        .forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
-  private JsonNode _getSandbox(String userId, JsonNode requestNode) {
-    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+  private ObjectNode _loadSandbox(String userId, String sandboxId, boolean includeOperatorLog) {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     ObjectNode sandboxNode =
-        (ObjectNode)
-            persistenceProvider
-                .getNonLockingMap()
-                .getItemValue(
-                    "environment#" + accessChecker.getUserEnvironmentId(userId),
-                    "sandbox#" + sandboxId);
+      (ObjectNode)
+        persistenceProvider
+          .getNonLockingMap()
+          .getItemValue(
+            "environment#" + accessChecker.getUserEnvironmentId(userId),
+            "sandbox#" + sandboxId);
 
-    boolean includeOperatorLog = requestNode.get("includeOperatorLog").asBoolean();
+    SandboxConfiguration sandboxConfiguration =
+      ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+
+    if (Arrays.stream(sandboxConfiguration.getCounterparts())
+        .noneMatch(CounterpartConfiguration::isInManualMode)) {
+      // just a flag to filter them out of the "all sandboxes" list
+      return OBJECT_MAPPER.createObjectNode().put("isAuto", true);
+    }
+
+    sandboxNode.put("standardName", sandboxConfiguration.getStandard().getName());
+    sandboxNode.put("standardVersion", sandboxConfiguration.getStandard().getVersion());
+    sandboxNode.put("scenarioSuite", sandboxConfiguration.getScenarioSuite());
+    CounterpartConfiguration testedCounterpartConfiguration = sandboxConfiguration.getExternalPartyCounterpartConfiguration();
+    sandboxNode.put(
+        "testedPartyRole",
+        testedCounterpartConfiguration == null
+            ? "both roles" // in dev mode, all-in-one sandboxes don't have an "external party"
+            : testedCounterpartConfiguration.getRole());
+    sandboxNode.put(
+        "isDefault",
+        testedCounterpartConfiguration != null // showing all-in-one dev sandboxes as DCSA internal
+            && testedCounterpartConfiguration.isInManualMode()
+            && sandboxConfiguration.getOrchestrator().isActive());
+
     if (includeOperatorLog) {
       ArrayNode operatorLog =
-          ConformanceSandbox.getOperatorLog(
-              persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+        ConformanceSandbox.getOperatorLog(
+          persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
       sandboxNode.set("operatorLog", operatorLog);
       sandboxNode.put("canNotifyParty", operatorLog != null);
     }
     return sandboxNode;
+  }
+
+  private JsonNode _getSandbox(String userId, JsonNode requestNode) {
+    return _loadSandbox(
+        userId,
+        requestNode.get(SANDBOX_ID).asText(),
+        requestNode.get("includeOperatorLog").asBoolean());
   }
 
   private JsonNode _notifyParty(String userId, JsonNode requestNode) {
@@ -543,5 +569,12 @@ public class ConformanceWebuiHandler {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
         persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+  }
+
+  private JsonNode _getCurrentActionExchanges(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getCurrentActionExchanges(
+        persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 }

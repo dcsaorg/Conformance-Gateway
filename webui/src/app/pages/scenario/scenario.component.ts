@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import { ConformanceService } from "../../service/conformance.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../auth/auth.service";
@@ -6,15 +6,12 @@ import { Sandbox } from "../../model/sandbox";
 import { sleep } from "../../model/toolkit";
 import { Subscription } from "rxjs";
 import { ScenarioDigest } from "src/app/model/scenario";
-import {
-  getConformanceStatusEmoji,
-  getConformanceStatusTitle
-} from "src/app/model/conformance-status";
 import { ScenarioStatus } from "src/app/model/scenario-status";
 import {ConfirmationDialog} from "../../dialogs/confirmation/confirmation-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {SandboxStatus, SandboxWaiting} from "../../model/sandbox-status";
 import {MessageDialog} from "../../dialogs/message/message-dialog.component";
+import {TextDialog} from "../../dialogs/text/text-dialog.component";
 
 @Component({
     selector: 'app-scenario',
@@ -22,7 +19,7 @@ import {MessageDialog} from "../../dialogs/message/message-dialog.component";
     styleUrls: ['../../shared-styles.css'],
     standalone: false
 })
-export class ScenarioComponent {
+export class ScenarioComponent implements OnInit, OnDestroy {
 
   sandboxStatus: SandboxStatus | undefined;
   sandbox: Sandbox | undefined;
@@ -31,9 +28,6 @@ export class ScenarioComponent {
   actionInput: string = '';
   performingAction: string = '';
   activatedRouteSubscription: Subscription | undefined;
-
-  getConformanceStatusEmoji = getConformanceStatusEmoji;
-  getConformanceStatusTitle = getConformanceStatusTitle;
 
   constructor(
     public activatedRoute: ActivatedRoute,
@@ -105,6 +99,18 @@ export class ScenarioComponent {
       this.performingAction = "";
       await this.loadScenarioStatus();
     }
+  }
+
+  async viewHttpExchanges() {
+    const exchanges = await this.conformanceService.getCurrentActionExchanges(
+      this.sandbox!.id,
+      this.scenario!.id
+    );
+    await TextDialog.open(
+      this.dialog,
+      "Current action HTTP exchanges",
+      JSON.stringify(exchanges, null, 4)
+    );
   }
 
   async ngOnDestroy() {

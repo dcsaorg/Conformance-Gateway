@@ -90,6 +90,7 @@ public class ConformanceWebuiHandler {
           case "handleActionInput" -> _handleActionInput(userId, requestNode);
           case "startOrStopScenario" -> _startOrStopScenario(userId, requestNode);
           case "completeCurrentAction" -> _completeCurrentAction(userId, requestNode);
+          case "getCurrentActionExchanges" -> _getCurrentActionExchanges(userId, requestNode);
           default -> throw new UnsupportedOperationException(operation);
         };
     log.debug("ConformanceWebuiHandler.handleRequest() returning: {}", resultNode.toPrettyString());
@@ -448,7 +449,9 @@ public class ConformanceWebuiHandler {
                     value.get("name").asText().toLowerCase(),
                     _loadSandbox(userId, key.substring("sandbox#".length()), false)));
     ArrayNode sandboxesNode = OBJECT_MAPPER.createArrayNode();
-    sortedSandboxesByLowercaseName.values().forEach(sandboxesNode::add);
+    sortedSandboxesByLowercaseName.values().stream()
+        .filter(sandboxNode -> !sandboxNode.path("isAuto").asBoolean())
+        .forEach(sandboxesNode::add);
     return sandboxesNode;
   }
 
@@ -464,6 +467,13 @@ public class ConformanceWebuiHandler {
 
     SandboxConfiguration sandboxConfiguration =
       ConformanceSandbox.loadSandboxConfiguration(persistenceProvider, sandboxId);
+
+    if (Arrays.stream(sandboxConfiguration.getCounterparts())
+        .noneMatch(CounterpartConfiguration::isInManualMode)) {
+      // just a flag to filter them out of the "all sandboxes" list
+      return OBJECT_MAPPER.createObjectNode().put("isAuto", true);
+    }
+
     sandboxNode.put("standardName", sandboxConfiguration.getStandard().getName());
     sandboxNode.put("standardVersion", sandboxConfiguration.getStandard().getVersion());
     sandboxNode.put("scenarioSuite", sandboxConfiguration.getScenarioSuite());
@@ -559,5 +569,12 @@ public class ConformanceWebuiHandler {
     accessChecker.checkUserSandboxAccess(userId, sandboxId);
     return ConformanceSandbox.completeCurrentAction(
         persistenceProvider, deferredSandboxTaskConsumer, sandboxId);
+  }
+
+  private JsonNode _getCurrentActionExchanges(String userId, JsonNode requestNode) {
+    String sandboxId = requestNode.get(SANDBOX_ID).asText();
+    accessChecker.checkUserSandboxAccess(userId, sandboxId);
+    return ConformanceSandbox.getCurrentActionExchanges(
+        persistenceProvider, sandboxId, requestNode.get("scenarioId").asText());
   }
 }

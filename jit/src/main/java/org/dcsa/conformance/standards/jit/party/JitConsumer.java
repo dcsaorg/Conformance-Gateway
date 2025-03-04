@@ -23,7 +23,9 @@ import org.dcsa.conformance.standards.jit.action.JitDeclineAction;
 import org.dcsa.conformance.standards.jit.action.JitGetAction;
 import org.dcsa.conformance.standards.jit.action.JitOOBTimestampInputAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
+import org.dcsa.conformance.standards.jit.action.JitWrongTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
+import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetType;
 import org.dcsa.conformance.standards.jit.model.JitServiceTypeSelector;
 import org.dcsa.conformance.standards.jit.model.JitTimestamp;
@@ -71,7 +73,8 @@ public class JitConsumer extends ConformanceParty {
         Map.entry(JitTimestampAction.class, this::timestampRequest),
         Map.entry(JitDeclineAction.class, this::declineRequest),
         Map.entry(JitOOBTimestampInputAction.class, this::outOfBandTimestampRequest),
-        Map.entry(JitGetAction.class, this::sendGetActionRequest));
+        Map.entry(JitGetAction.class, this::sendGetActionRequest),
+        Map.entry(JitWrongTimestampAction.class, this::sendWrongTimestampRequest));
   }
 
   private void supplyScenarioParameters(JsonNode actionPrompt) {
@@ -125,6 +128,24 @@ public class JitConsumer extends ConformanceParty {
 
     addOperatorLogEntry(
         "Submitted %s timestamp for: %s".formatted(timestampType, timestamp.dateTime()));
+  }
+
+  private void sendWrongTimestampRequest(JsonNode actionPrompt) {
+    log.info(
+        "{}.sendWrongTimestampRequest({})",
+        getClass().getSimpleName(),
+        actionPrompt.toPrettyString());
+
+    JitTimestamp timestamp =
+        JitTimestamp.getTimestampForType(JitTimestampType.REQUESTED, null, false);
+
+    // On purpose, set a random portCallServiceID to simulate a wrong timestamp.
+    timestamp = timestamp.withPortCallServiceID(UUID.randomUUID().toString());
+
+    syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
+    addOperatorLogEntry(
+        "Submitted %s timestamp with random portCallServiceID."
+            .formatted(timestamp.classifierCode()));
   }
 
   private void declineRequest(JsonNode actionPrompt) {
@@ -198,12 +219,22 @@ public class JitConsumer extends ConformanceParty {
       statusCode = 400;
     } else if (url.contains(JitStandard.TIMESTAMP_URL)) {
       JitTimestamp timestamp = JitTimestamp.fromJson(jsonBody);
-      addOperatorLogEntry(
-          "Handled %s timestamp accepted for: %s"
-              .formatted(
-                  JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
-                  timestamp.dateTime()));
-      JitPartyHelper.storeTimestamp(persistentMap, timestamp);
+
+      // Check if the portCallServiceID is known, if not, return 404.
+      JsonNode portCallService = persistentMap.load(JitGetType.PORT_CALL_SERVICES.name());
+      if (portCallService == null
+          || !timestamp
+              .portCallServiceID()
+              .equals(portCallService.path(JitChecks.PORT_CALL_SERVICE_ID).asText(null))) {
+        return JitPartyHelper.handleWrongTimestamp(request, apiVersion, this);
+      } else {
+        addOperatorLogEntry(
+            "Handled %s timestamp accepted for: %s"
+                .formatted(
+                    JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
+                    timestamp.dateTime()));
+        JitPartyHelper.storeTimestamp(persistentMap, timestamp);
+      }
     } else if (url.endsWith("/cancel")) {
       addOperatorLogEntry("Handled Cancel request accepted.");
     } else if (url.endsWith("/omit")) {

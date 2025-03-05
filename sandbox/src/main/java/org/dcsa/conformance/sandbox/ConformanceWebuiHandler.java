@@ -482,7 +482,9 @@ public class ConformanceWebuiHandler {
         "testedPartyRole",
         testedCounterpartConfiguration == null
             ? "both roles" // in dev mode, all-in-one sandboxes don't have an "external party"
-            : testedCounterpartConfiguration.getRole());
+            : sandboxConfiguration.getOrchestrator().isActive()
+                ? testedCounterpartConfiguration.getRole()
+                : sandboxConfiguration.getSandboxPartyCounterpartConfiguration().getRole());
     sandboxNode.put(
         "isDefault",
         testedCounterpartConfiguration != null // showing all-in-one dev sandboxes as DCSA internal

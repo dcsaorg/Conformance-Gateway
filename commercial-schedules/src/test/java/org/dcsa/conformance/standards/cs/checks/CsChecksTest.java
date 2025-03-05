@@ -11,11 +11,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 
-public class CsChecksTest {
+class CsChecksTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  ArrayNode rootNodeArray = objectMapper.createArrayNode();
-  ObjectNode routing =  objectMapper.createObjectNode();
+  private final ArrayNode rootNodeArray = objectMapper.createArrayNode();
+  private final ObjectNode routing = objectMapper.createObjectNode();
 
   @Test
   void testValidateCutoffTimeCodePtp() {
@@ -28,7 +28,6 @@ public class CsChecksTest {
     cutOffTime.put("cutOffDateTimeCode", "LCR");
     rootNodeArray.add(routing);
     assertFalse(VALIDATE_CUTOFF_TIME_CODE.validate(rootNodeArray).isEmpty());
-
   }
 
   @Test
@@ -47,9 +46,7 @@ public class CsChecksTest {
     cutOffTime.put("cutOffDateTimeCode", "PCO");
     routing.put("receiptTypeAtOrigin", "CO");
     assertTrue(VALIDATE_CUTOFF_TIME_CODE_AND_RECEIPTTYPEATORIGIN_PTP.validate(rootNodeArray).isEmpty());
-
   }
-
 
   @Test
   void testValidateCutoffTimeCodePs() {
@@ -65,6 +62,5 @@ public class CsChecksTest {
     cutOffTime.put("cutOffDateTimeCode", "LCR");
     rootNodeArray.add(schedule);
     assertFalse(VALIDATE_CUTOFF_TIME_CODE_PS.validate(rootNodeArray).isEmpty());
-
   }
 }

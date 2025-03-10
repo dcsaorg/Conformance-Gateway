@@ -68,6 +68,6 @@ public abstract class ActionCheck extends ConformanceCheck {
     }
   }
 
-  protected abstract Set<String> checkConformance(
+  public abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
 }

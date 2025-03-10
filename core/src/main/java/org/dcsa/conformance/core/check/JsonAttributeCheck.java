@@ -1,5 +1,8 @@
 package org.dcsa.conformance.core.check;
 
+import static org.dcsa.conformance.core.check.JsonAttribute.renderJsonPointer;
+import static org.dcsa.conformance.core.check.JsonAttribute.renderValue;
+
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
@@ -7,9 +10,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-
-import static org.dcsa.conformance.core.check.JsonAttribute.renderJsonPointer;
-import static org.dcsa.conformance.core.check.JsonAttribute.renderValue;
 
 public class JsonAttributeCheck extends ActionCheck {
   private final JsonPointer jsonPointer;
@@ -48,9 +48,8 @@ public class JsonAttributeCheck extends ActionCheck {
     this.expectedValue = expectedValue;
   }
 
-
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Collections.emptySet();
     JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();

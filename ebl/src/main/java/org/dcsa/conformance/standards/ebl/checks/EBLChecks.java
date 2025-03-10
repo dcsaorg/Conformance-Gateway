@@ -953,21 +953,21 @@ public class EBLChecks {
     ));
     if (isTD) {
       // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an
-      // earlier action
-      checks.add(
-          JsonAttribute.ifThen(
-              "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
-              ignored -> {
-                var dsp = dspSupplier.get();
-                return dsp.shippingInstructions()
-                        .path("isCarriersAgentAtDestinationRequired")
-                        .asBoolean(false)
-                    || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
-              },
+      // earlier action. This will be enabled when SI+TD scenarios are implemented.
+      /*      checks.add(
+      JsonAttribute.ifThen(
+          "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
+          ignored -> {
+            var dsp = dspSupplier.get();
+            return dsp.shippingInstructions()
+                    .path("isCarriersAgentAtDestinationRequired")
+                    .asBoolean(false)
+                || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
+          },
+          JsonAttribute.path(
+              DOCUMENT_PARTIES,
               JsonAttribute.path(
-                  DOCUMENT_PARTIES,
-                  JsonAttribute.path(
-                      "carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))));
+                  "carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))));*/
 
     } else {
       checks.add(

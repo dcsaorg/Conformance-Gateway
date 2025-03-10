@@ -38,7 +38,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return Collections.emptySet();
   }
@@ -62,7 +62,7 @@ class JsonRebaseableAttributeBasedCheck extends ActionCheck {
     }
 
     @Override
-    protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return Collections.emptySet();
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();

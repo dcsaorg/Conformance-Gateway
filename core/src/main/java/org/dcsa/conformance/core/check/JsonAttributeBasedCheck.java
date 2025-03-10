@@ -8,11 +8,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import lombok.NonNull;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 
 class JsonAttributeBasedCheck extends ActionCheck {
 
@@ -40,7 +38,7 @@ class JsonAttributeBasedCheck extends ActionCheck {
   }
 
   @Override
-  protected final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return Collections.emptySet();
   }
@@ -64,7 +62,7 @@ class JsonAttributeBasedCheck extends ActionCheck {
     }
 
     @Override
-    protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
       ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
       if (exchange == null) return Collections.emptySet();
       JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();

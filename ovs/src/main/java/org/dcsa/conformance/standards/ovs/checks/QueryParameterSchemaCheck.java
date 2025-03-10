@@ -1,5 +1,7 @@
 package org.dcsa.conformance.standards.ovs.checks;
 
+import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -7,18 +9,15 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import org.dcsa.conformance.core.check.ActionCheck;
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
+import org.dcsa.conformance.core.check.ActionCheck;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class QueryParameterSchemaCheck extends ActionCheck {
 
@@ -56,7 +55,7 @@ public class QueryParameterSchemaCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     Set<String> errors = new HashSet<>();
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) {

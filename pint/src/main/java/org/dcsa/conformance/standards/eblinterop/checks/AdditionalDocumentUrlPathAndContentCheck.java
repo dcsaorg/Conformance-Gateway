@@ -39,7 +39,7 @@ public class AdditionalDocumentUrlPathAndContentCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Set.of();
     String requestUrl = exchange.getRequest().url();

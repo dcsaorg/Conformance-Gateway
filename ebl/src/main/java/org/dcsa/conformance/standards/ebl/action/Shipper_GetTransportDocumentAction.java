@@ -80,6 +80,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
+
             new ActionCheck(
                 "Check if the TD has changed",
                 EblRole::isCarrier,

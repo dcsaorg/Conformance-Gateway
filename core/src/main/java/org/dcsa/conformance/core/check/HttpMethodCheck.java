@@ -1,13 +1,12 @@
 package org.dcsa.conformance.core.check;
 
-import org.dcsa.conformance.core.traffic.ConformanceExchange;
-import org.dcsa.conformance.core.traffic.HttpMessageType;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
+import org.dcsa.conformance.core.traffic.HttpMessageType;
 
 public class HttpMethodCheck extends ActionCheck {
   private final String expectedHttpMethod;
@@ -34,7 +33,7 @@ public class HttpMethodCheck extends ActionCheck {
   }
 
   @Override
-  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Set.of();
     var method = exchange.getRequest().method();

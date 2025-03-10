@@ -13,7 +13,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(
+    classes = ConformanceApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ConformanceApplicationTest {
 
   @Autowired

@@ -1,4 +1,5 @@
-name: Web UI Testing
+# Tests all standards on a running NPM server, with a real Chrome browser, on the localhost.
+name: Selenium UI Testing
 
 on:
   push:

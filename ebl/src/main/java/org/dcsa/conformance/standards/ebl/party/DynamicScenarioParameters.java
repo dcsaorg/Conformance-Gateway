@@ -15,6 +15,7 @@ public record DynamicScenarioParameters(
     String transportDocumentReference,
     JsonNode shippingInstructions,
     JsonNode updatedShippingInstructions,
+    boolean isCADInlcudedInSI,
     boolean newTransportDocumentContent,
     @Deprecated JsonNode transportDocument,
     @Deprecated JsonNode previousTransportDocument)
@@ -27,6 +28,7 @@ public record DynamicScenarioParameters(
         jsonNode.path("transportDocumentReference").asText(null),
         jsonNode.path("shippingInstructions"),
         jsonNode.path("updatedShippingInstructions"),
+        jsonNode.path("isCADInlcudedInSI").asBoolean(false),
         jsonNode.path("newTransportDocumentContent").asBoolean(false),
         jsonNode.path("transportDocument"),
         jsonNode.path("previousTransportDocument"));

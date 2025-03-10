@@ -2,9 +2,10 @@ package org.dcsa.conformance.standards.ebl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -38,8 +39,10 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return "GET the TD with reference '%s'"
-        .formatted(getDspSupplier().get().transportDocumentReference());
+    return getMarkdownHumanReadablePrompt(
+        Map.of("REFERENCE", getDSP().transportDocumentReference()),
+        "prompt-shipper-get-td.md",
+        "prompt-shipper-refresh-complete.md");
   }
 
   @Override
@@ -77,13 +80,24 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of
-            // an earlier action
-            checkTDChanged(
+            new ActionCheck(
+                "Check if the TD has changed",
+                EblRole::isCarrier,
                 getMatchedExchangeUuid(),
-                expectedApiVersion,
-                dsp,
-                previousAction.getMatchedExchangeUuid()), // see commit history
+                HttpMessageType.RESPONSE) {
+
+              final UUID compareToExchangeUuid = previousAction.getMatchedExchangeUuid();
+
+              @Override
+              public Set<String> checkConformance(
+                  Function<UUID, ConformanceExchange> getExchangeByUuid) {
+                ConformanceExchange previousExchange =
+                    getExchangeByUuid.apply(compareToExchangeUuid);
+                return checkTDChanged(
+                        getMatchedExchangeUuid(), expectedApiVersion, dsp, previousExchange)
+                    .checkConformance(getExchangeByUuid);
+              }
+            },
             EBLChecks.tdPlusScenarioContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
@@ -98,15 +112,11 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
       UUID matched,
       String standardsVersion,
       DynamicScenarioParameters dsp,
-      UUID previousActionMatched) {
+      ConformanceExchange previousExchange) {
     JsonNode previousTransportDocument =
-        previousActionMatched == null
+        previousExchange == null
             ? null
-            : ConformanceExchange.getExchangeByUuid(previousActionMatched)
-                .getResponse()
-                .message()
-                .body()
-                .getJsonBody();
+            : previousExchange.getResponse().message().body().getJsonBody();
     var deltaCheck =
         JsonAttribute.lostAttributeCheck(
             "(ignored)",
@@ -155,7 +165,8 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
         JsonAttribute.customValidator(
             "The TD match the scenario step",
             JsonAttribute.ifMatchedThenElse(
-                // For some cases, we assume the TD will change in ways we cannot predict, so here
+                // For some cases, we assume the TD will change in ways we cannot predict, so
+                // here
                 // we just effectively skip the check
                 //
                 // Common cases are new drafts and amendments.
@@ -163,4 +174,5 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 hadChangesCheck,
                 deltaCheck::validate)));
   }
+
 }

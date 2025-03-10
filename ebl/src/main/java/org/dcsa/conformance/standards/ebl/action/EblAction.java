@@ -45,10 +45,20 @@ public abstract class EblAction extends ConformanceAction {
     super(sourcePartyName, targetPartyName, previousAction, actionTitle);
     this.expectedStatus = expectedStatus;
     this.dspReference =
-      previousAction == null
-        ? new OverwritingReference<>(
-        null, new DynamicScenarioParameters(ScenarioType.REGULAR_SWB, null, null, null, null, false, OBJECT_MAPPER.createObjectNode(), OBJECT_MAPPER.createObjectNode()))
-        : new OverwritingReference<>(previousAction.dspReference, null);
+        previousAction == null
+            ? new OverwritingReference<>(
+                null,
+                new DynamicScenarioParameters(
+                    ScenarioType.REGULAR_SWB,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    false,
+                    OBJECT_MAPPER.createObjectNode(),
+                    OBJECT_MAPPER.createObjectNode()))
+            : new OverwritingReference<>(previousAction.dspReference, null);
   }
 
   @Override

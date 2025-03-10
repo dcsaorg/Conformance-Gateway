@@ -20,7 +20,14 @@ import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.dcsa.conformance.core.check.*;
+import org.dcsa.conformance.core.scenario.ConformanceAction;
+import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
+import org.dcsa.conformance.standards.booking.action.UC13ShipperCancelConfirmedBookingAction;
+import org.dcsa.conformance.standards.booking.action.UC1_Shipper_SubmitBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC3_Shipper_SubmitUpdatedBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC5_Carrier_ConfirmBookingRequestAction;
+import org.dcsa.conformance.standards.booking.action.UC7_Shipper_SubmitBookingAmendment;
 import org.dcsa.conformance.standards.booking.party.*;
 
 @UtilityClass
@@ -683,6 +690,72 @@ public class BookingChecks {
       standardVersion,
       checks
     );
+  }
+
+  public ActionCheck responseContentChecksNew(
+      String expectedApiVersion,
+      boolean requestAmendedContent,
+      UUID matched,
+      ConformanceAction previousAction) {
+
+    return new ActionCheck(
+        "Check if the Booking has changed",
+        BookingRole::isCarrier,
+        matched,
+        HttpMessageType.RESPONSE) {
+
+      @Override
+      public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+        JsonNode nodeToCheck = null;
+        ConformanceExchange previousExchange;
+        // uc13-updatedBooking->response
+        // uc1-booking-req
+        // uc3-booking-req
+        // uc5-booking-res
+        // uc7-updatedBooking-req
+
+        if (requestAmendedContent) {
+          var tempAction = previousAction;
+          while (!(tempAction instanceof UC7_Shipper_SubmitBookingAmendment
+              || tempAction instanceof UC13ShipperCancelConfirmedBookingAction)) {
+            tempAction = tempAction.getPreviousAction();
+          }
+          if (tempAction instanceof UC7_Shipper_SubmitBookingAmendment) {
+            previousExchange = getExchangeByUuid.apply(tempAction.getMatchedExchangeUuid());
+            nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
+          } else if (tempAction instanceof UC13ShipperCancelConfirmedBookingAction) {
+            previousExchange = getExchangeByUuid.apply(tempAction.getMatchedExchangeUuid());
+            nodeToCheck = previousExchange.getResponse().message().body().getJsonBody();
+          }
+        } else {
+          var action = previousAction;
+          while (!(action instanceof UC1_Shipper_SubmitBookingRequestAction
+              || action instanceof UC3_Shipper_SubmitUpdatedBookingRequestAction
+              || action instanceof UC5_Carrier_ConfirmBookingRequestAction)) {
+            action = action.getPreviousAction();
+          }
+          if (action instanceof UC1_Shipper_SubmitBookingRequestAction
+              || action instanceof UC3_Shipper_SubmitUpdatedBookingRequestAction) {
+            previousExchange = getExchangeByUuid.apply(action.getMatchedExchangeUuid());
+            nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
+          } else if (action instanceof UC5_Carrier_ConfirmBookingRequestAction) {
+            previousExchange = getExchangeByUuid.apply(action.getMatchedExchangeUuid());
+            nodeToCheck = previousExchange.getResponse().message().body().getJsonBody();
+          }
+        }
+        JsonNode finalNodeToCheck = nodeToCheck;
+        return JsonAttribute.contentChecks(
+                "",
+                "Validate that shipper provided data was not altered",
+                BookingRole::isCarrier,
+                matched,
+                HttpMessageType.RESPONSE,
+                expectedApiVersion,
+                JsonAttribute.lostAttributeCheck(
+                    "Validate that shipper provided data was not altered", () -> finalNodeToCheck))
+            .checkConformance(getExchangeByUuid);
+      }
+    };
   }
 
   private boolean isReeferContainerSizeTypeCode(String isoEquipmentCode) {

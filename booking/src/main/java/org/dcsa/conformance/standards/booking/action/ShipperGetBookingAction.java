@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.booking.action;
 
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
@@ -61,12 +60,13 @@ public class ShipperGetBookingAction extends BookingAction {
       @Override
       protected Stream<? extends ConformanceCheck> createSubChecks() {
         var dsp = getDspSupplier().get();
-        String reference = dsp.carrierBookingReference() !=  null ? dsp.carrierBookingReference() : dsp.carrierBookingRequestReference();
+        String reference =
+            dsp.carrierBookingReference() != null
+                ? dsp.carrierBookingReference()
+                : dsp.carrierBookingRequestReference();
         return Stream.of(
             new UrlPathCheck(
-                BookingRole::isShipper,
-                getMatchedExchangeUuid(),
-                "/v2/bookings/" + reference),
+                BookingRole::isShipper, getMatchedExchangeUuid(), "/v2/bookings/" + reference),
             new ResponseStatusCheck(
                 BookingRole::isCarrier, getMatchedExchangeUuid(), expectedStatus),
             new ApiHeaderCheck(
@@ -84,9 +84,19 @@ public class ShipperGetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-            BookingChecks.responseContentChecks(getMatchedExchangeUuid(), expectedApiVersion, getCspSupplier(), getDspSupplier(), expectedBookingStatus, expectedAmendedBookingStatus, expectedCancelledBookingStatus,requestAmendedContent))
-        ;
+          BookingChecks.responseContentChecksNew(expectedApiVersion,requestAmendedContent,getMatchedExchangeUuid(),previousAction),
+            BookingChecks.responseContentChecks(
+                getMatchedExchangeUuid(),
+                expectedApiVersion,
+                getCspSupplier(),
+                getDspSupplier(),
+                expectedBookingStatus,
+                expectedAmendedBookingStatus,
+                expectedCancelledBookingStatus,
+                requestAmendedContent));
       }
     };
   }
+
+
 }

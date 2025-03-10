@@ -177,11 +177,12 @@ public class EBLChecks {
                 rootNode, "requestedCarrierClauses", ArrayOrderHandler.toStringSortableArray());
           };
 
-  private static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER = (leftNode, rhsNode) -> {
-    for (var node : List.of(leftNode, rhsNode)) {
-      SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
-    }
-  };
+  public static final BiConsumer<JsonNode, JsonNode> SI_NORMALIZER =
+      (leftNode, rhsNode) -> {
+        for (var node : List.of(leftNode, rhsNode)) {
+          SI_ARRAY_ORDER_DEFINITIONS.accept(node, ArrayOrderHelper::restoreArrayOrder);
+        }
+      };
 
   private static final JsonRebaseableContentCheck ONLY_EBLS_CAN_BE_NEGOTIABLE = JsonAttribute.ifThen(
     "Validate transportDocumentTypeCode vs. isToOrder",
@@ -929,7 +930,7 @@ public class EBLChecks {
     return JsonAttribute.mustEqual(TD_NOTIFICATION_TDR_PTR, () -> dspSupplier.get().transportDocumentReference());
   }
 
-  private static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
+  public static <T, O> Supplier<T> delayedValue(Supplier<O> cspSupplier, Function<O, T> field) {
     return () -> {
       var csp = cspSupplier.get();
       if (csp == null) {
@@ -951,17 +952,23 @@ public class EBLChecks {
       JsonAttribute.matchedMustEqual(delayedValue(cspSupplier, CarrierScenarioParameters::carrierBookingReference))
     ));
     if (isTD) {
-/* FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an earlier action
+      // FIXME SD-1997 implement this properly, fetching the exchange by the matched UUID of an
+      // earlier action
       checks.add(
-        JsonAttribute.ifThen(
-          "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
-          ignored -> {
-            var dsp = dspSupplier.get();
-            return dsp.shippingInstructions().path("isCarriersAgentAtDestinationRequired").asBoolean(false) || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
-          },
-          JsonAttribute.path(DOCUMENT_PARTIES, JsonAttribute.path("carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))
-      ));
-*/
+          JsonAttribute.ifThen(
+              "[Scenario] Verify that the transportDocument included 'carriersAgentAtDestination'",
+              ignored -> {
+                var dsp = dspSupplier.get();
+                return dsp.shippingInstructions()
+                        .path("isCarriersAgentAtDestinationRequired")
+                        .asBoolean(false)
+                    || dsp.scenarioType().isCarriersAgentAtDestinationRequired();
+              },
+              JsonAttribute.path(
+                  DOCUMENT_PARTIES,
+                  JsonAttribute.path(
+                      "carriersAgentAtDestination", JsonAttribute.matchedMustBePresent()))));
+
     } else {
       checks.add(
         JsonAttribute.ifThen(
@@ -1325,7 +1332,14 @@ public class EBLChecks {
     );
   }
 
-  public static ActionCheck siResponseContentChecks(UUID matched, String standardVersion, Supplier<CarrierScenarioParameters> cspSupplier, Supplier<DynamicScenarioParameters> dspSupplier, ShippingInstructionsStatus shippingInstructionsStatus, ShippingInstructionsStatus updatedShippingInstructionsStatus, boolean requestedAmendment,UUID matchedPreviousAction) {
+  public static ActionCheck siResponseContentChecks(
+      UUID matched,
+      String standardVersion,
+      Supplier<CarrierScenarioParameters> cspSupplier,
+      Supplier<DynamicScenarioParameters> dspSupplier,
+      ShippingInstructionsStatus shippingInstructionsStatus,
+      ShippingInstructionsStatus updatedShippingInstructionsStatus,
+      boolean requestedAmendment) {
     var checks = new ArrayList<JsonContentCheck>();
     checks.add(JsonAttribute.mustEqual(
       SI_REF_SIR_PTR,

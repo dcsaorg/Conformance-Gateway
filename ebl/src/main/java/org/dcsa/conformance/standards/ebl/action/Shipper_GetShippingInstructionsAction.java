@@ -1,8 +1,13 @@
 package org.dcsa.conformance.standards.ebl.action;
 
+import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.SI_NORMALIZER;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
@@ -129,6 +134,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
+            responseContentChecks(expectedApiVersion),
             EBLChecks.siResponseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,
@@ -136,19 +142,58 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                 getDspSupplier(),
                 expectedSiStatus,
                 expectedAmendedSiStatus,
-                requestAmendedStatus,
-                previousAction.getMatchedExchangeUuid()));
+                requestAmendedStatus));
       }
     };
   }
 
-  private JsonNode getRequestOrResponseBody() {
-    ConformanceExchange exchange =
-        ConformanceExchange.getExchangeByUuid(previousAction.getMatchedExchangeUuid());
-    if (previousAction instanceof UC1_Shipper_SubmitShippingInstructionsAction
-        || previousAction instanceof UC3ShipperSubmitUpdatedShippingInstructionsAction) {
-      return exchange.getRequest().message().body().getJsonBody();
-    }
-    return exchange.getResponse().message().body().getJsonBody();
+  private ActionCheck responseContentChecks(String expectedApiVersion) {
+
+    return new ActionCheck(
+        "Check if the SI has changed",
+        EblRole::isCarrier,
+        getMatchedExchangeUuid(),
+        HttpMessageType.RESPONSE) {
+
+      @Override
+      public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+        JsonNode nodeToCheck;
+        final UUID compareToExchangeUuid = previousAction.getMatchedExchangeUuid();
+        ConformanceExchange previousExchange = getExchangeByUuid.apply(compareToExchangeUuid);
+
+        if (requestAmendedStatus) {
+          nodeToCheck = previousExchange.getResponse().message().body().getJsonBody();
+        } else if (previousAction
+            instanceof UC4_Carrier_ProcessUpdateToShippingInstructionsAction) { // checkUC4 accept
+          var tempAction = previousAction;
+          while (!(tempAction instanceof UC3ShipperSubmitUpdatedShippingInstructionsAction)) {
+            tempAction = tempAction.getPreviousAction();
+          }
+          previousExchange = getExchangeByUuid.apply(tempAction.getMatchedExchangeUuid());
+          nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
+        } else {
+          var action = previousAction;
+          while (!(action instanceof UC1_Shipper_SubmitShippingInstructionsAction)) {
+            action = action.getPreviousAction();
+          }
+          previousExchange = getExchangeByUuid.apply(action.getMatchedExchangeUuid());
+          nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
+        }
+
+        JsonNode finalNodeToCheck = nodeToCheck;
+        return JsonAttribute.contentChecks(
+                "",
+                "Validate that shipper provided data was not altered",
+                EblRole::isCarrier,
+                getMatchedExchangeUuid(),
+                HttpMessageType.RESPONSE,
+                expectedApiVersion,
+                JsonAttribute.lostAttributeCheck(
+                    "Validate that shipper provided data was not altered",
+                    () -> finalNodeToCheck,
+                    SI_NORMALIZER))
+            .checkConformance(getExchangeByUuid);
+      }
+    };
   }
 }

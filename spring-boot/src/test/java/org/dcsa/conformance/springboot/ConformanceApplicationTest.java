@@ -74,7 +74,7 @@ class ConformanceApplicationTest {
     String previousStatus = "";
     String startStatus = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
     do {
-      Thread.sleep(250L);
+      Thread.sleep(500L);
       status = restTemplate.getForObject("http://localhost:" + port + getAppURL(sandboxId, "status"), String.class);
       if (status.equals(previousStatus)) { // Detection of a stuck scenario, prevent waiting forever. Note: turn off while debugging!
         log.error("Status did not change: {}. Originally started at: {}", status, startStatus);

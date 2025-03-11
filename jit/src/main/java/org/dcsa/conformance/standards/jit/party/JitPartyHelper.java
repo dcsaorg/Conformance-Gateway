@@ -338,7 +338,10 @@ public class JitPartyHelper {
   }
 
   public static ConformanceResponse handleWrongTimestamp(
-      ConformanceRequest request, String apiVersion, ConformanceParty jitParty) {
+      ConformanceRequest request,
+      String apiVersion,
+      String portCallServiceID,
+      ConformanceParty jitParty) {
     String[] urlParts = request.url().split(JitStandard.TIMESTAMP_URL);
     String path = "%s%s".formatted(JitStandard.TIMESTAMP_URL, urlParts[urlParts.length - 1]);
     ObjectNode response =
@@ -356,7 +359,8 @@ public class JitPartyHelper {
                     LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
 
     jitParty.addOperatorLogEntry(
-        "Handled a Timestamp request with an unknown Port Call Service ID.");
+        "Handled a Timestamp request with an unknown Port Call Service ID: %s"
+            .formatted(portCallServiceID));
 
     return request.createResponse(
         404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));

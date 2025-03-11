@@ -746,19 +746,19 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
   private static void addScenarioGroup15and16(
       LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
     scenarioList.put(
-        "15. Service Provider answering bad Timestamp call",
+        "15. Service Provider handling unexpected Timestamp call",
+        noAction()
+            .thenEither(
+                new JitScenarioListBuilder(
+                    previousAction -> new JitWrongTimestampAction(context, previousAction, true))));
+
+    scenarioList.put(
+        "16. Service Consumer handling unexpected Timestamp call",
         noAction()
             .thenEither(
                 new JitScenarioListBuilder(
                     previousAction ->
                         new JitWrongTimestampAction(context, previousAction, false))));
-
-    scenarioList.put(
-        "16. Service Consumer answering bad Timestamp call",
-        noAction()
-            .thenEither(
-                new JitScenarioListBuilder(
-                    previousAction -> new JitWrongTimestampAction(context, previousAction, true))));
   }
 
   private static JitScenarioListBuilder noAction() {

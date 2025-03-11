@@ -144,8 +144,11 @@ public class JitConsumer extends ConformanceParty {
 
     syncCounterpartPut(JitStandard.TIMESTAMP_URL + timestamp.timestampID(), timestamp.toJson());
     addOperatorLogEntry(
-        "Submitted %s timestamp with random portCallServiceID."
-            .formatted(timestamp.classifierCode()));
+        "Submitted %s timestamp with (random) portCallServiceID: %s, timestampID: %s"
+            .formatted(
+                timestamp.classifierCode(),
+                timestamp.portCallServiceID(),
+                timestamp.timestampID()));
   }
 
   private void declineRequest(JsonNode actionPrompt) {
@@ -226,13 +229,15 @@ public class JitConsumer extends ConformanceParty {
           || !timestamp
               .portCallServiceID()
               .equals(portCallService.path(JitChecks.PORT_CALL_SERVICE_ID).asText(null))) {
-        return JitPartyHelper.handleWrongTimestamp(request, apiVersion, this);
+        return JitPartyHelper.handleWrongTimestamp(
+            request, apiVersion, timestamp.portCallServiceID(), this);
       } else {
         addOperatorLogEntry(
-            "Handled %s timestamp accepted for: %s"
+            "Handled %s timestamp accepted for: %s and remark: %s"
                 .formatted(
                     JitTimestampType.fromClassifierCode(timestamp.classifierCode()),
-                    timestamp.dateTime()));
+                    timestamp.dateTime(),
+                    timestamp.remark()));
         JitPartyHelper.storeTimestamp(persistentMap, timestamp);
       }
     } else if (url.endsWith("/cancel")) {

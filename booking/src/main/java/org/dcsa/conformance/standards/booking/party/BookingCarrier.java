@@ -448,7 +448,7 @@ public class BookingCarrier extends ConformanceParty {
             }
             yield return404(request);
           }
-          case "PATCH" -> _handlePatchBookingRequest(request);
+          case "PATCH" -> handlePatchBookingRequest(request);
           case "PUT" -> _handlePutBookingRequest(request);
           default -> return405(request, "GET", "POST", "PUT", "PATCH");
         };
@@ -531,15 +531,15 @@ public class BookingCarrier extends ConformanceParty {
     return returnEmpty202Response( request, booking, cbrr);
   }
 
-  private ConformanceResponse _handlePatchBookingRequest(ConformanceRequest request) {
+  private ConformanceResponse handlePatchBookingRequest(ConformanceRequest request) {
     var cancelOperation = readCancelOperation(request);
-    if (!cancelOperation.equals(CANCEL_BOOKING_OPERATION)
-        && !cancelOperation.equals(CANCEL_AMENDMENT_OPERATION)
-        && !cancelOperation.equals(CANCEL_CONFIRMED_BOOKING_OPERATION)) {
+    if (!CANCEL_BOOKING_OPERATION.equals(cancelOperation)
+        && !CANCEL_AMENDMENT_OPERATION.equals(cancelOperation)
+        && !CANCEL_CONFIRMED_BOOKING_OPERATION.equals(cancelOperation)) {
       return return400(
           request,
-          "The 'operation' query parameter must be given exactly one and have"
-              + " value either 'cancelBooking' OR 'cancelAmendment' OR 'cancelConfirmedBooking'");
+          "The message body must specify what to cancel: either 'bookingStatus' OR "
+              + "'amendedBookingStatus' OR 'bookingCancellationStatus' attribute should be present.");
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.

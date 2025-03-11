@@ -539,7 +539,7 @@ public class BookingCarrier extends ConformanceParty {
       return return400(
           request,
           "The message body must specify what to cancel: either 'bookingStatus' OR "
-              + "'amendedBookingStatus' OR 'bookingCancellationStatus' key/value should be present.");
+              + "'amendedBookingStatus' OR 'bookingCancellationStatus' attribute should be present.");
     }
     var bookingReference = lastUrlSegment(request.url());
     // bookingReference can either be a CBR or CBRR.

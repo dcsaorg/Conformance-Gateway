@@ -723,7 +723,7 @@ public class BookingChecks {
           if (tempAction instanceof UC7_Shipper_SubmitBookingAmendment) {
             previousExchange = getExchangeByUuid.apply(tempAction.getMatchedExchangeUuid());
             nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
-          } else if (tempAction instanceof UC13ShipperCancelConfirmedBookingAction) {
+          } else {
             previousExchange = getExchangeByUuid.apply(tempAction.getMatchedExchangeUuid());
             nodeToCheck = previousExchange.getResponse().message().body().getJsonBody();
           }
@@ -738,7 +738,7 @@ public class BookingChecks {
               || action instanceof UC3_Shipper_SubmitUpdatedBookingRequestAction) {
             previousExchange = getExchangeByUuid.apply(action.getMatchedExchangeUuid());
             nodeToCheck = previousExchange.getRequest().message().body().getJsonBody();
-          } else if (action instanceof UC5_Carrier_ConfirmBookingRequestAction) {
+          } else {
             previousExchange = getExchangeByUuid.apply(action.getMatchedExchangeUuid());
             nodeToCheck = previousExchange.getResponse().message().body().getJsonBody();
           }
@@ -753,7 +753,7 @@ public class BookingChecks {
                 expectedApiVersion,
                 JsonAttribute.lostAttributeCheck(
                     "Validate that shipper provided data was not altered", () -> finalNodeToCheck))
-            .checkConformance(getExchangeByUuid);
+            .performCheckConformance(getExchangeByUuid);
       }
     };
   }

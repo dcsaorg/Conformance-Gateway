@@ -68,7 +68,7 @@ public class ResponseStatusCheck extends ActionCheck {
   }
 
   @Override
-  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Collections.emptySet();
     int responseStatus = exchange.getResponse().statusCode();

@@ -36,7 +36,7 @@ public class JsonSchemaCheck extends ActionCheck {
   }
 
   @Override
-  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     return exchange == null
         ? Collections.emptySet()

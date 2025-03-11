@@ -49,7 +49,7 @@ public class JsonAttributeCheck extends ActionCheck {
   }
 
   @Override
-  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Collections.emptySet();
     JsonNode jsonBody = exchange.getMessage(httpMessageType).body().getJsonBody();

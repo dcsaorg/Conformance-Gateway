@@ -55,7 +55,7 @@ public class QueryParameterSchemaCheck extends ActionCheck {
   }
 
   @Override
-  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     Set<String> errors = new HashSet<>();
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) {

@@ -80,7 +80,6 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-
             new ActionCheck(
                 "Check if the TD has changed",
                 EblRole::isCarrier,
@@ -96,7 +95,7 @@ public class Shipper_GetTransportDocumentAction extends EblAction {
                     getExchangeByUuid.apply(compareToExchangeUuid);
                 return checkTDChanged(
                         getMatchedExchangeUuid(), expectedApiVersion, dsp, previousExchange)
-                    .checkConformance(getExchangeByUuid);
+                    .performCheckConformance(getExchangeByUuid);
               }
             },
             EBLChecks.tdPlusScenarioContentChecks(

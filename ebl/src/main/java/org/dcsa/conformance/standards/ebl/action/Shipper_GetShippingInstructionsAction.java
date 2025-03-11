@@ -192,7 +192,7 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
                     "Validate that shipper provided data was not altered",
                     () -> finalNodeToCheck,
                     SI_NORMALIZER))
-            .checkConformance(getExchangeByUuid);
+            .performCheckConformance(getExchangeByUuid);
       }
     };
   }

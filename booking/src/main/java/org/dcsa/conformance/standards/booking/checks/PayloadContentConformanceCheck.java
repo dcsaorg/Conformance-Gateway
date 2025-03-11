@@ -45,14 +45,17 @@ public abstract class PayloadContentConformanceCheck extends ActionCheck {
   }
 
   protected ConformanceCheck createSubCheck(String subtitle, Function<JsonNode, Set<String>> subCheck) {
-    return new ActionCheck(subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
+    return new ActionCheck(
+        subtitle, this::isRelevantForRole, this.matchedExchangeUuid, this.httpMessageType) {
       @Override
-      public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+      protected Set<String> checkConformance(
+          Function<UUID, ConformanceExchange> getExchangeByUuid) {
         ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
         if (exchange == null) return Collections.emptySet();
-        var conformanceMessage = this.httpMessageType == HttpMessageType.RESPONSE
-          ? exchange.getResponse().message()
-          : exchange.getRequest().message();
+        var conformanceMessage =
+            this.httpMessageType == HttpMessageType.RESPONSE
+                ? exchange.getResponse().message()
+                : exchange.getRequest().message();
         var payload = conformanceMessage.body().getJsonBody();
         return subCheck.apply(payload);
       }

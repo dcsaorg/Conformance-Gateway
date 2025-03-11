@@ -68,6 +68,12 @@ public abstract class ActionCheck extends ConformanceCheck {
     }
   }
 
-  public abstract Set<String> checkConformance(
+  protected abstract Set<String> checkConformance(
       Function<UUID, ConformanceExchange> getExchangeByUuid);
+
+  // Public wrapper method for checkConformance for some cases.
+  public Set<String> performCheckConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
+    return checkConformance(getExchangeByUuid);
+  }
 }

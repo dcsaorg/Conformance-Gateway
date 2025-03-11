@@ -38,7 +38,8 @@ class JsonAttributeBasedCheck extends ActionCheck {
   }
 
   @Override
-  public final Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected final Set<String> checkConformance(
+      Function<UUID, ConformanceExchange> getExchangeByUuid) {
     // All checks are delegated to sub-checks; nothing to do in here.
     return Collections.emptySet();
   }

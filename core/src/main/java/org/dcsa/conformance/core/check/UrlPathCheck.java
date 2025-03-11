@@ -31,7 +31,7 @@ public class UrlPathCheck extends ActionCheck {
   }
 
   @Override
-  public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
+  protected Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
     ConformanceExchange exchange = getExchangeByUuid.apply(matchedExchangeUuid);
     if (exchange == null) return Set.of();
     String requestUrl = exchange.getRequest().url();

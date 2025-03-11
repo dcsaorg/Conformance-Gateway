@@ -6,11 +6,13 @@ import static org.dcsa.conformance.core.toolkit.JsonToolkit.OBJECT_MAPPER;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -20,6 +22,7 @@ import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
+import org.dcsa.conformance.standards.jit.JitStandard;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.*;
 
@@ -332,5 +335,34 @@ public class JitPartyHelper {
       return "";
     }
     return typeCodes.getFirst().name();
+  }
+
+  public static ConformanceResponse handleWrongTimestamp(
+      ConformanceRequest request,
+      String apiVersion,
+      String portCallServiceID,
+      ConformanceParty jitParty) {
+    String[] urlParts = request.url().split(JitStandard.TIMESTAMP_URL);
+    String path = "%s%s".formatted(JitStandard.TIMESTAMP_URL, urlParts[urlParts.length - 1]);
+    ObjectNode response =
+        (ObjectNode)
+            JsonToolkit.templateFileToJsonNode(
+                "/standards/jit/messages/jit-200-error-message.json",
+                Map.of(
+                    "HTTP_METHOD_PLACEHOLDER",
+                    request.method(),
+                    "REQUEST_URI_PLACEHOLDER",
+                    path,
+                    "REFERENCE_PLACEHOLDER",
+                    UUID.randomUUID().toString(),
+                    "ERROR_DATE_TIME_PLACEHOLDER",
+                    LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+
+    jitParty.addOperatorLogEntry(
+        "Handled a Timestamp request with an unknown Port Call Service ID: %s"
+            .formatted(portCallServiceID));
+
+    return request.createResponse(
+        404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

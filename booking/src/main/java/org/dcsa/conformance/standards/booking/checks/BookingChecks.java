@@ -714,6 +714,9 @@ public class BookingChecks {
         // uc5-booking-res
         // uc7-updatedBooking-req
 
+        if (previousAction.getMatchedExchangeUuid() == null) {
+          return Set.of();
+        }
         if (requestAmendedContent) {
           var tempAction = previousAction;
           while (!(tempAction instanceof UC7_Shipper_SubmitBookingAmendment

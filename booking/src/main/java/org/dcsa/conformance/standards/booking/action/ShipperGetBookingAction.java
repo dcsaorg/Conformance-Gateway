@@ -84,7 +84,11 @@ public class ShipperGetBookingAction extends BookingAction {
                 getMatchedExchangeUuid(),
                 HttpMessageType.RESPONSE,
                 responseSchemaValidator),
-          BookingChecks.responseContentChecksNew(expectedApiVersion,requestAmendedContent,getMatchedExchangeUuid(),previousAction),
+            BookingChecks.responseContentChecksNew(
+                expectedApiVersion,
+                requestAmendedContent,
+                getMatchedExchangeUuid(),
+                previousAction),
             BookingChecks.responseContentChecks(
                 getMatchedExchangeUuid(),
                 expectedApiVersion,

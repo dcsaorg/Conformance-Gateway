@@ -158,6 +158,10 @@ public class Shipper_GetShippingInstructionsAction extends EblAction {
       @Override
       public Set<String> checkConformance(Function<UUID, ConformanceExchange> getExchangeByUuid) {
         JsonNode nodeToCheck;
+        if (previousAction.getMatchedExchangeUuid() == null) {
+          return Set.of();
+        }
+
         final UUID compareToExchangeUuid = previousAction.getMatchedExchangeUuid();
         ConformanceExchange previousExchange = getExchangeByUuid.apply(compareToExchangeUuid);
 

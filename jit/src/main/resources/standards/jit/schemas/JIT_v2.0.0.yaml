@@ -90,6 +90,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: put-port-call
@@ -286,6 +288,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: omit-port-call
@@ -368,7 +372,7 @@ paths:
                         errorCodeMessage: 'isFYI should be a boolean. `12` provided as value'
         '404':
           description: |
-            In case the implementer does not know of the `portCallID` used in the request (this could be because of a `PUT` request that has not finished processing or simply because the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
+            If the implementer does not know the `portCallID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -381,7 +385,7 @@ paths:
                   summary: |
                     portCallID not Found
                   description: |
-                    The provided `portCallID` cannot be found. This can be because a `PUT` request has not been finished processing or because the `portCallID` does not exist in the implementer system.
+                    The provided `portCallID` cannot be found. This can be because the `portCallID` does not exist in the implementer system.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
@@ -472,6 +476,8 @@ paths:
         - $ref: '#/components/parameters/MMSINumberQueryParam'
 
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: get-port-call
@@ -655,6 +661,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/terminalCallIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: put-terminal-call
@@ -688,7 +696,7 @@ paths:
                 description: |
                   A new **Terminal Call** linked to a previously created **Port Call** (in this example with `portCallID=0342254a-5927-4856-b9c9-aa12e7c00563`). After this call is accepted by **Service Consumer** - a **Port Call Service** can be created. In this example no `terminalCallReference` has yet been assigned to the **Terminal Call**.
                 value:
-                  terminalCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
+                  terminalCallID: '085a3207-5e45-49cf-8e1b-f8442beaf545'
                   portCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
                   terminalCallSequenceNumber: 2
                   carrierServiceName: 'Great Lion Service'
@@ -705,7 +713,7 @@ paths:
                 description: |
                   A **Terminal Call** has already been created - now send the **Terminal Call** as a FYI to a (secondary) **Service Consumer**. In this example all properties are the same as the previous example, except for `isFYI`.
                 value:
-                  terminalCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
+                  terminalCallID: '085a3207-5e45-49cf-8e1b-f8442beaf545'
                   portCallID: '0342254a-5927-4856-b9c9-aa12e7c00563'
                   terminalCallSequenceNumber: 2
                   carrierServiceName: 'Great Lion Service'
@@ -754,22 +762,11 @@ paths:
                         property: 'carrierServiceCode'
                         errorCodeText: 'mandatory property missing'
                         errorCodeMessage: 'carrierServiceCode must be provided as part of a Terminal Call'
-        '404':
-          description: |
-            In case the implementer does not know of the `portCallID` used in the request payload - it is possible for the implementer to reject the request by returning a `404` (Not Found).
-          headers:
-            API-Version:
-              $ref: '#/components/headers/API-Version'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
                 notFoundExample:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `portCallID` cannot be found.
+                    The provided `portCallID` in the payload cannot be found.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
@@ -883,6 +880,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/terminalCallIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: omit-terminal-call
@@ -964,7 +963,7 @@ paths:
                         errorCodeMessage: 'isFYI should be a boolean. `12` provided as value'
         '404':
           description: |
-            In case the implementer does not know of the `terminalCallID` used in the request (this could be because of a `PUT` request that has not finished processing or simply because the resource does not exist) - it is possible for the implementer to reject the request by returning a `404` (Not Found).
+            If the implementer does not know the `terminalCallID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -977,7 +976,7 @@ paths:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `terminalCallID` cannot be found. This can be because a `PUT` request has not been finished processing or because the `terminalCallID` does not exist in the implementer system.
+                    The provided `terminalCallID` cannot be found. This can be because the `terminalCallID` does not exist in the implementer system.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
@@ -1072,6 +1071,8 @@ paths:
         - $ref: '#/components/parameters/universalExportVoyageReferenceQueryParam'
 
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: get-terminal-call
@@ -1220,6 +1221,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallServiceIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: put-port-call-service
@@ -1252,7 +1255,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new **Port Call Service** fails schema validation, a `400` (Bad Request) is returned.
+            In case creating a new **Port Call Service** fails schema validation, or the referenced `terminalCallID` in the payload does not exist, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1270,7 +1273,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397'
                     statusCode: 400
                     statusCodeText: 'Bad Request'
                     statusCodeMessage: 'portCallServiceTypeCode not found - it is a mandatory property in Port Call Service.'
@@ -1281,27 +1284,16 @@ paths:
                         property: 'portCallServiceTypeCode'
                         errorCodeText: 'mandatory property missing'
                         errorCodeMessage: 'portCallServiceTypeCode must be provided as part of a Port Call Service'
-        '404':
-          description: |
-            In case the implementer does not know of the `terminalCallID` used in the request payload - it is possible for the implementer to reject the request by returning a `404` (Not Found).
-          headers:
-            API-Version:
-              $ref: '#/components/headers/API-Version'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
                 notFoundExample:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `terminalCallID` cannot be found.
+                    The provided `terminalCallID` in the payload cannot be found.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397'
                     statusCode: 404
                     statusCodeText: 'Not Found'
                     statusCodeMessage: 'terminalCallID not found'
@@ -1331,7 +1323,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397'
                     statusCode: 409
                     statusCodeText: 'Conflict'
                     statusCodeMessage: 'Trying to update a CANCELLED Port Call Service'
@@ -1361,7 +1353,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397'
                     statusCode: 500
                     statusCodeText: 'Internal Server Error'
                     statusCodeMessage: 'Internal Server Error occurred while processing Port Call Service'
@@ -1395,7 +1387,7 @@ paths:
                     **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397'
                     statusCode: 429
                     statusCodeText: 'Too Many Requests'
                     statusCodeMessage: 'Too many requests to create a Port Call Service has been requested. Please try again in 1 hour'
@@ -1409,6 +1401,9 @@ paths:
     post:
       parameters:
         - $ref: '#/components/parameters/portCallServiceIDPathParam'
+        - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: cancel-port-call-service
@@ -1458,7 +1453,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7004` is just a "random example".
                   value:
                     httpMethod: 'POST'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545/cancel'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397/cancel'
                     statusCode: 400
                     statusCodeText: 'Bad Request'
                     statusCodeMessage: 'isFYI has wrong type - boolean expected but integer found'
@@ -1471,7 +1466,7 @@ paths:
                         errorCodeMessage: 'isFYI should be a boolean. `12` provided as value'
         '404':
           description: |
-            In case the implementer does not know of the `portCallServiceID` used in the request (this could be because of a `PUT` request that has not finished processing or simply because the resource does not exist) - it is possible for the implementer to reject the request by returning a `404` (Not Found).
+            If the implementer does not know the `portCallServiceID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1484,12 +1479,12 @@ paths:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `portCallServiceID` cannot be found. This can be because a `PUT` request has not been finished processing or because the `portCallServiceID` does not exist in the implementer system.
+                    The provided `portCallServiceID` cannot be found. This can be because the `portCallServiceID` does not exist in the implementer system.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
                     httpMethod: 'POST'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545/cancel'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397/cancel'
                     statusCode: 404
                     statusCodeText: 'Not Found'
                     statusCodeMessage: 'portCallServiceID not found'
@@ -1519,7 +1514,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7005` is just a "random example".
                   value:
                     httpMethod: 'POST'
-                    requestUri: '/port-call-services/085a3207-5e45-49cf-8e1b-f8442beaf545/cancel'
+                    requestUri: '/port-call-services/48b971c9-139d-496a-a840-0e07efd46397/cancel'
                     statusCode: 500
                     statusCodeText: 'Internal Server Error'
                     statusCodeMessage: 'Internal Server Error occurred while processing Port Call Service'
@@ -1552,7 +1547,7 @@ paths:
                     **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
                   value:
                     httpMethod: 'POST'
-                    requestUri: '/terminal-calls/085a3207-5e45-49cf-8e1b-f8442beaf545/cancel'
+                    requestUri: '/terminal-calls/48b971c9-139d-496a-a840-0e07efd46397/cancel'
                     statusCode: 429
                     statusCodeText: 'Too Many Requests'
                     statusCodeMessage: 'Too many requests to cancel a Port Call Service has been requested. Please try again in 1 hour'
@@ -1571,6 +1566,8 @@ paths:
         - $ref: '#/components/parameters/portCallServiceTypeQueryParam'
 
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: get-port-call-services
@@ -1729,6 +1726,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/timestampIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: put-timestamp
@@ -1764,7 +1763,7 @@ paths:
               $ref: '#/components/headers/API-Version'
         '400':
           description: |
-            In case creating a new **Timestamp** fails schema validation, a `400` (Bad Request) is returned.
+            In case creating a new **Timestamp** fails schema validation, or the referenced `portCallServiceID` in the payload does not exist, a `400` (Bad Request) is returned.
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -1782,7 +1781,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/timestamps/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/timestamps/d26f740f-9dc3-42af-9277-472f155944e2'
                     statusCode: 400
                     statusCodeText: 'Bad Request'
                     statusCodeMessage: 'classifierCode property not found - it is a mandatory property in Timestamp'
@@ -1793,27 +1792,16 @@ paths:
                         property: 'classifierCode'
                         errorCodeText: 'mandatory property missing'
                         errorCodeMessage: 'classifierCode must be provided as part of a Timestamp'
-        '404':
-          description: |
-            In case the implementer does not know of the `portCallServiceID` used in the request, it is possible for the implementer to reject the request by returning a `404` (Not Found). This could be because of a `PUT` request, for creating/initiating the **Port Call Service**, that has not finished processing or simply because the resource does not exist.
-          headers:
-            API-Version:
-              $ref: '#/components/headers/API-Version'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
                 notFoundExample:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `portCallServiceID` cannot be found. This can be because a `PUT` request, for creating/initiating the **Port Call Service**, has not been finished processing or because the `portCallServiceID` does not exist in the implementer system.
+                    The provided `portCallServiceID` cannot be found. This can be because because the `portCallServiceID` does not exist in the implementer system.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/timestamps/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/timestamps/d26f740f-9dc3-42af-9277-472f155944e2'
                     statusCode: 404
                     statusCodeText: 'Not Found'
                     statusCodeMessage: 'portCallServiceID not found'
@@ -1843,7 +1831,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/timestamps/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/timestamps/d26f740f-9dc3-42af-9277-472f155944e2'
                     statusCode: 409
                     statusCodeText: 'Conflict'
                     statusCodeMessage: 'Trying to link a Timestamp to a CANCELLED Port Call Service'
@@ -1873,7 +1861,7 @@ paths:
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7005` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/timestamps/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/timestamps/d26f740f-9dc3-42af-9277-472f155944e2'
                     statusCode: 500
                     statusCodeText: 'Internal Server Error'
                     statusCodeMessage: 'Internal Server Error occurred while processing Timestamp'
@@ -1907,7 +1895,7 @@ paths:
                     **NB**: The `errorCode` is not yet standardized by DCSA. The value `7003` is just a "random example".
                   value:
                     httpMethod: 'PUT'
-                    requestUri: '/timestamps/085a3207-5e45-49cf-8e1b-f8442beaf545'
+                    requestUri: '/timestamps/d26f740f-9dc3-42af-9277-472f155944e2'
                     statusCode: 429
                     statusCodeText: 'Too Many Requests'
                     statusCodeMessage: 'Too many requests to create a Timestamp has been requested. Please try again in 1 hour'
@@ -1925,6 +1913,8 @@ paths:
         - $ref: '#/components/parameters/classifierCodeQueryParam'
 
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: get-timestamp
@@ -2055,6 +2045,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallServiceIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Consumer
       operationId: put-vessel-status
@@ -2116,7 +2108,7 @@ paths:
                         errorCodeMessage: 'portCallServiceID must be provided as part of a Vessel Status'
         '404':
           description: |
-            In case the implementer does not know of the `portCallServiceID` used in the request, it is possible for the implementer to reject the request by returning a `404` (Not Found). This could be because of a `PUT` request, for creating/initiating the **Port Call Service**, that has not finished processing or simply because the resource does not exist.
+            If the implementer does not know the `portCallServiceID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -2129,7 +2121,7 @@ paths:
                   summary: |
                     Not Found request
                   description: |
-                    The provided `portCallServiceID` cannot be found. This can be because a `PUT` request, for creating/initiating the **Port Call Service**, has not been finished processing or because the `portCallServiceID` does not exist in the implementer system.
+                    The provided `portCallServiceID` cannot be found. This can be because the `portCallServiceID` does not exist in the implementer system.
 
                     **NB**: `errorCode` not yet standardized by DCSA. Value `7006` is just a "random example".
                   value:
@@ -2243,6 +2235,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallServiceIDRequiredQueryParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service
       operationId: get-vessel-status
@@ -2378,6 +2372,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/portCallServiceIDPathParam'
         - $ref: '#/components/parameters/Api-Version-Major'
+        - $ref: '#/components/parameters/Sending-Party'
+        - $ref: '#/components/parameters/Receiving-Party'
       tags:
         - Port Call Service - Service Provider
       operationId: decline-port-call-service
@@ -2441,7 +2437,7 @@ paths:
                         errorCodeMessage: 'isFYI should be a boolean. `12` provided as value'
         '404':
           description: |
-            In case the implementer does not know of the `portCallServiceID` used in the request (this could be because the resource does not exist) - it is possible for the implementer to reject the request by returning a `404` (Not Found).
+            If the implementer does not know the `portCallServiceID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).
           headers:
             API-Version:
               $ref: '#/components/headers/API-Version'
@@ -2551,6 +2547,26 @@ components:
         example: '2'
       description: |
         An API-Version header **MAY** be added to the request (optional); if added it **MUST** only contain **MAJOR** version. API-Version header **MUST** be aligned with the URI version.
+    Sending-Party:
+      in: header
+      name: Sending-Party
+      required: false
+      schema:
+        type: string
+        maxLength: 4096
+        example: 'Sender-7101ad01-d608-483c-b746-e060ba335d51'
+      description: |
+        In case the request is being sent **on behalf of** another party - it is possible to add the identifier of the party `Sending` the message here. This header can be used when relaying messages.
+    Receiving-Party:
+      in: header
+      name: Receiving-Party
+      required: false
+      schema:
+        type: string
+        maxLength: 4096
+        example: 'Request-Receiver-fff76466-070b-463e-8dc2-efc55f108e74'
+      description: |
+        In case the request needs to be received **on behalf of** another party - it is possible to add the identifier of the party `Receiving` the message here. This header can be used when relaying messages.
     ##############
     # Query params
     ##############

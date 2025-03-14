@@ -45,7 +45,7 @@ public class JitWrongTimestampAction extends JitAction {
         if (!handledByProvider) {
           return Stream.of(
               new HttpMethodCheck(JitRole::isProvider, getMatchedExchangeUuid(), JitStandard.PUT),
-              new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 404),
+              new ResponseStatusCheck(JitRole::isConsumer, getMatchedExchangeUuid(), 400),
               new ApiHeaderCheck(
                   JitRole::isConsumer,
                   getMatchedExchangeUuid(),
@@ -60,7 +60,7 @@ public class JitWrongTimestampAction extends JitAction {
         // Service Consumer sends requested timestamp
         return Stream.of(
             new HttpMethodCheck(JitRole::isConsumer, getMatchedExchangeUuid(), JitStandard.PUT),
-            new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 404),
+            new ResponseStatusCheck(JitRole::isProvider, getMatchedExchangeUuid(), 400),
             new ApiHeaderCheck(
                 JitRole::isProvider,
                 getMatchedExchangeUuid(),

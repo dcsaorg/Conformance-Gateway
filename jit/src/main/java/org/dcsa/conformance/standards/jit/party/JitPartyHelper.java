@@ -363,6 +363,6 @@ public class JitPartyHelper {
             .formatted(portCallServiceID));
 
     return request.createResponse(
-        404, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
+        400, Map.of(API_VERSION, List.of(apiVersion)), new ConformanceMessageBody(response));
   }
 }

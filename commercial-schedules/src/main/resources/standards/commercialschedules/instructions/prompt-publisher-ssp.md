@@ -1,0 +1,3 @@
+The DCSA reference implementation of a subscriber running in the sandbox needs to call the GET API calls of your publisher application in order to measure its conformance, but out of the box the DCSA subscriber does not have any information about your organization's data. Therefore, at the beginning of the scenario you need to provide a number of filter parameters, which the DCSA subscriber will use to execute the GET requests that it sends to your publisher application throughout the scenario.
+
+Provide the values of the specified query parameters for which your party can successfully process a GET request.

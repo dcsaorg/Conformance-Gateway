@@ -86,22 +86,6 @@ If the length is specified in feet (`FOT`) then the decimal part means a fractio
       example = "NCVV")
   private String callSign;
 
-  @Schema(
-      description =
-          """
-  Categorization of ocean-going vessels distinguished by the main cargo the vessel carries. Possible values:
-    - `GCGO` (General cargo)
-    - `CONT` (Container)
-    - `RORO` (RoRo)
-    - `CARC` (Car carrier)
-    - `PASS` (Passenger)
-    - `FERY` (Ferry)
-    - `BULK` (Bulk)
-    - `TANK` (Tanker)
-    - `LGTK` (Liquefied gas tanker)
-    - `ASSI` (Assistance)
-    - `PILO` (Pilot boat)
-""",
-      example = "CONT")
+  @Schema(example = "CONT")
   private VesselType typeCode;
 }

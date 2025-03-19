@@ -1,6 +1,6 @@
 package org.dcsa.conformance.standards.jit.schema.endpoints;
 
-import static org.dcsa.conformance.standards.jit.schema.JitSchema.API_VERSION_HEADER;
+import static org.dcsa.conformance.standards.jit.schema.DCSABase.API_VERSION_HEADER;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.dcsa.conformance.standards.jit.schema.DCSABase;
 import org.dcsa.conformance.standards.jit.schema.JitSchema;
 import org.dcsa.conformance.standards.jit.schema.SchemaParams;
 
@@ -26,7 +27,7 @@ public class PortCallEndPoint {
 
   public static void addPortCallEndPoint(OpenAPI openAPI) {
     openAPI.path(
-        "'/port-calls/{portCallID}'",
+        "/port-calls/{portCallID}",
         new PathItem()
             .put(
                 new Operation()
@@ -59,7 +60,7 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                             .content(
                                 new Content()
                                     .addMediaType(
-                                        JitSchema.JSON_CONTENT_TYPE,
+                                        DCSABase.JSON_CONTENT_TYPE,
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
@@ -81,12 +82,9 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                                     .content(
                                         new Content()
                                             .addMediaType(
-                                                JitSchema.JSON_CONTENT_TYPE,
+                                                DCSABase.JSON_CONTENT_TYPE,
                                                 new MediaType()
-                                                    .schema(
-                                                        new Schema<>()
-                                                            .$ref(
-                                                                "#/components/schemas/ErrorResponse")))))
+                                                    .schema(DCSABase.getErrorResponseSchema()))))
                             .addApiResponse(
                                 "409",
                                 new ApiResponse()
@@ -96,7 +94,7 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                                     .content(
                                         new Content()
                                             .addMediaType(
-                                                JitSchema.JSON_CONTENT_TYPE,
+                                                DCSABase.JSON_CONTENT_TYPE,
                                                 new MediaType()
                                                     .examples(
                                                         Map.of(
@@ -135,10 +133,7 @@ Updating an OMITTED **Port Call**, returns a `409` (Conflict)
                                                                                 "Updating OMITTED Port Call",
                                                                                 "errorCodeMessage",
                                                                                 "Cannot update a Port Call that has been OMITTED"))))))
-                                                    .schema(
-                                                        new Schema<>()
-                                                            .$ref(
-                                                                "#/components/schemas/ErrorResponse")))))
+                                                    .schema(DCSABase.getErrorResponseSchema()))))
                             .addApiResponse("500", JitSchema.getErrorApiResponse()))));
   }
 }

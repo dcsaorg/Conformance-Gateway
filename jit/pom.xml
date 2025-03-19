@@ -28,20 +28,19 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core</artifactId>
-			<version>2.2.24</version>
+			<version>2.2.28</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-models</artifactId>
-			<version>2.2.24</version>
+			<version>2.2.28</version>
 		</dependency>
 
 		<!-- Jackson for YAML Export -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
-			<version>2.15.4</version>
 		</dependency>
 
 		<!-- Test scoped dependencies -->

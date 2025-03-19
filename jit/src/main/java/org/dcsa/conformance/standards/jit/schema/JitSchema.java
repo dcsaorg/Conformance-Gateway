@@ -8,7 +8,6 @@ import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Content;
@@ -20,15 +19,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
+import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
 
 public class JitSchema {
-
-  public static final String JSON_CONTENT_TYPE = "application/json";
-  public static final Map<String, Header> API_VERSION_HEADER =
-      Map.of("API-Version", new Header().$ref("#/components/headers/API-Version"));
 
   public static void main(String[] args) throws IOException {
     OpenAPI openAPI =
@@ -39,7 +34,7 @@ public class JitSchema {
                     .description("# DCSA OpenAPI specification for Just in Time Port Call process")
                     .version("2.0.0")
                     .license(new License().name("Apache 2.0").url("http://apache.org"))
-                    .contact(getDefaultDCSAContact()))
+                    .contact(DCSABase.getDefaultContact()))
             .addTagsItem(
                 new io.swagger.v3.oas.models.tags.Tag()
                     .name("Port Call Service - Consumer")
@@ -56,7 +51,7 @@ public class JitSchema {
 
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
-    Stream.of(Vessel.class, Container.class, PortCall.class)
+    Stream.of(PortCall.class, TerminalCall.class, Vessel.class, Container.class)
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));
@@ -73,6 +68,7 @@ public class JitSchema {
     openAPI.setComponents(components);
 
     PortCallEndPoint.addPortCallEndPoint(openAPI);
+    TerminalCallEndPoint.addPortCallEndPoint(openAPI);
 
     // Export to YAML
     YAMLFactory yamlFactory =
@@ -97,19 +93,12 @@ public class JitSchema {
     return new ApiResponse()
         .description(
             "In case a server error occurs in implementer system, a `500` (Internal Server Error) is returned.")
-        .headers(API_VERSION_HEADER)
+        .headers(DCSABase.API_VERSION_HEADER)
         .content(
             new Content()
                 .addMediaType(
-                    JSON_CONTENT_TYPE,
-                    new MediaType()
-                        .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))));
+                    DCSABase.JSON_CONTENT_TYPE,
+                    new MediaType().schema(DCSABase.getErrorResponseSchema())));
   }
 
-  public static Contact getDefaultDCSAContact() {
-    return new Contact()
-        .name("Digital Container Shipping Association (DCSA)")
-        .url("https://dcsa.org")
-        .email("info@dcsa.org");
-  }
 }

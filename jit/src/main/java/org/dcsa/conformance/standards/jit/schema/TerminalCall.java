@@ -6,28 +6,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Schema(
-    title = "Port Call",
-    requiredProperties = "portCallID, UNLocationCode, vessel",
+    title = "Terminal Call",
+    requiredProperties = "terminalCallID, portCallID",
     description =
-        "**Port Call** information. The `portCallID` uniquely identifies the **Port Call**. Any subsequent **Terminal Calls** linked to the same **Port Call** MUST use the same `portCallID`. An optional `portVisitReference` can be added in order to link the **Port Call** to external systems. It is mandatory to provide the **Vessel** information.")
+        "**Terminal Call** information. The `terminalCallID` uniquely identifies the **Terminal Call**. Any subsequent **Port Call Services** linked to the same **Terminal Call** MUST use the same `terminalCallID`. An optional `terminalCallReference` can be added in order to link the **Terminal Call** to external systems e.g Operational Vessel Schedules (**OVS**).")
 @Data
 @AllArgsConstructor
-public class PortCall {
+public class TerminalCall {
 
   @Schema(
       description =
-          """
-   Universal unique identifier for the **Port call**. The `portCallID` is created by the provider. The `portCallID` **MUST** only be created once per **
-   Port Call**. To be used in all communication regarding the **Port Call**.
-   """)
+          "Universal unique identifier for the **Terminal Call**. The `terminalCallID` is created by the provider. The `terminalCallID` **MUST** only be created once per **Terminal Call**. To be used in all communication regarding the **Terminal Call**.")
+  private TerminalCallID terminalCallID;
+
+  @Schema(
+      description =
+          "Universal unique identifier for the **Port call**. The `portCallID` is created by the provider. The `portCallID` **MUST** only be created once per **Port Call**. To be used in all communication regarding the **Port Call**.")
   private PortCallID portCallID;
 
   @Schema(
       description =
-          "The unique reference that can be used to link different **Terminal Calls** to the same port visit. The reference is provided by the port to uniquely identify a **Port Call**.",
-      example = "NLAMS1234589",
-      maxLength = 50)
-  private String portVisitReference;
+          """
+          The unique reference for a **Terminal Call**. It's the vessel operator's responsibility to provide the **Terminal Call Reference**, other parties are obliged to pick it up and use it.
+
+          In **Operational Vessel Schedules (OVS) 3.0** this field can be found as `transportCallReference`.""",
+      example = "15063401",
+      maxLength = 100)
+  private String terminalCallReference;
 
   @Schema(
       description =

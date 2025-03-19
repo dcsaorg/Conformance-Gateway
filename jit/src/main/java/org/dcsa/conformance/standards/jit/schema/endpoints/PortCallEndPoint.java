@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -109,31 +110,31 @@ Updating an OMITTED **Port Call**, returns a `409` (Conflict)
 **NB**: `errorCode` not yet standardized by DCSA. Value `7003` is just a "random example".
 """)
                                                                 .value(
-                                                                    Map.of(
-                                                                        "httpMethod",
-                                                                        "PUT",
-                                                                        "requestUri",
-                                                                        "/port-calls/085a3207-5e45-49cf-8e1b-f8442beaf545",
-                                                                        "statusCode",
-                                                                        409,
-                                                                        "statusCodeText",
-                                                                        "Conflict",
-                                                                        "statusCodeMessage",
-                                                                        "Trying to update a Port Call that has been OMITTED",
-                                                                        "providerCorrelationReference",
-                                                                        "4426d965-0dd8-4005-8c63-dc68b01c4962",
-                                                                        "errorDateTime",
-                                                                        "2024-11-21T09:41:00Z",
-                                                                        "errors",
-                                                                        List.of(
-                                                                            Map.of(
-                                                                                "errorCode",
-                                                                                7003,
-                                                                                "errorCodeText",
-                                                                                "Updating OMITTED Port Call",
-                                                                                "errorCodeMessage",
-                                                                                "Cannot update a Port Call that has been OMITTED"))))))
+                                                                    createExampleConflictResponse())))
                                                     .schema(DCSABase.getErrorResponseSchema()))))
                             .addApiResponse("500", JitSchema.getErrorApiResponse()))));
+  }
+
+  // Adding an example response, while keeping the insertion order. The Map.of part is in random
+  // order.
+  private static LinkedHashMap<String, Object> createExampleConflictResponse() {
+    var map = new LinkedHashMap<String, Object>();
+    map.put("httpMethod", "PUT");
+    map.put("requestUri", "/port-calls/085a3207-5e45-49cf-8e1b-f8442beaf545");
+    map.put("statusCode", 409);
+    map.put("statusCodeText", "Conflict");
+    map.put("statusCodeMessage", "Trying to update a Port Call that has been OMITTED");
+    map.put("providerCorrelationReference", "4426d965-0dd8-4005-8c63-dc68b01c4962");
+    map.put("errorDateTime", "2024-11-21T09:41:00Z");
+    map.put(
+        "errors",
+        Map.of(
+            "errorCode",
+            7003,
+            "errorCodeText",
+            "Updating OMITTED Port Call",
+            "errorCodeMessage",
+            "Cannot update a Port Call that has been OMITTED"));
+    return map;
   }
 }

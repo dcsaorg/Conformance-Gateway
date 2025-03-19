@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.jit.schema;
+package org.dcsa.conformance.standards.jit.schema.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;

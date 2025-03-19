@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.jit.schema;
+package org.dcsa.conformance.standards.jit.schema.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,12 +57,5 @@ The UN Location code specifying where the place is located. The pattern used mus
       example = "false")
   private boolean omitted;
 
-  @Schema(
-      accessMode = Schema.AccessMode.READ_ONLY,
-      defaultValue = "false",
-      description =
-          "If set to `true` it indicates that this message is primarily meant for another party - but is sent as a FYI (for your information).",
-      example = "true")
-  @JsonProperty("isFYI")
-  private boolean isFYI;
+  private IsFYI isFYI;
 }

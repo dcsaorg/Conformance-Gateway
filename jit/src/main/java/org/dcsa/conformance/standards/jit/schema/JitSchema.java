@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
+import org.dcsa.conformance.standards.jit.schema.model.PortCall;
+import org.dcsa.conformance.standards.jit.schema.model.TerminalCall;
+import org.dcsa.conformance.standards.jit.schema.model.Vessel;
 
 public class JitSchema {
 

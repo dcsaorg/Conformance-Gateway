@@ -1,1 +1,1 @@
-Process and accept an Out-of-Band request for a TIMESTAMP_TYPE_PLACEHOLDER timestamp.
+Communicate an Out-of-Band message for a TIMESTAMP_TYPE_PLACEHOLDER timestamp.

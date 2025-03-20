@@ -5,7 +5,10 @@ import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.oas.models.media.Schema;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ModelValidatorConverter implements ModelConverter {
   @Override
@@ -17,6 +20,8 @@ public class ModelValidatorConverter implements ModelConverter {
     if (type.getType() instanceof SimpleType simpleType && simpleType.isEnumType()) {
       updateEnumDescription(simpleType.getRawClass().getName(), schema);
     }
+
+    processDescriptionOverride(schema, type);
 
     if (schema.getProperties() != null) {
       verifyDescriptionIsUsed(schema, type);
@@ -39,6 +44,56 @@ public class ModelValidatorConverter implements ModelConverter {
                         propertyName, type.getType().getTypeName()));
               }
             });
+  }
+
+  private void processDescriptionOverride(Schema<?> schema, AnnotatedType type) {
+    if (schema.getProperties() != null) {
+      schema
+          .getProperties()
+          .forEach(
+              (propertyName, propertySchema) -> {
+                try {
+                  Class<?> clazz = Class.forName(type.getType().getTypeName());
+                  java.lang.reflect.Field field = getFieldFromClass(clazz, propertyName);
+                  DescriptionOverride override = field.getAnnotation(DescriptionOverride.class);
+                  if (override != null) {
+                    propertySchema.setDescription(override.value());
+                  }
+                } catch (ClassNotFoundException e) {
+                  throw new IllegalStateException(e);
+                }
+              });
+    }
+  }
+
+  private Field getFieldFromClass(Class<?> clazz, String propertyName) {
+    try {
+      return clazz.getDeclaredField(propertyName);
+    } catch (NoSuchFieldException e) {
+      // Field might be renamed by 'name' property in @Schema annotation.
+    }
+    // Continue to search for all fields in the given class, and match the 'name' property with an
+    // existing Field (Java class property).
+    AtomicReference<String> foundPropertyName = new AtomicReference<>();
+    Arrays.stream(clazz.getDeclaredFields())
+        .forEach(
+            field -> {
+              if (field.getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class) != null) {
+                io.swagger.v3.oas.annotations.media.Schema schema =
+                    field.getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class);
+                if (schema.name().equals(propertyName)) {
+                  foundPropertyName.set(field.getName());
+                }
+              }
+            });
+    if (foundPropertyName.get() != null) {
+      try {
+        return clazz.getDeclaredField(foundPropertyName.get());
+      } catch (NoSuchFieldException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    throw new IllegalStateException("Field not found: " + propertyName);
   }
 
   private void updateEnumDescription(String enumClassName, Schema<?> schema) {

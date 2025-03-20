@@ -1,9 +1,9 @@
 package org.dcsa.conformance.standards.jit.schema.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.jit.schema.DescriptionOverride;
 
 @Schema(
     title = "Port Call",
@@ -14,11 +14,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class PortCall {
 
-  @Schema(
-      description =
-          """
-          Universal unique identifier for the **Port call**. The `portCallID` is created by the provider. The `portCallID` **MUST** only be created once per **
-          Port Call**. To be used in all communication regarding the **Port Call**.
+  @Schema
+  @DescriptionOverride(
+      """
+          Universal unique identifier for the **Port call**. The `portCallID` is created by the **Service Provider**. The `portCallID` **MUST** only be created once per **Port Call**. To be used in all communication regarding the **Port Call**.
           """)
   private PortCallID portCallID;
 
@@ -40,10 +39,10 @@ public class PortCall {
         More info can be found here: [UN/LOCODE](https://unece.org/trade/cefact/UNLOCODE-Download).
         """,
       pattern = "^[A-Z]{2}[A-Z2-9]{3}$",
+      name = "UNLocationCode",
       example = "NLAMS",
       minLength = 5,
       maxLength = 5)
-  @JsonProperty("UNLocationCode")
   private String unLocationCode;
 
   @Schema(ref = "#/components/schemas/Vessel")

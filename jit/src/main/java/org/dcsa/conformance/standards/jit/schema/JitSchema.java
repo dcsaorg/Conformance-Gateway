@@ -85,7 +85,6 @@ public class JitSchema {
     // Export to YAML
     YAMLFactory yamlFactory =
         YAMLFactory.builder()
-            //            .disable(YAMLGenerator.Feature.SPLIT_LINES)
             .enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
             .configure(YAMLGenerator.Feature.SPLIT_LINES, false)
             .build();

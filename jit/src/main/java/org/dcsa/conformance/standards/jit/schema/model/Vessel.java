@@ -1,6 +1,5 @@
 package org.dcsa.conformance.standards.jit.schema.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,10 +18,10 @@ public class Vessel {
 
       **Condition:** At least one of `vesselIMONumber` or `MMSINumber` **MUST** be specified in order to identify the `Vessel`. It is also acceptable to provide both properties.
       """,
+      name = "vesselIMONumber",
       pattern = "^\\d{7,8}$",
       minLength = 7,
       maxLength = 8)
-  @JsonProperty("vesselIMONumber")
   private String vesselIMONumber;
 
   @Schema(
@@ -32,10 +31,10 @@ public class Vessel {
 
       **Condition:** At least one of `vesselIMONumber` or `MMSINumber` **MUST** be specified in order to identify the `Vessel`. It is also acceptable to provide both properties.
       """,
+      name = "MMSINumber",
       pattern = "^\\d{9}$",
       minLength = 9,
       maxLength = 9)
-  @JsonProperty("MMSINumber")
   private String mmsiNumber;
 
   @Schema(

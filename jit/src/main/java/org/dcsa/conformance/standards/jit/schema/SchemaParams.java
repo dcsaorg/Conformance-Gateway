@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 public class SchemaParams {
 
   public static final String PORT_CALL_ID_REF = "#/components/parameters/portCallIDPathParam";
+  public static final String PORT_CALL_SERVICE_ID_REF =
+      "#/components/parameters/portCallServiceIDPathParam";
   public static final String API_VERSION_MAJOR_REF = "#/components/parameters/Api-Version-Major";
 
   public static Parameter getPortCallIDPathParam() {

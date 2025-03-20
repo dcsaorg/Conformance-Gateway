@@ -65,17 +65,7 @@ If the length is specified in feet (`FOT`) then the decimal part means a fractio
       example = "37.33")
   private float width;
 
-  @Schema(
-      description =
-          """
-          The unit of measure which can be expressed in
-           - `MTR` (Meter)
-           - `FOT` (Foot)
-
-          **Condition:** Mandatory to provide if `lengthOverall` or `width` is provided.
-          """,
-      type = "string",
-      example = "MTR")
+  @Schema(example = "MTR")
   private DimensionUnit dimensionUnit;
 
   @Schema(

@@ -21,39 +21,38 @@ import org.dcsa.conformance.standards.jit.schema.JitSchema;
 import org.dcsa.conformance.standards.jit.schema.SchemaParams;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class TerminalCallEndPoint {
+public class PortCallServicesEndPoint {
 
   public static void addEndPoint(OpenAPI openAPI) {
     openAPI.path(
-        "/terminal-calls/{terminalCallID}",
+        "/port-call-services/{portCallServiceID}",
         new PathItem()
             .put(
                 new Operation()
-                    .summary("Initiates a new or updates a Terminal Call")
+                    .summary("Initiates a new or updates a Port Call Service")
                     .description(
                         """
-Creates or updates a **Terminal Call** record. The caller must provide a unique `terminalCallID` (UUIDv4), which identifies the **Terminal Call**. The `terminalCallID` must remain consistent across all subsequent communications and linked **Port Call Services**. If updating an existing **Terminal Call**, e.g. including the `terminalCallReference`, the provided `terminalCallID` must match the existing record.
+Creates or updates a **Port Call Service** record. The caller must provide a unique `portCallServiceID` (UUIDv4), which identifies the **Port Call Service**. The `portCallServiceID` must remain consistent across all subsequent communications and linked **Timestamps**. If updating an existing **Port Call Service**, e.g. updating the `moves`, the provided `portCallServiceID` must match the existing record.
 
-The **Terminal Call** includes:
-  - link to the **Port Call** (required): `portCallID`
-  - Service information (required): `carrierServiceCode`, `carrierServiceName` (and an optional `universalServiceReference`)
-  - Voyage information: `carrierImportVoyageNumber`, `carrierExportVoyageNumber`, `universalImportVoyageReference` and `universalExportVoyageReference`
-  - terminal information: `terminalCallReference` and `terminalCallSequenceNumber`
-  - The ability to send the record with informational purpose only, using `isFYI=true`
+The **Port Call Service** includes:
 
-This call is often provided as the second call from a **Carrier** to a **Terminal** after the creation of the **Port Call** and then sending `ETA-Berth` or `Moves`.
+ - link to the **Terminal Call** (required): `terminalCallID`
+ - type of Service (required): `portCallServiceTypeCode` and `portCallServiceEventTypeCode` (and optionally `portCallPhaseTypeCode` and `facilityTypeCode`)
+ - a location (required): `portCallServiceLocation`
+ - Moves forecast information: `moves`
+ - The ability to send the record with informational purpose only, using `isFYI=true`
 
-It is not possible to update a **Terminal Call** that has been `OMITTED`.
+This call is used to initiate a Service linked to a **Terminal Call**. It is used for sending e.g. `ETA-Berth` or `Moves`.
 """)
-                    .operationId("put-terminal-call")
+                    .operationId("put-port-call-service")
                     .parameters(
                         List.of(
-                            new Parameter().$ref(SchemaParams.PORT_CALL_ID_REF),
+                            new Parameter().$ref(SchemaParams.PORT_CALL_SERVICE_ID_REF),
                             new Parameter().$ref(SchemaParams.API_VERSION_MAJOR_REF)))
                     .tags(Collections.singletonList("Port Call Service - Consumer"))
                     .requestBody(
                         new RequestBody()
-                            .description("Initiates a new or updates a Terminal Call")
+                            .description("Initiates a new or updates a **Port Call Service**.")
                             .required(true)
                             .content(
                                 new Content()
@@ -62,20 +61,20 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .$ref("#/components/schemas/TerminalCall")))))
+                                                    .$ref(
+                                                        "#/components/schemas/PortCallService")))))
                     .responses(
                         new ApiResponses()
                             .addApiResponse(
                                 "204",
                                 new ApiResponse()
-                                    .description(
-                                        "A new or updated Terminal Call successfully accepted by consumer.")
+                                    .description("A new Port Call Service accepted")
                                     .headers(API_VERSION_HEADER))
                             .addApiResponse(
                                 "400",
                                 new ApiResponse()
                                     .description(
-                                        "In case creating a new **Terminal Call** fails schema validation, a `400` (Bad Request) is returned.")
+                                        "In case creating a new **Port Call Service** fails schema validation, a `400` (Bad Request) is returned.")
                                     .headers(API_VERSION_HEADER)
                                     .content(
                                         new Content()
@@ -87,7 +86,7 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                                 "409",
                                 new ApiResponse()
                                     .description(
-                                        "In case creating a new or updating a **Terminal Call** linked to a **Port Call** that has been `OMITTED`, a `409` (Conflict) is returned.")
+                                        "In case creating a new or updating a **Port Call Service** that is linked to a **Terminal Call** that has been `OMITTED`, a `409` (Conflict) is returned.")
                                     .headers(API_VERSION_HEADER)
                                     .content(
                                         new Content()

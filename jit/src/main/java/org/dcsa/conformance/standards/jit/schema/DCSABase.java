@@ -4,7 +4,10 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DCSABase {
 
   public static final Map<String, Header> API_VERSION_HEADER =

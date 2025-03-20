@@ -26,7 +26,7 @@ import org.dcsa.conformance.standards.jit.schema.SchemaParams;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PortCallEndPoint {
 
-  public static void addPortCallEndPoint(OpenAPI openAPI) {
+  public static void addEndPoint(OpenAPI openAPI) {
     openAPI.path(
         "/port-calls/{portCallID}",
         new PathItem()

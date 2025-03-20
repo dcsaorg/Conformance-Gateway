@@ -21,8 +21,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
+import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallServicesEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.model.PortCall;
+import org.dcsa.conformance.standards.jit.schema.model.PortCallService;
 import org.dcsa.conformance.standards.jit.schema.model.TerminalCall;
 import org.dcsa.conformance.standards.jit.schema.model.Vessel;
 
@@ -54,14 +56,20 @@ public class JitSchema {
 
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
-    Stream.of(PortCall.class, TerminalCall.class, Vessel.class, Container.class)
+    ModelConverters.getInstance().addConverter(new ModelValidatorConverter());
+    Stream.of(
+            PortCall.class,
+            TerminalCall.class,
+            PortCallService.class,
+            Vessel.class,
+            Container.class)
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));
     components.addParameters("Api-Version-Major", SchemaParams.getApiVersionMajorHeader());
     components.addParameters("portCallIDPathParam", SchemaParams.getPortCallIDPathParam());
     components.addParameters(
-        "PortCallServiceIDPathParam", SchemaParams.getPortCallServiceIDPathParam());
+        "portCallServiceIDPathParam", SchemaParams.getPortCallServiceIDPathParam());
     components.addHeaders(
         "API-Version",
         new Header()
@@ -70,15 +78,16 @@ public class JitSchema {
             .schema(new Schema<>().type("string").example("2.0.0")));
     openAPI.setComponents(components);
 
-    PortCallEndPoint.addPortCallEndPoint(openAPI);
-    TerminalCallEndPoint.addPortCallEndPoint(openAPI);
+    PortCallEndPoint.addEndPoint(openAPI);
+    TerminalCallEndPoint.addEndPoint(openAPI);
+    PortCallServicesEndPoint.addEndPoint(openAPI);
 
     // Export to YAML
     YAMLFactory yamlFactory =
         YAMLFactory.builder()
-            .disable(YAMLGenerator.Feature.SPLIT_LINES)
-            .disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
-            // .configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true)
+            //            .disable(YAMLGenerator.Feature.SPLIT_LINES)
+            .enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+            .configure(YAMLGenerator.Feature.SPLIT_LINES, false)
             .build();
 
     ObjectMapper mapper = new ObjectMapper(yamlFactory);
@@ -86,6 +95,7 @@ public class JitSchema {
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_DEFAULT);
     mapper.addMixIn(Schema.class, SchemaMixin.class);
+
     String yamlFilePath = "jit/src/main/resources/standards/jit/schemas/exported-JIT_v2.0.0.yaml";
     String yamlContent = mapper.writeValueAsString(openAPI);
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
@@ -103,5 +113,4 @@ public class JitSchema {
                     DCSABase.JSON_CONTENT_TYPE,
                     new MediaType().schema(DCSABase.getErrorResponseSchema())));
   }
-
 }

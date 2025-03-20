@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.scenario.OverwritingReference;
+import org.dcsa.conformance.core.toolkit.IOToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceExchange;
 import org.dcsa.conformance.standards.cs.party.DynamicScenarioParameters;
 import org.dcsa.conformance.standards.cs.party.SuppliedScenarioParameters;
@@ -46,6 +49,17 @@ public abstract class CsAction extends ConformanceAction {
         : previousAction == null
             ? () -> SuppliedScenarioParameters.fromMap(Map.ofEntries())
             : _getSspSupplier(previousAction.getPreviousAction());
+  }
+
+  protected String getMarkdownHumanReadablePrompt(
+    Map<String, String> replacementsMap, String... fileNames) {
+
+    return Arrays.stream(fileNames)
+      .map(
+        fileName ->
+          IOToolkit.templateFileToText(
+            "/standards/commercialschedules/instructions/" + fileName, replacementsMap))
+      .collect(Collectors.joining());
   }
 
   protected Supplier<DynamicScenarioParameters> getDspSupplier() {

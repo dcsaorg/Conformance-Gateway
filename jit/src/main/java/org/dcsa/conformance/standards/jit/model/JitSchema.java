@@ -25,7 +25,8 @@ public enum JitSchema {
   PORT_CALL_SERVICES("PortCallServices"),
   TIMESTAMPS("Timestamps"),
   VESSEL_STATUSES("VesselStatuses"),
-  ;
+  // Other
+  ERROR_RESPONSE("ErrorResponse");
 
   private final String schemaName;
 

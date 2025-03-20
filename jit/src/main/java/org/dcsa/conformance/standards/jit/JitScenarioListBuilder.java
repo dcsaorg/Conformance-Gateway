@@ -24,6 +24,7 @@ import org.dcsa.conformance.standards.jit.action.JitPortCallServiceAction;
 import org.dcsa.conformance.standards.jit.action.JitTerminalCallAction;
 import org.dcsa.conformance.standards.jit.action.JitTimestampAction;
 import org.dcsa.conformance.standards.jit.action.JitVesselStatusAction;
+import org.dcsa.conformance.standards.jit.action.JitWrongTimestampAction;
 import org.dcsa.conformance.standards.jit.action.SupplyScenarioParametersAction;
 import org.dcsa.conformance.standards.jit.checks.JitChecks;
 import org.dcsa.conformance.standards.jit.model.JitGetPortCallFilters;
@@ -85,6 +86,7 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
     addScenarioGroup12(scenarioList, context);
     addScenarioGroup13(scenarioList, context);
     addScenarioGroup14(scenarioList, context);
+    addScenarioGroup15and16(scenarioList, context);
 
     // Scenario suite: "GET endpoint conformance"
     addScenarioGroupGET1(scenarioList, context);
@@ -739,6 +741,28 @@ class JitScenarioListBuilder extends ScenarioListBuilder<JitScenarioListBuilder>
                         terminalCall(context)
                             .then(
                                 serviceCall(context, null, FULL_ERP).then(declineCall(context))))));
+  }
+
+  private static void addScenarioGroup15and16(
+      LinkedHashMap<String, JitScenarioListBuilder> scenarioList, JitScenarioContext context) {
+    scenarioList.put(
+        "15. Service Provider handling unexpected Timestamp call",
+        noAction()
+            .thenEither(
+                new JitScenarioListBuilder(
+                    previousAction -> new JitWrongTimestampAction(context, previousAction, true))));
+
+    scenarioList.put(
+        "16. Service Consumer handling unexpected Timestamp call",
+        noAction()
+            .thenEither(
+                new JitScenarioListBuilder(
+                    previousAction ->
+                        new JitWrongTimestampAction(context, previousAction, false))));
+  }
+
+  private static JitScenarioListBuilder noAction() {
+    return new JitScenarioListBuilder(null);
   }
 
   private static void addScenarioGroupGET1(

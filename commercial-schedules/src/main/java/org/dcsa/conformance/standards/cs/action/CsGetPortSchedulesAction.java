@@ -1,6 +1,7 @@
 package org.dcsa.conformance.standards.cs.action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
@@ -30,9 +31,18 @@ public class CsGetPortSchedulesAction extends CsAction {
   @Override
   public String getHumanReadablePrompt() {
     return previousAction instanceof CsGetPortSchedulesAction
-        ? "Send a GET port schedules request to fetch the second results page, using the cursor retrieved from the headers of the response of the first GET request."
-        : "Send a GET port schedules request with the following parameters: "
-            + sspSupplier.get().toJson().toPrettyString();
+        ? getMarkdownHumanReadablePrompt(
+            Map.of("API_PLACEHOLDER", "port schedules"),
+            "prompt-subscriber-get-secondpage.md",
+            "prompt-subscriber-refresh-complete.md")
+        : getMarkdownHumanReadablePrompt(
+            Map.of(
+                "API_PLACEHOLDER",
+                "port schedules",
+                "PARAMETERS_PLACEHOLDER",
+                sspSupplier.get().toJson().toPrettyString()),
+            "prompt-subscriber-get.md",
+            "prompt-subscriber-refresh-complete.md");
   }
 
   @Override

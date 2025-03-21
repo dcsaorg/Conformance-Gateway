@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DescriptionOverride {
-  String value();
+public @interface SchemaOverride {
+  String description() default "";
+
+  String example() default "";
 }

@@ -17,11 +17,13 @@ public class ModelValidatorConverter implements ModelConverter {
     Schema<?> schema = chain.hasNext() ? chain.next().resolve(type, context, chain) : null;
     if (schema == null) return null;
 
+    processDescriptionOverride(schema, type);
+
     if (type.getType() instanceof SimpleType simpleType && simpleType.isEnumType()) {
       updateEnumDescription(simpleType.getRawClass().getName(), schema);
     }
 
-    processDescriptionOverride(schema, type);
+    // TODO: updateConditionAnnotations(schema, type); required : {1,2,3}
 
     if (schema.getProperties() != null) {
       verifyDescriptionIsUsed(schema, type);
@@ -55,12 +57,17 @@ public class ModelValidatorConverter implements ModelConverter {
                 try {
                   Class<?> clazz = Class.forName(type.getType().getTypeName());
                   java.lang.reflect.Field field = getFieldFromClass(clazz, propertyName);
-                  DescriptionOverride override = field.getAnnotation(DescriptionOverride.class);
-                  if (override != null) {
-                    propertySchema.setDescription(override.value());
+                  SchemaOverride override = field.getAnnotation(SchemaOverride.class);
+                  if (override != null && !override.description().isEmpty()) {
+                    propertySchema.setDescription(override.description());
+                  }
+                  if (override != null && !override.example().isEmpty()) {
+                    propertySchema.setExample(override.example());
                   }
                 } catch (ClassNotFoundException e) {
-                  throw new IllegalStateException(e);
+                  throw new IllegalStateException(
+                      "While processing property '%s' in '%s': %s"
+                          .formatted(propertyName, type.getType().getTypeName(), e));
                 }
               });
     }

@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.jit.schema.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.dcsa.conformance.standards.jit.schema.DescriptionOverride;
+import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
 
 @Schema(
     title = "Terminal Call",
@@ -14,11 +14,14 @@ import org.dcsa.conformance.standards.jit.schema.DescriptionOverride;
 @AllArgsConstructor
 public class TerminalCall {
 
-  @DescriptionOverride(
-      "Universal unique identifier for the **Terminal Call**. The `terminalCallID` is created by the **Service Provider**. The `terminalCallID` **MUST** only be created once per **Terminal Call**. To be used in all communication regarding the **Terminal Call**.")
+  @SchemaOverride(
+      description =
+          "Universal unique identifier for the **Terminal Call**. The `terminalCallID` is created by the **Service Provider**. The `terminalCallID` **MUST** only be created once per **Terminal Call**. To be used in all communication regarding the **Terminal Call**.")
   private TerminalCallID terminalCallID;
 
-  @Schema private PortCallID portCallID;
+  @Schema
+  @SchemaOverride(example = "9d4b83fa-cf48-413e-aa79-8d01a17ee201")
+  private PortCallID portCallID;
 
   @Schema(
       description =

@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.jit.schema.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.dcsa.conformance.standards.jit.schema.DescriptionOverride;
+import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
 
 @Schema(
     title = "Port Call",
@@ -15,8 +15,9 @@ import org.dcsa.conformance.standards.jit.schema.DescriptionOverride;
 public class PortCall {
 
   @Schema
-  @DescriptionOverride(
-      """
+  @SchemaOverride(
+      description =
+          """
           Universal unique identifier for the **Port call**. The `portCallID` is created by the **Service Provider**. The `portCallID` **MUST** only be created once per **Port Call**. To be used in all communication regarding the **Port Call**.
           """)
   private PortCallID portCallID;

@@ -3,6 +3,7 @@ package org.dcsa.conformance.standards.jit.schema.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.jit.schema.Condition;
 import org.dcsa.conformance.standards.jit.schema.enums.DimensionUnit;
 import org.dcsa.conformance.standards.jit.schema.enums.VesselType;
 
@@ -22,6 +23,7 @@ public class Vessel {
       pattern = "^\\d{7,8}$",
       minLength = 7,
       maxLength = 8)
+  @Condition(anyOf = {"vesselIMONumber", "MMSINumber"})
   private String vesselIMONumber;
 
   @Schema(
@@ -35,12 +37,16 @@ public class Vessel {
       pattern = "^\\d{9}$",
       minLength = 9,
       maxLength = 9)
+  @Condition(required = "pancake")
   private String mmsiNumber;
 
   @Schema(
       description = "The name of the Vessel given by the Vessel Operator and registered with IMO.",
       pattern = "^\\S(?:.*\\S)?$",
       maxLength = 50)
+  @Condition(
+      oneOf = {"vesselIMONumber", "MMSINumber"},
+      required = "pancake")
   private String name;
 
   @Schema(
@@ -51,6 +57,7 @@ The maximum length of a ship's hull measured parallel to the waterline (Length O
 If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches. E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
 """,
       format = "float")
+  @Condition(allOf = {"vesselIMONumber", "MMSINumber"})
   private float lengthOverall;
 
   @Schema(

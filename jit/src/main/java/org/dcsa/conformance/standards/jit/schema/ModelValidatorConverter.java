@@ -17,13 +17,11 @@ public class ModelValidatorConverter implements ModelConverter {
     Schema<?> schema = chain.hasNext() ? chain.next().resolve(type, context, chain) : null;
     if (schema == null) return null;
 
-    processDescriptionOverride(schema, type);
+    processCustomAnnotations(schema, type);
 
     if (type.getType() instanceof SimpleType simpleType && simpleType.isEnumType()) {
       updateEnumDescription(simpleType.getRawClass().getName(), schema);
     }
-
-    // TODO: updateConditionAnnotations(schema, type); required : {1,2,3}
 
     if (schema.getProperties() != null) {
       verifyDescriptionIsUsed(schema, type);
@@ -48,34 +46,75 @@ public class ModelValidatorConverter implements ModelConverter {
             });
   }
 
-  private void processDescriptionOverride(Schema<?> schema, AnnotatedType type) {
+  private void processCustomAnnotations(Schema<?> schema, AnnotatedType type) {
     if (schema.getProperties() != null) {
       schema
           .getProperties()
           .forEach(
-              (propertyName, propertySchema) -> {
-                try {
-                  // Some classes are of type SimpleType, and we need to extract the class name
-                  // differently.
-                  String className;
-                  if (type.getType() instanceof SimpleType simpleType) {
-                    className = simpleType.getRawClass().getName();
-                  } else className = type.getType().getTypeName();
-                  Class<?> clazz = Class.forName(className);
-                  java.lang.reflect.Field field = getFieldFromClass(clazz, propertyName);
-                  SchemaOverride override = field.getAnnotation(SchemaOverride.class);
-                  if (override != null && !override.description().isEmpty()) {
-                    propertySchema.setDescription(override.description());
-                  }
-                  if (override != null && !override.example().isEmpty()) {
-                    propertySchema.setExample(override.example());
-                  }
-                } catch (ClassNotFoundException e) {
-                  throw new IllegalStateException(
-                      "While processing property '%s' in '%s': %s"
-                          .formatted(propertyName, type.getType().getTypeName(), e));
-                }
-              });
+              (propertyName, propertySchema) ->
+                  processFoundSchemaObjects(type, propertyName, propertySchema));
+    }
+  }
+
+  private void processFoundSchemaObjects(
+      AnnotatedType type, String propertyName, Schema propertySchema) {
+    try {
+      // Some classes are of type SimpleType, and we need to extract the class name differently.
+      String className;
+      if (type.getType() instanceof SimpleType simpleType) {
+        className = simpleType.getRawClass().getName();
+      } else className = type.getType().getTypeName();
+      Class<?> clazz = Class.forName(className);
+      Field field = getFieldFromClass(clazz, propertyName);
+
+      processSchemaOverride(propertySchema, field);
+      processConditionAnnotations(propertySchema, field);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(
+          "While processing property '%s' in '%s': %s"
+              .formatted(propertyName, type.getType().getTypeName(), e));
+    }
+  }
+
+  private static void processSchemaOverride(Schema propertySchema, Field field) {
+    SchemaOverride override = field.getAnnotation(SchemaOverride.class);
+    if (override == null) return;
+    if (!override.description().isEmpty()) {
+      propertySchema.setDescription(override.description());
+    }
+    if (!override.example().isEmpty()) {
+      propertySchema.setExample(override.example());
+    }
+  }
+
+  private void processConditionAnnotations(Schema<?> schema, Field field) {
+    Condition condition = field.getAnnotation(Condition.class);
+    if (condition == null) return;
+
+    if (!condition.required().isEmpty()) {
+      schema.setDescription(
+          schema.getDescription()
+              + "%n**Condition:** Mandatory if `%s` is provided.".formatted(condition.required()));
+    }
+
+    if (condition.oneOf().length > 0 && !condition.oneOf()[0].isEmpty()) {
+      schema.setDescription(
+          schema.getDescription()
+              + "%n**Condition:** One of `%s` **MUST** be specified."
+                  .formatted(String.join("` or `", condition.oneOf())));
+    }
+    if (condition.anyOf().length > 0 && !condition.anyOf()[0].isEmpty()) {
+      schema.setDescription(
+          schema.getDescription()
+              + "%n**Condition:** At least one of `%s` **MUST** be specified. It is also acceptable to provide more than one property."
+                  .formatted(String.join("` or `", condition.anyOf())));
+    }
+
+    if (condition.allOf().length > 0 && !condition.allOf()[0].isEmpty()) {
+      schema.setDescription(
+          schema.getDescription()
+              + "%n**Condition:** All of the following properties **MUST** be specified: `%s`."
+                  .formatted(String.join("` and `", condition.allOf())));
     }
   }
 

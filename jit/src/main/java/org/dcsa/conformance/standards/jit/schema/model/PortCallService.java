@@ -7,7 +7,7 @@ import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
 
 @Schema(
     title = "Port Call Service",
-    requiredProperties = "terminalCallID, portCallServiceID",
+    requiredProperties = {"terminalCallID", "portCallServiceID"},
     description =
         "The **Port Call Service** contains all information about the service being provided.")
 @Data

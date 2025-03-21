@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.jit.schema;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.core.converter.ModelConverters;
@@ -40,7 +41,7 @@ public class JitSchema {
                     .title("DCSA Just in Time Port Calls API")
                     .description("# DCSA OpenAPI specification for Just in Time Port Call process")
                     .version("2.0.0")
-                    .license(new License().name("Apache 2.0").url("http://apache.org"))
+                    .license(new License().name("Apache 2.0").url("https://apache.org"))
                     .contact(DCSABase.getDefaultContact()))
             .addTagsItem(
                 new io.swagger.v3.oas.models.tags.Tag()
@@ -97,7 +98,10 @@ public class JitSchema {
     mapper.findAndRegisterModules();
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_DEFAULT);
+    // Prevent date-time example values getting converted to unix timestamps.
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.addMixIn(Schema.class, SchemaMixin.class);
+    mapper.addMixIn(Object.class, ValueSetFlagIgnoreMixin.class); // Remove valueSetFlag attribute.
 
     String yamlFilePath = "jit/src/main/resources/standards/jit/schemas/exported-JIT_v2.0.0.yaml";
     String yamlContent = mapper.writeValueAsString(openAPI);

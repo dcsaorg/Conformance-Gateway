@@ -57,7 +57,7 @@ public class ModelValidatorConverter implements ModelConverter {
   }
 
   private void processFoundSchemaObjects(
-      AnnotatedType type, String propertyName, Schema propertySchema) {
+      AnnotatedType type, String propertyName, Schema<?> propertySchema) {
     try {
       // Some classes are of type SimpleType, and we need to extract the class name differently.
       String className;
@@ -76,7 +76,7 @@ public class ModelValidatorConverter implements ModelConverter {
     }
   }
 
-  private static void processSchemaOverride(Schema propertySchema, Field field) {
+  private static void processSchemaOverride(Schema<?> propertySchema, Field field) {
     SchemaOverride override = field.getAnnotation(SchemaOverride.class);
     if (override == null) return;
     if (!override.description().isEmpty()) {

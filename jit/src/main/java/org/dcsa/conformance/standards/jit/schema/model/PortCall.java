@@ -7,7 +7,7 @@ import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
 
 @Schema(
     title = "Port Call",
-    requiredProperties = "portCallID, UNLocationCode, vessel",
+    requiredProperties = {"portCallID", "UNLocationCode", "vessel"},
     description =
         "**Port Call** information. The `portCallID` uniquely identifies the **Port Call**. Any subsequent **Terminal Calls** linked to the same **Port Call** MUST use the same `portCallID`. An optional `portVisitReference` can be added in order to link the **Port Call** to external systems. It is mandatory to provide the **Vessel** information.")
 @Data

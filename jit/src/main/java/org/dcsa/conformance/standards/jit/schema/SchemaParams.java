@@ -24,11 +24,10 @@ public class SchemaParams {
 
   public static Parameter getPortCallServiceIDPathParam() {
     return new Parameter()
-        .$ref("#/components/parameters/portCallServiceIDPathParam")
         .name("portCallServiceID")
         .in("path")
         .required(true)
-        .description("The provider created identifier for the **Port Call Service**.")
+        .description("The **Service Provider** created identifier for the **Port Call Service**.")
         .schema(getUUIDSchema());
   }
 

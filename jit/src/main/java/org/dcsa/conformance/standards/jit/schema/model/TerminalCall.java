@@ -7,7 +7,7 @@ import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
 
 @Schema(
     title = "Terminal Call",
-    requiredProperties = "terminalCallID, portCallID",
+    requiredProperties = {"terminalCallID", "portCallID"},
     description =
         "**Terminal Call** information. The `terminalCallID` uniquely identifies the **Terminal Call**. Any subsequent **Port Call Services** linked to the same **Terminal Call** MUST use the same `terminalCallID`. An optional `terminalCallReference` can be added in order to link the **Terminal Call** to external systems e.g Operational Vessel Schedules (**OVS**).")
 @Data

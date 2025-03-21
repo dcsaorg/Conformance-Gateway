@@ -59,7 +59,7 @@ public class ErrorResponse {
   @Schema(
       description = "An array of errors providing more detail about the root cause.",
       minLength = 1,
-      //      type = "array",
+      type = "array",
       requiredMode = Schema.RequiredMode.REQUIRED)
-  private DetailedError errors;
+  private DetailedError[] errors;
 }

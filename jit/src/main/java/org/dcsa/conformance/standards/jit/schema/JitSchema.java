@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallServicesEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
+import org.dcsa.conformance.standards.jit.schema.model.DetailedError;
+import org.dcsa.conformance.standards.jit.schema.model.ErrorResponse;
 import org.dcsa.conformance.standards.jit.schema.model.PortCall;
 import org.dcsa.conformance.standards.jit.schema.model.PortCallService;
 import org.dcsa.conformance.standards.jit.schema.model.TerminalCall;
@@ -62,6 +64,8 @@ public class JitSchema {
             TerminalCall.class,
             PortCallService.class,
             Vessel.class,
+            ErrorResponse.class,
+            DetailedError.class,
             Container.class)
         .forEach(
             modelClass ->

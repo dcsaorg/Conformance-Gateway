@@ -55,7 +55,13 @@ public class ModelValidatorConverter implements ModelConverter {
           .forEach(
               (propertyName, propertySchema) -> {
                 try {
-                  Class<?> clazz = Class.forName(type.getType().getTypeName());
+                  // Some classes are of type SimpleType, and we need to extract the class name
+                  // differently.
+                  String className;
+                  if (type.getType() instanceof SimpleType simpleType) {
+                    className = simpleType.getRawClass().getName();
+                  } else className = type.getType().getTypeName();
+                  Class<?> clazz = Class.forName(className);
                   java.lang.reflect.Field field = getFieldFromClass(clazz, propertyName);
                   SchemaOverride override = field.getAnnotation(SchemaOverride.class);
                   if (override != null && !override.description().isEmpty()) {

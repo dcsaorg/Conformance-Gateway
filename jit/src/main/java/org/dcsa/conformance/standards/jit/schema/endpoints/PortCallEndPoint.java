@@ -1,7 +1,5 @@
 package org.dcsa.conformance.standards.jit.schema.endpoints;
 
-import static org.dcsa.conformance.standards.jit.schema.common.DCSABase.API_VERSION_HEADER;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -19,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.dcsa.conformance.standards.jit.schema.JitSchema;
-import org.dcsa.conformance.standards.jit.schema.SchemaParams;
+import org.dcsa.conformance.standards.jit.schema.JitSchemaComponents;
+import org.dcsa.conformance.standards.jit.schema.JitSchemaCreator;
 import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -39,10 +37,10 @@ Creates or updates a **Port Call** record. The caller must provide a unique `por
 
 The **Port Call** includes:
 
-- Location information (required): `UNLocationCode`
-- static **Vessel** information (required): `vessel`
-- an optional business identifier for the port visit: `portVisitReference`
-- The ability to send the record with informational purpose only, using `isFYI=true`
+ - Location information (required): `UNLocationCode`
+ - static **Vessel** information (required): `vessel`
+ - business identifier for the port visit (optional): `portVisitReference`
+ - The ability to send the record with informational purpose only, using `isFYI=true`
 
 This call is often provided as the first call from a **Carrier** to a **Terminal** before creating a **Terminal Call** and then sending `ETA-Berth` or `Moves`.
 
@@ -51,12 +49,12 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                     .operationId("put-port-call")
                     .parameters(
                         List.of(
-                            new Parameter().$ref(SchemaParams.PORT_CALL_ID_REF),
-                            new Parameter().$ref(SchemaParams.API_VERSION_MAJOR_REF)))
-                    .tags(Collections.singletonList("Port Call Service - Consumer"))
+                            new Parameter().$ref(JitSchemaComponents.PORT_CALL_ID_REF),
+                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF)))
+                    .tags(Collections.singletonList("Port Call Service - Service Consumer"))
                     .requestBody(
                         new RequestBody()
-                            .description("Initiates a new or updates a Port Call")
+                            .description("Initiates a new or updates a **Port Call**")
                             .required(true)
                             .content(
                                 new Content()
@@ -72,14 +70,14 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                                 "204",
                                 new ApiResponse()
                                     .description(
-                                        "A new or updated Port Call successfully accepted by the consumer.")
-                                    .headers(API_VERSION_HEADER))
+                                        "A new or updated **Port Call** successfully accepted by the **Service Consumer**.")
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders()))
                             .addApiResponse(
                                 "400",
                                 new ApiResponse()
                                     .description(
                                         "In case creating a new **Port Call** fails schema validation, a `400` (Bad Request) is returned.")
-                                    .headers(API_VERSION_HEADER)
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()
                                             .addMediaType(
@@ -91,7 +89,7 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                                 new ApiResponse()
                                     .description(
                                         "In case updating a **Port Call** that has been `OMITTED`, a `409` (Conflict) is returned.")
-                                    .headers(API_VERSION_HEADER)
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()
                                             .addMediaType(
@@ -112,7 +110,19 @@ Updating an OMITTED **Port Call**, returns a `409` (Conflict)
                                                                 .value(
                                                                     createExampleConflictResponse())))
                                                     .schema(DCSABase.getErrorResponseSchema()))))
-                            .addApiResponse("500", JitSchema.getErrorApiResponse()))));
+                            .addApiResponse("500", JitSchemaCreator.getErrorApiResponse())
+                            .addApiResponse(
+                                "default",
+                                new ApiResponse()
+                                    .description("Unexpected error")
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
+                                    .content(
+                                        new Content()
+                                            .addMediaType(
+                                                DCSABase.JSON_CONTENT_TYPE,
+                                                new MediaType()
+                                                    .schema(
+                                                        DCSABase.getErrorResponseSchema())))))));
   }
 
   // Adding an example response, while keeping the insertion order. The Map.of part is in random

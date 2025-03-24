@@ -1,7 +1,5 @@
 package org.dcsa.conformance.standards.jit.schema.endpoints;
 
-import static org.dcsa.conformance.standards.jit.schema.common.DCSABase.API_VERSION_HEADER;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -16,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.dcsa.conformance.standards.jit.schema.JitSchema;
-import org.dcsa.conformance.standards.jit.schema.SchemaParams;
+import org.dcsa.conformance.standards.jit.schema.JitSchemaComponents;
+import org.dcsa.conformance.standards.jit.schema.JitSchemaCreator;
 import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -29,17 +27,18 @@ public class TerminalCallEndPoint {
         new PathItem()
             .put(
                 new Operation()
-                    .summary("Initiates a new or updates a Terminal Call")
+                    .summary("Initiates a new or updates a **Terminal Call**.")
                     .description(
                         """
 Creates or updates a **Terminal Call** record. The caller must provide a unique `terminalCallID` (UUIDv4), which identifies the **Terminal Call**. The `terminalCallID` must remain consistent across all subsequent communications and linked **Port Call Services**. If updating an existing **Terminal Call**, e.g. including the `terminalCallReference`, the provided `terminalCallID` must match the existing record.
 
 The **Terminal Call** includes:
-  - link to the **Port Call** (required): `portCallID`
-  - Service information (required): `carrierServiceCode`, `carrierServiceName` (and an optional `universalServiceReference`)
-  - Voyage information: `carrierImportVoyageNumber`, `carrierExportVoyageNumber`, `universalImportVoyageReference` and `universalExportVoyageReference`
-  - terminal information: `terminalCallReference` and `terminalCallSequenceNumber`
-  - The ability to send the record with informational purpose only, using `isFYI=true`
+
+ - link to the **Port Call** (required): `portCallID`
+ - Service information (required): `carrierServiceCode`, `carrierServiceName` (and an optional `universalServiceReference`)
+ - Voyage information (optional): `carrierImportVoyageNumber`, `carrierExportVoyageNumber`, `universalImportVoyageReference` and `universalExportVoyageReference`
+ - terminal information (optional): `terminalCallReference` and `terminalCallSequenceNumber`
+ - The ability to send the record with informational purpose only, using `isFYI=true`
 
 This call is often provided as the second call from a **Carrier** to a **Terminal** after the creation of the **Port Call** and then sending `ETA-Berth` or `Moves`.
 
@@ -48,9 +47,9 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                     .operationId("put-terminal-call")
                     .parameters(
                         List.of(
-                            new Parameter().$ref(SchemaParams.PORT_CALL_ID_REF),
-                            new Parameter().$ref(SchemaParams.API_VERSION_MAJOR_REF)))
-                    .tags(Collections.singletonList("Port Call Service - Consumer"))
+                            new Parameter().$ref(JitSchemaComponents.PORT_CALL_ID_REF),
+                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF)))
+                    .tags(Collections.singletonList("Port Call Service - Service Consumer"))
                     .requestBody(
                         new RequestBody()
                             .description("Initiates a new or updates a Terminal Call")
@@ -69,14 +68,14 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                                 "204",
                                 new ApiResponse()
                                     .description(
-                                        "A new or updated Terminal Call successfully accepted by consumer.")
-                                    .headers(API_VERSION_HEADER))
+                                        "A new or updated **Terminal Call** successfully accepted by **Service Consumer**.")
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders()))
                             .addApiResponse(
                                 "400",
                                 new ApiResponse()
                                     .description(
-                                        "In case creating a new **Terminal Call** fails schema validation, a `400` (Bad Request) is returned.")
-                                    .headers(API_VERSION_HEADER)
+                                        "In case creating a new **Terminal Call** fails schema validation, or the provided `portCallID` in the payload cannot be found, a `400` (Bad Request) is returned.")
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()
                                             .addMediaType(
@@ -88,13 +87,25 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                                 new ApiResponse()
                                     .description(
                                         "In case creating a new or updating a **Terminal Call** linked to a **Port Call** that has been `OMITTED`, a `409` (Conflict) is returned.")
-                                    .headers(API_VERSION_HEADER)
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()
                                             .addMediaType(
                                                 DCSABase.JSON_CONTENT_TYPE,
                                                 new MediaType()
                                                     .schema(DCSABase.getErrorResponseSchema()))))
-                            .addApiResponse("500", JitSchema.getErrorApiResponse()))));
+                            .addApiResponse("500", JitSchemaCreator.getErrorApiResponse())
+                            .addApiResponse(
+                                "default",
+                                new ApiResponse()
+                                    .description("Unexpected error")
+                                    .headers(JitSchemaComponents.getDefaultJitHeaders())
+                                    .content(
+                                        new Content()
+                                            .addMediaType(
+                                                DCSABase.JSON_CONTENT_TYPE,
+                                                new MediaType()
+                                                    .schema(
+                                                        DCSABase.getErrorResponseSchema())))))));
   }
 }

@@ -8,18 +8,15 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Stream;
 import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 import org.dcsa.conformance.standards.jit.schema.common.ModelValidatorConverter;
@@ -35,31 +32,34 @@ import org.dcsa.conformance.standards.jit.schema.model.PortCallService;
 import org.dcsa.conformance.standards.jit.schema.model.TerminalCall;
 import org.dcsa.conformance.standards.jit.schema.model.Vessel;
 
-public class JitSchema {
+public class JitSchemaCreator {
 
   public static void main(String[] args) throws IOException {
     OpenAPI openAPI =
         new OpenAPI()
+            .openapi("3.0.3")
             .info(
                 new Info()
-                    .title("DCSA Just in Time Port Calls API")
-                    .description("# DCSA OpenAPI specification for Just in Time Port Call process")
                     .version("2.0.0")
-                    .license(new License().name("Apache 2.0").url("https://apache.org"))
+                    .title("DCSA Just in Time Port Calls API")
+                    .description(
+                        DCSABase.readFileFromResources(
+                            "standards/jit/schemas/standard-full-description.md"))
+                    .license(DCSABase.getDefaultLicense())
                     .contact(DCSABase.getDefaultContact()))
             .addTagsItem(
-                new io.swagger.v3.oas.models.tags.Tag()
-                    .name("Port Call Service - Consumer")
-                    .description("**Consumer** implemented endPoints"))
+                new Tag()
+                    .name("Port Call Service - Service Consumer")
+                    .description("**Service Consumer** implemented endPoints"))
             .addTagsItem(
-                new io.swagger.v3.oas.models.tags.Tag()
-                    .name("Port Call Service - Provider")
-                    .description("**Provider** implemented endPoints"))
+                new Tag()
+                    .name("Port Call Service - Service Provider")
+                    .description("**Service Provider** implemented endPoints"))
             .addTagsItem(
-                new io.swagger.v3.oas.models.tags.Tag()
+                new Tag()
                     .name("Port Call Service")
-                    .description("**Provider** and **Consumer** implemented endPoints"))
-            .servers(List.of(new Server().url("https://api.example.com")));
+                    .description(
+                        "**Service Provider** and **Service Consumer** implemented endPoints"));
 
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
@@ -74,16 +74,13 @@ public class JitSchema {
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));
-    components.addParameters("Api-Version-Major", SchemaParams.getApiVersionMajorHeader());
-    components.addParameters("portCallIDPathParam", SchemaParams.getPortCallIDPathParam());
+
+    components.addParameters("Api-Version-Major", JitSchemaComponents.getApiVersionMajorHeader());
+    components.addParameters("portCallIDPathParam", JitSchemaComponents.getPortCallIDPathParam());
     components.addParameters(
-        "portCallServiceIDPathParam", SchemaParams.getPortCallServiceIDPathParam());
-    components.addHeaders(
-        "API-Version",
-        new Header()
-            .description(
-                "SemVer used to indicate the version of the contract (API version) returned.")
-            .schema(new Schema<>().type("string").example("2.0.0")));
+        "portCallServiceIDPathParam", JitSchemaComponents.getPortCallServiceIDPathParam());
+
+    JitSchemaComponents.addHeaders(components);
     openAPI.setComponents(components);
 
     PortCallEndPoint.addEndPoint(openAPI);
@@ -116,7 +113,7 @@ public class JitSchema {
     return new ApiResponse()
         .description(
             "In case a server error occurs in implementer system, a `500` (Internal Server Error) is returned.")
-        .headers(DCSABase.API_VERSION_HEADER)
+        .headers(JitSchemaComponents.getDefaultJitHeaders())
         .content(
             new Content()
                 .addMediaType(

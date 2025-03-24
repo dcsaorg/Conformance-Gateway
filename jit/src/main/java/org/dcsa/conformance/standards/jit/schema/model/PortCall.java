@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.jit.schema.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.dcsa.conformance.standards.jit.schema.SchemaOverride;
+import org.dcsa.conformance.standards.jit.schema.common.SchemaOverride;
 
 @Schema(
     title = "Port Call",

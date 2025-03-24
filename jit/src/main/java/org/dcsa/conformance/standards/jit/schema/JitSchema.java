@@ -21,6 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
+import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
+import org.dcsa.conformance.standards.jit.schema.common.ModelValidatorConverter;
+import org.dcsa.conformance.standards.jit.schema.common.SchemaMixin;
+import org.dcsa.conformance.standards.jit.schema.common.ValueSetFlagIgnoreMixin;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallServicesEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
@@ -66,8 +70,7 @@ public class JitSchema {
             PortCallService.class,
             Vessel.class,
             ErrorResponse.class,
-            DetailedError.class,
-            Container.class)
+            DetailedError.class)
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));

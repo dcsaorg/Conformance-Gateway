@@ -3,7 +3,7 @@ package org.dcsa.conformance.standards.jit.schema.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.dcsa.conformance.standards.jit.schema.Condition;
+import org.dcsa.conformance.standards.jit.schema.common.Condition;
 import org.dcsa.conformance.standards.jit.schema.enums.DimensionUnit;
 import org.dcsa.conformance.standards.jit.schema.enums.VesselType;
 

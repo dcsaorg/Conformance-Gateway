@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.jit.schema;
+package org.dcsa.conformance.standards.jit.schema.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -7,4 +7,4 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * easiest way to remove that extra attribute.
  */
 @JsonIgnoreProperties("valueSetFlag")
-abstract class ValueSetFlagIgnoreMixin {}
+public abstract class ValueSetFlagIgnoreMixin {}

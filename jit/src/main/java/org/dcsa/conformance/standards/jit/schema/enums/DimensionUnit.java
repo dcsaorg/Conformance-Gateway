@@ -2,7 +2,7 @@ package org.dcsa.conformance.standards.jit.schema.enums;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import org.dcsa.conformance.standards.jit.schema.EnumBase;
+import org.dcsa.conformance.standards.jit.schema.common.EnumBase;
 
 @Schema(
     description =

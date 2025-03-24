@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.jit.schema;
+package org.dcsa.conformance.standards.jit.schema.common;
 
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;

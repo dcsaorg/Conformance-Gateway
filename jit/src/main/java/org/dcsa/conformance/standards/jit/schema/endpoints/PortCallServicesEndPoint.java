@@ -1,6 +1,6 @@
 package org.dcsa.conformance.standards.jit.schema.endpoints;
 
-import static org.dcsa.conformance.standards.jit.schema.DCSABase.API_VERSION_HEADER;
+import static org.dcsa.conformance.standards.jit.schema.common.DCSABase.API_VERSION_HEADER;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -16,9 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.dcsa.conformance.standards.jit.schema.DCSABase;
 import org.dcsa.conformance.standards.jit.schema.JitSchema;
 import org.dcsa.conformance.standards.jit.schema.SchemaParams;
+import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PortCallServicesEndPoint {

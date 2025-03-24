@@ -1,4 +1,4 @@
-package org.dcsa.conformance.standards.jit.schema;
+package org.dcsa.conformance.standards.jit.schema.common;
 
 import com.fasterxml.jackson.databind.type.SimpleType;
 import io.swagger.v3.core.converter.AnnotatedType;

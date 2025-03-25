@@ -17,6 +17,12 @@ public class JitSchemaComponents {
   public static final String PORT_CALL_SERVICE_ID_REF =
       "#/components/parameters/portCallServiceIDPathParam";
   public static final String API_VERSION_MAJOR_REF = "#/components/parameters/Api-Version-Major";
+  public static final String SENDING_PARTY_REF = "#/components/parameters/Sending-Party";
+  public static final String RECEIVING_PARTY_REF = "#/components/parameters/Receiving-Party";
+  public static final String REQUEST_SENDING_PARTY_REF =
+      "#/components/parameters/Request-Sending-Party";
+  public static final String REQUEST_RECEIVING_PARTY_REF =
+      "#/components/parameters/Request-Receiving-Party";
 
   public static Parameter getPortCallIDPathParam() {
     return new Parameter()

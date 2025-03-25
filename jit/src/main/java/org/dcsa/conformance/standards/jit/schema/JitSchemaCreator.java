@@ -23,10 +23,13 @@ import org.dcsa.conformance.standards.jit.schema.common.ModelValidatorConverter;
 import org.dcsa.conformance.standards.jit.schema.common.SchemaMixin;
 import org.dcsa.conformance.standards.jit.schema.common.ValueSetFlagIgnoreMixin;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
+import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallOmitEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallServicesEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.TerminalCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.model.DetailedError;
 import org.dcsa.conformance.standards.jit.schema.model.ErrorResponse;
+import org.dcsa.conformance.standards.jit.schema.model.OmitPortCall;
+import org.dcsa.conformance.standards.jit.schema.model.OmitTerminalCall;
 import org.dcsa.conformance.standards.jit.schema.model.PortCall;
 import org.dcsa.conformance.standards.jit.schema.model.PortCallService;
 import org.dcsa.conformance.standards.jit.schema.model.TerminalCall;
@@ -69,6 +72,8 @@ public class JitSchemaCreator {
             TerminalCall.class,
             PortCallService.class,
             Vessel.class,
+            OmitPortCall.class,
+            OmitTerminalCall.class,
             ErrorResponse.class,
             DetailedError.class)
         .forEach(
@@ -84,6 +89,7 @@ public class JitSchemaCreator {
     openAPI.setComponents(components);
 
     PortCallEndPoint.addEndPoint(openAPI);
+    PortCallOmitEndPoint.addEndPoint(openAPI);
     TerminalCallEndPoint.addEndPoint(openAPI);
     PortCallServicesEndPoint.addEndPoint(openAPI);
 

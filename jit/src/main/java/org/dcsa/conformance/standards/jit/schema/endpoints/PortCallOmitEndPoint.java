@@ -19,40 +19,42 @@ import org.dcsa.conformance.standards.jit.schema.JitSchemaCreator;
 import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class PortCallServicesEndPoint {
+public class PortCallOmitEndPoint {
 
   public static void addEndPoint(OpenAPI openAPI) {
     openAPI.path(
-        "/port-call-services/{portCallServiceID}",
+        "/port-calls/{portCallID}/omit",
         new PathItem()
             .put(
                 new Operation()
-                    .summary("Initiates a new or updates a Port Call Service")
+                    .summary("Omits a Port Call")
                     .description(
                         """
-Creates or updates a **Port Call Service** record. The caller must provide a unique `portCallServiceID` (UUIDv4), which identifies the **Port Call Service**. The `portCallServiceID` must remain consistent across all subsequent communications and linked **Timestamps**. If updating an existing **Port Call Service**, e.g. updating the `moves`, the provided `portCallServiceID` must match the existing record.
+Allows the **Service Provider** to `OMIT` a **Port Call**, signaling that the **Port Call** is no longer going to happen.
 
-The **Port Call Service** includes:
+When a **Service Consumer** receives an `OMIT`, it is their responsibility to propagate this information to any secondary receivers, they previously informed using the `isFYI=true` property, while creating **Port Calls** or sending related updates.
 
-  - link to the **Terminal Call** (required): `terminalCallID`
-  - type of Service (required): `portCallServiceTypeCode` and `portCallServiceEventTypeCode` (and optionally `portCallPhaseTypeCode` and `facilityTypeCode`)
-  - a location (required): `portCallServiceLocation`
-  - Moves forecast information (optional): `moves`
-  - The ability to send the record with informational purpose only, using `isFYI=true`
+The **Service Provider** is responsible for:
+ - sending an `OMIT` to all **Terminal Calls** linked to the `portCallID` (including secondary receivers)
+ - **Cancel** all **Port Call Services** that are associated with the omitted **Terminal Calls** and **Port Call**
 
-This call is used to initiate a Service linked to a **Terminal Call**. It is used for sending e.g. `ETA-Berth` or `Moves`.
+The **Service Consumer** is responsible for:
+ - propagating the `OMIT` to any secondary receivers
+ - **Cancel** any **Port Call Services** linked to the omitted **Terminal Call** initiated by the **Service Consumer**
+
+Once a **Port Call** has been `OMITTED`, this action **CANNOT** be undone. In case the `OMIT` has to be "undone" a new **Port Call** must be created with new **Terminal Calls** and new **Port Call Services**.
 """)
-                    .operationId("put-port-call-service")
+                    .operationId("omit-port-call")
                     .parameters(
                         List.of(
-                            new Parameter().$ref(JitSchemaComponents.PORT_CALL_SERVICE_ID_REF),
+                            new Parameter().$ref(JitSchemaComponents.PORT_CALL_ID_REF),
                             new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF),
-                            new Parameter().$ref(JitSchemaComponents.SENDING_PARTY_REF),
-                            new Parameter().$ref(JitSchemaComponents.RECEIVING_PARTY_REF)))
+                            new Parameter().$ref(JitSchemaComponents.REQUEST_SENDING_PARTY_REF),
+                            new Parameter().$ref(JitSchemaComponents.REQUEST_RECEIVING_PARTY_REF)))
                     .tags(Collections.singletonList("Port Call Service - Service Consumer"))
                     .requestBody(
                         new RequestBody()
-                            .description("Initiates a new or updates a **Port Call Service**.")
+                            .description("Omits a **Port Call**")
                             .required(true)
                             .content(
                                 new Content()
@@ -61,20 +63,19 @@ This call is used to initiate a Service linked to a **Terminal Call**. It is use
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .$ref(
-                                                        "#/components/schemas/PortCallService")))))
+                                                    .$ref("#/components/schemas/OmitPortCall")))))
                     .responses(
                         new ApiResponses()
                             .addApiResponse(
                                 "204",
                                 new ApiResponse()
-                                    .description("A new Port Call Service accepted")
+                                    .description("**Port Call** successfully marked as omitted.")
                                     .headers(JitSchemaComponents.getDefaultJitHeaders()))
                             .addApiResponse(
                                 "400",
                                 new ApiResponse()
                                     .description(
-                                        "In case creating a new **Port Call Service** fails schema validation, a `400` (Bad Request) is returned.")
+                                        "In case omitting a **Port Call** fails schema validation, a `400` (Bad Request) is returned.")
                                     .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()
@@ -83,10 +84,10 @@ This call is used to initiate a Service linked to a **Terminal Call**. It is use
                                                 new MediaType()
                                                     .schema(DCSABase.getErrorResponseSchema()))))
                             .addApiResponse(
-                                "409",
+                                "404",
                                 new ApiResponse()
                                     .description(
-                                        "In case creating a new or updating a **Port Call Service** that is linked to a **Terminal Call** that has been `OMITTED`, a `409` (Conflict) is returned.")
+                                        "If the implementer does not know the `portCallID` path parameter (e.g. the resource does not exist), it is possible for the implementer to reject the request by returning a `404` (Not Found).")
                                     .headers(JitSchemaComponents.getDefaultJitHeaders())
                                     .content(
                                         new Content()

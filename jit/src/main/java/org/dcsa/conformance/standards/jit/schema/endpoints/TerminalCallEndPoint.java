@@ -27,7 +27,7 @@ public class TerminalCallEndPoint {
         new PathItem()
             .put(
                 new Operation()
-                    .summary("Initiates a new or updates a **Terminal Call**.")
+                    .summary("Initiates a new or updates a Terminal Call")
                     .description(
                         """
 Creates or updates a **Terminal Call** record. The caller must provide a unique `terminalCallID` (UUIDv4), which identifies the **Terminal Call**. The `terminalCallID` must remain consistent across all subsequent communications and linked **Port Call Services**. If updating an existing **Terminal Call**, e.g. including the `terminalCallReference`, the provided `terminalCallID` must match the existing record.
@@ -48,11 +48,13 @@ It is not possible to update a **Terminal Call** that has been `OMITTED`.
                     .parameters(
                         List.of(
                             new Parameter().$ref(JitSchemaComponents.PORT_CALL_ID_REF),
-                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF)))
+                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF),
+                            new Parameter().$ref(JitSchemaComponents.SENDING_PARTY_REF),
+                            new Parameter().$ref(JitSchemaComponents.RECEIVING_PARTY_REF)))
                     .tags(Collections.singletonList("Port Call Service - Service Consumer"))
                     .requestBody(
                         new RequestBody()
-                            .description("Initiates a new or updates a Terminal Call")
+                            .description("Initiates a new or updates a **Terminal Call**.")
                             .required(true)
                             .content(
                                 new Content()

@@ -50,7 +50,9 @@ It is not possible to update a **Port Call** that has been `OMITTED`.
                     .parameters(
                         List.of(
                             new Parameter().$ref(JitSchemaComponents.PORT_CALL_ID_REF),
-                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF)))
+                            new Parameter().$ref(JitSchemaComponents.API_VERSION_MAJOR_REF),
+                            new Parameter().$ref(JitSchemaComponents.SENDING_PARTY_REF),
+                            new Parameter().$ref(JitSchemaComponents.RECEIVING_PARTY_REF)))
                     .tags(Collections.singletonList("Port Call Service - Service Consumer"))
                     .requestBody(
                         new RequestBody()

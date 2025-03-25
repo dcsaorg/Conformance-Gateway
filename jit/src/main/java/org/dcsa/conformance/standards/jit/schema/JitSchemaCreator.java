@@ -9,6 +9,7 @@ import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -22,6 +23,7 @@ import org.dcsa.conformance.standards.jit.schema.common.DCSABase;
 import org.dcsa.conformance.standards.jit.schema.common.ModelValidatorConverter;
 import org.dcsa.conformance.standards.jit.schema.common.SchemaMixin;
 import org.dcsa.conformance.standards.jit.schema.common.ValueSetFlagIgnoreMixin;
+import org.dcsa.conformance.standards.jit.schema.endpoints.GetPortCallsEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallOmitEndPoint;
 import org.dcsa.conformance.standards.jit.schema.endpoints.PortCallServicesEndPoint;
@@ -79,6 +81,12 @@ public class JitSchemaCreator {
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));
+    components.addSchemas(
+        "PortCalls",
+        new ArraySchema()
+            .description("An array of **Port Call** objects matching the filters provided.")
+            .items(new Schema<>().$ref("#/components/schemas/PortCall"))
+            .minItems(0));
 
     components.addParameters("Api-Version-Major", JitSchemaComponents.getApiVersionMajorHeader());
     components.addParameters("portCallIDPathParam", JitSchemaComponents.getPortCallIDPathParam());
@@ -90,6 +98,7 @@ public class JitSchemaCreator {
 
     PortCallEndPoint.addEndPoint(openAPI);
     PortCallOmitEndPoint.addEndPoint(openAPI);
+    GetPortCallsEndPoint.addEndPoint(openAPI);
     TerminalCallEndPoint.addEndPoint(openAPI);
     PortCallServicesEndPoint.addEndPoint(openAPI);
 

@@ -323,14 +323,12 @@ public class BookingChecks {
           "Feedbacks must be present for the selected Booking Status ",
           body -> {
             var bookingStatus = body.path("bookingStatus").asText("");
-            var amendedBookingStatus = body.path(ATTR_AMENDED_BOOKING_STATUS).asText("");
             var issues = new LinkedHashSet<String>();
             if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
-                || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-                    && amendedBookingStatus.isEmpty())) && body.path(FEEDBACKS).isMissingNode()) {
-                issues.add(
-                    "feedbacks is missing in the allowed booking state %s"
-                        .formatted(bookingStatus));
+                    || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)))
+                && body.path(FEEDBACKS).isMissingNode()) {
+              issues.add(
+                  "feedbacks is missing in the allowed booking state %s".formatted(bookingStatus));
             }
             return issues;
           });

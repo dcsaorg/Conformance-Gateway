@@ -1,14 +1,13 @@
 package org.dcsa.conformance.standards.booking.checks;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.booking.party.BookingCancellationState;
 import org.dcsa.conformance.standards.booking.party.BookingRole;
 import org.dcsa.conformance.standards.booking.party.BookingState;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConformanceCheck {
 
@@ -111,16 +110,36 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
     String bookingStatus = responsePayload.path("bookingStatus").asText(null);
     Set<String> errors = new HashSet<>();
-    String amendedBookingStatus =
+    /*    String amendedBookingStatus =
         responsePayload.path("amendedBookingStatus").asText(null);
     String bookingCancellationStatus =
-      responsePayload.path("bookingCancellationStatus").asText(null);
-    if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
-      || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-      && (amendedBookingStatus == null || amendedBookingStatus.isBlank()) && (bookingCancellationStatus == null || bookingCancellationStatus.isBlank())))
-      && responsePayload.path(FEEDBACKS).isMissingNode()) {
+      responsePayload.path("bookingCancellationStatus").asText(null);*/
+    boolean isBookingPresent = !responsePayload.path("booking").isMissingNode();
+    boolean isAmendedBookingPresent = !responsePayload.path("amendedBooking").isMissingNode();
+    boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
+    boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
+        /* && (amendedBookingStatus == null || amendedBookingStatus.isBlank())
+        && (bookingCancellationStatus == null || bookingCancellationStatus.isBlank())*/ ;
+    if ((isPendingUpdate || isPendingAmendment)
+        && responsePayload.path(FEEDBACKS).isMissingNode()) {
       errors.add("feedbacks property is required in the allowed booking state %s".formatted(bookingStatus));
     }
+
+    /*    if (isBookingPresent
+        && (isPendingUpdate || isPendingAmendment)
+        && responsePayload.path("booking").path(FEEDBACKS).isMissingNode()) {
+      errors.add(
+          "feedbacks property is required in the booking payload in the allowed booking state %s"
+              .formatted(bookingStatus));
+    }*/
+
+    /*if (isAmendedBookingPresent
+        && isPendingAmendment
+        && responsePayload.path("amendedBooking").path(FEEDBACKS).isMissingNode()) {
+      errors.add(
+          "feedbacks property is required in the amendedBooking payload in the allowed booking state %s"
+              .formatted(bookingStatus));
+    }*/
     return errors;
   }
 

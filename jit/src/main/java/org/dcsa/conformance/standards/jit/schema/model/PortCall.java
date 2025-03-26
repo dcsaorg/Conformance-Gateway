@@ -18,8 +18,10 @@ public class PortCall {
   @SchemaOverride(
       description =
           """
-          Universal unique identifier for the **Port call**. The `portCallID` is created by the **Service Provider**. The `portCallID` **MUST** only be created once per **Port Call**. To be used in all communication regarding the **Port Call**.
-          """)
+            Universal unique identifier for the **Port call**. The `portCallID` is created by the
+   **Service Provider**. The `portCallID` **MUST** only be created once per **Port Call**. To be
+   used in all communication regarding the **Port Call**.
+            """)
   private PortCallID portCallID;
 
   @Schema(
@@ -46,8 +48,7 @@ public class PortCall {
       maxLength = 5)
   private String unLocationCode;
 
-  @Schema(ref = "#/components/schemas/Vessel")
-  private String vessel;
+  private Vessel vessel;
 
   @Schema(
       accessMode = Schema.AccessMode.READ_ONLY,

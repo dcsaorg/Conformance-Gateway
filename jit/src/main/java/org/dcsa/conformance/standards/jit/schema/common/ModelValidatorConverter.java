@@ -93,29 +93,37 @@ public class ModelValidatorConverter implements ModelConverter {
 
     if (!condition.required().isEmpty()) {
       schema.setDescription(
-          schema.getDescription()
+          getDescription(schema)
               + "%n**Condition:** Mandatory if `%s` is provided.".formatted(condition.required()));
     }
 
     if (condition.oneOf().length > 0 && !condition.oneOf()[0].isEmpty()) {
       schema.setDescription(
-          schema.getDescription()
+          getDescription(schema)
               + "%n**Condition:** One of `%s` **MUST** be specified."
                   .formatted(String.join("` or `", condition.oneOf())));
     }
     if (condition.anyOf().length > 0 && !condition.anyOf()[0].isEmpty()) {
       schema.setDescription(
-          schema.getDescription()
+          getDescription(schema)
               + "%n**Condition:** At least one of `%s` **MUST** be specified. It is also acceptable to provide more than one property."
                   .formatted(String.join("` or `", condition.anyOf())));
     }
 
     if (condition.allOf().length > 0 && !condition.allOf()[0].isEmpty()) {
       schema.setDescription(
-          schema.getDescription()
+          getDescription(schema)
               + "%n**Condition:** All of the following properties **MUST** be specified: `%s`."
                   .formatted(String.join("` and `", condition.allOf())));
     }
+    // Remove the first newline character, if the first line is empty. Happens with $ref properties.
+    if (schema.getDescription().startsWith("\n")) {
+      schema.setDescription(schema.getDescription().replaceFirst("\n", ""));
+    }
+  }
+
+  private static String getDescription(Schema<?> schema) {
+    return schema.getDescription() != null ? schema.getDescription() : "";
   }
 
   private Field getFieldFromClass(Class<?> clazz, String propertyName) {

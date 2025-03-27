@@ -320,7 +320,7 @@ public class BookingChecks {
 
   static final JsonContentCheck FEEDBACKS_PRESENCE =
       JsonAttribute.customValidator(
-          "Feedbacks must be present for the selected Booking Status ",
+          "Feedbacks must be present for the selected Booking Status",
           body -> {
             var bookingStatus = body.path("bookingStatus").asText("");
             var issues = new LinkedHashSet<String>();

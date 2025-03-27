@@ -116,7 +116,6 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     changeState(AMENDED_BOOKING_STATUS, AMENDMENT_CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
-    removeFeedbacks();
   }
 
   public void confirmBooking(String reference, Supplier<String> cbrGenerator) {
@@ -129,7 +128,6 @@ public class PersistableCarrierBooking {
     changeState(BOOKING_STATUS, CONFIRMED);
     mutateBookingAndAmendment(this::ensureConfirmedBookingHasCarrierFields);
     mutateBookingAndAmendment(b -> b.remove(AMENDED_BOOKING_STATUS));
-    removeFeedbacks();
   }
 
   private void resetAmendedBookingState() {
@@ -259,11 +257,6 @@ public class PersistableCarrierBooking {
     }
   }
 
-  private void removeFeedbacks() {
-    getBooking().remove("feedbacks");
-    getAmendedBooking().ifPresent(amendedBooking -> amendedBooking.remove("feedbacks"));
-  }
-
   public void putBooking(String bookingReference, ObjectNode newBookingData) {
     var currentState = getOriginalBookingState();
     var amendedBookingState = getBookingAmendedState();
@@ -295,21 +288,16 @@ public class PersistableCarrierBooking {
     } else {
       setBooking(newBookingData);
     }
-    var bookingState = getOriginalBookingState();
-    if(!(PENDING_UPDATE.equals(bookingState) || PENDING_AMENDMENT.equals(bookingState) )) {
-      removeFeedbacks();
-    }
+
   }
 
   private void ensureFeedbacksExist(ObjectNode booking) {
     booking
-      .putArray("feedbacks")
-      .addObject()
-      .put("severity", "WARN")
-      .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
-      .put(
-        "message",
-        "Please perform the changes requested by the Conformance orchestrator");
+        .putArray(FEEDBACKS)
+        .addObject()
+        .put("severity", "WARN")
+        .put("code", "PROPERTY_VALUE_HAS_BEEN_CHANGED")
+        .put("message", "Please perform the changes requested by the Conformance orchestrator");
   }
 
   public BookingState getOriginalBookingState() {

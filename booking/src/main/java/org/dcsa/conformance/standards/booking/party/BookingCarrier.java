@@ -525,6 +525,10 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(booking)
+            .feedbacks(
+                persistableCarrierBooking.getfeedbacks() != null
+                    ? persistableCarrierBooking.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());
@@ -571,6 +575,10 @@ public class BookingCarrier extends ConformanceParty {
         BookingNotification.builder()
             .apiVersion(apiVersion)
             .booking(persistableCarrierBooking.getBooking())
+            .feedbacks(
+                persistableCarrierBooking.getfeedbacks() != null
+                    ? persistableCarrierBooking.getfeedbacks()
+                    : OBJECT_MAPPER.createArrayNode())
             .subscriptionReference(persistableCarrierBooking.getSubscriptionReference())
             .build()
             .asJsonNode());

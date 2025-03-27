@@ -16,8 +16,6 @@ public class Vessel {
       description =
           """
       The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd's register code, which does not change during the lifetime of the vessel.
-
-      **Condition:** At least one of `vesselIMONumber` or `MMSINumber` **MUST** be specified in order to identify the `Vessel`. It is also acceptable to provide both properties.
       """,
       name = "vesselIMONumber",
       pattern = "^\\d{7,8}$",
@@ -30,14 +28,12 @@ public class Vessel {
       description =
           """
       Maritime Mobile Service Identities (MMSIs) are nine-digit numbers used by maritime digital selective calling (DSC), automatic identification systems (AIS) and certain other equipment to uniquely identify a ship or a coast radio station.
-
-      **Condition:** At least one of `vesselIMONumber` or `MMSINumber` **MUST** be specified in order to identify the `Vessel`. It is also acceptable to provide both properties.
       """,
       name = "MMSINumber",
       pattern = "^\\d{9}$",
       minLength = 9,
       maxLength = 9)
-  @Condition(required = "pancake")
+  @Condition(anyOf = {"vesselIMONumber", "MMSINumber"})
   private String mmsiNumber;
 
   @Schema(
@@ -57,7 +53,6 @@ The maximum length of a ship's hull measured parallel to the waterline (Length O
 If the length is specified in feet (`FOT`) then the decimal part means a fraction of a foot and **not** as a number of inches. E.g. 120.5 feet means 120 and a half foot (which would be 120'6").
 """,
       format = "float")
-  @Condition(allOf = {"vesselIMONumber", "MMSINumber"})
   private float lengthOverall;
 
   @Schema(

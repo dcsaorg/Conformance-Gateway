@@ -327,8 +327,7 @@ public class BookingChecks {
             if ((BookingState.PENDING_UPDATE.name().equals(bookingStatus)
                     || (BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)))
                 && body.path(FEEDBACKS).isMissingNode()) {
-              issues.add(
-                  "feedbacks is missing in the allowed booking state %s".formatted(bookingStatus));
+              issues.add("feedbacks is missing in the booking state %s".formatted(bookingStatus));
             }
             return issues;
           });

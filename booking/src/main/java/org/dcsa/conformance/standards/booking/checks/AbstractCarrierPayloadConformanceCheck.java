@@ -110,36 +110,12 @@ abstract class AbstractCarrierPayloadConformanceCheck extends PayloadContentConf
   protected Set<String> ensureFeedbacksIsPresent(JsonNode responsePayload) {
     String bookingStatus = responsePayload.path("bookingStatus").asText(null);
     Set<String> errors = new HashSet<>();
-    /*    String amendedBookingStatus =
-        responsePayload.path("amendedBookingStatus").asText(null);
-    String bookingCancellationStatus =
-      responsePayload.path("bookingCancellationStatus").asText(null);*/
-    boolean isBookingPresent = !responsePayload.path("booking").isMissingNode();
-    boolean isAmendedBookingPresent = !responsePayload.path("amendedBooking").isMissingNode();
     boolean isPendingUpdate = BookingState.PENDING_UPDATE.name().equals(bookingStatus);
-    boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus)
-        /* && (amendedBookingStatus == null || amendedBookingStatus.isBlank())
-        && (bookingCancellationStatus == null || bookingCancellationStatus.isBlank())*/ ;
+    boolean isPendingAmendment = BookingState.PENDING_AMENDMENT.name().equals(bookingStatus);
     if ((isPendingUpdate || isPendingAmendment)
         && responsePayload.path(FEEDBACKS).isMissingNode()) {
-      errors.add("feedbacks property is required in the allowed booking state %s".formatted(bookingStatus));
+      errors.add("feedbacks property is required in the booking state %s".formatted(bookingStatus));
     }
-
-    /*    if (isBookingPresent
-        && (isPendingUpdate || isPendingAmendment)
-        && responsePayload.path("booking").path(FEEDBACKS).isMissingNode()) {
-      errors.add(
-          "feedbacks property is required in the booking payload in the allowed booking state %s"
-              .formatted(bookingStatus));
-    }*/
-
-    /*if (isAmendedBookingPresent
-        && isPendingAmendment
-        && responsePayload.path("amendedBooking").path(FEEDBACKS).isMissingNode()) {
-      errors.add(
-          "feedbacks property is required in the amendedBooking payload in the allowed booking state %s"
-              .formatted(bookingStatus));
-    }*/
     return errors;
   }
 

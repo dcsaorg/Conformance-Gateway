@@ -42,7 +42,11 @@ public class Vessel {
       maxLength = 50)
   @Condition(
       oneOf = {"vesselIMONumber", "MMSINumber"},
-      required = "pancake")
+      mandatory = "pancake",
+      description = {
+        "It is expected that if a location is specified in multiple ways..test text, please remove",
+        "The location is expected to be a valid location. Please remove later"
+      })
   private String name;
 
   @Schema(

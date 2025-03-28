@@ -1,7 +1,9 @@
 package org.dcsa.conformance.standards.jit.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
+@Data
 @Schema(
     format = "uuid",
     type = "string",
@@ -10,4 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
         """
           Universal unique identifier for the **Port call**. The `portCallID` is created by the **Service Provider**. The `portCallID` **MUST** only be created once per **Port Call**. To be used in all communication regarding the **Port Call**.
           """)
-public class PortCallID {}
+public class PortCallID {
+  String value;
+}

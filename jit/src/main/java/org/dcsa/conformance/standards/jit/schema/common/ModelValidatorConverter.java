@@ -25,6 +25,8 @@ public class ModelValidatorConverter implements ModelConverter {
 
     if (schema.getProperties() == null) return schema;
 
+    processSchemaRequiredProperties(type);
+
     schema
         .getProperties()
         .forEach(
@@ -53,11 +55,7 @@ public class ModelValidatorConverter implements ModelConverter {
       AnnotatedType type, String propertyName, Schema<?> propertySchema) {
     try {
       // Some classes are of type SimpleType, and we need to extract the class name differently.
-      String className;
-      if (type.getType() instanceof SimpleType simpleType) {
-        className = simpleType.getRawClass().getName();
-      } else className = type.getType().getTypeName();
-      Class<?> clazz = Class.forName(className);
+      Class<?> clazz = extractClass(type);
       Field field = getFieldFromClass(clazz, propertyName);
 
       processSchemaOverride(propertySchema, field);
@@ -66,6 +64,32 @@ public class ModelValidatorConverter implements ModelConverter {
       throw new IllegalStateException(
           "While processing property '%s' in '%s': %s"
               .formatted(propertyName, type.getType().getTypeName(), e));
+    }
+  }
+
+  private static void processSchemaRequiredProperties(AnnotatedType type) {
+    try {
+      Class<?> clazz = extractClass(type);
+      io.swagger.v3.oas.annotations.media.Schema schema =
+          clazz.getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class);
+      if (schema == null || schema.requiredProperties() == null) return;
+
+      List<String> allFields =
+          Arrays.stream(clazz.getDeclaredFields())
+              .map(Field::getName)
+              .map(String::toLowerCase) // Sometimes Java naming conventions are not in YAML.
+              .toList();
+      Arrays.stream(schema.requiredProperties())
+          .forEach(
+              requiredProperty -> {
+                if (!allFields.contains(requiredProperty.toLowerCase())) {
+                  throw new IllegalStateException(
+                      "Required property '%s' not found in class '%s'"
+                          .formatted(requiredProperty, clazz.getName()));
+                }
+              });
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("While processing required properties: %s".formatted(e));
     }
   }
 
@@ -111,7 +135,7 @@ public class ModelValidatorConverter implements ModelConverter {
             getDescription(schema) + "\n\n**Condition:** " + conditions.getFirst());
       } else {
         schema.setDescription(
-            getDescription(schema) + "\n\n**Conditions:\n - " + String.join("\n - ", conditions));
+            getDescription(schema) + "\n\n**Conditions:**\n - " + String.join("\n - ", conditions));
       }
     }
     // Remove the first newline character, if the first line is empty. Happens with $ref properties.
@@ -151,6 +175,14 @@ public class ModelValidatorConverter implements ModelConverter {
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Enum class not found: " + enumClassName);
     }
+  }
+
+  private static Class<?> extractClass(AnnotatedType type) throws ClassNotFoundException {
+    String className;
+    if (type.getType() instanceof SimpleType simpleType) {
+      className = simpleType.getRawClass().getName();
+    } else className = type.getType().getTypeName();
+    return Class.forName(className);
   }
 
   private Field getFieldFromClass(Class<?> clazz, String propertyName) {

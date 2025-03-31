@@ -115,7 +115,9 @@ The shipment term at the unloading of the cargo out of the container. Possible v
 
   @Schema(
       description =
-          "Clauses for a specific shipment added by the carrier, subject to local rules / guidelines or certain mandatory information required to be shared with the customer.")
+          """
+Clauses for a specific shipment added by the carrier, subject to local rules / guidelines
+ or certain mandatory information required to be shared with the customer.""")
   private List<String> carrierClauses;
 
   @Schema(description = "Document parties")
@@ -127,9 +129,20 @@ The shipment term at the unloading of the cargo out of the container. Possible v
   @Schema(description = "Transport info")
   private VesselVoyage transport;
 
-  //  @Schema(description = "", example = "")
-  //  private String xyz;
+  @Schema(description = "List of free time conditions applicable to this shipment at destination.")
+  private List<FreeTime> freeTime;
 
-  //  @Schema(description = "", example = "")
-  //  private String xyz;
+  @Schema(description = "List of charges applicable to this shipment.")
+  private List<Charge> charges;
+
+  @Schema(
+      description =
+          "Location where payment of ocean freight and charges for the main transport will take place by the customer.")
+  private InvoicePayableAt invoicePayableAt;
+
+  @Schema(description = "The equipments being used.")
+  private List<UtilizedTransportEquipment> utilizedTransportEquipments;
+
+  @Schema(description = "The list of consignment items in the shipment.")
+  private List<ConsignmentItem> consignmentItems;
 }

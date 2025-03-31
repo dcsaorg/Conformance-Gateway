@@ -12,16 +12,32 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Schema;
+import org.dcsa.conformance.standards.an.schema.model.ActiveReeferSettings;
 import org.dcsa.conformance.standards.an.schema.model.Address;
 import org.dcsa.conformance.standards.an.schema.model.ArrivalNotice;
+import org.dcsa.conformance.standards.an.schema.model.CargoItem;
+import org.dcsa.conformance.standards.an.schema.model.Charge;
+import org.dcsa.conformance.standards.an.schema.model.ConsignmentItem;
 import org.dcsa.conformance.standards.an.schema.model.Contact;
+import org.dcsa.conformance.standards.an.schema.model.DangerousGoods;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParties;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParty;
+import org.dcsa.conformance.standards.an.schema.model.EmergencyContactDetails;
+import org.dcsa.conformance.standards.an.schema.model.Equipment;
+import org.dcsa.conformance.standards.an.schema.model.FreeTime;
 import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
+import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
+import org.dcsa.conformance.standards.an.schema.model.InvoicePayableAt;
 import org.dcsa.conformance.standards.an.schema.model.Location;
+import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
+import org.dcsa.conformance.standards.an.schema.model.Seal;
+import org.dcsa.conformance.standards.an.schema.model.TemperatureLimits;
+import org.dcsa.conformance.standards.an.schema.model.Volume;
+import org.dcsa.conformance.standards.an.schema.model.Weight;
 import org.dcsa.conformance.standards.an.schema.model.TaxOrLegalReference;
 import org.dcsa.conformance.standards.an.schema.model.Transport;
+import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
 
 import java.io.IOException;
@@ -56,17 +72,33 @@ public class AnSchemaCreator {
     Components components = new Components();
     ModelConverters.getInstance().addConverter(new ModelValidatorConverter());
     Stream.of(
+            ActiveReeferSettings.class,
             Address.class,
             ArrivalNotice.class,
+            CargoItem.class,
+            Charge.class,
+            ConsignmentItem.class,
             Contact.class,
+            DangerousGoods.class,
             DocumentParty.class,
             DocumentParties.class,
+            EmergencyContactDetails.class,
+            Equipment.class,
+            FreeTime.class,
             IdentifyingPartyCode.class,
+            InnerPackaging.class,
+            InvoicePayableAt.class,
             Location.class,
+            OuterPackaging.class,
             Reference.class,
+            Seal.class,
             TaxOrLegalReference.class,
+            TemperatureLimits.class,
             Transport.class,
-            VesselVoyage.class)
+            UtilizedTransportEquipment.class,
+            VesselVoyage.class,
+            Volume.class,
+            Weight.class)
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));

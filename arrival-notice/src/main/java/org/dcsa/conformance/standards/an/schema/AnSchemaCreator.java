@@ -8,13 +8,24 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.dcsa.conformance.standards.an.schema.model.ActiveReeferSettings;
 import org.dcsa.conformance.standards.an.schema.model.Address;
 import org.dcsa.conformance.standards.an.schema.model.ArrivalNotice;
+import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticeDigest;
+import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticeDigestsMessage;
+import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.standards.an.schema.model.CargoItem;
 import org.dcsa.conformance.standards.an.schema.model.Charge;
 import org.dcsa.conformance.standards.an.schema.model.ConsignmentItem;
@@ -46,10 +57,16 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class AnSchemaCreator {
+
+  public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "Arrival Notice Publishers";
+  public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "Arrival Notice Subscribers";
 
   public static void main(String[] args) throws IOException {
     OpenAPI openAPI =
@@ -68,7 +85,17 @@ public class AnSchemaCreator {
                         new io.swagger.v3.oas.models.info.Contact()
                             .name("Digital Container Shipping Association (DCSA)")
                             .url("https://dcsa.org")
-                            .email("info@dcsa.org")));
+                            .email("info@dcsa.org")))
+            .addTagsItem(
+                new Tag()
+                    .name(TAG_ARRIVAL_NOTICE_PUBLISHERS)
+                    .description(
+                        "Endpoints implemented by the adopters who publish Arrival Notices"))
+            .addTagsItem(
+                new Tag()
+                    .name(TAG_ARRIVAL_NOTICE_SUBSCRIBERS)
+                    .description(
+                        "Endpoints implemented by the adopters who receive Arrival Notices"));
 
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
@@ -77,6 +104,9 @@ public class AnSchemaCreator {
             ActiveReeferSettings.class,
             Address.class,
             ArrivalNotice.class,
+            ArrivalNoticeDigest.class,
+            ArrivalNoticeDigestsMessage.class,
+            ArrivalNoticesMessage.class,
             CargoItem.class,
             Charge.class,
             ConsignmentItem.class,
@@ -116,7 +146,10 @@ public class AnSchemaCreator {
 
     openAPI.setComponents(components);
 
-    GetArrivalNoticesEndpoint.addEndPoint(openAPI);
+    openAPI.path(
+        "/arrival-notices",
+        new PathItem().get(operationArrivalNoticesGet()).put(operationArrivalNoticesPut()));
+    openAPI.path("/arrival-notice-digests", new PathItem().put(operationArrivalNoticeDigestsPut()));
 
     YAMLFactory yamlFactory =
         YAMLFactory.builder()
@@ -140,7 +173,7 @@ public class AnSchemaCreator {
     System.out.printf("OpenAPI spec exported to %s%n", yamlFilePath);
   }
 
-  static String readResourceFile(String fileName) {
+  static String readResourceFile(@SuppressWarnings("SameParameterValue") String fileName) {
     try {
       return Files.readString(
           Paths.get(
@@ -149,5 +182,99 @@ public class AnSchemaCreator {
     } catch (IOException | URISyntaxException e) {
       throw new RuntimeException("Failed to read file from resources: " + fileName, e);
     }
+  }
+
+  private static Operation operationArrivalNoticesGet() {
+    return new Operation()
+        .summary("Retrieves a list of Arrival Notices")
+        .description("TODO endpoint description")
+        .operationId("get-arrival-notices")
+        .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
+        .responses(
+            new ApiResponses()
+                .addApiResponse(
+                    "200",
+                    new ApiResponse()
+                        .description("TODO response description")
+                        .headers(
+                            new LinkedHashMap<>(
+                                Map.ofEntries(
+                                    Map.entry(
+                                        "API-Version",
+                                        new Header().$ref("#/components/headers/API-Version")))))
+                        .content(
+                            new Content()
+                                .addMediaType(
+                                    "application/json",
+                                    new MediaType()
+                                        .schema(
+                                            new Schema<>()
+                                                .$ref(
+                                                    "#/components/schemas/ArrivalNoticesMessage"))))));
+  }
+
+  private static Operation operationArrivalNoticesPut() {
+    return new Operation()
+        .summary("Sends a list of Arrival Notices")
+        .description("TODO description")
+        .operationId("put-arrival-notices")
+        .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
+        .requestBody(
+            new RequestBody()
+                .description("TODO request description")
+                .required(true)
+                .content(
+                    new Content()
+                        .addMediaType(
+                            "application/json",
+                            new MediaType()
+                                .schema(
+                                    new Schema<>()
+                                        .$ref("#/components/schemas/ArrivalNoticesMessage")))))
+        .responses(
+            new ApiResponses()
+                .addApiResponse(
+                    "204",
+                    new ApiResponse()
+                        .description("TODO response description")
+                        .headers(
+                            new LinkedHashMap<>(
+                                Map.ofEntries(
+                                    Map.entry(
+                                        "API-Version",
+                                        new Header().$ref("#/components/headers/API-Version")))))));
+  }
+
+  private static Operation operationArrivalNoticeDigestsPut() {
+    return new Operation()
+        .summary("Sends a list of Arrival Notice digests")
+        .description("TODO description")
+        .operationId("put-arrival-notice-digests")
+        .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_SUBSCRIBERS))
+        .requestBody(
+            new RequestBody()
+                .description("TODO request description")
+                .required(true)
+                .content(
+                    new Content()
+                        .addMediaType(
+                            "application/json",
+                            new MediaType()
+                                .schema(
+                                    new Schema<>()
+                                        .$ref(
+                                            "#/components/schemas/ArrivalNoticeDigestsMessage")))))
+        .responses(
+            new ApiResponses()
+                .addApiResponse(
+                    "204",
+                    new ApiResponse()
+                        .description("TODO response description")
+                        .headers(
+                            new LinkedHashMap<>(
+                                Map.ofEntries(
+                                    Map.entry(
+                                        "API-Version",
+                                        new Header().$ref("#/components/headers/API-Version")))))));
   }
 }

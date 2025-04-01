@@ -19,6 +19,7 @@ import org.dcsa.conformance.standards.an.schema.model.CargoItem;
 import org.dcsa.conformance.standards.an.schema.model.Charge;
 import org.dcsa.conformance.standards.an.schema.model.ConsignmentItem;
 import org.dcsa.conformance.standards.an.schema.model.Contact;
+import org.dcsa.conformance.standards.an.schema.model.CustomsReference;
 import org.dcsa.conformance.standards.an.schema.model.DangerousGoods;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParties;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParty;
@@ -29,6 +30,7 @@ import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
 import org.dcsa.conformance.standards.an.schema.model.InvoicePayableAt;
 import org.dcsa.conformance.standards.an.schema.model.Location;
+import org.dcsa.conformance.standards.an.schema.model.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
 import org.dcsa.conformance.standards.an.schema.model.Seal;
@@ -79,6 +81,7 @@ public class AnSchemaCreator {
             Charge.class,
             ConsignmentItem.class,
             Contact.class,
+            CustomsReference.class,
             DangerousGoods.class,
             DocumentParty.class,
             DocumentParties.class,
@@ -89,6 +92,7 @@ public class AnSchemaCreator {
             InnerPackaging.class,
             InvoicePayableAt.class,
             Location.class,
+            NationalCommodityCode.class,
             OuterPackaging.class,
             Reference.class,
             Seal.class,

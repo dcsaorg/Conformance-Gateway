@@ -44,9 +44,4 @@ The weight of the cargo item being carried in the container, excluding packaging
 
   @Schema(description = "Outer packaging specification")
   private OuterPackaging outerPackaging;
-
-  // TODO exportLicense?
-  // TODO importLicense?
-  // TODO nationalCommodityCodes?
-  // TODO customsReferences?
 }

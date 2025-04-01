@@ -52,4 +52,10 @@ A list of HS Codes that apply to this ConsignmentItem, used by customs to classi
 
   @Schema(description = "The list of Cargo Items grouped in this Consignment Item.")
   private List<CargoItem> cargoItems;
+
+  @Schema(description = "The list of National Commodity Codes in this Consignment Item.")
+  private List<NationalCommodityCode> nationalCommodityCodes;
+
+  @Schema(description = "The list of Customs References applicable to this Consignment Item.")
+  private List<CustomsReference> customsReferences;
 }

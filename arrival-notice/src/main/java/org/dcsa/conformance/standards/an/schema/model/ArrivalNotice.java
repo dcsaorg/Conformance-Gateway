@@ -127,7 +127,7 @@ Clauses for a specific shipment added by the carrier, subject to local rules / g
   private VesselVoyage vesselVoyage;
 
   @Schema(description = "Transport info")
-  private VesselVoyage transport;
+  private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination.")
   private List<FreeTime> freeTime;

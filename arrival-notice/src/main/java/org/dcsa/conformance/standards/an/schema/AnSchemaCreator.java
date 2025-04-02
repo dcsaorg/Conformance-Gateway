@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -59,14 +60,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class AnSchemaCreator {
 
-  public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "Arrival Notice Publishers";
-  public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "Arrival Notice Subscribers";
+  public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "AN Publisher Endpoints";
+  public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "AN Subscriber Endpoints";
 
   public static void main(String[] args) throws IOException {
     OpenAPI openAPI =
@@ -190,6 +192,57 @@ public class AnSchemaCreator {
         .description("TODO endpoint description")
         .operationId("get-arrival-notices")
         .tags(Collections.singletonList(TAG_ARRIVAL_NOTICE_PUBLISHERS))
+        .parameters(
+            List.of(
+                new Parameter()
+                    .in("query")
+                    .name("transportDocumentReference")
+                    .description(
+                        "Reference of the transport document for which to return the associated Arrival Notices")
+                    .example("TDR0123456")
+                    .schema(new Schema<String>().type("string")),
+                new Parameter()
+                    .in("query")
+                    .name("equipmentReference")
+                    .description(
+                        "Reference(s) of the equipment for which to return the associated Arrival Notices")
+                    .example("APZU4812090,APZU4812091")
+                    .schema(stringListQueryParameterSchema()),
+                new Parameter()
+                    .in("query")
+                    .name("portOfDischarge")
+                    .description(
+                        "UN location of the port of discharge for which to retrieve available Arrival Notices")
+                    .example("NLRTM")
+                    .schema(new Schema<String>().type("string")),
+                new Parameter()
+                    .in("query")
+                    .name("vesselIMONumber")
+                    .description(
+                        "IMO number of the vessel for which to retrieve available Arrival Notices")
+                    .example("12345678")
+                    .schema(new Schema<String>().type("string")),
+                new Parameter()
+                    .in("query")
+                    .name("minEtaAtPortOfDischargeDate")
+                    .description(
+                        "Retrieve Arrival Notices with an ETA at port of discharge on or after this date")
+                    .example("2025-01-23")
+                    .schema(new Schema<String>().type("string").format("date")),
+                new Parameter()
+                    .in("query")
+                    .name("maxEtaAtPortOfDischargeDate")
+                    .description(
+                        "Retrieve Arrival Notices with an ETA at port of discharge on or before this date")
+                    .example("2025-01-23")
+                    .schema(new Schema<String>().type("string").format("date")),
+                new Parameter()
+                    .in("query")
+                    .name("includeCharges")
+                    .description(
+                        "Flag indicating whether to include Arrival Notice charges (default: true).")
+                    .example(true)
+                    .schema(new Schema<Boolean>().type("boolean"))))
         .responses(
             new ApiResponses()
                 .addApiResponse(
@@ -211,6 +264,11 @@ public class AnSchemaCreator {
                                             new Schema<>()
                                                 .$ref(
                                                     "#/components/schemas/ArrivalNoticesMessage"))))));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Schema<List<String>> stringListQueryParameterSchema() {
+    return new Schema<List<String>>().type("array").items(new Schema<String>().type("string"));
   }
 
   private static Operation operationArrivalNoticesPut() {

@@ -35,33 +35,25 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
     var scenarios = new LinkedHashMap<String, PintScenarioListBuilder>();
     transferScenarios(scenarios);
     receiverValidationScenarios(scenarios);
+    errorScenarios(scenarios);
     return scenarios;
   }
 
   private static void transferScenarios(Map<String, PintScenarioListBuilder> scenarios) {
-    scenarios.put("Transfer scenarios",
-      noAction().thenEither(
-        supplySenderTransferScenarioParameters(0).thenEither(
-          receiverStateSetup(ScenarioClass.NO_ISSUES)
-            .thenEither(
-              initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
-                noAction(),
-                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
-                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
-                retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)),
-              initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
-                noAction(),
-                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
-                retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)
-              ),
-              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
-                initiateAndCloseTransferAction(PintResponseCode.RECE)
-              ),
-              initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM)
-            ),
-          receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
-            initiateAndCloseTransferAction(PintResponseCode.BENV)
-          )),
+    scenarios.put("Transfer scenarios: No additional documents",
+      supplySenderTransferScenarioParameters(0).thenEither(
+        receiverStateSetup(ScenarioClass.NO_ISSUES)
+          .thenEither(
+            initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
+              noAction(),
+              retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
+              retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN)),
+            initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+              noAction(),
+              retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN)
+            )
+          )));
+    scenarios.put("Transfer scenarios: With additional documents",
         supplySenderTransferScenarioParameters(2).thenEither(
           receiverStateSetup(ScenarioClass.NO_ISSUES)
             .then(
@@ -73,29 +65,64 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
                       closeTransferAction(PintResponseCode.RECE),
                       retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                     )
-                  ),
-                  transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
-                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
-                  ),
-                  transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
-                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
-                  ),
-                  closeTransferAction(PintResponseCode.MDOC).then(
-                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
-                      transferDocument().thenEither(
-                        closeTransferAction(PintResponseCode.RECE),
-                        retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
-                      )
-                    )
                   )
                 )
               )))
-      ));
+      );
   }
 
   private static void receiverValidationScenarios(Map<String, PintScenarioListBuilder> scenarios) {
     scenarios.put("Receiver validation scenarios", supplyReceiverValidationScenarioParameters()
       .then(receiverValidation())
+    );
+  }
+
+  private static void errorScenarios(Map<String, PintScenarioListBuilder> scenarios) {
+    scenarios.put("Error scenarios: Signature issues", supplySenderTransferScenarioParameters(0).thenEither(
+      receiverStateSetup(ScenarioClass.NO_ISSUES)
+        .then(
+          initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
+            initiateAndCloseTransferAction(PintResponseCode.RECE)
+          ))
+    ));
+    scenarios.put("Error scenarios: Incorrect payloads issues", supplySenderTransferScenarioParameters(0).thenEither(
+      receiverStateSetup(ScenarioClass.NO_ISSUES)
+        .thenEither(
+          initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM),
+          receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
+            initiateAndCloseTransferAction(PintResponseCode.BENV)
+          )
+        )));
+    scenarios.put("Error scenarios: Dispute errors", supplySenderTransferScenarioParameters(0).then(
+      receiverStateSetup(ScenarioClass.NO_ISSUES)
+        .thenEither(
+          initiateAndCloseTransferAction(PintResponseCode.RECE).then(
+            retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)),
+          initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).then(
+            retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)
+          )
+        )));
+    scenarios.put("Error scenarios: Document transfer issue", supplySenderTransferScenarioParameters(2).thenEither(
+      receiverStateSetup(ScenarioClass.NO_ISSUES)
+        .then(
+          initiateTransfer(2, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+            transferDocument().thenEither(
+              transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
+                retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+              ),
+              transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
+                retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+              ),
+              closeTransferAction(PintResponseCode.MDOC).then(
+                retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
+                  transferDocument().thenEither(
+                    closeTransferAction(PintResponseCode.RECE),
+                    retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
+                  )
+                )
+              )
+            )
+          )))
     );
   }
 

@@ -288,60 +288,69 @@ public class PintSendingPlatform extends ConformanceParty {
     var tdr = ssp.transportDocumentReference();
 
     var senderTransmissionClass = SenderTransmissionClass.valueOf(actionPrompt.required("senderTransmissionClass").asText());
-
-    boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
-
-    var sendingState = TDSendingState.newInstance(ssp.transportDocumentReference(), dsp.documentCount());
-
     var body = OBJECT_MAPPER.createObjectNode();
+    TDSendingState sendingState = null;
 
-    var tdPayload = loadTransportDocument(tdr);
-    body.set("transportDocument", tdPayload);
-    if (!isCorrect && tdPayload.path("transportDocument").has("issuingParty")) {
-      ((ObjectNode) tdPayload.path("transportDocument")).remove("issuingParty");
+    if (senderTransmissionClass != INVALID_PAYLOAD) {
+      boolean isCorrect = actionPrompt.path("isCorrect").asBoolean();
+
+      sendingState =
+          TDSendingState.newInstance(ssp.transportDocumentReference(), dsp.documentCount());
+
+      var tdPayload = loadTransportDocument(tdr);
+      body.set("transportDocument", tdPayload);
+      if (!isCorrect && tdPayload.path("transportDocument").has("issuingParty")) {
+        ((ObjectNode) tdPayload.path("transportDocument")).remove("issuingParty");
+      }
+
+      var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
+      var tdChecksum = Checksums.sha256CanonicalJson(tdPayload);
+
+      var latestEnvelopeTransferChainEntrySigned =
+          generateTransactions(body, tdChecksum, senderTransmissionClass, rsp);
+      var unsignedEnvelopeManifest =
+          sendingState.generateEnvelopeManifest(
+              tdChecksum, Checksums.sha256(latestEnvelopeTransferChainEntrySigned));
+      var issuanceManifest =
+          OBJECT_MAPPER
+              .createObjectNode()
+              .put("documentChecksum", tdChecksum)
+              // The receiver cannot validate the issueToChecksum anyway.
+              .put("issueToChecksum", Checksums.sha256(UUID.randomUUID().toString()));
+      var issuanceManifestSignedContentNode =
+          TextNode.valueOf(CARRIER_PLATFORM_PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
+
+      JsonNode signedManifest =
+          TextNode.valueOf(
+              SENDING_PLATFORM_PAYLOAD_SIGNER.sign(unsignedEnvelopeManifest.toString()));
+      sendingState.setSignedManifest(signedManifest);
+      if (senderTransmissionClass == SIGNATURE_ISSUE) {
+        signedManifest = mutatePayload(signedManifest);
+      }
+      sendingState.setIssuanceManifestNode(issuanceManifestSignedContentNode);
+      body.set("issuanceManifestSignedContent", issuanceManifestSignedContentNode);
+      body.set("envelopeManifestSignedContent", signedManifest);
+      var envelopeTransferChain = body.path("envelopeTransferChain");
+      sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
+      sendingState.save(persistentMap);
     }
-
-    var rsp = ReceiverScenarioParameters.fromJson(actionPrompt.required("rsp"));
-    var tdChecksum = Checksums.sha256CanonicalJson(tdPayload);
-
-    var latestEnvelopeTransferChainEntrySigned = generateTransactions(
-      body,
-      tdChecksum,
-      senderTransmissionClass,
-      rsp
-    );
-    var unsignedEnvelopeManifest = sendingState.generateEnvelopeManifest(
-      tdChecksum,
-      Checksums.sha256(latestEnvelopeTransferChainEntrySigned)
-    );
-    var issuanceManifest = OBJECT_MAPPER.createObjectNode()
-      .put("documentChecksum", tdChecksum)
-      // The receiver cannot validate the issueToChecksum anyway.
-      .put("issueToChecksum", Checksums.sha256(UUID.randomUUID().toString()));
-    var issuanceManifestSignedContentNode = TextNode.valueOf(CARRIER_PLATFORM_PAYLOAD_SIGNER.sign(issuanceManifest.toString()));
-
-    JsonNode signedManifest = TextNode.valueOf(SENDING_PLATFORM_PAYLOAD_SIGNER.sign(unsignedEnvelopeManifest.toString()));
-    sendingState.setSignedManifest(signedManifest);
-    if (senderTransmissionClass == SIGNATURE_ISSUE) {
-      signedManifest = mutatePayload(signedManifest);
-    }
-    sendingState.setIssuanceManifestNode(issuanceManifestSignedContentNode);
-    body.set("issuanceManifestSignedContent", issuanceManifestSignedContentNode);
-    body.set("envelopeManifestSignedContent", signedManifest);
-    var envelopeTransferChain = body.path("envelopeTransferChain");
-    sendingState.setSignedEnvelopeTransferChain(envelopeTransferChain);
-    sendingState.save(persistentMap);
+    var urlContext = "/v" + apiVersion.charAt(0) + "/envelopes";
     var response = this.syncCounterpartPost(
-      "/v" + apiVersion.charAt(0) + "/envelopes",
+      urlContext,
       body
     );
-    var responseBody = response.message().body().getJsonBody();
-    for (var checksumNode : responseBody.path("missingAdditionalDocumentChecksums")) {
-      sendingState.registerMissingAdditionalDocument(checksumNode.asText("").toLowerCase());
-    }
+    if (sendingState != null) {
+      var responseBody = response.message().body().getJsonBody();
+      for (var checksumNode : responseBody.path("missingAdditionalDocumentChecksums")) {
+        sendingState.registerMissingAdditionalDocument(checksumNode.asText("").toLowerCase());
+      }
 
-    addOperatorLogEntry(
-        "Sent an eBL with transportDocumentReference '%s'".formatted(tdr));
+      addOperatorLogEntry(
+        "Sent an eBL with transportDocumentReference '%s' [%s]".formatted(tdr, senderTransmissionClass.name()));
+    } else {
+      addOperatorLogEntry(
+        "Sent an invalid request [%s]".formatted(senderTransmissionClass.name()));
+    }
   }
 
   private JsonNode mutatePayload(JsonNode signedPayloadNode) {

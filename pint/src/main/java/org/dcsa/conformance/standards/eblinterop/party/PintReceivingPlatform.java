@@ -97,7 +97,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var tdr = ssp.transportDocumentReference();
     var scenarioClass = ScenarioClass.valueOf(actionPrompt.required("scenarioClass").asText());
     var receivingParameters = getReceiverScenarioParameters(ssp.eblPlatform(), scenarioClass);
-    var tdState = TDReceiveState.newInstance(tdr, ssp.sendersX509SigningCertificateInPEMFormat(), receivingParameters);
+    var tdState = TDReceiveState.newInstance(tdr, ssp.sendersX509SigningCertificateInPEMFormat());
     tdState.setExpectedReceiver(
       generateReceiverParty(
         ssp.eblPlatform(),
@@ -148,7 +148,16 @@ public class PintReceivingPlatform extends ConformanceParty {
     var transferRequest = request.message().body().getJsonBody();
     var td = transferRequest.path("transportDocument");
     var tdr = td.path("transportDocumentReference").asText();
-    var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
+    var receiveState = TDReceiveState.fromPersistentStoreIfPresent(persistentMap, tdr).orElse(null);
+    if (receiveState == null) {
+      receiveState = TDReceiveState.newInstance("", null);
+      var responseBody = receiveState.generateSignedResponse(BENV, RECEIVING_PLATFORM_PAYLOAD_SIGNER);
+      return request.createResponse(
+        BENV.getHttpResponseCode(),
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(responseBody)
+      );
+    }
     var cannedResponse = receiveState.cannedResponse(request);
     if (cannedResponse != null) {
       return cannedResponse;

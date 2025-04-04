@@ -91,7 +91,8 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
           initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM),
           receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
             initiateAndCloseTransferAction(PintResponseCode.BENV)
-          )
+          ),
+          initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.INVALID_PAYLOAD)
         )));
     scenarios.put("Error scenarios: Dispute errors", supplySenderTransferScenarioParameters(0).then(
       receiverStateSetup(ScenarioClass.NO_ISSUES)

@@ -3,6 +3,8 @@ package org.dcsa.conformance.standards.eblinterop.action;
 import static org.dcsa.conformance.standards.eblinterop.checks.PintChecks.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -80,6 +82,14 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
     }
   }
 
+  private boolean shouldValidateSignature() {
+    return senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE && senderTransmissionClass != SenderTransmissionClass.INVALID_PAYLOAD;
+  }
+
+  private boolean shouldValidateRequestPayload() {
+    return senderTransmissionClass != SenderTransmissionClass.INVALID_PAYLOAD;
+  }
+
   @Override
   public ConformanceCheck createCheck(String expectedApiVersion) {
     return new ConformanceCheck(getActionTitle()) {
@@ -89,79 +99,87 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
         Supplier<SignatureVerifier> carrierVerifierSupplier = () -> resolveSignatureVerifierCarrierSignatures();
         Supplier<SignatureVerifier> receiverVerifierSupplier = () -> resolveSignatureVerifierForReceiverSignatures();
 
-        return Stream.of(
-                new UrlPathCheck(
-                    PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
-                new ResponseStatusCheck(
-                    PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
-                new ApiHeaderCheck(
-                    PintRole::isSendingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.REQUEST,
-                    expectedApiVersion),
-                new ApiHeaderCheck(
-                    PintRole::isReceivingPlatform,
-                    getMatchedExchangeUuid(),
-                    HttpMessageType.RESPONSE,
-                    expectedApiVersion),
-                new JsonSchemaCheck(
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  responseSchemaValidator
-                ),
-                senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
-                  ? validateRequestSignatures(
-                      getMatchedExchangeUuid(),
-                      expectedApiVersion,
-                      senderVerifierSupplier,
-                      carrierVerifierSupplier
-                    )
-                  : null,
-              validateInnerRequestSchemas(
-                getMatchedExchangeUuid(),
-                expectedApiVersion,
-                envelopeEnvelopeSchemaValidator,
-                envelopeTransferChainEntrySchemaValidator,
-                issuanceManifestSchemaValidator
-              ),
-                JsonAttribute.contentChecks(
-                  "",
-                  "The signatures of the signed content of the HTTP response can be validated",
-                  PintRole::isReceivingPlatform,
-                  getMatchedExchangeUuid(),
-                  HttpMessageType.RESPONSE,
-                  expectedApiVersion,
-                  JsonAttribute.customValidator(
-                    "Response signature must be valid",
-                    SignatureChecks.signatureValidates(receiverVerifierSupplier)
-                  )
-                ),
-                new JsonSchemaCheck(
-                        PintRole::isSendingPlatform,
-                        getMatchedExchangeUuid(),
-                        HttpMessageType.REQUEST,
-                        requestSchemaValidator
-                ),
-                tdContentChecks(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  () -> getSsp()
-                ),
-                validateInitiateTransferRequest(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  senderTransmissionClass,
-                  () -> getSsp(),
-                  () -> getRsp(),
-                  () -> getDsp()
-                ),
-                validateSignedFinishResponse(
-                  getMatchedExchangeUuid(),
-                  expectedApiVersion,
-                  pintResponseCode
-                )
-            ).filter(Objects::nonNull);
+        var requestChecks = List.<ConformanceCheck>of();
+
+        if (shouldValidateRequestPayload()) {
+          requestChecks = List.of(
+            validateInnerRequestSchemas(
+              getMatchedExchangeUuid(),
+              expectedApiVersion,
+              envelopeEnvelopeSchemaValidator,
+              envelopeTransferChainEntrySchemaValidator,
+              issuanceManifestSchemaValidator
+            ),
+            JsonAttribute.contentChecks(
+              "",
+              "The signatures of the signed content of the HTTP response can be validated",
+              PintRole::isReceivingPlatform,
+              getMatchedExchangeUuid(),
+              HttpMessageType.RESPONSE,
+              expectedApiVersion,
+              JsonAttribute.customValidator(
+                "Response signature must be valid",
+                SignatureChecks.signatureValidates(receiverVerifierSupplier)
+              )
+            ),
+            new JsonSchemaCheck(
+              PintRole::isSendingPlatform,
+              getMatchedExchangeUuid(),
+              HttpMessageType.REQUEST,
+              requestSchemaValidator
+            ),
+            tdContentChecks(
+              getMatchedExchangeUuid(),
+              expectedApiVersion,
+              () -> getSsp()
+            ),
+            validateInitiateTransferRequest(
+              getMatchedExchangeUuid(),
+              expectedApiVersion,
+              senderTransmissionClass,
+              () -> getSsp(),
+              () -> getRsp(),
+              () -> getDsp()
+            )
+          );
+        }
+        var genericChecks = Stream.of(
+          new UrlPathCheck(
+            PintRole::isSendingPlatform, getMatchedExchangeUuid(), "/envelopes"),
+          new ResponseStatusCheck(
+            PintRole::isReceivingPlatform, getMatchedExchangeUuid(), expectedStatus),
+          new ApiHeaderCheck(
+            PintRole::isSendingPlatform,
+            getMatchedExchangeUuid(),
+            HttpMessageType.REQUEST,
+            expectedApiVersion),
+          new ApiHeaderCheck(
+            PintRole::isReceivingPlatform,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            expectedApiVersion),
+          new JsonSchemaCheck(
+            PintRole::isReceivingPlatform,
+            getMatchedExchangeUuid(),
+            HttpMessageType.RESPONSE,
+            responseSchemaValidator
+          ),
+          shouldValidateSignature()
+            ? validateRequestSignatures(
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            senderVerifierSupplier,
+            carrierVerifierSupplier
+          )
+            : null,
+          validateSignedFinishResponse(
+            getMatchedExchangeUuid(),
+            expectedApiVersion,
+            pintResponseCode
+          )
+        );
+
+        return Stream.concat(genericChecks, requestChecks.stream()).filter(Objects::nonNull);
       }
     };
   }

@@ -292,7 +292,7 @@ public class TDReceiveState {
     return new TDReceiveState((ObjectNode) state);
   }
 
-  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM, ReceiverScenarioParameters receivingParameters) {
+  public static TDReceiveState newInstance(String transportDocumentReference, String senderPublicKeyPEM) {
     var state = OBJECT_MAPPER.createObjectNode()
       .put(TRANSPORT_DOCUMENT_REFERENCE, transportDocumentReference)
       .put(TRANSFER_STATE, TransferState.NOT_STARTED.name())
@@ -304,12 +304,14 @@ public class TDReceiveState {
     return this.state;
   }
 
+  public static Optional<TDReceiveState> fromPersistentStoreIfPresent(JsonNodeMap jsonNodeMap, String transportDocumentReference) {
+    return Optional.ofNullable(jsonNodeMap.load(transportDocumentReference))
+      .map(TDReceiveState::fromPersistentStore);
+  }
+
   public static TDReceiveState fromPersistentStore(JsonNodeMap jsonNodeMap, String transportDocumentReference) {
-    var data = jsonNodeMap.load(transportDocumentReference);
-    if (data == null) {
-      throw new IllegalArgumentException("Unknown TD Reference: " + transportDocumentReference);
-    }
-    return fromPersistentStore(data);
+    return fromPersistentStoreIfPresent(jsonNodeMap, transportDocumentReference)
+      .orElseThrow(() -> new IllegalArgumentException("Unknown TD Reference: " + transportDocumentReference));
   }
 
   public void save(JsonNodeMap jsonNodeMap) {

@@ -5,4 +5,5 @@ public enum SenderTransmissionClass {
   VALID_TRANSFER,
   SIGNATURE_ISSUE,
   WRONG_RECIPIENT_PLATFORM,
+  INVALID_PAYLOAD,
 }

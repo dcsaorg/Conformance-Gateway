@@ -3,8 +3,6 @@ package org.dcsa.conformance.standards.eblinterop;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.check.JsonSchemaValidator;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
@@ -34,89 +32,71 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
     STANDARD_VERSION.set(standardVersion);
     SENDING_PLATFORM_PARTY_NAME.set(sendingPlatformPartyName);
     RECEIVING_PLATFORM_PARTY_NAME.set(receivingPlatformPartyName);
-    return Stream.of(
-        Map.entry(
-          "Transfer scenarios",
-          noAction().thenEither(
-            supplySenderTransferScenarioParameters(0).thenEither(
-              receiverStateSetup(ScenarioClass.NO_ISSUES)
-                .thenEither(
-                  initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
-                    noAction(),
-                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
-                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
-                    retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)),
-                  initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
-                    noAction(),
-                    retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
-                    retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)
-                  ),
-                  initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
-                    initiateAndCloseTransferAction(PintResponseCode.RECE)
-                  ),
-                  initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM)
-                ),
-              receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
-                initiateAndCloseTransferAction(PintResponseCode.BENV)
-              )/*,
-              receiverStateSetup(ScenarioClass.FAIL_W_503).then(
-                initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).thenEither(
-                  resetScenarioClass(ScenarioClass.NO_ISSUES).then(
-                    initiateAndCloseTransferAction(PintResponseCode.RECE)),
-                  initiateTransferUnsignedFailure(503, SenderTransmissionClass.VALID_TRANSFER).then(
-                    resetScenarioClass(ScenarioClass.NO_ISSUES).then(
-                      initiateAndCloseTransferAction(PintResponseCode.RECE)))
-                ))*/
+    var scenarios = new LinkedHashMap<String, PintScenarioListBuilder>();
+    transferScenarios(scenarios);
+    receiverValidationScenarios(scenarios);
+    return scenarios;
+  }
+
+  private static void transferScenarios(Map<String, PintScenarioListBuilder> scenarios) {
+    scenarios.put("Transfer scenarios",
+      noAction().thenEither(
+        supplySenderTransferScenarioParameters(0).thenEither(
+          receiverStateSetup(ScenarioClass.NO_ISSUES)
+            .thenEither(
+              initiateAndCloseTransferAction(PintResponseCode.RECE).thenEither(
+                noAction(),
+                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER),
+                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
+                retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)),
+              initiateAndCloseTransferAction(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+                noAction(),
+                retryTransfer(PintResponseCode.DUPE, SenderTransmissionClass.VALID_TRANSFER, RetryType.RESIGN),
+                retryTransfer(PintResponseCode.DISE, SenderTransmissionClass.VALID_TRANSFER, RetryType.MANIPULATE)
+              ),
+              initiateAndCloseTransferAction(PintResponseCode.BSIG, SenderTransmissionClass.SIGNATURE_ISSUE).then(
+                initiateAndCloseTransferAction(PintResponseCode.RECE)
+              ),
+              initiateAndCloseTransferAction(PintResponseCode.BENV, SenderTransmissionClass.WRONG_RECIPIENT_PLATFORM)
             ),
-            supplySenderTransferScenarioParameters(2).thenEither(
-              receiverStateSetup(ScenarioClass.NO_ISSUES)
-                .then(
-                  initiateTransfer(2, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+          receiverStateSetup(ScenarioClass.INVALID_RECIPIENT).then(
+            initiateAndCloseTransferAction(PintResponseCode.BENV)
+          )),
+        supplySenderTransferScenarioParameters(2).thenEither(
+          receiverStateSetup(ScenarioClass.NO_ISSUES)
+            .then(
+              initiateTransfer(2, SenderTransmissionClass.VALID_TRANSFER).thenEither(
+                transferDocument().thenEither(
+                  transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
+                  retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
                     transferDocument().thenEither(
-                      transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
-                      retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
-                        transferDocument().thenEither(
-                          closeTransferAction(PintResponseCode.RECE),
-                          retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
-                        )
-                      ),
-                      /*resetScenarioClass(ScenarioClass.FAIL_W_503).then(
-                        transferDocumentReceiverFailure().then(
-                          resetScenarioClass(ScenarioClass.NO_ISSUES).thenEither(
-                            transferDocument().then(closeTransferAction(PintResponseCode.RECE)),
-                            retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
-                              transferDocument().thenEither(
-                                closeTransferAction(PintResponseCode.RECE),
-                                retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
-                              )
-                            )
-                          )
-                        )
-                      ),*/
-                      transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
-                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
-                      ),
-                      transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
-                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
-                      ),
-                      closeTransferAction(PintResponseCode.MDOC).then(
-                        retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
-                          transferDocument().thenEither(
-                            closeTransferAction(PintResponseCode.RECE),
-                            retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
-                          )
-                        )
+                      closeTransferAction(PintResponseCode.RECE),
+                      retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
+                    )
+                  ),
+                  transferDocument(SenderDocumentTransmissionTypeCode.CORRUPTED_DOCUMENT).then(
+                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                  ),
+                  transferDocument(SenderDocumentTransmissionTypeCode.UNRELATED_DOCUMENT).then(
+                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(transferDocument().then(closeTransferAction(PintResponseCode.RECE)))
+                  ),
+                  closeTransferAction(PintResponseCode.MDOC).then(
+                    retryTransfer(1, SenderTransmissionClass.VALID_TRANSFER).then(
+                      transferDocument().thenEither(
+                        closeTransferAction(PintResponseCode.RECE),
+                        retryTransfer(PintResponseCode.RECE, SenderTransmissionClass.VALID_TRANSFER)
                       )
                     )
-                  )))
-          )),
-      Map.entry("Receiver validation scenarios",
-        supplyReceiverValidationScenarioParameters()
-          .then(receiverValidation())
-        ))
-      .collect(
-        Collectors.toMap(
-          Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                  )
+                )
+              )))
+      ));
+  }
+
+  private static void receiverValidationScenarios(Map<String, PintScenarioListBuilder> scenarios) {
+    scenarios.put("Receiver validation scenarios", supplyReceiverValidationScenarioParameters()
+      .then(receiverValidation())
+    );
   }
 
 

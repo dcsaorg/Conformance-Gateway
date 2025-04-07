@@ -150,6 +150,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     var tdr = td.path("transportDocumentReference").asText();
     var receiveState = TDReceiveState.fromPersistentStoreIfPresent(persistentMap, tdr).orElse(null);
     if (receiveState == null) {
+      addOperatorLogEntry("Received envelope for unknown TDR '%s', rejecting with a signed 422".formatted(tdr));
       receiveState = TDReceiveState.newInstance("", null);
       var responseBody = receiveState.generateSignedResponse(BENV, RECEIVING_PLATFORM_PAYLOAD_SIGNER);
       return request.createResponse(
@@ -160,6 +161,7 @@ public class PintReceivingPlatform extends ConformanceParty {
     }
     var cannedResponse = receiveState.cannedResponse(request);
     if (cannedResponse != null) {
+      addOperatorLogEntry("Returning canned response for TDR '%s' as scenario requested with no regards to the validity of the request".formatted(tdr));
       return cannedResponse;
     }
     var etc = transferRequest.path("envelopeTransferChain");

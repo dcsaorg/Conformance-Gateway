@@ -66,7 +66,7 @@ public class PintRetryTransferAndCloseAction extends PintAction {
     return switch (retryType) {
       case NO_CHANGE -> "Retry transfer-transaction request";
       case RESIGN -> "Retry the transfer-transaction request with the latest transaction entry resigned";
-      case MANIPULATE -> "Retry the transfer-transaction request after manipulating (and resigning) the latest transaction";
+      case MANIPULATE -> "Retry the transfer-transaction request after manipulating (and resigning) the latest transaction: Not to be performed by implementers";
     };
   }
 

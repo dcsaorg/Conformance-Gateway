@@ -43,7 +43,10 @@ public class PintTransferAdditionalDocumentAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
-    return ("Send transfer-transaction request");
+    if (senderDocumentTransmissionTypeCode != SenderDocumentTransmissionTypeCode.VALID_DOCUMENT) {
+      return ("Send transfer an additional document (case: %s): Not to be performed by implementers".formatted(senderDocumentTransmissionTypeCode.name()));
+    }
+    return ("Send transfer an additional document related to the envelope");
   }
 
   @Override

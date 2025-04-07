@@ -59,6 +59,9 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
 
   @Override
   public String getHumanReadablePrompt() {
+    if (isInvalidRequest()) {
+      return ("Send an invalid transfer-transaction request: Not to be performed by implementers");
+    }
     return ("Send transfer-transaction request");
   }
 
@@ -83,10 +86,15 @@ public class PintInitiateAndCloseTransferAction extends PintAction {
   }
 
   private boolean shouldValidateSignature() {
-    return senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE && senderTransmissionClass != SenderTransmissionClass.INVALID_PAYLOAD;
+    return senderTransmissionClass != SenderTransmissionClass.SIGNATURE_ISSUE
+      && senderTransmissionClass != SenderTransmissionClass.INVALID_PAYLOAD;
   }
 
   private boolean shouldValidateRequestPayload() {
+    return isInvalidRequest();
+  }
+
+  private boolean isInvalidRequest() {
     return senderTransmissionClass != SenderTransmissionClass.INVALID_PAYLOAD;
   }
 

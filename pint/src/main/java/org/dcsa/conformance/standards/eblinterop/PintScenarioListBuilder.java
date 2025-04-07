@@ -27,6 +27,8 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   private static final String RECEIVER_VALIDATION_RESPONSE = "ReceiverValidationResponse";
   private static final String RECEIVER_VALIDATION_REQUEST = "IdentifyingCode";
 
+  private static final String ERROR_RESPONSE = "ErrorResponse";
+
   public static LinkedHashMap<String, PintScenarioListBuilder> createModuleScenarioListBuilders(
     String standardVersion, String sendingPlatformPartyName, String receivingPlatformPartyName) {
     STANDARD_VERSION.set(standardVersion);
@@ -72,9 +74,10 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   }
 
   private static void receiverValidationScenarios(Map<String, PintScenarioListBuilder> scenarios) {
-    scenarios.put("Receiver validation scenarios", supplyReceiverValidationScenarioParameters()
-      .then(receiverValidation())
-    );
+    scenarios.put("Receiver validation scenarios", noAction().thenEither(
+        supplyReceiverValidationScenarioParameters().then(receiverValidation(true)),
+        supplyReceiverValidationScenarioParametersForUnknownParty().then(receiverValidation(false))
+    ));
   }
 
   private static void errorScenarios(Map<String, PintScenarioListBuilder> scenarios) {
@@ -134,6 +137,16 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
   }
 
   private static PintScenarioListBuilder supplyReceiverValidationScenarioParameters() {
+    return supplyReceiverValidationScenarioParameters(true);
+  }
+
+  private static PintScenarioListBuilder supplyReceiverValidationScenarioParametersForUnknownParty() {
+    return supplyReceiverValidationScenarioParameters(
+      false
+    );
+  }
+
+  private static PintScenarioListBuilder supplyReceiverValidationScenarioParameters(boolean isValid) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -141,11 +154,12 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
         new SupplyValidationEndpointScenarioParametersAction(
           sendingPlatform,
           receivingPlatform,
-          (PintAction) previousAction
+          (PintAction) previousAction,
+          isValid
         ));
   }
 
-  private static PintScenarioListBuilder receiverValidation() {
+  private static PintScenarioListBuilder receiverValidation(boolean isValid) {
     String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
     String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
     return new PintScenarioListBuilder(
@@ -154,9 +168,9 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
           sendingPlatform,
           receivingPlatform,
           (PintAction) previousAction,
-          200,
+          isValid ? 200 : 404,
           resolveMessageSchemaValidator(RECEIVER_VALIDATION_REQUEST),
-          resolveMessageSchemaValidator(RECEIVER_VALIDATION_RESPONSE)
+          resolveMessageSchemaValidator(isValid ? RECEIVER_VALIDATION_RESPONSE : ERROR_RESPONSE)
         ));
   }
 

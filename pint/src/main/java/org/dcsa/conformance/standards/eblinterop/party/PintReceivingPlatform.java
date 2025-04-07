@@ -5,9 +5,12 @@ import static org.dcsa.conformance.standards.eblinterop.action.PintResponseCode.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dcsa.conformance.core.party.ConformanceParty;
 import org.dcsa.conformance.core.party.CounterpartConfiguration;
@@ -16,6 +19,7 @@ import org.dcsa.conformance.core.party.PartyWebClient;
 import org.dcsa.conformance.core.scenario.ConformanceAction;
 import org.dcsa.conformance.core.state.JsonNodeMap;
 import org.dcsa.conformance.core.state.StateManagementUtil;
+import org.dcsa.conformance.core.toolkit.JsonToolkit;
 import org.dcsa.conformance.core.traffic.ConformanceMessageBody;
 import org.dcsa.conformance.core.traffic.ConformanceRequest;
 import org.dcsa.conformance.core.traffic.ConformanceResponse;
@@ -85,8 +89,11 @@ public class PintReceivingPlatform extends ConformanceParty {
 
   private void providedReceiverValidationScenarioParameters(JsonNode actionPrompt) {
     log.info("EblInteropReceivingPlatform.providedReceiverValidationScenarioParameters(%s)".formatted(actionPrompt.toPrettyString()));
+    var isValid = actionPrompt.required("isValid").asBoolean();
     asyncOrchestratorPostPartyInput(
-      actionPrompt.required("actionId").asText(), SupplyValidationEndpointScenarioParametersAction.getJsonForPrompt());
+      actionPrompt.required("actionId").asText(),
+      SupplyValidationEndpointScenarioParametersAction.getJsonForPrompt(isValid)
+    );
     addOperatorLogEntry(
       "Finished providedReceiverValidationScenarioParameters");
   }
@@ -282,7 +289,32 @@ public class PintReceivingPlatform extends ConformanceParty {
             "Unknown endpoint")));
   }
 
+  @SneakyThrows
   private ConformanceResponse handleReceiverValidation(ConformanceRequest request) {
+    var expected = SupplyValidationEndpointScenarioParametersAction.getJsonForPrompt(true);
+    var actual = request.message().body().getJsonBody();
+    if (! expected.equals(actual)) {
+      var path = new URI(request.url()).toURL().getPath();
+      ObjectNode response =
+        (ObjectNode)
+          JsonToolkit.templateFileToJsonNode(
+            "/standards/jit/messages/jit-200-error-message.json",
+            Map.of(
+              "HTTP_METHOD_PLACEHOLDER",
+              request.method(),
+              "REQUEST_URI_PLACEHOLDER",
+              path,
+              "REFERENCE_PLACEHOLDER",
+              UUID.randomUUID().toString(),
+              "ERROR_DATE_TIME_PLACEHOLDER",
+              LocalDateTime.now().format(JsonToolkit.ISO_8601_DATE_TIME_FORMAT)));
+
+      return request.createResponse(
+        404,
+        Map.of(API_VERSION, List.of(apiVersion)),
+        new ConformanceMessageBody(response)
+      );
+    }
     return request.createResponse(
       200,
       Map.of(API_VERSION, List.of(apiVersion)),

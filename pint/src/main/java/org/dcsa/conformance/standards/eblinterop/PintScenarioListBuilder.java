@@ -184,17 +184,6 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
             scenarioClass));
   }
 
-  private static PintScenarioListBuilder resetScenarioClass(ScenarioClass scenarioClass) {
-    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
-    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
-    return new PintScenarioListBuilder(
-      previousAction -> new ResetScenarioClassAction(
-        receivingPlatform,
-        sendingPlatform,
-        (PintAction) previousAction,
-        scenarioClass));
-  }
-
   private static PintScenarioListBuilder transferDocument() {
     return transferDocument(SenderDocumentTransmissionTypeCode.VALID_DOCUMENT);
   }
@@ -227,24 +216,6 @@ class PintScenarioListBuilder extends ScenarioListBuilder<PintScenarioListBuilde
 
   private static PintScenarioListBuilder noAction() {
     return new PintScenarioListBuilder(null);
-  }
-
-
-  private static PintScenarioListBuilder initiateTransferUnsignedFailure(int expectedStatus, SenderTransmissionClass senderTransmissionClass) {
-    String sendingPlatform = SENDING_PLATFORM_PARTY_NAME.get();
-    String receivingPlatform = RECEIVING_PLATFORM_PARTY_NAME.get();
-    return new PintScenarioListBuilder(
-        previousAction ->
-            new PintInitiateTransferUnsignedErrorAction(
-                receivingPlatform,
-                sendingPlatform,
-                (PintAction) previousAction,
-                expectedStatus,
-                senderTransmissionClass,
-                resolveMessageSchemaValidator(ENVELOPE_REQUEST_SCHEMA),
-                resolveMessageSchemaValidator(ENVELOPE_MANIFEST_SCHEMA),
-                resolveMessageSchemaValidator(ENVELOPE_TRANSFER_CHAIN_ENTRY_SCHEMA),
-                resolveMessageSchemaValidator(ISSUANCE_MANIFEST_SCHEMA)));
   }
 
   private static PintScenarioListBuilder initiateTransfer(int expectedMissingDocumentCount, SenderTransmissionClass senderTransmissionClass) {

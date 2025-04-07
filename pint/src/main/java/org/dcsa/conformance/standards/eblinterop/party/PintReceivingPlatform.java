@@ -159,11 +159,6 @@ public class PintReceivingPlatform extends ConformanceParty {
         new ConformanceMessageBody(responseBody)
       );
     }
-    var cannedResponse = receiveState.cannedResponse(request);
-    if (cannedResponse != null) {
-      addOperatorLogEntry("Returning canned response for TDR '%s' as scenario requested with no regards to the validity of the request".formatted(tdr));
-      return cannedResponse;
-    }
     var etc = transferRequest.path("envelopeTransferChain");
     var lastEtcEntry = etc.path(etc.size() - 1);
     var lastEnvelopeTransferChainEntrySignedContentChecksum = Checksums.sha256(lastEtcEntry.asText(""));
@@ -231,11 +226,6 @@ public class PintReceivingPlatform extends ConformanceParty {
       var tdr = this.envelopeReferences.get(envelopeReference);
       if (tdr != null) {
         var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
-        var cannedResponse = receiveState.cannedResponse(request);
-        if (cannedResponse != null) {
-          return cannedResponse;
-        }
-
         String computedChecksum = "";
         try {
           computedChecksum = Checksums.sha256(request.message().body().getJsonBody().binaryValue());
@@ -271,10 +261,6 @@ public class PintReceivingPlatform extends ConformanceParty {
       var envelopeReference = ftpm.group(1);
       var tdr = this.envelopeReferences.get(envelopeReference);
       var receiveState = TDReceiveState.fromPersistentStore(persistentMap, tdr);
-      var cannedResponse = receiveState.cannedResponse(request);
-      if (cannedResponse != null) {
-        return cannedResponse;
-      }
       var responseCode = receiveState.finishTransferCode();
       receiveState.updateTransferState(responseCode);
       var signedPayloadJsonNode = receiveState.generateSignedResponse(responseCode, RECEIVING_PLATFORM_PAYLOAD_SIGNER);

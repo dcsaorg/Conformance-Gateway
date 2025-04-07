@@ -322,14 +322,4 @@ public class TDReceiveState {
     this.state.put(SCENARIO_CLASS, scenarioClass.name());
   }
 
-  public ConformanceResponse cannedResponse(ConformanceRequest conformanceRequest) {
-    var scenarioClass = ScenarioClass.valueOf(this.state.path(SCENARIO_CLASS).asText(ScenarioClass.NO_ISSUES.name()));
-    if (scenarioClass == ScenarioClass.FAIL_W_503) {
-      return conformanceRequest.createResponse(503,
-        Map.of("Retry-after", List.of("10")),
-        new ConformanceMessageBody("Please retry as directed by the scenario")
-      );
-    }
-    return null;
-  }
 }

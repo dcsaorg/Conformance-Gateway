@@ -59,7 +59,7 @@ public class CarrierScenarioParametersAction extends IssuanceAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
+  protected void doHandlePartyInput(JsonNode partyInput) {
     CarrierScenarioParameters carrierScenarioParameters = CarrierScenarioParameters.fromJson(partyInput.get("input"));
     // validate the carrier signing key
     PayloadSignerFactory.verifierFromPemEncodedCertificate(

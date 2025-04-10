@@ -5,9 +5,14 @@ import static org.dcsa.conformance.standards.ebl.checks.EBLChecks.genericTDConte
 import static org.dcsa.conformance.standards.ebl.checks.EblDatasets.DOCUMENTATION_PARTY_CODE_LIST_PROVIDER_CODES;
 
 import com.fasterxml.jackson.core.JsonPointer;
+
+import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import org.dcsa.conformance.core.check.*;
 import org.dcsa.conformance.core.traffic.HttpMessageType;
 import org.dcsa.conformance.standards.ebl.checks.SignatureChecks;
@@ -87,35 +92,47 @@ public class IssuanceChecks {
           "Validate checksum of transportDocument vs. the checksum provided in the issuanceManifest",
           validateJsonNodeToChecksumAttribute(
             "document",
-            "documentChecksum"
+            "documentChecksum",
+            Checksums::sha256CanonicalJson
           )
         ),
         JsonAttribute.customValidator(
           "Validate checksum of issueTo vs. the checksum provided in the issuanceManifest",
           validateJsonNodeToChecksumAttribute(
             "issueTo",
-            "issueToChecksum"
+            "issueToChecksum",
+            Checksums::sha256CanonicalJson
           )
         ),
         JsonAttribute.customValidator(
           "Validate checksum of eBLVisualisationByCarrier vs. the checksum provided in the issuanceManifest",
           validateJsonNodeToChecksumAttribute(
             "eBLVisualisationByCarrier",
-            "eBLVisualisationByCarrierChecksum"
+            "eBLVisualisationByCarrierChecksum",
+            IssuanceChecks::checksumSupportingDocument
           )
         )
     );
   }
 
+  private static String checksumSupportingDocument(JsonNode node) {
+    try {
+      return Checksums.sha256(node.path("content").binaryValue());
+    } catch (IOException e) {
+      return "<Document was incorrect format>";
+    }
+  }
+
   public static JsonContentMatchedValidation validateJsonNodeToChecksumAttribute(
     String protectedAttribute,
-    String manifestChecksumAttribute
+    String manifestChecksumAttribute,
+    Function<JsonNode, String> checksummer
   ) {
     return (nodeToValidate, contextPath) -> {
       var json = nodeToValidate.path(protectedAttribute);
       var checksumValidator = JsonAttribute.matchedMustBeAbsent();
       if (!json.isMissingNode()) {
-        var actualChecksum = Checksums.sha256CanonicalJson(json);
+        var actualChecksum = checksummer.apply(json);
         checksumValidator = JsonAttribute.combine(
           JsonAttribute.matchedMustBePresent(),
           matchedMustEqual(() -> actualChecksum)

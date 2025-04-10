@@ -1,8 +1,7 @@
-name: Build+Test+SonarCloud
+name: Build+Test
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  SONAR_PARAMS: -Dsonar.branch.name=$BRANCH_NAME
 
 on:
   workflow_dispatch:
@@ -45,16 +44,3 @@ jobs:
       - name: Build and test Conformance-Gateway
         run: |
           ./mvnw package -B -V
-
-      - name: Set Sonar settings for PR build
-        if: ${{ (github.event_name == 'pull_request') }}
-        run: |
-          echo "SONAR_PARAMS=-Dsonar.pullrequest.base=dev -Dsonar.pullrequest.key=${{github.event.pull_request.number}} -Dsonar.pullrequest.branch=$BRANCH_NAME -Dsonar.pullrequest.provider=GitHub -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=90" >> $GITHUB_ENV
-
-      - name: Run SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # SonarCloud
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # SonarCloud
-        run: |
-          ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -B ${{env.SONAR_PARAMS}}
-

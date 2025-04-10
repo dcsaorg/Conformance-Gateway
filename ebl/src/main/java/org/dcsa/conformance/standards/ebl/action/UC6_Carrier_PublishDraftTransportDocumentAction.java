@@ -65,8 +65,7 @@ public class UC6_Carrier_PublishDraftTransportDocumentAction extends StateChangi
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) throws UserFacingException {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) throws UserFacingException {
     getDspConsumer()
         .accept(
             getDspSupplier()

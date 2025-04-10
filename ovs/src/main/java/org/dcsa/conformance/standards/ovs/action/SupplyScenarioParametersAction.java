@@ -3,16 +3,12 @@ package org.dcsa.conformance.standards.ovs.action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import lombok.Getter;
 import org.dcsa.conformance.core.UserFacingException;
 import org.dcsa.conformance.standards.ovs.party.OvsFilterParameter;
@@ -95,28 +91,8 @@ public class SupplyScenarioParametersAction extends OvsAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     JsonNode inputNode = partyInput.get("input");
-    Set<String> inputKeys =
-      StreamSupport.stream(
-          ((Iterable<String>) inputNode::fieldNames)
-            .spliterator(),
-          false)
-        .collect(Collectors.toSet());
-
-    Set<String> missingKeys =
-      StreamSupport.stream(
-          ((Iterable<String>) () -> getJsonForHumanReadablePrompt().fieldNames())
-            .spliterator(),
-          false)
-        .collect(Collectors.toSet());
-    missingKeys.removeAll(inputKeys);
-    if (!missingKeys.isEmpty()) {
-      throw new UserFacingException(
-        "The input must contain: %s".formatted(String.join(", ", missingKeys)));
-    }
-
     Arrays.stream(OvsFilterParameter.values())
         .map(OvsFilterParameter::getQueryParamName)
         .filter(

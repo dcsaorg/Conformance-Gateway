@@ -178,8 +178,7 @@ public class Carrier_SupplyScenarioParametersAction extends EblAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     getCspConsumer().accept(CarrierScenarioParameters.fromJson(partyInput.get("input")));
     validateCSR(carrierScenarioParameters, scenarioType);
   }

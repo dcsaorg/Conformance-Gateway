@@ -85,8 +85,7 @@ public class SupplyScenarioParametersAction extends CsAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
   }
 

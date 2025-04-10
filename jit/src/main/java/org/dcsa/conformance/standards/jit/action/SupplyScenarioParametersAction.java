@@ -63,9 +63,8 @@ public class SupplyScenarioParametersAction extends JitAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
+  protected void doHandlePartyInput(JsonNode partyInput) {
     log.info("SupplyScenarioParametersAction.handlePartyInput({})", partyInput.toPrettyString());
-    super.handlePartyInput(partyInput);
     suppliedScenarioParameters = SuppliedScenarioParameters.fromJson(partyInput.get("input"));
 
     dsp =

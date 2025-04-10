@@ -97,8 +97,7 @@ public class PlatformScenarioParametersAction extends IssuanceAction {
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     setDsp(getDsp().withEblType(eblType));
     getSspConsumer().accept(SuppliedScenarioParameters.fromJson(partyInput.get("input")));
   }

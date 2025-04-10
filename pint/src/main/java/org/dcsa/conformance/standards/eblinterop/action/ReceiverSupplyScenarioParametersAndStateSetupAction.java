@@ -42,8 +42,7 @@ public class ReceiverSupplyScenarioParametersAndStateSetupAction extends PintAct
   }
 
   @Override
-  public void handlePartyInput(JsonNode partyInput) {
-    super.handlePartyInput(partyInput);
+  protected void doHandlePartyInput(JsonNode partyInput) {
     var rsp = ReceiverScenarioParameters.fromJson(partyInput.path("input"));
     rsp.validate();
     this.setRsp(rsp);

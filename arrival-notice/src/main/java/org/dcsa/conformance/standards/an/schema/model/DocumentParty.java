@@ -24,5 +24,5 @@ public class DocumentParty {
   private List<TaxOrLegalReference> taxOrLegalReferences;
 
   @Schema(description = "Party contact details")
-  private List<Contact> contactDetails;
+  private List<ContactInformation> contactDetails;
 }

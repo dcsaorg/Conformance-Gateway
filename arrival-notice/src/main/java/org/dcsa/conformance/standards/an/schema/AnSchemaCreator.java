@@ -31,7 +31,7 @@ import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.standards.an.schema.model.CargoItem;
 import org.dcsa.conformance.standards.an.schema.model.Charge;
 import org.dcsa.conformance.standards.an.schema.model.ConsignmentItem;
-import org.dcsa.conformance.standards.an.schema.model.Contact;
+import org.dcsa.conformance.standards.an.schema.model.ContactInformation;
 import org.dcsa.conformance.standards.an.schema.model.CustomsReference;
 import org.dcsa.conformance.standards.an.schema.model.DangerousGoods;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParties;
@@ -54,6 +54,8 @@ import org.dcsa.conformance.standards.an.schema.model.TaxOrLegalReference;
 import org.dcsa.conformance.standards.an.schema.model.Transport;
 import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
+import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -114,13 +116,14 @@ public class AnSchemaCreator {
             CargoItem.class,
             Charge.class,
             ConsignmentItem.class,
-            Contact.class,
+            ContactInformation.class,
             CustomsReference.class,
             DangerousGoods.class,
             DocumentParty.class,
             DocumentParties.class,
             EmergencyContactDetails.class,
             Equipment.class,
+            FacilityCodeListProvider.class,
             FreeTime.class,
             IdentifyingPartyCode.class,
             InnerPackaging.class,
@@ -133,6 +136,7 @@ public class AnSchemaCreator {
             TaxOrLegalReference.class,
             TemperatureLimits.class,
             Transport.class,
+            UNLocationCode.class,
             UtilizedTransportEquipment.class,
             VesselVoyage.class,
             Volume.class,

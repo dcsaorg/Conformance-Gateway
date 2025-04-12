@@ -10,7 +10,7 @@ import org.dcsa.conformance.standards.an.schema.EnumBase;
     example = "NMFTA",
     description = "The provider of the code list from which a business entity code is used.")
 @AllArgsConstructor
-public enum CodeListProvider implements EnumBase {
+public enum CarrierCodeListProvider implements EnumBase {
   SMDG("Ship Message Design Group"),
   NMFTA("National Motor Freight Traffic Association; includes SPLC (Standard Point Location Code)");
 

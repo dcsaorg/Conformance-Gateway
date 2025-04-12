@@ -7,7 +7,6 @@ import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,16 +32,14 @@ public class ModelValidatorConverter implements ModelConverter {
           "  attribute: {} {}",
           simpleType.getRawClass().getSimpleName(),
           annotatedType.getPropertyName());
+      Arrays.stream(annotatedType.getCtxAnnotations())
+          .filter(annotation -> annotation instanceof SchemaOverride)
+          .map(annotation -> (SchemaOverride) annotation)
+          .filter(schemaOverride -> !schemaOverride.description().isEmpty())
+          .forEach(schemaOverride -> schema.setDescription(schemaOverride.description()));
       if (simpleType.isEnumType()) {
-        AtomicReference<String> descriptionReference =
-            new AtomicReference<>(schema.getDescription());
-        Arrays.stream(annotatedType.getCtxAnnotations())
-            .filter(annotation -> annotation instanceof SchemaOverride)
-            .map(annotation -> (SchemaOverride) annotation)
-            .filter(schemaOverride -> !schemaOverride.description().isEmpty())
-            .forEach(schemaOverride -> descriptionReference.set(schemaOverride.description()));
         schema.setDescription(
-            descriptionReference.get()
+            schema.getDescription()
                 + "\n"
                 + Arrays.stream(
                         Class.forName(simpleType.getRawClass().getName()).getEnumConstants())

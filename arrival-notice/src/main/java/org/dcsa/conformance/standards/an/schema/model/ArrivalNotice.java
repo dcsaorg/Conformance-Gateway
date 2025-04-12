@@ -1,51 +1,55 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
-import org.dcsa.conformance.standards.an.schema.types.CodeListProvider;
-
-import java.util.List;
+import org.dcsa.conformance.standards.an.schema.types.CarrierCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.FormattedDate;
 
 @Data
 @AllArgsConstructor
-@Schema(description = "**Arrival Notice** published.")
+@Schema(description = "Full content of an Arrival Notice document.")
 public class ArrivalNotice {
 
-  @Schema(
-      type = "string",
-      format = "date",
-      example = "2025-01-23",
-      description = "Date when the Arrival Notice was issued.")
-  private String issueDate;
+  @SchemaOverride(description = "The date when the Arrival Notice was issued.")
+  private FormattedDate issueDate;
 
   @Schema(
       type = "string",
       pattern = "^\\S+$",
       maxLength = 4,
       example = "HLCU",
-      description = "The NMFTA or the SMDG code of the issuing carrier of the Arrival Notice.")
+      description =
+          "Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice")
   private String carrierCode;
 
   @Schema()
   @SchemaOverride(description = "The provider of the code list in which `carrierCode` is defined.")
-  private CodeListProvider carrierCodeListProvider;
-
-  @Schema(
-      description = "The party to contact in case of questions in relation to the Arrival Notice.")
-  private List<Contact> carrierContactInformation;
+  private CarrierCodeListProvider carrierCodeListProvider;
 
   @Schema(
       description =
-          "The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).")
-  private List<Contact> carrierInformationForCargoRelease;
+          "ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice.")
+  @ArraySchema(minItems = 1)
+  private List<ContactInformation> carrierContactInformation;
 
-  @Schema(description = "Pickup location")
-  private Location pickupLocation;
+  @Schema(
+      description =
+"""
+The party to contact in relation to the cargo release (e.g. a shipping agency other than the POD carrier agency).
+""")
+  private List<ContactInformation> carrierInformationForCargoRelease;
 
-  @Schema(description = "Return location")
-  private Location returnLocation;
+  @Schema(allOf = Location.class)
+  @SchemaOverride(description = "Pickup location")
+  private Object pickupLocation;
+
+  @Schema(allOf = Location.class)
+  @SchemaOverride(description = "Return location")
+  private Object returnLocation;
 
   @Schema(description = "Return instructions", example = "Please place the container...")
   private String returnInstructions;

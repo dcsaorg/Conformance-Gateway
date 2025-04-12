@@ -15,9 +15,9 @@ public class InvoicePayableAt {
       name = "UNLocationCode",
       description =
           """
-The UN Location code specifying where the place is located. The pattern used must be:
+The UN Location code identifying a certain location. The pattern used must be:
  * 2 characters for the country code using ISO 3166-1 alpha-2
- * 3 characters to code a location within that country. Letters A-Z and numbers from 2-9 can be used
+ * 3 characters to code a location within that country (using letters A-Z and numbers from 2-9)
 More info can be found at: https://unece.org/trade/cefact/UNLOCODE-Download""",
       example = "NLAMS")
   private String unLocationCode;

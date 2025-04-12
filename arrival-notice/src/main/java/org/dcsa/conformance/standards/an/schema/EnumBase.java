@@ -1,5 +1,6 @@
 package org.dcsa.conformance.standards.an.schema;
 
 public interface EnumBase {
-  String getDescription();
+  String name();
+  String getValueDescription();
 }

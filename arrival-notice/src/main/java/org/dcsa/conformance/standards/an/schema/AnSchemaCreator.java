@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
+import lombok.SneakyThrows;
 import org.dcsa.conformance.standards.an.schema.model.ActiveReeferSettings;
 import org.dcsa.conformance.standards.an.schema.model.Address;
 import org.dcsa.conformance.standards.an.schema.model.ArrivalNotice;
@@ -70,7 +71,8 @@ public class AnSchemaCreator {
   public static final String TAG_ARRIVAL_NOTICE_PUBLISHERS = "AN Publisher Endpoints";
   public static final String TAG_ARRIVAL_NOTICE_SUBSCRIBERS = "AN Subscriber Endpoints";
 
-  public static void main(String[] args) throws IOException {
+  @SneakyThrows
+  public static void createSchema() {
     OpenAPI openAPI =
         new OpenAPI()
             .openapi("3.0.3")
@@ -170,7 +172,7 @@ public class AnSchemaCreator {
 
     String yamlContent = mapper.writeValueAsString(openAPI);
     String yamlFilePath =
-        "arrival-notice/src/main/resources/standards/an/schemas/exported-AN_v1.0.0.yaml";
+        "../arrival-notice/src/main/resources/standards/an/schemas/exported-AN_v1.0.0.yaml";
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     System.out.printf("OpenAPI spec exported to %s%n", yamlFilePath);
   }

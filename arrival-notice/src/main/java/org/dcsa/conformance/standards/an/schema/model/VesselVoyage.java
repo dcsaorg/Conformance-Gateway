@@ -1,35 +1,45 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.types.CountryCode;
+import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
+import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
+import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "Vessel voyage information")
+@Schema(
+    description =
+"""
+The details of the last sea-going vessel arriving at the Port of Discharge,
+ which can be either a feeder or the mother vessel.
+""")
 public class VesselVoyage {
 
-  @Schema(
-      description =
-          """
-Vessel voyage type; one of:
- * DC (at destination country)
- * POD (at port of destination)""",
-      example = "POD")
-  private String vesselVoyageType;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  private VesselVoyageDestinationTypeCode typeCode;
 
-  @Schema(description = "Vessel name", example = "King of the Seas")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      maxLength = 50,
+      example = "King of the Seas",
+      description = "Vessel name")
   private String vesselName;
 
-  @Schema(description = "Vessel flag", example = "DE")
-  private String vesselFlag;
+  @SchemaOverride(description = "Vessel flag")
+  private CountryCode vesselFlag;
 
-  @Schema(description = "Vessel IMO number", example = "12345678")
-  private String vesselImoNumber;
+  @Schema() private VesselIMONumber vesselIMONumber;
 
-  @Schema(description = "Carrier import voyage number", example = "2103N")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      maxLength = 50,
+      example = "1234N",
+      description =
+          "The identifier of an import voyage. The carrier-specific identifier of the import Voyage.")
   private String carrierImportVoyageNumber;
 
-  @Schema(description = "Universal import voyage reference", example = "2103N")
-  private String universalImportVoyageReference;
+  @Schema()
+  private UniversalVoyageReference universalImportVoyageReference;
 }

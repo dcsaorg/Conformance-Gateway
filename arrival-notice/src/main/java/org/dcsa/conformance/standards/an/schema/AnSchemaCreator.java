@@ -63,6 +63,9 @@ import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
+import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
+import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
+import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -192,9 +195,12 @@ public class AnSchemaCreator {
         TemperatureLimits.class,
         Transport.class,
         TransportDocumentTypeCode.class,
+        UniversalVoyageReference.class,
         UNLocationCode.class,
         UtilizedTransportEquipment.class,
+        VesselIMONumber.class,
         VesselVoyage.class,
+        VesselVoyageDestinationTypeCode.class,
         Volume.class,
         Weight.class);
   }

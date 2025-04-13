@@ -139,7 +139,7 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
   private List<DocumentParty> documentParties;
 
-  @Schema(description = "Vessel voyage")
+  @Schema()
   private VesselVoyage vesselVoyage;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Transport info")

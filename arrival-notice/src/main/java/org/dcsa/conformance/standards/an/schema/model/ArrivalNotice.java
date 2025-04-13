@@ -17,10 +17,12 @@ import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 @Schema(description = "Full content of an Arrival Notice document.")
 public class ArrivalNotice {
 
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(description = "The date when the Arrival Notice was issued.")
   private FormattedDate issueDate;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       type = "string",
       pattern = "^\\S+$",
       maxLength = 4,
@@ -29,11 +31,12 @@ public class ArrivalNotice {
           "Code in the list provided by `carrierCodeListProvider` of the carrier publishing the Arrival Notice")
   private String carrierCode;
 
-  @Schema()
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(description = "The provider of the code list in which `carrierCode` is defined.")
   private CarrierCodeListProvider carrierCodeListProvider;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       description =
           "ATTRIBUTE The party to contact for any inquiries related to this Arrival Notice.")
   @ArraySchema(minItems = 1)
@@ -86,17 +89,20 @@ on the B/L. Customers can use these references to track shipments in their inter
   private List<Reference> references;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       pattern = "^\\S(?:.*\\S)?$",
       maxLength = 20,
       example = "XYZ1234",
       description = "Reference of the transport document for which this arrival notice was created")
   private String transportDocumentReference;
 
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
       description = "Type of the transport document for which this arrival notice was created")
   private TransportDocumentTypeCode transportDocumentTypeCode;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       name = "isElectronic",
       type = "boolean",
       example = "true",
@@ -106,9 +112,11 @@ Flag indicating whether the transport document for which this arrival notice was
 """)
   private boolean electronic;
 
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(description = "Code representing the delivery type offered at destination")
   private DestinationDeliveryTypeCode deliveryTypeAtDestination;
 
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
       description =
 """
@@ -119,25 +127,22 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   private ContainerLoadTypeCode cargoMovementTypeAtDestination;
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
       example = "These terms and conditions define...")
   private String termsAndConditions;
 
-  @Schema(
-      description =
-"""
-Clauses for a specific shipment added by the carrier, subject to local rules / guidelines
- or certain mandatory information required to be shared with the customer.""")
-  private List<String> carrierClauses;
+  @Schema(description = "List of carrier clauses")
+  private List<CarrierClause> carrierClauses;
 
-  @Schema(description = "Document parties")
-  private DocumentParties documentParties;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
+  private List<DocumentParty> documentParties;
 
   @Schema(description = "Vessel voyage")
   private VesselVoyage vesselVoyage;
 
-  @Schema(description = "Transport info")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Transport info")
   private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination.")
@@ -151,9 +156,11 @@ Clauses for a specific shipment added by the carrier, subject to local rules / g
           "Location where payment of ocean freight and charges for the main transport will take place by the customer.")
   private InvoicePayableAt invoicePayableAt;
 
-  @Schema(description = "The equipments being used.")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
-  @Schema(description = "The list of consignment items in the shipment.")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      description = "The list of consignment items in the shipment.")
   private List<ConsignmentItem> consignmentItems;
 }

@@ -12,6 +12,7 @@ Reference used by customers to track shipment within their own systems.
 public class Reference {
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       maxLength = 3,
       example = "FF",
       description =
@@ -31,6 +32,10 @@ One of the reference type codes defined by DCSA. Possible values are:
 """)
   private String referenceType;
 
-  @Schema(maxLength = 100, example = "XYZ1234", description = "Reference value")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      maxLength = 100,
+      example = "XYZ1234",
+      description = "Reference value")
   private String value;
 }

@@ -29,12 +29,12 @@ import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticeDigest;
 import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticeDigestsMessage;
 import org.dcsa.conformance.standards.an.schema.model.ArrivalNoticesMessage;
 import org.dcsa.conformance.standards.an.schema.model.CargoItem;
+import org.dcsa.conformance.standards.an.schema.model.CarrierClause;
 import org.dcsa.conformance.standards.an.schema.model.Charge;
 import org.dcsa.conformance.standards.an.schema.model.ConsignmentItem;
 import org.dcsa.conformance.standards.an.schema.model.ContactInformation;
 import org.dcsa.conformance.standards.an.schema.model.CustomsReference;
 import org.dcsa.conformance.standards.an.schema.model.DangerousGoods;
-import org.dcsa.conformance.standards.an.schema.model.DocumentParties;
 import org.dcsa.conformance.standards.an.schema.model.DocumentParty;
 import org.dcsa.conformance.standards.an.schema.model.EmergencyContactDetails;
 import org.dcsa.conformance.standards.an.schema.model.Equipment;
@@ -55,8 +55,12 @@ import org.dcsa.conformance.standards.an.schema.model.Transport;
 import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.CountryCode;
 import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 
@@ -159,15 +163,17 @@ public class AnSchemaCreator {
         ArrivalNoticeDigestsMessage.class,
         ArrivalNoticesMessage.class,
         CargoItem.class,
+        CarrierClause.class,
         Charge.class,
         ConsignmentItem.class,
         ContactInformation.class,
         ContainerLoadTypeCode.class,
+        CountryCode.class,
         CustomsReference.class,
         DangerousGoods.class,
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
-        DocumentParties.class,
+        DocumentPartyTypeCode.class,
         EmergencyContactDetails.class,
         Equipment.class,
         FacilityCodeListProvider.class,
@@ -178,6 +184,8 @@ public class AnSchemaCreator {
         Location.class,
         NationalCommodityCode.class,
         OuterPackaging.class,
+        PartyCodeListProvider.class,
+        PersonTypeCode.class,
         Reference.class,
         Seal.class,
         TaxOrLegalReference.class,

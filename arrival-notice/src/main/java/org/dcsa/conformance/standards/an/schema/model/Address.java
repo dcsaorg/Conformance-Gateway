@@ -2,6 +2,7 @@ package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.types.CountryCode;
 
 @Data
 @Schema(description = "Address information")
@@ -27,14 +28,6 @@ public class Address {
   @Schema(maxLength = 65, example = "North Holland", description = "State or region")
   private String stateRegion;
 
-  @Schema(
-      pattern = "^[A-Z]{2}$",
-      minLength = 2,
-      maxLength = 2,
-      example = "NL",
-      description =
-"""
-The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
-""")
-  private String countryCode;
+  @Schema()
+  private CountryCode countryCode;
 }

@@ -13,7 +13,6 @@ import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 public class Location {
 
   @Schema(
-      pattern = "^\\S(?:.*\\S)?$",
       maxLength = 100,
       example = "Port of Amsterdam",
       description = "Location name")

@@ -54,7 +54,10 @@ import org.dcsa.conformance.standards.an.schema.model.TaxOrLegalReference;
 import org.dcsa.conformance.standards.an.schema.model.Transport;
 import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
+import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 
 import java.io.IOException;
@@ -106,41 +109,7 @@ public class AnSchemaCreator {
     // Extract and register Java class schemas: add Parameters, Headers, and Schemas.
     Components components = new Components();
     ModelConverters.getInstance().addConverter(new ModelValidatorConverter());
-    Stream.of(
-            ActiveReeferSettings.class,
-            Address.class,
-            ArrivalNotice.class,
-            ArrivalNoticeDigest.class,
-            ArrivalNoticeDigestsMessage.class,
-            ArrivalNoticesMessage.class,
-            CargoItem.class,
-            Charge.class,
-            ConsignmentItem.class,
-            ContactInformation.class,
-            CustomsReference.class,
-            DangerousGoods.class,
-            DocumentParty.class,
-            DocumentParties.class,
-            EmergencyContactDetails.class,
-            Equipment.class,
-            FacilityCodeListProvider.class,
-            FreeTime.class,
-            IdentifyingPartyCode.class,
-            InnerPackaging.class,
-            InvoicePayableAt.class,
-            Location.class,
-            NationalCommodityCode.class,
-            OuterPackaging.class,
-            Reference.class,
-            Seal.class,
-            TaxOrLegalReference.class,
-            TemperatureLimits.class,
-            Transport.class,
-            UNLocationCode.class,
-            UtilizedTransportEquipment.class,
-            VesselVoyage.class,
-            Volume.class,
-            Weight.class)
+    modelClassesStream()
         .forEach(
             modelClass ->
                 ModelConverters.getInstance().read(modelClass).forEach(components::addSchemas));
@@ -179,6 +148,47 @@ public class AnSchemaCreator {
         "../arrival-notice/src/main/resources/standards/an/schemas/exported-AN_v1.0.0.yaml";
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     System.out.printf("OpenAPI spec exported to %s%n", yamlFilePath);
+  }
+
+  private static Stream<Class<?>> modelClassesStream() {
+    return Stream.of(
+        ActiveReeferSettings.class,
+        Address.class,
+        ArrivalNotice.class,
+        ArrivalNoticeDigest.class,
+        ArrivalNoticeDigestsMessage.class,
+        ArrivalNoticesMessage.class,
+        CargoItem.class,
+        Charge.class,
+        ConsignmentItem.class,
+        ContactInformation.class,
+        ContainerLoadTypeCode.class,
+        CustomsReference.class,
+        DangerousGoods.class,
+        DestinationDeliveryTypeCode.class,
+        DocumentParty.class,
+        DocumentParties.class,
+        EmergencyContactDetails.class,
+        Equipment.class,
+        FacilityCodeListProvider.class,
+        FreeTime.class,
+        IdentifyingPartyCode.class,
+        InnerPackaging.class,
+        InvoicePayableAt.class,
+        Location.class,
+        NationalCommodityCode.class,
+        OuterPackaging.class,
+        Reference.class,
+        Seal.class,
+        TaxOrLegalReference.class,
+        TemperatureLimits.class,
+        Transport.class,
+        TransportDocumentTypeCode.class,
+        UNLocationCode.class,
+        UtilizedTransportEquipment.class,
+        VesselVoyage.class,
+        Volume.class,
+        Weight.class);
   }
 
   static String readResourceFile(@SuppressWarnings("SameParameterValue") String fileName) {

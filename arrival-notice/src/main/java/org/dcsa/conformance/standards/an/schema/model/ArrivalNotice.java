@@ -7,7 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
 import org.dcsa.conformance.standards.an.schema.types.CarrierCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FormattedDate;
+import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 
 @Data
 @AllArgsConstructor
@@ -51,70 +54,72 @@ The party to contact in relation to the cargo release (e.g. a shipping agency ot
   @SchemaOverride(description = "Return location")
   private Object returnLocation;
 
-  @Schema(description = "Return instructions", example = "Please place the container...")
+  @Schema(
+      maxLength = 500,
+      description = "Return instructions",
+      example = "Please place the container...")
   private String returnInstructions;
 
   @Schema(
+      maxLength = 1000,
       description = "Customs import declaration procedure",
       example = "The tax must be declared...")
   private String customsImportDeclarationProcedure;
 
-  @Schema(description = "Additional information", example = "FIRMS code: B986")
+  @Schema(
+      maxLength = 500,
+      example = "FIRMS code: B986",
+      description =
+"""
+Free text field to provide additional required information for the consignee to prepare for the shipment arrival,
+ e.g. additional required documents to prepare and present for shipment release - country specific.
+""")
   private String additionalInformation;
 
   @Schema(
       description =
 """
-References provided by the shipper or freight forwarder at the time of Booking or at the time of providing Shipping Instructions.
-Carriers share it back when providing Track & Trace event updates, some are also printed on the B/L.
-Customers can use these references to track shipments in their internal systems.
+References provided by the shipper or freight forwarder at the time of Booking or at the time of providing
+Shipping Instructions. Carriers share them back when providing Track & Trace event updates, some are also printed
+on the B/L. Customers can use these references to track shipments in their internal systems.
 """)
   private List<Reference> references;
 
   @Schema(
-      description = "Reference of the transport document for which this arrival notice was created",
-      example = "XYZ1234")
+      pattern = "^\\S(?:.*\\S)?$",
+      maxLength = 20,
+      example = "XYZ1234",
+      description = "Reference of the transport document for which this arrival notice was created")
   private String transportDocumentReference;
 
-  @Schema(
-      description =
-"""
-The type of the transport document:
- * BOL (Bill of Lading)
- * SWB (Sea Waybill)
-""",
-      example = "BOL")
-  private String transportDocumentTypeCode;
+  @SchemaOverride(
+      description = "Type of the transport document for which this arrival notice was created")
+  private TransportDocumentTypeCode transportDocumentTypeCode;
 
   @Schema(
       name = "isElectronic",
+      type = "boolean",
+      example = "true",
       description =
-          "Flag indicating whether or not the transport document is electronically transferred",
-      example = "true")
+"""
+Flag indicating whether the transport document for which this arrival notice was created is electronically transferred
+""")
   private boolean electronic;
 
-  @Schema(
-      description =
-"""
-The type of service offered at destination. The options are:
- * CY (Container yard (incl. rail ramp))
- * SD (Store Door)
- * CFS (Container Freight Station)
-""",
-      example = "CY")
-  private String deliveryTypeAtDestination;
+  @SchemaOverride(description = "Code representing the delivery type offered at destination")
+  private DestinationDeliveryTypeCode deliveryTypeAtDestination;
 
-  @Schema(
+  @SchemaOverride(
       description =
 """
-The shipment term at the unloading of the cargo out of the container. Possible values are:
- * FCL (Full Container Load)
- * LCL (Less than Container Load)
+Code indicating whether at destination the unloaded cargo occupies an entire container (FCL)
+ or shares the container with other shipments (LCL).
 """,
       example = "FCL")
-  private String cargoMovementTypeAtDestination;
+  private ContainerLoadTypeCode cargoMovementTypeAtDestination;
 
   @Schema(
+      maxLength = 50000,
       description = "Carrier terms and conditions of transport.",
       example = "These terms and conditions define...")
   private String termsAndConditions;

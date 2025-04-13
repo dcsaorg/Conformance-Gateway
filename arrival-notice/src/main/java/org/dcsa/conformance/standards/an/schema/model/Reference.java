@@ -1,17 +1,21 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "Reference information")
+@Schema(
+    description =
+"""
+Reference used by customers to track shipment within their own systems.
+""")
 public class Reference {
 
   @Schema(
+      maxLength = 3,
+      example = "FF",
       description =
-          """
+"""
 One of the reference type codes defined by DCSA. Possible values are:
  * FF (Freight Forwarder's Reference)
  * SI (Shipper's Reference)
@@ -24,10 +28,9 @@ One of the reference type codes defined by DCSA. Possible values are:
  * BPR (Booking party reference number)
  * BID (Booking Request ID)
  * SAC (Shipping Agency Code)
-""",
-      example = "FF")
+""")
   private String referenceType;
 
-  @Schema(description = "Reference value", example = "XYZ1234")
+  @Schema(maxLength = 100, example = "XYZ1234", description = "Reference value")
   private String value;
 }

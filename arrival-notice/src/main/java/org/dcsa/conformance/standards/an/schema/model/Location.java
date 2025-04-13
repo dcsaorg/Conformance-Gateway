@@ -16,7 +16,7 @@ public class Location {
       maxLength = 100,
       example = "Port of Amsterdam",
       description = "Location name")
-  private String name;
+  private String locationName;
 
   @Schema(description = "Location address")
   private Address address;

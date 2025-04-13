@@ -145,16 +145,20 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transport transport;
 
-  @Schema(description = "List of free time conditions applicable to this shipment at destination.")
+  @Schema(description = "List of free time conditions applicable to this shipment at destination")
   private List<FreeTime> freeTime;
 
-  @Schema(description = "List of charges applicable to this shipment.")
+  @Schema(description = "List of charges applicable to this shipment")
   private List<Charge> charges;
 
-  @Schema(
+  @Schema(allOf = Location.class)
+  @SchemaOverride(
       description =
-          "Location where payment of ocean freight and charges for the main transport will take place by the customer.")
-  private InvoicePayableAt invoicePayableAt;
+"""
+Location where the customer will make the payment of ocean freight and charges for the main transport,
+ typically expressed as a UN/LOCODE or just a location name.
+""")
+  private Object invoicePayableAt;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;

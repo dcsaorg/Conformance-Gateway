@@ -41,7 +41,6 @@ import org.dcsa.conformance.standards.an.schema.model.Equipment;
 import org.dcsa.conformance.standards.an.schema.model.FreeTime;
 import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
-import org.dcsa.conformance.standards.an.schema.model.InvoicePayableAt;
 import org.dcsa.conformance.standards.an.schema.model.Location;
 import org.dcsa.conformance.standards.an.schema.model.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
@@ -56,6 +55,8 @@ import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.CountryCode;
+import org.dcsa.conformance.standards.an.schema.types.CurrencyAmount;
+import org.dcsa.conformance.standards.an.schema.types.CurrencyCode;
 import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
@@ -64,6 +65,7 @@ import org.dcsa.conformance.standards.an.schema.types.FreeTimeTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.ISOEquipmentCode;
 import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
 import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
+import org.dcsa.conformance.standards.an.schema.types.PaymentTermCode;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
@@ -176,6 +178,8 @@ public class AnSchemaCreator {
         ContactInformation.class,
         ContainerLoadTypeCode.class,
         CountryCode.class,
+        CurrencyAmount.class,
+        CurrencyCode.class,
         CustomsReference.class,
         DangerousGoods.class,
         DestinationDeliveryTypeCode.class,
@@ -189,13 +193,13 @@ public class AnSchemaCreator {
         FreeTimeTypeCode.class,
         IdentifyingPartyCode.class,
         InnerPackaging.class,
-        InvoicePayableAt.class,
         ISOEquipmentCode.class,
         Location.class,
         NationalCommodityCode.class,
         ModeOfTransportCode.class,
         OuterPackaging.class,
         PartyCodeListProvider.class,
+        PaymentTermCode.class,
         PersonTypeCode.class,
         Reference.class,
         Seal.class,

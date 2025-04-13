@@ -36,6 +36,7 @@ public class FreeTime {
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
+      maxLength = 1000,
       description =
 """
 Description of the conditions under which this free time item applies.

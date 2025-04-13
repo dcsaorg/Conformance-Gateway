@@ -142,7 +142,7 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   @Schema()
   private VesselVoyage vesselVoyage;
 
-  @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Transport info")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transport transport;
 
   @Schema(description = "List of free time conditions applicable to this shipment at destination.")

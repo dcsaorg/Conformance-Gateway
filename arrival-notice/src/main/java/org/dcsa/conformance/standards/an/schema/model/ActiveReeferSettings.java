@@ -1,88 +1,92 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.types.AirExchangeUnitCode;
+import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "Specifications of a Reefer equipment.")
+@Schema(description = "Settings for an active reefer equipment")
 public class ActiveReeferSettings {
 
   @Schema(
-      description =
-          "Target value of the temperature for the Reefer based on the cargo requirement.",
-      example = "-15")
-  private String temperatureSetPoint;
+      type = "string",
+      pattern = "^-?\\d+(\\.\\d+)?$",
+      example = "-12.3",
+      description = "Target temperature")
+  private String temperatureSetpoint;
+
+  @SchemaOverride(description = "Measurement unit in which the `temperatureSetpoint` is expressed")
+  private TemperatureUnitCode temperatureUnit;
 
   @Schema(
-      description =
-          """
-The unit in which the temperature is expressed:
- * CEL (Celsius)
- * FAH (Fahrenheit)
-""",
-      example = "CEL")
-  private String temperatureUnit;
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "12.3",
+      description = "Target O2 percentage")
+  private String o2Setpoint;
 
   @Schema(
-      description = "The percentage of the controlled atmosphere O2 target value.",
-      example = "25")
-  private String o2SetPoint;
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "12.3",
+      description = "Target CO2 percentage")
+  private String co2Setpoint;
 
   @Schema(
-      description = "The percentage of the controlled atmosphere CO2 target value",
-      example = "25")
-  private String co2SetPoint;
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "12.3",
+      description = "Target humidity percentage")
+  private String humiditySetpoint;
 
   @Schema(
-      description = "The percentage of the controlled atmosphere humidity target value",
-      example = "95.6")
-  private String humiditySetPoint;
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "12.3",
+      description = "Target rate at which outdoor air replaces indoor air")
+  private String airExchangeSetpoint;
 
-  @Schema(description = "Target rate at which outdoor air replaces indoor air", example = "15.4")
-  private String airExchangeSetPoint;
-
-  @Schema(
-      description =
-          """
-The unit in which the airExchangeSetPoint is expressed:
- * MQH (Cubic metre per hour)
- * FQH (Cubic foot per hour)
-""",
-      example = "MQH")
-  private String airExchangeUnit;
+  @SchemaOverride(description = "Measurement unit in which the `airExchangeSetpoint` is expressed")
+  private AirExchangeUnitCode airExchangeUnit;
 
   @Schema(
       name = "isVentilationOpen",
-      description = "Flag indicating whether the ventilation orifice is open",
-      example = "true")
+      type = "boolean",
+      example = "true",
+      description = "Flag indicating whether the ventilation orifice is open")
   private String ventilationOpen;
 
   @Schema(
       name = "isDrainHolesOpen",
-      description = "Flag indicating whether the drain holes are open",
-      example = "true")
+      type = "boolean",
+      example = "true",
+      description = "Flag indicating whether the drain holes are open")
   private String drainHolesOpen;
 
   @Schema(
       name = "isBulbMode",
-      description = "Flag indicating whether flower bulb handling mode is active",
-      example = "true")
+      type = "boolean",
+      example = "true",
+      description = "Flag indicating whether flower bulb handling mode is active")
   private String bulbMode;
 
   @Schema(
       name = "isColdTreatmentRequired",
+      type = "boolean",
+      example = "true",
       description =
-          """
-Indicates whether cargo requires cold treatment prior to loading at origin or during transit,
- but prior arrival at POD""",
-      example = "true")
+"""
+Flag indicating whether the cargo requires cold treatment prior to loading at origin or during transit,
+ but prior arrival at POD
+""")
   private String coldTreatmentRequired;
 
   @Schema(
       name = "isControlledAtmosphereRequired",
-      description = "Indicates whether the cargo requires controlled atmosphere",
-      example = "true")
+      type = "boolean",
+      example = "true",
+      description = "Flag indicating whether the cargo requires controlled atmosphere")
   private String controlledAtmosphereRequired;
 }

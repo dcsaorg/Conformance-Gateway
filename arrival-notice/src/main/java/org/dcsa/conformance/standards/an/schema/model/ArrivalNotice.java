@@ -137,6 +137,7 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   private List<CarrierClause> carrierClauses;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Document parties")
+  @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
   @Schema()
@@ -161,10 +162,12 @@ Location where the customer will make the payment of ocean freight and charges f
   private Object invoicePayableAt;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "The equipments being used.")
+  @ArraySchema(minItems = 1)
   private List<UtilizedTransportEquipment> utilizedTransportEquipments;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       description = "The list of consignment items in the shipment.")
+  @ArraySchema(minItems = 1)
   private List<ConsignmentItem> consignmentItems;
 }

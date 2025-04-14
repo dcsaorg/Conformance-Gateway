@@ -1,26 +1,21 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "The weight and the unit in which it is expressed.")
+@Schema(description = "Representation of a weight including the unit in which it is expressed.")
 public class Weight {
 
-  @Schema(description = "The weight expressed in the selected unit.", example = "4800")
+  @Schema(
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "123.456",
+      description = "The weight expressed in the selected `unit`.")
   private String value;
 
-  @Schema(
-      description =
-          """
-The unit in which the weight is expressed:
- * KGM (Kilograms)
- * LBR (Pounds)
- * GRM (Grams)
- * ONZ (Ounce)
-""",
-      example = "KGM")
-  private String unit;
+  @SchemaOverride(description = "The unit in which the weight `value` is expressed", example = "KGM")
+  private WeightUnitCode unit;
 }

@@ -53,6 +53,7 @@ import org.dcsa.conformance.standards.an.schema.model.TaxOrLegalReference;
 import org.dcsa.conformance.standards.an.schema.model.Transport;
 import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
+import org.dcsa.conformance.standards.an.schema.types.AirExchangeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.CountryCode;
 import org.dcsa.conformance.standards.an.schema.types.CurrencyAmount;
@@ -67,11 +68,13 @@ import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
 import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.PaymentTermCode;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
 import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
 import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -167,6 +170,7 @@ public class AnSchemaCreator {
     return Stream.of(
         ActiveReeferSettings.class,
         Address.class,
+        AirExchangeUnitCode.class,
         ArrivalNotice.class,
         ArrivalNoticeDigest.class,
         ArrivalNoticeDigestsMessage.class,
@@ -205,6 +209,7 @@ public class AnSchemaCreator {
         Seal.class,
         TaxOrLegalReference.class,
         TemperatureLimits.class,
+        TemperatureUnitCode.class,
         Transport.class,
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
@@ -214,7 +219,8 @@ public class AnSchemaCreator {
         VesselVoyage.class,
         VesselVoyageDestinationTypeCode.class,
         Volume.class,
-        Weight.class);
+        Weight.class,
+        WeightUnitCode.class);
   }
 
   static String readResourceFile(@SuppressWarnings("SameParameterValue") String fileName) {

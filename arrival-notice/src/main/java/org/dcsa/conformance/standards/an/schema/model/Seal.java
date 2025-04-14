@@ -1,30 +1,20 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.types.SealSourceCode;
 
 @Data
-@AllArgsConstructor
-@Schema(
-    description =
-        """
-The seal put on a shipment equipment once it is loaded.
- This Seal is meant to stay on until the shipment equipment reaches its final destination.""")
+@Schema(description = "Specification of the seal put on a container")
 public class Seal {
 
-  @Schema(description = "Identifies a seal affixed to the container.", example = "VET123")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      type = "string",
+      maxLength = 15,
+      example = "VET123",
+      description = "Seal number")
   private String sealNumber;
 
-  @Schema(
-      description =
-          """
-The source of the seal, namely who has affixed the seal.
- * CAR (Carrier)
- * SHI (Shipper)
- * VET (Veterinary)
- * CUS (Customs)
-""",
-      example = "CUS")
-  private String source;
+  @Schema() private SealSourceCode source;
 }

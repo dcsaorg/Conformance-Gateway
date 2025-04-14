@@ -68,6 +68,8 @@ import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
 import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.PaymentTermCode;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.SealSourceCode;
+import org.dcsa.conformance.standards.an.schema.types.ShippingMark;
 import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
@@ -207,6 +209,8 @@ public class AnSchemaCreator {
         PersonTypeCode.class,
         Reference.class,
         Seal.class,
+        SealSourceCode.class,
+        ShippingMark.class,
         TaxOrLegalReference.class,
         TemperatureLimits.class,
         TemperatureUnitCode.class,

@@ -1,8 +1,10 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.types.ShippingMark;
 
 @Data
 @Schema(
@@ -46,23 +48,15 @@ Indicates whether the equipment is a reefer container that should be treated as 
 """)
   private boolean nonOperatingReefer;
 
-  @Schema()
-  private ActiveReeferSettings activeReeferSettings;
+  @Schema() private ActiveReeferSettings activeReeferSettings;
 
-  @Schema(
-      description =
-"""
-A list of the shipping marks applicable to this utilized transport equipment.
- The identifying details of a package or the actual markings that appear on the package(s).
- This information is provided by the customer.
-
-The order of the items in this array MUST be preserved.
-""",
-      example = "Made in China")
-  private List<String> shippingMarks;
+  @Schema(description = "Ordered list of shipping mark lines printed on the package")
+  @ArraySchema(maxItems = 50)
+  private List<ShippingMark> shippingMarks;
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
       description = "The seal-related information associated with this equipment.")
+  @ArraySchema(minItems = 1)
   private List<Seal> seals;
 }

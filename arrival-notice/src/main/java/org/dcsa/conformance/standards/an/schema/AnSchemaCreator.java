@@ -2,7 +2,10 @@ package org.dcsa.conformance.standards.an.schema;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.swagger.v3.core.converter.ModelConverters;
@@ -21,6 +24,19 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeSet;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.dcsa.conformance.standards.an.schema.model.ActiveReeferSettings;
 import org.dcsa.conformance.standards.an.schema.model.Address;
@@ -46,13 +62,13 @@ import org.dcsa.conformance.standards.an.schema.model.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
 import org.dcsa.conformance.standards.an.schema.model.Seal;
-import org.dcsa.conformance.standards.an.schema.model.TemperatureLimits;
-import org.dcsa.conformance.standards.an.schema.model.Volume;
-import org.dcsa.conformance.standards.an.schema.model.Weight;
 import org.dcsa.conformance.standards.an.schema.model.TaxOrLegalReference;
+import org.dcsa.conformance.standards.an.schema.model.TemperatureLimits;
 import org.dcsa.conformance.standards.an.schema.model.Transport;
 import org.dcsa.conformance.standards.an.schema.model.UtilizedTransportEquipment;
 import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
+import org.dcsa.conformance.standards.an.schema.model.Volume;
+import org.dcsa.conformance.standards.an.schema.model.Weight;
 import org.dcsa.conformance.standards.an.schema.types.AirExchangeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.CountryCode;
@@ -77,17 +93,6 @@ import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
 import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
 import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 public class AnSchemaCreator {
 
@@ -162,10 +167,115 @@ public class AnSchemaCreator {
     mapper.addMixIn(Object.class, ValueSetFlagIgnoreMixin.class); // Remove valueSetFlag attribute.
 
     String yamlContent = mapper.writeValueAsString(openAPI);
-    String yamlFilePath =
-        "../arrival-notice/src/main/resources/standards/an/schemas/exported-AN_v1.0.0.yaml";
+    String exportFileDir = "../arrival-notice/src/main/resources/standards/an/schemas/";
+    String yamlFilePath = exportFileDir + "exported-AN_v1.0.0.yaml";
     Files.writeString(Paths.get(yamlFilePath), yamlContent);
     System.out.printf("OpenAPI spec exported to %s%n", yamlFilePath);
+
+    exportDataOverviewCsv(openAPI, exportFileDir + "AN_v1.0.0_DataOverview.csv");
+  }
+
+  private static void exportDataOverviewCsv(OpenAPI openAPI, String csvFilePath)
+      throws IOException {
+    Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+    CsvMapper csvMapper = new CsvMapper();
+    String objectColumnTitle = "Object";
+    String attributeColumnTitle = "Attribute";
+    String typeColumnTitle = "Type";
+    String patternColumnTitle = "Pattern";
+    String descriptionColumnTitle = "Description";
+    CsvSchema csvSchema =
+        CsvSchema.builder()
+            .addColumn(objectColumnTitle)
+            .addColumn(attributeColumnTitle)
+            .addColumn(typeColumnTitle)
+            .addColumn(patternColumnTitle)
+            .addColumn(descriptionColumnTitle)
+            .build()
+            .withHeader();
+    ObjectWriter csvWriter = csvMapper.writer(csvSchema);
+    List<Map<String, Object>> csvRows = new ArrayList<>();
+    new TreeSet<>(schemas.keySet())
+        .forEach(
+            typeName -> {
+              Map<String, Schema> typeAttributeProperties = schemas.get(typeName).getProperties();
+              if (typeAttributeProperties != null) {
+                new TreeSet<>(typeAttributeProperties.keySet())
+                    .forEach(
+                        propertyName -> {
+                          Schema attributeSchema = typeAttributeProperties.get(propertyName);
+                          String attributeSchemaType = attributeSchema.getType();
+                          String csvType = "UNKNOWN";
+                          switch (attributeSchemaType) {
+                            case "array":
+                              {
+                                Schema itemSchema = attributeSchema.getItems();
+                                String itemType = itemSchema.getType();
+                                if (itemType == null) {
+                                  String $ref = itemSchema.get$ref();
+                                  if ($ref != null) {
+                                    itemType = $ref.substring("#/components/schemas/".length());
+                                  } else {
+                                    itemType = "UNKNOWN";
+                                  }
+                                }
+                                csvType = "List of %s".formatted(itemType);
+                                break;
+                              }
+                            case "object":
+                              {
+                                List<Schema> allOf = attributeSchema.getAllOf();
+                                if (allOf.size() == 1) {
+                                  String $ref = allOf.getFirst().get$ref();
+                                  if ($ref != null) {
+                                    String attributeTypeName =
+                                        $ref.substring("#/components/schemas/".length());
+                                    csvType = "Alias of %s".formatted(attributeTypeName);
+                                  }
+                                }
+                                break;
+                              }
+                            case null:
+                              {
+                                String $ref = attributeSchema.get$ref();
+                                if ($ref != null) {
+                                  csvType = $ref.substring("#/components/schemas/".length());
+                                } else {
+                                  csvType = "string";
+                                }
+                                break;
+                              }
+                            default:
+                              {
+                                csvType = attributeSchemaType;
+                                break;
+                              }
+                          }
+                          String csvDescription =
+                              Objects.requireNonNullElse(attributeSchema.getDescription(), "");
+                          String csvPattern = "";
+                          if (csvType.equals("string")) {
+                            String schemaPattern = attributeSchema.getPattern();
+                            if (schemaPattern != null) {
+                              csvPattern = schemaPattern;
+                            }
+                          }
+                          csvRows.add(
+                              Map.ofEntries(
+                                  Map.entry(objectColumnTitle, typeName),
+                                  Map.entry(attributeColumnTitle, propertyName),
+                                  Map.entry(typeColumnTitle, csvType),
+                                  Map.entry(patternColumnTitle, csvPattern),
+                                  Map.entry(descriptionColumnTitle, csvDescription)));
+                        });
+              }
+            });
+    StringWriter stringWriter = new StringWriter();
+    csvWriter.writeValue(stringWriter, csvRows);
+    System.out.println("Data overview CSV:");
+    System.out.println(stringWriter);
+    Files.writeString(Paths.get(csvFilePath), stringWriter.toString());
+    System.out.printf("Data overview exported to %s%n", csvFilePath);
   }
 
   private static Stream<Class<?>> modelClassesStream() {

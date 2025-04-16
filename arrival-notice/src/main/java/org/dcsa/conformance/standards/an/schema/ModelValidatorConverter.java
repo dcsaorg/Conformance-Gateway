@@ -28,7 +28,7 @@ public class ModelValidatorConverter implements ModelConverter {
     if (schema == null) return null;
 
     if (annotatedType.getType() instanceof SimpleType simpleType) {
-      log.info(
+      log.debug(
           "  attribute: {} {}",
           simpleType.getRawClass().getSimpleName(),
           annotatedType.getPropertyName());
@@ -52,7 +52,7 @@ public class ModelValidatorConverter implements ModelConverter {
                     .collect(Collectors.joining("\n")));
       }
     } else {
-      log.info("Object: {}", annotatedType.getType());
+      log.debug("Object: {}", annotatedType.getType());
     }
     return schema;
   }

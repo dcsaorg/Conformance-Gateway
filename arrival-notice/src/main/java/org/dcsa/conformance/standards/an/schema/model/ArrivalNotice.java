@@ -3,7 +3,6 @@ package org.dcsa.conformance.standards.an.schema.model;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
 import org.dcsa.conformance.standards.an.schema.types.CarrierCodeListProvider;
@@ -13,7 +12,6 @@ import org.dcsa.conformance.standards.an.schema.types.FormattedDate;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "Full content of an Arrival Notice document.")
 public class ArrivalNotice {
 

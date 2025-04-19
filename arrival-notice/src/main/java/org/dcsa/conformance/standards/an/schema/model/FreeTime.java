@@ -5,7 +5,7 @@ import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTypeCode;
-import org.dcsa.conformance.standards.an.schema.types.ISOEquipmentCode;
+import org.dcsa.conformance.standards.an.schema.types.IsoEquipmentCode;
 import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
 
 @Data
@@ -16,7 +16,7 @@ public class FreeTime {
   private FreeTimeTypeCode typeCode;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED, name = "ISOEquipmentCode")
-  private ISOEquipmentCode isoEquipmentCode;
+  private IsoEquipmentCode isoEquipmentCode;
 
   @SchemaOverride(
       description =

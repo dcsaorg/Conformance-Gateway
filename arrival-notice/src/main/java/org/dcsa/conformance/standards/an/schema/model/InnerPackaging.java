@@ -1,22 +1,33 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "Inner packaging specification.")
+@Schema(description = "Inner packaging specification")
 public class InnerPackaging {
 
-  @Schema(description = "Number of Inner Packagings.", example = "20")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      type = "integer",
+      format = "int32",
+      example = "20",
+      description = "Number of inner packagings.")
   private String quantity;
 
-  @Schema(description = "The material used for the Inner Packaging.", example = "Plastic")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      type = "string",
+      maxLength = 100,
+      example = "Plastic",
+      description = "The material used for the Inner Packaging.")
   private String material;
 
   @Schema(
-      description = "Description of the Inner Packaging.",
-      example = "Woven plastic water resistant bag")
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      type = "string",
+      maxLength = 100,
+      example = "Woven plastic water resistant bag",
+      description = "Description of the Inner Packaging.")
   private String description;
 }

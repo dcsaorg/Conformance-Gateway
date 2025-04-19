@@ -1,13 +1,11 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
 import org.dcsa.conformance.standards.an.schema.types.EquipmentReference;
 
 @Data
-@AllArgsConstructor
 @Schema(
     description =
         "A cargo item is the smallest unit used by stuffing. It cannot be split across containers.")

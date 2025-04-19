@@ -62,7 +62,10 @@ import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Location;
 import org.dcsa.conformance.standards.an.schema.types.EquipmentReference;
+import org.dcsa.conformance.standards.an.schema.types.FormattedDate;
+import org.dcsa.conformance.standards.an.schema.types.FormattedDateTime;
 import org.dcsa.conformance.standards.an.schema.types.ImoPackagingCode;
+import org.dcsa.conformance.standards.an.schema.types.InhalationZoneTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
@@ -87,14 +90,16 @@ import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.HSCode;
-import org.dcsa.conformance.standards.an.schema.types.ISOEquipmentCode;
+import org.dcsa.conformance.standards.an.schema.types.IsoEquipmentCode;
 import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
 import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.PaymentTermCode;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.SealSourceCode;
+import org.dcsa.conformance.standards.an.schema.types.SegregationGroupCode;
 import org.dcsa.conformance.standards.an.schema.types.ShippingMark;
+import org.dcsa.conformance.standards.an.schema.types.SubsidiaryRisk;
 import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
@@ -339,14 +344,17 @@ public class AnSchemaCreator {
         Equipment.class,
         EquipmentReference.class,
         FacilityCodeListProvider.class,
+        FormattedDate.class,
+        FormattedDateTime.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
         HSCode.class,
         IdentifyingPartyCode.class,
         ImoPackagingCode.class,
+        InhalationZoneTypeCode.class,
         InnerPackaging.class,
-        ISOEquipmentCode.class,
+        IsoEquipmentCode.class,
         Location.class,
         NationalCommodityCode.class,
         NationalCommodityCodeValue.class,
@@ -358,7 +366,9 @@ public class AnSchemaCreator {
         Reference.class,
         Seal.class,
         SealSourceCode.class,
+        SegregationGroupCode.class,
         ShippingMark.class,
+        SubsidiaryRisk.class,
         TaxOrLegalReference.class,
         TemperatureLimits.class,
         TemperatureUnitCode.class,

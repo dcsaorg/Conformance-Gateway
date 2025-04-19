@@ -1,11 +1,9 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "Minimal information published about an Arrival Notice as a lightweight notification.")
 public class ArrivalNoticeDigest {
 

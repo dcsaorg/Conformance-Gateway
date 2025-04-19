@@ -1,7 +1,6 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
 import org.dcsa.conformance.standards.an.schema.StringPatterns;
@@ -9,7 +8,6 @@ import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 
 @Data
-@AllArgsConstructor
 @Schema(description = "Location information")
 public class Location {
 

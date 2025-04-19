@@ -1,12 +1,10 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.types.CountryCode;
 
 @Data
-@AllArgsConstructor
 @Schema(
     description =
 """

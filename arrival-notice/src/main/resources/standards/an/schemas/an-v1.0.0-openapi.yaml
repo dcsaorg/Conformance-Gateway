@@ -450,16 +450,23 @@ components:
             $ref: "#/components/schemas/ArrivalNotice"
       description: "API message containing a list of Arrival Notices."
     CargoItem:
+      required:
+      - "cargoGrossWeight"
+      - "equipmentReference"
+      - "outerPackaging"
       type: "object"
       properties:
         equipmentReference:
+          maxLength: 11
+          minLength: 1
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: |-
+          description: |
             The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-            According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-            (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
-            If a container does not comply with ISO 6346, it is suggested to follow "Recommendation #2:
-            Containers with non-ISO identification" from SMDG: https://smdg.org/documents/smdg-recommendations
+             According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+             (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+             If a container does not comply with ISO 6346, it is suggested to follow "Recommendation #2:
+             Containers with non-ISO identification" from SMDG: https://smdg.org/documents/smdg-recommendations
           example: "APZU4812090"
         cargoGrossWeight:
           $ref: "#/components/schemas/Weight"
@@ -1528,28 +1535,35 @@ components:
         The details of the last sea-going vessel arriving at the Port of Discharge,
          which can be either a feeder or the mother vessel.
     Volume:
-      type: "object"
-      properties:
-        value:
-          type: "string"
-          description: "The volume expressed in the selected unit."
-          example: "2.4"
-        unit:
-          type: "string"
-          description: |
-            The unit in which the volume is expressed:
-             * FTQ (Cubic feet)
-             * MTQ (Cubic meters)
-             * LTR (Litre)
-          example: "MTQ"
-      description: "The volume and the unit in which it is expressed."
-    Weight:
+      required:
+      - "unit"
+      - "value"
       type: "object"
       properties:
         value:
           pattern: "^\\d+(\\.\\d+)?$"
           type: "string"
-          description: "The weight expressed in the selected `unit`."
+          description: "The volume expressed in the selected `unit`"
+          example: "123.456"
+        unit:
+          type: "string"
+          description: |-
+            The unit in which the volume `value` is expressed
+             - `FTQ` - Cubic feet
+             - `LTR` - Litres
+             - `MTQ` - Cubic meters
+          example: "MTQ"
+      description: "Representation of a volume including the unit in which it is expressed."
+    Weight:
+      required:
+      - "unit"
+      - "value"
+      type: "object"
+      properties:
+        value:
+          pattern: "^\\d+(\\.\\d+)?$"
+          type: "string"
+          description: "The weight expressed in the selected `unit`"
           example: "123.456"
         unit:
           type: "string"

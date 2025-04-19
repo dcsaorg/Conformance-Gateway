@@ -1,13 +1,10 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
+import java.util.List;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-@AllArgsConstructor
 @Schema(description = """
 Outer packaging / overpack specification.
  Examples of overpacks are a number of packages stacked on to a pallet and secured by strapping

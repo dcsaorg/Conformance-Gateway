@@ -82,15 +82,16 @@ ArrivalNoticeDigest,"transportDocumentReference",string,,,,XYZ1234,"Reference of
 "ArrivalNoticeDigestsMessage",arrivalNoticeDigests,"ArrivalNoticeDigest list",,,,,"List of Arrival Notice digests."
 ArrivalNoticesMessage,arrivalNotices,"ArrivalNotice list",,,,,"List of arrival notices."
 CargoItem,cargoGrossVolume,Volume,,,,,
-CargoItem,cargoGrossWeight,Weight,,,,,
+CargoItem,cargoGrossWeight,Weight,yes,,,,
 CargoItem,cargoNetVolume,Volume,,,,,
 CargoItem,cargoNetWeight,Weight,,,,,
-CargoItem,equipmentReference,string,,,,APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
-According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
-(composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
-If a container does not comply with ISO 6346, it is suggested to follow ""Recommendation #2:
-Containers with non-ISO identification"" from SMDG: https://smdg.org/documents/smdg-recommendations"
-CargoItem,outerPackaging,OuterPackaging,,,,,
+CargoItem,equipmentReference,string,yes,11,"^\S(?:.*\S)?$",APZU4812090,"The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+ According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number
+ (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit).
+ If a container does not comply with ISO 6346, it is suggested to follow ""Recommendation #2:
+ Containers with non-ISO identification"" from SMDG: https://smdg.org/documents/smdg-recommendations
+"
+CargoItem,outerPackaging,OuterPackaging,yes,,,,
 Charge,calculationBasis,string,yes,50,,"Per day","The code specifying the measure unit used for the corresponding unit price for this cost, such as per day, per ton,
  per square metre.
 "
@@ -443,15 +444,14 @@ VesselVoyage,"universalImportVoyageReference",UniversalVoyageReference,,,,,
 VesselVoyage,vesselFlag,string,,2,"^[A-Z]{2}$",NL,"Vessel flag"
 VesselVoyage,vesselIMONumber,VesselIMONumber,,,,,
 VesselVoyage,vesselName,string,yes,50,,"King of the Seas","Vessel name"
-Volume,unit,string,,,,MTQ,"The unit in which the volume is expressed:
- * FTQ (Cubic feet)
- * MTQ (Cubic meters)
- * LTR (Litre)
-"
-Volume,value,string,,,,2.4,"The volume expressed in the selected unit."
-Weight,unit,string,,,,KGM,"The unit in which the weight `value` is expressed
+Volume,unit,string,yes,,,MTQ,"The unit in which the volume `value` is expressed
+ - `FTQ` - Cubic feet
+ - `LTR` - Litres
+ - `MTQ` - Cubic meters"
+Volume,value,string,yes,,"^\d+(\.\d+)?$",123.456,"The volume expressed in the selected `unit`"
+Weight,unit,string,yes,,,KGM,"The unit in which the weight `value` is expressed
  - `GRM` - Grams
  - `KGM` - Kilograms
  - `LBR` - Pounds
  - `ONZ` - Ounce"
-Weight,value,string,,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`."
+Weight,value,string,yes,,"^\d+(\.\d+)?$",123.456,"The weight expressed in the selected `unit`"

@@ -10,12 +10,16 @@ import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
 public class Weight {
 
   @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
       type = "string",
       pattern = "^\\d+(\\.\\d+)?$",
       example = "123.456",
-      description = "The weight expressed in the selected `unit`.")
+      description = "The weight expressed in the selected `unit`")
   private String value;
 
-  @SchemaOverride(description = "The unit in which the weight `value` is expressed", example = "KGM")
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @SchemaOverride(
+      description = "The unit in which the weight `value` is expressed",
+      example = "KGM")
   private WeightUnitCode unit;
 }

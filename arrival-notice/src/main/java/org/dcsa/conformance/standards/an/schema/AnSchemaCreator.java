@@ -61,6 +61,7 @@ import org.dcsa.conformance.standards.an.schema.model.FreeTime;
 import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Location;
+import org.dcsa.conformance.standards.an.schema.types.EquipmentReference;
 import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
@@ -99,6 +100,7 @@ import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
 import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
 import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.VolumeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
 
 @Slf4j
@@ -332,6 +334,7 @@ public class AnSchemaCreator {
         DocumentPartyTypeCode.class,
         EmergencyContactDetails.class,
         Equipment.class,
+        EquipmentReference.class,
         FacilityCodeListProvider.class,
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
@@ -364,6 +367,7 @@ public class AnSchemaCreator {
         VesselVoyage.class,
         VesselVoyageDestinationTypeCode.class,
         Volume.class,
+        VolumeUnitCode.class,
         Weight.class,
         WeightUnitCode.class);
   }

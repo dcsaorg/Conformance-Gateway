@@ -1,25 +1,25 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.types.VolumeUnitCode;
 
 @Data
-@AllArgsConstructor
-@Schema(description = "The volume and the unit in which it is expressed.")
+@Schema(description = "Representation of a volume including the unit in which it is expressed.")
 public class Volume {
 
-  @Schema(description = "The volume expressed in the selected unit.", example = "2.4")
+  @Schema(
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      type = "string",
+      pattern = "^\\d+(\\.\\d+)?$",
+      example = "123.456",
+      description = "The volume expressed in the selected `unit`")
   private String value;
 
-  @Schema(
-      description =
-          """
-The unit in which the volume is expressed:
- * FTQ (Cubic feet)
- * MTQ (Cubic meters)
- * LTR (Litre)
-""",
-      example = "MTQ")
-  private String unit;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @SchemaOverride(
+      description = "The unit in which the volume `value` is expressed",
+      example = "KGM")
+  private VolumeUnitCode unit;
 }

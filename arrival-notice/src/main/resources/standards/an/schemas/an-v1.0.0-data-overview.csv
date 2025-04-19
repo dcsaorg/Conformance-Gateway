@@ -1,4 +1,4 @@
-Object,Attribute,Type,Required,MaxLength,Pattern,Example,Description
+Object,Attribute,Type,Required,Size,Pattern,Example,Description
 ActiveReeferSettings,airExchangeSetpoint,string,,,"^\d+(\.\d+)?$",12.3,"Target rate at which outdoor air replaces indoor air"
 ActiveReeferSettings,airExchangeUnit,string,,,,MQH,"Measurement unit in which the `airExchangeSetpoint` is expressed
  - `FQH` - Cubic foot per hour
@@ -113,33 +113,26 @@ Charge,paymentTermCode,string,yes,,,PRE,"An indicator of whether a charge is pre
 Charge,quantity,string,yes,,"^\d+(\.\d+)?$",123.456,"The quantity of this charge item in units at `unitPrice`"
 Charge,unitPrice,string,yes,,"^\d+(\.\d{1,2})?$",123.45,"The unit price of this charge item in the `chargeCurrency`, expressed with a maximum of 2 decimal digits
 "
-ConsignmentItem,HSCodes,string,,,,,"A list of HS Codes that apply to this ConsignmentItem, used by customs to classify the product being shipped.
- The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.
- More information can be found in the HS Nomenclature:
- https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools"
-ConsignmentItem,cargoItems,"CargoItem list",,,,,"The list of Cargo Items grouped in this Consignment Item."
-ConsignmentItem,carrierBookingReference,string,,,,ABC709951,"The associated booking number provided by the carrier for this Consignment Item."
-ConsignmentItem,customsReferences,"CustomsReference list",,,,,"The list of Customs References applicable to this Consignment Item."
-ConsignmentItem,descriptionOfGoods,"string list",,,,,"A plain language description that is precise enough for Customs services to be able to identify the goods.
- General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise
- description cannot be accepted.
-
-The order of the items in this array MUST be preserved."
-ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of National Commodity Codes in this Consignment Item."
-ConsignmentItem,shippingMarks,"string list",,,,"Made in China","A list of the shipping marks applicable to this utilized transport equipment.
-The identifying details of a package or the actual markings that appear on the package(s).
-This information is provided by the customer.
-
-The order of the items in this array MUST be preserved.
+ConsignmentItem,HSCodes,"string list",yes,,,,"List of HS Codes that apply to this consignment item"
+ConsignmentItem,cargoItems,"CargoItem list",yes,,,,"The list of cargo items grouped in this consignment item."
+ConsignmentItem,carrierBookingReference,string,yes,35,"^\S(?:.*\S)?$",XYZ1234,"The booking number corresponding to this consignment item"
+ConsignmentItem,commoditySubReference,string,yes,100,"^\S(?:.*\S)?$",XYZ1234,"Reference to the commodity object assigned by the carrier in the booking confirmation,
+ unique within the context of one booking.
 "
+ConsignmentItem,customsReferences,"CustomsReference list",,,,,"The list of customs references applicable to this consignment item."
+ConsignmentItem,descriptionOfGoods,"string list",yes,,,,"Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods.
+"
+ConsignmentItem,nationalCommodityCodes,"NationalCommodityCode list",,,,,"The list of national commodity codes applicable to this consignment item."
+ConsignmentItem,shippingMarks,"string list",,,,,"Ordered list of shipping mark lines printed on the package"
 ContactInformation,email,string,,100,"^\S+(\s+\S+)*$",jane.doe@example.com,"Email address"
 ContactInformation,name,string,,100,"^\S+(\s+\S+)*$","Jane Doe","Contact name"
 ContactInformation,phone,string,,30,"^\S+(\s+\S+)*$","+1 555-123-4567","Phone number"
-CustomsReference,countryCode,string,,,,NL,"The 2 characters for the country code using ISO 3166-1 alpha-2
+CustomsReference,countryCode,string,yes,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+When the country code is required but not applicable, use the code `ZZ`.
 "
-CustomsReference,crType,string,,,,CUS,"The reference type code as defined in the relevant customs jurisdiction."
-CustomsReference,values,"string list",,,,"[1234, 5678]","A list of national commodity codes values
-"
+CustomsReference,crType,string,yes,,,CUS,"The reference type code as defined in the relevant customs jurisdiction."
+CustomsReference,values,"string list",yes,,,,"List of customs reference values"
 DangerousGoods,EMSNumber,string,,,,"F-A S-Q","The emergency schedule identified in the IMO EmS Guide – Emergency Response Procedures for Ships Carrying
  Dangerous Goods. Comprises 2 values; 1 for spillage and 1 for fire. Possible values spillage: S-A to S-Z.
  Possible values fire: F-A to F-Z."
@@ -335,9 +328,11 @@ Location,facilityCodeListProvider,string,,,,BIC,"The provider of the code list i
  - `BIC` - BIC Facility Codes; details [here](https://www.bic-code.org/facility-codes/)
  - `SMDG` - Ship Message Design Group; details [here](https://www.bic-code.org/facility-codes/)"
 Location,locationName,string,,100,,"Port of Amsterdam","Location name"
-NationalCommodityCode,countryCode,string,,,,BR,"The 2 characters for the country code using ISO 3166-1 alpha-2
+NationalCommodityCode,countryCode,string,,2,"^[A-Z]{2}$",NL,"The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+When the country code is required but not applicable, use the code `ZZ`.
 "
-NationalCommodityCode,nccType,string,,,,NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
+NationalCommodityCode,nccType,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national commodity classification code, which can be one of the following values defined by DCSA:
  * NCM (Nomenclatura Comum do Mercosul)
  * HTS (Harmonized Tariff Schedule)
  * SCHEDULE_B ( Schedule B)
@@ -345,8 +340,7 @@ NationalCommodityCode,nccType,string,,,,NCM,"The national commodity classificati
  * CN (Combined Nomenclature)
  * CUS (Customs Union and Statistics)
 "
-NationalCommodityCode,values,"string list",,,,"[1234, 5678]","A list of national commodity codes values
-"
+NationalCommodityCode,nccValues,"string list",yes,,,,"List of national commodity code values"
 OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"List of Dangerous Goods."
 OuterPackaging,description,string,,,,"Drum, steel","Description of the outer packaging/overpack."
 OuterPackaging,imoPackagingCode,string,,,,1A2,"The code of the packaging as per IMO.

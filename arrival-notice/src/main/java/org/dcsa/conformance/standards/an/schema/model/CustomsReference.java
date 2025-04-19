@@ -1,39 +1,45 @@
 package org.dcsa.conformance.standards.an.schema.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
+import org.dcsa.conformance.standards.an.schema.types.CountryCode;
+import org.dcsa.conformance.standards.an.schema.types.CustomsReferenceValue;
 
 @Data
-@AllArgsConstructor
 @Schema(
     description =
 """
-Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export,
+Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export
  or transit of the goods.
+
+Examples of possible customs references are:
+
+| Type  | Country | Description |
+|-------|:-------:|-------------|
+|UCR|NL|Unique Consignment Reference|
+|CUS|NL|Customs Union and Statistics|
+|ACID|EG|Advance Cargo Information Declaration in Egypt|
+|CERS|CA|Canadian Export Reporting System|
+|ITN|US|Internal Transaction Number in US|
+|PEB|ID|PEB reference number|
+|CSN|IN|Cargo Summary Notification (CSN)|
 """)
 public class CustomsReference {
 
   @Schema(
-      description = "The reference type code as defined in the relevant customs jurisdiction.",
-      example = "CUS")
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      example = "CUS",
+      description = "The reference type code as defined in the relevant customs jurisdiction.")
   private String crType;
 
-  @Schema(
-      description =
-"""
-The 2 characters for the country code using ISO 3166-1 alpha-2
-""",
-      example = "NL")
-  private String countryCode;
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  private CountryCode countryCode;
 
   @Schema(
-      description =
-"""
-A list of national commodity codes values
-""",
-      example = "[1234, 5678]")
-  private List<String> values;
+    requiredMode = Schema.RequiredMode.REQUIRED,
+    description = "List of customs reference values")
+  @ArraySchema(minItems = 1)
+  private List<CustomsReferenceValue> values;
 }

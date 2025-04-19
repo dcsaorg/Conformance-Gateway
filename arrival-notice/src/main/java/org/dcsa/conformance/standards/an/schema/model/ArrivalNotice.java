@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.StringPatterns;
 import org.dcsa.conformance.standards.an.schema.types.CarrierCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
@@ -88,7 +89,7 @@ on the B/L. Customers can use these references to track shipments in their inter
 
   @Schema(
       requiredMode = Schema.RequiredMode.REQUIRED,
-      pattern = "^\\S(?:.*\\S)?$",
+      pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
       maxLength = 20,
       example = "XYZ1234",
       description = "Reference of the transport document for which this arrival notice was created")

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
+import org.dcsa.conformance.standards.an.schema.StringPatterns;
 import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 
@@ -25,7 +26,7 @@ public class Location {
   private UNLocationCode unLocationCode;
 
   @Schema(
-      pattern = "^\\S(?:.*\\S)?$",
+      pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
       maxLength = 6,
       example = "CTA",
       description = "Facility code in the list provided by `facilityCodeListProvider`")

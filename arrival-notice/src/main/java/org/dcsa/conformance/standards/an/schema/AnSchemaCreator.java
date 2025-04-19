@@ -61,7 +61,7 @@ import org.dcsa.conformance.standards.an.schema.model.FreeTime;
 import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Location;
-import org.dcsa.conformance.standards.an.schema.model.NationalCommodityCode;
+import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
 import org.dcsa.conformance.standards.an.schema.model.Seal;
@@ -73,17 +73,21 @@ import org.dcsa.conformance.standards.an.schema.model.VesselVoyage;
 import org.dcsa.conformance.standards.an.schema.model.Volume;
 import org.dcsa.conformance.standards.an.schema.model.Weight;
 import org.dcsa.conformance.standards.an.schema.types.AirExchangeUnitCode;
+import org.dcsa.conformance.standards.an.schema.types.CargoDescriptionLine;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.CountryCode;
 import org.dcsa.conformance.standards.an.schema.types.CurrencyAmount;
 import org.dcsa.conformance.standards.an.schema.types.CurrencyCode;
+import org.dcsa.conformance.standards.an.schema.types.CustomsReferenceValue;
 import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.DocumentPartyTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FacilityCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTimeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.FreeTimeTypeCode;
+import org.dcsa.conformance.standards.an.schema.types.HSCode;
 import org.dcsa.conformance.standards.an.schema.types.ISOEquipmentCode;
 import org.dcsa.conformance.standards.an.schema.types.ModeOfTransportCode;
+import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCodeValue;
 import org.dcsa.conformance.standards.an.schema.types.PartyCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.PaymentTermCode;
 import org.dcsa.conformance.standards.an.schema.types.PersonTypeCode;
@@ -188,7 +192,7 @@ public class AnSchemaCreator {
     String attributeColumnTitle = "Attribute";
     String typeColumnTitle = "Type";
     String requiredColumnTitle = "Required";
-    String maxLengthColumnTitle = "MaxLength";
+    String sizeColumnTitle = "Size";
     String patternColumnTitle = "Pattern";
     String exampleColumnTitle = "Example";
     String descriptionColumnTitle = "Description";
@@ -198,7 +202,7 @@ public class AnSchemaCreator {
             .addColumn(attributeColumnTitle)
             .addColumn(typeColumnTitle)
             .addColumn(requiredColumnTitle)
-            .addColumn(maxLengthColumnTitle)
+            .addColumn(sizeColumnTitle)
             .addColumn(patternColumnTitle)
             .addColumn(exampleColumnTitle)
             .addColumn(descriptionColumnTitle)
@@ -223,10 +227,10 @@ public class AnSchemaCreator {
                         String csvType = "UNKNOWN";
                         String csvRequired = requiredAttributes.remove(attributeName) ? "yes" : "";
                         Integer maxLength = attributeSchema.getMaxLength();
-                        String csvMaxLength =
+                        String csvSize =
                             maxLength == null || maxLength == Integer.MAX_VALUE
                                 ? ""
-                                : maxLength.toString();
+                                : maxLength.toString(); // FIXME range, array items
                         switch (attributeSchemaType) {
                           case "array":
                             {
@@ -289,7 +293,7 @@ public class AnSchemaCreator {
                                 Map.entry(attributeColumnTitle, attributeName),
                                 Map.entry(typeColumnTitle, csvType),
                                 Map.entry(requiredColumnTitle, csvRequired),
-                                Map.entry(maxLengthColumnTitle, csvMaxLength),
+                                Map.entry(sizeColumnTitle, csvSize),
                                 Map.entry(patternColumnTitle, csvPattern),
                                 Map.entry(exampleColumnTitle, csvExample),
                                 Map.entry(descriptionColumnTitle, csvDescription)));
@@ -310,6 +314,7 @@ public class AnSchemaCreator {
         ArrivalNoticeDigest.class,
         ArrivalNoticeDigestsMessage.class,
         ArrivalNoticesMessage.class,
+        CargoDescriptionLine.class,
         CargoItem.class,
         CarrierClause.class,
         Charge.class,
@@ -320,6 +325,7 @@ public class AnSchemaCreator {
         CurrencyAmount.class,
         CurrencyCode.class,
         CustomsReference.class,
+        CustomsReferenceValue.class,
         DangerousGoods.class,
         DestinationDeliveryTypeCode.class,
         DocumentParty.class,
@@ -330,11 +336,13 @@ public class AnSchemaCreator {
         FreeTime.class,
         FreeTimeTimeUnitCode.class,
         FreeTimeTypeCode.class,
+        HSCode.class,
         IdentifyingPartyCode.class,
         InnerPackaging.class,
         ISOEquipmentCode.class,
         Location.class,
         NationalCommodityCode.class,
+        NationalCommodityCodeValue.class,
         ModeOfTransportCode.class,
         OuterPackaging.class,
         PartyCodeListProvider.class,

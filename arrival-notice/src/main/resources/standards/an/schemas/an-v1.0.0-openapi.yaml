@@ -545,72 +545,77 @@ components:
           example: "INV51XX80YY"
       description: "Contact details"
     ConsignmentItem:
+      required:
+      - "HSCodes"
+      - "cargoItems"
+      - "carrierBookingReference"
+      - "commoditySubReference"
+      - "descriptionOfGoods"
       type: "object"
       properties:
         carrierBookingReference:
+          maxLength: 35
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
-          description: "The associated booking number provided by the carrier for this Consignment Item."
-          example: "ABC709951"
+          description: "The booking number corresponding to this consignment item"
+          example: "XYZ1234"
+        commoditySubReference:
+          maxLength: 100
+          pattern: "^\\S(?:.*\\S)?$"
+          type: "string"
+          description: |
+            Reference to the commodity object assigned by the carrier in the booking confirmation,
+             unique within the context of one booking.
+          example: "XYZ1234"
         descriptionOfGoods:
           type: "array"
-          description: |-
-            A plain language description that is precise enough for Customs services to be able to identify the goods.
-             General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise
-             description cannot be accepted.
-
-            The order of the items in this array MUST be preserved.
-          items:
-            type: "string"
-            description: |-
-              A plain language description that is precise enough for Customs services to be able to identify the goods.
-               General terms (i.e. 'consolidated', 'general cargo' 'parts' or 'freight of all kinds') or not sufficiently precise
-               description cannot be accepted.
-
-              The order of the items in this array MUST be preserved.
-        shippingMarks:
-          type: "array"
           description: |
-            A list of the shipping marks applicable to this utilized transport equipment.
-            The identifying details of a package or the actual markings that appear on the package(s).
-            This information is provided by the customer.
-
-            The order of the items in this array MUST be preserved.
-          example: "Made in China"
+            Ordered list of cargo descriptions precise enough for customs services to be able to identify the goods.
           items:
+            maxLength: 35
+            type: "string"
+            description: "One line in the cargo description"
+            example: "Plush tiger"
+        HSCodes:
+          type: "array"
+          description: "List of HS Codes that apply to this consignment item"
+          items:
+            maxLength: 10
+            minLength: 6
+            pattern: "^\\d{6,10}$"
             type: "string"
             description: |
-              A list of the shipping marks applicable to this utilized transport equipment.
-              The identifying details of a package or the actual markings that appear on the package(s).
-              This information is provided by the customer.
-
-              The order of the items in this array MUST be preserved.
-            example: "Made in China"
-        HSCodes:
-          type: "string"
-          description: |-
-            A list of HS Codes that apply to this ConsignmentItem, used by customs to classify the product being shipped.
-             The type of HS code depends on country and customs requirements. The code must be at least 6 and at most 10 digits.
-             More information can be found in the HS Nomenclature:
-             https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools
-        cargoItems:
-          type: "array"
-          description: "The list of Cargo Items grouped in this Consignment Item."
-          items:
-            $ref: "#/components/schemas/CargoItem"
+              Code used by customs to classify the product being shipped.
+               The type of HS code depends on country and customs requirements. More information can be found
+               in the [HS Nomenclature](https://www.wcoomd.org/en/topics/nomenclature/instrument-and-tools)
+            example: "12345678"
         nationalCommodityCodes:
           type: "array"
-          description: "The list of National Commodity Codes in this Consignment Item."
+          description: "The list of national commodity codes applicable to this consignment item."
           items:
             $ref: "#/components/schemas/NationalCommodityCode"
+        shippingMarks:
+          type: "array"
+          description: "Ordered list of shipping mark lines printed on the package"
+          items:
+            maxLength: 35
+            type: "string"
+            description: "One line of details printed on a package"
+            example: "Fragile"
         customsReferences:
           type: "array"
-          description: "The list of Customs References applicable to this Consignment Item."
+          description: "The list of customs references applicable to this consignment item."
           items:
             $ref: "#/components/schemas/CustomsReference"
+        cargoItems:
+          type: "array"
+          description: "The list of cargo items grouped in this consignment item."
+          items:
+            $ref: "#/components/schemas/CargoItem"
       description: |-
-        A list of CargoItems belonging together and the associated Booking.
-         A ConsignmentItem can be split across multiple containers (UtilizedTransportEquipment)
-         by referencing multiple CargoItems.
+        A list of cargo items belonging together and the associated booking.
+         A consignment item can be split across multiple containers (`UtilizedTransportEquipment`)
+         by referencing multiple cargo items.
     ContactInformation:
       type: "object"
       properties:
@@ -634,6 +639,10 @@ components:
           example: "jane.doe@example.com"
       description: "Contact information"
     CustomsReference:
+      required:
+      - "countryCode"
+      - "crType"
+      - "values"
       type: "object"
       properties:
         crType:
@@ -641,25 +650,39 @@ components:
           description: "The reference type code as defined in the relevant customs jurisdiction."
           example: "CUS"
         countryCode:
+          maxLength: 2
+          minLength: 2
+          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
-            The 2 characters for the country code using ISO 3166-1 alpha-2
+            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            When the country code is required but not applicable, use the code `ZZ`.
           example: "NL"
         values:
           type: "array"
-          description: |
-            A list of national commodity codes values
-          example:
-          - 1234
-          - 5678
+          description: "List of customs reference values"
           items:
+            maxLength: 35
+            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
-            description: |
-              A list of national commodity codes values
-            example: "[1234,5678]"
+            description: "The value of a `CustomsReference`"
+            example: "ABC12345"
       description: |
-        Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export,
+        Reference associated with customs and/or excise purposes required by the relevant authorities for the import, export
          or transit of the goods.
+
+        Examples of possible customs references are:
+
+        | Type  | Country | Description |
+        |-------|:-------:|-------------|
+        |UCR|NL|Unique Consignment Reference|
+        |CUS|NL|Customs Union and Statistics|
+        |ACID|EG|Advance Cargo Information Declaration in Egypt|
+        |CERS|CA|Canadian Export Reporting System|
+        |ITN|US|Internal Transaction Number in US|
+        |PEB|ID|PEB reference number|
+        |CSN|IN|Cargo Summary Notification (CSN)|
     DangerousGoods:
       type: "object"
       properties:
@@ -1107,9 +1130,14 @@ components:
           example: "BIC"
       description: "Location information"
     NationalCommodityCode:
+      required:
+      - "nccType"
+      - "nccValues"
       type: "object"
       properties:
         nccType:
+          maxLength: 10
+          pattern: "^\\S(?:.*\\S)?$"
           type: "string"
           description: |
             The national commodity classification code, which can be one of the following values defined by DCSA:
@@ -1121,22 +1149,24 @@ components:
              * CUS (Customs Union and Statistics)
           example: "NCM"
         countryCode:
+          maxLength: 2
+          minLength: 2
+          pattern: "^[A-Z]{2}$"
           type: "string"
           description: |
-            The 2 characters for the country code using ISO 3166-1 alpha-2
-          example: "BR"
-        values:
+            The 2 characters for the country code using [ISO 3166-1 alpha-2](https://www.iso.org/obp/ui/#iso:pub:PUB500001:en)
+
+            When the country code is required but not applicable, use the code `ZZ`.
+          example: "NL"
+        nccValues:
           type: "array"
-          description: |
-            A list of national commodity codes values
-          example:
-          - 1234
-          - 5678
+          description: "List of national commodity code values"
           items:
+            maxLength: 10
+            pattern: "^\\S(?:.*\\S)?$"
             type: "string"
-            description: |
-              A list of national commodity codes values
-            example: "[1234,5678]"
+            description: "The value of a `NationalCommodityCode`"
+            example: "ABC12345"
       description: "The national commodity classification code linked to a country with a value."
     OuterPackaging:
       type: "object"
@@ -1441,7 +1471,7 @@ components:
             maxLength: 35
             type: "string"
             description: "One line of details printed on a package"
-            example: "Made in China"
+            example: "Fragile"
         seals:
           type: "array"
           description: "The seal-related information associated with this equipment."

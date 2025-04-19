@@ -342,26 +342,28 @@ NationalCommodityCode,nccType,string,yes,10,"^\S(?:.*\S)?$",NCM,"The national co
  * CUS (Customs Union and Statistics)
 "
 NationalCommodityCode,nccValues,"string list",yes,,,,"List of national commodity code values"
-OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"List of Dangerous Goods."
-OuterPackaging,description,string,,,,"Drum, steel","Description of the outer packaging/overpack."
-OuterPackaging,imoPackagingCode,string,,,,1A2,"The code of the packaging as per IMO.
- Only applicable to dangerous goods if specified in the IMO IMDG code:
- https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx
+OuterPackaging,dangerousGoods,"DangerousGoods list",,,,,"List of dangerous goods specifications"
+OuterPackaging,description,string,yes,100,,"Drum, steel","Description of the outer packaging / overpack"
+OuterPackaging,imoPackagingCode,string,,5,"^[A-Z0-9]{1,5}$",1A2,"IMO packaging code.
 
-If not available, the packageCode as per UN recommendation 21 should be used."
-OuterPackaging,numberOfPackages,string,,,,18,"Specifies the number of outer packagings / overpacks associated with this Cargo Item."
-OuterPackaging,packageCode,string,,,,5H,"A code identifying the outer packaging / overpack.
- PackageCode must follow the codes specified in Recommendation N°21:
- https://unece.org/trade/uncefact/cl-recommendations
+Only applicable to dangerous goods if specified in the
+ [IMO IMDG code](https://www.imo.org/en/publications/Pages/IMDG%20Code.aspx).
 
-Only applicable to dangerous goods if the IMO packaging code is not available."
-OuterPackaging,woodDeclaration,string,,,,TREATED_AND_CERTIFIED,"Property to clearly indicate if the products, packaging and any other items are made of wood. Possible values include:
- * NOT_APPLICABLE (if no wood or any other wood product such as packaging and supports are being shipped)
- * NOT_TREATED_AND_NOT_CERTIFIED (if the wood or wooden materials have not been treated nor fumigated and do not
-  include a certificate)
- * PROCESSED (if the wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
-  sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these)
- * TREATED_AND_CERTIFIED (if the wood or wooden materials have been treated and/or fumigated and include a certificate)
+If not available, the UNECE Recommendation 21 `packageCode` should be used.
+"
+OuterPackaging,numberOfPackages,integer,yes,,,123,"Specifies the number of outer packagings / overpacks associated with this Cargo Item."
+OuterPackaging,unecePackageCode,string,,2,"^[A-Z0-9]{2}$",5H,"[UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code
+"
+OuterPackaging,woodDeclaration,string,,30,,TREATED_AND_CERTIFIED,"Code indicating whether the products, packaging and any other items are made of wood.
+
+ - `NOT_APPLICABLE` - No wood or any other wood product such as packaging and supports are being shipped.
+
+ - `NOT_TREATED_AND_NOT_CERTIFIED` - The wood or wooden materials have not been treated nor fumigated and do not include a certificate.
+
+ - `PROCESSED` - The wood or wooden materials are entirely made of processed wood, such as plywood, particle board,
+ sliver plates of wood and wood laminate sheets produced using glue, heat, pressure or a combination of these.
+
+ - `TREATED_AND_CERTIFIED` - The wood or wooden materials have been treated and/or fumigated and include a certificate.
 "
 Reference,referenceType,string,yes,3,,FF,"One of the reference type codes defined by DCSA. Possible values are:
  * FF (Freight Forwarder's Reference)

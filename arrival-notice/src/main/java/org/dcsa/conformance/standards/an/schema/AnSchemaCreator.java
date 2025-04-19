@@ -62,6 +62,7 @@ import org.dcsa.conformance.standards.an.schema.model.IdentifyingPartyCode;
 import org.dcsa.conformance.standards.an.schema.model.InnerPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Location;
 import org.dcsa.conformance.standards.an.schema.types.EquipmentReference;
+import org.dcsa.conformance.standards.an.schema.types.ImoPackagingCode;
 import org.dcsa.conformance.standards.an.schema.types.NationalCommodityCode;
 import org.dcsa.conformance.standards.an.schema.model.OuterPackaging;
 import org.dcsa.conformance.standards.an.schema.model.Reference;
@@ -97,11 +98,13 @@ import org.dcsa.conformance.standards.an.schema.types.ShippingMark;
 import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
+import org.dcsa.conformance.standards.an.schema.types.UnecePackageCode;
 import org.dcsa.conformance.standards.an.schema.types.UniversalVoyageReference;
 import org.dcsa.conformance.standards.an.schema.types.VesselIMONumber;
 import org.dcsa.conformance.standards.an.schema.types.VesselVoyageDestinationTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.VolumeUnitCode;
 import org.dcsa.conformance.standards.an.schema.types.WeightUnitCode;
+import org.dcsa.conformance.standards.an.schema.types.WoodDeclarationTypeCode;
 
 @Slf4j
 public class AnSchemaCreator {
@@ -341,6 +344,7 @@ public class AnSchemaCreator {
         FreeTimeTypeCode.class,
         HSCode.class,
         IdentifyingPartyCode.class,
+        ImoPackagingCode.class,
         InnerPackaging.class,
         ISOEquipmentCode.class,
         Location.class,
@@ -361,6 +365,7 @@ public class AnSchemaCreator {
         Transport.class,
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
+        UnecePackageCode.class,
         UNLocationCode.class,
         UtilizedTransportEquipment.class,
         VesselIMONumber.class,
@@ -369,7 +374,8 @@ public class AnSchemaCreator {
         Volume.class,
         VolumeUnitCode.class,
         Weight.class,
-        WeightUnitCode.class);
+        WeightUnitCode.class,
+        WoodDeclarationTypeCode.class);
   }
 
   static String readResourceFile(@SuppressWarnings("SameParameterValue") String fileName) {

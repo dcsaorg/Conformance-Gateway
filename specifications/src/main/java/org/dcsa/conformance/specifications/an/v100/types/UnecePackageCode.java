@@ -1,0 +1,14 @@
+package org.dcsa.conformance.specifications.an.v100.types;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(
+    type = "string",
+    pattern = "^[A-Z0-9]{2}$",
+    minLength = 2,
+    maxLength = 2,
+    example = "5H",
+    description = """
+[UNECE Recommendation 21](https://unece.org/trade/uncefact/cl-recommendations) package code
+""")
+public class UnecePackageCode {}

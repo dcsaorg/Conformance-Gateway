@@ -101,6 +101,7 @@ import org.dcsa.conformance.standards.an.schema.types.SegregationGroupCode;
 import org.dcsa.conformance.standards.an.schema.types.ShippingMark;
 import org.dcsa.conformance.standards.an.schema.types.SubsidiaryRisk;
 import org.dcsa.conformance.standards.an.schema.types.TemperatureUnitCode;
+import org.dcsa.conformance.standards.an.schema.types.TransportDocumentReference;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.UNLocationCode;
 import org.dcsa.conformance.standards.an.schema.types.UnecePackageCode;
@@ -373,6 +374,7 @@ public class AnSchemaCreator {
         TemperatureLimits.class,
         TemperatureUnitCode.class,
         Transport.class,
+        TransportDocumentReference.class,
         TransportDocumentTypeCode.class,
         UniversalVoyageReference.class,
         UnecePackageCode.class,

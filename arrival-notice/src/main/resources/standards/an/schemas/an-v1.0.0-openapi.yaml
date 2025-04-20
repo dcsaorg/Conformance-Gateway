@@ -325,11 +325,7 @@ components:
           items:
             $ref: "#/components/schemas/Reference"
         transportDocumentReference:
-          maxLength: 20
-          pattern: "^\\S(?:.*\\S)?$"
-          type: "string"
-          description: "Reference of the transport document for which this arrival notice was created"
-          example: "XYZ1234"
+          $ref: "#/components/schemas/TransportDocumentReference"
         transportDocumentTypeCode:
           type: "string"
           description: |-
@@ -412,25 +408,43 @@ components:
             $ref: "#/components/schemas/ConsignmentItem"
       description: "Full content of an Arrival Notice document."
     ArrivalNoticeDigest:
+      required:
+      - "etaAtPortOfDischargeDate"
+      - "portOfDischarge"
+      - "transportDocumentReference"
       type: "object"
       properties:
         transportDocumentReference:
-          type: "string"
-          description: "Reference of the transport document for which this arrival notice was created"
-          example: "XYZ1234"
+          $ref: "#/components/schemas/TransportDocumentReference"
         portOfDischarge:
-          $ref: "#/components/schemas/Location"
+          type: "object"
+          description: |
+            The location where the cargo is discharged from the last sea-going vessel
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPortOfDischargeDate:
+          pattern: "yyyy-MM-dd"
           type: "string"
-          description: "The expected date of arrival of the vessel at the Port of Discharge."
-          example: "2025-01-23"
+          description: |
+            The expected date of arrival of the vessel at the port of discharge
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
         placeOfDelivery:
-          $ref: "#/components/schemas/Location"
+          type: "object"
+          description: |
+            The location where the cargo is handed over by the shipping line to the consignee or its agent and where the
+            responsibility of the shipping line ceases
+          allOf:
+          - $ref: "#/components/schemas/Location"
         etaAtPlaceOfDeliveryDate:
+          pattern: "yyyy-MM-dd"
           type: "string"
-          description: "The expected date of arrival of the shipment at Place of Delivery."
-          example: "2025-01-23"
-      description: "Minimal information published about an Arrival Notice as a lightweight notification."
+          description: |
+            The expected date of arrival of the shipment at place of delivery
+          format: "date"
+          example: "2025-01-23T00:00:00.000+00:00"
+      description: |
+        Minimal relevant information that can be published about an Arrival Notice
     ArrivalNoticeDigestsMessage:
       type: "object"
       properties:
@@ -1509,6 +1523,12 @@ components:
           allOf:
           - $ref: "#/components/schemas/Location"
       description: "Transport info"
+    TransportDocumentReference:
+      maxLength: 20
+      pattern: "^\\S(?:.*\\S)?$"
+      type: "object"
+      description: "Reference of a transport document"
+      example: "XYZ1234"
     UniversalVoyageReference:
       maxLength: 5
       minLength: 5

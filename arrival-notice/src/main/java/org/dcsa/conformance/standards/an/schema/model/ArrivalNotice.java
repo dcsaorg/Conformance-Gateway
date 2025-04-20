@@ -5,11 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Data;
 import org.dcsa.conformance.standards.an.schema.SchemaOverride;
-import org.dcsa.conformance.standards.an.schema.StringPatterns;
 import org.dcsa.conformance.standards.an.schema.types.CarrierCodeListProvider;
 import org.dcsa.conformance.standards.an.schema.types.ContainerLoadTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.DestinationDeliveryTypeCode;
 import org.dcsa.conformance.standards.an.schema.types.FormattedDate;
+import org.dcsa.conformance.standards.an.schema.types.TransportDocumentReference;
 import org.dcsa.conformance.standards.an.schema.types.TransportDocumentTypeCode;
 
 @Data
@@ -87,13 +87,10 @@ on the B/L. Customers can use these references to track shipments in their inter
 """)
   private List<Reference> references;
 
-  @Schema(
-      requiredMode = Schema.RequiredMode.REQUIRED,
-      pattern = StringPatterns.TRIMMED_NON_EMPTY_STRING,
-      maxLength = 20,
-      example = "XYZ1234",
+  @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+  @SchemaOverride(
       description = "Reference of the transport document for which this arrival notice was created")
-  private String transportDocumentReference;
+  private TransportDocumentReference transportDocumentReference;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   @SchemaOverride(
@@ -139,8 +136,7 @@ Code indicating whether at destination the unloaded cargo occupies an entire con
   @ArraySchema(minItems = 1)
   private List<DocumentParty> documentParties;
 
-  @Schema()
-  private VesselVoyage vesselVoyage;
+  @Schema() private VesselVoyage vesselVoyage;
 
   @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
   private Transport transport;

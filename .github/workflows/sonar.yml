@@ -8,15 +8,16 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
-      - test
-      - master
+      # Disabled again until SD-2092 is fixed
+      - NOT_dev
+      - NOT_test
+      - NOT_master
     paths-ignore:
       - "**.md"
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths-ignore:
-      - "**.md"
+#  pull_request:
+#    types: [opened, synchronize, reopened]
+#    paths-ignore:
+#      - "**.md"
 
 jobs:
   build:
@@ -42,7 +43,7 @@ jobs:
           java-version: 21
           cache: 'maven'
 
-      - name: Build and test Conformance-Gateway
+      - name: Build Conformance-Gateway
         run: |
           ./mvnw package -B -V -DskipTests -Dmaven.test.skip=true
 
